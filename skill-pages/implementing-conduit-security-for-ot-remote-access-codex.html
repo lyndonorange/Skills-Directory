@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>implementing-conduit-security-for-ot-remote-access - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/implementing-conduit-security-for-ot-remote-access-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>implementing-conduit-security-for-ot-remote-access</h1>
+      <p class="description">'Implement secure conduit architecture for OT remote access following</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>implementing-conduit-security-for-ot-remote-access</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>implementing-conduit-security-for-ot-remote-access</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Implement secure conduit architecture for OT remote access following</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose implementing-conduit-security-for-ot-remote-access, then write the task. Fallback prompt: Use the implementing-conduit-security-for-ot-remote-access skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Implementing Conduit Security for OT Remote Access</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When replacing direct VPN connections from IT or vendors into OT control networks</li>
+<li>When implementing IEC 62443-compliant conduit architecture for remote access paths</li>
+<li>When deploying secure remote access for third-party vendor maintenance of ICS equipment</li>
+<li>When building approval-based access workflows for privileged OT system access</li>
+<li>When remediating audit findings about uncontrolled remote access to SCADA systems</li>
+</ul>
+<p><strong>Do not use</strong> for designing the overall Purdue Model segmentation (see implementing-purdue-model-network-segmentation), for deploying IT-only remote access solutions, or for configuring local console access to PLCs.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>IT/OT DMZ (Level 3.5) deployed with dual-firewall architecture</li>
+<li>Jump server or privileged access management (PAM) platform (CyberArk, BeyondTrust)</li>
+<li>Multi-factor authentication (MFA) infrastructure for OT remote access users</li>
+<li>Session recording capability for compliance and forensic purposes</li>
+<li>Approval workflow system (ServiceNow, ticketing) for access requests</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Design Conduit Architecture for Remote Access</h4>
+<pre><code># IEC 62443 Conduit Security Architecture for OT Remote Access
+# All remote access terminates in DMZ - never passes through to OT directly
+
+conduit_architecture:
+  remote_access_conduit:
+    conduit_id: &quot;RA-001&quot;
+    source_zone: &quot;Enterprise IT (Level 4)&quot;
+    destination_zone: &quot;OT DMZ (Level 3.5)&quot;
+    security_level_target: &quot;SL3&quot;
+
+    components:
+      external_gateway:
+        type: &quot;VPN Concentrator&quot;
+        location: &quot;Enterprise DMZ&quot;
+        ip: &quot;10.200.1.10&quot;
+        protocols: [&quot;IPsec&quot;, &quot;SSL-VPN&quot;]
+        authentication: &quot;MFA required (certificate + OTP)&quot;
+
+      dmz_jump_server:
+        type: &quot;Privileged Access Workstation&quot;
+        location: &quot;OT DMZ (Level 3.5)&quot;
+        ip: &quot;10.10.150.20&quot;
+        os: &quot;Windows Server 2022 (hardened)&quot;
+        controls:
+          - &quot;Local admin accounts disabled&quot;
+          - &quot;USB ports disabled&quot;
+          - &quot;Clipboard transfer disabled by default&quot;
+          - &quot;Session recording enabled (all keystrokes and screen)&quot;
+          - &quot;Maximum session duration: 4 hours&quot;
+          - &quot;Automatic logoff after 15 minutes idle&quot;
+          - &quot;Application whitelisting enforced&quot;
+
+      ot_access_gateway:
+        type: &quot;Industrial Remote Access Gateway&quot;
+        location: &quot;OT DMZ / Level 3 boundary&quot;
+        ip: &quot;10.10.150.25&quot;
+        controls:
+          - &quot;Only pre-approved destination IPs reachable&quot;
+          - &quot;Protocol-level filtering (RDP, SSH, VNC only)&quot;
+          - &quot;Time-limited sessions with automatic expiry&quot;
+          - &quot;Approval-based access (plant manager must authorize)&quot;
+
+    data_flow:
+      - step: 1
+        description: &quot;User authenticates via enterprise VPN with MFA&quot;
+        source: &quot;Remote user&quot;
+        destination: &quot;VPN concentrator&quot;
+        protocol: &quot;IPsec/SSL-VPN&quot;
+      - step: 2
+        description: &quot;User connects to jump server in OT DMZ&quot;
+        source: &quot;VPN tunnel&quot;
+        destination: &quot;DMZ jump server&quot;
+        protocol: &quot;RDP with NLA&quot;
+      - step: 3
+        description: &quot;From jump server, user accesses specific OT system&quot;
+        source: &quot;DMZ jump server&quot;
+        destination: &quot;Approved OT target&quot;
+        protocol: &quot;RDP/SSH/VNC&quot;
+        condition: &quot;Only after manager approval and within time window&quot;
+
+    prohibited_flows:
+      - &quot;Direct VPN tunnel from external to Level 1/2 OT devices&quot;
+      - &quot;Split tunneling allowing internet access during OT session&quot;
+      - &quot;File transfer from jump server to OT without scanning&quot;
+      - &quot;Persistent VPN connections (auto-reconnect disabled)&quot;
+
+  vendor_access_conduit:
+    conduit_id: &quot;VA-001&quot;
+    source_zone: &quot;Vendor External Network&quot;
+    destination_zone: &quot;OT DMZ (Level 3.5)&quot;
+    security_level_target: &quot;SL3&quot;
+
+    workflow:
+      request:
+        - &quot;Vendor submits access request via portal (24h advance)&quot;
+        - &quot;Request includes: purpose, target systems, duration, personnel&quot;
+        - &quot;Plant operations manager reviews and approves/rejects&quot;
+        - &quot;Time-limited credentials generated upon approval&quot;
+      session:
+        - &quot;Vendor connects via dedicated vendor VPN gateway&quot;
+        - &quot;MFA authentication (vendor receives OTP via SMS/app)&quot;
+        - &quot;Session lands on vendor-specific jump server (isolated from internal jump)&quot;
+        - &quot;All actions recorded (video + keystroke logging)&quot;
+        - &quot;OT engineer monitors vendor session in real-time&quot;
+      termination:
+        - &quot;Session auto-terminates at approved end time&quot;
+        - &quot;Credentials automatically revoked&quot;
+        - &quot;Session recording archived for 90 days&quot;
+        - &quot;Access log forwarded to SIEM&quot;</code></pre>
+<h4>Step 2: Implement Access Control and Monitoring</h4>
+<pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;OT Remote Access Conduit Manager.
+
+Manages approval-based remote access to OT systems through
+secure conduit architecture with session recording, MFA
+enforcement, and time-limited access windows.
+&quot;&quot;&quot;
+
+import json
+import sys
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional
+from enum import Enum
+
+
+class AccessRequestStatus(Enum):
+    PENDING = &quot;pending&quot;
+    APPROVED = &quot;approved&quot;
+    REJECTED = &quot;rejected&quot;
+    ACTIVE = &quot;active&quot;
+    EXPIRED = &quot;expired&quot;
+    REVOKED = &quot;revoked&quot;
+
+
+class RemoteAccessRequest:
+    &quot;&quot;&quot;Represents an OT remote access request.&quot;&quot;&quot;
+
+    def __init__(self, requestor: str, requestor_type: str, purpose: str,
+                 target_systems: List[str], duration_hours: int,
+                 requested_start: str):
+        self.id = f&quot;OT-RA-{datetime.now().strftime('%Y%m%d-%H%M%S')}&quot;
+        self.requestor = requestor
+        self.requestor_type = requestor_type  # &quot;internal_engineer&quot; or &quot;vendor&quot;
+        self.purpose = purpose
+        self.target_systems = target_systems
+        self.duration_hours = duration_hours
+        self.requested_start = requested_start
+        self.status = AccessRequestStatus.PENDING
+        self.created = datetime.now().isoformat()
+        self.approved_by = None
+        self.session_id = None
+        self.audit_trail = []
+
+    def approve(self, approver: str, conditions: str = &quot;&quot;):
+        &quot;&quot;&quot;Approve the access request.&quot;&quot;&quot;
+        self.status = AccessRequestStatus.APPROVED
+        self.approved_by = approver
+        self.audit_trail.append({
+            &quot;timestamp&quot;: datetime.now().isoformat(),
+            &quot;action&quot;: &quot;APPROVED&quot;,
+            &quot;actor&quot;: approver,
+            &quot;conditions&quot;: conditions,
+        })
+
+    def reject(self, rejector: str, reason: str):
+        &quot;&quot;&quot;Reject the access request.&quot;&quot;&quot;
+        self.status = AccessRequestStatus.REJECTED
+        self.audit_trail.append({
+            &quot;timestamp&quot;: datetime.now().isoformat(),
+            &quot;action&quot;: &quot;REJECTED&quot;,
+            &quot;actor&quot;: rejector,
+            &quot;reason&quot;: reason,
+        })
+
+
+class OTConduitManager:
+    &quot;&quot;&quot;Manages OT remote access conduit security.&quot;&quot;&quot;
+
+    def __init__(self):
+        self.access_requests: Dict[str, RemoteAccessRequest] = {}
+        self.active_sessions: Dict[str, dict] = {}
+        self.policy = self._load_policy()
+
+    def _load_policy(self) -&gt; dict:
+        &quot;&quot;&quot;Load remote access policy.&quot;&quot;&quot;
+        return {
+            &quot;max_session_hours&quot;: 4,
+            &quot;idle_timeout_minutes&quot;: 15,
+            &quot;mfa_required&quot;: True,
+            &quot;session_recording&quot;: True,
+            &quot;clipboard_transfer&quot;: False,
+            &quot;file_transfer&quot;: &quot;scan_required&quot;,
+            &quot;advance_notice_hours&quot;: 24,
+            &quot;vendor_escort_required&quot;: True,
+            &quot;prohibited_targets&quot;: [&quot;SIS-*&quot;, &quot;SAFETY-*&quot;],
+            &quot;allowed_protocols&quot;: [&quot;RDP&quot;, &quot;SSH&quot;, &quot;VNC&quot;],
+            &quot;blocked_protocols&quot;: [&quot;Telnet&quot;, &quot;FTP&quot;, &quot;SMB&quot;],
+        }
+
+    def submit_request(self, request: RemoteAccessRequest) -&gt; str:
+        &quot;&quot;&quot;Submit a new remote access request.&quot;&quot;&quot;
+        # Validate against policy
+        violations = []
+
+        if request.duration_hours &gt; self.policy[&quot;max_session_hours&quot;]:
+            violations.append(
+                f&quot;Duration {request.duration_hours}h exceeds maximum {self.policy['max_session_hours']}h&quot;
+            )
+
+        for target in request.target_systems:
+            for prohibited in self.policy[&quot;prohibited_targets&quot;]:
+                pattern = prohibited.replace(&quot;*&quot;, &quot;&quot;)
+                if target.startswith(pattern):
+                    violations.append(f&quot;Target {target} is in prohibited list (safety systems)&quot;)
+
+        if violations:
+            print(f&quot;[!] Policy violations found:&quot;)
+            for v in violations:
+                print(f&quot;    - {v}&quot;)
+            return &quot;&quot;
+
+        self.access_requests[request.id] = request
+        print(f&quot;[+] Access request {request.id} submitted for approval&quot;)
+        return request.id
+
+    def list_pending_requests(self):
+        &quot;&quot;&quot;List all pending access requests for approval.&quot;&quot;&quot;
+        pending = [r for r in self.access_requests.values()
+                   if r.status == AccessRequestStatus.PENDING]
+
+        print(f&quot;\n{'='*65}&quot;)
+        print(&quot;PENDING OT REMOTE ACCESS REQUESTS&quot;)
+        print(f&quot;{'='*65}&quot;)
+
+        if not pending:
+            print(&quot;  No pending requests&quot;)
+            return
+
+        for req in pending:
+            print(f&quot;\n  Request: {req.id}&quot;)
+            print(f&quot;    Requestor: {req.requestor} ({req.requestor_type})&quot;)
+            print(f&quot;    Purpose: {req.purpose}&quot;)
+            print(f&quot;    Targets: {', '.join(req.target_systems)}&quot;)
+            print(f&quot;    Duration: {req.duration_hours} hours&quot;)
+            print(f&quot;    Start: {req.requested_start}&quot;)
+            print(f&quot;    Submitted: {req.created}&quot;)
+
+    def generate_audit_report(self):
+        &quot;&quot;&quot;Generate audit report of all remote access activity.&quot;&quot;&quot;
+        print(f&quot;\n{'='*65}&quot;)
+        print(&quot;OT REMOTE ACCESS AUDIT REPORT&quot;)
+        print(f&quot;{'='*65}&quot;)
+        print(f&quot;Report Date: {datetime.now().isoformat()}&quot;)
+        print(f&quot;Total Requests: {len(self.access_requests)}&quot;)
+
+        status_counts = {}
+        for req in self.access_requests.values():
+            status = req.status.value
+            status_counts[status] = status_counts.get(status, 0) + 1
+
+        print(f&quot;\nRequest Status:&quot;)
+        for status, count in status_counts.items():
+            print(f&quot;  {status}: {count}&quot;)
+
+        print(f&quot;\nDetailed Audit Trail:&quot;)
+        for req in self.access_requests.values():
+            print(f&quot;\n  {req.id} - {req.requestor} ({req.requestor_type})&quot;)
+            print(f&quot;    Status: {req.status.value}&quot;)
+            print(f&quot;    Targets: {', '.join(req.target_systems)}&quot;)
+            for entry in req.audit_trail:
+                print(f&quot;    [{entry['timestamp']}] {entry['action']} by {entry['actor']}&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    manager = OTConduitManager()
+
+    # Vendor access request
+    vendor_req = RemoteAccessRequest(
+        requestor=&quot;John Smith - Siemens Field Service&quot;,
+        requestor_type=&quot;vendor&quot;,
+        purpose=&quot;Annual PLC firmware update for S7-1500 controllers&quot;,
+        target_systems=[&quot;PLC-REACTOR-01&quot;, &quot;PLC-REACTOR-02&quot;],
+        duration_hours=3,
+        requested_start=&quot;2025-03-15T08:00:00&quot;,
+    )
+
+    req_id = manager.submit_request(vendor_req)
+    if req_id:
+        manager.list_pending_requests()
+
+    # Simulate approval
+    manager.access_requests[req_id].approve(
+        approver=&quot;Plant Manager - Jane Doe&quot;,
+        conditions=&quot;OT engineer must shadow the vendor session&quot;,
+    )
+
+    manager.generate_audit_report()</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | Conduit | IEC 62443 controlled communication path between security zones with defined security policies | | Jump Server | Hardened intermediary server in the DMZ through which all remote OT access must transit | | Session Recording | Capture of all screen activity, keystrokes, and commands during a remote access session for audit | | Approval-Based Access | Workflow requiring plant operations manager authorization before remote access credentials are activated | | Vendor Escort | Practice of having an internal OT engineer monitor vendor remote sessions in real time | | Break-Glass Access | Emergency access procedure bypassing normal approval workflow for critical situations |</p>
+<h3>Output Format</h3>
+<pre><code>OT REMOTE ACCESS CONDUIT REPORT
+==================================
+Date: YYYY-MM-DD
+
+CONDUIT STATUS:
+  Internal Access Conduit: [Active/Inactive]
+  Vendor Access Conduit: [Active/Inactive]
+
+ACCESS REQUESTS (Last 30 Days):
+  Submitted: [count]
+  Approved: [count]
+  Rejected: [count]
+  Average Session Duration: [hours]
+
+POLICY COMPLIANCE:
+  MFA Enforcement: [100%]
+  Session Recording: [100%]
+  Time-Limited Sessions: [compliance %]
+  Prohibited Target Attempts: [count blocked]</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: implementing-conduit-security-for-ot-remote-access\ndisplay_name: implementing-conduit-security-for-ot-remote-access\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# implementing-conduit-security-for-ot-remote-access - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `implementing-conduit-security-for-ot-remote-access` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When replacing direct VPN connections from IT or vendors into OT control networks\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose implementing-conduit-security-for-ot-remote-access, then write the task. Fallback prompt: Use the implementing-conduit-security-for-ot-remote-access skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `implementing-conduit-security-for-ot-remote-access` |\n| Canonical name | `implementing-conduit-security-for-ot-remote-access` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\n- When replacing direct VPN connections from IT or vendors into OT control networks\n\n## Original SKILL.md\n\n---\nname: implementing-conduit-security-for-ot-remote-access\ndescription: 'Implement secure conduit architecture for OT remote access following\n  IEC 62443 zones and conduits model, deploying jump servers, MFA-enabled gateways,\n  session recording, and approval-based workflows to control vendor and engineer access\n  to industrial control systems without exposing OT networks directly.\n\n  '\ndomain: cybersecurity\nsubdomain: ot-ics-security\ntags:\n- ot-security\n- ics\n- remote-access\n- iec62443\n- jump-server\n- zero-trust\n- conduit\n- mfa\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- PR.IR-01\n- DE.CM-01\n- ID.AM-05\n- GV.OC-02\nmitre_attack:\n- T1078\n- T1190\n- T1059\n- T0816\n- T0836\n---\n\n# Implementing Conduit Security for OT Remote Access\n\n## When to Use\n\n- When replacing direct VPN connections from IT or vendors into OT control networks\n- When implementing IEC 62443-compliant conduit architecture for remote access paths\n- When deploying secure remote access for third-party vendor maintenance of ICS equipment\n- When building approval-based access workflows for privileged OT system access\n- When remediating audit findings about uncontrolled remote access to SCADA systems\n\n**Do not use** for designing the overall Purdue Model segmentation (see implementing-purdue-model-network-segmentation), for deploying IT-only remote access solutions, or for configuring local console access to PLCs.\n\n## Prerequisites\n\n- IT/OT DMZ (Level 3.5) deployed with dual-firewall architecture\n- Jump server or privileged access management (PAM) platform (CyberArk, BeyondTrust)\n- Multi-factor authentication (MFA) infrastructure for OT remote access users\n- Session recording capability for compliance and forensic purposes\n- Approval workflow system (ServiceNow, ticketing) for access requests\n\n## Workflow\n\n### Step 1: Design Conduit Architecture for Remote Access\n\n```yaml\n# IEC 62443 Conduit Security Architecture for OT Remote Access\n# All remote access terminates in DMZ - never passes through to OT directly\n\nconduit_architecture:\n  remote_access_conduit:\n    conduit_id: \"RA-001\"\n    source_zone: \"Enterprise IT (Level 4)\"\n    destination_zone: \"OT DMZ (Level 3.5)\"\n    security_level_target: \"SL3\"\n\n    components:\n      external_gateway:\n        type: \"VPN Concentrator\"\n        location: \"Enterprise DMZ\"\n        ip: \"10.200.1.10\"\n        protocols: [\"IPsec\", \"SSL-VPN\"]\n        authentication: \"MFA required (certificate + OTP)\"\n\n      dmz_jump_server:\n        type: \"Privileged Access Workstation\"\n        location: \"OT DMZ (Level 3.5)\"\n        ip: \"10.10.150.20\"\n        os: \"Windows Server 2022 (hardened)\"\n        controls:\n          - \"Local admin accounts disabled\"\n          - \"USB ports disabled\"\n          - \"Clipboard transfer disabled by default\"\n          - \"Session recording enabled (all keystrokes and screen)\"\n          - \"Maximum session duration: 4 hours\"\n          - \"Automatic logoff after 15 minutes idle\"\n          - \"Application whitelisting enforced\"\n\n      ot_access_gateway:\n        type: \"Industrial Remote Access Gateway\"\n        location: \"OT DMZ / Level 3 boundary\"\n        ip: \"10.10.150.25\"\n        controls:\n          - \"Only pre-approved destination IPs reachable\"\n          - \"Protocol-level filtering (RDP, SSH, VNC only)\"\n          - \"Time-limited sessions with automatic expiry\"\n          - \"Approval-based access (plant manager must authorize)\"\n\n    data_flow:\n      - step: 1\n        description: \"User authenticates via enterprise VPN with MFA\"\n        source: \"Remote user\"\n        destination: \"VPN concentrator\"\n        protocol: \"IPsec/SSL-VPN\"\n      - step: 2\n        description: \"User connects to jump server in OT DMZ\"\n        source: \"VPN tunnel\"\n        destination: \"DMZ jump server\"\n        protocol: \"RDP with NLA\"\n      - step: 3\n        description: \"From jump server, user accesses specific OT system\"\n        source: \"DMZ jump server\"\n        destination: \"Approved OT target\"\n        protocol: \"RDP/SSH/VNC\"\n        condition: \"Only after manager approval and within time window\"\n\n    prohibited_flows:\n      - \"Direct VPN tunnel from external to Level 1/2 OT devices\"\n      - \"Split tunneling allowing internet access during OT session\"\n      - \"File transfer from jump server to OT without scanning\"\n      - \"Persistent VPN connections (auto-reconnect disabled)\"\n\n  vendor_access_conduit:\n    conduit_id: \"VA-001\"\n    source_zone: \"Vendor External Network\"\n    destination_zone: \"OT DMZ (Level 3.5)\"\n    security_level_target: \"SL3\"\n\n    workflow:\n      request:\n        - \"Vendor submits access request via portal (24h advance)\"\n        - \"Request includes: purpose, target systems, duration, personnel\"\n        - \"Plant operations manager reviews and approves/rejects\"\n        - \"Time-limited credentials generated upon approval\"\n      session:\n        - \"Vendor connects via dedicated vendor VPN gateway\"\n        - \"MFA authentication (vendor receives OTP via SMS/app)\"\n        - \"Session lands on vendor-specific jump server (isolated from internal jump)\"\n        - \"All actions recorded (video + keystroke logging)\"\n        - \"OT engineer monitors vendor session in real-time\"\n      termination:\n        - \"Session auto-terminates at approved end time\"\n        - \"Credentials automatically revoked\"\n        - \"Session recording archived for 90 days\"\n        - \"Access log forwarded to SIEM\"\n```\n\n### Step 2: Implement Access Control and Monitoring\n\n```python\n#!/usr/bin/env python3\n\"\"\"OT Remote Access Conduit Manager.\n\nManages approval-based remote access to OT systems through\nsecure conduit architecture with session recording, MFA\nenforcement, and time-limited access windows.\n\"\"\"\n\nimport json\nimport sys\nfrom datetime import datetime, timedelta\nfrom typing import Dict, List, Optional\nfrom enum import Enum\n\n\nclass AccessRequestStatus(Enum):\n    PENDING = \"pending\"\n    APPROVED = \"approved\"\n    REJECTED = \"rejected\"\n    ACTIVE = \"active\"\n    EXPIRED = \"expired\"\n    REVOKED = \"revoked\"\n\n\nclass RemoteAccessRequest:\n    \"\"\"Represents an OT remote access request.\"\"\"\n\n    def __init__(self, requestor: str, requestor_type: str, purpose: str,\n                 target_systems: List[str], duration_hours: int,\n                 requested_start: str):\n        self.id = f\"OT-RA-{datetime.now().strftime('%Y%m%d-%H%M%S')}\"\n        self.requestor = requestor\n        self.requestor_type = requestor_type  # \"internal_engineer\" or \"vendor\"\n        self.purpose = purpose\n        self.target_systems = target_systems\n        self.duration_hours = duration_hours\n        self.requested_start = requested_start\n        self.status = AccessRequestStatus.PENDING\n        self.created = datetime.now().isoformat()\n        self.approved_by = None\n        self.session_id = None\n        self.audit_trail = []\n\n    def approve(self, approver: str, conditions: str = \"\"):\n        \"\"\"Approve the access request.\"\"\"\n        self.status = AccessRequestStatus.APPROVED\n        self.approved_by = approver\n        self.audit_trail.append({\n            \"timestamp\": datetime.now().isoformat(),\n            \"action\": \"APPROVED\",\n            \"actor\": approver,\n            \"conditions\": conditions,\n        })\n\n    def reject(self, rejector: str, reason: str):\n        \"\"\"Reject the access request.\"\"\"\n        self.status = AccessRequestStatus.REJECTED\n        self.audit_trail.append({\n            \"timestamp\": datetime.now().isoformat(),\n            \"action\": \"REJECTED\",\n            \"actor\": rejector,\n            \"reason\": reason,\n        })\n\n\nclass OTConduitManager:\n    \"\"\"Manages OT remote access conduit security.\"\"\"\n\n    def __init__(self):\n        self.access_requests: Dict[str, RemoteAccessRequest] = {}\n        self.active_sessions: Dict[str, dict] = {}\n        self.policy = self._load_policy()\n\n    def _load_policy(self) -> dict:\n        \"\"\"Load remote access policy.\"\"\"\n        return {\n            \"max_session_hours\": 4,\n            \"idle_timeout_minutes\": 15,\n            \"mfa_required\": True,\n            \"session_recording\": True,\n            \"clipboard_transfer\": False,\n            \"file_transfer\": \"scan_required\",\n            \"advance_notice_hours\": 24,\n            \"vendor_escort_required\": True,\n            \"prohibited_targets\": [\"SIS-*\", \"SAFETY-*\"],\n            \"allowed_protocols\": [\"RDP\", \"SSH\", \"VNC\"],\n            \"blocked_protocols\": [\"Telnet\", \"FTP\", \"SMB\"],\n        }\n\n    def submit_request(self, request: RemoteAccessRequest) -> str:\n        \"\"\"Submit a new remote access request.\"\"\"\n        # Validate against policy\n        violations = []\n\n        if request.duration_hours > self.policy[\"max_session_hours\"]:\n            violations.append(\n                f\"Duration {request.duration_hours}h exceeds maximum {self.policy['max_session_hours']}h\"\n            )\n\n        for target in request.target_systems:\n            for prohibited in self.policy[\"prohibited_targets\"]:\n                pattern = prohibited.replace(\"*\", \"\")\n                if target.startswith(pattern):\n                    violations.append(f\"Target {target} is in prohibited list (safety systems)\")\n\n        if violations:\n            print(f\"[!] Policy violations found:\")\n            for v in violations:\n                print(f\"    - {v}\")\n            return \"\"\n\n        self.access_requests[request.id] = request\n        print(f\"[+] Access request {request.id} submitted for approval\")\n        return request.id\n\n    def list_pending_requests(self):\n        \"\"\"List all pending access requests for approval.\"\"\"\n        pending = [r for r in self.access_requests.values()\n                   if r.status == AccessRequestStatus.PENDING]\n\n        print(f\"\\n{'='*65}\")\n        print(\"PENDING OT REMOTE ACCESS REQUESTS\")\n        print(f\"{'='*65}\")\n\n        if not pending:\n            print(\"  No pending requests\")\n            return\n\n        for req in pending:\n            print(f\"\\n  Request: {req.id}\")\n            print(f\"    Requestor: {req.requestor} ({req.requestor_type})\")\n            print(f\"    Purpose: {req.purpose}\")\n            print(f\"    Targets: {', '.join(req.target_systems)}\")\n            print(f\"    Duration: {req.duration_hours} hours\")\n            print(f\"    Start: {req.requested_start}\")\n            print(f\"    Submitted: {req.created}\")\n\n    def generate_audit_report(self):\n        \"\"\"Generate audit report of all remote access activity.\"\"\"\n        print(f\"\\n{'='*65}\")\n        print(\"OT REMOTE ACCESS AUDIT REPORT\")\n        print(f\"{'='*65}\")\n        print(f\"Report Date: {datetime.now().isoformat()}\")\n        print(f\"Total Requests: {len(self.access_requests)}\")\n\n        status_counts = {}\n        for req in self.access_requests.values():\n            status = req.status.value\n            status_counts[status] = status_counts.get(status, 0) + 1\n\n        print(f\"\\nRequest Status:\")\n        for status, count in status_counts.items():\n            print(f\"  {status}: {count}\")\n\n        print(f\"\\nDetailed Audit Trail:\")\n        for req in self.access_requests.values():\n            print(f\"\\n  {req.id} - {req.requestor} ({req.requestor_type})\")\n            print(f\"    Status: {req.status.value}\")\n            print(f\"    Targets: {', '.join(req.target_systems)}\")\n            for entry in req.audit_trail:\n                print(f\"    [{entry['timestamp']}] {entry['action']} by {entry['actor']}\")\n\n\nif __name__ == \"__main__\":\n    manager = OTConduitManager()\n\n    # Vendor access request\n    vendor_req = RemoteAccessRequest(\n        requestor=\"John Smith - Siemens Field Service\",\n        requestor_type=\"vendor\",\n        purpose=\"Annual PLC firmware update for S7-1500 controllers\",\n        target_systems=[\"PLC-REACTOR-01\", \"PLC-REACTOR-02\"],\n        duration_hours=3,\n        requested_start=\"2025-03-15T08:00:00\",\n    )\n\n    req_id = manager.submit_request(vendor_req)\n    if req_id:\n        manager.list_pending_requests()\n\n    # Simulate approval\n    manager.access_requests[req_id].approve(\n        approver=\"Plant Manager - Jane Doe\",\n        conditions=\"OT engineer must shadow the vendor session\",\n    )\n\n    manager.generate_audit_report()\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| Conduit | IEC 62443 controlled communication path between security zones with defined security policies |\n| Jump Server | Hardened intermediary server in the DMZ through which all remote OT access must transit |\n| Session Recording | Capture of all screen activity, keystrokes, and commands during a remote access session for audit |\n| Approval-Based Access | Workflow requiring plant operations manager authorization before remote access credentials are activated |\n| Vendor Escort | Practice of having an internal OT engineer monitor vendor remote sessions in real time |\n| Break-Glass Access | Emergency access procedure bypassing normal approval workflow for critical situations |\n\n## Output Format\n\n```\nOT REMOTE ACCESS CONDUIT REPORT\n==================================\nDate: YYYY-MM-DD\n\nCONDUIT STATUS:\n  Internal Access Conduit: [Active/Inactive]\n  Vendor Access Conduit: [Active/Inactive]\n\nACCESS REQUESTS (Last 30 Days):\n  Submitted: [count]\n  Approved: [count]\n  Rejected: [count]\n  Average Session Duration: [hours]\n\nPOLICY COMPLIANCE:\n  MFA Enforcement: [100%]\n  Session Recording: [100%]\n  Time-Limited Sessions: [compliance %]\n  Prohibited Target Attempts: [count blocked]\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("implementing-conduit-security-for-ot-remote-access-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

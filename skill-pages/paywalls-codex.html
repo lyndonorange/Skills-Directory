@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>paywalls - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/paywalls-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>paywalls</h1>
+      <p class="description">When the user wants to create or optimize in-app paywalls, upgrade screens, upsell modals, or feature gates. Also use when the user mentions &quot;paywall,&quot; &quot;upgrade screen,&quot; &quot;upgrade modal,&quot; &quot;upsell,&quot; &quot;feature gate,&quot; &quot;convert free to paid,&quot; &quot;freemium conversion,&quot; &quot;trial expiration screen,&quot; &quot;limit reached screen,&quot; &quot;plan upgrade prompt,&quot; &quot;in-app pricing,&quot; &quot;free users won't upgrade,&quot; &quot;trial to paid conversion,&quot; or &quot;how do I get users to pay.&quot; Use this for any in-product moment where you're asking users to upgrade. Distinct from public pricing pages (see cro) — this focuses on in-product upgrade moments where the user has already experienced value. For pricing decisions, see pricing.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>paywalls</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>paywalls</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>When the user wants to create or optimize in-app paywalls, upgrade screens, upsell modals, or feature gates. Also use when the user mentions &quot;paywall,&quot; &quot;upgrade screen,&quot; &quot;upgrade modal,&quot; &quot;upsell,&quot; &quot;feature gate,&quot; &quot;convert free to paid,&quot; &quot;freemium conversion,&quot; &quot;trial expiration screen,&quot; &quot;limit reached screen,&quot; &quot;plan upgrade prompt,&quot; &quot;in-app pricing,&quot; &quot;free users won't upgrade,&quot; &quot;trial to paid conversion,&quot; or &quot;how do I get users to pay.&quot; Use this for any in-product moment where you're asking users to upgrade. Distinct from public pricing pages (see cro) — this focuses on in-product upgrade moments where the user has already experienced value. For pricing decisions, see pricing.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose paywalls, then write the task. Fallback prompt: Use the paywalls skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Paywall and Upgrade Screen CRO</h2>
+<p>You are an expert in in-app paywalls and upgrade flows. Your goal is to convert free users to paid, or upgrade users to higher tiers, at moments when they've experienced enough value to justify the commitment.</p>
+<h3>Initial Assessment</h3>
+<p><strong>Check for product marketing context first:</strong> If <code>.agents/product-marketing.md</code> exists (or <code>.claude/product-marketing.md</code>, or the legacy <code>product-marketing-context.md</code> filename, in older setups), read it before asking questions. Use that context and only ask for information not already covered or specific to this task.</p>
+<p>Before providing recommendations, understand:</p>
+<ol>
+<li><strong>Upgrade Context</strong> - Freemium → Paid? Trial → Paid? Tier upgrade? Feature upsell? Usage limit?</li>
+</ol>
+<ol>
+<li><strong>Product Model</strong> - What's free? What's behind paywall? What triggers prompts? Current conversion rate?</li>
+</ol>
+<ol>
+<li><strong>User Journey</strong> - When does this appear? What have they experienced? What are they trying to do?</li>
+</ol>
+<hr>
+<h3>Core Principles</h3>
+<h4>1. Value Before Ask</h4>
+<ul>
+<li>User should have experienced real value first</li>
+<li>Upgrade should feel like natural next step</li>
+<li>Timing: After &quot;aha moment,&quot; not before</li>
+</ul>
+<h4>2. Show, Don't Just Tell</h4>
+<ul>
+<li>Demonstrate the value of paid features</li>
+<li>Preview what they're missing</li>
+<li>Make the upgrade feel tangible</li>
+</ul>
+<h4>3. Friction-Free Path</h4>
+<ul>
+<li>Easy to upgrade when ready</li>
+<li>Don't make them hunt for pricing</li>
+</ul>
+<h4>4. Respect the No</h4>
+<ul>
+<li>Don't trap or pressure</li>
+<li>Make it easy to continue free</li>
+<li>Maintain trust for future conversion</li>
+</ul>
+<hr>
+<h3>Paywall Trigger Points</h3>
+<h4>Feature Gates</h4>
+<p>When user clicks a paid-only feature:</p>
+<ul>
+<li>Clear explanation of why it's paid</li>
+<li>Show what the feature does</li>
+<li>Quick path to unlock</li>
+<li>Option to continue without</li>
+</ul>
+<h4>Usage Limits</h4>
+<p>When user hits a limit:</p>
+<ul>
+<li>Clear indication of limit reached</li>
+<li>Show what upgrading provides</li>
+<li>Don't block abruptly</li>
+</ul>
+<h4>Trial Expiration</h4>
+<p>When trial is ending:</p>
+<ul>
+<li>Early warnings (7, 3, 1 day)</li>
+<li>Clear &quot;what happens&quot; on expiration</li>
+<li>Summarize value received</li>
+</ul>
+<h4>Time-Based Prompts</h4>
+<p>After X days of free use:</p>
+<ul>
+<li>Gentle upgrade reminder</li>
+<li>Highlight unused paid features</li>
+<li>Easy to dismiss</li>
+</ul>
+<hr>
+<h3>Paywall Screen Components</h3>
+<ol>
+<li><strong>Headline</strong> - Focus on what they get: &quot;Unlock [Feature] to [Benefit]&quot;</li>
+</ol>
+<ol>
+<li><strong>Value Demonstration</strong> - Preview, before/after, &quot;With Pro you could...&quot;</li>
+</ol>
+<ol>
+<li><strong>Feature Comparison</strong> - Highlight key differences, current plan marked</li>
+</ol>
+<ol>
+<li><strong>Pricing</strong> - Clear, simple, annual vs. monthly options</li>
+</ol>
+<ol>
+<li><strong>Social Proof</strong> - Customer quotes, &quot;X teams use this&quot;</li>
+</ol>
+<ol>
+<li><strong>CTA</strong> - Specific and value-oriented: &quot;Start Getting [Benefit]&quot;</li>
+</ol>
+<ol>
+<li><strong>Escape Hatch</strong> - Clear &quot;Not now&quot; or &quot;Continue with Free&quot;</li>
+</ol>
+<hr>
+<h3>Specific Paywall Types</h3>
+<h4>Feature Lock Paywall</h4>
+<pre><code>[Lock Icon]
+This feature is available on Pro
+
+[Feature preview/screenshot]
+
+[Feature name] helps you [benefit]:
+• [Capability]
+• [Capability]
+
+[Upgrade to Pro - $X/mo]
+[Maybe Later]</code></pre>
+<h4>Usage Limit Paywall</h4>
+<pre><code>You've reached your free limit
+
+[Progress bar at 100%]
+
+Free: 3 projects | Pro: Unlimited
+
+[Upgrade to Pro]  [Delete a project]</code></pre>
+<h4>Trial Expiration Paywall</h4>
+<pre><code>Your trial ends in 3 days
+
+What you'll lose:
+• [Feature used]
+• [Data created]
+
+What you've accomplished:
+• Created X projects
+
+[Continue with Pro]
+[Remind me later]  [Downgrade]</code></pre>
+<hr>
+<h3>Timing and Frequency</h3>
+<h4>When to Show</h4>
+<ul>
+<li>After value moment, before frustration</li>
+<li>After activation/aha moment</li>
+<li>When hitting genuine limits</li>
+</ul>
+<h4>When NOT to Show</h4>
+<ul>
+<li>During onboarding (too early)</li>
+<li>When they're in a flow</li>
+<li>Repeatedly after dismissal</li>
+</ul>
+<h4>Frequency Rules</h4>
+<ul>
+<li>Limit per session</li>
+<li>Cool-down after dismiss (days, not hours)</li>
+<li>Track annoyance signals</li>
+</ul>
+<hr>
+<h3>Upgrade Flow Optimization</h3>
+<h4>From Paywall to Payment</h4>
+<ul>
+<li>Minimize steps</li>
+<li>Keep in-context if possible</li>
+<li>Pre-fill known information</li>
+</ul>
+<h4>Post-Upgrade</h4>
+<ul>
+<li>Immediate access to features</li>
+<li>Confirmation and receipt</li>
+<li>Guide to new features</li>
+</ul>
+<hr>
+<h3>A/B Testing</h3>
+<h4>What to Test</h4>
+<ul>
+<li>Trigger timing</li>
+<li>Headline/copy variations</li>
+<li>Price presentation</li>
+<li>Trial length</li>
+<li>Feature emphasis</li>
+<li>Design/layout</li>
+</ul>
+<h4>Metrics to Track</h4>
+<ul>
+<li>Paywall impression rate</li>
+<li>Click-through to upgrade</li>
+<li>Completion rate</li>
+<li>Revenue per user</li>
+<li>Churn rate post-upgrade</li>
+</ul>
+<p><strong>For comprehensive experiment ideas</strong>: See [references/experiments.md](references/experiments.md)</p>
+<hr>
+<h3>Anti-Patterns to Avoid</h3>
+<h4>Dark Patterns</h4>
+<ul>
+<li>Hiding the close button</li>
+<li>Confusing plan selection</li>
+<li>Guilt-trip copy</li>
+</ul>
+<h4>Conversion Killers</h4>
+<ul>
+<li>Asking before value delivered</li>
+<li>Too frequent prompts</li>
+<li>Blocking critical flows</li>
+<li>Complicated upgrade process</li>
+</ul>
+<hr>
+<h3>Task-Specific Questions</h3>
+<ol>
+<li>What's your current free → paid conversion rate?</li>
+<li>What triggers upgrade prompts today?</li>
+<li>What features are behind the paywall?</li>
+<li>What's your &quot;aha moment&quot; for users?</li>
+<li>What pricing model? (per seat, usage, flat)</li>
+<li>Mobile app, web app, or both?</li>
+</ol>
+<hr>
+<h3>Related Skills</h3>
+<ul>
+<li><strong>churn-prevention</strong>: For cancel flows, save offers, and reducing churn post-upgrade</li>
+<li><strong>cro</strong>: For public pricing page optimization</li>
+<li><strong>onboarding</strong>: For driving to aha moment before upgrade</li>
+<li><strong>ab-testing</strong>: For testing paywall variations</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: paywalls\ndisplay_name: paywalls\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# paywalls - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `paywalls` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nYou are an expert in in-app paywalls and upgrade flows. Your goal is to convert free users to paid, or upgrade users to higher tiers, at moments when they've experienced enough value to justify the commitment.\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose paywalls, then write the task. Fallback prompt: Use the paywalls skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `paywalls` |\n| Canonical name | `paywalls` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nYou are an expert in in-app paywalls and upgrade flows. Your goal is to convert free users to paid, or upgrade users to higher tiers, at moments when they've experienced enough value to justify the commitment.\n\n## Original SKILL.md\n\n---\nname: paywalls\ndescription: When the user wants to create or optimize in-app paywalls, upgrade screens, upsell modals, or feature gates. Also use when the user mentions \"paywall,\" \"upgrade screen,\" \"upgrade modal,\" \"upsell,\" \"feature gate,\" \"convert free to paid,\" \"freemium conversion,\" \"trial expiration screen,\" \"limit reached screen,\" \"plan upgrade prompt,\" \"in-app pricing,\" \"free users won't upgrade,\" \"trial to paid conversion,\" or \"how do I get users to pay.\" Use this for any in-product moment where you're asking users to upgrade. Distinct from public pricing pages (see cro) — this focuses on in-product upgrade moments where the user has already experienced value. For pricing decisions, see pricing.\nmetadata:\n  version: 2.0.0\n---\n\n# Paywall and Upgrade Screen CRO\n\nYou are an expert in in-app paywalls and upgrade flows. Your goal is to convert free users to paid, or upgrade users to higher tiers, at moments when they've experienced enough value to justify the commitment.\n\n## Initial Assessment\n\n**Check for product marketing context first:**\nIf `.agents/product-marketing.md` exists (or `.claude/product-marketing.md`, or the legacy `product-marketing-context.md` filename, in older setups), read it before asking questions. Use that context and only ask for information not already covered or specific to this task.\n\nBefore providing recommendations, understand:\n\n1. **Upgrade Context** - Freemium → Paid? Trial → Paid? Tier upgrade? Feature upsell? Usage limit?\n\n2. **Product Model** - What's free? What's behind paywall? What triggers prompts? Current conversion rate?\n\n3. **User Journey** - When does this appear? What have they experienced? What are they trying to do?\n\n---\n\n## Core Principles\n\n### 1. Value Before Ask\n- User should have experienced real value first\n- Upgrade should feel like natural next step\n- Timing: After \"aha moment,\" not before\n\n### 2. Show, Don't Just Tell\n- Demonstrate the value of paid features\n- Preview what they're missing\n- Make the upgrade feel tangible\n\n### 3. Friction-Free Path\n- Easy to upgrade when ready\n- Don't make them hunt for pricing\n\n### 4. Respect the No\n- Don't trap or pressure\n- Make it easy to continue free\n- Maintain trust for future conversion\n\n---\n\n## Paywall Trigger Points\n\n### Feature Gates\nWhen user clicks a paid-only feature:\n- Clear explanation of why it's paid\n- Show what the feature does\n- Quick path to unlock\n- Option to continue without\n\n### Usage Limits\nWhen user hits a limit:\n- Clear indication of limit reached\n- Show what upgrading provides\n- Don't block abruptly\n\n### Trial Expiration\nWhen trial is ending:\n- Early warnings (7, 3, 1 day)\n- Clear \"what happens\" on expiration\n- Summarize value received\n\n### Time-Based Prompts\nAfter X days of free use:\n- Gentle upgrade reminder\n- Highlight unused paid features\n- Easy to dismiss\n\n---\n\n## Paywall Screen Components\n\n1. **Headline** - Focus on what they get: \"Unlock [Feature] to [Benefit]\"\n\n2. **Value Demonstration** - Preview, before/after, \"With Pro you could...\"\n\n3. **Feature Comparison** - Highlight key differences, current plan marked\n\n4. **Pricing** - Clear, simple, annual vs. monthly options\n\n5. **Social Proof** - Customer quotes, \"X teams use this\"\n\n6. **CTA** - Specific and value-oriented: \"Start Getting [Benefit]\"\n\n7. **Escape Hatch** - Clear \"Not now\" or \"Continue with Free\"\n\n---\n\n## Specific Paywall Types\n\n### Feature Lock Paywall\n```\n[Lock Icon]\nThis feature is available on Pro\n\n[Feature preview/screenshot]\n\n[Feature name] helps you [benefit]:\n• [Capability]\n• [Capability]\n\n[Upgrade to Pro - $X/mo]\n[Maybe Later]\n```\n\n### Usage Limit Paywall\n```\nYou've reached your free limit\n\n[Progress bar at 100%]\n\nFree: 3 projects | Pro: Unlimited\n\n[Upgrade to Pro]  [Delete a project]\n```\n\n### Trial Expiration Paywall\n```\nYour trial ends in 3 days\n\nWhat you'll lose:\n• [Feature used]\n• [Data created]\n\nWhat you've accomplished:\n• Created X projects\n\n[Continue with Pro]\n[Remind me later]  [Downgrade]\n```\n\n---\n\n## Timing and Frequency\n\n### When to Show\n- After value moment, before frustration\n- After activation/aha moment\n- When hitting genuine limits\n\n### When NOT to Show\n- During onboarding (too early)\n- When they're in a flow\n- Repeatedly after dismissal\n\n### Frequency Rules\n- Limit per session\n- Cool-down after dismiss (days, not hours)\n- Track annoyance signals\n\n---\n\n## Upgrade Flow Optimization\n\n### From Paywall to Payment\n- Minimize steps\n- Keep in-context if possible\n- Pre-fill known information\n\n### Post-Upgrade\n- Immediate access to features\n- Confirmation and receipt\n- Guide to new features\n\n---\n\n## A/B Testing\n\n### What to Test\n- Trigger timing\n- Headline/copy variations\n- Price presentation\n- Trial length\n- Feature emphasis\n- Design/layout\n\n### Metrics to Track\n- Paywall impression rate\n- Click-through to upgrade\n- Completion rate\n- Revenue per user\n- Churn rate post-upgrade\n\n**For comprehensive experiment ideas**: See [references/experiments.md](references/experiments.md)\n\n---\n\n## Anti-Patterns to Avoid\n\n### Dark Patterns\n- Hiding the close button\n- Confusing plan selection\n- Guilt-trip copy\n\n### Conversion Killers\n- Asking before value delivered\n- Too frequent prompts\n- Blocking critical flows\n- Complicated upgrade process\n\n---\n\n## Task-Specific Questions\n\n1. What's your current free → paid conversion rate?\n2. What triggers upgrade prompts today?\n3. What features are behind the paywall?\n4. What's your \"aha moment\" for users?\n5. What pricing model? (per seat, usage, flat)\n6. Mobile app, web app, or both?\n\n---\n\n## Related Skills\n\n- **churn-prevention**: For cancel flows, save offers, and reducing churn post-upgrade\n- **cro**: For public pricing page optimization\n- **onboarding**: For driving to aha moment before upgrade\n- **ab-testing**: For testing paywall variations\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("paywalls-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>analyzing-usb-device-connection-history - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/analyzing-usb-device-connection-history-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>analyzing-usb-device-connection-history</h1>
+      <p class="description">Investigate USB device connection history from Windows registry, event</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>analyzing-usb-device-connection-history</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>analyzing-usb-device-connection-history</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Investigate USB device connection history from Windows registry, event</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose analyzing-usb-device-connection-history, then write the task. Fallback prompt: Use the analyzing-usb-device-connection-history skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Analyzing USB Device Connection History</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When investigating potential data exfiltration via removable storage devices</li>
+<li>During insider threat investigations to track USB device usage</li>
+<li>For compliance audits verifying removable media policy enforcement</li>
+<li>When correlating USB connections with file access and copy events</li>
+<li>For establishing a timeline of device connections during an incident</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Forensic image or extracted registry hives and event logs</li>
+<li>Access to SYSTEM, SOFTWARE, and NTUSER.DAT registry hives</li>
+<li>SetupAPI logs (setupapi.dev.log)</li>
+<li>Windows Event Logs (System, Security, DriverFrameworks-UserMode)</li>
+<li>USBDeview, USB Forensic Tracker, or RegRipper</li>
+<li>Understanding of USB device identification (VID, PID, serial number)</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Extract USB-Related Artifacts</h4>
+<pre><code># Mount forensic image and copy relevant artifacts
+mount -o ro,loop,offset=$((2048*512)) /cases/case-2024-001/images/evidence.dd /mnt/evidence
+
+mkdir -p /cases/case-2024-001/usb/
+
+# Registry hives
+cp /mnt/evidence/Windows/System32/config/SYSTEM /cases/case-2024-001/usb/
+cp /mnt/evidence/Windows/System32/config/SOFTWARE /cases/case-2024-001/usb/
+cp /mnt/evidence/Users/*/NTUSER.DAT /cases/case-2024-001/usb/
+
+# SetupAPI logs (first connection timestamps)
+cp /mnt/evidence/Windows/INF/setupapi.dev.log /cases/case-2024-001/usb/
+
+# Event logs
+cp /mnt/evidence/Windows/System32/winevt/Logs/System.evtx /cases/case-2024-001/usb/
+cp &quot;/mnt/evidence/Windows/System32/winevt/Logs/Microsoft-Windows-DriverFrameworks-UserMode%4Operational.evtx&quot; \
+   /cases/case-2024-001/usb/ 2&gt;/dev/null
+cp &quot;/mnt/evidence/Windows/System32/winevt/Logs/Microsoft-Windows-Partition%4Diagnostic.evtx&quot; \
+   /cases/case-2024-001/usb/ 2&gt;/dev/null</code></pre>
+<h4>Step 2: Parse USBSTOR Registry Key</h4>
+<pre><code># Extract USBSTOR entries from SYSTEM hive
+python3 &lt;&lt; 'PYEOF'
+from Registry import Registry
+import json
+
+reg = Registry.Registry(&quot;/cases/case-2024-001/usb/SYSTEM&quot;)
+
+# Find current ControlSet
+select = reg.open(&quot;Select&quot;)
+current = select.value(&quot;Current&quot;).value()
+controlset = f&quot;ControlSet{current:03d}&quot;
+
+# Parse USBSTOR
+usbstor_path = f&quot;{controlset}\\Enum\\USBSTOR&quot;
+usbstor = reg.open(usbstor_path)
+
+devices = []
+print(&quot;=== USBSTOR DEVICES ===\n&quot;)
+
+for device_class in usbstor.subkeys():
+    # Format: Disk&amp;Ven_VENDOR&amp;Prod_PRODUCT&amp;Rev_REVISION
+    class_name = device_class.name()
+    parts = class_name.split('&amp;')
+    vendor = parts[1].replace('Ven_', '') if len(parts) &gt; 1 else 'Unknown'
+    product = parts[2].replace('Prod_', '') if len(parts) &gt; 2 else 'Unknown'
+    revision = parts[3].replace('Rev_', '') if len(parts) &gt; 3 else 'Unknown'
+
+    for instance in device_class.subkeys():
+        serial = instance.name()
+        last_write = instance.timestamp()
+
+        device_info = {
+            'vendor': vendor,
+            'product': product,
+            'revision': revision,
+            'serial': serial,
+            'last_connected': str(last_write),
+        }
+
+        # Get friendly name if available
+        try:
+            friendly = instance.value(&quot;FriendlyName&quot;).value()
+            device_info['friendly_name'] = friendly
+        except:
+            pass
+
+        # Get device parameters
+        try:
+            params = instance.subkey(&quot;Device Parameters&quot;)
+            try:
+                device_info['class_guid'] = params.value(&quot;ClassGUID&quot;).value()
+            except:
+                pass
+        except:
+            pass
+
+        devices.append(device_info)
+        print(f&quot;Device: {vendor} {product}&quot;)
+        print(f&quot;  Serial: {serial}&quot;)
+        print(f&quot;  Last Connected: {last_write}&quot;)
+        print(f&quot;  Friendly Name: {device_info.get('friendly_name', 'N/A')}&quot;)
+        print()
+
+# Save results
+with open('/cases/case-2024-001/analysis/usb_devices.json', 'w') as f:
+    json.dump(devices, f, indent=2)
+
+print(f&quot;\nTotal USB storage devices found: {len(devices)}&quot;)
+PYEOF</code></pre>
+<h4>Step 3: Extract Drive Letter Assignments and User Associations</h4>
+<pre><code># Parse MountedDevices from SYSTEM hive
+python3 &lt;&lt; 'PYEOF'
+from Registry import Registry
+import struct
+
+reg = Registry.Registry(&quot;/cases/case-2024-001/usb/SYSTEM&quot;)
+
+mounted = reg.open(&quot;MountedDevices&quot;)
+
+print(&quot;=== MOUNTED DEVICES (Drive Letter Assignments) ===\n&quot;)
+for value in mounted.values():
+    name = value.name()
+    data = value.value()
+
+    if name.startswith(&quot;\\DosDevices\\&quot;):
+        drive_letter = name.replace(&quot;\\DosDevices\\&quot;, &quot;&quot;)
+        if len(data) &gt; 24:
+            # USB device - contains device path string
+            try:
+                device_path = data.decode('utf-16-le').strip('\x00')
+                if 'USBSTOR' in device_path or 'USB#' in device_path:
+                    print(f&quot;  {drive_letter} -&gt; {device_path}&quot;)
+            except:
+                pass
+        else:
+            # Fixed disk - contains disk signature + offset
+            disk_sig = struct.unpack('&lt;I', data[0:4])[0]
+            offset = struct.unpack('&lt;Q', data[4:12])[0]
+            print(f&quot;  {drive_letter} -&gt; Disk Signature: 0x{disk_sig:08X}, Offset: {offset}&quot;)
+PYEOF
+
+# Parse user MountPoints2 (which user accessed which devices)
+python3 &lt;&lt; 'PYEOF'
+from Registry import Registry
+import os, glob
+
+print(&quot;\n=== USER MOUNT POINTS (MountPoints2) ===\n&quot;)
+
+for ntuser in glob.glob(&quot;/cases/case-2024-001/usb/NTUSER*.DAT&quot;):
+    try:
+        reg = Registry.Registry(ntuser)
+        mp2 = reg.open(&quot;Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MountPoints2&quot;)
+
+        print(f&quot;User hive: {os.path.basename(ntuser)}&quot;)
+        for key in mp2.subkeys():
+            guid = key.name()
+            last_write = key.timestamp()
+            if '{' in guid:
+                print(f&quot;  Volume: {guid} | Last accessed: {last_write}&quot;)
+        print()
+    except Exception as e:
+        print(f&quot;  Error parsing {ntuser}: {e}&quot;)
+PYEOF</code></pre>
+<h4>Step 4: Extract First Connection Timestamps from SetupAPI</h4>
+<pre><code># Parse setupapi.dev.log for USB device first-install timestamps
+python3 &lt;&lt; 'PYEOF'
+import re
+
+print(&quot;=== SETUPAPI USB DEVICE INSTALLATIONS ===\n&quot;)
+
+with open('/cases/case-2024-001/usb/setupapi.dev.log', 'r', errors='ignore') as f:
+    content = f.read()
+
+# Find USB device installation sections
+pattern = r'&gt;&gt;&gt;\s+\[Device Install.*?\n.*?Section start (\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*?\n(.*?)&lt;&lt;&lt;'
+matches = re.findall(pattern, content, re.DOTALL)
+
+usb_installs = []
+for timestamp, section in matches:
+    if 'USBSTOR' in section or 'USB\\VID' in section:
+        # Extract device ID
+        dev_match = re.search(r'(USBSTOR\\[^\s]+|USB\\VID_\w+&amp;PID_\w+[^\s]*)', section)
+        if dev_match:
+            device_id = dev_match.group(1)
+            usb_installs.append({
+                'first_install': timestamp,
+                'device_id': device_id
+            })
+            print(f&quot;  {timestamp} | {device_id}&quot;)
+
+print(f&quot;\nTotal USB installations found: {len(usb_installs)}&quot;)
+PYEOF
+
+# Parse Windows Event Logs for USB events
+# Event IDs: 2003, 2010, 2100, 2102 (DriverFrameworks-UserMode)
+# Event IDs: 6416 (Security - new external device recognized)
+python3 &lt;&lt; 'PYEOF'
+import json
+from evtx import PyEvtxParser
+
+try:
+    parser = PyEvtxParser(&quot;/cases/case-2024-001/usb/System.evtx&quot;)
+
+    print(&quot;\n=== SYSTEM EVENT LOG USB EVENTS ===\n&quot;)
+    for record in parser.records_json():
+        data = json.loads(record['data'])
+        event_id = str(data['Event']['System']['EventID'])
+
+        # USB device connection events
+        if event_id in ('20001', '20003', '10000', '10100'):
+            timestamp = data['Event']['System']['TimeCreated']['#attributes']['SystemTime']
+            event_data = data['Event'].get('UserData', data['Event'].get('EventData', {}))
+            print(f&quot;  [{timestamp}] EventID {event_id}: {json.dumps(event_data, default=str)[:200]}&quot;)
+except Exception as e:
+    print(f&quot;Error: {e}&quot;)
+PYEOF</code></pre>
+<h4>Step 5: Build USB Activity Timeline and Report</h4>
+<pre><code># Compile all USB evidence into a unified timeline
+python3 &lt;&lt; 'PYEOF'
+import json, csv
+
+timeline = []
+
+# Load USBSTOR data
+with open('/cases/case-2024-001/analysis/usb_devices.json') as f:
+    devices = json.load(f)
+
+for device in devices:
+    timeline.append({
+        'timestamp': device['last_connected'],
+        'source': 'USBSTOR Registry',
+        'device': f&quot;{device['vendor']} {device['product']}&quot;,
+        'serial': device['serial'],
+        'event': 'Last Connected',
+        'detail': device.get('friendly_name', '')
+    })
+
+# Sort chronologically
+timeline.sort(key=lambda x: x['timestamp'])
+
+# Write timeline CSV
+with open('/cases/case-2024-001/analysis/usb_timeline.csv', 'w', newline='') as f:
+    writer = csv.DictWriter(f, fieldnames=['timestamp', 'source', 'device', 'serial', 'event', 'detail'])
+    writer.writeheader()
+    writer.writerows(timeline)
+
+print(f&quot;USB Timeline: {len(timeline)} events written to usb_timeline.csv&quot;)
+
+# Print summary
+print(&quot;\n=== USB DEVICE SUMMARY ===&quot;)
+for entry in timeline:
+    print(f&quot;  {entry['timestamp']} | {entry['device']} | {entry['serial'][:20]} | {entry['event']}&quot;)
+PYEOF</code></pre>
+<h3>Key Concepts</h3>
+<p>| Concept | Description | |---------|-------------| | USBSTOR | Registry key storing USB mass storage device identification and connection data | | VID/PID | Vendor ID and Product ID uniquely identifying USB device manufacturer and model | | Device serial number | Unique identifier for individual USB devices (some devices share serials) | | MountedDevices | Registry key mapping volume GUIDs and drive letters to physical devices | | MountPoints2 | Per-user registry key showing which volumes a user accessed | | SetupAPI log | Windows driver installation log recording first-time device connections | | DeviceContainers | Registry key in SOFTWARE hive with device metadata and timestamps | | EMDMgmt | Registry key tracking ReadyBoost-compatible devices with serial numbers and timestamps |</p>
+<h3>Tools &amp; Systems</h3>
+<p>| Tool | Purpose | |------|---------| | USB Forensic Tracker | Specialized tool for USB device history extraction | | USBDeview | NirSoft tool listing all USB devices connected to a system | | RegRipper (usbstor plugin) | Automated USB artifact extraction from registry hives | | Registry Explorer | Interactive registry analysis for USB-related keys | | KAPE | Automated collection of USB-related artifacts | | Plaso/log2timeline | Timeline creation including USB connection events | | FTK Imager | Forensic imaging including removable media | | Velociraptor | Endpoint agent with USB device history hunting artifacts |</p>
+<h3>Common Scenarios</h3>
+<p><strong>Scenario 1: Data Exfiltration by Departing Employee</strong> Extract USBSTOR entries to identify all USB devices ever connected, correlate device serial numbers with MountPoints2 to confirm user access, cross-reference timestamps with file access logs and jump list recent files, check for large file copy patterns in USN journal.</p>
+<p><strong>Scenario 2: Unauthorized Device on Secure System</strong> Audit all USBSTOR entries against approved device list, identify unauthorized devices by VID/PID not matching corporate-approved hardware, determine when the unauthorized device was first and last connected, check if any data was transferred.</p>
+<p><strong>Scenario 3: Malware Delivery via USB</strong> Identify USB device connected just before malware execution (Prefetch timestamps), extract the device serial and vendor information, check if autorun was enabled for the device, look for executable launch from the removable drive letter in Prefetch and ShimCache.</p>
+<p><strong>Scenario 4: Tracking a Specific USB Drive Across Multiple Systems</strong> Search for the same device serial number in USBSTOR across all forensic images, build a map of which systems the drive was connected to and when, identify the chronological path of the device through the organization, correlate with network share access logs.</p>
+<h3>Output Format</h3>
+<pre><code>USB Device History Analysis:
+  System: DESKTOP-ABC123 (Windows 10 Pro)
+  Total USB Storage Devices: 12
+  Analysis Sources: USBSTOR, MountedDevices, MountPoints2, SetupAPI, Event Logs
+
+  Device Inventory:
+    1. Kingston DataTraveler 3.0 (Serial: 0019E06B4521A2B0)
+       First Connected:  2024-01-10 09:15:32 (SetupAPI)
+       Last Connected:   2024-01-18 14:30:00 (USBSTOR)
+       Drive Letter:     E:
+       User Access:      suspect_user (MountPoints2)
+
+    2. WD My Passport (Serial: 575834314131363035)
+       First Connected:  2024-01-15 20:00:00
+       Last Connected:   2024-01-15 23:45:00
+       Drive Letter:     F:
+       User Access:      suspect_user
+
+  Suspicious Findings:
+    - Kingston drive connected 15 times during investigation period
+    - WD Passport connected only once, late evening (unusual hours)
+    - Unknown device (VID_1234&amp;PID_5678) connected 2024-01-17, no matching approved device
+
+  Timeline: /cases/case-2024-001/analysis/usb_timeline.csv</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: analyzing-usb-device-connection-history\ndisplay_name: analyzing-usb-device-connection-history\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# analyzing-usb-device-connection-history - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `analyzing-usb-device-connection-history` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When investigating potential data exfiltration via removable storage devices\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose analyzing-usb-device-connection-history, then write the task. Fallback prompt: Use the analyzing-usb-device-connection-history skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `analyzing-usb-device-connection-history` |\n| Canonical name | `analyzing-usb-device-connection-history` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n- When investigating potential data exfiltration via removable storage devices\n\n## Original SKILL.md\n\n---\nname: analyzing-usb-device-connection-history\ndescription: Investigate USB device connection history from Windows registry, event\n  logs, and setupapi logs to track removable media usage and potential data exfiltration.\ndomain: cybersecurity\nsubdomain: digital-forensics\ntags:\n- forensics\n- usb-forensics\n- removable-media\n- registry-analysis\n- data-exfiltration\n- device-history\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- RS.AN-01\n- RS.AN-03\n- DE.AE-02\n- RS.MA-01\nmitre_attack:\n- T1052.001\n- T1025\n- T1091\n- T1005\n- T1074.001\n---\n\n# Analyzing USB Device Connection History\n\n## When to Use\n- When investigating potential data exfiltration via removable storage devices\n- During insider threat investigations to track USB device usage\n- For compliance audits verifying removable media policy enforcement\n- When correlating USB connections with file access and copy events\n- For establishing a timeline of device connections during an incident\n\n## Prerequisites\n- Forensic image or extracted registry hives and event logs\n- Access to SYSTEM, SOFTWARE, and NTUSER.DAT registry hives\n- SetupAPI logs (setupapi.dev.log)\n- Windows Event Logs (System, Security, DriverFrameworks-UserMode)\n- USBDeview, USB Forensic Tracker, or RegRipper\n- Understanding of USB device identification (VID, PID, serial number)\n\n## Workflow\n\n### Step 1: Extract USB-Related Artifacts\n\n```bash\n# Mount forensic image and copy relevant artifacts\nmount -o ro,loop,offset=$((2048*512)) /cases/case-2024-001/images/evidence.dd /mnt/evidence\n\nmkdir -p /cases/case-2024-001/usb/\n\n# Registry hives\ncp /mnt/evidence/Windows/System32/config/SYSTEM /cases/case-2024-001/usb/\ncp /mnt/evidence/Windows/System32/config/SOFTWARE /cases/case-2024-001/usb/\ncp /mnt/evidence/Users/*/NTUSER.DAT /cases/case-2024-001/usb/\n\n# SetupAPI logs (first connection timestamps)\ncp /mnt/evidence/Windows/INF/setupapi.dev.log /cases/case-2024-001/usb/\n\n# Event logs\ncp /mnt/evidence/Windows/System32/winevt/Logs/System.evtx /cases/case-2024-001/usb/\ncp \"/mnt/evidence/Windows/System32/winevt/Logs/Microsoft-Windows-DriverFrameworks-UserMode%4Operational.evtx\" \\\n   /cases/case-2024-001/usb/ 2>/dev/null\ncp \"/mnt/evidence/Windows/System32/winevt/Logs/Microsoft-Windows-Partition%4Diagnostic.evtx\" \\\n   /cases/case-2024-001/usb/ 2>/dev/null\n```\n\n### Step 2: Parse USBSTOR Registry Key\n\n```bash\n# Extract USBSTOR entries from SYSTEM hive\npython3 \u003c\u003c 'PYEOF'\nfrom Registry import Registry\nimport json\n\nreg = Registry.Registry(\"/cases/case-2024-001/usb/SYSTEM\")\n\n# Find current ControlSet\nselect = reg.open(\"Select\")\ncurrent = select.value(\"Current\").value()\ncontrolset = f\"ControlSet{current:03d}\"\n\n# Parse USBSTOR\nusbstor_path = f\"{controlset}\\\\Enum\\\\USBSTOR\"\nusbstor = reg.open(usbstor_path)\n\ndevices = []\nprint(\"=== USBSTOR DEVICES ===\\n\")\n\nfor device_class in usbstor.subkeys():\n    # Format: Disk&Ven_VENDOR&Prod_PRODUCT&Rev_REVISION\n    class_name = device_class.name()\n    parts = class_name.split('&')\n    vendor = parts[1].replace('Ven_', '') if len(parts) > 1 else 'Unknown'\n    product = parts[2].replace('Prod_', '') if len(parts) > 2 else 'Unknown'\n    revision = parts[3].replace('Rev_', '') if len(parts) > 3 else 'Unknown'\n\n    for instance in device_class.subkeys():\n        serial = instance.name()\n        last_write = instance.timestamp()\n\n        device_info = {\n            'vendor': vendor,\n            'product': product,\n            'revision': revision,\n            'serial': serial,\n            'last_connected': str(last_write),\n        }\n\n        # Get friendly name if available\n        try:\n            friendly = instance.value(\"FriendlyName\").value()\n            device_info['friendly_name'] = friendly\n        except:\n            pass\n\n        # Get device parameters\n        try:\n            params = instance.subkey(\"Device Parameters\")\n            try:\n                device_info['class_guid'] = params.value(\"ClassGUID\").value()\n            except:\n                pass\n        except:\n            pass\n\n        devices.append(device_info)\n        print(f\"Device: {vendor} {product}\")\n        print(f\"  Serial: {serial}\")\n        print(f\"  Last Connected: {last_write}\")\n        print(f\"  Friendly Name: {device_info.get('friendly_name', 'N/A')}\")\n        print()\n\n# Save results\nwith open('/cases/case-2024-001/analysis/usb_devices.json', 'w') as f:\n    json.dump(devices, f, indent=2)\n\nprint(f\"\\nTotal USB storage devices found: {len(devices)}\")\nPYEOF\n```\n\n### Step 3: Extract Drive Letter Assignments and User Associations\n\n```bash\n# Parse MountedDevices from SYSTEM hive\npython3 \u003c\u003c 'PYEOF'\nfrom Registry import Registry\nimport struct\n\nreg = Registry.Registry(\"/cases/case-2024-001/usb/SYSTEM\")\n\nmounted = reg.open(\"MountedDevices\")\n\nprint(\"=== MOUNTED DEVICES (Drive Letter Assignments) ===\\n\")\nfor value in mounted.values():\n    name = value.name()\n    data = value.value()\n\n    if name.startswith(\"\\\\DosDevices\\\\\"):\n        drive_letter = name.replace(\"\\\\DosDevices\\\\\", \"\")\n        if len(data) > 24:\n            # USB device - contains device path string\n            try:\n                device_path = data.decode('utf-16-le').strip('\\x00')\n                if 'USBSTOR' in device_path or 'USB#' in device_path:\n                    print(f\"  {drive_letter} -> {device_path}\")\n            except:\n                pass\n        else:\n            # Fixed disk - contains disk signature + offset\n            disk_sig = struct.unpack('\u003cI', data[0:4])[0]\n            offset = struct.unpack('\u003cQ', data[4:12])[0]\n            print(f\"  {drive_letter} -> Disk Signature: 0x{disk_sig:08X}, Offset: {offset}\")\nPYEOF\n\n# Parse user MountPoints2 (which user accessed which devices)\npython3 \u003c\u003c 'PYEOF'\nfrom Registry import Registry\nimport os, glob\n\nprint(\"\\n=== USER MOUNT POINTS (MountPoints2) ===\\n\")\n\nfor ntuser in glob.glob(\"/cases/case-2024-001/usb/NTUSER*.DAT\"):\n    try:\n        reg = Registry.Registry(ntuser)\n        mp2 = reg.open(\"Software\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Explorer\\\\MountPoints2\")\n\n        print(f\"User hive: {os.path.basename(ntuser)}\")\n        for key in mp2.subkeys():\n            guid = key.name()\n            last_write = key.timestamp()\n            if '{' in guid:\n                print(f\"  Volume: {guid} | Last accessed: {last_write}\")\n        print()\n    except Exception as e:\n        print(f\"  Error parsing {ntuser}: {e}\")\nPYEOF\n```\n\n### Step 4: Extract First Connection Timestamps from SetupAPI\n\n```bash\n# Parse setupapi.dev.log for USB device first-install timestamps\npython3 \u003c\u003c 'PYEOF'\nimport re\n\nprint(\"=== SETUPAPI USB DEVICE INSTALLATIONS ===\\n\")\n\nwith open('/cases/case-2024-001/usb/setupapi.dev.log', 'r', errors='ignore') as f:\n    content = f.read()\n\n# Find USB device installation sections\npattern = r'>>>\\s+\\[Device Install.*?\\n.*?Section start (\\d{4}/\\d{2}/\\d{2} \\d{2}:\\d{2}:\\d{2}).*?\\n(.*?)\u003c\u003c\u003c'\nmatches = re.findall(pattern, content, re.DOTALL)\n\nusb_installs = []\nfor timestamp, section in matches:\n    if 'USBSTOR' in section or 'USB\\\\VID' in section:\n        # Extract device ID\n        dev_match = re.search(r'(USBSTOR\\\\[^\\s]+|USB\\\\VID_\\w+&PID_\\w+[^\\s]*)', section)\n        if dev_match:\n            device_id = dev_match.group(1)\n            usb_installs.append({\n                'first_install': timestamp,\n                'device_id': device_id\n            })\n            print(f\"  {timestamp} | {device_id}\")\n\nprint(f\"\\nTotal USB installations found: {len(usb_installs)}\")\nPYEOF\n\n# Parse Windows Event Logs for USB events\n# Event IDs: 2003, 2010, 2100, 2102 (DriverFrameworks-UserMode)\n# Event IDs: 6416 (Security - new external device recognized)\npython3 \u003c\u003c 'PYEOF'\nimport json\nfrom evtx import PyEvtxParser\n\ntry:\n    parser = PyEvtxParser(\"/cases/case-2024-001/usb/System.evtx\")\n\n    print(\"\\n=== SYSTEM EVENT LOG USB EVENTS ===\\n\")\n    for record in parser.records_json():\n        data = json.loads(record['data'])\n        event_id = str(data['Event']['System']['EventID'])\n\n        # USB device connection events\n        if event_id in ('20001', '20003', '10000', '10100'):\n            timestamp = data['Event']['System']['TimeCreated']['#attributes']['SystemTime']\n            event_data = data['Event'].get('UserData', data['Event'].get('EventData', {}))\n            print(f\"  [{timestamp}] EventID {event_id}: {json.dumps(event_data, default=str)[:200]}\")\nexcept Exception as e:\n    print(f\"Error: {e}\")\nPYEOF\n```\n\n### Step 5: Build USB Activity Timeline and Report\n\n```bash\n# Compile all USB evidence into a unified timeline\npython3 \u003c\u003c 'PYEOF'\nimport json, csv\n\ntimeline = []\n\n# Load USBSTOR data\nwith open('/cases/case-2024-001/analysis/usb_devices.json') as f:\n    devices = json.load(f)\n\nfor device in devices:\n    timeline.append({\n        'timestamp': device['last_connected'],\n        'source': 'USBSTOR Registry',\n        'device': f\"{device['vendor']} {device['product']}\",\n        'serial': device['serial'],\n        'event': 'Last Connected',\n        'detail': device.get('friendly_name', '')\n    })\n\n# Sort chronologically\ntimeline.sort(key=lambda x: x['timestamp'])\n\n# Write timeline CSV\nwith open('/cases/case-2024-001/analysis/usb_timeline.csv', 'w', newline='') as f:\n    writer = csv.DictWriter(f, fieldnames=['timestamp', 'source', 'device', 'serial', 'event', 'detail'])\n    writer.writeheader()\n    writer.writerows(timeline)\n\nprint(f\"USB Timeline: {len(timeline)} events written to usb_timeline.csv\")\n\n# Print summary\nprint(\"\\n=== USB DEVICE SUMMARY ===\")\nfor entry in timeline:\n    print(f\"  {entry['timestamp']} | {entry['device']} | {entry['serial'][:20]} | {entry['event']}\")\nPYEOF\n```\n\n## Key Concepts\n\n| Concept | Description |\n|---------|-------------|\n| USBSTOR | Registry key storing USB mass storage device identification and connection data |\n| VID/PID | Vendor ID and Product ID uniquely identifying USB device manufacturer and model |\n| Device serial number | Unique identifier for individual USB devices (some devices share serials) |\n| MountedDevices | Registry key mapping volume GUIDs and drive letters to physical devices |\n| MountPoints2 | Per-user registry key showing which volumes a user accessed |\n| SetupAPI log | Windows driver installation log recording first-time device connections |\n| DeviceContainers | Registry key in SOFTWARE hive with device metadata and timestamps |\n| EMDMgmt | Registry key tracking ReadyBoost-compatible devices with serial numbers and timestamps |\n\n## Tools & Systems\n\n| Tool | Purpose |\n|------|---------|\n| USB Forensic Tracker | Specialized tool for USB device history extraction |\n| USBDeview | NirSoft tool listing all USB devices connected to a system |\n| RegRipper (usbstor plugin) | Automated USB artifact extraction from registry hives |\n| Registry Explorer | Interactive registry analysis for USB-related keys |\n| KAPE | Automated collection of USB-related artifacts |\n| Plaso/log2timeline | Timeline creation including USB connection events |\n| FTK Imager | Forensic imaging including removable media |\n| Velociraptor | Endpoint agent with USB device history hunting artifacts |\n\n## Common Scenarios\n\n**Scenario 1: Data Exfiltration by Departing Employee**\nExtract USBSTOR entries to identify all USB devices ever connected, correlate device serial numbers with MountPoints2 to confirm user access, cross-reference timestamps with file access logs and jump list recent files, check for large file copy patterns in USN journal.\n\n**Scenario 2: Unauthorized Device on Secure System**\nAudit all USBSTOR entries against approved device list, identify unauthorized devices by VID/PID not matching corporate-approved hardware, determine when the unauthorized device was first and last connected, check if any data was transferred.\n\n**Scenario 3: Malware Delivery via USB**\nIdentify USB device connected just before malware execution (Prefetch timestamps), extract the device serial and vendor information, check if autorun was enabled for the device, look for executable launch from the removable drive letter in Prefetch and ShimCache.\n\n**Scenario 4: Tracking a Specific USB Drive Across Multiple Systems**\nSearch for the same device serial number in USBSTOR across all forensic images, build a map of which systems the drive was connected to and when, identify the chronological path of the device through the organization, correlate with network share access logs.\n\n## Output Format\n\n```\nUSB Device History Analysis:\n  System: DESKTOP-ABC123 (Windows 10 Pro)\n  Total USB Storage Devices: 12\n  Analysis Sources: USBSTOR, MountedDevices, MountPoints2, SetupAPI, Event Logs\n\n  Device Inventory:\n    1. Kingston DataTraveler 3.0 (Serial: 0019E06B4521A2B0)\n       First Connected:  2024-01-10 09:15:32 (SetupAPI)\n       Last Connected:   2024-01-18 14:30:00 (USBSTOR)\n       Drive Letter:     E:\n       User Access:      suspect_user (MountPoints2)\n\n    2. WD My Passport (Serial: 575834314131363035)\n       First Connected:  2024-01-15 20:00:00\n       Last Connected:   2024-01-15 23:45:00\n       Drive Letter:     F:\n       User Access:      suspect_user\n\n  Suspicious Findings:\n    - Kingston drive connected 15 times during investigation period\n    - WD Passport connected only once, late evening (unusual hours)\n    - Unknown device (VID_1234&PID_5678) connected 2024-01-17, no matching approved device\n\n  Timeline: /cases/case-2024-001/analysis/usb_timeline.csv\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("analyzing-usb-device-connection-history-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>analyzing-command-and-control-communication - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/analyzing-command-and-control-communication-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>analyzing-command-and-control-communication</h1>
+      <p class="description">'Analyzes malware command-and-control (C2) communication protocols to</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>analyzing-command-and-control-communication</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>analyzing-command-and-control-communication</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Analyzes malware command-and-control (C2) communication protocols to</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose analyzing-command-and-control-communication, then write the task. Fallback prompt: Use the analyzing-command-and-control-communication skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Analyzing Command-and-Control Communication</h2>
+<h3>When to Use</h3>
+<ul>
+<li>Reverse engineering a malware sample has revealed network communication that needs protocol analysis</li>
+<li>Building network-level detection signatures for a specific C2 framework (Cobalt Strike, Metasploit, Sliver)</li>
+<li>Mapping C2 infrastructure including primary servers, fallback domains, and dead drops</li>
+<li>Analyzing encrypted or encoded C2 traffic to understand the command set and data format</li>
+<li>Attributing malware to a threat actor based on C2 infrastructure patterns and tooling</li>
+</ul>
+<p><strong>Do not use</strong> for general network anomaly detection; this is specifically for understanding known or suspected C2 protocols from malware analysis.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>PCAP capture of malware network traffic (from sandbox, network tap, or full packet capture)</li>
+<li>Wireshark/tshark for packet-level analysis</li>
+<li>Reverse engineering tools (Ghidra, dnSpy) for understanding C2 code in the malware binary</li>
+<li>Python 3.8+ with <code>scapy</code>, <code>dpkt</code>, and <code>requests</code> for protocol analysis and replay</li>
+<li>Threat intelligence databases for C2 infrastructure correlation (VirusTotal, Shodan, Censys)</li>
+<li>JA3/JA3S fingerprint databases for TLS-based C2 identification</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Identify the C2 Channel</h4>
+<p>Determine the protocol and transport used for C2 communication:</p>
+<pre><code>C2 Communication Channels:
+━━━━━━━━━━━━━━━━━━━━━━━━━
+HTTP/HTTPS:     Most common; uses standard web traffic to blend in
+                Indicators: Regular POST/GET requests, specific URI patterns, custom headers
+
+DNS:            Tunneling data through DNS queries and responses
+                Indicators: High-volume TXT queries, long subdomain names, high entropy
+
+Custom TCP/UDP: Proprietary binary protocol on non-standard port
+                Indicators: Non-HTTP traffic on high ports, unknown protocol
+
+ICMP:           Data encoded in ICMP echo/reply payloads
+                Indicators: ICMP packets with large or non-standard payloads
+
+WebSocket:      Persistent bidirectional connection for real-time C2
+                Indicators: WebSocket upgrade followed by binary frames
+
+Cloud Services: Using legitimate APIs (Telegram, Discord, Slack, GitHub)
+                Indicators: API calls to cloud services from unexpected processes
+
+Email:          SMTP/IMAP for C2 commands and data exfiltration
+                Indicators: Automated email operations from non-email processes</code></pre>
+<h4>Step 2: Analyze Beacon Pattern</h4>
+<p>Characterize the periodic communication pattern:</p>
+<pre><code>from scapy.all import rdpcap, IP, TCP
+from collections import defaultdict
+import statistics
+import json
+
+packets = rdpcap(&quot;c2_traffic.pcap&quot;)
+
+# Group TCP SYN packets by destination
+connections = defaultdict(list)
+for pkt in packets:
+    if IP in pkt and TCP in pkt and (pkt[TCP].flags &amp; 0x02):
+        key = f&quot;{pkt[IP].dst}:{pkt[TCP].dport}&quot;
+        connections[key].append(float(pkt.time))
+
+# Analyze each destination for beaconing
+for dst, times in sorted(connections.items()):
+    if len(times) &lt; 3:
+        continue
+
+    intervals = [times[i+1] - times[i] for i in range(len(times)-1)]
+    avg_interval = statistics.mean(intervals)
+    stdev = statistics.stdev(intervals) if len(intervals) &gt; 1 else 0
+    jitter_pct = (stdev / avg_interval * 100) if avg_interval &gt; 0 else 0
+    duration = times[-1] - times[0]
+
+    beacon_data = {
+        &quot;destination&quot;: dst,
+        &quot;connections&quot;: len(times),
+        &quot;duration_seconds&quot;: round(duration, 1),
+        &quot;avg_interval_seconds&quot;: round(avg_interval, 1),
+        &quot;stdev_seconds&quot;: round(stdev, 1),
+        &quot;jitter_percent&quot;: round(jitter_pct, 1),
+        &quot;is_beacon&quot;: 5 &lt; avg_interval &lt; 7200 and jitter_pct &lt; 25,
+    }
+
+    if beacon_data[&quot;is_beacon&quot;]:
+        print(f&quot;[!] BEACON DETECTED: {dst}&quot;)
+        print(f&quot;    Interval: {avg_interval:.0f}s +/- {stdev:.0f}s ({jitter_pct:.0f}% jitter)&quot;)
+        print(f&quot;    Sessions: {len(times)} over {duration:.0f}s&quot;)</code></pre>
+<h4>Step 3: Decode C2 Protocol Structure</h4>
+<p>Reverse engineer the message format from captured traffic:</p>
+<pre><code># HTTP-based C2 protocol analysis
+import dpkt
+import base64
+
+with open(&quot;c2_traffic.pcap&quot;, &quot;rb&quot;) as f:
+    pcap = dpkt.pcap.Reader(f)
+
+for ts, buf in pcap:
+    eth = dpkt.ethernet.Ethernet(buf)
+    if not isinstance(eth.data, dpkt.ip.IP):
+        continue
+    ip = eth.data
+    if not isinstance(ip.data, dpkt.tcp.TCP):
+        continue
+    tcp = ip.data
+
+    if tcp.dport == 80 or tcp.dport == 443:
+        if len(tcp.data) &gt; 0:
+            try:
+                http = dpkt.http.Request(tcp.data)
+                print(f&quot;\n--- C2 REQUEST ---&quot;)
+                print(f&quot;Method: {http.method}&quot;)
+                print(f&quot;URI: {http.uri}&quot;)
+                print(f&quot;Headers: {dict(http.headers)}&quot;)
+                if http.body:
+                    print(f&quot;Body ({len(http.body)} bytes):&quot;)
+                    # Try Base64 decode
+                    try:
+                        decoded = base64.b64decode(http.body)
+                        print(f&quot;  Decoded: {decoded[:200]}&quot;)
+                    except:
+                        print(f&quot;  Raw: {http.body[:200]}&quot;)
+            except:
+                pass</code></pre>
+<h4>Step 4: Identify C2 Framework</h4>
+<p>Match observed patterns to known C2 frameworks:</p>
+<pre><code>Known C2 Framework Signatures:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cobalt Strike:
+  - Default URIs: /pixel, /submit.php, /___utm.gif, /ca, /dpixel
+  - Malleable C2 profiles customize all traffic characteristics
+  - JA3: varies by profile, catalog at ja3er.com
+  - Watermark in beacon config (unique per license)
+  - Config extraction: use CobaltStrikeParser or 1768.py
+
+Metasploit/Meterpreter:
+  - Default staging URI patterns: random 4-char checksum
+  - Reverse HTTP(S) handler patterns
+  - Meterpreter TLV (Type-Length-Value) protocol structure
+
+Sliver:
+  - mTLS, HTTP, DNS, WireGuard transport options
+  - Protobuf-encoded messages
+  - Unique implant ID in communication
+
+Covenant:
+  - .NET-based C2 framework
+  - HTTP with customizable profiles
+  - Task-based command execution
+
+PoshC2:
+  - PowerShell/C# based
+  - HTTP with encrypted payloads
+  - Cookie-based session management</code></pre>
+<pre><code># Extract Cobalt Strike beacon configuration from PCAP or sample
+python3 &lt;&lt; 'PYEOF'
+# Using CobaltStrikeParser (pip install cobalt-strike-parser)
+from cobalt_strike_parser import BeaconConfig
+
+try:
+    config = BeaconConfig.from_file(&quot;suspect.exe&quot;)
+    print(&quot;Cobalt Strike Beacon Configuration:&quot;)
+    for key, value in config.items():
+        print(f&quot;  {key}: {value}&quot;)
+except Exception as e:
+    print(f&quot;Not a Cobalt Strike beacon or parse error: {e}&quot;)
+PYEOF</code></pre>
+<h4>Step 5: Map C2 Infrastructure</h4>
+<p>Document the full C2 infrastructure and failover mechanisms:</p>
+<pre><code># Infrastructure mapping
+import requests
+import json
+
+c2_indicators = {
+    &quot;primary_c2&quot;: &quot;185.220.101.42&quot;,
+    &quot;domains&quot;: [&quot;update.malicious.com&quot;, &quot;backup.evil.net&quot;],
+    &quot;ports&quot;: [443, 8443],
+    &quot;failover_dns&quot;: [&quot;ns1.malicious-dns.com&quot;],
+}
+
+# Enrich with Shodan
+def shodan_lookup(ip, api_key):
+    resp = requests.get(f&quot;https://api.shodan.io/shodan/host/{ip}?key={api_key}&quot;)
+    if resp.status_code == 200:
+        data = resp.json()
+        return {
+            &quot;ip&quot;: ip,
+            &quot;ports&quot;: data.get(&quot;ports&quot;, []),
+            &quot;os&quot;: data.get(&quot;os&quot;),
+            &quot;org&quot;: data.get(&quot;org&quot;),
+            &quot;asn&quot;: data.get(&quot;asn&quot;),
+            &quot;country&quot;: data.get(&quot;country_code&quot;),
+            &quot;hostnames&quot;: data.get(&quot;hostnames&quot;, []),
+            &quot;last_update&quot;: data.get(&quot;last_update&quot;),
+        }
+    return None
+
+# Enrich with passive DNS
+def pdns_lookup(domain):
+    # Using VirusTotal passive DNS
+    resp = requests.get(
+        f&quot;https://www.virustotal.com/api/v3/domains/{domain}/resolutions&quot;,
+        headers={&quot;x-apikey&quot;: VT_API_KEY}
+    )
+    if resp.status_code == 200:
+        data = resp.json()
+        resolutions = []
+        for r in data.get(&quot;data&quot;, []):
+            resolutions.append({
+                &quot;ip&quot;: r[&quot;attributes&quot;][&quot;ip_address&quot;],
+                &quot;date&quot;: r[&quot;attributes&quot;][&quot;date&quot;],
+            })
+        return resolutions
+    return []</code></pre>
+<h4>Step 6: Create Network Detection Signatures</h4>
+<p>Build detection rules based on analyzed C2 characteristics:</p>
+<pre><code># Suricata rules for the analyzed C2
+cat &lt;&lt; 'EOF' &gt; c2_detection.rules
+# HTTP beacon pattern
+alert http $HOME_NET any -&gt; $EXTERNAL_NET any (
+    msg:&quot;MALWARE MalwareX C2 HTTP Beacon&quot;;
+    flow:established,to_server;
+    http.method; content:&quot;POST&quot;;
+    http.uri; content:&quot;/gate.php&quot;; startswith;
+    http.header; content:&quot;User-Agent: Mozilla/5.0 (compatible; MSIE 10.0)&quot;;
+    threshold:type threshold, track by_src, count 5, seconds 600;
+    sid:9000010; rev:1;
+)
+
+# JA3 fingerprint match
+alert tls $HOME_NET any -&gt; $EXTERNAL_NET any (
+    msg:&quot;MALWARE MalwareX TLS JA3 Fingerprint&quot;;
+    ja3.hash; content:&quot;a0e9f5d64349fb13191bc781f81f42e1&quot;;
+    sid:9000011; rev:1;
+)
+
+# DNS beacon detection (high-entropy subdomain)
+alert dns $HOME_NET any -&gt; any any (
+    msg:&quot;MALWARE Suspected DNS C2 Tunneling&quot;;
+    dns.query; pcre:&quot;/^[a-z0-9]{20,}\./&quot;;
+    threshold:type threshold, track by_src, count 10, seconds 60;
+    sid:9000012; rev:1;
+)
+
+# Certificate-based detection
+alert tls $HOME_NET any -&gt; $EXTERNAL_NET any (
+    msg:&quot;MALWARE MalwareX Self-Signed C2 Certificate&quot;;
+    tls.cert_subject; content:&quot;CN=update.malicious.com&quot;;
+    sid:9000013; rev:1;
+)
+EOF</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | <strong>Beaconing</strong> | Periodic check-in communication from malware to C2 server at regular intervals, often with jitter to avoid pattern detection | | <strong>Jitter</strong> | Randomization applied to beacon interval (e.g., 60s +/- 15%) to make the timing pattern less predictable and harder to detect | | <strong>Malleable C2</strong> | Cobalt Strike feature allowing operators to customize all aspects of C2 traffic (URIs, headers, encoding) to mimic legitimate services | | <strong>Dead Drop</strong> | Intermediate location (paste site, cloud storage, social media) where C2 commands are posted for the malware to retrieve | | <strong>Domain Fronting</strong> | Using a trusted CDN domain in the TLS SNI while routing to a different backend, making C2 traffic appear to go to a legitimate service | | <strong>Fast Flux</strong> | Rapidly changing DNS records for C2 domains to distribute across many IPs and resist takedown efforts | | <strong>C2 Framework</strong> | Software toolkit providing C2 server, implant generator, and operator interface (Cobalt Strike, Metasploit, Sliver, Covenant) |</p>
+<h3>Tools &amp; Systems</h3>
+<ul>
+<li><strong>Wireshark</strong>: Packet analyzer for detailed C2 protocol analysis at the packet level</li>
+<li><strong>RITA (Real Intelligence Threat Analytics)</strong>: Open-source tool analyzing Zeek logs for beacon detection and DNS tunneling</li>
+<li><strong>CobaltStrikeParser</strong>: Tool extracting Cobalt Strike beacon configuration from samples and memory dumps</li>
+<li><strong>JA3/JA3S</strong>: TLS fingerprinting method for identifying C2 frameworks by their TLS implementation characteristics</li>
+<li><strong>Shodan/Censys</strong>: Internet scanning platforms for mapping C2 infrastructure and identifying related servers</li>
+</ul>
+<h3>Common Scenarios</h3>
+<h4>Scenario: Reverse Engineering a Custom C2 Protocol</h4>
+<p><strong>Context</strong>: A malware sample communicates with its C2 server using an unknown binary protocol over TCP port 8443. The protocol needs to be decoded to understand the command set and build detection signatures.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Filter PCAP for TCP port 8443 conversations and extract the TCP streams</li>
+<li>Analyze the first few exchanges to identify the handshake/authentication mechanism</li>
+<li>Map the message structure (length prefix, type field, payload encoding)</li>
+<li>Cross-reference with Ghidra disassembly of the send/receive functions in the malware</li>
+<li>Identify the command dispatcher and document each command code's function</li>
+<li>Build a protocol decoder in Python for ongoing traffic analysis</li>
+<li>Create Suricata rules matching the protocol handshake or static header bytes</li>
+</ol>
+<p><strong>Pitfalls</strong>:</p>
+<ul>
+<li>Assuming the protocol is static; some C2 frameworks negotiate encryption during the handshake</li>
+<li>Not capturing enough traffic to see all command types (some commands are rare)</li>
+<li>Missing fallback C2 channels (DNS, ICMP) that activate when the primary channel fails</li>
+<li>Confusing encrypted payload data with the protocol framing structure</li>
+</ul>
+<h3>Output Format</h3>
+<pre><code>C2 COMMUNICATION ANALYSIS REPORT
+===================================
+Sample:           malware.exe (SHA-256: e3b0c44...)
+C2 Framework:     Cobalt Strike 4.9
+
+BEACON CONFIGURATION
+C2 Server:        hxxps://185.220.101[.]42/updates
+Beacon Type:      HTTPS (reverse)
+Sleep:            60 seconds
+Jitter:           15%
+User-Agent:       Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+URI (GET):        /dpixel
+URI (POST):       /submit.php
+Watermark:        1234567890
+
+PROTOCOL ANALYSIS
+Transport:        HTTPS (TLS 1.2)
+JA3 Hash:         a0e9f5d64349fb13191bc781f81f42e1
+Certificate:      CN=Microsoft Update (self-signed)
+Encoding:         Base64 with XOR key 0x69
+Command Format:   [4B length][4B command_id][payload]
+
+COMMAND SET
+0x01 - Sleep          Change beacon interval
+0x02 - Shell          Execute cmd.exe command
+0x03 - Download       Transfer file from C2
+0x04 - Upload         Exfiltrate file to C2
+0x05 - Inject         Process injection
+0x06 - Keylog         Start keylogger
+0x07 - Screenshot     Capture screen
+
+INFRASTRUCTURE
+Primary:          185.220.101[.]42 (AS12345, Hosting Co, NL)
+Failover:         91.215.85[.]17 (AS67890, VPS Provider, RU)
+DNS:              update.malicious[.]com -&gt; 185.220.101[.]42
+Registrar:        NameCheap
+Registration:     2025-09-01
+
+DETECTION SIGNATURES
+SID 9000010:      HTTP beacon pattern
+SID 9000011:      JA3 TLS fingerprint
+SID 9000013:      C2 certificate match</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: analyzing-command-and-control-communication\ndisplay_name: analyzing-command-and-control-communication\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# analyzing-command-and-control-communication - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `analyzing-command-and-control-communication` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- Reverse engineering a malware sample has revealed network communication that needs protocol analysis\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose analyzing-command-and-control-communication, then write the task. Fallback prompt: Use the analyzing-command-and-control-communication skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `analyzing-command-and-control-communication` |\n| Canonical name | `analyzing-command-and-control-communication` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n- Reverse engineering a malware sample has revealed network communication that needs protocol analysis\n\n## Original SKILL.md\n\n---\nname: analyzing-command-and-control-communication\ndescription: 'Analyzes malware command-and-control (C2) communication protocols to\n  understand beacon patterns, command structures, data encoding, and infrastructure.\n  Covers HTTP, HTTPS, DNS, and custom protocol C2 analysis for detection development\n  and threat intelligence. Activates for requests involving C2 analysis, beacon detection,\n  C2 protocol reverse engineering, or command-and-control infrastructure mapping.\n\n  '\ndomain: cybersecurity\nsubdomain: malware-analysis\ntags:\n- malware\n- C2\n- command-and-control\n- beacon\n- protocol-analysis\nversion: 1.0.0\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- DE.AE-02\n- RS.AN-03\n- ID.RA-01\n- DE.CM-01\nmitre_attack:\n- T1071.001\n- T1573\n- T1571\n- T1008\n- T1095\n---\n\n# Analyzing Command-and-Control Communication\n\n## When to Use\n\n- Reverse engineering a malware sample has revealed network communication that needs protocol analysis\n- Building network-level detection signatures for a specific C2 framework (Cobalt Strike, Metasploit, Sliver)\n- Mapping C2 infrastructure including primary servers, fallback domains, and dead drops\n- Analyzing encrypted or encoded C2 traffic to understand the command set and data format\n- Attributing malware to a threat actor based on C2 infrastructure patterns and tooling\n\n**Do not use** for general network anomaly detection; this is specifically for understanding known or suspected C2 protocols from malware analysis.\n\n## Prerequisites\n\n- PCAP capture of malware network traffic (from sandbox, network tap, or full packet capture)\n- Wireshark/tshark for packet-level analysis\n- Reverse engineering tools (Ghidra, dnSpy) for understanding C2 code in the malware binary\n- Python 3.8+ with `scapy`, `dpkt`, and `requests` for protocol analysis and replay\n- Threat intelligence databases for C2 infrastructure correlation (VirusTotal, Shodan, Censys)\n- JA3/JA3S fingerprint databases for TLS-based C2 identification\n\n## Workflow\n\n### Step 1: Identify the C2 Channel\n\nDetermine the protocol and transport used for C2 communication:\n\n```\nC2 Communication Channels:\n━━━━━━━━━━━━━━━━━━━━━━━━━\nHTTP/HTTPS:     Most common; uses standard web traffic to blend in\n                Indicators: Regular POST/GET requests, specific URI patterns, custom headers\n\nDNS:            Tunneling data through DNS queries and responses\n                Indicators: High-volume TXT queries, long subdomain names, high entropy\n\nCustom TCP/UDP: Proprietary binary protocol on non-standard port\n                Indicators: Non-HTTP traffic on high ports, unknown protocol\n\nICMP:           Data encoded in ICMP echo/reply payloads\n                Indicators: ICMP packets with large or non-standard payloads\n\nWebSocket:      Persistent bidirectional connection for real-time C2\n                Indicators: WebSocket upgrade followed by binary frames\n\nCloud Services: Using legitimate APIs (Telegram, Discord, Slack, GitHub)\n                Indicators: API calls to cloud services from unexpected processes\n\nEmail:          SMTP/IMAP for C2 commands and data exfiltration\n                Indicators: Automated email operations from non-email processes\n```\n\n### Step 2: Analyze Beacon Pattern\n\nCharacterize the periodic communication pattern:\n\n```python\nfrom scapy.all import rdpcap, IP, TCP\nfrom collections import defaultdict\nimport statistics\nimport json\n\npackets = rdpcap(\"c2_traffic.pcap\")\n\n# Group TCP SYN packets by destination\nconnections = defaultdict(list)\nfor pkt in packets:\n    if IP in pkt and TCP in pkt and (pkt[TCP].flags & 0x02):\n        key = f\"{pkt[IP].dst}:{pkt[TCP].dport}\"\n        connections[key].append(float(pkt.time))\n\n# Analyze each destination for beaconing\nfor dst, times in sorted(connections.items()):\n    if len(times) \u003c 3:\n        continue\n\n    intervals = [times[i+1] - times[i] for i in range(len(times)-1)]\n    avg_interval = statistics.mean(intervals)\n    stdev = statistics.stdev(intervals) if len(intervals) > 1 else 0\n    jitter_pct = (stdev / avg_interval * 100) if avg_interval > 0 else 0\n    duration = times[-1] - times[0]\n\n    beacon_data = {\n        \"destination\": dst,\n        \"connections\": len(times),\n        \"duration_seconds\": round(duration, 1),\n        \"avg_interval_seconds\": round(avg_interval, 1),\n        \"stdev_seconds\": round(stdev, 1),\n        \"jitter_percent\": round(jitter_pct, 1),\n        \"is_beacon\": 5 \u003c avg_interval \u003c 7200 and jitter_pct \u003c 25,\n    }\n\n    if beacon_data[\"is_beacon\"]:\n        print(f\"[!] BEACON DETECTED: {dst}\")\n        print(f\"    Interval: {avg_interval:.0f}s +/- {stdev:.0f}s ({jitter_pct:.0f}% jitter)\")\n        print(f\"    Sessions: {len(times)} over {duration:.0f}s\")\n```\n\n### Step 3: Decode C2 Protocol Structure\n\nReverse engineer the message format from captured traffic:\n\n```python\n# HTTP-based C2 protocol analysis\nimport dpkt\nimport base64\n\nwith open(\"c2_traffic.pcap\", \"rb\") as f:\n    pcap = dpkt.pcap.Reader(f)\n\nfor ts, buf in pcap:\n    eth = dpkt.ethernet.Ethernet(buf)\n    if not isinstance(eth.data, dpkt.ip.IP):\n        continue\n    ip = eth.data\n    if not isinstance(ip.data, dpkt.tcp.TCP):\n        continue\n    tcp = ip.data\n\n    if tcp.dport == 80 or tcp.dport == 443:\n        if len(tcp.data) > 0:\n            try:\n                http = dpkt.http.Request(tcp.data)\n                print(f\"\\n--- C2 REQUEST ---\")\n                print(f\"Method: {http.method}\")\n                print(f\"URI: {http.uri}\")\n                print(f\"Headers: {dict(http.headers)}\")\n                if http.body:\n                    print(f\"Body ({len(http.body)} bytes):\")\n                    # Try Base64 decode\n                    try:\n                        decoded = base64.b64decode(http.body)\n                        print(f\"  Decoded: {decoded[:200]}\")\n                    except:\n                        print(f\"  Raw: {http.body[:200]}\")\n            except:\n                pass\n```\n\n### Step 4: Identify C2 Framework\n\nMatch observed patterns to known C2 frameworks:\n\n```\nKnown C2 Framework Signatures:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nCobalt Strike:\n  - Default URIs: /pixel, /submit.php, /___utm.gif, /ca, /dpixel\n  - Malleable C2 profiles customize all traffic characteristics\n  - JA3: varies by profile, catalog at ja3er.com\n  - Watermark in beacon config (unique per license)\n  - Config extraction: use CobaltStrikeParser or 1768.py\n\nMetasploit/Meterpreter:\n  - Default staging URI patterns: random 4-char checksum\n  - Reverse HTTP(S) handler patterns\n  - Meterpreter TLV (Type-Length-Value) protocol structure\n\nSliver:\n  - mTLS, HTTP, DNS, WireGuard transport options\n  - Protobuf-encoded messages\n  - Unique implant ID in communication\n\nCovenant:\n  - .NET-based C2 framework\n  - HTTP with customizable profiles\n  - Task-based command execution\n\nPoshC2:\n  - PowerShell/C# based\n  - HTTP with encrypted payloads\n  - Cookie-based session management\n```\n\n```bash\n# Extract Cobalt Strike beacon configuration from PCAP or sample\npython3 \u003c\u003c 'PYEOF'\n# Using CobaltStrikeParser (pip install cobalt-strike-parser)\nfrom cobalt_strike_parser import BeaconConfig\n\ntry:\n    config = BeaconConfig.from_file(\"suspect.exe\")\n    print(\"Cobalt Strike Beacon Configuration:\")\n    for key, value in config.items():\n        print(f\"  {key}: {value}\")\nexcept Exception as e:\n    print(f\"Not a Cobalt Strike beacon or parse error: {e}\")\nPYEOF\n```\n\n### Step 5: Map C2 Infrastructure\n\nDocument the full C2 infrastructure and failover mechanisms:\n\n```python\n# Infrastructure mapping\nimport requests\nimport json\n\nc2_indicators = {\n    \"primary_c2\": \"185.220.101.42\",\n    \"domains\": [\"update.malicious.com\", \"backup.evil.net\"],\n    \"ports\": [443, 8443],\n    \"failover_dns\": [\"ns1.malicious-dns.com\"],\n}\n\n# Enrich with Shodan\ndef shodan_lookup(ip, api_key):\n    resp = requests.get(f\"https://api.shodan.io/shodan/host/{ip}?key={api_key}\")\n    if resp.status_code == 200:\n        data = resp.json()\n        return {\n            \"ip\": ip,\n            \"ports\": data.get(\"ports\", []),\n            \"os\": data.get(\"os\"),\n            \"org\": data.get(\"org\"),\n            \"asn\": data.get(\"asn\"),\n            \"country\": data.get(\"country_code\"),\n            \"hostnames\": data.get(\"hostnames\", []),\n            \"last_update\": data.get(\"last_update\"),\n        }\n    return None\n\n# Enrich with passive DNS\ndef pdns_lookup(domain):\n    # Using VirusTotal passive DNS\n    resp = requests.get(\n        f\"https://www.virustotal.com/api/v3/domains/{domain}/resolutions\",\n        headers={\"x-apikey\": VT_API_KEY}\n    )\n    if resp.status_code == 200:\n        data = resp.json()\n        resolutions = []\n        for r in data.get(\"data\", []):\n            resolutions.append({\n                \"ip\": r[\"attributes\"][\"ip_address\"],\n                \"date\": r[\"attributes\"][\"date\"],\n            })\n        return resolutions\n    return []\n```\n\n### Step 6: Create Network Detection Signatures\n\nBuild detection rules based on analyzed C2 characteristics:\n\n```bash\n# Suricata rules for the analyzed C2\ncat \u003c\u003c 'EOF' > c2_detection.rules\n# HTTP beacon pattern\nalert http $HOME_NET any -> $EXTERNAL_NET any (\n    msg:\"MALWARE MalwareX C2 HTTP Beacon\";\n    flow:established,to_server;\n    http.method; content:\"POST\";\n    http.uri; content:\"/gate.php\"; startswith;\n    http.header; content:\"User-Agent: Mozilla/5.0 (compatible; MSIE 10.0)\";\n    threshold:type threshold, track by_src, count 5, seconds 600;\n    sid:9000010; rev:1;\n)\n\n# JA3 fingerprint match\nalert tls $HOME_NET any -> $EXTERNAL_NET any (\n    msg:\"MALWARE MalwareX TLS JA3 Fingerprint\";\n    ja3.hash; content:\"a0e9f5d64349fb13191bc781f81f42e1\";\n    sid:9000011; rev:1;\n)\n\n# DNS beacon detection (high-entropy subdomain)\nalert dns $HOME_NET any -> any any (\n    msg:\"MALWARE Suspected DNS C2 Tunneling\";\n    dns.query; pcre:\"/^[a-z0-9]{20,}\\./\";\n    threshold:type threshold, track by_src, count 10, seconds 60;\n    sid:9000012; rev:1;\n)\n\n# Certificate-based detection\nalert tls $HOME_NET any -> $EXTERNAL_NET any (\n    msg:\"MALWARE MalwareX Self-Signed C2 Certificate\";\n    tls.cert_subject; content:\"CN=update.malicious.com\";\n    sid:9000013; rev:1;\n)\nEOF\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| **Beaconing** | Periodic check-in communication from malware to C2 server at regular intervals, often with jitter to avoid pattern detection |\n| **Jitter** | Randomization applied to beacon interval (e.g., 60s +/- 15%) to make the timing pattern less predictable and harder to detect |\n| **Malleable C2** | Cobalt Strike feature allowing operators to customize all aspects of C2 traffic (URIs, headers, encoding) to mimic legitimate services |\n| **Dead Drop** | Intermediate location (paste site, cloud storage, social media) where C2 commands are posted for the malware to retrieve |\n| **Domain Fronting** | Using a trusted CDN domain in the TLS SNI while routing to a different backend, making C2 traffic appear to go to a legitimate service |\n| **Fast Flux** | Rapidly changing DNS records for C2 domains to distribute across many IPs and resist takedown efforts |\n| **C2 Framework** | Software toolkit providing C2 server, implant generator, and operator interface (Cobalt Strike, Metasploit, Sliver, Covenant) |\n\n## Tools & Systems\n\n- **Wireshark**: Packet analyzer for detailed C2 protocol analysis at the packet level\n- **RITA (Real Intelligence Threat Analytics)**: Open-source tool analyzing Zeek logs for beacon detection and DNS tunneling\n- **CobaltStrikeParser**: Tool extracting Cobalt Strike beacon configuration from samples and memory dumps\n- **JA3/JA3S**: TLS fingerprinting method for identifying C2 frameworks by their TLS implementation characteristics\n- **Shodan/Censys**: Internet scanning platforms for mapping C2 infrastructure and identifying related servers\n\n## Common Scenarios\n\n### Scenario: Reverse Engineering a Custom C2 Protocol\n\n**Context**: A malware sample communicates with its C2 server using an unknown binary protocol over TCP port 8443. The protocol needs to be decoded to understand the command set and build detection signatures.\n\n**Approach**:\n1. Filter PCAP for TCP port 8443 conversations and extract the TCP streams\n2. Analyze the first few exchanges to identify the handshake/authentication mechanism\n3. Map the message structure (length prefix, type field, payload encoding)\n4. Cross-reference with Ghidra disassembly of the send/receive functions in the malware\n5. Identify the command dispatcher and document each command code's function\n6. Build a protocol decoder in Python for ongoing traffic analysis\n7. Create Suricata rules matching the protocol handshake or static header bytes\n\n**Pitfalls**:\n- Assuming the protocol is static; some C2 frameworks negotiate encryption during the handshake\n- Not capturing enough traffic to see all command types (some commands are rare)\n- Missing fallback C2 channels (DNS, ICMP) that activate when the primary channel fails\n- Confusing encrypted payload data with the protocol framing structure\n\n## Output Format\n\n```\nC2 COMMUNICATION ANALYSIS REPORT\n===================================\nSample:           malware.exe (SHA-256: e3b0c44...)\nC2 Framework:     Cobalt Strike 4.9\n\nBEACON CONFIGURATION\nC2 Server:        hxxps://185.220.101[.]42/updates\nBeacon Type:      HTTPS (reverse)\nSleep:            60 seconds\nJitter:           15%\nUser-Agent:       Mozilla/5.0 (Windows NT 10.0; Win64; x64)\nURI (GET):        /dpixel\nURI (POST):       /submit.php\nWatermark:        1234567890\n\nPROTOCOL ANALYSIS\nTransport:        HTTPS (TLS 1.2)\nJA3 Hash:         a0e9f5d64349fb13191bc781f81f42e1\nCertificate:      CN=Microsoft Update (self-signed)\nEncoding:         Base64 with XOR key 0x69\nCommand Format:   [4B length][4B command_id][payload]\n\nCOMMAND SET\n0x01 - Sleep          Change beacon interval\n0x02 - Shell          Execute cmd.exe command\n0x03 - Download       Transfer file from C2\n0x04 - Upload         Exfiltrate file to C2\n0x05 - Inject         Process injection\n0x06 - Keylog         Start keylogger\n0x07 - Screenshot     Capture screen\n\nINFRASTRUCTURE\nPrimary:          185.220.101[.]42 (AS12345, Hosting Co, NL)\nFailover:         91.215.85[.]17 (AS67890, VPS Provider, RU)\nDNS:              update.malicious[.]com -> 185.220.101[.]42\nRegistrar:        NameCheap\nRegistration:     2025-09-01\n\nDETECTION SIGNATURES\nSID 9000010:      HTTP beacon pattern\nSID 9000011:      JA3 TLS fingerprint\nSID 9000013:      C2 certificate match\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("analyzing-command-and-control-communication-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

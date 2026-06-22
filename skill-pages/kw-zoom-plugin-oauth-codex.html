@@ -1,0 +1,804 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>kw-zoom-plugin-oauth - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/kw-zoom-plugin-oauth-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>kw-zoom-plugin-oauth</h1>
+      <p class="description">Reference skill for Zoom authentication. Use after routing to an auth workflow when choosing app credentials, grant types, scopes, token refresh behavior, or debugging Zoom OAuth failures.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>kw-zoom-plugin-oauth</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>kw-zoom-plugin-oauth</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Reference skill for Zoom authentication. Use after routing to an auth workflow when choosing app credentials, grant types, scopes, token refresh behavior, or debugging Zoom OAuth failures.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose kw-zoom-plugin-oauth, then write the task. Fallback prompt: Use the kw-zoom-plugin-oauth skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Zoom OAuth</h2>
+<p>Background reference for Zoom auth and token lifecycle behavior. Prefer <code>setup-zoom-oauth</code> first, then use this skill for the exact flow, scope, and error details.</p>
+<h2>Zoom OAuth</h2>
+<p>Authentication and authorization for Zoom APIs.</p>
+<h3>📖 Complete Documentation</h3>
+<p>For comprehensive guides, production patterns, and troubleshooting, see <strong>Integrated Index section below</strong>.</p>
+<p>Quick navigation:</p>
+<ul>
+<li><strong>[5-Minute Runbook](RUNBOOK.md)</strong> - Preflight checks before deep debugging</li>
+<li><strong>[OAuth Flows](concepts/oauth-flows.md)</strong> - Which flow to use and how each works</li>
+<li><strong>[Token Lifecycle](concepts/token-lifecycle.md)</strong> - Expiration, refresh, and revocation</li>
+<li><strong>[Production Examples](examples/s2s-oauth-redis.md)</strong> - Redis caching, MySQL storage, auto-refresh</li>
+<li><strong>[Troubleshooting](troubleshooting/common-errors.md)</strong> - Error codes 4700-4741</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Zoom app created in [Marketplace](https://marketplace.zoom.us/)</li>
+<li>Client ID and Client Secret</li>
+<li>For S2S OAuth: Account ID</li>
+</ul>
+<h3>Four Authorization Use Cases</h3>
+<p>| Use Case | App Type | Grant Type | Industry Name | |----------|----------|------------|---------------| | <strong>Account Authorization</strong> | Server-to-Server | <code>account_credentials</code> | Client Credentials Grant, M2M, Two-legged OAuth | | <strong>User Authorization</strong> | General | <code>authorization_code</code> | Authorization Code Grant, Three-legged OAuth | | <strong>Device Authorization</strong> | General | <code>urn:ietf:params:oauth:grant-type:device_code</code> | Device Authorization Grant (RFC 8628) | | <strong>Client Authorization</strong> | General | <code>client_credentials</code> | Client Credentials Grant (chatbot-scoped) |</p>
+<h4>Industry Terminology</h4>
+<p>| Term | Meaning | |------|---------| | <strong>Two-legged OAuth</strong> | No user involved (client ↔ server) | | <strong>Three-legged OAuth</strong> | User involved (user ↔ client ↔ server) | | <strong>M2M</strong> | Machine-to-Machine (backend services) | | <strong>Public client</strong> | Can't keep secrets (mobile, SPA) → use PKCE | | <strong>Confidential client</strong> | Can keep secrets (backend servers) | | <strong>PKCE</strong> | Proof Key for Code Exchange (RFC 7636), pronounced &quot;pixy&quot; |</p>
+<h4>Which Flow Should I Use?</h4>
+<pre><code>                              ┌─────────────────────┐
+                              │  What are you       │
+                              │  building?          │
+                              └──────────┬──────────┘
+                                         │
+                    ┌────────────────────┼────────────────────┐
+                    │                    │                    │
+                    ▼                    ▼                    ▼
+          ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+          │  Backend        │  │  App for other  │  │  Chatbot only   │
+          │  automation     │  │  users/accounts │  │  (Team Chat)    │
+          │  (your account) │  │                 │  │                 │
+          └────────┬────────┘  └────────┬────────┘  └────────┬────────┘
+                   │                    │                    │
+                   ▼                    │                    ▼
+          ┌─────────────────┐           │           ┌─────────────────┐
+          │    ACCOUNT      │           │           │     CLIENT      │
+          │   (S2S OAuth)   │           │           │   (Chatbot)     │
+          └─────────────────┘           │           └─────────────────┘
+                                        │
+                                        ▼
+                              ┌─────────────────────┐
+                              │  Does device have   │
+                              │  a browser?         │
+                              └──────────┬──────────┘
+                                         │
+                         ┌───────────────┴───────────────┐
+                         │ NO                         YES│
+                         ▼                               ▼
+          ┌─────────────────────────┐         ┌─────────────────┐
+          │        DEVICE           │         │      USER       │
+          │     (Device Flow)       │         │  (Auth Code)    │
+          │                         │         │                 │
+          │ Examples:               │         │ + PKCE if       │
+          │ • Smart TV              │         │   public client │
+          │ • Meeting SDK device    │         │                 │
+          └─────────────────────────┘         └─────────────────┘</code></pre>
+<hr>
+<h3>Account Authorization (Server-to-Server OAuth)</h3>
+<p>For backend automation without user interaction.</p>
+<h4>Request Access Token</h4>
+<pre><code>POST https://zoom.us/oauth/token?grant_type=account_credentials&amp;account_id={ACCOUNT_ID}
+
+Headers:
+Authorization: Basic {Base64(ClientID:ClientSecret)}</code></pre>
+<h4>Response</h4>
+<pre><code>{
+  &quot;access_token&quot;: &quot;eyJ...&quot;,
+  &quot;token_type&quot;: &quot;bearer&quot;,
+  &quot;expires_in&quot;: 3600,
+  &quot;scope&quot;: &quot;user:read:user:admin&quot;,
+  &quot;api_url&quot;: &quot;https://api.zoom.us&quot;
+}</code></pre>
+<h4>Refresh</h4>
+<p>Access tokens expire after <strong>1 hour</strong>. No separate refresh flow - just request a new token.</p>
+<hr>
+<h3>User Authorization (Authorization Code Flow)</h3>
+<p>For apps that act on behalf of users.</p>
+<h4>Step 1: Redirect User to Authorize</h4>
+<pre><code>https://zoom.us/oauth/authorize?response_type=code&amp;client_id={CLIENT_ID}&amp;redirect_uri={REDIRECT_URI}</code></pre>
+<p>Use <code>https://zoom.us/oauth/authorize</code> for consent, but <code>https://zoom.us/oauth/token</code> for token exchange.</p>
+<p><strong>Optional Parameters:</strong></p>
+<p>| Parameter | Description | |-----------|-------------| | <code>state</code> | CSRF protection, maintains state through flow | | <code>code_challenge</code> | For PKCE (see below) | | <code>code_challenge_method</code> | <code>S256</code> or <code>plain</code> (default: plain) |</p>
+<h4>Step 2: User Authorizes</h4>
+<ul>
+<li>User signs in and grants permission</li>
+<li>Redirects to <code>redirect_uri</code> with authorization code:</li>
+</ul>
+<pre><code>  https://example.com/?code={AUTHORIZATION_CODE}</code></pre>
+<h4>Step 3: Exchange Code for Token</h4>
+<pre><code>POST https://zoom.us/oauth/token?grant_type=authorization_code&amp;code={CODE}&amp;redirect_uri={REDIRECT_URI}
+
+Headers:
+Authorization: Basic {Base64(ClientID:ClientSecret)}</code></pre>
+<p><strong>With PKCE:</strong> Add <code>code_verifier</code> parameter.</p>
+<h4>Response</h4>
+<pre><code>{
+  &quot;access_token&quot;: &quot;eyJ...&quot;,
+  &quot;token_type&quot;: &quot;bearer&quot;,
+  &quot;refresh_token&quot;: &quot;eyJ...&quot;,
+  &quot;expires_in&quot;: 3600,
+  &quot;scope&quot;: &quot;user:read:user&quot;,
+  &quot;api_url&quot;: &quot;https://api.zoom.us&quot;
+}</code></pre>
+<h4>Refresh Token</h4>
+<pre><code>POST https://zoom.us/oauth/token?grant_type=refresh_token&amp;refresh_token={REFRESH_TOKEN}
+
+Headers:
+Authorization: Basic {Base64(ClientID:ClientSecret)}</code></pre>
+<ul>
+<li>Access tokens expire after <strong>1 hour</strong></li>
+<li>Refresh token lifetime can vary; ~90 days is common for some user-based flows. Treat it as configuration/behavior that can change and rely on runtime errors + re-auth fallback.</li>
+<li>Always use the latest refresh token for the next request</li>
+<li>If refresh token expires, redirect user to authorization URL to restart flow</li>
+</ul>
+<h4>User-Level vs Account-Level Apps</h4>
+<p>| Type | Who Can Authorize | Scope Access | |------|-------------------|--------------| | <strong>User-level</strong> | Any individual user | Scoped to themselves | | <strong>Account-level</strong> | User with admin permissions | Account-wide access (admin scopes) |</p>
+<hr>
+<h3>Device Authorization (Device Flow)</h3>
+<p>For devices without browsers (e.g., Meeting SDK apps).</p>
+<h4>Prerequisites</h4>
+<p>Enable &quot;Use App on Device&quot; in: Features &gt; Embed &gt; Enable Meeting SDK</p>
+<h4>Step 1: Request Device Code</h4>
+<pre><code>POST https://zoom.us/oauth/devicecode?client_id={CLIENT_ID}
+
+Headers:
+Authorization: Basic {Base64(ClientID:ClientSecret)}</code></pre>
+<h4>Response</h4>
+<pre><code>{
+  &quot;device_code&quot;: &quot;DEVICE_CODE&quot;,
+  &quot;user_code&quot;: &quot;abcd1234&quot;,
+  &quot;verification_uri&quot;: &quot;https://zoom.us/oauth_device&quot;,
+  &quot;verification_uri_complete&quot;: &quot;https://zoom.us/oauth/device/complete/{CODE}&quot;,
+  &quot;expires_in&quot;: 900,
+  &quot;interval&quot;: 5
+}</code></pre>
+<h4>Step 2: User Authorization</h4>
+<p>Direct user to:</p>
+<ul>
+<li><code>verification_uri</code> and display <code>user_code</code> for manual entry, OR</li>
+<li><code>verification_uri_complete</code> (user code prefilled)</li>
+</ul>
+<p>User signs in and allows the app.</p>
+<h4>Step 3: Poll for Token</h4>
+<p>Poll at the <code>interval</code> (5 seconds) until user authorizes:</p>
+<pre><code>POST https://zoom.us/oauth/token?grant_type=urn:ietf:params:oauth:grant-type:device_code&amp;device_code={DEVICE_CODE}
+
+Headers:
+Authorization: Basic {Base64(ClientID:ClientSecret)}</code></pre>
+<h4>Response</h4>
+<pre><code>{
+  &quot;access_token&quot;: &quot;eyJ...&quot;,
+  &quot;token_type&quot;: &quot;bearer&quot;,
+  &quot;refresh_token&quot;: &quot;eyJ...&quot;,
+  &quot;expires_in&quot;: 3599,
+  &quot;scope&quot;: &quot;user:read:user user:read:token&quot;,
+  &quot;api_url&quot;: &quot;https://api.zoom.us&quot;
+}</code></pre>
+<h4>Polling Responses</h4>
+<p>| Response | Meaning | Action | |----------|---------|--------| | Token returned | User authorized | Store tokens, done | | <code>error: authorization_pending</code> | User hasn't authorized yet | Keep polling at interval | | <code>error: slow_down</code> | Polling too fast | Increase interval by 5 seconds | | <code>error: expired_token</code> | Device code expired (15 min) | Restart flow from Step 1 | | <code>error: access_denied</code> | User denied authorization | Handle denial, don't retry |</p>
+<h4>Polling Implementation</h4>
+<pre><code>async function pollForToken(deviceCode, interval) {
+  while (true) {
+    await sleep(interval * 1000);
+    
+    try {
+      const response = await axios.post(
+        `https://zoom.us/oauth/token?grant_type=urn:ietf:params:oauth:grant-type:device_code&amp;device_code=${deviceCode}`,
+        null,
+        { headers: { 'Authorization': `Basic ${credentials}` } }
+      );
+      return response.data; // Success - got tokens
+    } catch (error) {
+      const err = error.response?.data?.error;
+      if (err === 'authorization_pending') continue;
+      if (err === 'slow_down') { interval += 5; continue; }
+      throw error; // expired_token or access_denied
+    }
+  }
+}</code></pre>
+<h4>Refresh</h4>
+<p>Same as User Authorization. If refresh token expires, restart device flow from Step 1.</p>
+<hr>
+<h3>Client Authorization (Chatbot)</h3>
+<p>For chatbot message operations only.</p>
+<h4>Request Token</h4>
+<pre><code>POST https://zoom.us/oauth/token?grant_type=client_credentials
+
+Headers:
+Authorization: Basic {Base64(ClientID:ClientSecret)}</code></pre>
+<h4>Response</h4>
+<pre><code>{
+  &quot;access_token&quot;: &quot;eyJ...&quot;,
+  &quot;token_type&quot;: &quot;bearer&quot;,
+  &quot;expires_in&quot;: 3600,
+  &quot;scope&quot;: &quot;imchat:bot&quot;,
+  &quot;api_url&quot;: &quot;https://api.zoom.us&quot;
+}</code></pre>
+<h4>Refresh</h4>
+<p>Tokens expire after <strong>1 hour</strong>. No refresh flow - just request a new token.</p>
+<hr>
+<h3>Using Access Tokens</h3>
+<h4>Call API</h4>
+<pre><code>GET https://api.zoom.us/v2/users/me
+
+Headers:
+Authorization: Bearer {ACCESS_TOKEN}</code></pre>
+<h4>Me Context</h4>
+<p>Replace <code>userID</code> with <code>me</code> to target the token's associated user:</p>
+<p>| Endpoint | Methods | |----------|---------| | <code>/v2/users/me</code> | GET, PATCH | | <code>/v2/users/me/token</code> | GET | | <code>/v2/users/me/meetings</code> | GET, POST |</p>
+<hr>
+<h3>Revoke Access Token</h3>
+<p>Works for all authorization types.</p>
+<pre><code>POST https://zoom.us/oauth/revoke?token={ACCESS_TOKEN}
+
+Headers:
+Authorization: Basic {Base64(ClientID:ClientSecret)}</code></pre>
+<h4>Response</h4>
+<pre><code>{
+  &quot;status&quot;: &quot;success&quot;
+}</code></pre>
+<hr>
+<h3>PKCE (Proof Key for Code Exchange)</h3>
+<p>For public clients that can't securely store secrets (mobile apps, SPAs, desktop apps).</p>
+<h4>When to Use PKCE</h4>
+<p>| Client Type | Use PKCE? | Why | |-------------|-----------|-----| | Mobile app | <strong>Yes</strong> | Can't securely store client secret | | Single Page App (SPA) | <strong>Yes</strong> | JavaScript is visible to users | | Desktop app | <strong>Yes</strong> | Binary can be decompiled | | Meeting SDK (client-side) | <strong>Yes</strong> | Runs on user's device | | Backend server | Optional | Can keep secrets, but PKCE adds security |</p>
+<h4>How PKCE Works</h4>
+<pre><code>┌──────────┐                              ┌──────────┐                    ┌──────────┐
+│  Client  │                              │   Zoom   │                    │   Zoom   │
+│   App    │                              │  Auth    │                    │  Token   │
+└────┬─────┘                              └────┬─────┘                    └────┬─────┘
+     │                                         │                              │
+     │ 1. Generate code_verifier (random)      │                              │
+     │ 2. Create code_challenge = SHA256(verifier)                            │
+     │                                         │                              │
+     │ ─────── /authorize + code_challenge ──► │                              │
+     │                                         │                              │
+     │ ◄────── authorization_code ──────────── │                              │
+     │                                         │                              │
+     │ ─────────────── /token + code_verifier ─┼────────────────────────────► │
+     │                                         │                              │
+     │                                         │     Verify: SHA256(verifier) │
+     │                                         │            == challenge      │
+     │                                         │                              │
+     │ ◄───────────────────────────────────────┼─────── access_token ──────── │
+     │                                         │                              │</code></pre>
+<h4>Implementation (Node.js)</h4>
+<pre><code>const crypto = require('crypto');
+
+function generatePKCE() {
+  const verifier = crypto.randomBytes(32).toString('base64url');
+  const challenge = crypto.createHash('sha256').update(verifier).digest('base64url');
+  return { verifier, challenge };
+}
+
+const pkce = generatePKCE();
+
+const authUrl = `https://zoom.us/oauth/authorize?` +
+  `response_type=code&amp;` +
+  `client_id=${CLIENT_ID}&amp;` +
+  `redirect_uri=${REDIRECT_URI}&amp;` +
+  `code_challenge=${pkce.challenge}&amp;` +
+  `code_challenge_method=S256`;
+
+// Store pkce.verifier in session for callback</code></pre>
+<h4>Token Exchange with PKCE</h4>
+<pre><code>POST https://zoom.us/oauth/token?grant_type=authorization_code&amp;code={CODE}&amp;redirect_uri={REDIRECT_URI}&amp;code_verifier={VERIFIER}
+
+Headers:
+Authorization: Basic {Base64(ClientID:ClientSecret)}</code></pre>
+<hr>
+<h3>Deauthorization</h3>
+<p>When a user removes your app, Zoom sends a webhook to your Deauthorization Notification Endpoint URL.</p>
+<h4>Webhook Event</h4>
+<pre><code>{
+  &quot;event&quot;: &quot;app_deauthorized&quot;,
+  &quot;event_ts&quot;: 1740439732278,
+  &quot;payload&quot;: {
+    &quot;account_id&quot;: &quot;ACCOUNT_ID&quot;,
+    &quot;user_id&quot;: &quot;USER_ID&quot;,
+    &quot;signature&quot;: &quot;SIGNATURE&quot;,
+    &quot;deauthorization_time&quot;: &quot;2019-06-17T13:52:28.632Z&quot;,
+    &quot;client_id&quot;: &quot;CLIENT_ID&quot;
+  }
+}</code></pre>
+<h4>Requirements</h4>
+<ul>
+<li><strong>Delete all associated user data</strong> after receiving this event</li>
+<li><strong>Verify webhook signature</strong> (use secret token, verification token deprecated Oct 2023)</li>
+<li>Only public apps receive deauthorization webhooks (not private/dev apps)</li>
+</ul>
+<hr>
+<h3>Pre-Approval Flow</h3>
+<p>Some Zoom accounts require Marketplace admin pre-approval before users can authorize apps.</p>
+<ul>
+<li>Users can request pre-approval from their admin</li>
+<li>Account-level apps (admin scopes) require appropriate role permissions</li>
+</ul>
+<hr>
+<h3>Active Apps Notifier (AAN)</h3>
+<p>In-meeting feature showing apps with real-time access to content.</p>
+<ul>
+<li>Displays icon + tooltip with app info, content type being accessed, approving account</li>
+<li>Supported: Zoom client 5.6.7+, Meeting SDK 5.9.0+</li>
+</ul>
+<hr>
+<h3>OAuth Scopes</h3>
+<h4>Scope Types</h4>
+<p>| Type | Description | For | |------|-------------|-----| | <strong>Classic scopes</strong> | Legacy scopes (user, admin, master levels) | Existing apps | | <strong>Granular scopes</strong> | New fine-grained scopes with optional support | New apps |</p>
+<h4>Classic Scopes</h4>
+<p>For previously-created apps. Three levels:</p>
+<ul>
+<li><strong>User-level</strong>: Access to individual user's data</li>
+<li><strong>Admin-level</strong>: Account-wide access, requires admin role</li>
+<li><strong>Master-level</strong>: For master-sub account setups, requires account owner</li>
+</ul>
+<p>Full list: https://developers.zoom.us/docs/integrations/oauth-scopes/</p>
+<h4>Granular Scopes</h4>
+<p>For new apps. Format: <code>&lt;service&gt;:&lt;action&gt;:&lt;data_claim&gt;:&lt;access&gt;</code></p>
+<p>| Component | Values | |-----------|--------| | <strong>service</strong> | <code>meeting</code>, <code>webinar</code>, <code>user</code>, <code>recording</code>, etc. | | <strong>action</strong> | <code>read</code>, <code>write</code>, <code>update</code>, <code>delete</code> | | <strong>data_claim</strong> | Data category (e.g., <code>participants</code>, <code>settings</code>) | | <strong>access</strong> | empty (user), <code>admin</code>, <code>master</code> |</p>
+<p>Example: <code>meeting:read:list_meetings:admin</code></p>
+<p>Full list: https://developers.zoom.us/docs/integrations/oauth-scopes-granular/</p>
+<h4>Optional Scopes</h4>
+<p>Granular scopes can be marked as <strong>optional</strong> - users choose whether to grant them.</p>
+<p><strong>Basic authorization</strong> (uses build flow defaults):</p>
+<pre><code>https://zoom.us/oauth/authorize?response_type=code&amp;client_id={CLIENT_ID}&amp;redirect_uri={REDIRECT_URI}</code></pre>
+<p><strong>Advanced authorization</strong> (custom scopes per request):</p>
+<pre><code>https://zoom.us/oauth/authorize?client_id={CLIENT_ID}&amp;response_type=code&amp;redirect_uri={REDIRECT_URI}&amp;scope={required_scopes}&amp;optional_scope={optional_scopes}</code></pre>
+<p><strong>Include previously granted scopes:</strong></p>
+<pre><code>https://zoom.us/oauth/authorize?...&amp;include_granted_scopes&amp;scope={additional_scopes}</code></pre>
+<h4>Migrating Classic to Granular</h4>
+<ol>
+<li>Manage &gt; select app &gt; edit</li>
+<li>Scope page &gt; Development tab &gt; click <strong>Migrate</strong></li>
+<li>Review auto-assigned granular scopes, remove unnecessary, mark optional</li>
+<li>Test</li>
+<li>Production tab &gt; click <strong>Migrate</strong></li>
+</ol>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>No review needed if only migrating or reducing scopes</li>
+<li>Existing user tokens continue with classic scope values until re-authorization</li>
+<li>New users get granular scopes after migration</li>
+</ul>
+<hr>
+<h3>Common Error Codes</h3>
+<p>| Code | Message | Solution | |------|---------|----------| | 4700 | Token cannot be empty | Check Authorization header has valid token | | 4702/4704 | Invalid client | Verify Client ID and Client Secret | | 4705 | Grant type not supported | Use: <code>account_credentials</code>, <code>authorization_code</code>, <code>urn:ietf:params:oauth:grant-type:device_code</code>, or <code>client_credentials</code> | | 4706 | Client ID or secret missing | Add credentials to header or request params | | 4709 | Redirect URI mismatch | Ensure redirect_uri matches app configuration exactly (including trailing slash) | | 4711 | Refresh token invalid | Token scopes don't match client scopes | | 4717 | App has been disabled | Contact Zoom support | | 4733 | Code is expired | Authorization codes expire in 5 minutes - restart flow | | 4734 | Invalid authorization code | Regenerate authorization code | | 4735 | Owner of token does not exist | User was removed from account - re-authorize | | 4741 | Token has been revoked | Use the most recent token from latest authorization |</p>
+<p>See <code>references/oauth-errors.md</code> for complete error list.</p>
+<hr>
+<h3>Quick Reference</h3>
+<p>| Flow | Grant Type | Token Expiry | Refresh | |------|------------|--------------|---------| | Account (S2S) | <code>account_credentials</code> | 1 hour | Request new token | | User | <code>authorization_code</code> | 1 hour | Use refresh_token (90 day expiry) | | Device | <code>urn:ietf:params:oauth:grant-type:device_code</code> | 1 hour | Use refresh_token (90 day expiry) | | Client (Chatbot) | <code>client_credentials</code> | 1 hour | Request new token |</p>
+<hr>
+<h3>Demo Guidance</h3>
+<p>If you build an OAuth demo app, document its runtime base URL in that demo project's own README or <code>.env.example</code>, not in this shared skill.</p>
+<h3>Resources</h3>
+<ul>
+<li><strong>OAuth docs</strong>: https://developers.zoom.us/docs/integrations/oauth/</li>
+<li><strong>S2S OAuth docs</strong>: https://developers.zoom.us/docs/internal-apps/s2s-oauth/</li>
+<li><strong>PKCE blog</strong>: https://developers.zoom.us/blog/pcke-oauth-with-postman-rest-api/</li>
+<li><strong>Classic scopes</strong>: https://developers.zoom.us/docs/integrations/oauth-scopes/</li>
+<li><strong>Granular scopes</strong>: https://developers.zoom.us/docs/integrations/oauth-scopes-granular/</li>
+</ul>
+<hr>
+<h3>Integrated Index</h3>
+<p>_This section was migrated from <code>SKILL.md</code>._</p>
+<h3>Quick Start Path</h3>
+<p><strong>If you're new to Zoom OAuth, follow this order:</strong></p>
+<ol>
+<li><strong>Run preflight checks first</strong> → [RUNBOOK.md](RUNBOOK.md)</li>
+</ol>
+<ol>
+<li><strong>Choose your OAuth flow</strong> → [concepts/oauth-flows.md](concepts/oauth-flows.md)</li>
+</ol>
+<ul>
+<li>4 flows: S2S (backend), User (SaaS), Device (no browser), Chatbot</li>
+<li>Decision matrix: Which flow fits your use case?</li>
+</ul>
+<ol>
+<li><strong>Understand token lifecycle</strong> → [concepts/token-lifecycle.md](concepts/token-lifecycle.md)</li>
+</ol>
+<ul>
+<li><strong>CRITICAL</strong>: How tokens expire, refresh, and revoke</li>
+<li>Common pitfalls: refresh token rotation</li>
+</ul>
+<ol>
+<li><strong>Implement your flow</strong> → Jump to examples:</li>
+</ol>
+<ul>
+<li>Backend automation → [examples/s2s-oauth-redis.md](examples/s2s-oauth-redis.md)</li>
+<li>SaaS app → [examples/user-oauth-mysql.md](examples/user-oauth-mysql.md)</li>
+<li>Mobile/SPA → [examples/pkce-implementation.md](examples/pkce-implementation.md)</li>
+<li>Device (TV/kiosk) → [examples/device-flow.md](examples/device-flow.md)</li>
+</ul>
+<ol>
+<li><strong>Fix redirect URI issues</strong> → [troubleshooting/redirect-uri-issues.md](troubleshooting/redirect-uri-issues.md)</li>
+</ol>
+<ul>
+<li>Most common OAuth error: Redirect URI mismatch</li>
+</ul>
+<ol>
+<li><strong>Implement token refresh</strong> → [examples/token-refresh.md](examples/token-refresh.md)</li>
+</ol>
+<ul>
+<li>Automatic middleware pattern</li>
+<li>Handle refresh token rotation</li>
+</ul>
+<ol>
+<li><strong>Troubleshoot errors</strong> → [troubleshooting/common-errors.md](troubleshooting/common-errors.md)</li>
+</ol>
+<ul>
+<li>Error code tables (4700-4741 range)</li>
+<li>Quick diagnostic workflow</li>
+</ul>
+<hr>
+<h3>Documentation Structure</h3>
+<pre><code>oauth/
+├── SKILL.md                           # Main skill overview
+├── SKILL.md                           # This file - navigation guide
+│
+├── concepts/                          # Core OAuth concepts
+│   ├── oauth-flows.md                # 4 flows: S2S, User, Device, Chatbot
+│   ├── token-lifecycle.md            # Expiration, refresh, revocation
+│   ├── pkce.md                       # PKCE security for public clients
+│   ├── scopes-architecture.md        # Classic vs Granular scopes
+│   └── state-parameter.md            # CSRF protection with state
+│
+├── examples/                          # Complete working code
+│   ├── s2s-oauth-basic.md            # S2S OAuth minimal example
+│   ├── s2s-oauth-redis.md            # S2S OAuth with Redis caching (production)
+│   ├── user-oauth-basic.md           # User OAuth minimal example
+│   ├── user-oauth-mysql.md           # User OAuth with MySQL + encryption (production)
+│   ├── device-flow.md                # Device authorization flow
+│   ├── pkce-implementation.md        # PKCE for SPAs/mobile apps
+│   └── token-refresh.md              # Auto-refresh middleware pattern
+│
+├── troubleshooting/                   # Problem solving guides
+│   ├── common-errors.md              # Error codes 4700-4741
+│   ├── redirect-uri-issues.md        # Most common OAuth error
+│   ├── token-issues.md               # Expired, revoked, invalid tokens
+│   └── scope-issues.md               # Scope mismatch errors
+│
+└── references/                        # Reference documentation
+    ├── oauth-errors.md                # Complete error code reference
+    ├── classic-scopes.md              # Classic scope reference
+    └── granular-scopes.md             # Granular scope reference</code></pre>
+<hr>
+<h3>By Use Case</h3>
+<h4>I want to automate Zoom tasks on my own account</h4>
+<ol>
+<li>[OAuth Flows](concepts/oauth-flows.md#server-to-server-s2s-oauth) - S2S OAuth explained</li>
+<li>[S2S OAuth Redis](examples/s2s-oauth-redis.md) - Production pattern with Redis caching</li>
+<li>[Token Lifecycle](concepts/token-lifecycle.md) - 1hr token, no refresh</li>
+</ol>
+<h4>I want to build a SaaS app for other Zoom users</h4>
+<ol>
+<li>[OAuth Flows](concepts/oauth-flows.md#user-authorization-oauth) - User OAuth explained</li>
+<li>[User OAuth MySQL](examples/user-oauth-mysql.md) - Production pattern with encryption</li>
+<li>[Token Refresh](examples/token-refresh.md) - Automatic refresh middleware</li>
+<li>[Redirect URI Issues](troubleshooting/redirect-uri-issues.md) - Fix most common error</li>
+</ol>
+<h4>I want to build a mobile or SPA app</h4>
+<ol>
+<li>[PKCE](concepts/pkce.md) - Why PKCE is required for public clients</li>
+<li>[PKCE Implementation](examples/pkce-implementation.md) - Complete code example</li>
+<li>[State Parameter](concepts/state-parameter.md) - CSRF protection</li>
+</ol>
+<h4>I want to build an app for devices without browsers (TV, kiosk)</h4>
+<ol>
+<li>[OAuth Flows](concepts/oauth-flows.md#device-authorization-flow) - Device flow explained</li>
+<li>[Device Flow Example](examples/device-flow.md) - Complete polling implementation</li>
+<li>[Common Errors](troubleshooting/common-errors.md) - Device-specific errors</li>
+</ol>
+<h4>I'm building a Team Chat bot</h4>
+<ol>
+<li>[OAuth Flows](concepts/oauth-flows.md#client-authorization-chatbot) - Chatbot flow explained</li>
+<li>[S2S OAuth Basic](examples/s2s-oauth-basic.md) - Similar pattern, different grant type</li>
+<li>[Scopes Architecture](concepts/scopes-architecture.md) - Chatbot-specific scopes</li>
+</ol>
+<h4>I'm getting redirect URI errors (4709)</h4>
+<ol>
+<li>[Redirect URI Issues](troubleshooting/redirect-uri-issues.md) - <strong>START HERE!</strong></li>
+<li>[Common Errors](troubleshooting/common-errors.md#4709-redirect-uri-mismatch) - Error details</li>
+<li>[User OAuth Basic](examples/user-oauth-basic.md) - See correct pattern</li>
+</ol>
+<h4>I'm getting token errors (4700-4741)</h4>
+<ol>
+<li>[Token Issues](troubleshooting/token-issues.md) - Diagnostic workflow</li>
+<li>[Token Lifecycle](concepts/token-lifecycle.md) - Understand expiration</li>
+<li>[Token Refresh](examples/token-refresh.md) - Implement auto-refresh</li>
+<li>[Common Errors](troubleshooting/common-errors.md) - Error code tables</li>
+</ol>
+<h4>I'm getting scope errors (4711)</h4>
+<ol>
+<li>[Scope Issues](troubleshooting/scope-issues.md) - Mismatch causes</li>
+<li>[Scopes Architecture](concepts/scopes-architecture.md) - Classic vs Granular</li>
+<li>[Classic Scopes](references/classic-scopes.md) - Complete scope reference</li>
+<li>[Granular Scopes](references/granular-scopes.md) - Granular scope reference</li>
+</ol>
+<h4>I need to refresh tokens</h4>
+<ol>
+<li>[Token Lifecycle](concepts/token-lifecycle.md#refresh-strategy) - When to refresh</li>
+<li>[Token Refresh](examples/token-refresh.md) - Middleware pattern</li>
+<li>[Token Issues](troubleshooting/token-issues.md#refresh-token-problems) - Common mistakes</li>
+</ol>
+<h4>I want to understand the difference between Classic and Granular scopes</h4>
+<ol>
+<li>[Scopes Architecture](concepts/scopes-architecture.md) - <strong>Complete comparison</strong></li>
+<li>[Classic Scopes](references/classic-scopes.md) - <code>resource:level</code> format</li>
+<li>[Granular Scopes](references/granular-scopes.md) - <code>service:action:data_claim:access</code> format</li>
+</ol>
+<h4>I need to secure my OAuth implementation</h4>
+<ol>
+<li>[PKCE](concepts/pkce.md) - Public client security</li>
+<li>[State Parameter](concepts/state-parameter.md) - CSRF protection</li>
+<li>[User OAuth MySQL](examples/user-oauth-mysql.md#token-encryption) - Token encryption at rest</li>
+</ol>
+<h4>I want to migrate from JWT app to S2S OAuth</h4>
+<ol>
+<li>[S2S OAuth Redis](examples/s2s-oauth-redis.md) - Modern replacement</li>
+<li>[Token Lifecycle](concepts/token-lifecycle.md) - Different token behavior</li>
+</ol>
+<blockquote><strong>Note</strong>: JWT App Type was deprecated in June 2023. Migrate to S2S OAuth for server-to-server automation.</blockquote>
+<hr>
+<h3>Most Critical Documents</h3>
+<h4>1. OAuth Flows (DECISION DOCUMENT)</h4>
+<p><strong>[concepts/oauth-flows.md](concepts/oauth-flows.md)</strong></p>
+<p>Understand which of the 4 flows to use:</p>
+<ul>
+<li><strong>S2S OAuth</strong>: Backend automation (your account)</li>
+<li><strong>User OAuth</strong>: SaaS apps (users authorize you)</li>
+<li><strong>Device Flow</strong>: Devices without browsers</li>
+<li><strong>Chatbot</strong>: Team Chat bots only</li>
+</ul>
+<h4>2. Token Lifecycle (MOST COMMON ISSUE)</h4>
+<p><strong>[concepts/token-lifecycle.md](concepts/token-lifecycle.md)</strong></p>
+<p>99% of OAuth issues stem from misunderstanding:</p>
+<ul>
+<li>Token expiration (1 hour for all flows)</li>
+<li>Refresh token rotation (must save new refresh token)</li>
+<li>Revocation behavior (invalidates all tokens)</li>
+</ul>
+<h4>3. Redirect URI Issues (MOST COMMON ERROR)</h4>
+<p><strong>[troubleshooting/redirect-uri-issues.md](troubleshooting/redirect-uri-issues.md)</strong></p>
+<p>Error 4709 (&quot;Redirect URI mismatch&quot;) is the #1 OAuth error. Must match EXACTLY (including trailing slash, http vs https).</p>
+<hr>
+<h3>Key Learnings</h3>
+<h4>Critical Discoveries:</h4>
+<ol>
+<li><strong>Refresh Token Rotation</strong></li>
+</ol>
+<ul>
+<li>Each refresh returns a NEW refresh token</li>
+<li>Old refresh token becomes invalid</li>
+<li>Failure to save new token causes 4735 errors</li>
+<li>See: [Token Refresh](examples/token-refresh.md)</li>
+</ul>
+<ol>
+<li><strong>S2S OAuth Uses Redis, User OAuth Uses Database</strong></li>
+</ol>
+<ul>
+<li>S2S: Single token for entire account → Redis (ephemeral)</li>
+<li>User: Per-user tokens → Database (persistent)</li>
+<li>See: [S2S OAuth Redis](examples/s2s-oauth-redis.md) vs [User OAuth MySQL](examples/user-oauth-mysql.md)</li>
+</ul>
+<ol>
+<li><strong>Redirect URI Must Match EXACTLY</strong></li>
+</ol>
+<ul>
+<li>Trailing slash matters: <code>/callback</code> ≠ <code>/callback/</code></li>
+<li>Protocol matters: <code>http://</code> ≠ <code>https://</code></li>
+<li>Port matters: <code>:3000</code> ≠ <code>:3001</code></li>
+<li>See: [Redirect URI Issues](troubleshooting/redirect-uri-issues.md)</li>
+</ul>
+<ol>
+<li><strong>PKCE Required for Public Clients</strong></li>
+</ol>
+<ul>
+<li>Mobile apps CANNOT keep secrets</li>
+<li>SPAs CANNOT keep secrets</li>
+<li>PKCE prevents authorization code interception</li>
+<li>See: [PKCE](concepts/pkce.md)</li>
+</ul>
+<ol>
+<li><strong>State Parameter Prevents CSRF</strong></li>
+</ol>
+<ul>
+<li>Generate random state before redirect</li>
+<li>Store in session</li>
+<li>Verify on callback</li>
+<li>See: [State Parameter](concepts/state-parameter.md)</li>
+</ul>
+<ol>
+<li><strong>Token Storage Must Be Encrypted</strong></li>
+</ol>
+<ul>
+<li>NEVER store tokens in plain text</li>
+<li>Use AES-256 minimum</li>
+<li>See: [User OAuth MySQL](examples/user-oauth-mysql.md#token-encryption)</li>
+</ul>
+<ol>
+<li><strong>JWT App Type is Deprecated (June 2023)</strong></li>
+</ol>
+<ul>
+<li>No new JWT apps can be created</li>
+<li>Existing apps still work but will eventually be sunset</li>
+<li>Migrate to S2S OAuth or User OAuth</li>
+</ul>
+<ol>
+<li><strong>Scope Levels Determine Authorization Requirements</strong></li>
+</ol>
+<ul>
+<li>No suffix (user-level): Any user can authorize</li>
+<li><code>:admin</code>: Requires admin role</li>
+<li><code>:master</code>: Requires account owner (multi-account)</li>
+<li>See: [Scopes Architecture](concepts/scopes-architecture.md)</li>
+</ul>
+<ol>
+<li><strong>Authorization Codes Expire in 5 Minutes</strong></li>
+</ol>
+<ul>
+<li>Exchange code for token immediately</li>
+<li>Don't cache authorization codes</li>
+<li>See: [Token Lifecycle](concepts/token-lifecycle.md#authorization-code-expiration)</li>
+</ul>
+<ol>
+<li><strong>Device Flow Requires Polling</strong></li>
+</ol>
+<ul>
+<li>Poll at interval returned by <code>/devicecode</code> (usually 5s)</li>
+<li>Handle <code>authorization_pending</code>, <code>slow_down</code>, <code>expired_token</code></li>
+<li>See: [Device Flow](examples/device-flow.md)</li>
+</ul>
+<hr>
+<h3>Quick Reference</h3>
+<h4>&quot;Which OAuth flow should I use?&quot;</h4>
+<p>→ [OAuth Flows](concepts/oauth-flows.md)</p>
+<h4>&quot;Redirect URI mismatch error (4709)&quot;</h4>
+<p>→ [Redirect URI Issues](troubleshooting/redirect-uri-issues.md)</p>
+<h4>&quot;Token expired or invalid&quot;</h4>
+<p>→ [Token Issues](troubleshooting/token-issues.md)</p>
+<h4>&quot;Refresh token invalid (4735)&quot;</h4>
+<p>→ [Token Refresh](examples/token-refresh.md) - Must save new refresh token</p>
+<h4>&quot;Scope mismatch error (4711)&quot;</h4>
+<p>→ [Scope Issues](troubleshooting/scope-issues.md)</p>
+<h4>&quot;How do I secure my OAuth app?&quot;</h4>
+<p>→ [PKCE](concepts/pkce.md) + [State Parameter](concepts/state-parameter.md)</p>
+<h4>&quot;How do I implement auto-refresh?&quot;</h4>
+<p>→ [Token Refresh](examples/token-refresh.md)</p>
+<h4>&quot;What's the difference between Classic and Granular scopes?&quot;</h4>
+<p>→ [Scopes Architecture](concepts/scopes-architecture.md)</p>
+<h4>&quot;What error code means what?&quot;</h4>
+<p>→ [Common Errors](troubleshooting/common-errors.md)</p>
+<hr>
+<h3>Document Version</h3>
+<p>Based on <strong>Zoom OAuth API v2</strong> (2024+)</p>
+<p><strong>Deprecated:</strong> JWT App Type (June 2023)</p>
+<hr>
+<p><strong>Happy coding!</strong></p>
+<p>Remember: Start with [OAuth Flows](concepts/oauth-flows.md) to understand which flow fits your use case!</p>
+<h3>Environment Variables</h3>
+<ul>
+<li>See [references/environment-variables.md](references/environment-variables.md) for standardized <code>.env</code> keys and where to find each value.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: kw-zoom-plugin-oauth\ndisplay_name: kw-zoom-plugin-oauth\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# kw-zoom-plugin-oauth - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `kw-zoom-plugin-oauth` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nBackground reference for Zoom auth and token lifecycle behavior. Prefer `setup-zoom-oauth` first, then use this skill for the exact flow, scope, and error details.\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose kw-zoom-plugin-oauth, then write the task. Fallback prompt: Use the kw-zoom-plugin-oauth skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `kw-zoom-plugin-oauth` |\n| Canonical name | `kw-zoom-plugin-oauth` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nBackground reference for Zoom auth and token lifecycle behavior. Prefer `setup-zoom-oauth` first, then use this skill for the exact flow, scope, and error details.\n\n## Original SKILL.md\n\n---\nknowledge-work-plugin: zoom-plugin\nupstream-skill: oauth\nname: kw-zoom-plugin-oauth\ndescription: Reference skill for Zoom authentication. Use after routing to an auth workflow when choosing app credentials, grant types, scopes, token refresh behavior, or debugging Zoom OAuth failures.\nuser-invocable: false\ntriggers:\n  - zoom oauth\n  - zoom authentication\n  - zoom authorization\n  - server to server oauth\n  - s2s oauth\n  - zoom access token\n  - zoom refresh token\n  - authorization code flow\n  - device authorization\n  - pkce\n  - zoom api authentication\n  - oauth error 4709\n  - oauth error 4733\n  - oauth error 4735\n  - redirect uri mismatch\n---\n\n# Zoom OAuth\n\nBackground reference for Zoom auth and token lifecycle behavior. Prefer `setup-zoom-oauth` first, then use this skill for the exact flow, scope, and error details.\n\n# Zoom OAuth\n\nAuthentication and authorization for Zoom APIs.\n\n## 📖 Complete Documentation\n\nFor comprehensive guides, production patterns, and troubleshooting, see **Integrated Index section below**.\n\nQuick navigation:\n- **[5-Minute Runbook](RUNBOOK.md)** - Preflight checks before deep debugging\n- **[OAuth Flows](concepts/oauth-flows.md)** - Which flow to use and how each works\n- **[Token Lifecycle](concepts/token-lifecycle.md)** - Expiration, refresh, and revocation\n- **[Production Examples](examples/s2s-oauth-redis.md)** - Redis caching, MySQL storage, auto-refresh\n- **[Troubleshooting](troubleshooting/common-errors.md)** - Error codes 4700-4741\n\n## Prerequisites\n\n- Zoom app created in [Marketplace](https://marketplace.zoom.us/)\n- Client ID and Client Secret\n- For S2S OAuth: Account ID\n\n## Four Authorization Use Cases\n\n| Use Case | App Type | Grant Type | Industry Name |\n|----------|----------|------------|---------------|\n| **Account Authorization** | Server-to-Server | `account_credentials` | Client Credentials Grant, M2M, Two-legged OAuth |\n| **User Authorization** | General | `authorization_code` | Authorization Code Grant, Three-legged OAuth |\n| **Device Authorization** | General | `urn:ietf:params:oauth:grant-type:device_code` | Device Authorization Grant (RFC 8628) |\n| **Client Authorization** | General | `client_credentials` | Client Credentials Grant (chatbot-scoped) |\n\n### Industry Terminology\n\n| Term | Meaning |\n|------|---------|\n| **Two-legged OAuth** | No user involved (client ↔ server) |\n| **Three-legged OAuth** | User involved (user ↔ client ↔ server) |\n| **M2M** | Machine-to-Machine (backend services) |\n| **Public client** | Can't keep secrets (mobile, SPA) → use PKCE |\n| **Confidential client** | Can keep secrets (backend servers) |\n| **PKCE** | Proof Key for Code Exchange (RFC 7636), pronounced \"pixy\" |\n\n### Which Flow Should I Use?\n\n```\n                              ┌─────────────────────┐\n                              │  What are you       │\n                              │  building?          │\n                              └──────────┬──────────┘\n                                         │\n                    ┌────────────────────┼────────────────────┐\n                    │                    │                    │\n                    ▼                    ▼                    ▼\n          ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐\n          │  Backend        │  │  App for other  │  │  Chatbot only   │\n          │  automation     │  │  users/accounts │  │  (Team Chat)    │\n          │  (your account) │  │                 │  │                 │\n          └────────┬────────┘  └────────┬────────┘  └────────┬────────┘\n                   │                    │                    │\n                   ▼                    │                    ▼\n          ┌─────────────────┐           │           ┌─────────────────┐\n          │    ACCOUNT      │           │           │     CLIENT      │\n          │   (S2S OAuth)   │           │           │   (Chatbot)     │\n          └─────────────────┘           │           └─────────────────┘\n                                        │\n                                        ▼\n                              ┌─────────────────────┐\n                              │  Does device have   │\n                              │  a browser?         │\n                              └──────────┬──────────┘\n                                         │\n                         ┌───────────────┴───────────────┐\n                         │ NO                         YES│\n                         ▼                               ▼\n          ┌─────────────────────────┐         ┌─────────────────┐\n          │        DEVICE           │         │      USER       │\n          │     (Device Flow)       │         │  (Auth Code)    │\n          │                         │         │                 │\n          │ Examples:               │         │ + PKCE if       │\n          │ • Smart TV              │         │   public client │\n          │ • Meeting SDK device    │         │                 │\n          └─────────────────────────┘         └─────────────────┘\n```\n\n---\n\n## Account Authorization (Server-to-Server OAuth)\n\nFor backend automation without user interaction.\n\n### Request Access Token\n\n```bash\nPOST https://zoom.us/oauth/token?grant_type=account_credentials&account_id={ACCOUNT_ID}\n\nHeaders:\nAuthorization: Basic {Base64(ClientID:ClientSecret)}\n```\n\n### Response\n\n```json\n{\n  \"access_token\": \"eyJ...\",\n  \"token_type\": \"bearer\",\n  \"expires_in\": 3600,\n  \"scope\": \"user:read:user:admin\",\n  \"api_url\": \"https://api.zoom.us\"\n}\n```\n\n### Refresh\n\nAccess tokens expire after **1 hour**. No separate refresh flow - just request a new token.\n\n---\n\n## User Authorization (Authorization Code Flow)\n\nFor apps that act on behalf of users.\n\n### Step 1: Redirect User to Authorize\n\n```\nhttps://zoom.us/oauth/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}\n```\n\nUse `https://zoom.us/oauth/authorize` for consent, but `https://zoom.us/oauth/token` for token exchange.\n\n**Optional Parameters:**\n\n| Parameter | Description |\n|-----------|-------------|\n| `state` | CSRF protection, maintains state through flow |\n| `code_challenge` | For PKCE (see below) |\n| `code_challenge_method` | `S256` or `plain` (default: plain) |\n\n### Step 2: User Authorizes\n\n- User signs in and grants permission\n- Redirects to `redirect_uri` with authorization code:\n  ```\n  https://example.com/?code={AUTHORIZATION_CODE}\n  ```\n\n### Step 3: Exchange Code for Token\n\n```bash\nPOST https://zoom.us/oauth/token?grant_type=authorization_code&code={CODE}&redirect_uri={REDIRECT_URI}\n\nHeaders:\nAuthorization: Basic {Base64(ClientID:ClientSecret)}\n```\n\n**With PKCE:** Add `code_verifier` parameter.\n\n### Response\n\n```json\n{\n  \"access_token\": \"eyJ...\",\n  \"token_type\": \"bearer\",\n  \"refresh_token\": \"eyJ...\",\n  \"expires_in\": 3600,\n  \"scope\": \"user:read:user\",\n  \"api_url\": \"https://api.zoom.us\"\n}\n```\n\n### Refresh Token\n\n```bash\nPOST https://zoom.us/oauth/token?grant_type=refresh_token&refresh_token={REFRESH_TOKEN}\n\nHeaders:\nAuthorization: Basic {Base64(ClientID:ClientSecret)}\n```\n\n- Access tokens expire after **1 hour**\n- Refresh token lifetime can vary; ~90 days is common for some user-based flows. Treat it as configuration/behavior that can change and rely on runtime errors + re-auth fallback.\n- Always use the latest refresh token for the next request\n- If refresh token expires, redirect user to authorization URL to restart flow\n\n### User-Level vs Account-Level Apps\n\n| Type | Who Can Authorize | Scope Access |\n|------|-------------------|--------------|\n| **User-level** | Any individual user | Scoped to themselves |\n| **Account-level** | User with admin permissions | Account-wide access (admin scopes) |\n\n---\n\n## Device Authorization (Device Flow)\n\nFor devices without browsers (e.g., Meeting SDK apps).\n\n### Prerequisites\n\nEnable \"Use App on Device\" in: Features > Embed > Enable Meeting SDK\n\n### Step 1: Request Device Code\n\n```bash\nPOST https://zoom.us/oauth/devicecode?client_id={CLIENT_ID}\n\nHeaders:\nAuthorization: Basic {Base64(ClientID:ClientSecret)}\n```\n\n### Response\n\n```json\n{\n  \"device_code\": \"DEVICE_CODE\",\n  \"user_code\": \"abcd1234\",\n  \"verification_uri\": \"https://zoom.us/oauth_device\",\n  \"verification_uri_complete\": \"https://zoom.us/oauth/device/complete/{CODE}\",\n  \"expires_in\": 900,\n  \"interval\": 5\n}\n```\n\n### Step 2: User Authorization\n\nDirect user to:\n- `verification_uri` and display `user_code` for manual entry, OR\n- `verification_uri_complete` (user code prefilled)\n\nUser signs in and allows the app.\n\n### Step 3: Poll for Token\n\nPoll at the `interval` (5 seconds) until user authorizes:\n\n```bash\nPOST https://zoom.us/oauth/token?grant_type=urn:ietf:params:oauth:grant-type:device_code&device_code={DEVICE_CODE}\n\nHeaders:\nAuthorization: Basic {Base64(ClientID:ClientSecret)}\n```\n\n### Response\n\n```json\n{\n  \"access_token\": \"eyJ...\",\n  \"token_type\": \"bearer\",\n  \"refresh_token\": \"eyJ...\",\n  \"expires_in\": 3599,\n  \"scope\": \"user:read:user user:read:token\",\n  \"api_url\": \"https://api.zoom.us\"\n}\n```\n\n### Polling Responses\n\n| Response | Meaning | Action |\n|----------|---------|--------|\n| Token returned | User authorized | Store tokens, done |\n| `error: authorization_pending` | User hasn't authorized yet | Keep polling at interval |\n| `error: slow_down` | Polling too fast | Increase interval by 5 seconds |\n| `error: expired_token` | Device code expired (15 min) | Restart flow from Step 1 |\n| `error: access_denied` | User denied authorization | Handle denial, don't retry |\n\n### Polling Implementation\n\n```javascript\nasync function pollForToken(deviceCode, interval) {\n  while (true) {\n    await sleep(interval * 1000);\n    \n    try {\n      const response = await axios.post(\n        `https://zoom.us/oauth/token?grant_type=urn:ietf:params:oauth:grant-type:device_code&device_code=${deviceCode}`,\n        null,\n        { headers: { 'Authorization': `Basic ${credentials}` } }\n      );\n      return response.data; // Success - got tokens\n    } catch (error) {\n      const err = error.response?.data?.error;\n      if (err === 'authorization_pending') continue;\n      if (err === 'slow_down') { interval += 5; continue; }\n      throw error; // expired_token or access_denied\n    }\n  }\n}\n```\n\n### Refresh\n\nSame as User Authorization. If refresh token expires, restart device flow from Step 1.\n\n---\n\n## Client Authorization (Chatbot)\n\nFor chatbot message operations only.\n\n### Request Token\n\n```bash\nPOST https://zoom.us/oauth/token?grant_type=client_credentials\n\nHeaders:\nAuthorization: Basic {Base64(ClientID:ClientSecret)}\n```\n\n### Response\n\n```json\n{\n  \"access_token\": \"eyJ...\",\n  \"token_type\": \"bearer\",\n  \"expires_in\": 3600,\n  \"scope\": \"imchat:bot\",\n  \"api_url\": \"https://api.zoom.us\"\n}\n```\n\n### Refresh\n\nTokens expire after **1 hour**. No refresh flow - just request a new token.\n\n---\n\n## Using Access Tokens\n\n### Call API\n\n```bash\nGET https://api.zoom.us/v2/users/me\n\nHeaders:\nAuthorization: Bearer {ACCESS_TOKEN}\n```\n\n### Me Context\n\nReplace `userID` with `me` to target the token's associated user:\n\n| Endpoint | Methods |\n|----------|---------|\n| `/v2/users/me` | GET, PATCH |\n| `/v2/users/me/token` | GET |\n| `/v2/users/me/meetings` | GET, POST |\n\n---\n\n## Revoke Access Token\n\nWorks for all authorization types.\n\n```bash\nPOST https://zoom.us/oauth/revoke?token={ACCESS_TOKEN}\n\nHeaders:\nAuthorization: Basic {Base64(ClientID:ClientSecret)}\n```\n\n### Response\n\n```json\n{\n  \"status\": \"success\"\n}\n```\n\n---\n\n## PKCE (Proof Key for Code Exchange)\n\nFor public clients that can't securely store secrets (mobile apps, SPAs, desktop apps).\n\n### When to Use PKCE\n\n| Client Type | Use PKCE? | Why |\n|-------------|-----------|-----|\n| Mobile app | **Yes** | Can't securely store client secret |\n| Single Page App (SPA) | **Yes** | JavaScript is visible to users |\n| Desktop app | **Yes** | Binary can be decompiled |\n| Meeting SDK (client-side) | **Yes** | Runs on user's device |\n| Backend server | Optional | Can keep secrets, but PKCE adds security |\n\n### How PKCE Works\n\n```\n┌──────────┐                              ┌──────────┐                    ┌──────────┐\n│  Client  │                              │   Zoom   │                    │   Zoom   │\n│   App    │                              │  Auth    │                    │  Token   │\n└────┬─────┘                              └────┬─────┘                    └────┬─────┘\n     │                                         │                              │\n     │ 1. Generate code_verifier (random)      │                              │\n     │ 2. Create code_challenge = SHA256(verifier)                            │\n     │                                         │                              │\n     │ ─────── /authorize + code_challenge ──► │                              │\n     │                                         │                              │\n     │ ◄────── authorization_code ──────────── │                              │\n     │                                         │                              │\n     │ ─────────────── /token + code_verifier ─┼────────────────────────────► │\n     │                                         │                              │\n     │                                         │     Verify: SHA256(verifier) │\n     │                                         │            == challenge      │\n     │                                         │                              │\n     │ ◄───────────────────────────────────────┼─────── access_token ──────── │\n     │                                         │                              │\n```\n\n### Implementation (Node.js)\n\n```javascript\nconst crypto = require('crypto');\n\nfunction generatePKCE() {\n  const verifier = crypto.randomBytes(32).toString('base64url');\n  const challenge = crypto.createHash('sha256').update(verifier).digest('base64url');\n  return { verifier, challenge };\n}\n\nconst pkce = generatePKCE();\n\nconst authUrl = `https://zoom.us/oauth/authorize?` +\n  `response_type=code&` +\n  `client_id=${CLIENT_ID}&` +\n  `redirect_uri=${REDIRECT_URI}&` +\n  `code_challenge=${pkce.challenge}&` +\n  `code_challenge_method=S256`;\n\n// Store pkce.verifier in session for callback\n```\n\n### Token Exchange with PKCE\n\n```bash\nPOST https://zoom.us/oauth/token?grant_type=authorization_code&code={CODE}&redirect_uri={REDIRECT_URI}&code_verifier={VERIFIER}\n\nHeaders:\nAuthorization: Basic {Base64(ClientID:ClientSecret)}\n```\n\n---\n\n## Deauthorization\n\nWhen a user removes your app, Zoom sends a webhook to your Deauthorization Notification Endpoint URL.\n\n### Webhook Event\n\n```json\n{\n  \"event\": \"app_deauthorized\",\n  \"event_ts\": 1740439732278,\n  \"payload\": {\n    \"account_id\": \"ACCOUNT_ID\",\n    \"user_id\": \"USER_ID\",\n    \"signature\": \"SIGNATURE\",\n    \"deauthorization_time\": \"2019-06-17T13:52:28.632Z\",\n    \"client_id\": \"CLIENT_ID\"\n  }\n}\n```\n\n### Requirements\n\n- **Delete all associated user data** after receiving this event\n- **Verify webhook signature** (use secret token, verification token deprecated Oct 2023)\n- Only public apps receive deauthorization webhooks (not private/dev apps)\n\n---\n\n## Pre-Approval Flow\n\nSome Zoom accounts require Marketplace admin pre-approval before users can authorize apps.\n\n- Users can request pre-approval from their admin\n- Account-level apps (admin scopes) require appropriate role permissions\n\n---\n\n## Active Apps Notifier (AAN)\n\nIn-meeting feature showing apps with real-time access to content.\n\n- Displays icon + tooltip with app info, content type being accessed, approving account\n- Supported: Zoom client 5.6.7+, Meeting SDK 5.9.0+\n\n---\n\n## OAuth Scopes\n\n### Scope Types\n\n| Type | Description | For |\n|------|-------------|-----|\n| **Classic scopes** | Legacy scopes (user, admin, master levels) | Existing apps |\n| **Granular scopes** | New fine-grained scopes with optional support | New apps |\n\n### Classic Scopes\n\nFor previously-created apps. Three levels:\n- **User-level**: Access to individual user's data\n- **Admin-level**: Account-wide access, requires admin role\n- **Master-level**: For master-sub account setups, requires account owner\n\nFull list: https://developers.zoom.us/docs/integrations/oauth-scopes/\n\n### Granular Scopes\n\nFor new apps. Format: `\u003cservice>:\u003caction>:\u003cdata_claim>:\u003caccess>`\n\n| Component | Values |\n|-----------|--------|\n| **service** | `meeting`, `webinar`, `user`, `recording`, etc. |\n| **action** | `read`, `write`, `update`, `delete` |\n| **data_claim** | Data category (e.g., `participants`, `settings`) |\n| **access** | empty (user), `admin`, `master` |\n\nExample: `meeting:read:list_meetings:admin`\n\nFull list: https://developers.zoom.us/docs/integrations/oauth-scopes-granular/\n\n### Optional Scopes\n\nGranular scopes can be marked as **optional** - users choose whether to grant them.\n\n**Basic authorization** (uses build flow defaults):\n```\nhttps://zoom.us/oauth/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}\n```\n\n**Advanced authorization** (custom scopes per request):\n```\nhttps://zoom.us/oauth/authorize?client_id={CLIENT_ID}&response_type=code&redirect_uri={REDIRECT_URI}&scope={required_scopes}&optional_scope={optional_scopes}\n```\n\n**Include previously granted scopes:**\n```\nhttps://zoom.us/oauth/authorize?...&include_granted_scopes&scope={additional_scopes}\n```\n\n### Migrating Classic to Granular\n\n1. Manage > select app > edit\n2. Scope page > Development tab > click **Migrate**\n3. Review auto-assigned granular scopes, remove unnecessary, mark optional\n4. Test\n5. Production tab > click **Migrate**\n\n**Notes:**\n- No review needed if only migrating or reducing scopes\n- Existing user tokens continue with classic scope values until re-authorization\n- New users get granular scopes after migration\n\n---\n\n## Common Error Codes\n\n| Code | Message | Solution |\n|------|---------|----------|\n| 4700 | Token cannot be empty | Check Authorization header has valid token |\n| 4702/4704 | Invalid client | Verify Client ID and Client Secret |\n| 4705 | Grant type not supported | Use: `account_credentials`, `authorization_code`, `urn:ietf:params:oauth:grant-type:device_code`, or `client_credentials` |\n| 4706 | Client ID or secret missing | Add credentials to header or request params |\n| 4709 | Redirect URI mismatch | Ensure redirect_uri matches app configuration exactly (including trailing slash) |\n| 4711 | Refresh token invalid | Token scopes don't match client scopes |\n| 4717 | App has been disabled | Contact Zoom support |\n| 4733 | Code is expired | Authorization codes expire in 5 minutes - restart flow |\n| 4734 | Invalid authorization code | Regenerate authorization code |\n| 4735 | Owner of token does not exist | User was removed from account - re-authorize |\n| 4741 | Token has been revoked | Use the most recent token from latest authorization |\n\nSee `references/oauth-errors.md` for complete error list.\n\n---\n\n## Quick Reference\n\n| Flow | Grant Type | Token Expiry | Refresh |\n|------|------------|--------------|---------|\n| Account (S2S) | `account_credentials` | 1 hour | Request new token |\n| User | `authorization_code` | 1 hour | Use refresh_token (90 day expiry) |\n| Device | `urn:ietf:params:oauth:grant-type:device_code` | 1 hour | Use refresh_token (90 day expiry) |\n| Client (Chatbot) | `client_credentials` | 1 hour | Request new token |\n\n---\n\n## Demo Guidance\n\nIf you build an OAuth demo app, document its runtime base URL in that demo project's own\nREADME or `.env.example`, not in this shared skill.\n\n## Resources\n\n- **OAuth docs**: https://developers.zoom.us/docs/integrations/oauth/\n- **S2S OAuth docs**: https://developers.zoom.us/docs/internal-apps/s2s-oauth/\n- **PKCE blog**: https://developers.zoom.us/blog/pcke-oauth-with-postman-rest-api/\n- **Classic scopes**: https://developers.zoom.us/docs/integrations/oauth-scopes/\n- **Granular scopes**: https://developers.zoom.us/docs/integrations/oauth-scopes-granular/\n\n---\n\n## Integrated Index\n\n_This section was migrated from `SKILL.md`._\n\n## Quick Start Path\n\n**If you're new to Zoom OAuth, follow this order:**\n\n1. **Run preflight checks first** → [RUNBOOK.md](RUNBOOK.md)\n\n2. **Choose your OAuth flow** → [concepts/oauth-flows.md](concepts/oauth-flows.md)\n   - 4 flows: S2S (backend), User (SaaS), Device (no browser), Chatbot\n   - Decision matrix: Which flow fits your use case?\n\n3. **Understand token lifecycle** → [concepts/token-lifecycle.md](concepts/token-lifecycle.md)\n   - **CRITICAL**: How tokens expire, refresh, and revoke\n   - Common pitfalls: refresh token rotation\n\n4. **Implement your flow** → Jump to examples:\n   - Backend automation → [examples/s2s-oauth-redis.md](examples/s2s-oauth-redis.md)\n   - SaaS app → [examples/user-oauth-mysql.md](examples/user-oauth-mysql.md)\n   - Mobile/SPA → [examples/pkce-implementation.md](examples/pkce-implementation.md)\n   - Device (TV/kiosk) → [examples/device-flow.md](examples/device-flow.md)\n\n5. **Fix redirect URI issues** → [troubleshooting/redirect-uri-issues.md](troubleshooting/redirect-uri-issues.md)\n   - Most common OAuth error: Redirect URI mismatch\n\n6. **Implement token refresh** → [examples/token-refresh.md](examples/token-refresh.md)\n   - Automatic middleware pattern\n   - Handle refresh token rotation\n\n7. **Troubleshoot errors** → [troubleshooting/common-errors.md](troubleshooting/common-errors.md)\n   - Error code tables (4700-4741 range)\n   - Quick diagnostic workflow\n\n---\n\n## Documentation Structure\n\n```\noauth/\n├── SKILL.md                           # Main skill overview\n├── SKILL.md                           # This file - navigation guide\n│\n├── concepts/                          # Core OAuth concepts\n│   ├── oauth-flows.md                # 4 flows: S2S, User, Device, Chatbot\n│   ├── token-lifecycle.md            # Expiration, refresh, revocation\n│   ├── pkce.md                       # PKCE security for public clients\n│   ├── scopes-architecture.md        # Classic vs Granular scopes\n│   └── state-parameter.md            # CSRF protection with state\n│\n├── examples/                          # Complete working code\n│   ├── s2s-oauth-basic.md            # S2S OAuth minimal example\n│   ├── s2s-oauth-redis.md            # S2S OAuth with Redis caching (production)\n│   ├── user-oauth-basic.md           # User OAuth minimal example\n│   ├── user-oauth-mysql.md           # User OAuth with MySQL + encryption (production)\n│   ├── device-flow.md                # Device authorization flow\n│   ├── pkce-implementation.md        # PKCE for SPAs/mobile apps\n│   └── token-refresh.md              # Auto-refresh middleware pattern\n│\n├── troubleshooting/                   # Problem solving guides\n│   ├── common-errors.md              # Error codes 4700-4741\n│   ├── redirect-uri-issues.md        # Most common OAuth error\n│   ├── token-issues.md               # Expired, revoked, invalid tokens\n│   └── scope-issues.md               # Scope mismatch errors\n│\n└── references/                        # Reference documentation\n    ├── oauth-errors.md                # Complete error code reference\n    ├── classic-scopes.md              # Classic scope reference\n    └── granular-scopes.md             # Granular scope reference\n```\n\n---\n\n## By Use Case\n\n### I want to automate Zoom tasks on my own account\n1. [OAuth Flows](concepts/oauth-flows.md#server-to-server-s2s-oauth) - S2S OAuth explained\n2. [S2S OAuth Redis](examples/s2s-oauth-redis.md) - Production pattern with Redis caching\n3. [Token Lifecycle](concepts/token-lifecycle.md) - 1hr token, no refresh\n\n### I want to build a SaaS app for other Zoom users\n1. [OAuth Flows](concepts/oauth-flows.md#user-authorization-oauth) - User OAuth explained\n2. [User OAuth MySQL](examples/user-oauth-mysql.md) - Production pattern with encryption\n3. [Token Refresh](examples/token-refresh.md) - Automatic refresh middleware\n4. [Redirect URI Issues](troubleshooting/redirect-uri-issues.md) - Fix most common error\n\n### I want to build a mobile or SPA app\n1. [PKCE](concepts/pkce.md) - Why PKCE is required for public clients\n2. [PKCE Implementation](examples/pkce-implementation.md) - Complete code example\n3. [State Parameter](concepts/state-parameter.md) - CSRF protection\n\n### I want to build an app for devices without browsers (TV, kiosk)\n1. [OAuth Flows](concepts/oauth-flows.md#device-authorization-flow) - Device flow explained\n2. [Device Flow Example](examples/device-flow.md) - Complete polling implementation\n3. [Common Errors](troubleshooting/common-errors.md) - Device-specific errors\n\n### I'm building a Team Chat bot\n1. [OAuth Flows](concepts/oauth-flows.md#client-authorization-chatbot) - Chatbot flow explained\n2. [S2S OAuth Basic](examples/s2s-oauth-basic.md) - Similar pattern, different grant type\n3. [Scopes Architecture](concepts/scopes-architecture.md) - Chatbot-specific scopes\n\n### I'm getting redirect URI errors (4709)\n1. [Redirect URI Issues](troubleshooting/redirect-uri-issues.md) - **START HERE!**\n2. [Common Errors](troubleshooting/common-errors.md#4709-redirect-uri-mismatch) - Error details\n3. [User OAuth Basic](examples/user-oauth-basic.md) - See correct pattern\n\n### I'm getting token errors (4700-4741)\n1. [Token Issues](troubleshooting/token-issues.md) - Diagnostic workflow\n2. [Token Lifecycle](concepts/token-lifecycle.md) - Understand expiration\n3. [Token Refresh](examples/token-refresh.md) - Implement auto-refresh\n4. [Common Errors](troubleshooting/common-errors.md) - Error code tables\n\n### I'm getting scope errors (4711)\n1. [Scope Issues](troubleshooting/scope-issues.md) - Mismatch causes\n2. [Scopes Architecture](concepts/scopes-architecture.md) - Classic vs Granular\n3. [Classic Scopes](references/classic-scopes.md) - Complete scope reference\n4. [Granular Scopes](references/granular-scopes.md) - Granular scope reference\n\n### I need to refresh tokens\n1. [Token Lifecycle](concepts/token-lifecycle.md#refresh-strategy) - When to refresh\n2. [Token Refresh](examples/token-refresh.md) - Middleware pattern\n3. [Token Issues](troubleshooting/token-issues.md#refresh-token-problems) - Common mistakes\n\n### I want to understand the difference between Classic and Granular scopes\n1. [Scopes Architecture](concepts/scopes-architecture.md) - **Complete comparison**\n2. [Classic Scopes](references/classic-scopes.md) - `resource:level` format\n3. [Granular Scopes](references/granular-scopes.md) - `service:action:data_claim:access` format\n\n### I need to secure my OAuth implementation\n1. [PKCE](concepts/pkce.md) - Public client security\n2. [State Parameter](concepts/state-parameter.md) - CSRF protection\n3. [User OAuth MySQL](examples/user-oauth-mysql.md#token-encryption) - Token encryption at rest\n\n### I want to migrate from JWT app to S2S OAuth\n1. [S2S OAuth Redis](examples/s2s-oauth-redis.md) - Modern replacement\n2. [Token Lifecycle](concepts/token-lifecycle.md) - Different token behavior\n\n> **Note**: JWT App Type was deprecated in June 2023. Migrate to S2S OAuth for server-to-server automation.\n\n---\n\n## Most Critical Documents\n\n### 1. OAuth Flows (DECISION DOCUMENT)\n**[concepts/oauth-flows.md](concepts/oauth-flows.md)**\n\nUnderstand which of the 4 flows to use:\n- **S2S OAuth**: Backend automation (your account)\n- **User OAuth**: SaaS apps (users authorize you)\n- **Device Flow**: Devices without browsers\n- **Chatbot**: Team Chat bots only\n\n### 2. Token Lifecycle (MOST COMMON ISSUE)\n**[concepts/token-lifecycle.md](concepts/token-lifecycle.md)**\n\n99% of OAuth issues stem from misunderstanding:\n- Token expiration (1 hour for all flows)\n- Refresh token rotation (must save new refresh token)\n- Revocation behavior (invalidates all tokens)\n\n### 3. Redirect URI Issues (MOST COMMON ERROR)\n**[troubleshooting/redirect-uri-issues.md](troubleshooting/redirect-uri-issues.md)**\n\nError 4709 (\"Redirect URI mismatch\") is the #1 OAuth error.\nMust match EXACTLY (including trailing slash, http vs https).\n\n---\n\n## Key Learnings\n\n### Critical Discoveries:\n\n1. **Refresh Token Rotation**\n   - Each refresh returns a NEW refresh token\n   - Old refresh token becomes invalid\n   - Failure to save new token causes 4735 errors\n   - See: [Token Refresh](examples/token-refresh.md)\n\n2. **S2S OAuth Uses Redis, User OAuth Uses Database**\n   - S2S: Single token for entire account → Redis (ephemeral)\n   - User: Per-user tokens → Database (persistent)\n   - See: [S2S OAuth Redis](examples/s2s-oauth-redis.md) vs [User OAuth MySQL](examples/user-oauth-mysql.md)\n\n3. **Redirect URI Must Match EXACTLY**\n   - Trailing slash matters: `/callback` ≠ `/callback/`\n   - Protocol matters: `http://` ≠ `https://`\n   - Port matters: `:3000` ≠ `:3001`\n   - See: [Redirect URI Issues](troubleshooting/redirect-uri-issues.md)\n\n4. **PKCE Required for Public Clients**\n   - Mobile apps CANNOT keep secrets\n   - SPAs CANNOT keep secrets\n   - PKCE prevents authorization code interception\n   - See: [PKCE](concepts/pkce.md)\n\n5. **State Parameter Prevents CSRF**\n   - Generate random state before redirect\n   - Store in session\n   - Verify on callback\n   - See: [State Parameter](concepts/state-parameter.md)\n\n6. **Token Storage Must Be Encrypted**\n   - NEVER store tokens in plain text\n   - Use AES-256 minimum\n   - See: [User OAuth MySQL](examples/user-oauth-mysql.md#token-encryption)\n\n7. **JWT App Type is Deprecated (June 2023)**\n   - No new JWT apps can be created\n   - Existing apps still work but will eventually be sunset\n   - Migrate to S2S OAuth or User OAuth\n\n8. **Scope Levels Determine Authorization Requirements**\n   - No suffix (user-level): Any user can authorize\n   - `:admin`: Requires admin role\n   - `:master`: Requires account owner (multi-account)\n   - See: [Scopes Architecture](concepts/scopes-architecture.md)\n\n9. **Authorization Codes Expire in 5 Minutes**\n   - Exchange code for token immediately\n   - Don't cache authorization codes\n   - See: [Token Lifecycle](concepts/token-lifecycle.md#authorization-code-expiration)\n\n10. **Device Flow Requires Polling**\n    - Poll at interval returned by `/devicecode` (usually 5s)\n    - Handle `authorization_pending`, `slow_down`, `expired_token`\n    - See: [Device Flow](examples/device-flow.md)\n\n---\n\n## Quick Reference\n\n### \"Which OAuth flow should I use?\"\n→ [OAuth Flows](concepts/oauth-flows.md)\n\n### \"Redirect URI mismatch error (4709)\"\n→ [Redirect URI Issues](troubleshooting/redirect-uri-issues.md)\n\n### \"Token expired or invalid\"\n→ [Token Issues](troubleshooting/token-issues.md)\n\n### \"Refresh token invalid (4735)\"\n→ [Token Refresh](examples/token-refresh.md) - Must save new refresh token\n\n### \"Scope mismatch error (4711)\"\n→ [Scope Issues](troubleshooting/scope-issues.md)\n\n### \"How do I secure my OAuth app?\"\n→ [PKCE](concepts/pkce.md) + [State Parameter](concepts/state-parameter.md)\n\n### \"How do I implement auto-refresh?\"\n→ [Token Refresh](examples/token-refresh.md)\n\n### \"What's the difference between Classic and Granular scopes?\"\n→ [Scopes Architecture](concepts/scopes-architecture.md)\n\n### \"What error code means what?\"\n→ [Common Errors](troubleshooting/common-errors.md)\n\n---\n\n## Document Version\n\nBased on **Zoom OAuth API v2** (2024+)\n\n**Deprecated:** JWT App Type (June 2023)\n\n---\n\n**Happy coding!**\n\nRemember: Start with [OAuth Flows](concepts/oauth-flows.md) to understand which flow fits your use case!\n\n## Environment Variables\n\n- See [references/environment-variables.md](references/environment-variables.md) for standardized `.env` keys and where to find each value.\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("kw-zoom-plugin-oauth-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

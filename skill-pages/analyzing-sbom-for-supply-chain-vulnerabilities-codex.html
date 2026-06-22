@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>analyzing-sbom-for-supply-chain-vulnerabilities - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/analyzing-sbom-for-supply-chain-vulnerabilities-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>analyzing-sbom-for-supply-chain-vulnerabilities</h1>
+      <p class="description">'Parses Software Bill of Materials (SBOM) in CycloneDX and SPDX JSON</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>analyzing-sbom-for-supply-chain-vulnerabilities</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>analyzing-sbom-for-supply-chain-vulnerabilities</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Parses Software Bill of Materials (SBOM) in CycloneDX and SPDX JSON</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose analyzing-sbom-for-supply-chain-vulnerabilities, then write the task. Fallback prompt: Use the analyzing-sbom-for-supply-chain-vulnerabilities skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Analyzing SBOM for Supply Chain Vulnerabilities</h2>
+<h3>When to Use</h3>
+<ul>
+<li>A new regulatory requirement (EO 14028, EU CRA) mandates SBOM analysis for software deliveries</li>
+<li>Security team needs to assess third-party risk by scanning vendor-provided SBOMs</li>
+<li>CI/CD pipeline requires automated vulnerability checks against generated SBOMs</li>
+<li>Incident response needs to determine if a newly disclosed CVE affects deployed software</li>
+<li>Procurement team requires supply chain risk assessment for a software acquisition</li>
+</ul>
+<p><strong>Do not use</strong> for runtime vulnerability scanning of live systems; use container scanning tools (Trivy, Grype CLI) or host-based vulnerability scanners (Nessus, Qualys) instead.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>SBOM file in CycloneDX JSON (v1.4+) or SPDX JSON (v2.3+) format</li>
+<li>Python 3.9+ with requests, networkx, and packaging libraries installed</li>
+<li>NVD API key (free, from https://nvd.nist.gov/developers/request-an-api-key) for higher rate limits</li>
+<li>Network access to NVD API (https://services.nvd.nist.gov/rest/json/cves/2.0)</li>
+<li>Optionally: syft for SBOM generation, grype for cross-validation</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Generate SBOM (if not provided)</h4>
+<p>Use syft to create an SBOM from a container image or project directory:</p>
+<pre><code># Generate CycloneDX JSON from a container image
+syft alpine:latest -o cyclonedx-json &gt; sbom-cyclonedx.json
+
+# Generate SPDX JSON from a project directory
+syft dir:/path/to/project -o spdx-json &gt; sbom-spdx.json
+
+# Generate from a running container
+syft docker:my-app-container -o cyclonedx-json &gt; sbom.json</code></pre>
+<p>Syft supports over 30 package ecosystems including npm, PyPI, Maven, Go modules, apt, apk, and RPM. The generated SBOM includes package names, versions, licenses, CPE identifiers, and PURL (Package URL) references.</p>
+<h4>Step 2: Parse SBOM and Extract Components</h4>
+<p>Parse the SBOM to extract all software components with their identifiers:</p>
+<p><strong>CycloneDX JSON Structure:</strong></p>
+<pre><code>{
+  &quot;bomFormat&quot;: &quot;CycloneDX&quot;,
+  &quot;specVersion&quot;: &quot;1.5&quot;,
+  &quot;components&quot;: [
+    {
+      &quot;type&quot;: &quot;library&quot;,
+      &quot;name&quot;: &quot;lodash&quot;,
+      &quot;version&quot;: &quot;4.17.20&quot;,
+      &quot;purl&quot;: &quot;pkg:npm/lodash@4.17.20&quot;,
+      &quot;cpe&quot;: &quot;cpe:2.3:a:lodash:lodash:4.17.20:*:*:*:*:*:*:*&quot;,
+      &quot;licenses&quot;: [{&quot;license&quot;: {&quot;id&quot;: &quot;MIT&quot;}}]
+    }
+  ],
+  &quot;dependencies&quot;: [
+    {&quot;ref&quot;: &quot;pkg:npm/express@4.18.2&quot;, &quot;dependsOn&quot;: [&quot;pkg:npm/lodash@4.17.20&quot;]}
+  ]
+}</code></pre>
+<p><strong>SPDX JSON Structure:</strong></p>
+<pre><code>{
+  &quot;spdxVersion&quot;: &quot;SPDX-2.3&quot;,
+  &quot;packages&quot;: [
+    {
+      &quot;name&quot;: &quot;lodash&quot;,
+      &quot;versionInfo&quot;: &quot;4.17.20&quot;,
+      &quot;externalRefs&quot;: [
+        {&quot;referenceType&quot;: &quot;purl&quot;, &quot;referenceLocator&quot;: &quot;pkg:npm/lodash@4.17.20&quot;},
+        {&quot;referenceType&quot;: &quot;cpe23Type&quot;, &quot;referenceLocator&quot;: &quot;cpe:2.3:a:lodash:lodash:4.17.20:*:*:*:*:*:*:*&quot;}
+      ],
+      &quot;licenseConcluded&quot;: &quot;MIT&quot;
+    }
+  ],
+  &quot;relationships&quot;: [
+    {&quot;spdxElementId&quot;: &quot;SPDXRef-express&quot;, &quot;relatedSpdxElement&quot;: &quot;SPDXRef-lodash&quot;,
+     &quot;relationshipType&quot;: &quot;DEPENDS_ON&quot;}
+  ]
+}</code></pre>
+<h4>Step 3: Correlate Components with NVD CVE Database</h4>
+<p>Query the NVD 2.0 API to find known vulnerabilities for each component:</p>
+<pre><code>import requests
+
+NVD_API = &quot;https://services.nvd.nist.gov/rest/json/cves/2.0&quot;
+
+def search_cves_by_cpe(cpe_name, api_key=None):
+    params = {&quot;cpeName&quot;: cpe_name, &quot;resultsPerPage&quot;: 50}
+    headers = {&quot;apiKey&quot;: api_key} if api_key else {}
+    resp = requests.get(NVD_API, params=params, headers=headers, timeout=30)
+    resp.raise_for_status()
+    return resp.json().get(&quot;vulnerabilities&quot;, [])
+
+def search_cves_by_keyword(keyword, version=None, api_key=None):
+    params = {&quot;keywordSearch&quot;: keyword, &quot;resultsPerPage&quot;: 50}
+    headers = {&quot;apiKey&quot;: api_key} if api_key else {}
+    resp = requests.get(NVD_API, params=params, headers=headers, timeout=30)
+    resp.raise_for_status()
+    return resp.json().get(&quot;vulnerabilities&quot;, [])</code></pre>
+<p>The NVD API supports searching by CPE name (most precise), keyword, CVE ID, and date ranges. Rate limits: 5 requests/30 seconds without API key, 50 requests/30 seconds with key.</p>
+<h4>Step 4: Build Dependency Graph and Identify Transitive Risks</h4>
+<p>Construct a directed graph of dependencies to trace vulnerability propagation:</p>
+<pre><code>import networkx as nx
+
+def build_dependency_graph(sbom):
+    G = nx.DiGraph()
+    # Add nodes for each component
+    for comp in sbom[&quot;components&quot;]:
+        G.add_node(comp[&quot;purl&quot;], name=comp[&quot;name&quot;], version=comp[&quot;version&quot;])
+    # Add edges from dependency relationships
+    for dep in sbom.get(&quot;dependencies&quot;, []):
+        for child in dep.get(&quot;dependsOn&quot;, []):
+            G.add_edge(dep[&quot;ref&quot;], child)
+    return G</code></pre>
+<p>Transitive dependency analysis identifies components that are not directly included but are pulled in through dependency chains. A vulnerability in a deeply nested transitive dependency (e.g., 4 levels deep) still represents risk but may be harder to remediate.</p>
+<p>Key graph metrics for risk assessment:</p>
+<ul>
+<li><strong>In-degree</strong>: How many components depend on this one (high in-degree = high blast radius)</li>
+<li><strong>Shortest path to root</strong>: Distance from application entry point (closer = more exploitable)</li>
+<li><strong>Betweenness centrality</strong>: Components that sit on many dependency paths (bottleneck risk)</li>
+</ul>
+<h4>Step 5: Calculate Risk Scores</h4>
+<p>Aggregate vulnerability data into component and overall risk scores:</p>
+<pre><code>Risk Score Calculation:
+━━━━━━━━━━━━━━━━━━━━━━
+Component Risk = max(CVSS scores of all CVEs affecting the component)
+
+Weighted Risk = Component Risk * Dependency Factor
+  where Dependency Factor = 1.0 + (0.1 * in_degree)
+  (more dependents = higher organizational impact)
+
+Overall SBOM Risk = weighted average of all component risks
+  weighted by dependency centrality
+
+Risk Levels:
+  CRITICAL: CVSS &gt;= 9.0 or known exploited (CISA KEV)
+  HIGH:     CVSS &gt;= 7.0
+  MEDIUM:   CVSS &gt;= 4.0
+  LOW:      CVSS &lt; 4.0</code></pre>
+<h4>Step 6: Cross-Validate with Grype</h4>
+<p>Use grype to independently scan the SBOM and compare findings:</p>
+<pre><code># Scan CycloneDX SBOM with grype
+grype sbom:sbom-cyclonedx.json -o json &gt; grype-results.json
+
+# Scan SPDX SBOM
+grype sbom:sbom-spdx.json -o table
+
+# Filter by severity
+grype sbom:sbom-cyclonedx.json --only-fixed --fail-on critical</code></pre>
+<p>Grype pulls vulnerability data from NVD, GitHub Security Advisories, Alpine SecDB, Red Hat, Debian, Ubuntu, Amazon Linux, and Oracle security databases, providing broader coverage than NVD alone.</p>
+<h4>Step 7: Generate Compliance Report</h4>
+<p>Produce a structured report suitable for regulatory compliance:</p>
+<pre><code>SBOM VULNERABILITY ANALYSIS REPORT
+====================================
+SBOM File:         app-sbom-cyclonedx.json
+Format:            CycloneDX v1.5
+Analysis Date:     2026-03-19
+Total Components:  247
+Total Dependencies: 1,842 (direct: 34, transitive: 213)
+
+VULNERABILITY SUMMARY
+  Critical:  3 components / 5 CVEs
+  High:      11 components / 18 CVEs
+  Medium:    27 components / 41 CVEs
+  Low:       8 components / 12 CVEs
+
+CRITICAL FINDINGS
+1. lodash@4.17.20
+   CVE-2021-23337 (CVSS 7.2) - Command Injection via template
+   CVE-2020-28500 (CVSS 5.3) - ReDoS in trimEnd
+   Dependents: 14 components (high blast radius)
+   Fix: Upgrade to 4.17.21+
+
+2. log4j-core@2.14.1
+   CVE-2021-44228 (CVSS 10.0) - Log4Shell RCE [CISA KEV]
+   CVE-2021-45046 (CVSS 9.0) - Incomplete fix bypass
+   Dependents: 8 components
+   Fix: Upgrade to 2.17.1+
+
+DEPENDENCY GRAPH RISKS
+  Most depended-on: core-util@1.2.3 (47 dependents)
+  Deepest chain: app -&gt; framework -&gt; adapter -&gt; codec -&gt; zlib (5 levels)
+  Bottleneck components: 3 components on &gt;50% of dependency paths
+
+LICENSE COMPLIANCE
+  Copyleft licenses found: 2 (GPL-3.0 in libxml2, AGPL-3.0 in mongodb-driver)
+  Review required for commercial distribution</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | <strong>SBOM</strong> | Software Bill of Materials; a formal inventory of all components, libraries, and dependencies in a software product | | <strong>CycloneDX</strong> | OWASP-maintained SBOM standard supporting JSON, XML, and protobuf formats with dependency graph and vulnerability data | | <strong>SPDX</strong> | Linux Foundation SBOM standard focused on license compliance with support for package, file, and snippet-level detail | | <strong>PURL</strong> | Package URL; a standardized scheme for identifying software packages across ecosystems (e.g., pkg:npm/lodash@4.17.21) | | <strong>CPE</strong> | Common Platform Enumeration; NIST naming scheme for IT products used to correlate with NVD CVE data | | <strong>NVD</strong> | National Vulnerability Database; US government repository of vulnerability data indexed by CVE identifiers | | <strong>Transitive Dependency</strong> | A dependency not directly declared but pulled in through the dependency chain of direct dependencies | | <strong>CISA KEV</strong> | CISA Known Exploited Vulnerabilities catalog; CVEs confirmed to be actively exploited in the wild |</p>
+<h3>Tools &amp; Systems</h3>
+<ul>
+<li><strong>syft</strong> (Anchore): Open-source SBOM generator supporting 30+ package ecosystems and CycloneDX/SPDX output</li>
+<li><strong>grype</strong> (Anchore): Vulnerability scanner that accepts SBOMs as input and correlates against multiple advisory databases</li>
+<li><strong>cyclonedx-python-lib</strong>: Python library for creating, parsing, and validating CycloneDX SBOMs programmatically</li>
+<li><strong>lib4sbom</strong>: Python library for parsing both SPDX and CycloneDX format SBOMs</li>
+<li><strong>nvdlib</strong>: Python wrapper for the NVD 2.0 API supporting CVE and CPE queries with rate limit management</li>
+<li><strong>OWASP Dependency-Track</strong>: Platform for continuous SBOM analysis, vulnerability tracking, and policy enforcement</li>
+</ul>
+<h3>Common Scenarios</h3>
+<h4>Scenario: Assessing Vendor Software After Log4Shell Disclosure</h4>
+<p><strong>Context</strong>: After the Log4Shell (CVE-2021-44228) disclosure, the security team needs to determine which vendor-supplied applications contain vulnerable versions of log4j. Several vendors have provided SBOMs per contractual requirements.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Collect all vendor SBOMs (CycloneDX or SPDX JSON format)</li>
+<li>Parse each SBOM and search for log4j-core components with versions &lt; 2.17.1</li>
+<li>Query NVD API for the specific CVEs (CVE-2021-44228, CVE-2021-45046, CVE-2021-45105)</li>
+<li>Build dependency graphs to identify which application components depend on log4j</li>
+<li>Calculate blast radius: how many services and endpoints are exposed</li>
+<li>Generate prioritized remediation report sorted by exposure and business criticality</li>
+<li>Cross-validate findings with grype scan of the same SBOMs</li>
+</ol>
+<p><strong>Pitfalls</strong>:</p>
+<ul>
+<li>Vendor SBOMs may be incomplete, missing shaded/bundled JAR files that embed log4j</li>
+<li>SPDX and CycloneDX version differences may affect parser compatibility</li>
+<li>NVD API rate limits can slow analysis when scanning hundreds of components without an API key</li>
+<li>CPE names in SBOMs may not exactly match NVD entries, requiring fuzzy matching</li>
+<li>Transitive dependencies may include log4j even when it is not a direct dependency</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: analyzing-sbom-for-supply-chain-vulnerabilities\ndisplay_name: analyzing-sbom-for-supply-chain-vulnerabilities\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# analyzing-sbom-for-supply-chain-vulnerabilities - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `analyzing-sbom-for-supply-chain-vulnerabilities` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- A new regulatory requirement (EO 14028, EU CRA) mandates SBOM analysis for software deliveries\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose analyzing-sbom-for-supply-chain-vulnerabilities, then write the task. Fallback prompt: Use the analyzing-sbom-for-supply-chain-vulnerabilities skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `analyzing-sbom-for-supply-chain-vulnerabilities` |\n| Canonical name | `analyzing-sbom-for-supply-chain-vulnerabilities` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n- A new regulatory requirement (EO 14028, EU CRA) mandates SBOM analysis for software deliveries\n\n## Original SKILL.md\n\n---\nname: analyzing-sbom-for-supply-chain-vulnerabilities\ndescription: 'Parses Software Bill of Materials (SBOM) in CycloneDX and SPDX JSON\n  formats to identify supply chain vulnerabilities by correlating components against\n  the NVD CVE database via the NVD 2.0 API. Builds dependency graphs, calculates risk\n  scores, identifies transitive vulnerability paths, and generates compliance reports.\n  Activates for requests involving SBOM analysis, software composition analysis, supply\n  chain security assessment, dependency vulnerability scanning, CycloneDX/SPDX parsing,\n  or CVE correlation.\n\n  '\ndomain: cybersecurity\nsubdomain: supply-chain-security\ntags:\n- SBOM\n- CycloneDX\n- SPDX\n- NVD\n- CVE\n- supply-chain\n- dependency-analysis\n- syft\n- grype\nversion: 1.0.0\nauthor: mukul975\nlicense: Apache-2.0\natlas_techniques:\n- AML.T0010\n- AML.T0104\nnist_ai_rmf:\n- GOVERN-5.2\n- MAP-1.6\n- MANAGE-2.2\n- GOVERN-1.1\n- GOVERN-4.2\nnist_csf:\n- GV.SC-01\n- GV.SC-03\n- GV.SC-06\n- GV.SC-07\nmitre_attack:\n- T1195.001\n- T1195.002\n- T1554\n- T1190\n---\n\n# Analyzing SBOM for Supply Chain Vulnerabilities\n\n## When to Use\n\n- A new regulatory requirement (EO 14028, EU CRA) mandates SBOM analysis for software deliveries\n- Security team needs to assess third-party risk by scanning vendor-provided SBOMs\n- CI/CD pipeline requires automated vulnerability checks against generated SBOMs\n- Incident response needs to determine if a newly disclosed CVE affects deployed software\n- Procurement team requires supply chain risk assessment for a software acquisition\n\n**Do not use** for runtime vulnerability scanning of live systems; use container scanning tools (Trivy, Grype CLI) or host-based vulnerability scanners (Nessus, Qualys) instead.\n\n## Prerequisites\n\n- SBOM file in CycloneDX JSON (v1.4+) or SPDX JSON (v2.3+) format\n- Python 3.9+ with requests, networkx, and packaging libraries installed\n- NVD API key (free, from https://nvd.nist.gov/developers/request-an-api-key) for higher rate limits\n- Network access to NVD API (https://services.nvd.nist.gov/rest/json/cves/2.0)\n- Optionally: syft for SBOM generation, grype for cross-validation\n\n## Workflow\n\n### Step 1: Generate SBOM (if not provided)\n\nUse syft to create an SBOM from a container image or project directory:\n\n```bash\n# Generate CycloneDX JSON from a container image\nsyft alpine:latest -o cyclonedx-json > sbom-cyclonedx.json\n\n# Generate SPDX JSON from a project directory\nsyft dir:/path/to/project -o spdx-json > sbom-spdx.json\n\n# Generate from a running container\nsyft docker:my-app-container -o cyclonedx-json > sbom.json\n```\n\nSyft supports over 30 package ecosystems including npm, PyPI, Maven, Go modules, apt, apk, and RPM. The generated SBOM includes package names, versions, licenses, CPE identifiers, and PURL (Package URL) references.\n\n### Step 2: Parse SBOM and Extract Components\n\nParse the SBOM to extract all software components with their identifiers:\n\n**CycloneDX JSON Structure:**\n```json\n{\n  \"bomFormat\": \"CycloneDX\",\n  \"specVersion\": \"1.5\",\n  \"components\": [\n    {\n      \"type\": \"library\",\n      \"name\": \"lodash\",\n      \"version\": \"4.17.20\",\n      \"purl\": \"pkg:npm/lodash@4.17.20\",\n      \"cpe\": \"cpe:2.3:a:lodash:lodash:4.17.20:*:*:*:*:*:*:*\",\n      \"licenses\": [{\"license\": {\"id\": \"MIT\"}}]\n    }\n  ],\n  \"dependencies\": [\n    {\"ref\": \"pkg:npm/express@4.18.2\", \"dependsOn\": [\"pkg:npm/lodash@4.17.20\"]}\n  ]\n}\n```\n\n**SPDX JSON Structure:**\n```json\n{\n  \"spdxVersion\": \"SPDX-2.3\",\n  \"packages\": [\n    {\n      \"name\": \"lodash\",\n      \"versionInfo\": \"4.17.20\",\n      \"externalRefs\": [\n        {\"referenceType\": \"purl\", \"referenceLocator\": \"pkg:npm/lodash@4.17.20\"},\n        {\"referenceType\": \"cpe23Type\", \"referenceLocator\": \"cpe:2.3:a:lodash:lodash:4.17.20:*:*:*:*:*:*:*\"}\n      ],\n      \"licenseConcluded\": \"MIT\"\n    }\n  ],\n  \"relationships\": [\n    {\"spdxElementId\": \"SPDXRef-express\", \"relatedSpdxElement\": \"SPDXRef-lodash\",\n     \"relationshipType\": \"DEPENDS_ON\"}\n  ]\n}\n```\n\n### Step 3: Correlate Components with NVD CVE Database\n\nQuery the NVD 2.0 API to find known vulnerabilities for each component:\n\n```python\nimport requests\n\nNVD_API = \"https://services.nvd.nist.gov/rest/json/cves/2.0\"\n\ndef search_cves_by_cpe(cpe_name, api_key=None):\n    params = {\"cpeName\": cpe_name, \"resultsPerPage\": 50}\n    headers = {\"apiKey\": api_key} if api_key else {}\n    resp = requests.get(NVD_API, params=params, headers=headers, timeout=30)\n    resp.raise_for_status()\n    return resp.json().get(\"vulnerabilities\", [])\n\ndef search_cves_by_keyword(keyword, version=None, api_key=None):\n    params = {\"keywordSearch\": keyword, \"resultsPerPage\": 50}\n    headers = {\"apiKey\": api_key} if api_key else {}\n    resp = requests.get(NVD_API, params=params, headers=headers, timeout=30)\n    resp.raise_for_status()\n    return resp.json().get(\"vulnerabilities\", [])\n```\n\nThe NVD API supports searching by CPE name (most precise), keyword, CVE ID, and date ranges. Rate limits: 5 requests/30 seconds without API key, 50 requests/30 seconds with key.\n\n### Step 4: Build Dependency Graph and Identify Transitive Risks\n\nConstruct a directed graph of dependencies to trace vulnerability propagation:\n\n```python\nimport networkx as nx\n\ndef build_dependency_graph(sbom):\n    G = nx.DiGraph()\n    # Add nodes for each component\n    for comp in sbom[\"components\"]:\n        G.add_node(comp[\"purl\"], name=comp[\"name\"], version=comp[\"version\"])\n    # Add edges from dependency relationships\n    for dep in sbom.get(\"dependencies\", []):\n        for child in dep.get(\"dependsOn\", []):\n            G.add_edge(dep[\"ref\"], child)\n    return G\n```\n\nTransitive dependency analysis identifies components that are not directly included but are pulled in through dependency chains. A vulnerability in a deeply nested transitive dependency (e.g., 4 levels deep) still represents risk but may be harder to remediate.\n\nKey graph metrics for risk assessment:\n- **In-degree**: How many components depend on this one (high in-degree = high blast radius)\n- **Shortest path to root**: Distance from application entry point (closer = more exploitable)\n- **Betweenness centrality**: Components that sit on many dependency paths (bottleneck risk)\n\n### Step 5: Calculate Risk Scores\n\nAggregate vulnerability data into component and overall risk scores:\n\n```\nRisk Score Calculation:\n━━━━━━━━━━━━━━━━━━━━━━\nComponent Risk = max(CVSS scores of all CVEs affecting the component)\n\nWeighted Risk = Component Risk * Dependency Factor\n  where Dependency Factor = 1.0 + (0.1 * in_degree)\n  (more dependents = higher organizational impact)\n\nOverall SBOM Risk = weighted average of all component risks\n  weighted by dependency centrality\n\nRisk Levels:\n  CRITICAL: CVSS >= 9.0 or known exploited (CISA KEV)\n  HIGH:     CVSS >= 7.0\n  MEDIUM:   CVSS >= 4.0\n  LOW:      CVSS \u003c 4.0\n```\n\n### Step 6: Cross-Validate with Grype\n\nUse grype to independently scan the SBOM and compare findings:\n\n```bash\n# Scan CycloneDX SBOM with grype\ngrype sbom:sbom-cyclonedx.json -o json > grype-results.json\n\n# Scan SPDX SBOM\ngrype sbom:sbom-spdx.json -o table\n\n# Filter by severity\ngrype sbom:sbom-cyclonedx.json --only-fixed --fail-on critical\n```\n\nGrype pulls vulnerability data from NVD, GitHub Security Advisories, Alpine SecDB, Red Hat, Debian, Ubuntu, Amazon Linux, and Oracle security databases, providing broader coverage than NVD alone.\n\n### Step 7: Generate Compliance Report\n\nProduce a structured report suitable for regulatory compliance:\n\n```\nSBOM VULNERABILITY ANALYSIS REPORT\n====================================\nSBOM File:         app-sbom-cyclonedx.json\nFormat:            CycloneDX v1.5\nAnalysis Date:     2026-03-19\nTotal Components:  247\nTotal Dependencies: 1,842 (direct: 34, transitive: 213)\n\nVULNERABILITY SUMMARY\n  Critical:  3 components / 5 CVEs\n  High:      11 components / 18 CVEs\n  Medium:    27 components / 41 CVEs\n  Low:       8 components / 12 CVEs\n\nCRITICAL FINDINGS\n1. lodash@4.17.20\n   CVE-2021-23337 (CVSS 7.2) - Command Injection via template\n   CVE-2020-28500 (CVSS 5.3) - ReDoS in trimEnd\n   Dependents: 14 components (high blast radius)\n   Fix: Upgrade to 4.17.21+\n\n2. log4j-core@2.14.1\n   CVE-2021-44228 (CVSS 10.0) - Log4Shell RCE [CISA KEV]\n   CVE-2021-45046 (CVSS 9.0) - Incomplete fix bypass\n   Dependents: 8 components\n   Fix: Upgrade to 2.17.1+\n\nDEPENDENCY GRAPH RISKS\n  Most depended-on: core-util@1.2.3 (47 dependents)\n  Deepest chain: app -> framework -> adapter -> codec -> zlib (5 levels)\n  Bottleneck components: 3 components on >50% of dependency paths\n\nLICENSE COMPLIANCE\n  Copyleft licenses found: 2 (GPL-3.0 in libxml2, AGPL-3.0 in mongodb-driver)\n  Review required for commercial distribution\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| **SBOM** | Software Bill of Materials; a formal inventory of all components, libraries, and dependencies in a software product |\n| **CycloneDX** | OWASP-maintained SBOM standard supporting JSON, XML, and protobuf formats with dependency graph and vulnerability data |\n| **SPDX** | Linux Foundation SBOM standard focused on license compliance with support for package, file, and snippet-level detail |\n| **PURL** | Package URL; a standardized scheme for identifying software packages across ecosystems (e.g., pkg:npm/lodash@4.17.21) |\n| **CPE** | Common Platform Enumeration; NIST naming scheme for IT products used to correlate with NVD CVE data |\n| **NVD** | National Vulnerability Database; US government repository of vulnerability data indexed by CVE identifiers |\n| **Transitive Dependency** | A dependency not directly declared but pulled in through the dependency chain of direct dependencies |\n| **CISA KEV** | CISA Known Exploited Vulnerabilities catalog; CVEs confirmed to be actively exploited in the wild |\n\n## Tools & Systems\n\n- **syft** (Anchore): Open-source SBOM generator supporting 30+ package ecosystems and CycloneDX/SPDX output\n- **grype** (Anchore): Vulnerability scanner that accepts SBOMs as input and correlates against multiple advisory databases\n- **cyclonedx-python-lib**: Python library for creating, parsing, and validating CycloneDX SBOMs programmatically\n- **lib4sbom**: Python library for parsing both SPDX and CycloneDX format SBOMs\n- **nvdlib**: Python wrapper for the NVD 2.0 API supporting CVE and CPE queries with rate limit management\n- **OWASP Dependency-Track**: Platform for continuous SBOM analysis, vulnerability tracking, and policy enforcement\n\n## Common Scenarios\n\n### Scenario: Assessing Vendor Software After Log4Shell Disclosure\n\n**Context**: After the Log4Shell (CVE-2021-44228) disclosure, the security team needs to determine which vendor-supplied applications contain vulnerable versions of log4j. Several vendors have provided SBOMs per contractual requirements.\n\n**Approach**:\n1. Collect all vendor SBOMs (CycloneDX or SPDX JSON format)\n2. Parse each SBOM and search for log4j-core components with versions \u003c 2.17.1\n3. Query NVD API for the specific CVEs (CVE-2021-44228, CVE-2021-45046, CVE-2021-45105)\n4. Build dependency graphs to identify which application components depend on log4j\n5. Calculate blast radius: how many services and endpoints are exposed\n6. Generate prioritized remediation report sorted by exposure and business criticality\n7. Cross-validate findings with grype scan of the same SBOMs\n\n**Pitfalls**:\n- Vendor SBOMs may be incomplete, missing shaded/bundled JAR files that embed log4j\n- SPDX and CycloneDX version differences may affect parser compatibility\n- NVD API rate limits can slow analysis when scanning hundreds of components without an API key\n- CPE names in SBOMs may not exactly match NVD entries, requiring fuzzy matching\n- Transitive dependencies may include log4j even when it is not a direct dependency\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("analyzing-sbom-for-supply-chain-vulnerabilities-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

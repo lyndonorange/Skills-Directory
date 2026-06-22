@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>detecting-modbus-command-injection-attacks - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/detecting-modbus-command-injection-attacks-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>detecting-modbus-command-injection-attacks</h1>
+      <p class="description">'Detect command injection attacks against Modbus TCP/RTU protocol in</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>detecting-modbus-command-injection-attacks</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>detecting-modbus-command-injection-attacks</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Detect command injection attacks against Modbus TCP/RTU protocol in</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose detecting-modbus-command-injection-attacks, then write the task. Fallback prompt: Use the detecting-modbus-command-injection-attacks skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Detecting Modbus Command Injection Attacks</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When deploying intrusion detection for environments using Modbus TCP (port 502) or Modbus RTU</li>
+<li>When investigating suspected unauthorized modifications to PLC registers or coils</li>
+<li>When building detection analytics for OT SOC monitoring Modbus-heavy environments</li>
+<li>When responding to FrostyGoop-style attacks that leverage Modbus TCP for operational impact</li>
+<li>When performing baseline validation after a suspected compromise of a Modbus master</li>
+</ul>
+<p><strong>Do not use</strong> for detecting attacks on non-Modbus protocols (see detecting-dnp3-protocol-anomalies for DNP3), for general IT network intrusion detection, or for Modbus device configuration (see performing-ot-vulnerability-scanning-safely).</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>Network SPAN/TAP on the segment carrying Modbus TCP traffic (typically port 502)</li>
+<li>Baseline of normal Modbus communication patterns (masters, slaves, function codes, register ranges, polling intervals)</li>
+<li>Suricata, Zeek, or commercial OT IDS deployed with Modbus protocol parsers enabled</li>
+<li>Understanding of Modbus function codes used in the environment (read vs write operations)</li>
+<li>Access to PLC programming documentation to validate expected register ranges</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Build Modbus Communication Baseline</h4>
+<p>Capture and analyze normal Modbus traffic to establish what constitutes legitimate communication patterns.</p>
+<pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Modbus Command Injection Detector.
+
+Monitors Modbus TCP traffic for unauthorized write operations, anomalous
+function codes, and deviations from established communication baselines.
+Detects attacks like FrostyGoop that use Modbus TCP for operational impact.
+&quot;&quot;&quot;
+
+import json
+import struct
+import sys
+import time
+from collections import defaultdict
+from datetime import datetime
+from typing import Dict, List, Optional, Set, Tuple
+
+try:
+    from scapy.all import sniff, IP, TCP
+except ImportError:
+    print(&quot;Install scapy: pip install scapy&quot;)
+    sys.exit(1)
+
+
+# Modbus function code definitions
+MODBUS_READ_FUNCTIONS = {1, 2, 3, 4}
+MODBUS_WRITE_FUNCTIONS = {5, 6, 15, 16}
+MODBUS_DIAGNOSTIC_FUNCTIONS = {8, 17, 43}
+
+MODBUS_FUNC_NAMES = {
+    1: &quot;Read Coils&quot;, 2: &quot;Read Discrete Inputs&quot;,
+    3: &quot;Read Holding Registers&quot;, 4: &quot;Read Input Registers&quot;,
+    5: &quot;Write Single Coil&quot;, 6: &quot;Write Single Register&quot;,
+    8: &quot;Diagnostics&quot;, 15: &quot;Write Multiple Coils&quot;,
+    16: &quot;Write Multiple Registers&quot;, 17: &quot;Report Slave ID&quot;,
+    22: &quot;Mask Write Register&quot;, 23: &quot;Read/Write Multiple Registers&quot;,
+    43: &quot;Encapsulated Interface Transport&quot;,
+}
+
+
+class ModbusAlert:
+    &quot;&quot;&quot;Represents a detected Modbus anomaly.&quot;&quot;&quot;
+
+    def __init__(self, severity: str, alert_type: str, src_ip: str,
+                 dst_ip: str, unit_id: int, func_code: int,
+                 description: str, mitre_technique: str = &quot;&quot;):
+        self.timestamp = datetime.now().isoformat()
+        self.severity = severity
+        self.alert_type = alert_type
+        self.src_ip = src_ip
+        self.dst_ip = dst_ip
+        self.unit_id = unit_id
+        self.func_code = func_code
+        self.func_name = MODBUS_FUNC_NAMES.get(func_code, f&quot;Unknown FC {func_code}&quot;)
+        self.description = description
+        self.mitre_technique = mitre_technique
+
+    def __str__(self):
+        return (
+            f&quot;[{self.severity}] {self.alert_type} | {self.src_ip} -&gt; {self.dst_ip} &quot;
+            f&quot;| Unit {self.unit_id} | {self.func_name} | {self.description}&quot;
+        )
+
+
+class ModbusInjectionDetector:
+    &quot;&quot;&quot;Detects Modbus command injection attacks.&quot;&quot;&quot;
+
+    def __init__(self, baseline_file: Optional[str] = None):
+        self.alerts: List[ModbusAlert] = []
+        self.packet_count = 0
+        self.modbus_count = 0
+
+        # Baseline data
+        self.authorized_masters: Set[str] = set()
+        self.authorized_pairs: Set[Tuple[str, str]] = set()
+        self.allowed_write_sources: Set[str] = set()
+        self.allowed_function_codes: Dict[str, Set[int]] = defaultdict(set)
+        self.allowed_register_ranges: Dict[str, List[Tuple[int, int]]] = defaultdict(list)
+        self.polling_intervals: Dict[str, float] = {}
+        self.last_seen: Dict[str, float] = {}
+
+        # Counters for rate detection
+        self.write_counts: Dict[str, List[float]] = defaultdict(list)
+
+        if baseline_file:
+            self.load_baseline(baseline_file)
+
+    def load_baseline(self, filepath: str):
+        &quot;&quot;&quot;Load established Modbus communication baseline.&quot;&quot;&quot;
+        with open(filepath, &quot;r&quot;) as f:
+            baseline = json.load(f)
+
+        for session_key, data in baseline.get(&quot;modbus_baselines&quot;, {}).items():
+            src, dst = session_key.split(&quot;-&gt;&quot;)
+            self.authorized_pairs.add((src.strip(), dst.strip()))
+            self.authorized_masters.add(src.strip())
+
+            fc_set = set(data.get(&quot;allowed_function_codes&quot;, []))
+            self.allowed_function_codes[session_key] = fc_set
+
+            if fc_set &amp; MODBUS_WRITE_FUNCTIONS:
+                self.allowed_write_sources.add(src.strip())
+
+            for reg_range in data.get(&quot;register_ranges&quot;, []):
+                self.allowed_register_ranges[session_key].append(
+                    (reg_range[&quot;start&quot;], reg_range[&quot;end&quot;])
+                )
+
+            if data.get(&quot;polling_interval_avg_sec&quot;):
+                self.polling_intervals[session_key] = data[&quot;polling_interval_avg_sec&quot;]
+
+        print(f&quot;[*] Baseline loaded: {len(self.authorized_pairs)} authorized pairs, &quot;
+              f&quot;{len(self.allowed_write_sources)} authorized write sources&quot;)
+
+    def parse_modbus_mbap(self, payload: bytes) -&gt; Optional[dict]:
+        &quot;&quot;&quot;Parse Modbus TCP MBAP header and PDU.&quot;&quot;&quot;
+        if len(payload) &lt; 8:
+            return None
+
+        transaction_id = struct.unpack(&quot;&gt;H&quot;, payload[0:2])[0]
+        protocol_id = struct.unpack(&quot;&gt;H&quot;, payload[2:4])[0]
+        length = struct.unpack(&quot;&gt;H&quot;, payload[4:6])[0]
+        unit_id = payload[6]
+        func_code = payload[7]
+
+        if protocol_id != 0:  # Not Modbus
+            return None
+
+        result = {
+            &quot;transaction_id&quot;: transaction_id,
+            &quot;protocol_id&quot;: protocol_id,
+            &quot;length&quot;: length,
+            &quot;unit_id&quot;: unit_id,
+            &quot;func_code&quot;: func_code,
+        }
+
+        # Parse register address and count for read/write operations
+        if len(payload) &gt;= 12 and func_code in (1, 2, 3, 4, 5, 6, 15, 16):
+            result[&quot;start_address&quot;] = struct.unpack(&quot;&gt;H&quot;, payload[8:10])[0]
+            result[&quot;quantity&quot;] = struct.unpack(&quot;&gt;H&quot;, payload[10:12])[0]
+
+        return result
+
+    def analyze_packet(self, pkt):
+        &quot;&quot;&quot;Analyze a network packet for Modbus command injection.&quot;&quot;&quot;
+        self.packet_count += 1
+
+        if not pkt.haslayer(IP) or not pkt.haslayer(TCP):
+            return
+
+        tcp = pkt[TCP]
+        if tcp.dport != 502 and tcp.sport != 502:
+            return
+
+        payload = bytes(tcp.payload)
+        if not payload:
+            return
+
+        modbus = self.parse_modbus_mbap(payload)
+        if not modbus:
+            return
+
+        self.modbus_count += 1
+        src_ip = pkt[IP].src
+        dst_ip = pkt[IP].dst
+        session_key = f&quot;{src_ip}-&gt;{dst_ip}&quot;
+        now = time.time()
+
+        # Detection Rule 1: Unauthorized Modbus master
+        if self.authorized_masters and src_ip not in self.authorized_masters:
+            if tcp.dport == 502:
+                self.alerts.append(ModbusAlert(
+                    severity=&quot;CRITICAL&quot;,
+                    alert_type=&quot;UNAUTHORIZED_MASTER&quot;,
+                    src_ip=src_ip, dst_ip=dst_ip,
+                    unit_id=modbus[&quot;unit_id&quot;],
+                    func_code=modbus[&quot;func_code&quot;],
+                    description=f&quot;Unauthorized device {src_ip} sending Modbus commands to {dst_ip}&quot;,
+                    mitre_technique=&quot;T0843 - Program Download&quot;,
+                ))
+
+        # Detection Rule 2: Unauthorized write operation
+        if modbus[&quot;func_code&quot;] in MODBUS_WRITE_FUNCTIONS:
+            if self.allowed_write_sources and src_ip not in self.allowed_write_sources:
+                self.alerts.append(ModbusAlert(
+                    severity=&quot;CRITICAL&quot;,
+                    alert_type=&quot;UNAUTHORIZED_WRITE&quot;,
+                    src_ip=src_ip, dst_ip=dst_ip,
+                    unit_id=modbus[&quot;unit_id&quot;],
+                    func_code=modbus[&quot;func_code&quot;],
+                    description=f&quot;Write command from non-authorized source {src_ip}&quot;,
+                    mitre_technique=&quot;T0855 - Unauthorized Command Message&quot;,
+                ))
+
+            # Track write frequency for rate anomaly detection
+            self.write_counts[src_ip].append(now)
+            recent_writes = [t for t in self.write_counts[src_ip] if now - t &lt; 60]
+            self.write_counts[src_ip] = recent_writes
+            if len(recent_writes) &gt; 20:
+                self.alerts.append(ModbusAlert(
+                    severity=&quot;HIGH&quot;,
+                    alert_type=&quot;WRITE_FLOOD&quot;,
+                    src_ip=src_ip, dst_ip=dst_ip,
+                    unit_id=modbus[&quot;unit_id&quot;],
+                    func_code=modbus[&quot;func_code&quot;],
+                    description=f&quot;Excessive write rate: {len(recent_writes)} writes in 60s from {src_ip}&quot;,
+                    mitre_technique=&quot;T0836 - Modify Parameter&quot;,
+                ))
+
+        # Detection Rule 3: Anomalous function code
+        if session_key in self.allowed_function_codes:
+            if modbus[&quot;func_code&quot;] not in self.allowed_function_codes[session_key]:
+                self.alerts.append(ModbusAlert(
+                    severity=&quot;HIGH&quot;,
+                    alert_type=&quot;ANOMALOUS_FUNCTION_CODE&quot;,
+                    src_ip=src_ip, dst_ip=dst_ip,
+                    unit_id=modbus[&quot;unit_id&quot;],
+                    func_code=modbus[&quot;func_code&quot;],
+                    description=(
+                        f&quot;Function code {modbus['func_code']} ({MODBUS_FUNC_NAMES.get(modbus['func_code'], 'Unknown')}) &quot;
+                        f&quot;not in baseline for {session_key}&quot;
+                    ),
+                    mitre_technique=&quot;T0855 - Unauthorized Command Message&quot;,
+                ))
+
+        # Detection Rule 4: Broadcast write (unit ID 0)
+        if modbus[&quot;unit_id&quot;] == 0 and modbus[&quot;func_code&quot;] in MODBUS_WRITE_FUNCTIONS:
+            self.alerts.append(ModbusAlert(
+                severity=&quot;CRITICAL&quot;,
+                alert_type=&quot;BROADCAST_WRITE&quot;,
+                src_ip=src_ip, dst_ip=dst_ip,
+                unit_id=0,
+                func_code=modbus[&quot;func_code&quot;],
+                description=&quot;Broadcast write command (unit ID 0) affects ALL Modbus devices on segment&quot;,
+                mitre_technique=&quot;T0855 - Unauthorized Command Message&quot;,
+            ))
+
+        # Detection Rule 5: Out-of-range register access
+        if &quot;start_address&quot; in modbus and session_key in self.allowed_register_ranges:
+            addr = modbus[&quot;start_address&quot;]
+            qty = modbus.get(&quot;quantity&quot;, 1)
+            in_range = any(
+                start &lt;= addr and addr + qty &lt;= end
+                for start, end in self.allowed_register_ranges[session_key]
+            )
+            if not in_range:
+                self.alerts.append(ModbusAlert(
+                    severity=&quot;HIGH&quot;,
+                    alert_type=&quot;OUT_OF_RANGE_REGISTER&quot;,
+                    src_ip=src_ip, dst_ip=dst_ip,
+                    unit_id=modbus[&quot;unit_id&quot;],
+                    func_code=modbus[&quot;func_code&quot;],
+                    description=f&quot;Register access {addr}-{addr+qty} outside baseline ranges&quot;,
+                    mitre_technique=&quot;T0836 - Modify Parameter&quot;,
+                ))
+
+        # Detection Rule 6: Diagnostic/restart commands
+        if modbus[&quot;func_code&quot;] in MODBUS_DIAGNOSTIC_FUNCTIONS:
+            self.alerts.append(ModbusAlert(
+                severity=&quot;HIGH&quot;,
+                alert_type=&quot;DIAGNOSTIC_COMMAND&quot;,
+                src_ip=src_ip, dst_ip=dst_ip,
+                unit_id=modbus[&quot;unit_id&quot;],
+                func_code=modbus[&quot;func_code&quot;],
+                description=f&quot;Diagnostic function code {modbus['func_code']} detected - potential DoS or reconnaissance&quot;,
+                mitre_technique=&quot;T0814 - Denial of Service&quot;,
+            ))
+
+    def print_report(self):
+        &quot;&quot;&quot;Print detection report.&quot;&quot;&quot;
+        print(f&quot;\n{'='*70}&quot;)
+        print(f&quot;MODBUS COMMAND INJECTION DETECTION REPORT&quot;)
+        print(f&quot;{'='*70}&quot;)
+        print(f&quot;Analysis Time: {datetime.now().isoformat()}&quot;)
+        print(f&quot;Total Packets Analyzed: {self.packet_count}&quot;)
+        print(f&quot;Modbus Packets: {self.modbus_count}&quot;)
+        print(f&quot;Alerts Generated: {len(self.alerts)}&quot;)
+
+        if self.alerts:
+            severity_counts = defaultdict(int)
+            for alert in self.alerts:
+                severity_counts[alert.severity] += 1
+
+            print(f&quot;\nSeverity Distribution:&quot;)
+            for sev in [&quot;CRITICAL&quot;, &quot;HIGH&quot;, &quot;MEDIUM&quot;, &quot;LOW&quot;]:
+                if sev in severity_counts:
+                    print(f&quot;  {sev}: {severity_counts[sev]}&quot;)
+
+            print(f&quot;\nDetailed Alerts:&quot;)
+            for alert in self.alerts:
+                print(f&quot;\n  [{alert.severity}] {alert.alert_type}&quot;)
+                print(f&quot;    Time: {alert.timestamp}&quot;)
+                print(f&quot;    Source: {alert.src_ip} -&gt; {alert.dst_ip}&quot;)
+                print(f&quot;    Unit ID: {alert.unit_id}&quot;)
+                print(f&quot;    Function: {alert.func_name} (FC {alert.func_code})&quot;)
+                print(f&quot;    Detail: {alert.description}&quot;)
+                if alert.mitre_technique:
+                    print(f&quot;    MITRE ATT&amp;CK ICS: {alert.mitre_technique}&quot;)
+
+    def start_live_monitoring(self, interface: str, duration: int = 0):
+        &quot;&quot;&quot;Start live Modbus traffic monitoring.&quot;&quot;&quot;
+        print(f&quot;[*] Starting Modbus monitoring on {interface}...&quot;)
+        print(f&quot;[*] Press Ctrl+C to stop&quot;)
+        try:
+            sniff(
+                iface=interface,
+                filter=&quot;tcp port 502&quot;,
+                prn=self.analyze_packet,
+                timeout=duration if duration &gt; 0 else None,
+            )
+        except KeyboardInterrupt:
+            pass
+        self.print_report()
+
+
+if __name__ == &quot;__main__&quot;:
+    detector = ModbusInjectionDetector(
+        baseline_file=sys.argv[2] if len(sys.argv) &gt; 2 else None
+    )
+
+    if len(sys.argv) &gt;= 2:
+        if sys.argv[1].endswith(&quot;.pcap&quot;) or sys.argv[1].endswith(&quot;.pcapng&quot;):
+            from scapy.all import rdpcap
+            print(f&quot;[*] Analyzing capture file: {sys.argv[1]}&quot;)
+            packets = rdpcap(sys.argv[1])
+            for pkt in packets:
+                detector.analyze_packet(pkt)
+            detector.print_report()
+        else:
+            detector.start_live_monitoring(sys.argv[1])
+    else:
+        print(&quot;Usage:&quot;)
+        print(&quot;  Live:    python modbus_detector.py &lt;interface&gt; [baseline.json]&quot;)
+        print(&quot;  Offline: python modbus_detector.py &lt;capture.pcap&gt; [baseline.json]&quot;)</code></pre>
+<h4>Step 2: Deploy Suricata Rules for Modbus Attack Detection</h4>
+<pre><code># Suricata IDS Rules for Modbus Command Injection Detection
+# Reference: MITRE ATT&amp;CK for ICS, FrostyGoop analysis
+
+# Unauthorized Modbus write from non-engineering workstation
+alert modbus !$MODBUS_AUTHORIZED_WRITERS any -&gt; $OT_PLC_SUBNET 502 (
+  msg:&quot;MODBUS-INJECT Unauthorized write operation detected&quot;;
+  modbus_func:write_single_coil;
+  flow:to_server,established;
+  classtype:attempted-admin;
+  sid:4000001; rev:1; priority:1;
+)
+
+alert modbus !$MODBUS_AUTHORIZED_WRITERS any -&gt; $OT_PLC_SUBNET 502 (
+  msg:&quot;MODBUS-INJECT Unauthorized write multiple registers&quot;;
+  modbus_func:write_multiple_registers;
+  flow:to_server,established;
+  classtype:attempted-admin;
+  sid:4000002; rev:1; priority:1;
+)
+
+# Modbus broadcast write affecting all slaves
+alert modbus any any -&gt; $OT_PLC_SUBNET 502 (
+  msg:&quot;MODBUS-INJECT Broadcast write command (Unit ID 0)&quot;;
+  modbus_unit_id:0;
+  flow:to_server,established;
+  classtype:attempted-admin;
+  sid:4000003; rev:1; priority:1;
+)
+
+# Excessive Modbus write rate (potential automated attack)
+alert modbus any any -&gt; $OT_PLC_SUBNET 502 (
+  msg:&quot;MODBUS-INJECT Excessive write rate - possible automated attack&quot;;
+  modbus_func:write_multiple_registers;
+  flow:to_server,established;
+  threshold:type threshold, track by_src, count 20, seconds 60;
+  classtype:attempted-admin;
+  sid:4000004; rev:1;
+)
+
+# Modbus diagnostics/restart command
+alert modbus any any -&gt; $OT_PLC_SUBNET 502 (
+  msg:&quot;MODBUS-INJECT Diagnostics function code detected&quot;;
+  modbus_func:diagnostics;
+  flow:to_server,established;
+  classtype:attempted-dos;
+  sid:4000005; rev:1;
+)
+
+# FrostyGoop-pattern: write to specific register ranges used for heating control
+alert modbus any any -&gt; $OT_PLC_SUBNET 502 (
+  msg:&quot;MODBUS-INJECT Potential FrostyGoop - write to heating control registers&quot;;
+  modbus_func:write_multiple_registers;
+  content:&quot;|00 10|&quot;; offset:8; depth:2;
+  flow:to_server,established;
+  classtype:attempted-admin;
+  sid:4000010; rev:1; priority:1;
+)</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | Modbus TCP | Industrial protocol operating on TCP port 502, lacking authentication or encryption, making it vulnerable to command injection | | Function Code | Single byte in Modbus PDU specifying the operation (read coils, write registers, diagnostics); monitoring for unauthorized function codes is key to detection | | MBAP Header | Modbus Application Protocol header in TCP variant containing transaction ID, protocol ID, length, and unit ID | | FrostyGoop | First known malware using Modbus TCP for real-world operational impact, disrupted Ukrainian district heating in 2024 | | Unit ID | Address of the target Modbus slave device; Unit ID 0 is a broadcast affecting all slaves | | Register Range | Specific memory addresses in the PLC; legitimate operations access known ranges; out-of-range access indicates reconnaissance or manipulation |</p>
+<h3>Common Scenarios</h3>
+<h4>Scenario: FrostyGoop-Style Heating Control Attack</h4>
+<p><strong>Context</strong>: A building automation system uses Modbus TCP to control HVAC equipment. Monitoring detects unexpected write commands to heating control registers from an IP not associated with any authorized BMS controller.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Verify the source IP against the authorized Modbus master list</li>
+<li>Check if any authorized maintenance or configuration change is in progress</li>
+<li>Capture full Modbus transaction including register addresses and values being written</li>
+<li>Compare written values against safe operating ranges for the heating equipment</li>
+<li>If unauthorized, immediately block the source IP at the industrial firewall</li>
+<li>Inspect the source device for compromise indicators (malware, unauthorized remote access)</li>
+<li>Verify current setpoints on all affected controllers against known-good values</li>
+<li>Restore safe setpoints if manipulation is confirmed</li>
+</ol>
+<p><strong>Pitfalls</strong>: Modbus lacks authentication, so the source IP is the only identifier -- attackers can spoof IPs if ARP protections are not in place. Do not assume all writes are malicious; legitimate SCADA operations include writes. Always verify against the change management log before escalating.</p>
+<h3>Output Format</h3>
+<pre><code>MODBUS INJECTION DETECTION REPORT
+====================================
+Analysis Period: [start] to [end]
+Monitoring Point: [interface/SPAN description]
+
+TRAFFIC SUMMARY:
+  Total Modbus Packets: [count]
+  Read Operations: [count]
+  Write Operations: [count]
+  Unauthorized Writes Detected: [count]
+
+ALERTS:
+  [CRITICAL] Unauthorized write from [IP] to PLC [IP]
+    Function: Write Multiple Registers (FC 16)
+    Registers: [start]-[end]
+    MITRE: T0855 - Unauthorized Command Message
+
+BASELINE DEVIATIONS:
+  New Modbus masters: [list]
+  Unusual function codes: [list]
+  Out-of-range register access: [list]
+
+RECOMMENDED ACTIONS:
+  1. Verify source [IP] authorization status
+  2. Block unauthorized sources at industrial firewall
+  3. Validate PLC register values against known-good state</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: detecting-modbus-command-injection-attacks\ndisplay_name: detecting-modbus-command-injection-attacks\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# detecting-modbus-command-injection-attacks - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `detecting-modbus-command-injection-attacks` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When deploying intrusion detection for environments using Modbus TCP (port 502) or Modbus RTU\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose detecting-modbus-command-injection-attacks, then write the task. Fallback prompt: Use the detecting-modbus-command-injection-attacks skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `detecting-modbus-command-injection-attacks` |\n| Canonical name | `detecting-modbus-command-injection-attacks` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n- When deploying intrusion detection for environments using Modbus TCP (port 502) or Modbus RTU\n\n## Original SKILL.md\n\n---\nname: detecting-modbus-command-injection-attacks\ndescription: 'Detect command injection attacks against Modbus TCP/RTU protocol in\n  ICS environments by monitoring for unauthorized write operations, anomalous function\n  codes, malformed frames, and deviations from established communication baselines\n  using ICS-aware IDS and protocol deep packet inspection.\n\n  '\ndomain: cybersecurity\nsubdomain: ot-ics-security\ntags:\n- ot-security\n- ics\n- modbus\n- command-injection\n- protocol-analysis\n- ids\n- scada\n- threat-detection\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- PR.IR-01\n- DE.CM-01\n- ID.AM-05\n- GV.OC-02\nmitre_attack:\n- T1078\n- T1190\n- T1059\n- T1055\n- T0816\n---\n\n# Detecting Modbus Command Injection Attacks\n\n## When to Use\n\n- When deploying intrusion detection for environments using Modbus TCP (port 502) or Modbus RTU\n- When investigating suspected unauthorized modifications to PLC registers or coils\n- When building detection analytics for OT SOC monitoring Modbus-heavy environments\n- When responding to FrostyGoop-style attacks that leverage Modbus TCP for operational impact\n- When performing baseline validation after a suspected compromise of a Modbus master\n\n**Do not use** for detecting attacks on non-Modbus protocols (see detecting-dnp3-protocol-anomalies for DNP3), for general IT network intrusion detection, or for Modbus device configuration (see performing-ot-vulnerability-scanning-safely).\n\n## Prerequisites\n\n- Network SPAN/TAP on the segment carrying Modbus TCP traffic (typically port 502)\n- Baseline of normal Modbus communication patterns (masters, slaves, function codes, register ranges, polling intervals)\n- Suricata, Zeek, or commercial OT IDS deployed with Modbus protocol parsers enabled\n- Understanding of Modbus function codes used in the environment (read vs write operations)\n- Access to PLC programming documentation to validate expected register ranges\n\n## Workflow\n\n### Step 1: Build Modbus Communication Baseline\n\nCapture and analyze normal Modbus traffic to establish what constitutes legitimate communication patterns.\n\n```python\n#!/usr/bin/env python3\n\"\"\"Modbus Command Injection Detector.\n\nMonitors Modbus TCP traffic for unauthorized write operations, anomalous\nfunction codes, and deviations from established communication baselines.\nDetects attacks like FrostyGoop that use Modbus TCP for operational impact.\n\"\"\"\n\nimport json\nimport struct\nimport sys\nimport time\nfrom collections import defaultdict\nfrom datetime import datetime\nfrom typing import Dict, List, Optional, Set, Tuple\n\ntry:\n    from scapy.all import sniff, IP, TCP\nexcept ImportError:\n    print(\"Install scapy: pip install scapy\")\n    sys.exit(1)\n\n\n# Modbus function code definitions\nMODBUS_READ_FUNCTIONS = {1, 2, 3, 4}\nMODBUS_WRITE_FUNCTIONS = {5, 6, 15, 16}\nMODBUS_DIAGNOSTIC_FUNCTIONS = {8, 17, 43}\n\nMODBUS_FUNC_NAMES = {\n    1: \"Read Coils\", 2: \"Read Discrete Inputs\",\n    3: \"Read Holding Registers\", 4: \"Read Input Registers\",\n    5: \"Write Single Coil\", 6: \"Write Single Register\",\n    8: \"Diagnostics\", 15: \"Write Multiple Coils\",\n    16: \"Write Multiple Registers\", 17: \"Report Slave ID\",\n    22: \"Mask Write Register\", 23: \"Read/Write Multiple Registers\",\n    43: \"Encapsulated Interface Transport\",\n}\n\n\nclass ModbusAlert:\n    \"\"\"Represents a detected Modbus anomaly.\"\"\"\n\n    def __init__(self, severity: str, alert_type: str, src_ip: str,\n                 dst_ip: str, unit_id: int, func_code: int,\n                 description: str, mitre_technique: str = \"\"):\n        self.timestamp = datetime.now().isoformat()\n        self.severity = severity\n        self.alert_type = alert_type\n        self.src_ip = src_ip\n        self.dst_ip = dst_ip\n        self.unit_id = unit_id\n        self.func_code = func_code\n        self.func_name = MODBUS_FUNC_NAMES.get(func_code, f\"Unknown FC {func_code}\")\n        self.description = description\n        self.mitre_technique = mitre_technique\n\n    def __str__(self):\n        return (\n            f\"[{self.severity}] {self.alert_type} | {self.src_ip} -> {self.dst_ip} \"\n            f\"| Unit {self.unit_id} | {self.func_name} | {self.description}\"\n        )\n\n\nclass ModbusInjectionDetector:\n    \"\"\"Detects Modbus command injection attacks.\"\"\"\n\n    def __init__(self, baseline_file: Optional[str] = None):\n        self.alerts: List[ModbusAlert] = []\n        self.packet_count = 0\n        self.modbus_count = 0\n\n        # Baseline data\n        self.authorized_masters: Set[str] = set()\n        self.authorized_pairs: Set[Tuple[str, str]] = set()\n        self.allowed_write_sources: Set[str] = set()\n        self.allowed_function_codes: Dict[str, Set[int]] = defaultdict(set)\n        self.allowed_register_ranges: Dict[str, List[Tuple[int, int]]] = defaultdict(list)\n        self.polling_intervals: Dict[str, float] = {}\n        self.last_seen: Dict[str, float] = {}\n\n        # Counters for rate detection\n        self.write_counts: Dict[str, List[float]] = defaultdict(list)\n\n        if baseline_file:\n            self.load_baseline(baseline_file)\n\n    def load_baseline(self, filepath: str):\n        \"\"\"Load established Modbus communication baseline.\"\"\"\n        with open(filepath, \"r\") as f:\n            baseline = json.load(f)\n\n        for session_key, data in baseline.get(\"modbus_baselines\", {}).items():\n            src, dst = session_key.split(\"->\")\n            self.authorized_pairs.add((src.strip(), dst.strip()))\n            self.authorized_masters.add(src.strip())\n\n            fc_set = set(data.get(\"allowed_function_codes\", []))\n            self.allowed_function_codes[session_key] = fc_set\n\n            if fc_set & MODBUS_WRITE_FUNCTIONS:\n                self.allowed_write_sources.add(src.strip())\n\n            for reg_range in data.get(\"register_ranges\", []):\n                self.allowed_register_ranges[session_key].append(\n                    (reg_range[\"start\"], reg_range[\"end\"])\n                )\n\n            if data.get(\"polling_interval_avg_sec\"):\n                self.polling_intervals[session_key] = data[\"polling_interval_avg_sec\"]\n\n        print(f\"[*] Baseline loaded: {len(self.authorized_pairs)} authorized pairs, \"\n              f\"{len(self.allowed_write_sources)} authorized write sources\")\n\n    def parse_modbus_mbap(self, payload: bytes) -> Optional[dict]:\n        \"\"\"Parse Modbus TCP MBAP header and PDU.\"\"\"\n        if len(payload) \u003c 8:\n            return None\n\n        transaction_id = struct.unpack(\">H\", payload[0:2])[0]\n        protocol_id = struct.unpack(\">H\", payload[2:4])[0]\n        length = struct.unpack(\">H\", payload[4:6])[0]\n        unit_id = payload[6]\n        func_code = payload[7]\n\n        if protocol_id != 0:  # Not Modbus\n            return None\n\n        result = {\n            \"transaction_id\": transaction_id,\n            \"protocol_id\": protocol_id,\n            \"length\": length,\n            \"unit_id\": unit_id,\n            \"func_code\": func_code,\n        }\n\n        # Parse register address and count for read/write operations\n        if len(payload) >= 12 and func_code in (1, 2, 3, 4, 5, 6, 15, 16):\n            result[\"start_address\"] = struct.unpack(\">H\", payload[8:10])[0]\n            result[\"quantity\"] = struct.unpack(\">H\", payload[10:12])[0]\n\n        return result\n\n    def analyze_packet(self, pkt):\n        \"\"\"Analyze a network packet for Modbus command injection.\"\"\"\n        self.packet_count += 1\n\n        if not pkt.haslayer(IP) or not pkt.haslayer(TCP):\n            return\n\n        tcp = pkt[TCP]\n        if tcp.dport != 502 and tcp.sport != 502:\n            return\n\n        payload = bytes(tcp.payload)\n        if not payload:\n            return\n\n        modbus = self.parse_modbus_mbap(payload)\n        if not modbus:\n            return\n\n        self.modbus_count += 1\n        src_ip = pkt[IP].src\n        dst_ip = pkt[IP].dst\n        session_key = f\"{src_ip}->{dst_ip}\"\n        now = time.time()\n\n        # Detection Rule 1: Unauthorized Modbus master\n        if self.authorized_masters and src_ip not in self.authorized_masters:\n            if tcp.dport == 502:\n                self.alerts.append(ModbusAlert(\n                    severity=\"CRITICAL\",\n                    alert_type=\"UNAUTHORIZED_MASTER\",\n                    src_ip=src_ip, dst_ip=dst_ip,\n                    unit_id=modbus[\"unit_id\"],\n                    func_code=modbus[\"func_code\"],\n                    description=f\"Unauthorized device {src_ip} sending Modbus commands to {dst_ip}\",\n                    mitre_technique=\"T0843 - Program Download\",\n                ))\n\n        # Detection Rule 2: Unauthorized write operation\n        if modbus[\"func_code\"] in MODBUS_WRITE_FUNCTIONS:\n            if self.allowed_write_sources and src_ip not in self.allowed_write_sources:\n                self.alerts.append(ModbusAlert(\n                    severity=\"CRITICAL\",\n                    alert_type=\"UNAUTHORIZED_WRITE\",\n                    src_ip=src_ip, dst_ip=dst_ip,\n                    unit_id=modbus[\"unit_id\"],\n                    func_code=modbus[\"func_code\"],\n                    description=f\"Write command from non-authorized source {src_ip}\",\n                    mitre_technique=\"T0855 - Unauthorized Command Message\",\n                ))\n\n            # Track write frequency for rate anomaly detection\n            self.write_counts[src_ip].append(now)\n            recent_writes = [t for t in self.write_counts[src_ip] if now - t \u003c 60]\n            self.write_counts[src_ip] = recent_writes\n            if len(recent_writes) > 20:\n                self.alerts.append(ModbusAlert(\n                    severity=\"HIGH\",\n                    alert_type=\"WRITE_FLOOD\",\n                    src_ip=src_ip, dst_ip=dst_ip,\n                    unit_id=modbus[\"unit_id\"],\n                    func_code=modbus[\"func_code\"],\n                    description=f\"Excessive write rate: {len(recent_writes)} writes in 60s from {src_ip}\",\n                    mitre_technique=\"T0836 - Modify Parameter\",\n                ))\n\n        # Detection Rule 3: Anomalous function code\n        if session_key in self.allowed_function_codes:\n            if modbus[\"func_code\"] not in self.allowed_function_codes[session_key]:\n                self.alerts.append(ModbusAlert(\n                    severity=\"HIGH\",\n                    alert_type=\"ANOMALOUS_FUNCTION_CODE\",\n                    src_ip=src_ip, dst_ip=dst_ip,\n                    unit_id=modbus[\"unit_id\"],\n                    func_code=modbus[\"func_code\"],\n                    description=(\n                        f\"Function code {modbus['func_code']} ({MODBUS_FUNC_NAMES.get(modbus['func_code'], 'Unknown')}) \"\n                        f\"not in baseline for {session_key}\"\n                    ),\n                    mitre_technique=\"T0855 - Unauthorized Command Message\",\n                ))\n\n        # Detection Rule 4: Broadcast write (unit ID 0)\n        if modbus[\"unit_id\"] == 0 and modbus[\"func_code\"] in MODBUS_WRITE_FUNCTIONS:\n            self.alerts.append(ModbusAlert(\n                severity=\"CRITICAL\",\n                alert_type=\"BROADCAST_WRITE\",\n                src_ip=src_ip, dst_ip=dst_ip,\n                unit_id=0,\n                func_code=modbus[\"func_code\"],\n                description=\"Broadcast write command (unit ID 0) affects ALL Modbus devices on segment\",\n                mitre_technique=\"T0855 - Unauthorized Command Message\",\n            ))\n\n        # Detection Rule 5: Out-of-range register access\n        if \"start_address\" in modbus and session_key in self.allowed_register_ranges:\n            addr = modbus[\"start_address\"]\n            qty = modbus.get(\"quantity\", 1)\n            in_range = any(\n                start \u003c= addr and addr + qty \u003c= end\n                for start, end in self.allowed_register_ranges[session_key]\n            )\n            if not in_range:\n                self.alerts.append(ModbusAlert(\n                    severity=\"HIGH\",\n                    alert_type=\"OUT_OF_RANGE_REGISTER\",\n                    src_ip=src_ip, dst_ip=dst_ip,\n                    unit_id=modbus[\"unit_id\"],\n                    func_code=modbus[\"func_code\"],\n                    description=f\"Register access {addr}-{addr+qty} outside baseline ranges\",\n                    mitre_technique=\"T0836 - Modify Parameter\",\n                ))\n\n        # Detection Rule 6: Diagnostic/restart commands\n        if modbus[\"func_code\"] in MODBUS_DIAGNOSTIC_FUNCTIONS:\n            self.alerts.append(ModbusAlert(\n                severity=\"HIGH\",\n                alert_type=\"DIAGNOSTIC_COMMAND\",\n                src_ip=src_ip, dst_ip=dst_ip,\n                unit_id=modbus[\"unit_id\"],\n                func_code=modbus[\"func_code\"],\n                description=f\"Diagnostic function code {modbus['func_code']} detected - potential DoS or reconnaissance\",\n                mitre_technique=\"T0814 - Denial of Service\",\n            ))\n\n    def print_report(self):\n        \"\"\"Print detection report.\"\"\"\n        print(f\"\\n{'='*70}\")\n        print(f\"MODBUS COMMAND INJECTION DETECTION REPORT\")\n        print(f\"{'='*70}\")\n        print(f\"Analysis Time: {datetime.now().isoformat()}\")\n        print(f\"Total Packets Analyzed: {self.packet_count}\")\n        print(f\"Modbus Packets: {self.modbus_count}\")\n        print(f\"Alerts Generated: {len(self.alerts)}\")\n\n        if self.alerts:\n            severity_counts = defaultdict(int)\n            for alert in self.alerts:\n                severity_counts[alert.severity] += 1\n\n            print(f\"\\nSeverity Distribution:\")\n            for sev in [\"CRITICAL\", \"HIGH\", \"MEDIUM\", \"LOW\"]:\n                if sev in severity_counts:\n                    print(f\"  {sev}: {severity_counts[sev]}\")\n\n            print(f\"\\nDetailed Alerts:\")\n            for alert in self.alerts:\n                print(f\"\\n  [{alert.severity}] {alert.alert_type}\")\n                print(f\"    Time: {alert.timestamp}\")\n                print(f\"    Source: {alert.src_ip} -> {alert.dst_ip}\")\n                print(f\"    Unit ID: {alert.unit_id}\")\n                print(f\"    Function: {alert.func_name} (FC {alert.func_code})\")\n                print(f\"    Detail: {alert.description}\")\n                if alert.mitre_technique:\n                    print(f\"    MITRE ATT&CK ICS: {alert.mitre_technique}\")\n\n    def start_live_monitoring(self, interface: str, duration: int = 0):\n        \"\"\"Start live Modbus traffic monitoring.\"\"\"\n        print(f\"[*] Starting Modbus monitoring on {interface}...\")\n        print(f\"[*] Press Ctrl+C to stop\")\n        try:\n            sniff(\n                iface=interface,\n                filter=\"tcp port 502\",\n                prn=self.analyze_packet,\n                timeout=duration if duration > 0 else None,\n            )\n        except KeyboardInterrupt:\n            pass\n        self.print_report()\n\n\nif __name__ == \"__main__\":\n    detector = ModbusInjectionDetector(\n        baseline_file=sys.argv[2] if len(sys.argv) > 2 else None\n    )\n\n    if len(sys.argv) >= 2:\n        if sys.argv[1].endswith(\".pcap\") or sys.argv[1].endswith(\".pcapng\"):\n            from scapy.all import rdpcap\n            print(f\"[*] Analyzing capture file: {sys.argv[1]}\")\n            packets = rdpcap(sys.argv[1])\n            for pkt in packets:\n                detector.analyze_packet(pkt)\n            detector.print_report()\n        else:\n            detector.start_live_monitoring(sys.argv[1])\n    else:\n        print(\"Usage:\")\n        print(\"  Live:    python modbus_detector.py \u003cinterface> [baseline.json]\")\n        print(\"  Offline: python modbus_detector.py \u003ccapture.pcap> [baseline.json]\")\n```\n\n### Step 2: Deploy Suricata Rules for Modbus Attack Detection\n\n```yaml\n# Suricata IDS Rules for Modbus Command Injection Detection\n# Reference: MITRE ATT&CK for ICS, FrostyGoop analysis\n\n# Unauthorized Modbus write from non-engineering workstation\nalert modbus !$MODBUS_AUTHORIZED_WRITERS any -> $OT_PLC_SUBNET 502 (\n  msg:\"MODBUS-INJECT Unauthorized write operation detected\";\n  modbus_func:write_single_coil;\n  flow:to_server,established;\n  classtype:attempted-admin;\n  sid:4000001; rev:1; priority:1;\n)\n\nalert modbus !$MODBUS_AUTHORIZED_WRITERS any -> $OT_PLC_SUBNET 502 (\n  msg:\"MODBUS-INJECT Unauthorized write multiple registers\";\n  modbus_func:write_multiple_registers;\n  flow:to_server,established;\n  classtype:attempted-admin;\n  sid:4000002; rev:1; priority:1;\n)\n\n# Modbus broadcast write affecting all slaves\nalert modbus any any -> $OT_PLC_SUBNET 502 (\n  msg:\"MODBUS-INJECT Broadcast write command (Unit ID 0)\";\n  modbus_unit_id:0;\n  flow:to_server,established;\n  classtype:attempted-admin;\n  sid:4000003; rev:1; priority:1;\n)\n\n# Excessive Modbus write rate (potential automated attack)\nalert modbus any any -> $OT_PLC_SUBNET 502 (\n  msg:\"MODBUS-INJECT Excessive write rate - possible automated attack\";\n  modbus_func:write_multiple_registers;\n  flow:to_server,established;\n  threshold:type threshold, track by_src, count 20, seconds 60;\n  classtype:attempted-admin;\n  sid:4000004; rev:1;\n)\n\n# Modbus diagnostics/restart command\nalert modbus any any -> $OT_PLC_SUBNET 502 (\n  msg:\"MODBUS-INJECT Diagnostics function code detected\";\n  modbus_func:diagnostics;\n  flow:to_server,established;\n  classtype:attempted-dos;\n  sid:4000005; rev:1;\n)\n\n# FrostyGoop-pattern: write to specific register ranges used for heating control\nalert modbus any any -> $OT_PLC_SUBNET 502 (\n  msg:\"MODBUS-INJECT Potential FrostyGoop - write to heating control registers\";\n  modbus_func:write_multiple_registers;\n  content:\"|00 10|\"; offset:8; depth:2;\n  flow:to_server,established;\n  classtype:attempted-admin;\n  sid:4000010; rev:1; priority:1;\n)\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| Modbus TCP | Industrial protocol operating on TCP port 502, lacking authentication or encryption, making it vulnerable to command injection |\n| Function Code | Single byte in Modbus PDU specifying the operation (read coils, write registers, diagnostics); monitoring for unauthorized function codes is key to detection |\n| MBAP Header | Modbus Application Protocol header in TCP variant containing transaction ID, protocol ID, length, and unit ID |\n| FrostyGoop | First known malware using Modbus TCP for real-world operational impact, disrupted Ukrainian district heating in 2024 |\n| Unit ID | Address of the target Modbus slave device; Unit ID 0 is a broadcast affecting all slaves |\n| Register Range | Specific memory addresses in the PLC; legitimate operations access known ranges; out-of-range access indicates reconnaissance or manipulation |\n\n## Common Scenarios\n\n### Scenario: FrostyGoop-Style Heating Control Attack\n\n**Context**: A building automation system uses Modbus TCP to control HVAC equipment. Monitoring detects unexpected write commands to heating control registers from an IP not associated with any authorized BMS controller.\n\n**Approach**:\n1. Verify the source IP against the authorized Modbus master list\n2. Check if any authorized maintenance or configuration change is in progress\n3. Capture full Modbus transaction including register addresses and values being written\n4. Compare written values against safe operating ranges for the heating equipment\n5. If unauthorized, immediately block the source IP at the industrial firewall\n6. Inspect the source device for compromise indicators (malware, unauthorized remote access)\n7. Verify current setpoints on all affected controllers against known-good values\n8. Restore safe setpoints if manipulation is confirmed\n\n**Pitfalls**: Modbus lacks authentication, so the source IP is the only identifier -- attackers can spoof IPs if ARP protections are not in place. Do not assume all writes are malicious; legitimate SCADA operations include writes. Always verify against the change management log before escalating.\n\n## Output Format\n\n```\nMODBUS INJECTION DETECTION REPORT\n====================================\nAnalysis Period: [start] to [end]\nMonitoring Point: [interface/SPAN description]\n\nTRAFFIC SUMMARY:\n  Total Modbus Packets: [count]\n  Read Operations: [count]\n  Write Operations: [count]\n  Unauthorized Writes Detected: [count]\n\nALERTS:\n  [CRITICAL] Unauthorized write from [IP] to PLC [IP]\n    Function: Write Multiple Registers (FC 16)\n    Registers: [start]-[end]\n    MITRE: T0855 - Unauthorized Command Message\n\nBASELINE DEVIATIONS:\n  New Modbus masters: [list]\n  Unusual function codes: [list]\n  Out-of-range register access: [list]\n\nRECOMMENDED ACTIONS:\n  1. Verify source [IP] authorization status\n  2. Block unauthorized sources at industrial firewall\n  3. Validate PLC register values against known-good state\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("detecting-modbus-command-injection-attacks-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

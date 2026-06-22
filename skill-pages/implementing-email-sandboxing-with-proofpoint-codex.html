@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>implementing-email-sandboxing-with-proofpoint - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/implementing-email-sandboxing-with-proofpoint-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>implementing-email-sandboxing-with-proofpoint</h1>
+      <p class="description">Email sandboxing detonates suspicious attachments and URLs in isolated</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>implementing-email-sandboxing-with-proofpoint</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>implementing-email-sandboxing-with-proofpoint</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Email sandboxing detonates suspicious attachments and URLs in isolated</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose implementing-email-sandboxing-with-proofpoint, then write the task. Fallback prompt: Use the implementing-email-sandboxing-with-proofpoint skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Implementing Email Sandboxing with Proofpoint</h2>
+<h3>Overview</h3>
+<p>Email sandboxing detonates suspicious attachments and URLs in isolated environments to detect zero-day malware and evasive phishing payloads. Proofpoint Targeted Attack Protection (TAP) is an industry-leading solution that uses multi-stage sandboxing, URL rewriting, and predictive analysis. This skill covers configuring Proofpoint TAP, integrating with email flow, analyzing sandbox reports, and tuning detection policies.</p>
+<h3>When to Use</h3>
+<ul>
+<li>When deploying or configuring implementing email sandboxing with proofpoint capabilities in your environment</li>
+<li>When establishing security controls aligned to compliance requirements</li>
+<li>When building or improving security architecture for this domain</li>
+<li>When conducting security assessments that require this implementation</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Proofpoint Email Protection license with TAP add-on</li>
+<li>Admin access to Proofpoint admin console</li>
+<li>Understanding of email delivery architecture (MX records, mail flow rules)</li>
+<li>SIEM integration capability</li>
+</ul>
+<h3>Key Concepts</h3>
+<h4>Proofpoint TAP Capabilities</h4>
+<ol>
+<li><strong>Attachment sandboxing</strong>: Detonates files in virtual machines (Windows, macOS, Android)</li>
+<li><strong>URL Defense</strong>: Rewrites URLs, detonates at time-of-click</li>
+<li><strong>Threat Intelligence</strong>: Proofpoint's NexusAI threat intelligence integration</li>
+<li><strong>TAP Dashboard</strong>: Real-time visibility into threats targeting the organization</li>
+<li><strong>Campaign correlation</strong>: Groups related attacks into campaigns</li>
+<li><strong>Very Attacked People (VAP)</strong>: Identifies most-targeted individuals</li>
+</ol>
+<h4>Sandbox Evasion Techniques Detected</h4>
+<ul>
+<li>Delayed execution (time-bomb malware)</li>
+<li>VM detection bypass</li>
+<li>User interaction requirements (click-to-enable macros)</li>
+<li>Sandbox-aware malware that checks for analysis environment</li>
+<li>Encrypted/password-protected attachments</li>
+<li>Multi-stage payloads with delayed C2 retrieval</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Configure TAP in Proofpoint</h4>
+<ul>
+<li>Enable TAP for inbound email policy</li>
+<li>Configure sandbox profiles (attachment types to detonate)</li>
+<li>Set URL Defense rewriting policy</li>
+<li>Configure quarantine actions for malicious verdicts</li>
+</ul>
+<h4>Step 2: Tune Attachment Policies</h4>
+<pre><code>Recommended attachment policy:
+- Detonate: .exe, .dll, .scr, .doc(m), .xls(m), .ppt(m), .pdf, .zip, .rar, .7z, .iso
+- Block without detonation: .bat, .cmd, .ps1, .vbs, .js, .wsf, .hta
+- Password-protected archives: Attempt common passwords, then quarantine
+- Dynamic delivery: Deliver email body, hold attachment until verdict</code></pre>
+<h4>Step 3: Configure URL Defense</h4>
+<ul>
+<li>Enable URL rewriting for all inbound email</li>
+<li>Set time-of-click detonation</li>
+<li>Block access to malicious URLs</li>
+<li>Show warning page for suspicious (not confirmed malicious) URLs</li>
+<li>Configure allowed domains bypass list</li>
+</ul>
+<h4>Step 4: Set Up TAP Dashboard Monitoring</h4>
+<ul>
+<li>Configure daily threat digest emails to security team</li>
+<li>Set up real-time alerts for targeted attacks</li>
+<li>Monitor VAP report for high-risk users</li>
+<li>Review campaign clusters for coordinated attacks</li>
+</ul>
+<h4>Step 5: Integrate with SIEM</h4>
+<ul>
+<li>Configure syslog/API export to SIEM</li>
+<li>Create correlation rules for TAP alerts</li>
+<li>Set up automated response workflows</li>
+</ul>
+<h3>Tools &amp; Resources</h3>
+<ul>
+<li><strong>Proofpoint TAP</strong>: https://www.proofpoint.com/us/products/advanced-threat-protection</li>
+<li><strong>Proofpoint TAP Dashboard</strong>: https://threatinsight.proofpoint.com/</li>
+<li><strong>Proofpoint API</strong>: https://help.proofpoint.com/Threat_Insight_Dashboard/API_Documentation</li>
+<li><strong>Proofpoint Community</strong>: https://community.proofpoint.com/</li>
+</ul>
+<h3>Validation</h3>
+<ul>
+<li>Attachment detonation catches EICAR test file and macro-enabled document</li>
+<li>URL Defense rewrites and blocks known phishing URLs</li>
+<li>TAP Dashboard displays threat summary</li>
+<li>SIEM receives and alerts on TAP events</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: implementing-email-sandboxing-with-proofpoint\ndisplay_name: implementing-email-sandboxing-with-proofpoint\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# implementing-email-sandboxing-with-proofpoint - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `implementing-email-sandboxing-with-proofpoint` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nEmail sandboxing detonates suspicious attachments and URLs in isolated environments to detect zero-day malware and evasive phishing payloads. Proofpoint Targeted Attack Protection (TAP) is an industry-leading solution th\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose implementing-email-sandboxing-with-proofpoint, then write the task. Fallback prompt: Use the implementing-email-sandboxing-with-proofpoint skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `implementing-email-sandboxing-with-proofpoint` |\n| Canonical name | `implementing-email-sandboxing-with-proofpoint` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nEmail sandboxing detonates suspicious attachments and URLs in isolated environments to detect zero-day malware and evasive phishing payloads. Proofpoint Targeted Attack Protection (TAP) is an industry-leading solution th\n\n## Original SKILL.md\n\n---\nname: implementing-email-sandboxing-with-proofpoint\ndescription: Email sandboxing detonates suspicious attachments and URLs in isolated\n  environments to detect zero-day malware and evasive phishing payloads. Proofpoint\n  Targeted Attack Protection (TAP) is an industry\ndomain: cybersecurity\nsubdomain: phishing-defense\ntags:\n- phishing\n- email-security\n- social-engineering\n- dmarc\n- awareness\n- sandboxing\n- proofpoint\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- PR.AT-01\n- DE.CM-09\n- RS.CO-02\n- DE.AE-02\nmitre_attack:\n- T1566\n- T1598\n- T1534\n- T1036\n- T1027\n---\n# Implementing Email Sandboxing with Proofpoint\n\n## Overview\nEmail sandboxing detonates suspicious attachments and URLs in isolated environments to detect zero-day malware and evasive phishing payloads. Proofpoint Targeted Attack Protection (TAP) is an industry-leading solution that uses multi-stage sandboxing, URL rewriting, and predictive analysis. This skill covers configuring Proofpoint TAP, integrating with email flow, analyzing sandbox reports, and tuning detection policies.\n\n\n## When to Use\n\n- When deploying or configuring implementing email sandboxing with proofpoint capabilities in your environment\n- When establishing security controls aligned to compliance requirements\n- When building or improving security architecture for this domain\n- When conducting security assessments that require this implementation\n\n## Prerequisites\n- Proofpoint Email Protection license with TAP add-on\n- Admin access to Proofpoint admin console\n- Understanding of email delivery architecture (MX records, mail flow rules)\n- SIEM integration capability\n\n## Key Concepts\n\n### Proofpoint TAP Capabilities\n1. **Attachment sandboxing**: Detonates files in virtual machines (Windows, macOS, Android)\n2. **URL Defense**: Rewrites URLs, detonates at time-of-click\n3. **Threat Intelligence**: Proofpoint's NexusAI threat intelligence integration\n4. **TAP Dashboard**: Real-time visibility into threats targeting the organization\n5. **Campaign correlation**: Groups related attacks into campaigns\n6. **Very Attacked People (VAP)**: Identifies most-targeted individuals\n\n### Sandbox Evasion Techniques Detected\n- Delayed execution (time-bomb malware)\n- VM detection bypass\n- User interaction requirements (click-to-enable macros)\n- Sandbox-aware malware that checks for analysis environment\n- Encrypted/password-protected attachments\n- Multi-stage payloads with delayed C2 retrieval\n\n## Workflow\n\n### Step 1: Configure TAP in Proofpoint\n- Enable TAP for inbound email policy\n- Configure sandbox profiles (attachment types to detonate)\n- Set URL Defense rewriting policy\n- Configure quarantine actions for malicious verdicts\n\n### Step 2: Tune Attachment Policies\n```\nRecommended attachment policy:\n- Detonate: .exe, .dll, .scr, .doc(m), .xls(m), .ppt(m), .pdf, .zip, .rar, .7z, .iso\n- Block without detonation: .bat, .cmd, .ps1, .vbs, .js, .wsf, .hta\n- Password-protected archives: Attempt common passwords, then quarantine\n- Dynamic delivery: Deliver email body, hold attachment until verdict\n```\n\n### Step 3: Configure URL Defense\n- Enable URL rewriting for all inbound email\n- Set time-of-click detonation\n- Block access to malicious URLs\n- Show warning page for suspicious (not confirmed malicious) URLs\n- Configure allowed domains bypass list\n\n### Step 4: Set Up TAP Dashboard Monitoring\n- Configure daily threat digest emails to security team\n- Set up real-time alerts for targeted attacks\n- Monitor VAP report for high-risk users\n- Review campaign clusters for coordinated attacks\n\n### Step 5: Integrate with SIEM\n- Configure syslog/API export to SIEM\n- Create correlation rules for TAP alerts\n- Set up automated response workflows\n\n## Tools & Resources\n- **Proofpoint TAP**: https://www.proofpoint.com/us/products/advanced-threat-protection\n- **Proofpoint TAP Dashboard**: https://threatinsight.proofpoint.com/\n- **Proofpoint API**: https://help.proofpoint.com/Threat_Insight_Dashboard/API_Documentation\n- **Proofpoint Community**: https://community.proofpoint.com/\n\n## Validation\n- Attachment detonation catches EICAR test file and macro-enabled document\n- URL Defense rewrites and blocks known phishing URLs\n- TAP Dashboard displays threat summary\n- SIEM receives and alerts on TAP events\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("implementing-email-sandboxing-with-proofpoint-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

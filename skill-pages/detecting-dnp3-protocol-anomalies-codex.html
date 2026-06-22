@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>detecting-dnp3-protocol-anomalies - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/detecting-dnp3-protocol-anomalies-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>detecting-dnp3-protocol-anomalies</h1>
+      <p class="description">'Detect anomalies in DNP3 (Distributed Network Protocol 3) communications</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>detecting-dnp3-protocol-anomalies</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>detecting-dnp3-protocol-anomalies</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Detect anomalies in DNP3 (Distributed Network Protocol 3) communications</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose detecting-dnp3-protocol-anomalies, then write the task. Fallback prompt: Use the detecting-dnp3-protocol-anomalies skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Detecting DNP3 Protocol Anomalies</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When monitoring SCADA systems in the energy sector where DNP3 is the primary protocol</li>
+<li>When building detection rules for DNP3-based attacks against RTUs and substations</li>
+<li>When investigating suspected unauthorized control commands sent via DNP3</li>
+<li>When deploying IDS with DNP3 deep packet inspection at utility substations</li>
+<li>When responding to alerts from OT monitoring platforms about DNP3 traffic anomalies</li>
+</ul>
+<p><strong>Do not use</strong> for non-DNP3 protocol monitoring (see detecting-modbus-command-injection-attacks for Modbus), for DNP3 Secure Authentication configuration (separate implementation), or for protocol-agnostic network anomaly detection.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>Network TAP/SPAN on DNP3 communication segments (TCP port 20000 or serial)</li>
+<li>Baseline of normal DNP3 traffic patterns (masters, outstations, poll intervals, function codes)</li>
+<li>Suricata or Zeek with DNP3 protocol parser enabled</li>
+<li>Understanding of DNP3 function codes and object groups used in the environment</li>
+<li>DNP3 communication topology map (master-to-outstation relationships)</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Analyze DNP3 Traffic for Anomalies</h4>
+<pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;DNP3 Protocol Anomaly Detector.
+
+Monitors DNP3 communications for unauthorized control commands,
+protocol violations, and deviations from established baselines.
+Supports both TCP and serial DNP3 deployments.
+&quot;&quot;&quot;
+
+import struct
+import sys
+import json
+from collections import defaultdict
+from datetime import datetime
+from typing import Dict, List, Optional, Set
+
+try:
+    from scapy.all import rdpcap, IP, TCP
+except ImportError:
+    print(&quot;Install scapy: pip install scapy&quot;)
+    sys.exit(1)
+
+
+# DNP3 Function Codes
+DNP3_FUNCTIONS = {
+    0x00: &quot;Confirm&quot;, 0x01: &quot;Read&quot;, 0x02: &quot;Write&quot;,
+    0x03: &quot;Select&quot;, 0x04: &quot;Operate&quot;, 0x05: &quot;Direct Operate&quot;,
+    0x06: &quot;Direct Operate No Ack&quot;, 0x07: &quot;Immediate Freeze&quot;,
+    0x08: &quot;Immediate Freeze No Ack&quot;, 0x09: &quot;Freeze and Clear&quot;,
+    0x0A: &quot;Freeze and Clear No Ack&quot;, 0x0B: &quot;Freeze at Time&quot;,
+    0x0C: &quot;Freeze at Time No Ack&quot;, 0x0D: &quot;Cold Restart&quot;,
+    0x0E: &quot;Warm Restart&quot;, 0x0F: &quot;Initialize Data&quot;,
+    0x10: &quot;Initialize Application&quot;, 0x11: &quot;Start Application&quot;,
+    0x12: &quot;Stop Application&quot;, 0x13: &quot;Save Configuration&quot;,
+    0x14: &quot;Enable Unsolicited&quot;, 0x15: &quot;Disable Unsolicited&quot;,
+    0x16: &quot;Assign Class&quot;, 0x17: &quot;Delay Measurement&quot;,
+    0x18: &quot;Record Current Time&quot;, 0x19: &quot;Open File&quot;,
+    0x1A: &quot;Close File&quot;, 0x1B: &quot;Delete File&quot;,
+    0x1C: &quot;Get File Info&quot;, 0x1D: &quot;Authenticate File&quot;,
+    0x1E: &quot;Abort File&quot;, 0x81: &quot;Response&quot;, 0x82: &quot;Unsolicited Response&quot;,
+}
+
+# High-risk function codes that should trigger alerts
+DNP3_CRITICAL_FUNCTIONS = {
+    0x02,  # Write
+    0x03, 0x04, 0x05, 0x06,  # Select/Operate/Direct Operate
+    0x0D,  # Cold Restart
+    0x0E,  # Warm Restart
+    0x0F,  # Initialize Data
+    0x10,  # Initialize Application
+    0x12,  # Stop Application
+    0x19, 0x1A, 0x1B,  # File operations (firmware update)
+}
+
+
+class DNP3AnomalyDetector:
+    &quot;&quot;&quot;Detects anomalies in DNP3 protocol communications.&quot;&quot;&quot;
+
+    def __init__(self, baseline_file: Optional[str] = None):
+        self.alerts = []
+        self.sessions = defaultdict(lambda: {
+            &quot;packet_count&quot;: 0,
+            &quot;function_codes&quot;: defaultdict(int),
+            &quot;control_commands&quot;: 0,
+            &quot;file_operations&quot;: 0,
+            &quot;restarts&quot;: 0,
+        })
+        self.packet_count = 0
+        self.dnp3_count = 0
+
+        self.authorized_masters: Set[str] = set()
+        self.authorized_pairs: Dict[str, Set[str]] = defaultdict(set)
+        self.baseline_functions: Dict[str, Set[int]] = defaultdict(set)
+
+        if baseline_file:
+            self.load_baseline(baseline_file)
+
+    def load_baseline(self, filepath: str):
+        &quot;&quot;&quot;Load DNP3 communication baseline.&quot;&quot;&quot;
+        with open(filepath, &quot;r&quot;) as f:
+            baseline = json.load(f)
+
+        for entry in baseline.get(&quot;authorized_communications&quot;, []):
+            master = entry[&quot;master_ip&quot;]
+            outstation = entry[&quot;outstation_ip&quot;]
+            self.authorized_masters.add(master)
+            self.authorized_pairs[master].add(outstation)
+            self.baseline_functions[f&quot;{master}-&gt;{outstation}&quot;] = set(
+                entry.get(&quot;expected_function_codes&quot;, [0x00, 0x01])
+            )
+
+    def parse_dnp3_header(self, payload: bytes) -&gt; Optional[dict]:
+        &quot;&quot;&quot;Parse DNP3 data link layer and transport/application headers.&quot;&quot;&quot;
+        if len(payload) &lt; 10:
+            return None
+
+        # DNP3 Data Link Layer: start(2) + length(1) + control(1) + dest(2) + source(2) + crc(2)
+        start_bytes = struct.unpack(&quot;&gt;H&quot;, payload[0:2])[0]
+        if start_bytes != 0x0564:
+            return None
+
+        length = payload[2]
+        control = payload[3]
+        dest_addr = struct.unpack(&quot;&lt;H&quot;, payload[4:6])[0]
+        source_addr = struct.unpack(&quot;&lt;H&quot;, payload[6:8])[0]
+
+        direction = &quot;Master-&gt;Outstation&quot; if (control &amp; 0x80) else &quot;Outstation-&gt;Master&quot;
+
+        result = {
+            &quot;length&quot;: length,
+            &quot;control&quot;: control,
+            &quot;direction&quot;: direction,
+            &quot;dest_addr&quot;: dest_addr,
+            &quot;source_addr&quot;: source_addr,
+            &quot;is_master&quot;: bool(control &amp; 0x80),
+        }
+
+        # Parse transport and application layer (after CRC bytes)
+        if len(payload) &gt;= 12:
+            transport_header = payload[10]
+            if len(payload) &gt;= 13:
+                app_control = payload[11]
+                func_code = payload[12]
+                result[&quot;function_code&quot;] = func_code
+                result[&quot;function_name&quot;] = DNP3_FUNCTIONS.get(
+                    func_code, f&quot;Unknown (0x{func_code:02x})&quot;
+                )
+
+        return result
+
+    def analyze_packet(self, pkt):
+        &quot;&quot;&quot;Analyze a packet for DNP3 anomalies.&quot;&quot;&quot;
+        self.packet_count += 1
+
+        if not pkt.haslayer(IP) or not pkt.haslayer(TCP):
+            return
+
+        tcp = pkt[TCP]
+        if tcp.dport != 20000 and tcp.sport != 20000:
+            return
+
+        payload = bytes(tcp.payload)
+        if not payload:
+            return
+
+        dnp3 = self.parse_dnp3_header(payload)
+        if not dnp3:
+            return
+
+        self.dnp3_count += 1
+        src_ip = pkt[IP].src
+        dst_ip = pkt[IP].dst
+        session_key = f&quot;{src_ip}-&gt;{dst_ip}&quot;
+        session = self.sessions[session_key]
+        session[&quot;packet_count&quot;] += 1
+
+        func_code = dnp3.get(&quot;function_code&quot;)
+        if func_code is not None:
+            session[&quot;function_codes&quot;][func_code] += 1
+
+            # Detection 1: Unauthorized DNP3 master
+            if dnp3.get(&quot;is_master&quot;) and self.authorized_masters:
+                if src_ip not in self.authorized_masters:
+                    self.alerts.append({
+                        &quot;severity&quot;: &quot;CRITICAL&quot;,
+                        &quot;type&quot;: &quot;UNAUTHORIZED_DNP3_MASTER&quot;,
+                        &quot;src&quot;: src_ip, &quot;dst&quot;: dst_ip,
+                        &quot;function&quot;: dnp3.get(&quot;function_name&quot;),
+                        &quot;description&quot;: f&quot;Unauthorized DNP3 master {src_ip} communicating with outstation {dst_ip}&quot;,
+                        &quot;mitre&quot;: &quot;T0869 - Standard Application Layer Protocol&quot;,
+                    })
+
+            # Detection 2: Cold/Warm restart command
+            if func_code in (0x0D, 0x0E):
+                session[&quot;restarts&quot;] += 1
+                restart_type = &quot;Cold&quot; if func_code == 0x0D else &quot;Warm&quot;
+                self.alerts.append({
+                    &quot;severity&quot;: &quot;CRITICAL&quot;,
+                    &quot;type&quot;: &quot;DNP3_RESTART_COMMAND&quot;,
+                    &quot;src&quot;: src_ip, &quot;dst&quot;: dst_ip,
+                    &quot;function&quot;: f&quot;{restart_type} Restart&quot;,
+                    &quot;description&quot;: f&quot;{restart_type} restart command sent to outstation {dst_ip} (addr {dnp3['dest_addr']})&quot;,
+                    &quot;mitre&quot;: &quot;T0816 - Device Restart/Shutdown&quot;,
+                })
+
+            # Detection 3: File operations (potential firmware update)
+            if func_code in (0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E):
+                session[&quot;file_operations&quot;] += 1
+                self.alerts.append({
+                    &quot;severity&quot;: &quot;CRITICAL&quot;,
+                    &quot;type&quot;: &quot;DNP3_FILE_OPERATION&quot;,
+                    &quot;src&quot;: src_ip, &quot;dst&quot;: dst_ip,
+                    &quot;function&quot;: dnp3.get(&quot;function_name&quot;),
+                    &quot;description&quot;: f&quot;File operation on outstation {dst_ip} - potential firmware update or PIPEDREAM indicator&quot;,
+                    &quot;mitre&quot;: &quot;T0839 - Module Firmware&quot;,
+                })
+
+            # Detection 4: Control commands (Select/Operate)
+            if func_code in (0x03, 0x04, 0x05, 0x06):
+                session[&quot;control_commands&quot;] += 1
+                if session_key in self.baseline_functions:
+                    if func_code not in self.baseline_functions[session_key]:
+                        self.alerts.append({
+                            &quot;severity&quot;: &quot;HIGH&quot;,
+                            &quot;type&quot;: &quot;UNEXPECTED_CONTROL_COMMAND&quot;,
+                            &quot;src&quot;: src_ip, &quot;dst&quot;: dst_ip,
+                            &quot;function&quot;: dnp3.get(&quot;function_name&quot;),
+                            &quot;description&quot;: f&quot;Control command {dnp3.get('function_name')} not in baseline for {session_key}&quot;,
+                            &quot;mitre&quot;: &quot;T0855 - Unauthorized Command Message&quot;,
+                        })
+
+            # Detection 5: Anomalous function code for this pair
+            if session_key in self.baseline_functions:
+                if func_code not in self.baseline_functions[session_key]:
+                    if func_code not in (0x00, 0x81, 0x82):  # Exclude common response codes
+                        self.alerts.append({
+                            &quot;severity&quot;: &quot;MEDIUM&quot;,
+                            &quot;type&quot;: &quot;ANOMALOUS_FUNCTION_CODE&quot;,
+                            &quot;src&quot;: src_ip, &quot;dst&quot;: dst_ip,
+                            &quot;function&quot;: dnp3.get(&quot;function_name&quot;),
+                            &quot;description&quot;: f&quot;Function code 0x{func_code:02x} not in baseline&quot;,
+                            &quot;mitre&quot;: &quot;T0855 - Unauthorized Command Message&quot;,
+                        })
+
+    def generate_report(self):
+        &quot;&quot;&quot;Generate DNP3 anomaly detection report.&quot;&quot;&quot;
+        print(f&quot;\n{'='*70}&quot;)
+        print(&quot;DNP3 PROTOCOL ANOMALY DETECTION REPORT&quot;)
+        print(f&quot;{'='*70}&quot;)
+        print(f&quot;Analysis Time: {datetime.now().isoformat()}&quot;)
+        print(f&quot;Total Packets: {self.packet_count}&quot;)
+        print(f&quot;DNP3 Packets: {self.dnp3_count}&quot;)
+        print(f&quot;Alerts: {len(self.alerts)}&quot;)
+
+        print(f&quot;\n--- DNP3 SESSION SUMMARY ---&quot;)
+        for key, session in self.sessions.items():
+            print(f&quot;\n  {key}&quot;)
+            print(f&quot;    Packets: {session['packet_count']}&quot;)
+            funcs = [DNP3_FUNCTIONS.get(f, f&quot;0x{f:02x}&quot;) for f in session[&quot;function_codes&quot;]]
+            print(f&quot;    Functions: {', '.join(funcs)}&quot;)
+            print(f&quot;    Control Commands: {session['control_commands']}&quot;)
+            print(f&quot;    File Operations: {session['file_operations']}&quot;)
+            print(f&quot;    Restart Commands: {session['restarts']}&quot;)
+
+        if self.alerts:
+            print(f&quot;\n--- ALERTS ---&quot;)
+            for alert in self.alerts:
+                print(f&quot;\n  [{alert['severity']}] {alert['type']}&quot;)
+                print(f&quot;    {alert['src']} -&gt; {alert['dst']}&quot;)
+                print(f&quot;    Function: {alert['function']}&quot;)
+                print(f&quot;    Detail: {alert['description']}&quot;)
+                print(f&quot;    MITRE ICS: {alert.get('mitre', 'N/A')}&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    detector = DNP3AnomalyDetector(
+        baseline_file=sys.argv[2] if len(sys.argv) &gt; 2 else None
+    )
+
+    if len(sys.argv) &gt;= 2:
+        print(f&quot;[*] Analyzing: {sys.argv[1]}&quot;)
+        packets = rdpcap(sys.argv[1])
+        for pkt in packets:
+            detector.analyze_packet(pkt)
+        detector.generate_report()
+    else:
+        print(&quot;Usage: python dnp3_detector.py &lt;capture.pcap&gt; [baseline.json]&quot;)</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | DNP3 | Distributed Network Protocol version 3, the predominant SCADA protocol in the energy sector for communication between masters and outstations | | Outstation | DNP3 slave device (typically an RTU or IED) that responds to master station polls and commands | | Select-Before-Operate | DNP3 safety mechanism requiring a Select command before an Operate, preventing accidental control actions | | Cold Restart (FC 0x0D) | DNP3 command that fully restarts an outstation, resetting all configuration -- a high-risk denial-of-service operation | | DNP3 Secure Authentication | Optional DNP3 extension (SA v5) adding HMAC-based authentication to prevent command spoofing | | PIPEDREAM | ICS attack framework with DNP3 capabilities for manipulating outstations and performing firmware updates |</p>
+<h3>Output Format</h3>
+<pre><code>DNP3 ANOMALY DETECTION REPORT
+================================
+Analysis Period: [start] to [end]
+Monitoring Point: [substation/segment]
+
+TRAFFIC SUMMARY:
+  DNP3 Packets: [count]
+  Unique Master-Outstation Pairs: [count]
+  Control Commands: [count]
+  File Operations: [count]
+
+ALERTS:
+  [CRITICAL] Unauthorized DNP3 master [IP]
+  [CRITICAL] Cold restart command to outstation [addr]
+  [HIGH] Unexpected control command from [IP]
+
+RECOMMENDATIONS:
+  1. Deploy DNP3 Secure Authentication (SA v5)
+  2. Block unauthorized sources at firewall
+  3. Enable DNP3 DPI on industrial firewall</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: detecting-dnp3-protocol-anomalies\ndisplay_name: detecting-dnp3-protocol-anomalies\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# detecting-dnp3-protocol-anomalies - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `detecting-dnp3-protocol-anomalies` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When monitoring SCADA systems in the energy sector where DNP3 is the primary protocol\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose detecting-dnp3-protocol-anomalies, then write the task. Fallback prompt: Use the detecting-dnp3-protocol-anomalies skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `detecting-dnp3-protocol-anomalies` |\n| Canonical name | `detecting-dnp3-protocol-anomalies` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n- When monitoring SCADA systems in the energy sector where DNP3 is the primary protocol\n\n## Original SKILL.md\n\n---\nname: detecting-dnp3-protocol-anomalies\ndescription: 'Detect anomalies in DNP3 (Distributed Network Protocol 3) communications\n  used in SCADA systems by monitoring for unauthorized control commands, firmware\n  update attempts, protocol violations, and deviations from baseline traffic patterns\n  using deep packet inspection and machine learning approaches.\n\n  '\ndomain: cybersecurity\nsubdomain: ot-ics-security\ntags:\n- ot-security\n- ics\n- dnp3\n- scada\n- anomaly-detection\n- protocol-analysis\n- energy-sector\n- ids\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\natlas_techniques:\n- AML.T0043\n- AML.T0018\nnist_ai_rmf:\n- MEASURE-2.7\n- MEASURE-2.5\n- MAP-5.1\nnist_csf:\n- PR.IR-01\n- DE.CM-01\n- ID.AM-05\n- GV.OC-02\nmitre_attack:\n- T1078\n- T1190\n- T1059\n- T0816\n- T0836\n---\n\n# Detecting DNP3 Protocol Anomalies\n\n## When to Use\n\n- When monitoring SCADA systems in the energy sector where DNP3 is the primary protocol\n- When building detection rules for DNP3-based attacks against RTUs and substations\n- When investigating suspected unauthorized control commands sent via DNP3\n- When deploying IDS with DNP3 deep packet inspection at utility substations\n- When responding to alerts from OT monitoring platforms about DNP3 traffic anomalies\n\n**Do not use** for non-DNP3 protocol monitoring (see detecting-modbus-command-injection-attacks for Modbus), for DNP3 Secure Authentication configuration (separate implementation), or for protocol-agnostic network anomaly detection.\n\n## Prerequisites\n\n- Network TAP/SPAN on DNP3 communication segments (TCP port 20000 or serial)\n- Baseline of normal DNP3 traffic patterns (masters, outstations, poll intervals, function codes)\n- Suricata or Zeek with DNP3 protocol parser enabled\n- Understanding of DNP3 function codes and object groups used in the environment\n- DNP3 communication topology map (master-to-outstation relationships)\n\n## Workflow\n\n### Step 1: Analyze DNP3 Traffic for Anomalies\n\n```python\n#!/usr/bin/env python3\n\"\"\"DNP3 Protocol Anomaly Detector.\n\nMonitors DNP3 communications for unauthorized control commands,\nprotocol violations, and deviations from established baselines.\nSupports both TCP and serial DNP3 deployments.\n\"\"\"\n\nimport struct\nimport sys\nimport json\nfrom collections import defaultdict\nfrom datetime import datetime\nfrom typing import Dict, List, Optional, Set\n\ntry:\n    from scapy.all import rdpcap, IP, TCP\nexcept ImportError:\n    print(\"Install scapy: pip install scapy\")\n    sys.exit(1)\n\n\n# DNP3 Function Codes\nDNP3_FUNCTIONS = {\n    0x00: \"Confirm\", 0x01: \"Read\", 0x02: \"Write\",\n    0x03: \"Select\", 0x04: \"Operate\", 0x05: \"Direct Operate\",\n    0x06: \"Direct Operate No Ack\", 0x07: \"Immediate Freeze\",\n    0x08: \"Immediate Freeze No Ack\", 0x09: \"Freeze and Clear\",\n    0x0A: \"Freeze and Clear No Ack\", 0x0B: \"Freeze at Time\",\n    0x0C: \"Freeze at Time No Ack\", 0x0D: \"Cold Restart\",\n    0x0E: \"Warm Restart\", 0x0F: \"Initialize Data\",\n    0x10: \"Initialize Application\", 0x11: \"Start Application\",\n    0x12: \"Stop Application\", 0x13: \"Save Configuration\",\n    0x14: \"Enable Unsolicited\", 0x15: \"Disable Unsolicited\",\n    0x16: \"Assign Class\", 0x17: \"Delay Measurement\",\n    0x18: \"Record Current Time\", 0x19: \"Open File\",\n    0x1A: \"Close File\", 0x1B: \"Delete File\",\n    0x1C: \"Get File Info\", 0x1D: \"Authenticate File\",\n    0x1E: \"Abort File\", 0x81: \"Response\", 0x82: \"Unsolicited Response\",\n}\n\n# High-risk function codes that should trigger alerts\nDNP3_CRITICAL_FUNCTIONS = {\n    0x02,  # Write\n    0x03, 0x04, 0x05, 0x06,  # Select/Operate/Direct Operate\n    0x0D,  # Cold Restart\n    0x0E,  # Warm Restart\n    0x0F,  # Initialize Data\n    0x10,  # Initialize Application\n    0x12,  # Stop Application\n    0x19, 0x1A, 0x1B,  # File operations (firmware update)\n}\n\n\nclass DNP3AnomalyDetector:\n    \"\"\"Detects anomalies in DNP3 protocol communications.\"\"\"\n\n    def __init__(self, baseline_file: Optional[str] = None):\n        self.alerts = []\n        self.sessions = defaultdict(lambda: {\n            \"packet_count\": 0,\n            \"function_codes\": defaultdict(int),\n            \"control_commands\": 0,\n            \"file_operations\": 0,\n            \"restarts\": 0,\n        })\n        self.packet_count = 0\n        self.dnp3_count = 0\n\n        self.authorized_masters: Set[str] = set()\n        self.authorized_pairs: Dict[str, Set[str]] = defaultdict(set)\n        self.baseline_functions: Dict[str, Set[int]] = defaultdict(set)\n\n        if baseline_file:\n            self.load_baseline(baseline_file)\n\n    def load_baseline(self, filepath: str):\n        \"\"\"Load DNP3 communication baseline.\"\"\"\n        with open(filepath, \"r\") as f:\n            baseline = json.load(f)\n\n        for entry in baseline.get(\"authorized_communications\", []):\n            master = entry[\"master_ip\"]\n            outstation = entry[\"outstation_ip\"]\n            self.authorized_masters.add(master)\n            self.authorized_pairs[master].add(outstation)\n            self.baseline_functions[f\"{master}->{outstation}\"] = set(\n                entry.get(\"expected_function_codes\", [0x00, 0x01])\n            )\n\n    def parse_dnp3_header(self, payload: bytes) -> Optional[dict]:\n        \"\"\"Parse DNP3 data link layer and transport/application headers.\"\"\"\n        if len(payload) \u003c 10:\n            return None\n\n        # DNP3 Data Link Layer: start(2) + length(1) + control(1) + dest(2) + source(2) + crc(2)\n        start_bytes = struct.unpack(\">H\", payload[0:2])[0]\n        if start_bytes != 0x0564:\n            return None\n\n        length = payload[2]\n        control = payload[3]\n        dest_addr = struct.unpack(\"\u003cH\", payload[4:6])[0]\n        source_addr = struct.unpack(\"\u003cH\", payload[6:8])[0]\n\n        direction = \"Master->Outstation\" if (control & 0x80) else \"Outstation->Master\"\n\n        result = {\n            \"length\": length,\n            \"control\": control,\n            \"direction\": direction,\n            \"dest_addr\": dest_addr,\n            \"source_addr\": source_addr,\n            \"is_master\": bool(control & 0x80),\n        }\n\n        # Parse transport and application layer (after CRC bytes)\n        if len(payload) >= 12:\n            transport_header = payload[10]\n            if len(payload) >= 13:\n                app_control = payload[11]\n                func_code = payload[12]\n                result[\"function_code\"] = func_code\n                result[\"function_name\"] = DNP3_FUNCTIONS.get(\n                    func_code, f\"Unknown (0x{func_code:02x})\"\n                )\n\n        return result\n\n    def analyze_packet(self, pkt):\n        \"\"\"Analyze a packet for DNP3 anomalies.\"\"\"\n        self.packet_count += 1\n\n        if not pkt.haslayer(IP) or not pkt.haslayer(TCP):\n            return\n\n        tcp = pkt[TCP]\n        if tcp.dport != 20000 and tcp.sport != 20000:\n            return\n\n        payload = bytes(tcp.payload)\n        if not payload:\n            return\n\n        dnp3 = self.parse_dnp3_header(payload)\n        if not dnp3:\n            return\n\n        self.dnp3_count += 1\n        src_ip = pkt[IP].src\n        dst_ip = pkt[IP].dst\n        session_key = f\"{src_ip}->{dst_ip}\"\n        session = self.sessions[session_key]\n        session[\"packet_count\"] += 1\n\n        func_code = dnp3.get(\"function_code\")\n        if func_code is not None:\n            session[\"function_codes\"][func_code] += 1\n\n            # Detection 1: Unauthorized DNP3 master\n            if dnp3.get(\"is_master\") and self.authorized_masters:\n                if src_ip not in self.authorized_masters:\n                    self.alerts.append({\n                        \"severity\": \"CRITICAL\",\n                        \"type\": \"UNAUTHORIZED_DNP3_MASTER\",\n                        \"src\": src_ip, \"dst\": dst_ip,\n                        \"function\": dnp3.get(\"function_name\"),\n                        \"description\": f\"Unauthorized DNP3 master {src_ip} communicating with outstation {dst_ip}\",\n                        \"mitre\": \"T0869 - Standard Application Layer Protocol\",\n                    })\n\n            # Detection 2: Cold/Warm restart command\n            if func_code in (0x0D, 0x0E):\n                session[\"restarts\"] += 1\n                restart_type = \"Cold\" if func_code == 0x0D else \"Warm\"\n                self.alerts.append({\n                    \"severity\": \"CRITICAL\",\n                    \"type\": \"DNP3_RESTART_COMMAND\",\n                    \"src\": src_ip, \"dst\": dst_ip,\n                    \"function\": f\"{restart_type} Restart\",\n                    \"description\": f\"{restart_type} restart command sent to outstation {dst_ip} (addr {dnp3['dest_addr']})\",\n                    \"mitre\": \"T0816 - Device Restart/Shutdown\",\n                })\n\n            # Detection 3: File operations (potential firmware update)\n            if func_code in (0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E):\n                session[\"file_operations\"] += 1\n                self.alerts.append({\n                    \"severity\": \"CRITICAL\",\n                    \"type\": \"DNP3_FILE_OPERATION\",\n                    \"src\": src_ip, \"dst\": dst_ip,\n                    \"function\": dnp3.get(\"function_name\"),\n                    \"description\": f\"File operation on outstation {dst_ip} - potential firmware update or PIPEDREAM indicator\",\n                    \"mitre\": \"T0839 - Module Firmware\",\n                })\n\n            # Detection 4: Control commands (Select/Operate)\n            if func_code in (0x03, 0x04, 0x05, 0x06):\n                session[\"control_commands\"] += 1\n                if session_key in self.baseline_functions:\n                    if func_code not in self.baseline_functions[session_key]:\n                        self.alerts.append({\n                            \"severity\": \"HIGH\",\n                            \"type\": \"UNEXPECTED_CONTROL_COMMAND\",\n                            \"src\": src_ip, \"dst\": dst_ip,\n                            \"function\": dnp3.get(\"function_name\"),\n                            \"description\": f\"Control command {dnp3.get('function_name')} not in baseline for {session_key}\",\n                            \"mitre\": \"T0855 - Unauthorized Command Message\",\n                        })\n\n            # Detection 5: Anomalous function code for this pair\n            if session_key in self.baseline_functions:\n                if func_code not in self.baseline_functions[session_key]:\n                    if func_code not in (0x00, 0x81, 0x82):  # Exclude common response codes\n                        self.alerts.append({\n                            \"severity\": \"MEDIUM\",\n                            \"type\": \"ANOMALOUS_FUNCTION_CODE\",\n                            \"src\": src_ip, \"dst\": dst_ip,\n                            \"function\": dnp3.get(\"function_name\"),\n                            \"description\": f\"Function code 0x{func_code:02x} not in baseline\",\n                            \"mitre\": \"T0855 - Unauthorized Command Message\",\n                        })\n\n    def generate_report(self):\n        \"\"\"Generate DNP3 anomaly detection report.\"\"\"\n        print(f\"\\n{'='*70}\")\n        print(\"DNP3 PROTOCOL ANOMALY DETECTION REPORT\")\n        print(f\"{'='*70}\")\n        print(f\"Analysis Time: {datetime.now().isoformat()}\")\n        print(f\"Total Packets: {self.packet_count}\")\n        print(f\"DNP3 Packets: {self.dnp3_count}\")\n        print(f\"Alerts: {len(self.alerts)}\")\n\n        print(f\"\\n--- DNP3 SESSION SUMMARY ---\")\n        for key, session in self.sessions.items():\n            print(f\"\\n  {key}\")\n            print(f\"    Packets: {session['packet_count']}\")\n            funcs = [DNP3_FUNCTIONS.get(f, f\"0x{f:02x}\") for f in session[\"function_codes\"]]\n            print(f\"    Functions: {', '.join(funcs)}\")\n            print(f\"    Control Commands: {session['control_commands']}\")\n            print(f\"    File Operations: {session['file_operations']}\")\n            print(f\"    Restart Commands: {session['restarts']}\")\n\n        if self.alerts:\n            print(f\"\\n--- ALERTS ---\")\n            for alert in self.alerts:\n                print(f\"\\n  [{alert['severity']}] {alert['type']}\")\n                print(f\"    {alert['src']} -> {alert['dst']}\")\n                print(f\"    Function: {alert['function']}\")\n                print(f\"    Detail: {alert['description']}\")\n                print(f\"    MITRE ICS: {alert.get('mitre', 'N/A')}\")\n\n\nif __name__ == \"__main__\":\n    detector = DNP3AnomalyDetector(\n        baseline_file=sys.argv[2] if len(sys.argv) > 2 else None\n    )\n\n    if len(sys.argv) >= 2:\n        print(f\"[*] Analyzing: {sys.argv[1]}\")\n        packets = rdpcap(sys.argv[1])\n        for pkt in packets:\n            detector.analyze_packet(pkt)\n        detector.generate_report()\n    else:\n        print(\"Usage: python dnp3_detector.py \u003ccapture.pcap> [baseline.json]\")\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| DNP3 | Distributed Network Protocol version 3, the predominant SCADA protocol in the energy sector for communication between masters and outstations |\n| Outstation | DNP3 slave device (typically an RTU or IED) that responds to master station polls and commands |\n| Select-Before-Operate | DNP3 safety mechanism requiring a Select command before an Operate, preventing accidental control actions |\n| Cold Restart (FC 0x0D) | DNP3 command that fully restarts an outstation, resetting all configuration -- a high-risk denial-of-service operation |\n| DNP3 Secure Authentication | Optional DNP3 extension (SA v5) adding HMAC-based authentication to prevent command spoofing |\n| PIPEDREAM | ICS attack framework with DNP3 capabilities for manipulating outstations and performing firmware updates |\n\n## Output Format\n\n```\nDNP3 ANOMALY DETECTION REPORT\n================================\nAnalysis Period: [start] to [end]\nMonitoring Point: [substation/segment]\n\nTRAFFIC SUMMARY:\n  DNP3 Packets: [count]\n  Unique Master-Outstation Pairs: [count]\n  Control Commands: [count]\n  File Operations: [count]\n\nALERTS:\n  [CRITICAL] Unauthorized DNP3 master [IP]\n  [CRITICAL] Cold restart command to outstation [addr]\n  [HIGH] Unexpected control command from [IP]\n\nRECOMMENDATIONS:\n  1. Deploy DNP3 Secure Authentication (SA v5)\n  2. Block unauthorized sources at firewall\n  3. Enable DNP3 DPI on industrial firewall\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("detecting-dnp3-protocol-anomalies-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Utility Update Pm Skills - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/utility-update-pm-skills-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / PM operations, communication, and utilities</div>
+      <h1>Utility Update Pm Skills</h1>
+      <p class="description">Checks for newer pm-skills releases, compares local vs. latest version, previews what would change, and updates local files after user confirmation. Generates a structured update report documenting changed files, new capabilities, and the value delta between versions. Use when you want to bring a local pm-skills installation up to date.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>PM operations, communication, and utilities</span></div>
+<div class="meta-card"><strong>display name</strong><span>utility-update-pm-skills</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>pm-skills-utility-update-pm-skills</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Checks for newer pm-skills releases, compares local vs. latest version, previews what would change, and updates local files after user confirmation. Generates a structured update report documenting changed files, new capabilities, and the value delta between versions. Use when you want to bring a local pm-skills installation up to date.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose utility-update-pm-skills, then write the task. Fallback prompt: Use the utility-update-pm-skills skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <p>&lt;!-- PM-Skills | https://github.com/product-on-purpose/pm-skills | Apache 2.0 --&gt;</p>
+<h2>PM Skills Updater</h2>
+<p>This skill updates a local pm-skills installation to the latest public release. It validates connectivity, compares versions, previews changes, and produces a structured report documenting what was updated and what new capabilities are available.</p>
+<h3>When to Use</h3>
+<ul>
+<li>When you want to update local pm-skills to the latest release</li>
+<li>When you want to check if a newer version is available</li>
+<li>After a new pm-skills release is announced</li>
+<li>When onboarding and you want to confirm you have the latest version</li>
+</ul>
+<h3>When NOT to Use</h3>
+<ul>
+<li>To create or edit individual skills -&gt; use <code>utility-pm-skill-builder</code> or <code>utility-pm-skill-iterate</code></li>
+<li>To validate skills against conventions -&gt; use <code>utility-pm-skill-validate</code></li>
+<li>If you are a maintainer working directly on the pm-skills repo (use git)</li>
+<li>To pin a specific older version (this skill always targets the latest release)</li>
+</ul>
+<h3>Flags</h3>
+<p>| Flag | Behavior | |------|----------| | <em>(none)</em> | Full update flow: pre-flight → preview → confirm → update → report | | <code>--report-only</code> | Pre-flight → preview → report (no files written) | | <code>--status</code> | Lightweight version check . prints current and latest version, then stops |</p>
+<h4>--status behavior</h4>
+<p>When <code>--status</code> is provided, run only the pre-flight checks and display:</p>
+<pre><code>pm-skills v{local} (installed, from {source})
+pm-skills v{latest} (latest, released {date})
+{Status: up to date | update available ({type})}
+
+Run utility-update-pm-skills for details, or utility-update-pm-skills --report-only for a preview.</code></pre>
+<p>No report file is generated. No files are written.</p>
+<h3>Instructions</h3>
+<p>When asked to update pm-skills (without <code>--status</code>), follow these steps:</p>
+<h4>Step 1: Pre-Flight</h4>
+<p>Run three checks before proceeding:</p>
+<ol>
+<li><strong>Network access</strong>: Reach the GitHub API or repository URL</li>
+</ol>
+<p>(<code>https://github.com/product-on-purpose/pm-skills</code>). Use any available method: <code>curl</code>, <code>wget</code>, GitHub CLI (<code>gh</code>), or MCP tools.</p>
+<ol>
+<li><strong>Latest version</strong>: Query the latest release using this fallback chain</li>
+</ol>
+<p>(try each in order, use the first that succeeds):</p>
+<ol>
+<li>GitHub API: <code>GET /repos/product-on-purpose/pm-skills/releases/latest</code></li>
+<li>GitHub CLI: <code>gh release list --repo product-on-purpose/pm-skills --limit 1</code></li>
+<li>Git: <code>git ls-remote --tags https://github.com/product-on-purpose/pm-skills.git</code></li>
+</ol>
+<p>If all three fail (rate limiting, 404, malformed response, no network), enter degraded mode (see below).</p>
+<p>Record: version string, release date, release notes URL, release notes body.</p>
+<ol>
+<li><strong>Local version</strong>: Read from the first available source:</li>
+</ol>
+<ul>
+<li><code>.claude-plugin/plugin.json</code> → <code>version</code> field</li>
+<li><code>marketplace.json</code> → <code>plugins[0].version</code> field</li>
+<li><code>CHANGELOG.md</code> → most recent version header</li>
+<li>Git tags → most recent <code>v*</code> tag</li>
+</ul>
+<p><strong>Version parsing:</strong> Normalize by stripping an optional <code>v</code> prefix and trimming whitespace. If a source is present but yields an empty, non-semver, or malformed string (invalid JSON, missing field), skip it with a warning and try the next source. Only fall back to <code>0.0.0</code> after all four sources fail.</p>
+<p><strong>If network access fails</strong> (degraded mode):</p>
+<ul>
+<li>Report the failure with error details.</li>
+<li>Provide manual update instructions:</li>
+</ul>
+<blockquote>Visit https://github.com/product-on-purpose/pm-skills/releases to</blockquote>
+<blockquote>download the latest release. Extract the archive and copy the</blockquote>
+<blockquote><code>skills/</code>, <code>commands/</code>, <code>_workflows/</code>, and other content directories</blockquote>
+<blockquote>to your local pm-skills installation.</blockquote>
+<ul>
+<li>Stop execution.</li>
+</ul>
+<h4>Step 2: Version Comparison</h4>
+<p>Compare the local version against the latest release using semver.</p>
+<p><strong>If local version &gt;= latest version:</strong></p>
+<ul>
+<li>Report: &quot;Your pm-skills installation is up to date (v{local}).&quot;</li>
+<li>Offer to generate a report-only anyway.</li>
+<li>Stop execution.</li>
+</ul>
+<p><strong>If local version &lt; latest version:</strong></p>
+<ul>
+<li>Show the version delta:</li>
+</ul>
+<pre><code>  Local version:  v{local}
+  Latest version: v{latest}
+  Update type:    {major | minor | patch}</code></pre>
+<ul>
+<li><strong>Major version warning</strong>: If the update is a major bump (e.g., v2.x</li>
+</ul>
+<p>to v3.x), show a prominent warning:</p>
+<blockquote>This is a major version update. It may include breaking changes to</blockquote>
+<blockquote>skill contracts. Review the release notes before proceeding.</blockquote>
+<ul>
+<li>Continue to Step 3.</li>
+</ul>
+<h4>Step 3: Preview</h4>
+<p>Show the user what the update includes:</p>
+<ol>
+<li><strong>Version delta</strong>: local version, latest version, update type.</li>
+</ol>
+<ol>
+<li><strong>Value summary</strong>: Derive from CHANGELOG entries between the two</li>
+</ol>
+<p>versions, GitHub release notes, and directory diffs (new skills/, new _workflows/ files):</p>
+<ul>
+<li>New skills and what they enable</li>
+<li>Updated skills and what improved</li>
+<li>New workflows and what they connect</li>
+<li>Other notable changes</li>
+</ul>
+<ol>
+<li><strong>File manifest</strong>: List of files and folders that will be written,</li>
+</ol>
+<p>grouped by directory with counts:</p>
+<pre><code>   Files to be written:
+     skills/       31 files (2 new, 29 updated)
+     commands/     38 files (2 new, 36 updated)
+     _workflows/    9 files (1 new, 8 updated)
+     other          7 files
+     Total:        85 files</code></pre>
+<p><strong>If <code>--report-only</code>:</strong> Generate the report using <code>references/TEMPLATE.md</code> with the banner &quot;Report only . update was not applied.&quot; Save to <code>_pm-skills/updates/update-report_v{latest}_report-only_{YYYY-MM-DD_HHMMSS}.md</code>. Stop execution.</p>
+<h4>Step 4: Confirmation</h4>
+<p>Prompt the user for two decisions:</p>
+<ol>
+<li><strong>Update confirmation</strong>:</li>
+</ol>
+<p>&quot;These files will be overwritten. Proceed? [yes / no]&quot;</p>
+<ul>
+<li>If major version bump: require typing &quot;yes&quot; explicitly.</li>
+<li>If the user declines: save a report-only and stop.</li>
+</ul>
+<ol>
+<li><strong>Backup offer</strong>:</li>
+</ol>
+<p>&quot;Create a backup of current files before updating? [yes (recommended) / no]&quot;</p>
+<ul>
+<li>If yes: copy all in-scope files to</li>
+</ul>
+<p><code>_pm-skills/backups/v{current}_{YYYY-MM-DD_HHMMSS}/</code></p>
+<ul>
+<li>Create the <code>_pm-skills/</code> directory if it doesn't exist.</li>
+</ul>
+<h4>Step 5: Update</h4>
+<p>Execute the update using validated-before-copy with backup:</p>
+<ol>
+<li><strong>Download</strong>: Fetch the release ZIP asset (<code>pm-skills-vX.Y.Z.zip</code>)</li>
+</ol>
+<p>from the GitHub Release page to a temporary directory. This is the curated build artifact produced by <code>build-release.sh</code> . it includes only user-facing content and excludes <code>docs/internal/</code>.</p>
+<ol>
+<li><strong>Validate</strong>: Confirm the extracted archive contains <code>skills/</code>,</li>
+</ol>
+<p><code>commands/</code>, <code>AGENTS.md</code>, and <code>.claude-plugin/plugin.json</code>. If validation fails, report the error and stop without writing any files.</p>
+<ol>
+<li><strong>Copy</strong>: Overwrite in-scope files from the extracted archive to the</li>
+</ol>
+<p>install root. Show progress per directory:</p>
+<pre><code>   Updating pm-skills v2.9.0 -&gt; v2.10.0...
+     skills/       31/31 ████████████████████  done
+     commands/     38/38 ████████████████████  done
+     _workflows/    9/9  ████████████████████  done
+     other files    7/7  ████████████████████  done</code></pre>
+<ol>
+<li><strong>Clean up</strong>: Remove the temporary directory.</li>
+</ol>
+<h4>Step 6: Post-Update</h4>
+<ol>
+<li><strong>Smoke test</strong>:</li>
+</ol>
+<ul>
+<li>Version consistency: <code>plugin.json</code>, <code>marketplace.json</code>, and</li>
+</ul>
+<p><code>CHANGELOG.md</code> all reflect the new version. (Note: version detection in Step 1 uses first-match; the smoke test verifies all sources agree. A mismatch here suggests a release packaging issue.)</p>
+<ul>
+<li>File integrity: <code>AGENTS.md</code>, <code>skills/</code>, <code>commands/</code>, <code>_workflows/</code></li>
+</ul>
+<p>all exist.</p>
+<ul>
+<li>Skill count delta: count skills before and after, report the change.</li>
+<li>If any check fails: warn the user with specific details. Do NOT</li>
+</ul>
+<p>auto-rollback. Provide recovery guidance:</p>
+<ul>
+<li><strong>Version mismatch</strong>: &quot;Run the update again, or manually edit</li>
+</ul>
+<p>{file} to set the version to {expected}.&quot;</p>
+<ul>
+<li><strong>Missing files</strong>: &quot;Re-run <code>utility-update-pm-skills</code> to re-download,</li>
+</ul>
+<p>or restore from backup: <code>cp -r _pm-skills/backups/{dir}/* .</code>&quot;</p>
+<ul>
+<li><strong>If backup exists</strong>: Always remind the user of the backup</li>
+</ul>
+<p>location and restore command.</p>
+<ol>
+<li><strong>Summary line</strong>: Show a single scannable confirmation:</li>
+</ol>
+<pre><code>   Updated v{old} -&gt; v{new} | +{n} skills, +{n} workflows | Report: _pm-skills/updates/{file}</code></pre>
+<ol>
+<li><strong>Completion report</strong>: Generate using <code>references/TEMPLATE.md</code> and</li>
+</ol>
+<p>save to <code>_pm-skills/updates/update-report_v{from}-to-v{to}_{YYYY-MM-DD_HHMMSS}.md</code></p>
+<ol>
+<li><strong>MCP advisory</strong>: If <code>../pm-skills-mcp/</code> exists, try to read</li>
+</ol>
+<p><code>pm-skills-source.json</code>. If the file is missing or malformed, show: &quot;pm-skills-mcp detected but pm-skills-source.json not found or unreadable. Check the MCP repo manually.&quot; If readable, show:</p>
+<pre><code>   pm-skills-mcp detected at ../pm-skills-mcp/
+     Embedded skills version: v{embedded}
+     Updated pm-skills version: v{new}
+
+     To update the MCP server's embedded skills:
+       cd ../pm-skills-mcp &amp;&amp; npm run embed-skills &amp;&amp; npm run build</code></pre>
+<ol>
+<li><strong>Next steps</strong>:</li>
+</ol>
+<pre><code>   Next Steps:
+   - Review the update report at _pm-skills/updates/{report-file}
+   - Run utility-pm-skill-validate --all to verify skill integrity
+   - Run local CI: bash scripts/lint-skills-frontmatter.sh
+   - Check release notes: {release-url}</code></pre>
+<h3>File Scope</h3>
+<p>The updater writes only files present in the release ZIP asset (<code>pm-skills-vX.Y.Z.zip</code>), which is the curated build produced by <code>build-release.sh</code>. The ZIP excludes <code>docs/internal/</code> and other non-user-facing content . no exclusion logic is needed at copy time.</p>
+<p><strong>Files included in the release ZIP (updated):</strong></p>
+<p>| Path | Rationale | |------|-----------| | <code>skills/</code> | Core skill files | | <code>commands/</code> | Slash command definitions | | <code>_workflows/</code> | Workflow chains | | <code>library/</code> | Sample library and skill output samples (note: user-added samples may be overwritten) | | <code>AGENTS.md</code> | Skill discovery for IDEs | | <code>.claude-plugin/plugin.json</code> | Version + plugin metadata | | <code>marketplace.json</code> | Marketplace metadata | | <code>CHANGELOG.md</code> | Release history | | <code>README.md</code> | Public docs | | <code>docs/</code> (public guides, reference, workflows) | User-facing documentation | | <code>scripts/</code> | CI/validation scripts | | <code>mkdocs.yml</code> | Docs site config |</p>
+<p><strong>Files NOT in the release ZIP (never overwritten):</strong></p>
+<p>| Path | Rationale | |------|-----------| | <code>docs/internal/</code> | Excluded from ZIP by <code>build-release.sh</code> | | <code>_NOTES/</code> | Local-only, gitignored, not in ZIP | | <code>_pm-skills/</code> | Local state (reports, backups), not in ZIP | | <code>.github/</code> | CI workflows, not in ZIP | | <code>CONTRIBUTING.md</code>, <code>LICENSE</code> | Not in ZIP (repo-level files) |</p>
+<h3>Output Contract</h3>
+<p>The skill MUST:</p>
+<ul>
+<li>Validate network access before any remote operations</li>
+<li>Show a preview before writing any files</li>
+<li>Require explicit user confirmation before overwriting</li>
+<li>Offer a backup before overwriting</li>
+<li>Use validated-before-copy (download to temp, validate, then copy; backup is the recovery path for mid-copy failures)</li>
+<li>Generate a report in both modes (report-only and completion)</li>
+<li>Run the post-update smoke test</li>
+<li>Show MCP advisory if sibling repo is detected</li>
+</ul>
+<p>The skill MUST NOT:</p>
+<ul>
+<li>Write files without user confirmation</li>
+<li>Proceed without network access confirmation</li>
+<li>Modify files outside the pm-skills directory</li>
+<li>Modify <code>docs/internal/</code>, <code>_NOTES/</code>, or <code>_pm-skills/</code> with upstream content</li>
+<li>Auto-rollback on smoke test failure (inform the user instead)</li>
+<li>Delete local files that don't exist in the upstream release</li>
+</ul>
+<h3>Quality Checklist</h3>
+<p>Before marking the update complete, verify:</p>
+<ul>
+<li>[ ] Pre-flight passed: network, versions detected</li>
+<li>[ ] User was shown preview before any files were written</li>
+<li>[ ] User explicitly confirmed before update proceeded</li>
+<li>[ ] Backup was offered (and created if accepted)</li>
+<li>[ ] Archive was downloaded to temp and validated before copying</li>
+<li>[ ] All in-scope files were written successfully</li>
+<li>[ ] Version consistency: plugin.json, marketplace.json, CHANGELOG match</li>
+<li>[ ] File integrity: AGENTS.md, skills/, commands/, _workflows/ exist</li>
+<li>[ ] Skill count delta is reported (before -&gt; after)</li>
+<li>[ ] Report was generated and saved to <code>_pm-skills/updates/</code></li>
+<li>[ ] MCP advisory was shown if sibling repo detected</li>
+<li>[ ] Next steps were presented</li>
+<li>[ ] Summary line displayed</li>
+</ul>
+<h3>FAQ</h3>
+<p><strong>I'm a contributor who cloned the repo. Should I use this skill?</strong> No. Use <code>git pull</code> or <code>git fetch &amp;&amp; git merge</code> instead. This skill is for end users who installed pm-skills as a plugin or downloaded a release.</p>
+<p><strong>Can I update to a specific version instead of the latest?</strong> Not in v1. This skill always targets the latest release. To install a specific version, download it manually from the releases page.</p>
+<p><strong>What happens to my local notes and planning docs?</strong> They are never touched. The skill explicitly excludes <code>docs/internal/</code>, <code>_NOTES/</code>, and <code>_pm-skills/</code> from updates. See the File Scope table.</p>
+<p><strong>What happens to files I added that aren't in the upstream release?</strong> They are left untouched. The skill only overwrites files that exist in the new release . it never deletes local files.</p>
+<p><strong>How do I undo an update?</strong> If you created a backup (the default offer), restore it: <code>cp -r _pm-skills/backups/v{version}_{timestamp}/* .</code> If you didn't create a backup but have git, use <code>git checkout .</code> to restore tracked files to their last committed state.</p>
+<p><strong>The update failed partway through. What do I do?</strong> The skill validates before copying (download to temp, check, then write), so partial failures are rare. If it does happen: restore from backup if available, or re-run <code>utility-update-pm-skills</code> to retry.</p>
+<h3>Further Reading</h3>
+<p>For a visual walkthrough and additional context, see the [Updating PM Skills Guide](../../docs/guides/updating-pm-skills.md).</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: pm-skills-utility-update-pm-skills\ndisplay_name: utility-update-pm-skills\nplatform: Codex\ncategory: PM operations, communication, and utilities\n---\n\n# utility-update-pm-skills - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `utility-update-pm-skills` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nThis skill updates a local pm-skills installation to the latest public\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose utility-update-pm-skills, then write the task. Fallback prompt: Use the utility-update-pm-skills skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `utility-update-pm-skills` |\n| Canonical name | `pm-skills-utility-update-pm-skills` |\n| Platform | `Codex` |\n| Category | PM operations, communication, and utilities |\n\n## Description\n\nThis skill updates a local pm-skills installation to the latest public\n\n## Original SKILL.md\n\n---\nname: pm-skills-utility-update-pm-skills\ndescription: Checks for newer pm-skills releases, compares local vs. latest version, previews what would change, and updates local files after user confirmation. Generates a structured update report documenting changed files, new capabilities, and the value delta between versions. Use when you want to bring a local pm-skills installation up to date.\nlicense: Apache-2.0\nmetadata:\n  classification: utility\n  version: \"1.0.0\"\n  updated: 2026-04-09\n  category: coordination\n  frameworks: [triple-diamond]\n  author: product-on-purpose\n---\n\u003c!-- PM-Skills | https://github.com/product-on-purpose/pm-skills | Apache 2.0 -->\n\n# PM Skills Updater\n\nThis skill updates a local pm-skills installation to the latest public\nrelease. It validates connectivity, compares versions, previews changes,\nand produces a structured report documenting what was updated and what\nnew capabilities are available.\n\n## When to Use\n\n- When you want to update local pm-skills to the latest release\n- When you want to check if a newer version is available\n- After a new pm-skills release is announced\n- When onboarding and you want to confirm you have the latest version\n\n## When NOT to Use\n\n- To create or edit individual skills -> use `utility-pm-skill-builder` or `utility-pm-skill-iterate`\n- To validate skills against conventions -> use `utility-pm-skill-validate`\n- If you are a maintainer working directly on the pm-skills repo (use git)\n- To pin a specific older version (this skill always targets the latest release)\n\n## Flags\n\n| Flag | Behavior |\n|------|----------|\n| *(none)* | Full update flow: pre-flight → preview → confirm → update → report |\n| `--report-only` | Pre-flight → preview → report (no files written) |\n| `--status` | Lightweight version check . prints current and latest version, then stops |\n\n### --status behavior\n\nWhen `--status` is provided, run only the pre-flight checks and display:\n\n```\npm-skills v{local} (installed, from {source})\npm-skills v{latest} (latest, released {date})\n{Status: up to date | update available ({type})}\n\nRun utility-update-pm-skills for details, or utility-update-pm-skills --report-only for a preview.\n```\n\nNo report file is generated. No files are written.\n\n## Instructions\n\nWhen asked to update pm-skills (without `--status`), follow these steps:\n\n### Step 1: Pre-Flight\n\nRun three checks before proceeding:\n\n1. **Network access**: Reach the GitHub API or repository URL\n   (`https://github.com/product-on-purpose/pm-skills`). Use any\n   available method: `curl`, `wget`, GitHub CLI (`gh`), or MCP tools.\n\n2. **Latest version**: Query the latest release using this fallback chain\n   (try each in order, use the first that succeeds):\n   1. GitHub API: `GET /repos/product-on-purpose/pm-skills/releases/latest`\n   2. GitHub CLI: `gh release list --repo product-on-purpose/pm-skills --limit 1`\n   3. Git: `git ls-remote --tags https://github.com/product-on-purpose/pm-skills.git`\n\n   If all three fail (rate limiting, 404, malformed response, no network),\n   enter degraded mode (see below).\n\n   Record: version string, release date, release notes URL, release notes body.\n\n3. **Local version**: Read from the first available source:\n   - `.claude-plugin/plugin.json` → `version` field\n   - `marketplace.json` → `plugins[0].version` field\n   - `CHANGELOG.md` → most recent version header\n   - Git tags → most recent `v*` tag\n\n   **Version parsing:** Normalize by stripping an optional `v` prefix and\n   trimming whitespace. If a source is present but yields an empty,\n   non-semver, or malformed string (invalid JSON, missing field), skip it\n   with a warning and try the next source. Only fall back to `0.0.0`\n   after all four sources fail.\n\n**If network access fails** (degraded mode):\n- Report the failure with error details.\n- Provide manual update instructions:\n  > Visit https://github.com/product-on-purpose/pm-skills/releases to\n  > download the latest release. Extract the archive and copy the\n  > `skills/`, `commands/`, `_workflows/`, and other content directories\n  > to your local pm-skills installation.\n- Stop execution.\n\n### Step 2: Version Comparison\n\nCompare the local version against the latest release using semver.\n\n**If local version >= latest version:**\n- Report: \"Your pm-skills installation is up to date (v{local}).\"\n- Offer to generate a report-only anyway.\n- Stop execution.\n\n**If local version \u003c latest version:**\n- Show the version delta:\n  ```\n  Local version:  v{local}\n  Latest version: v{latest}\n  Update type:    {major | minor | patch}\n  ```\n- **Major version warning**: If the update is a major bump (e.g., v2.x\n  to v3.x), show a prominent warning:\n  > This is a major version update. It may include breaking changes to\n  > skill contracts. Review the release notes before proceeding.\n- Continue to Step 3.\n\n### Step 3: Preview\n\nShow the user what the update includes:\n\n1. **Version delta**: local version, latest version, update type.\n\n2. **Value summary**: Derive from CHANGELOG entries between the two\n   versions, GitHub release notes, and directory diffs (new skills/,\n   new _workflows/ files):\n   - New skills and what they enable\n   - Updated skills and what improved\n   - New workflows and what they connect\n   - Other notable changes\n\n3. **File manifest**: List of files and folders that will be written,\n   grouped by directory with counts:\n   ```\n   Files to be written:\n     skills/       31 files (2 new, 29 updated)\n     commands/     38 files (2 new, 36 updated)\n     _workflows/    9 files (1 new, 8 updated)\n     other          7 files\n     Total:        85 files\n   ```\n\n**If `--report-only`:** Generate the report using `references/TEMPLATE.md`\nwith the banner \"Report only . update was not applied.\" Save to\n`_pm-skills/updates/update-report_v{latest}_report-only_{YYYY-MM-DD_HHMMSS}.md`. Stop\nexecution.\n\n### Step 4: Confirmation\n\nPrompt the user for two decisions:\n\n1. **Update confirmation**:\n   \"These files will be overwritten. Proceed? [yes / no]\"\n   - If major version bump: require typing \"yes\" explicitly.\n   - If the user declines: save a report-only and stop.\n\n2. **Backup offer**:\n   \"Create a backup of current files before updating?\n   [yes (recommended) / no]\"\n   - If yes: copy all in-scope files to\n     `_pm-skills/backups/v{current}_{YYYY-MM-DD_HHMMSS}/`\n   - Create the `_pm-skills/` directory if it doesn't exist.\n\n### Step 5: Update\n\nExecute the update using validated-before-copy with backup:\n\n1. **Download**: Fetch the release ZIP asset (`pm-skills-vX.Y.Z.zip`)\n   from the GitHub Release page to a temporary directory. This is the\n   curated build artifact produced by `build-release.sh` . it includes\n   only user-facing content and excludes `docs/internal/`.\n\n2. **Validate**: Confirm the extracted archive contains `skills/`,\n   `commands/`, `AGENTS.md`, and `.claude-plugin/plugin.json`. If\n   validation fails, report the error and stop without writing any files.\n\n3. **Copy**: Overwrite in-scope files from the extracted archive to the\n   install root. Show progress per directory:\n   ```\n   Updating pm-skills v2.9.0 -> v2.10.0...\n     skills/       31/31 ████████████████████  done\n     commands/     38/38 ████████████████████  done\n     _workflows/    9/9  ████████████████████  done\n     other files    7/7  ████████████████████  done\n   ```\n\n4. **Clean up**: Remove the temporary directory.\n\n### Step 6: Post-Update\n\n1. **Smoke test**:\n   - Version consistency: `plugin.json`, `marketplace.json`, and\n     `CHANGELOG.md` all reflect the new version. (Note: version detection\n     in Step 1 uses first-match; the smoke test verifies all sources\n     agree. A mismatch here suggests a release packaging issue.)\n   - File integrity: `AGENTS.md`, `skills/`, `commands/`, `_workflows/`\n     all exist.\n   - Skill count delta: count skills before and after, report the change.\n   - If any check fails: warn the user with specific details. Do NOT\n     auto-rollback. Provide recovery guidance:\n     - **Version mismatch**: \"Run the update again, or manually edit\n       {file} to set the version to {expected}.\"\n     - **Missing files**: \"Re-run `utility-update-pm-skills` to re-download,\n       or restore from backup: `cp -r _pm-skills/backups/{dir}/* .`\"\n     - **If backup exists**: Always remind the user of the backup\n       location and restore command.\n\n2. **Summary line**: Show a single scannable confirmation:\n   ```\n   Updated v{old} -> v{new} | +{n} skills, +{n} workflows | Report: _pm-skills/updates/{file}\n   ```\n\n3. **Completion report**: Generate using `references/TEMPLATE.md` and\n   save to `_pm-skills/updates/update-report_v{from}-to-v{to}_{YYYY-MM-DD_HHMMSS}.md`\n\n4. **MCP advisory**: If `../pm-skills-mcp/` exists, try to read\n   `pm-skills-source.json`. If the file is missing or malformed, show:\n   \"pm-skills-mcp detected but pm-skills-source.json not found or\n   unreadable. Check the MCP repo manually.\" If readable, show:\n   ```\n   pm-skills-mcp detected at ../pm-skills-mcp/\n     Embedded skills version: v{embedded}\n     Updated pm-skills version: v{new}\n\n     To update the MCP server's embedded skills:\n       cd ../pm-skills-mcp && npm run embed-skills && npm run build\n   ```\n\n5. **Next steps**:\n   ```\n   Next Steps:\n   - Review the update report at _pm-skills/updates/{report-file}\n   - Run utility-pm-skill-validate --all to verify skill integrity\n   - Run local CI: bash scripts/lint-skills-frontmatter.sh\n   - Check release notes: {release-url}\n   ```\n\n## File Scope\n\nThe updater writes only files present in the release ZIP asset\n(`pm-skills-vX.Y.Z.zip`), which is the curated build produced by\n`build-release.sh`. The ZIP excludes `docs/internal/` and other\nnon-user-facing content . no exclusion logic is needed at copy time.\n\n**Files included in the release ZIP (updated):**\n\n| Path | Rationale |\n|------|-----------|\n| `skills/` | Core skill files |\n| `commands/` | Slash command definitions |\n| `_workflows/` | Workflow chains |\n| `library/` | Sample library and skill output samples (note: user-added samples may be overwritten) |\n| `AGENTS.md` | Skill discovery for IDEs |\n| `.claude-plugin/plugin.json` | Version + plugin metadata |\n| `marketplace.json` | Marketplace metadata |\n| `CHANGELOG.md` | Release history |\n| `README.md` | Public docs |\n| `docs/` (public guides, reference, workflows) | User-facing documentation |\n| `scripts/` | CI/validation scripts |\n| `mkdocs.yml` | Docs site config |\n\n**Files NOT in the release ZIP (never overwritten):**\n\n| Path | Rationale |\n|------|-----------|\n| `docs/internal/` | Excluded from ZIP by `build-release.sh` |\n| `_NOTES/` | Local-only, gitignored, not in ZIP |\n| `_pm-skills/` | Local state (reports, backups), not in ZIP |\n| `.github/` | CI workflows, not in ZIP |\n| `CONTRIBUTING.md`, `LICENSE` | Not in ZIP (repo-level files) |\n\n## Output Contract\n\nThe skill MUST:\n- Validate network access before any remote operations\n- Show a preview before writing any files\n- Require explicit user confirmation before overwriting\n- Offer a backup before overwriting\n- Use validated-before-copy (download to temp, validate, then copy; backup is the recovery path for mid-copy failures)\n- Generate a report in both modes (report-only and completion)\n- Run the post-update smoke test\n- Show MCP advisory if sibling repo is detected\n\nThe skill MUST NOT:\n- Write files without user confirmation\n- Proceed without network access confirmation\n- Modify files outside the pm-skills directory\n- Modify `docs/internal/`, `_NOTES/`, or `_pm-skills/` with upstream content\n- Auto-rollback on smoke test failure (inform the user instead)\n- Delete local files that don't exist in the upstream release\n\n## Quality Checklist\n\nBefore marking the update complete, verify:\n\n- [ ] Pre-flight passed: network, versions detected\n- [ ] User was shown preview before any files were written\n- [ ] User explicitly confirmed before update proceeded\n- [ ] Backup was offered (and created if accepted)\n- [ ] Archive was downloaded to temp and validated before copying\n- [ ] All in-scope files were written successfully\n- [ ] Version consistency: plugin.json, marketplace.json, CHANGELOG match\n- [ ] File integrity: AGENTS.md, skills/, commands/, _workflows/ exist\n- [ ] Skill count delta is reported (before -> after)\n- [ ] Report was generated and saved to `_pm-skills/updates/`\n- [ ] MCP advisory was shown if sibling repo detected\n- [ ] Next steps were presented\n- [ ] Summary line displayed\n\n## FAQ\n\n**I'm a contributor who cloned the repo. Should I use this skill?**\nNo. Use `git pull` or `git fetch && git merge` instead. This skill is\nfor end users who installed pm-skills as a plugin or downloaded a release.\n\n**Can I update to a specific version instead of the latest?**\nNot in v1. This skill always targets the latest release. To install a\nspecific version, download it manually from the releases page.\n\n**What happens to my local notes and planning docs?**\nThey are never touched. The skill explicitly excludes `docs/internal/`,\n`_NOTES/`, and `_pm-skills/` from updates. See the File Scope table.\n\n**What happens to files I added that aren't in the upstream release?**\nThey are left untouched. The skill only overwrites files that exist in\nthe new release . it never deletes local files.\n\n**How do I undo an update?**\nIf you created a backup (the default offer), restore it:\n`cp -r _pm-skills/backups/v{version}_{timestamp}/* .`\nIf you didn't create a backup but have git, use `git checkout .` to\nrestore tracked files to their last committed state.\n\n**The update failed partway through. What do I do?**\nThe skill validates before copying (download to temp, check, then write),\nso partial failures are rare. If it does happen: restore from backup if\navailable, or re-run `utility-update-pm-skills` to retry.\n\n## Further Reading\n\nFor a visual walkthrough and additional context, see the\n[Updating PM Skills Guide](../../docs/guides/updating-pm-skills.md).\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("utility-update-pm-skills-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

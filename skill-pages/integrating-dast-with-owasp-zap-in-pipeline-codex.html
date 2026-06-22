@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>integrating-dast-with-owasp-zap-in-pipeline - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/integrating-dast-with-owasp-zap-in-pipeline-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>integrating-dast-with-owasp-zap-in-pipeline</h1>
+      <p class="description">'This skill covers integrating OWASP ZAP (Zed Attack Proxy) for Dynamic</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>integrating-dast-with-owasp-zap-in-pipeline</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>integrating-dast-with-owasp-zap-in-pipeline</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'This skill covers integrating OWASP ZAP (Zed Attack Proxy) for Dynamic</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose integrating-dast-with-owasp-zap-in-pipeline, then write the task. Fallback prompt: Use the integrating-dast-with-owasp-zap-in-pipeline skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Integrating DAST with OWASP ZAP in Pipeline</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When testing running web applications for vulnerabilities like XSS, SQLi, CSRF, and misconfigurations</li>
+<li>When SAST alone is insufficient and runtime behavior testing is required</li>
+<li>When compliance mandates dynamic security testing of web applications before production</li>
+<li>When testing APIs (REST/GraphQL) for authentication, authorization, and injection flaws</li>
+<li>When establishing continuous DAST scanning in staging environments before production deployment</li>
+</ul>
+<p><strong>Do not use</strong> for scanning source code (use SAST), for scanning dependencies (use SCA), or for infrastructure configuration scanning (use IaC scanning tools).</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>OWASP ZAP Docker image or installed locally (zaproxy/zap-stable or zaproxy/action-*)</li>
+<li>Running target application accessible from the CI/CD runner (staging URL or Docker service)</li>
+<li>ZAP scan rules configuration (optional, for tuning)</li>
+<li>OpenAPI/Swagger specification for API scanning (optional)</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Configure ZAP Baseline Scan in GitHub Actions</h4>
+<pre><code># .github/workflows/dast-scan.yml
+name: DAST Security Scan
+
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'Target URL to scan'
+        required: true
+
+jobs:
+  zap-baseline:
+    name: ZAP Baseline Scan
+    runs-on: ubuntu-latest
+    services:
+      webapp:
+        image: ${{ github.repository }}:${{ github.sha }}
+        ports:
+          - 8080:8080
+        options: --health-cmd=&quot;curl -f http://localhost:8080/health&quot; --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'http://webapp:8080'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j'
+          allow_issue_writing: false
+
+      - name: Upload ZAP Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-baseline-report
+          path: report_html.html</code></pre>
+<h4>Step 2: Configure ZAP Full Scan for Comprehensive Testing</h4>
+<pre><code>  zap-full-scan:
+    name: ZAP Full Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ZAP Full Scan
+        uses: zaproxy/action-full-scan@v0.12.0
+        with:
+          target: ${{ github.event.inputs.target_url || 'https://staging.example.com' }}
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j -T 60'
+
+      - name: Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-full-report
+          path: |
+            report_html.html
+            report_json.json</code></pre>
+<h4>Step 3: Configure API Scan with OpenAPI Specification</h4>
+<pre><code>  zap-api-scan:
+    name: ZAP API Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ZAP API Scan
+        uses: zaproxy/action-api-scan@v0.12.0
+        with:
+          target: 'https://staging.example.com/api/openapi.json'
+          format: openapi
+          rules_file_name: '.zap/api-rules.tsv'
+          cmd_options: '-a -j'</code></pre>
+<h4>Step 4: Configure ZAP Scan Rules</h4>
+<pre><code># .zap/rules.tsv
+# Rule ID	Action (IGNORE/WARN/FAIL)	Description
+10003	IGNORE	# Vulnerable JS Library (handled by SCA)
+10015	WARN	# Incomplete or No Cache-control Header
+10021	FAIL	# X-Content-Type-Options Missing
+10035	FAIL	# Strict-Transport-Security Missing
+10038	FAIL	# Content Security Policy Missing
+10098	IGNORE	# Cross-Domain Misconfiguration (CDN)
+40012	FAIL	# Cross Site Scripting (Reflected)
+40014	FAIL	# Cross Site Scripting (Persistent)
+40018	FAIL	# SQL Injection
+40019	FAIL	# SQL Injection (MySQL)
+40032	FAIL	# .htaccess Information Leak
+90033	FAIL	# Loosely Scoped Cookie</code></pre>
+<h4>Step 5: Run ZAP with Docker Compose for Local Testing</h4>
+<pre><code># docker-compose.zap.yml
+version: '3.8'
+services:
+  webapp:
+    build: .
+    ports:
+      - &quot;8080:8080&quot;
+    healthcheck:
+      test: [&quot;CMD&quot;, &quot;curl&quot;, &quot;-f&quot;, &quot;http://localhost:8080/health&quot;]
+      interval: 10s
+      retries: 5
+
+  zap:
+    image: zaproxy/zap-stable:latest
+    depends_on:
+      webapp:
+        condition: service_healthy
+    command: &gt;
+      zap-baseline.py
+        -t http://webapp:8080
+        -r /zap/wrk/report.html
+        -J /zap/wrk/report.json
+        -c /zap/wrk/rules.tsv
+        -I
+    volumes:
+      - ./zap-reports:/zap/wrk
+      - ./.zap/rules.tsv:/zap/wrk/rules.tsv</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | DAST | Dynamic Application Security Testing — tests running applications by sending requests and analyzing responses | | Baseline Scan | Quick passive scan that spiders the application without active attacks, suitable for CI/CD | | Full Scan | Active scan including attack payloads for XSS, SQLi, and other injection vulnerabilities | | API Scan | Targeted scan using OpenAPI/Swagger specs to test all documented API endpoints | | Spider | ZAP's crawler that discovers application pages and endpoints by following links | | Active Scan | Phase where ZAP sends attack payloads to discovered endpoints to find exploitable vulnerabilities | | Passive Scan | Analysis of HTTP responses for security headers, cookies, and information disclosure without sending attacks | | Scan Policy | Configuration defining which attack types to enable and their intensity levels |</p>
+<h3>Tools &amp; Systems</h3>
+<ul>
+<li><strong>OWASP ZAP</strong>: Open-source web application security scanner for DAST testing</li>
+<li><strong>zaproxy/action-baseline</strong>: GitHub Action for ZAP passive baseline scanning</li>
+<li><strong>zaproxy/action-full-scan</strong>: GitHub Action for ZAP active full scanning</li>
+<li><strong>zaproxy/action-api-scan</strong>: GitHub Action for API-focused scanning with OpenAPI support</li>
+<li><strong>Nuclei</strong>: Alternative vulnerability scanner with template-based detection for CI/CD integration</li>
+</ul>
+<h3>Common Scenarios</h3>
+<h4>Scenario: Integrating DAST into a Staging Deployment Pipeline</h4>
+<p><strong>Context</strong>: A team deploys to staging before production and needs automated DAST scanning between stages to catch runtime vulnerabilities.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Add a DAST job in the pipeline that triggers after successful staging deployment</li>
+<li>Run ZAP baseline scan first for quick passive feedback (2-5 minutes)</li>
+<li>Follow with a targeted API scan using the application's OpenAPI specification</li>
+<li>Configure rules.tsv to FAIL on critical findings (XSS, SQLi) and WARN on headers/cookies</li>
+<li>Upload ZAP reports as pipeline artifacts for review</li>
+<li>Block production deployment if any FAIL-level findings are detected</li>
+<li>Schedule weekly full scans against staging for deeper coverage</li>
+</ol>
+<p><strong>Pitfalls</strong>: ZAP full scans can take 30+ minutes and may overwhelm staging servers with attack traffic. Use baseline scans in CI and full scans on schedule. Running DAST against production without coordination can trigger WAF blocks and incident alerts.</p>
+<h3>Output Format</h3>
+<pre><code>ZAP DAST Scan Report
+======================
+Target: https://staging.example.com
+Scan Type: Baseline + API
+Date: 2026-02-23
+Duration: 4m 32s
+
+FINDINGS:
+  FAIL: 3
+  WARN: 7
+  INFO: 12
+  PASS: 45
+
+FAILING ALERTS:
+  [HIGH] 40012 - Cross Site Scripting (Reflected)
+    URL: https://staging.example.com/search?q=&lt;script&gt;
+    Method: GET
+    Evidence: &lt;script&gt;alert(1)&lt;/script&gt;
+
+  [MEDIUM] 10021 - X-Content-Type-Options Missing
+    URL: https://staging.example.com/api/v1/*
+    Evidence: Response header missing
+
+  [MEDIUM] 10035 - Strict-Transport-Security Missing
+    URL: https://staging.example.com/
+    Evidence: HSTS header not present
+
+QUALITY GATE: FAILED (1 HIGH, 2 MEDIUM findings)</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: integrating-dast-with-owasp-zap-in-pipeline\ndisplay_name: integrating-dast-with-owasp-zap-in-pipeline\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# integrating-dast-with-owasp-zap-in-pipeline - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `integrating-dast-with-owasp-zap-in-pipeline` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When testing running web applications for vulnerabilities like XSS, SQLi, CSRF, and misconfigurations\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose integrating-dast-with-owasp-zap-in-pipeline, then write the task. Fallback prompt: Use the integrating-dast-with-owasp-zap-in-pipeline skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `integrating-dast-with-owasp-zap-in-pipeline` |\n| Canonical name | `integrating-dast-with-owasp-zap-in-pipeline` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\n- When testing running web applications for vulnerabilities like XSS, SQLi, CSRF, and misconfigurations\n\n## Original SKILL.md\n\n---\nname: integrating-dast-with-owasp-zap-in-pipeline\ndescription: 'This skill covers integrating OWASP ZAP (Zed Attack Proxy) for Dynamic\n  Application Security Testing in CI/CD pipelines. It addresses configuring baseline,\n  full, and API scans against running applications, interpreting ZAP findings, tuning\n  scan policies, and establishing DAST quality gates in GitHub Actions and GitLab\n  CI.\n\n  '\ndomain: cybersecurity\nsubdomain: devsecops\ntags:\n- devsecops\n- cicd\n- dast\n- owasp-zap\n- dynamic-testing\n- secure-sdlc\nversion: 1.0.0\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- PR.PS-01\n- GV.SC-07\n- ID.IM-04\n- PR.PS-04\nmitre_attack:\n- T1195\n- T1554\n- T1059.004\n---\n\n# Integrating DAST with OWASP ZAP in Pipeline\n\n## When to Use\n\n- When testing running web applications for vulnerabilities like XSS, SQLi, CSRF, and misconfigurations\n- When SAST alone is insufficient and runtime behavior testing is required\n- When compliance mandates dynamic security testing of web applications before production\n- When testing APIs (REST/GraphQL) for authentication, authorization, and injection flaws\n- When establishing continuous DAST scanning in staging environments before production deployment\n\n**Do not use** for scanning source code (use SAST), for scanning dependencies (use SCA), or for infrastructure configuration scanning (use IaC scanning tools).\n\n## Prerequisites\n\n- OWASP ZAP Docker image or installed locally (zaproxy/zap-stable or zaproxy/action-*)\n- Running target application accessible from the CI/CD runner (staging URL or Docker service)\n- ZAP scan rules configuration (optional, for tuning)\n- OpenAPI/Swagger specification for API scanning (optional)\n\n## Workflow\n\n### Step 1: Configure ZAP Baseline Scan in GitHub Actions\n\n```yaml\n# .github/workflows/dast-scan.yml\nname: DAST Security Scan\n\non:\n  deployment_status:\n  workflow_dispatch:\n    inputs:\n      target_url:\n        description: 'Target URL to scan'\n        required: true\n\njobs:\n  zap-baseline:\n    name: ZAP Baseline Scan\n    runs-on: ubuntu-latest\n    services:\n      webapp:\n        image: ${{ github.repository }}:${{ github.sha }}\n        ports:\n          - 8080:8080\n        options: --health-cmd=\"curl -f http://localhost:8080/health\" --health-interval=10s --health-timeout=5s --health-retries=5\n\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: ZAP Baseline Scan\n        uses: zaproxy/action-baseline@v0.12.0\n        with:\n          target: 'http://webapp:8080'\n          rules_file_name: '.zap/rules.tsv'\n          cmd_options: '-a -j'\n          allow_issue_writing: false\n\n      - name: Upload ZAP Report\n        if: always()\n        uses: actions/upload-artifact@v4\n        with:\n          name: zap-baseline-report\n          path: report_html.html\n```\n\n### Step 2: Configure ZAP Full Scan for Comprehensive Testing\n\n```yaml\n  zap-full-scan:\n    name: ZAP Full Scan\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: ZAP Full Scan\n        uses: zaproxy/action-full-scan@v0.12.0\n        with:\n          target: ${{ github.event.inputs.target_url || 'https://staging.example.com' }}\n          rules_file_name: '.zap/rules.tsv'\n          cmd_options: '-a -j -T 60'\n\n      - name: Upload Reports\n        if: always()\n        uses: actions/upload-artifact@v4\n        with:\n          name: zap-full-report\n          path: |\n            report_html.html\n            report_json.json\n```\n\n### Step 3: Configure API Scan with OpenAPI Specification\n\n```yaml\n  zap-api-scan:\n    name: ZAP API Scan\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: ZAP API Scan\n        uses: zaproxy/action-api-scan@v0.12.0\n        with:\n          target: 'https://staging.example.com/api/openapi.json'\n          format: openapi\n          rules_file_name: '.zap/api-rules.tsv'\n          cmd_options: '-a -j'\n```\n\n### Step 4: Configure ZAP Scan Rules\n\n```tsv\n# .zap/rules.tsv\n# Rule ID\tAction (IGNORE/WARN/FAIL)\tDescription\n10003\tIGNORE\t# Vulnerable JS Library (handled by SCA)\n10015\tWARN\t# Incomplete or No Cache-control Header\n10021\tFAIL\t# X-Content-Type-Options Missing\n10035\tFAIL\t# Strict-Transport-Security Missing\n10038\tFAIL\t# Content Security Policy Missing\n10098\tIGNORE\t# Cross-Domain Misconfiguration (CDN)\n40012\tFAIL\t# Cross Site Scripting (Reflected)\n40014\tFAIL\t# Cross Site Scripting (Persistent)\n40018\tFAIL\t# SQL Injection\n40019\tFAIL\t# SQL Injection (MySQL)\n40032\tFAIL\t# .htaccess Information Leak\n90033\tFAIL\t# Loosely Scoped Cookie\n```\n\n### Step 5: Run ZAP with Docker Compose for Local Testing\n\n```yaml\n# docker-compose.zap.yml\nversion: '3.8'\nservices:\n  webapp:\n    build: .\n    ports:\n      - \"8080:8080\"\n    healthcheck:\n      test: [\"CMD\", \"curl\", \"-f\", \"http://localhost:8080/health\"]\n      interval: 10s\n      retries: 5\n\n  zap:\n    image: zaproxy/zap-stable:latest\n    depends_on:\n      webapp:\n        condition: service_healthy\n    command: >\n      zap-baseline.py\n        -t http://webapp:8080\n        -r /zap/wrk/report.html\n        -J /zap/wrk/report.json\n        -c /zap/wrk/rules.tsv\n        -I\n    volumes:\n      - ./zap-reports:/zap/wrk\n      - ./.zap/rules.tsv:/zap/wrk/rules.tsv\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| DAST | Dynamic Application Security Testing — tests running applications by sending requests and analyzing responses |\n| Baseline Scan | Quick passive scan that spiders the application without active attacks, suitable for CI/CD |\n| Full Scan | Active scan including attack payloads for XSS, SQLi, and other injection vulnerabilities |\n| API Scan | Targeted scan using OpenAPI/Swagger specs to test all documented API endpoints |\n| Spider | ZAP's crawler that discovers application pages and endpoints by following links |\n| Active Scan | Phase where ZAP sends attack payloads to discovered endpoints to find exploitable vulnerabilities |\n| Passive Scan | Analysis of HTTP responses for security headers, cookies, and information disclosure without sending attacks |\n| Scan Policy | Configuration defining which attack types to enable and their intensity levels |\n\n## Tools & Systems\n\n- **OWASP ZAP**: Open-source web application security scanner for DAST testing\n- **zaproxy/action-baseline**: GitHub Action for ZAP passive baseline scanning\n- **zaproxy/action-full-scan**: GitHub Action for ZAP active full scanning\n- **zaproxy/action-api-scan**: GitHub Action for API-focused scanning with OpenAPI support\n- **Nuclei**: Alternative vulnerability scanner with template-based detection for CI/CD integration\n\n## Common Scenarios\n\n### Scenario: Integrating DAST into a Staging Deployment Pipeline\n\n**Context**: A team deploys to staging before production and needs automated DAST scanning between stages to catch runtime vulnerabilities.\n\n**Approach**:\n1. Add a DAST job in the pipeline that triggers after successful staging deployment\n2. Run ZAP baseline scan first for quick passive feedback (2-5 minutes)\n3. Follow with a targeted API scan using the application's OpenAPI specification\n4. Configure rules.tsv to FAIL on critical findings (XSS, SQLi) and WARN on headers/cookies\n5. Upload ZAP reports as pipeline artifacts for review\n6. Block production deployment if any FAIL-level findings are detected\n7. Schedule weekly full scans against staging for deeper coverage\n\n**Pitfalls**: ZAP full scans can take 30+ minutes and may overwhelm staging servers with attack traffic. Use baseline scans in CI and full scans on schedule. Running DAST against production without coordination can trigger WAF blocks and incident alerts.\n\n## Output Format\n\n```\nZAP DAST Scan Report\n======================\nTarget: https://staging.example.com\nScan Type: Baseline + API\nDate: 2026-02-23\nDuration: 4m 32s\n\nFINDINGS:\n  FAIL: 3\n  WARN: 7\n  INFO: 12\n  PASS: 45\n\nFAILING ALERTS:\n  [HIGH] 40012 - Cross Site Scripting (Reflected)\n    URL: https://staging.example.com/search?q=\u003cscript>\n    Method: GET\n    Evidence: \u003cscript>alert(1)\u003c/script>\n\n  [MEDIUM] 10021 - X-Content-Type-Options Missing\n    URL: https://staging.example.com/api/v1/*\n    Evidence: Response header missing\n\n  [MEDIUM] 10035 - Strict-Transport-Security Missing\n    URL: https://staging.example.com/\n    Evidence: HSTS header not present\n\nQUALITY GATE: FAILED (1 HIGH, 2 MEDIUM findings)\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("integrating-dast-with-owasp-zap-in-pipeline-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

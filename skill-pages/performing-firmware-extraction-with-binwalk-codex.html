@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>performing-firmware-extraction-with-binwalk - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/performing-firmware-extraction-with-binwalk-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>performing-firmware-extraction-with-binwalk</h1>
+      <p class="description">'Performs firmware image extraction and analysis using binwalk to identify</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>performing-firmware-extraction-with-binwalk</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>performing-firmware-extraction-with-binwalk</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Performs firmware image extraction and analysis using binwalk to identify</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose performing-firmware-extraction-with-binwalk, then write the task. Fallback prompt: Use the performing-firmware-extraction-with-binwalk skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Performing Firmware Extraction with Binwalk</h2>
+<h3>When to Use</h3>
+<ul>
+<li>Analyzing IoT device firmware downloaded from vendor sites or extracted from flash chips</li>
+<li>Reverse engineering router, camera, or embedded device firmware for vulnerability research</li>
+<li>Identifying embedded filesystems (SquashFS, CramFS, JFFS2, UBIFS) within firmware blobs</li>
+<li>Detecting encrypted or compressed regions using entropy analysis</li>
+<li>Extracting hardcoded credentials, API keys, certificates, or configuration files from firmware</li>
+<li>Performing security assessments of embedded devices in authorized penetration tests</li>
+</ul>
+<p><strong>Do not use</strong> for analyzing standard desktop application binaries or malware samples that are not firmware images; use dedicated malware analysis tools instead.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>binwalk v3.x installed (<code>pip install binwalk3</code> or from system package manager)</li>
+<li>Python 3.8+ with standard libraries (struct, math, hashlib, subprocess)</li>
+<li>SquashFS tools (<code>unsquashfs</code>) for mounting extracted SquashFS filesystems</li>
+<li>Jefferson for JFFS2 filesystem extraction (<code>pip install jefferson</code>)</li>
+<li>Sasquatch for non-standard SquashFS variants used by vendors like TP-Link and D-Link</li>
+<li><code>strings</code> utility (GNU binutils) for string extraction</li>
+<li>Optional: firmware-mod-kit for repacking modified firmware images</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Initial Firmware Reconnaissance</h4>
+<p>Perform a signature scan to identify embedded file types and their offsets:</p>
+<pre><code># Basic signature scan - identify all recognized file types
+binwalk firmware.bin
+
+# Scan with verbose output showing confidence levels
+binwalk -v firmware.bin
+
+# Scan for specific file types only
+binwalk -y &quot;squashfs&quot; firmware.bin
+binwalk -y &quot;gzip\|lzma\|xz&quot; firmware.bin
+
+# Opcode scan to identify CPU architecture
+binwalk -A firmware.bin
+
+# Scan for raw strings to find version info, URLs, credentials
+binwalk -R &quot;password&quot; firmware.bin
+binwalk -R &quot;http://&quot; firmware.bin</code></pre>
+<h4>Step 2: Entropy Analysis</h4>
+<p>Analyze entropy to identify encrypted, compressed, and plaintext regions:</p>
+<pre><code># Generate entropy plot
+binwalk -E firmware.bin
+
+# Entropy with specific block size for higher resolution
+binwalk -E -K 256 firmware.bin
+
+# Combined entropy and signature scan
+binwalk -BE firmware.bin</code></pre>
+<p>Interpreting entropy values:</p>
+<ul>
+<li><strong>0.0 - 1.0</strong>: Empty or padding regions (null bytes, 0xFF fill)</li>
+<li><strong>1.0 - 5.0</strong>: Plaintext data, code, ASCII strings, configuration</li>
+<li><strong>5.0 - 7.0</strong>: Compressed data (gzip, LZMA, zlib)</li>
+<li><strong>7.0 - 7.99</strong>: Strongly compressed or encrypted data</li>
+<li><strong>~8.0</strong>: Maximum entropy, likely encrypted or random data</li>
+</ul>
+<h4>Step 3: Extract Embedded Files</h4>
+<p>Extract all identified components from the firmware image:</p>
+<pre><code># Automatic extraction of known file types
+binwalk -e firmware.bin
+
+# Recursive extraction (matryoshka mode) for nested archives
+binwalk -Me firmware.bin
+
+# Recursive extraction with depth limit
+binwalk -Me -d 5 firmware.bin
+
+# Extract specific file type with custom handler
+binwalk -D &quot;squashfs filesystem:squashfs:unsquashfs %e&quot; firmware.bin
+
+# Manual extraction of data at a known offset
+dd if=firmware.bin of=extracted.squashfs bs=1 skip=327680 count=4194304</code></pre>
+<h4>Step 4: Mount and Inspect Extracted Filesystems</h4>
+<p>Mount extracted filesystems for deep inspection:</p>
+<pre><code># Mount SquashFS filesystem
+mkdir /tmp/squashfs_root
+unsquashfs -d /tmp/squashfs_root extracted.squashfs
+
+# Mount CramFS filesystem
+mkdir /tmp/cramfs_root
+mount -t cramfs -o loop extracted.cramfs /tmp/cramfs_root
+
+# Extract JFFS2 filesystem
+jefferson extracted.jffs2 -d /tmp/jffs2_root
+
+# Inspect the extracted filesystem
+ls -la /tmp/squashfs_root/
+find /tmp/squashfs_root -name &quot;*.conf&quot; -o -name &quot;*.cfg&quot; -o -name &quot;*.key&quot;
+find /tmp/squashfs_root -name &quot;passwd&quot; -o -name &quot;shadow&quot;</code></pre>
+<h4>Step 5: String Analysis and Credential Discovery</h4>
+<p>Search extracted filesystem and raw firmware for sensitive data:</p>
+<pre><code># Extract all printable strings
+strings -a firmware.bin &gt; all_strings.txt
+strings -n 12 firmware.bin | sort -u &gt; long_strings.txt
+
+# Search for credentials and secrets
+grep -rni &quot;password\|passwd\|secret\|api_key\|token&quot; /tmp/squashfs_root/etc/
+grep -rni &quot;BEGIN.*PRIVATE KEY&quot; /tmp/squashfs_root/
+
+# Find hardcoded URLs and endpoints
+grep -rnoE &quot;https?://[a-zA-Z0-9./?=_-]+&quot; /tmp/squashfs_root/
+
+# Search for certificate files
+find /tmp/squashfs_root -name &quot;*.pem&quot; -o -name &quot;*.crt&quot; -o -name &quot;*.key&quot; -o -name &quot;*.p12&quot;
+
+# Identify busybox and service versions
+strings /tmp/squashfs_root/bin/busybox | grep &quot;BusyBox v&quot;
+cat /tmp/squashfs_root/etc/banner 2&gt;/dev/null</code></pre>
+<h4>Step 6: Generate Firmware Analysis Report</h4>
+<p>Compile comprehensive extraction and analysis findings:</p>
+<pre><code>Report should include:
+- Firmware metadata (vendor, model, version, build date)
+- Identified components with offsets and sizes (bootloader, kernel, filesystem, config)
+- Entropy analysis summary with regions of interest
+- Extracted filesystem structure and key contents
+- Discovered credentials, keys, certificates
+- Identified services, daemons, and their versions
+- Known CVEs applicable to identified component versions
+- Recommendations for hardening or vulnerability remediation</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | <strong>Firmware</strong> | Software embedded in hardware devices providing low-level control; typically contains a bootloader, kernel, root filesystem, and configuration data | | <strong>Entropy Analysis</strong> | Statistical measurement of randomness in binary data; high entropy indicates encryption or compression, low entropy indicates plaintext or structured data | | <strong>SquashFS</strong> | Read-only compressed filesystem commonly used in embedded Linux devices; supports LZMA, gzip, LZO, and zstd compression | | <strong>Magic Bytes</strong> | Known byte sequences at fixed offsets that identify file types; binwalk uses a database of magic signatures to detect embedded files | | <strong>Matryoshka Extraction</strong> | Recursive extraction mode where binwalk re-scans extracted files for additional embedded content, handling deeply nested archives | | <strong>CramFS</strong> | Compressed ROM filesystem designed for embedded systems with limited flash storage; supports only zlib compression | | <strong>JFFS2</strong> | Journalling Flash File System version 2, designed for NOR and NAND flash memory in embedded devices |</p>
+<h3>Tools &amp; Systems</h3>
+<ul>
+<li><strong>binwalk</strong>: Primary firmware analysis tool for signature scanning, entropy analysis, and automated extraction of embedded files</li>
+<li><strong>unsquashfs</strong>: SquashFS extraction utility for mounting read-only compressed filesystems found in router and IoT firmware</li>
+<li><strong>jefferson</strong>: Python tool for extracting JFFS2 flash filesystem images commonly found in embedded devices</li>
+<li><strong>sasquatch</strong>: Patched SquashFS utility supporting non-standard vendor-modified SquashFS variants</li>
+<li><strong>firmware-mod-kit</strong>: Toolkit for extracting, modifying, and repacking firmware images for security testing</li>
+</ul>
+<h3>Common Scenarios</h3>
+<h4>Scenario: Extracting and Auditing Router Firmware for Hardcoded Credentials</h4>
+<p><strong>Context</strong>: A security researcher is performing an authorized assessment of a consumer router. The firmware update file was downloaded from the vendor's support page. The goal is to identify hardcoded credentials, insecure default configurations, and known vulnerable components.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Run <code>binwalk -e firmware.bin</code> to perform initial extraction</li>
+<li>Use <code>binwalk -E firmware.bin</code> to check entropy and identify encrypted regions</li>
+<li>Locate the SquashFS root filesystem in the extracted output</li>
+<li>Mount with <code>unsquashfs</code> and inspect <code>/etc/passwd</code>, <code>/etc/shadow</code>, and web server configs</li>
+<li>Search for hardcoded credentials with <code>grep -rni &quot;password&quot; /tmp/root/etc/</code></li>
+<li>Identify service versions and cross-reference with CVE databases</li>
+<li>Check for debug interfaces (telnet, UART, JTAG references) in startup scripts</li>
+<li>Examine web application code for authentication bypass or command injection</li>
+</ol>
+<p><strong>Pitfalls</strong>:</p>
+<ul>
+<li>Some vendors use non-standard SquashFS with custom compression; use sasquatch instead of unsquashfs</li>
+<li>Encrypted firmware requires decryption keys often found in bootloader or previous unencrypted versions</li>
+<li>Firmware headers may need to be stripped before binwalk can identify the embedded filesystem</li>
+<li>Obfuscated strings may evade simple grep searches; use entropy analysis to locate data blobs</li>
+</ul>
+<h3>Output Format</h3>
+<pre><code>FIRMWARE EXTRACTION REPORT
+====================================
+Firmware:         TP-Link TL-WR841N v14
+File:             wr841nv14_en_3_16_9_up.bin
+Size:             3,932,160 bytes (3.75 MB)
+SHA-256:          a1b2c3d4e5f6...
+
+SIGNATURE SCAN RESULTS
+Offset       Type                          Size
+------       ----                          ----
+0x00000000   U-Boot bootloader header      64 bytes
+0x00020000   LZMA compressed data          1,048,576 bytes
+0x00120000   SquashFS filesystem v4.0      2,752,512 bytes
+0x003B0000   Configuration partition       131,072 bytes
+
+ENTROPY ANALYSIS
+Region 0x000000-0x020000: 4.21 (bootloader - plaintext code)
+Region 0x020000-0x120000: 7.89 (kernel - LZMA compressed)
+Region 0x120000-0x3B0000: 7.45 (filesystem - SquashFS compressed)
+Region 0x3B0000-0x3C0000: 1.12 (config - mostly empty)
+
+EXTRACTED FILESYSTEM
+Root filesystem: SquashFS v4.0, LZMA compression
+Total files: 847
+Total dirs: 112
+BusyBox version: 1.19.4
+
+SECURITY FINDINGS
+[CRITICAL] Hardcoded root password in /etc/shadow (hash: $1$...)
+[HIGH]     Telnet daemon enabled by default in /etc/init.d/rcS
+[HIGH]     Private RSA key at /etc/ssl/private/server.key
+[MEDIUM]   BusyBox 1.19.4 (CVE-2021-42373, CVE-2021-42374)
+[MEDIUM]   Dropbear SSH 2014.63 (CVE-2016-3116)
+[LOW]      UPnP service enabled by default</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: performing-firmware-extraction-with-binwalk\ndisplay_name: performing-firmware-extraction-with-binwalk\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# performing-firmware-extraction-with-binwalk - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `performing-firmware-extraction-with-binwalk` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- Analyzing IoT device firmware downloaded from vendor sites or extracted from flash chips\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose performing-firmware-extraction-with-binwalk, then write the task. Fallback prompt: Use the performing-firmware-extraction-with-binwalk skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `performing-firmware-extraction-with-binwalk` |\n| Canonical name | `performing-firmware-extraction-with-binwalk` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n- Analyzing IoT device firmware downloaded from vendor sites or extracted from flash chips\n\n## Original SKILL.md\n\n---\nname: performing-firmware-extraction-with-binwalk\ndescription: 'Performs firmware image extraction and analysis using binwalk to identify\n  embedded filesystems, compressed archives, bootloaders, kernel images, and cryptographic\n  material. Covers entropy analysis for detecting encrypted or compressed regions,\n  recursive extraction of nested archives, SquashFS/CramFS/JFFS2 filesystem mounting,\n  and string analysis for credential and configuration discovery. Activates for requests\n  involving firmware reverse engineering, IoT device analysis, embedded system security\n  assessment, or router/camera firmware extraction.\n\n  '\ndomain: cybersecurity\nsubdomain: firmware-analysis\ntags:\n- firmware\n- binwalk\n- extraction\n- entropy\n- IoT-security\n- reverse-engineering\nversion: 1.0.0\nauthor: mukul975\nlicense: Apache-2.0\nnist_csf:\n- ID.RA-01\n- PR.PS-01\n- DE.AE-02\nmitre_attack:\n- T1078\n- T1190\n- T1059\n- T1003\n- T1110\n---\n\n# Performing Firmware Extraction with Binwalk\n\n## When to Use\n\n- Analyzing IoT device firmware downloaded from vendor sites or extracted from flash chips\n- Reverse engineering router, camera, or embedded device firmware for vulnerability research\n- Identifying embedded filesystems (SquashFS, CramFS, JFFS2, UBIFS) within firmware blobs\n- Detecting encrypted or compressed regions using entropy analysis\n- Extracting hardcoded credentials, API keys, certificates, or configuration files from firmware\n- Performing security assessments of embedded devices in authorized penetration tests\n\n**Do not use** for analyzing standard desktop application binaries or malware samples that are not firmware images; use dedicated malware analysis tools instead.\n\n## Prerequisites\n\n- binwalk v3.x installed (`pip install binwalk3` or from system package manager)\n- Python 3.8+ with standard libraries (struct, math, hashlib, subprocess)\n- SquashFS tools (`unsquashfs`) for mounting extracted SquashFS filesystems\n- Jefferson for JFFS2 filesystem extraction (`pip install jefferson`)\n- Sasquatch for non-standard SquashFS variants used by vendors like TP-Link and D-Link\n- `strings` utility (GNU binutils) for string extraction\n- Optional: firmware-mod-kit for repacking modified firmware images\n\n## Workflow\n\n### Step 1: Initial Firmware Reconnaissance\n\nPerform a signature scan to identify embedded file types and their offsets:\n\n```bash\n# Basic signature scan - identify all recognized file types\nbinwalk firmware.bin\n\n# Scan with verbose output showing confidence levels\nbinwalk -v firmware.bin\n\n# Scan for specific file types only\nbinwalk -y \"squashfs\" firmware.bin\nbinwalk -y \"gzip\\|lzma\\|xz\" firmware.bin\n\n# Opcode scan to identify CPU architecture\nbinwalk -A firmware.bin\n\n# Scan for raw strings to find version info, URLs, credentials\nbinwalk -R \"password\" firmware.bin\nbinwalk -R \"http://\" firmware.bin\n```\n\n### Step 2: Entropy Analysis\n\nAnalyze entropy to identify encrypted, compressed, and plaintext regions:\n\n```bash\n# Generate entropy plot\nbinwalk -E firmware.bin\n\n# Entropy with specific block size for higher resolution\nbinwalk -E -K 256 firmware.bin\n\n# Combined entropy and signature scan\nbinwalk -BE firmware.bin\n```\n\nInterpreting entropy values:\n- **0.0 - 1.0**: Empty or padding regions (null bytes, 0xFF fill)\n- **1.0 - 5.0**: Plaintext data, code, ASCII strings, configuration\n- **5.0 - 7.0**: Compressed data (gzip, LZMA, zlib)\n- **7.0 - 7.99**: Strongly compressed or encrypted data\n- **~8.0**: Maximum entropy, likely encrypted or random data\n\n### Step 3: Extract Embedded Files\n\nExtract all identified components from the firmware image:\n\n```bash\n# Automatic extraction of known file types\nbinwalk -e firmware.bin\n\n# Recursive extraction (matryoshka mode) for nested archives\nbinwalk -Me firmware.bin\n\n# Recursive extraction with depth limit\nbinwalk -Me -d 5 firmware.bin\n\n# Extract specific file type with custom handler\nbinwalk -D \"squashfs filesystem:squashfs:unsquashfs %e\" firmware.bin\n\n# Manual extraction of data at a known offset\ndd if=firmware.bin of=extracted.squashfs bs=1 skip=327680 count=4194304\n```\n\n### Step 4: Mount and Inspect Extracted Filesystems\n\nMount extracted filesystems for deep inspection:\n\n```bash\n# Mount SquashFS filesystem\nmkdir /tmp/squashfs_root\nunsquashfs -d /tmp/squashfs_root extracted.squashfs\n\n# Mount CramFS filesystem\nmkdir /tmp/cramfs_root\nmount -t cramfs -o loop extracted.cramfs /tmp/cramfs_root\n\n# Extract JFFS2 filesystem\njefferson extracted.jffs2 -d /tmp/jffs2_root\n\n# Inspect the extracted filesystem\nls -la /tmp/squashfs_root/\nfind /tmp/squashfs_root -name \"*.conf\" -o -name \"*.cfg\" -o -name \"*.key\"\nfind /tmp/squashfs_root -name \"passwd\" -o -name \"shadow\"\n```\n\n### Step 5: String Analysis and Credential Discovery\n\nSearch extracted filesystem and raw firmware for sensitive data:\n\n```bash\n# Extract all printable strings\nstrings -a firmware.bin > all_strings.txt\nstrings -n 12 firmware.bin | sort -u > long_strings.txt\n\n# Search for credentials and secrets\ngrep -rni \"password\\|passwd\\|secret\\|api_key\\|token\" /tmp/squashfs_root/etc/\ngrep -rni \"BEGIN.*PRIVATE KEY\" /tmp/squashfs_root/\n\n# Find hardcoded URLs and endpoints\ngrep -rnoE \"https?://[a-zA-Z0-9./?=_-]+\" /tmp/squashfs_root/\n\n# Search for certificate files\nfind /tmp/squashfs_root -name \"*.pem\" -o -name \"*.crt\" -o -name \"*.key\" -o -name \"*.p12\"\n\n# Identify busybox and service versions\nstrings /tmp/squashfs_root/bin/busybox | grep \"BusyBox v\"\ncat /tmp/squashfs_root/etc/banner 2>/dev/null\n```\n\n### Step 6: Generate Firmware Analysis Report\n\nCompile comprehensive extraction and analysis findings:\n\n```\nReport should include:\n- Firmware metadata (vendor, model, version, build date)\n- Identified components with offsets and sizes (bootloader, kernel, filesystem, config)\n- Entropy analysis summary with regions of interest\n- Extracted filesystem structure and key contents\n- Discovered credentials, keys, certificates\n- Identified services, daemons, and their versions\n- Known CVEs applicable to identified component versions\n- Recommendations for hardening or vulnerability remediation\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| **Firmware** | Software embedded in hardware devices providing low-level control; typically contains a bootloader, kernel, root filesystem, and configuration data |\n| **Entropy Analysis** | Statistical measurement of randomness in binary data; high entropy indicates encryption or compression, low entropy indicates plaintext or structured data |\n| **SquashFS** | Read-only compressed filesystem commonly used in embedded Linux devices; supports LZMA, gzip, LZO, and zstd compression |\n| **Magic Bytes** | Known byte sequences at fixed offsets that identify file types; binwalk uses a database of magic signatures to detect embedded files |\n| **Matryoshka Extraction** | Recursive extraction mode where binwalk re-scans extracted files for additional embedded content, handling deeply nested archives |\n| **CramFS** | Compressed ROM filesystem designed for embedded systems with limited flash storage; supports only zlib compression |\n| **JFFS2** | Journalling Flash File System version 2, designed for NOR and NAND flash memory in embedded devices |\n\n## Tools & Systems\n\n- **binwalk**: Primary firmware analysis tool for signature scanning, entropy analysis, and automated extraction of embedded files\n- **unsquashfs**: SquashFS extraction utility for mounting read-only compressed filesystems found in router and IoT firmware\n- **jefferson**: Python tool for extracting JFFS2 flash filesystem images commonly found in embedded devices\n- **sasquatch**: Patched SquashFS utility supporting non-standard vendor-modified SquashFS variants\n- **firmware-mod-kit**: Toolkit for extracting, modifying, and repacking firmware images for security testing\n\n## Common Scenarios\n\n### Scenario: Extracting and Auditing Router Firmware for Hardcoded Credentials\n\n**Context**: A security researcher is performing an authorized assessment of a consumer router. The firmware update file was downloaded from the vendor's support page. The goal is to identify hardcoded credentials, insecure default configurations, and known vulnerable components.\n\n**Approach**:\n1. Run `binwalk -e firmware.bin` to perform initial extraction\n2. Use `binwalk -E firmware.bin` to check entropy and identify encrypted regions\n3. Locate the SquashFS root filesystem in the extracted output\n4. Mount with `unsquashfs` and inspect `/etc/passwd`, `/etc/shadow`, and web server configs\n5. Search for hardcoded credentials with `grep -rni \"password\" /tmp/root/etc/`\n6. Identify service versions and cross-reference with CVE databases\n7. Check for debug interfaces (telnet, UART, JTAG references) in startup scripts\n8. Examine web application code for authentication bypass or command injection\n\n**Pitfalls**:\n- Some vendors use non-standard SquashFS with custom compression; use sasquatch instead of unsquashfs\n- Encrypted firmware requires decryption keys often found in bootloader or previous unencrypted versions\n- Firmware headers may need to be stripped before binwalk can identify the embedded filesystem\n- Obfuscated strings may evade simple grep searches; use entropy analysis to locate data blobs\n\n## Output Format\n\n```\nFIRMWARE EXTRACTION REPORT\n====================================\nFirmware:         TP-Link TL-WR841N v14\nFile:             wr841nv14_en_3_16_9_up.bin\nSize:             3,932,160 bytes (3.75 MB)\nSHA-256:          a1b2c3d4e5f6...\n\nSIGNATURE SCAN RESULTS\nOffset       Type                          Size\n------       ----                          ----\n0x00000000   U-Boot bootloader header      64 bytes\n0x00020000   LZMA compressed data          1,048,576 bytes\n0x00120000   SquashFS filesystem v4.0      2,752,512 bytes\n0x003B0000   Configuration partition       131,072 bytes\n\nENTROPY ANALYSIS\nRegion 0x000000-0x020000: 4.21 (bootloader - plaintext code)\nRegion 0x020000-0x120000: 7.89 (kernel - LZMA compressed)\nRegion 0x120000-0x3B0000: 7.45 (filesystem - SquashFS compressed)\nRegion 0x3B0000-0x3C0000: 1.12 (config - mostly empty)\n\nEXTRACTED FILESYSTEM\nRoot filesystem: SquashFS v4.0, LZMA compression\nTotal files: 847\nTotal dirs: 112\nBusyBox version: 1.19.4\n\nSECURITY FINDINGS\n[CRITICAL] Hardcoded root password in /etc/shadow (hash: $1$...)\n[HIGH]     Telnet daemon enabled by default in /etc/init.d/rcS\n[HIGH]     Private RSA key at /etc/ssl/private/server.key\n[MEDIUM]   BusyBox 1.19.4 (CVE-2021-42373, CVE-2021-42374)\n[MEDIUM]   Dropbear SSH 2014.63 (CVE-2016-3116)\n[LOW]      UPnP service enabled by default\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("performing-firmware-extraction-with-binwalk-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>implementing-opa-gatekeeper-for-policy-enforcement - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/implementing-opa-gatekeeper-for-policy-enforcement-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>implementing-opa-gatekeeper-for-policy-enforcement</h1>
+      <p class="description">Enforce Kubernetes admission policies using OPA Gatekeeper with ConstraintTemplates,</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>implementing-opa-gatekeeper-for-policy-enforcement</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>implementing-opa-gatekeeper-for-policy-enforcement</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Enforce Kubernetes admission policies using OPA Gatekeeper with ConstraintTemplates,</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose implementing-opa-gatekeeper-for-policy-enforcement, then write the task. Fallback prompt: Use the implementing-opa-gatekeeper-for-policy-enforcement skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Implementing OPA Gatekeeper for Policy Enforcement</h2>
+<h3>Overview</h3>
+<p>OPA Gatekeeper is a Kubernetes admission controller that enforces policies written in Rego. It uses ConstraintTemplates (policy blueprints with Rego logic) and Constraints (instantiated policies with parameters) to validate, mutate, or deny Kubernetes resource requests at admission time.</p>
+<h3>When to Use</h3>
+<ul>
+<li>When deploying or configuring implementing opa gatekeeper for policy enforcement capabilities in your environment</li>
+<li>When establishing security controls aligned to compliance requirements</li>
+<li>When building or improving security architecture for this domain</li>
+<li>When conducting security assessments that require this implementation</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Kubernetes cluster v1.24+</li>
+<li>Helm 3</li>
+<li>kubectl with cluster-admin access</li>
+<li>Familiarity with Rego policy language</li>
+</ul>
+<h3>Installing Gatekeeper</h3>
+<pre><code># Install via Helm
+helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
+helm repo update
+
+helm install gatekeeper gatekeeper/gatekeeper \
+  --namespace gatekeeper-system --create-namespace \
+  --set replicas=3 \
+  --set audit.replicas=1 \
+  --set audit.logLevel=INFO
+
+# Verify
+kubectl get pods -n gatekeeper-system
+kubectl get crd | grep gatekeeper</code></pre>
+<h4>Verify Installation</h4>
+<pre><code># Check webhook
+kubectl get validatingwebhookconfigurations gatekeeper-validating-webhook-configuration
+
+# Check CRDs
+kubectl get crd constrainttemplates.templates.gatekeeper.sh
+kubectl get crd configs.config.gatekeeper.sh</code></pre>
+<h3>ConstraintTemplate Examples</h3>
+<h4>1. Require Labels on Resources</h4>
+<pre><code># template-required-labels.yaml
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredlabels
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredLabels
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            labels:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredlabels
+
+        violation[{&quot;msg&quot;: msg, &quot;details&quot;: {&quot;missing_labels&quot;: missing}}] {
+          provided := {label | input.review.object.metadata.labels[label]}
+          required := {label | label := input.parameters.labels[_]}
+          missing := required - provided
+          count(missing) &gt; 0
+          msg := sprintf(&quot;Missing required labels: %v&quot;, [missing])
+        }</code></pre>
+<pre><code># constraint-require-team-label.yaml
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredLabels
+metadata:
+  name: require-team-label
+spec:
+  match:
+    kinds:
+      - apiGroups: [&quot;&quot;]
+        kinds: [&quot;Namespace&quot;]
+      - apiGroups: [&quot;apps&quot;]
+        kinds: [&quot;Deployment&quot;]
+  parameters:
+    labels:
+      - &quot;team&quot;
+      - &quot;environment&quot;</code></pre>
+<h4>2. Block Privileged Containers</h4>
+<pre><code># template-block-privileged.yaml
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8sblockprivileged
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sBlockPrivileged
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sblockprivileged
+
+        violation[{&quot;msg&quot;: msg}] {
+          container := input.review.object.spec.containers[_]
+          container.securityContext.privileged == true
+          msg := sprintf(&quot;Privileged container not allowed: %v&quot;, [container.name])
+        }
+
+        violation[{&quot;msg&quot;: msg}] {
+          container := input.review.object.spec.initContainers[_]
+          container.securityContext.privileged == true
+          msg := sprintf(&quot;Privileged init container not allowed: %v&quot;, [container.name])
+        }</code></pre>
+<pre><code># constraint-block-privileged.yaml
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sBlockPrivileged
+metadata:
+  name: block-privileged-containers
+spec:
+  match:
+    kinds:
+      - apiGroups: [&quot;&quot;]
+        kinds: [&quot;Pod&quot;]
+    namespaces:
+      - &quot;production&quot;
+      - &quot;staging&quot;</code></pre>
+<h4>3. Restrict Container Image Registries</h4>
+<pre><code># template-allowed-repos.yaml
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8sallowedrepos
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sAllowedRepos
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            repos:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sallowedrepos
+
+        violation[{&quot;msg&quot;: msg}] {
+          container := input.review.object.spec.containers[_]
+          not image_matches(container.image)
+          msg := sprintf(&quot;Container image %v is not from an allowed registry. Allowed: %v&quot;, [container.image, input.parameters.repos])
+        }
+
+        violation[{&quot;msg&quot;: msg}] {
+          container := input.review.object.spec.initContainers[_]
+          not image_matches(container.image)
+          msg := sprintf(&quot;Init container image %v is not from an allowed registry. Allowed: %v&quot;, [container.image, input.parameters.repos])
+        }
+
+        image_matches(image) {
+          repo := input.parameters.repos[_]
+          startswith(image, repo)
+        }</code></pre>
+<pre><code># constraint-allowed-repos.yaml
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sAllowedRepos
+metadata:
+  name: restrict-image-repos
+spec:
+  match:
+    kinds:
+      - apiGroups: [&quot;&quot;]
+        kinds: [&quot;Pod&quot;]
+  parameters:
+    repos:
+      - &quot;gcr.io/my-project/&quot;
+      - &quot;ghcr.io/my-org/&quot;
+      - &quot;registry.k8s.io/&quot;</code></pre>
+<h4>4. Enforce Resource Limits</h4>
+<pre><code># template-require-limits.yaml
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequirelimits
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequireLimits
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequirelimits
+
+        violation[{&quot;msg&quot;: msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.resources.limits.cpu
+          msg := sprintf(&quot;Container %v has no CPU limit&quot;, [container.name])
+        }
+
+        violation[{&quot;msg&quot;: msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.resources.limits.memory
+          msg := sprintf(&quot;Container %v has no memory limit&quot;, [container.name])
+        }</code></pre>
+<h4>5. Block Latest Image Tag</h4>
+<pre><code># template-block-latest-tag.yaml
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8sblocklatesttag
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sBlockLatestTag
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sblocklatesttag
+
+        violation[{&quot;msg&quot;: msg}] {
+          container := input.review.object.spec.containers[_]
+          endswith(container.image, &quot;:latest&quot;)
+          msg := sprintf(&quot;Container %v uses ':latest' tag. Use specific version tags.&quot;, [container.name])
+        }
+
+        violation[{&quot;msg&quot;: msg}] {
+          container := input.review.object.spec.containers[_]
+          not contains(container.image, &quot;:&quot;)
+          msg := sprintf(&quot;Container %v has no tag (defaults to latest). Use specific version tags.&quot;, [container.name])
+        }</code></pre>
+<h4>6. Enforce Read-Only Root Filesystem</h4>
+<pre><code>apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8sreadonlyroot
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sReadOnlyRoot
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sreadonlyroot
+
+        violation[{&quot;msg&quot;: msg}] {
+          container := input.review.object.spec.containers[_]
+          not container.securityContext.readOnlyRootFilesystem
+          msg := sprintf(&quot;Container %v must have readOnlyRootFilesystem set to true&quot;, [container.name])
+        }</code></pre>
+<h3>Audit and Enforcement Modes</h3>
+<pre><code># Dry-run mode (audit only, don't block)
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sBlockPrivileged
+metadata:
+  name: block-privileged-dryrun
+spec:
+  enforcementAction: dryrun   # dryrun | deny | warn
+  match:
+    kinds:
+      - apiGroups: [&quot;&quot;]
+        kinds: [&quot;Pod&quot;]</code></pre>
+<h4>Check Audit Violations</h4>
+<pre><code># List all constraint violations
+kubectl get k8sblockprivileged block-privileged-containers -o yaml | grep -A 20 violations
+
+# Check all constraints audit status
+kubectl get constraints -o json | jq '.items[] | {name: .metadata.name, violations: (.status.violations // [] | length)}'</code></pre>
+<h3>Gatekeeper Config (Exempt Namespaces)</h3>
+<pre><code>apiVersion: config.gatekeeper.sh/v1alpha1
+kind: Config
+metadata:
+  name: config
+  namespace: gatekeeper-system
+spec:
+  match:
+    - excludedNamespaces:
+        - kube-system
+        - gatekeeper-system
+        - calico-system
+      processes:
+        - &quot;*&quot;</code></pre>
+<h3>Monitoring</h3>
+<pre><code># Check Gatekeeper metrics
+kubectl port-forward -n gatekeeper-system svc/gatekeeper-webhook-service 8443:443
+
+# Prometheus metrics
+kubectl get --raw /metrics | grep gatekeeper</code></pre>
+<h3>Best Practices</h3>
+<ol>
+<li><strong>Start with dryrun</strong> - Deploy constraints in <code>dryrun</code> mode first, review violations, then switch to <code>deny</code></li>
+<li><strong>Use the policy library</strong> - Leverage https://github.com/open-policy-agent/gatekeeper-library for pre-built templates</li>
+<li><strong>Exempt system namespaces</strong> - Always exclude kube-system and gatekeeper-system</li>
+<li><strong>Version control policies</strong> - Store ConstraintTemplates and Constraints in Git</li>
+<li><strong>Monitor audit results</strong> - Check constraint <code>.status.violations</code> regularly</li>
+<li><strong>Test Rego policies</strong> - Use <code>opa test</code> or Rego Playground before deploying</li>
+<li><strong>Combine with admission webhooks</strong> - Layer Gatekeeper with Pod Security Admission for defense in depth</li>
+</ol>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: implementing-opa-gatekeeper-for-policy-enforcement\ndisplay_name: implementing-opa-gatekeeper-for-policy-enforcement\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# implementing-opa-gatekeeper-for-policy-enforcement - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `implementing-opa-gatekeeper-for-policy-enforcement` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nOPA Gatekeeper is a Kubernetes admission controller that enforces policies written in Rego. It uses ConstraintTemplates (policy blueprints with Rego logic) and Constraints (instantiated policies with parameters) to valid\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose implementing-opa-gatekeeper-for-policy-enforcement, then write the task. Fallback prompt: Use the implementing-opa-gatekeeper-for-policy-enforcement skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `implementing-opa-gatekeeper-for-policy-enforcement` |\n| Canonical name | `implementing-opa-gatekeeper-for-policy-enforcement` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nOPA Gatekeeper is a Kubernetes admission controller that enforces policies written in Rego. It uses ConstraintTemplates (policy blueprints with Rego logic) and Constraints (instantiated policies with parameters) to valid\n\n## Original SKILL.md\n\n---\nname: implementing-opa-gatekeeper-for-policy-enforcement\ndescription: Enforce Kubernetes admission policies using OPA Gatekeeper with ConstraintTemplates,\n  Rego rules, and the Gatekeeper policy library.\ndomain: cybersecurity\nsubdomain: container-security\ntags:\n- opa\n- gatekeeper\n- kubernetes\n- admission-control\n- policy-as-code\n- rego\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- PR.PS-01\n- PR.IR-01\n- ID.AM-08\n- DE.CM-01\nmitre_attack:\n- T1610\n- T1611\n- T1609\n- T1525\n---\n\n# Implementing OPA Gatekeeper for Policy Enforcement\n\n## Overview\n\nOPA Gatekeeper is a Kubernetes admission controller that enforces policies written in Rego. It uses ConstraintTemplates (policy blueprints with Rego logic) and Constraints (instantiated policies with parameters) to validate, mutate, or deny Kubernetes resource requests at admission time.\n\n\n## When to Use\n\n- When deploying or configuring implementing opa gatekeeper for policy enforcement capabilities in your environment\n- When establishing security controls aligned to compliance requirements\n- When building or improving security architecture for this domain\n- When conducting security assessments that require this implementation\n\n## Prerequisites\n\n- Kubernetes cluster v1.24+\n- Helm 3\n- kubectl with cluster-admin access\n- Familiarity with Rego policy language\n\n## Installing Gatekeeper\n\n```bash\n# Install via Helm\nhelm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts\nhelm repo update\n\nhelm install gatekeeper gatekeeper/gatekeeper \\\n  --namespace gatekeeper-system --create-namespace \\\n  --set replicas=3 \\\n  --set audit.replicas=1 \\\n  --set audit.logLevel=INFO\n\n# Verify\nkubectl get pods -n gatekeeper-system\nkubectl get crd | grep gatekeeper\n```\n\n### Verify Installation\n\n```bash\n# Check webhook\nkubectl get validatingwebhookconfigurations gatekeeper-validating-webhook-configuration\n\n# Check CRDs\nkubectl get crd constrainttemplates.templates.gatekeeper.sh\nkubectl get crd configs.config.gatekeeper.sh\n```\n\n## ConstraintTemplate Examples\n\n### 1. Require Labels on Resources\n\n```yaml\n# template-required-labels.yaml\napiVersion: templates.gatekeeper.sh/v1\nkind: ConstraintTemplate\nmetadata:\n  name: k8srequiredlabels\nspec:\n  crd:\n    spec:\n      names:\n        kind: K8sRequiredLabels\n      validation:\n        openAPIV3Schema:\n          type: object\n          properties:\n            labels:\n              type: array\n              items:\n                type: string\n  targets:\n    - target: admission.k8s.gatekeeper.sh\n      rego: |\n        package k8srequiredlabels\n\n        violation[{\"msg\": msg, \"details\": {\"missing_labels\": missing}}] {\n          provided := {label | input.review.object.metadata.labels[label]}\n          required := {label | label := input.parameters.labels[_]}\n          missing := required - provided\n          count(missing) > 0\n          msg := sprintf(\"Missing required labels: %v\", [missing])\n        }\n```\n\n```yaml\n# constraint-require-team-label.yaml\napiVersion: constraints.gatekeeper.sh/v1beta1\nkind: K8sRequiredLabels\nmetadata:\n  name: require-team-label\nspec:\n  match:\n    kinds:\n      - apiGroups: [\"\"]\n        kinds: [\"Namespace\"]\n      - apiGroups: [\"apps\"]\n        kinds: [\"Deployment\"]\n  parameters:\n    labels:\n      - \"team\"\n      - \"environment\"\n```\n\n### 2. Block Privileged Containers\n\n```yaml\n# template-block-privileged.yaml\napiVersion: templates.gatekeeper.sh/v1\nkind: ConstraintTemplate\nmetadata:\n  name: k8sblockprivileged\nspec:\n  crd:\n    spec:\n      names:\n        kind: K8sBlockPrivileged\n  targets:\n    - target: admission.k8s.gatekeeper.sh\n      rego: |\n        package k8sblockprivileged\n\n        violation[{\"msg\": msg}] {\n          container := input.review.object.spec.containers[_]\n          container.securityContext.privileged == true\n          msg := sprintf(\"Privileged container not allowed: %v\", [container.name])\n        }\n\n        violation[{\"msg\": msg}] {\n          container := input.review.object.spec.initContainers[_]\n          container.securityContext.privileged == true\n          msg := sprintf(\"Privileged init container not allowed: %v\", [container.name])\n        }\n```\n\n```yaml\n# constraint-block-privileged.yaml\napiVersion: constraints.gatekeeper.sh/v1beta1\nkind: K8sBlockPrivileged\nmetadata:\n  name: block-privileged-containers\nspec:\n  match:\n    kinds:\n      - apiGroups: [\"\"]\n        kinds: [\"Pod\"]\n    namespaces:\n      - \"production\"\n      - \"staging\"\n```\n\n### 3. Restrict Container Image Registries\n\n```yaml\n# template-allowed-repos.yaml\napiVersion: templates.gatekeeper.sh/v1\nkind: ConstraintTemplate\nmetadata:\n  name: k8sallowedrepos\nspec:\n  crd:\n    spec:\n      names:\n        kind: K8sAllowedRepos\n      validation:\n        openAPIV3Schema:\n          type: object\n          properties:\n            repos:\n              type: array\n              items:\n                type: string\n  targets:\n    - target: admission.k8s.gatekeeper.sh\n      rego: |\n        package k8sallowedrepos\n\n        violation[{\"msg\": msg}] {\n          container := input.review.object.spec.containers[_]\n          not image_matches(container.image)\n          msg := sprintf(\"Container image %v is not from an allowed registry. Allowed: %v\", [container.image, input.parameters.repos])\n        }\n\n        violation[{\"msg\": msg}] {\n          container := input.review.object.spec.initContainers[_]\n          not image_matches(container.image)\n          msg := sprintf(\"Init container image %v is not from an allowed registry. Allowed: %v\", [container.image, input.parameters.repos])\n        }\n\n        image_matches(image) {\n          repo := input.parameters.repos[_]\n          startswith(image, repo)\n        }\n```\n\n```yaml\n# constraint-allowed-repos.yaml\napiVersion: constraints.gatekeeper.sh/v1beta1\nkind: K8sAllowedRepos\nmetadata:\n  name: restrict-image-repos\nspec:\n  match:\n    kinds:\n      - apiGroups: [\"\"]\n        kinds: [\"Pod\"]\n  parameters:\n    repos:\n      - \"gcr.io/my-project/\"\n      - \"ghcr.io/my-org/\"\n      - \"registry.k8s.io/\"\n```\n\n### 4. Enforce Resource Limits\n\n```yaml\n# template-require-limits.yaml\napiVersion: templates.gatekeeper.sh/v1\nkind: ConstraintTemplate\nmetadata:\n  name: k8srequirelimits\nspec:\n  crd:\n    spec:\n      names:\n        kind: K8sRequireLimits\n  targets:\n    - target: admission.k8s.gatekeeper.sh\n      rego: |\n        package k8srequirelimits\n\n        violation[{\"msg\": msg}] {\n          container := input.review.object.spec.containers[_]\n          not container.resources.limits.cpu\n          msg := sprintf(\"Container %v has no CPU limit\", [container.name])\n        }\n\n        violation[{\"msg\": msg}] {\n          container := input.review.object.spec.containers[_]\n          not container.resources.limits.memory\n          msg := sprintf(\"Container %v has no memory limit\", [container.name])\n        }\n```\n\n### 5. Block Latest Image Tag\n\n```yaml\n# template-block-latest-tag.yaml\napiVersion: templates.gatekeeper.sh/v1\nkind: ConstraintTemplate\nmetadata:\n  name: k8sblocklatesttag\nspec:\n  crd:\n    spec:\n      names:\n        kind: K8sBlockLatestTag\n  targets:\n    - target: admission.k8s.gatekeeper.sh\n      rego: |\n        package k8sblocklatesttag\n\n        violation[{\"msg\": msg}] {\n          container := input.review.object.spec.containers[_]\n          endswith(container.image, \":latest\")\n          msg := sprintf(\"Container %v uses ':latest' tag. Use specific version tags.\", [container.name])\n        }\n\n        violation[{\"msg\": msg}] {\n          container := input.review.object.spec.containers[_]\n          not contains(container.image, \":\")\n          msg := sprintf(\"Container %v has no tag (defaults to latest). Use specific version tags.\", [container.name])\n        }\n```\n\n### 6. Enforce Read-Only Root Filesystem\n\n```yaml\napiVersion: templates.gatekeeper.sh/v1\nkind: ConstraintTemplate\nmetadata:\n  name: k8sreadonlyroot\nspec:\n  crd:\n    spec:\n      names:\n        kind: K8sReadOnlyRoot\n  targets:\n    - target: admission.k8s.gatekeeper.sh\n      rego: |\n        package k8sreadonlyroot\n\n        violation[{\"msg\": msg}] {\n          container := input.review.object.spec.containers[_]\n          not container.securityContext.readOnlyRootFilesystem\n          msg := sprintf(\"Container %v must have readOnlyRootFilesystem set to true\", [container.name])\n        }\n```\n\n## Audit and Enforcement Modes\n\n```yaml\n# Dry-run mode (audit only, don't block)\napiVersion: constraints.gatekeeper.sh/v1beta1\nkind: K8sBlockPrivileged\nmetadata:\n  name: block-privileged-dryrun\nspec:\n  enforcementAction: dryrun   # dryrun | deny | warn\n  match:\n    kinds:\n      - apiGroups: [\"\"]\n        kinds: [\"Pod\"]\n```\n\n### Check Audit Violations\n\n```bash\n# List all constraint violations\nkubectl get k8sblockprivileged block-privileged-containers -o yaml | grep -A 20 violations\n\n# Check all constraints audit status\nkubectl get constraints -o json | jq '.items[] | {name: .metadata.name, violations: (.status.violations // [] | length)}'\n```\n\n## Gatekeeper Config (Exempt Namespaces)\n\n```yaml\napiVersion: config.gatekeeper.sh/v1alpha1\nkind: Config\nmetadata:\n  name: config\n  namespace: gatekeeper-system\nspec:\n  match:\n    - excludedNamespaces:\n        - kube-system\n        - gatekeeper-system\n        - calico-system\n      processes:\n        - \"*\"\n```\n\n## Monitoring\n\n```bash\n# Check Gatekeeper metrics\nkubectl port-forward -n gatekeeper-system svc/gatekeeper-webhook-service 8443:443\n\n# Prometheus metrics\nkubectl get --raw /metrics | grep gatekeeper\n```\n\n## Best Practices\n\n1. **Start with dryrun** - Deploy constraints in `dryrun` mode first, review violations, then switch to `deny`\n2. **Use the policy library** - Leverage https://github.com/open-policy-agent/gatekeeper-library for pre-built templates\n3. **Exempt system namespaces** - Always exclude kube-system and gatekeeper-system\n4. **Version control policies** - Store ConstraintTemplates and Constraints in Git\n5. **Monitor audit results** - Check constraint `.status.violations` regularly\n6. **Test Rego policies** - Use `opa test` or Rego Playground before deploying\n7. **Combine with admission webhooks** - Layer Gatekeeper with Pod Security Admission for defense in depth\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("implementing-opa-gatekeeper-for-policy-enforcement-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

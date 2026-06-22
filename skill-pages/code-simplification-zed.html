@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>code-simplification - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Zed</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/code-simplification-zed.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Zed / Software engineering and app building</div>
+      <h1>code-simplification</h1>
+      <p class="description">Simplifies code for clarity. Use when refactoring code for clarity without changing behavior. Use when code works but is harder to read, maintain, or extend than it should be. Use when reviewing code that has accumulated unnecessary complexity.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Zed</span></div>
+<div class="meta-card"><strong>category</strong><span>Software engineering and app building</span></div>
+<div class="meta-card"><strong>display name</strong><span>code-simplification</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>code-simplification</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Simplifies code for clarity. Use when refactoring code for clarity without changing behavior. Use when code works but is harder to read, maintain, or extend than it should be. Use when reviewing code that has accumulated unnecessary complexity.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Zed</strong><p>In Zed, open the Agent panel and type: Use the code-simplification skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Code Simplification</h2>
+<blockquote>Inspired by the [Claude Code Simplifier plugin](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-simplifier/agents/code-simplifier.md). Adapted here as a model-agnostic, process-driven skill for any AI coding agent.</blockquote>
+<h3>Overview</h3>
+<p>Simplify code by reducing complexity while preserving exact behavior. The goal is not fewer lines — it's code that is easier to read, understand, modify, and debug. Every simplification must pass a simple test: &quot;Would a new team member understand this faster than the original?&quot;</p>
+<h3>When to Use</h3>
+<ul>
+<li>After a feature is working and tests pass, but the implementation feels heavier than it needs to be</li>
+<li>During code review when readability or complexity issues are flagged</li>
+<li>When you encounter deeply nested logic, long functions, or unclear names</li>
+<li>When refactoring code written under time pressure</li>
+<li>When consolidating related logic scattered across files</li>
+<li>After merging changes that introduced duplication or inconsistency</li>
+</ul>
+<p><strong>When NOT to use:</strong></p>
+<ul>
+<li>Code is already clean and readable — don't simplify for the sake of it</li>
+<li>You don't understand what the code does yet — comprehend before you simplify</li>
+<li>The code is performance-critical and the &quot;simpler&quot; version would be measurably slower</li>
+<li>You're about to rewrite the module entirely — simplifying throwaway code wastes effort</li>
+</ul>
+<h3>The Five Principles</h3>
+<h4>1. Preserve Behavior Exactly</h4>
+<p>Don't change what the code does — only how it expresses it. All inputs, outputs, side effects, error behavior, and edge cases must remain identical. If you're not sure a simplification preserves behavior, don't make it.</p>
+<pre><code>ASK BEFORE EVERY CHANGE:
+→ Does this produce the same output for every input?
+→ Does this maintain the same error behavior?
+→ Does this preserve the same side effects and ordering?
+→ Do all existing tests still pass without modification?</code></pre>
+<h4>2. Follow Project Conventions</h4>
+<p>Simplification means making code more consistent with the codebase, not imposing external preferences. Before simplifying:</p>
+<pre><code>1. Read CLAUDE.md / project conventions
+2. Study how neighboring code handles similar patterns
+3. Match the project's style for:
+   - Import ordering and module system
+   - Function declaration style
+   - Naming conventions
+   - Error handling patterns
+   - Type annotation depth</code></pre>
+<p>Simplification that breaks project consistency is not simplification — it's churn.</p>
+<h4>3. Prefer Clarity Over Cleverness</h4>
+<p>Explicit code is better than compact code when the compact version requires a mental pause to parse.</p>
+<pre><code>// UNCLEAR: Dense ternary chain
+const label = isNew ? 'New' : isUpdated ? 'Updated' : isArchived ? 'Archived' : 'Active';
+
+// CLEAR: Readable mapping
+function getStatusLabel(item: Item): string {
+  if (item.isNew) return 'New';
+  if (item.isUpdated) return 'Updated';
+  if (item.isArchived) return 'Archived';
+  return 'Active';
+}</code></pre>
+<pre><code>// UNCLEAR: Chained reduces with inline logic
+const result = items.reduce((acc, item) =&gt; ({
+  ...acc,
+  [item.id]: { ...acc[item.id], count: (acc[item.id]?.count ?? 0) + 1 }
+}), {});
+
+// CLEAR: Named intermediate step
+const countById = new Map&lt;string, number&gt;();
+for (const item of items) {
+  countById.set(item.id, (countById.get(item.id) ?? 0) + 1);
+}</code></pre>
+<h4>4. Maintain Balance</h4>
+<p>Simplification has a failure mode: over-simplification. Watch for these traps:</p>
+<ul>
+<li><strong>Inlining too aggressively</strong> — removing a helper that gave a concept a name makes the call site harder to read</li>
+<li><strong>Combining unrelated logic</strong> — two simple functions merged into one complex function is not simpler</li>
+<li><strong>Removing &quot;unnecessary&quot; abstraction</strong> — some abstractions exist for extensibility or testability, not complexity</li>
+<li><strong>Optimizing for line count</strong> — fewer lines is not the goal; easier comprehension is</li>
+</ul>
+<h4>5. Scope to What Changed</h4>
+<p>Default to simplifying recently modified code. Avoid drive-by refactors of unrelated code unless explicitly asked to broaden scope. Unscoped simplification creates noise in diffs and risks unintended regressions.</p>
+<h3>The Simplification Process</h3>
+<h4>Step 1: Understand Before Touching (Chesterton's Fence)</h4>
+<p>Before changing or removing anything, understand why it exists. This is Chesterton's Fence: if you see a fence across a road and don't understand why it's there, don't tear it down. First understand the reason, then decide if the reason still applies.</p>
+<pre><code>BEFORE SIMPLIFYING, ANSWER:
+- What is this code's responsibility?
+- What calls it? What does it call?
+- What are the edge cases and error paths?
+- Are there tests that define the expected behavior?
+- Why might it have been written this way? (Performance? Platform constraint? Historical reason?)
+- Check git blame: what was the original context for this code?</code></pre>
+<p>If you can't answer these, you're not ready to simplify. Read more context first.</p>
+<h4>Step 2: Identify Simplification Opportunities</h4>
+<p>Scan for these patterns — each one is a concrete signal, not a vague smell:</p>
+<p><strong>Structural complexity:</strong></p>
+<p>| Pattern | Signal | Simplification | |---------|--------|----------------| | Deep nesting (3+ levels) | Hard to follow control flow | Extract conditions into guard clauses or helper functions | | Long functions (50+ lines) | Multiple responsibilities | Split into focused functions with descriptive names | | Nested ternaries | Requires mental stack to parse | Replace with if/else chains, switch, or lookup objects | | Boolean parameter flags | <code>doThing(true, false, true)</code> | Replace with options objects or separate functions | | Repeated conditionals | Same <code>if</code> check in multiple places | Extract to a well-named predicate function |</p>
+<p><strong>Naming and readability:</strong></p>
+<p>| Pattern | Signal | Simplification | |---------|--------|----------------| | Generic names | <code>data</code>, <code>result</code>, <code>temp</code>, <code>val</code>, <code>item</code> | Rename to describe the content: <code>userProfile</code>, <code>validationErrors</code> | | Abbreviated names | <code>usr</code>, <code>cfg</code>, <code>btn</code>, <code>evt</code> | Use full words unless the abbreviation is universal (<code>id</code>, <code>url</code>, <code>api</code>) | | Misleading names | Function named <code>get</code> that also mutates state | Rename to reflect actual behavior | | Comments explaining &quot;what&quot; | <code>// increment counter</code> above <code>count++</code> | Delete the comment — the code is clear enough | | Comments explaining &quot;why&quot; | <code>// Retry because the API is flaky under load</code> | Keep these — they carry intent the code can't express |</p>
+<p><strong>Redundancy:</strong></p>
+<p>| Pattern | Signal | Simplification | |---------|--------|----------------| | Duplicated logic | Same 5+ lines in multiple places | Extract to a shared function | | Dead code | Unreachable branches, unused variables, commented-out blocks | Remove (after confirming it's truly dead) | | Unnecessary abstractions | Wrapper that adds no value | Inline the wrapper, call the underlying function directly | | Over-engineered patterns | Factory-for-a-factory, strategy-with-one-strategy | Replace with the simple direct approach | | Redundant type assertions | Casting to a type that's already inferred | Remove the assertion |</p>
+<h4>Step 3: Apply Changes Incrementally</h4>
+<p>Make one simplification at a time. Run tests after each change. <strong>Submit refactoring changes separately from feature or bug fix changes.</strong> A PR that refactors and adds a feature is two PRs — split them.</p>
+<pre><code>FOR EACH SIMPLIFICATION:
+1. Make the change
+2. Run the test suite
+3. If tests pass → commit (or continue to next simplification)
+4. If tests fail → revert and reconsider</code></pre>
+<p>Avoid batching multiple simplifications into a single untested change. If something breaks, you need to know which simplification caused it.</p>
+<p><strong>The Rule of 500:</strong> If a refactoring would touch more than 500 lines, invest in automation (codemods, sed scripts, AST transforms) rather than making the changes by hand. Manual edits at that scale are error-prone and exhausting to review.</p>
+<h4>Step 4: Verify the Result</h4>
+<p>After all simplifications, step back and evaluate the whole:</p>
+<pre><code>COMPARE BEFORE AND AFTER:
+- Is the simplified version genuinely easier to understand?
+- Did you introduce any new patterns inconsistent with the codebase?
+- Is the diff clean and reviewable?
+- Would a teammate approve this change?</code></pre>
+<p>If the &quot;simplified&quot; version is harder to understand or review, revert. Not every simplification attempt succeeds.</p>
+<h3>Language-Specific Guidance</h3>
+<h4>TypeScript / JavaScript</h4>
+<pre><code>// SIMPLIFY: Unnecessary async wrapper
+// Before
+async function getUser(id: string): Promise&lt;User&gt; {
+  return await userService.findById(id);
+}
+// After
+function getUser(id: string): Promise&lt;User&gt; {
+  return userService.findById(id);
+}
+
+// SIMPLIFY: Verbose conditional assignment
+// Before
+let displayName: string;
+if (user.nickname) {
+  displayName = user.nickname;
+} else {
+  displayName = user.fullName;
+}
+// After
+const displayName = user.nickname || user.fullName;
+
+// SIMPLIFY: Manual array building
+// Before
+const activeUsers: User[] = [];
+for (const user of users) {
+  if (user.isActive) {
+    activeUsers.push(user);
+  }
+}
+// After
+const activeUsers = users.filter((user) =&gt; user.isActive);
+
+// SIMPLIFY: Redundant boolean return
+// Before
+function isValid(input: string): boolean {
+  if (input.length &gt; 0 &amp;&amp; input.length &lt; 100) {
+    return true;
+  }
+  return false;
+}
+// After
+function isValid(input: string): boolean {
+  return input.length &gt; 0 &amp;&amp; input.length &lt; 100;
+}</code></pre>
+<h4>Python</h4>
+<pre><code># SIMPLIFY: Verbose dictionary building
+# Before
+result = {}
+for item in items:
+    result[item.id] = item.name
+# After
+result = {item.id: item.name for item in items}
+
+# SIMPLIFY: Nested conditionals with early return
+# Before
+def process(data):
+    if data is not None:
+        if data.is_valid():
+            if data.has_permission():
+                return do_work(data)
+            else:
+                raise PermissionError(&quot;No permission&quot;)
+        else:
+            raise ValueError(&quot;Invalid data&quot;)
+    else:
+        raise TypeError(&quot;Data is None&quot;)
+# After
+def process(data):
+    if data is None:
+        raise TypeError(&quot;Data is None&quot;)
+    if not data.is_valid():
+        raise ValueError(&quot;Invalid data&quot;)
+    if not data.has_permission():
+        raise PermissionError(&quot;No permission&quot;)
+    return do_work(data)</code></pre>
+<h4>React / JSX</h4>
+<pre><code>// SIMPLIFY: Verbose conditional rendering
+// Before
+function UserBadge({ user }: Props) {
+  if (user.isAdmin) {
+    return &lt;Badge variant=&quot;admin&quot;&gt;Admin&lt;/Badge&gt;;
+  } else {
+    return &lt;Badge variant=&quot;default&quot;&gt;User&lt;/Badge&gt;;
+  }
+}
+// After
+function UserBadge({ user }: Props) {
+  const variant = user.isAdmin ? 'admin' : 'default';
+  const label = user.isAdmin ? 'Admin' : 'User';
+  return &lt;Badge variant={variant}&gt;{label}&lt;/Badge&gt;;
+}
+
+// SIMPLIFY: Prop drilling through intermediate components
+// Before — consider whether context or composition solves this better.
+// This is a judgment call — flag it, don't auto-refactor.</code></pre>
+<h3>Common Rationalizations</h3>
+<p>| Rationalization | Reality | |---|---| | &quot;It's working, no need to touch it&quot; | Working code that's hard to read will be hard to fix when it breaks. Simplifying now saves time on every future change. | | &quot;Fewer lines is always simpler&quot; | A 1-line nested ternary is not simpler than a 5-line if/else. Simplicity is about comprehension speed, not line count. | | &quot;I'll just quickly simplify this unrelated code too&quot; | Unscoped simplification creates noisy diffs and risks regressions in code you didn't intend to change. Stay focused. | | &quot;The types make it self-documenting&quot; | Types document structure, not intent. A well-named function explains <em>why</em> better than a type signature explains <em>what</em>. | | &quot;This abstraction might be useful later&quot; | Don't preserve speculative abstractions. If it's not used now, it's complexity without value. Remove it and re-add when needed. | | &quot;The original author must have had a reason&quot; | Maybe. Check git blame — apply Chesterton's Fence. But accumulated complexity often has no reason; it's just the residue of iteration under pressure. | | &quot;I'll refactor while adding this feature&quot; | Separate refactoring from feature work. Mixed changes are harder to review, revert, and understand in history. |</p>
+<h3>Red Flags</h3>
+<ul>
+<li>Simplification that requires modifying tests to pass (you likely changed behavior)</li>
+<li>&quot;Simplified&quot; code that is longer and harder to follow than the original</li>
+<li>Renaming things to match your preferences rather than project conventions</li>
+<li>Removing error handling because &quot;it makes the code cleaner&quot;</li>
+<li>Simplifying code you don't fully understand</li>
+<li>Batching many simplifications into one large, hard-to-review commit</li>
+<li>Refactoring code outside the scope of the current task without being asked</li>
+</ul>
+<h3>Verification</h3>
+<p>After completing a simplification pass:</p>
+<ul>
+<li>[ ] All existing tests pass without modification</li>
+<li>[ ] Build succeeds with no new warnings</li>
+<li>[ ] Linter/formatter passes (no style regressions)</li>
+<li>[ ] Each simplification is a reviewable, incremental change</li>
+<li>[ ] The diff is clean — no unrelated changes mixed in</li>
+<li>[ ] Simplified code follows project conventions (checked against CLAUDE.md or equivalent)</li>
+<li>[ ] No error handling was removed or weakened</li>
+<li>[ ] No dead code was left behind (unused imports, unreachable branches)</li>
+<li>[ ] A teammate or review agent would approve the change as a net improvement</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: code-simplification\ndisplay_name: code-simplification\nplatform: Zed\ncategory: Software engineering and app building\n---\n\n# code-simplification - Zed Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `code-simplification` for Zed. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n> Inspired by the [Claude Code Simplifier plugin](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-simplifier/agents/code-simplifier.md). Adapted here as a model-agnostic, process-driven skill\n\n## How To Use It In Zed\n\nIn Zed, open the Agent panel and type: Use the code-simplification skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `code-simplification` |\n| Canonical name | `code-simplification` |\n| Platform | `Zed` |\n| Category | Software engineering and app building |\n\n## Description\n\n> Inspired by the [Claude Code Simplifier plugin](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-simplifier/agents/code-simplifier.md). Adapted here as a model-agnostic, process-driven skill\n\n## Original SKILL.md\n\n---\nname: code-simplification\ndescription: Simplifies code for clarity. Use when refactoring code for clarity without changing behavior. Use when code works but is harder to read, maintain, or extend than it should be. Use when reviewing code that has accumulated unnecessary complexity.\n---\n\n# Code Simplification\n\n> Inspired by the [Claude Code Simplifier plugin](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-simplifier/agents/code-simplifier.md). Adapted here as a model-agnostic, process-driven skill for any AI coding agent.\n\n## Overview\n\nSimplify code by reducing complexity while preserving exact behavior. The goal is not fewer lines — it's code that is easier to read, understand, modify, and debug. Every simplification must pass a simple test: \"Would a new team member understand this faster than the original?\"\n\n## When to Use\n\n- After a feature is working and tests pass, but the implementation feels heavier than it needs to be\n- During code review when readability or complexity issues are flagged\n- When you encounter deeply nested logic, long functions, or unclear names\n- When refactoring code written under time pressure\n- When consolidating related logic scattered across files\n- After merging changes that introduced duplication or inconsistency\n\n**When NOT to use:**\n\n- Code is already clean and readable — don't simplify for the sake of it\n- You don't understand what the code does yet — comprehend before you simplify\n- The code is performance-critical and the \"simpler\" version would be measurably slower\n- You're about to rewrite the module entirely — simplifying throwaway code wastes effort\n\n## The Five Principles\n\n### 1. Preserve Behavior Exactly\n\nDon't change what the code does — only how it expresses it. All inputs, outputs, side effects, error behavior, and edge cases must remain identical. If you're not sure a simplification preserves behavior, don't make it.\n\n```\nASK BEFORE EVERY CHANGE:\n→ Does this produce the same output for every input?\n→ Does this maintain the same error behavior?\n→ Does this preserve the same side effects and ordering?\n→ Do all existing tests still pass without modification?\n```\n\n### 2. Follow Project Conventions\n\nSimplification means making code more consistent with the codebase, not imposing external preferences. Before simplifying:\n\n```\n1. Read CLAUDE.md / project conventions\n2. Study how neighboring code handles similar patterns\n3. Match the project's style for:\n   - Import ordering and module system\n   - Function declaration style\n   - Naming conventions\n   - Error handling patterns\n   - Type annotation depth\n```\n\nSimplification that breaks project consistency is not simplification — it's churn.\n\n### 3. Prefer Clarity Over Cleverness\n\nExplicit code is better than compact code when the compact version requires a mental pause to parse.\n\n```typescript\n// UNCLEAR: Dense ternary chain\nconst label = isNew ? 'New' : isUpdated ? 'Updated' : isArchived ? 'Archived' : 'Active';\n\n// CLEAR: Readable mapping\nfunction getStatusLabel(item: Item): string {\n  if (item.isNew) return 'New';\n  if (item.isUpdated) return 'Updated';\n  if (item.isArchived) return 'Archived';\n  return 'Active';\n}\n```\n\n```typescript\n// UNCLEAR: Chained reduces with inline logic\nconst result = items.reduce((acc, item) => ({\n  ...acc,\n  [item.id]: { ...acc[item.id], count: (acc[item.id]?.count ?? 0) + 1 }\n}), {});\n\n// CLEAR: Named intermediate step\nconst countById = new Map\u003cstring, number>();\nfor (const item of items) {\n  countById.set(item.id, (countById.get(item.id) ?? 0) + 1);\n}\n```\n\n### 4. Maintain Balance\n\nSimplification has a failure mode: over-simplification. Watch for these traps:\n\n- **Inlining too aggressively** — removing a helper that gave a concept a name makes the call site harder to read\n- **Combining unrelated logic** — two simple functions merged into one complex function is not simpler\n- **Removing \"unnecessary\" abstraction** — some abstractions exist for extensibility or testability, not complexity\n- **Optimizing for line count** — fewer lines is not the goal; easier comprehension is\n\n### 5. Scope to What Changed\n\nDefault to simplifying recently modified code. Avoid drive-by refactors of unrelated code unless explicitly asked to broaden scope. Unscoped simplification creates noise in diffs and risks unintended regressions.\n\n## The Simplification Process\n\n### Step 1: Understand Before Touching (Chesterton's Fence)\n\nBefore changing or removing anything, understand why it exists. This is Chesterton's Fence: if you see a fence across a road and don't understand why it's there, don't tear it down. First understand the reason, then decide if the reason still applies.\n\n```\nBEFORE SIMPLIFYING, ANSWER:\n- What is this code's responsibility?\n- What calls it? What does it call?\n- What are the edge cases and error paths?\n- Are there tests that define the expected behavior?\n- Why might it have been written this way? (Performance? Platform constraint? Historical reason?)\n- Check git blame: what was the original context for this code?\n```\n\nIf you can't answer these, you're not ready to simplify. Read more context first.\n\n### Step 2: Identify Simplification Opportunities\n\nScan for these patterns — each one is a concrete signal, not a vague smell:\n\n**Structural complexity:**\n\n| Pattern | Signal | Simplification |\n|---------|--------|----------------|\n| Deep nesting (3+ levels) | Hard to follow control flow | Extract conditions into guard clauses or helper functions |\n| Long functions (50+ lines) | Multiple responsibilities | Split into focused functions with descriptive names |\n| Nested ternaries | Requires mental stack to parse | Replace with if/else chains, switch, or lookup objects |\n| Boolean parameter flags | `doThing(true, false, true)` | Replace with options objects or separate functions |\n| Repeated conditionals | Same `if` check in multiple places | Extract to a well-named predicate function |\n\n**Naming and readability:**\n\n| Pattern | Signal | Simplification |\n|---------|--------|----------------|\n| Generic names | `data`, `result`, `temp`, `val`, `item` | Rename to describe the content: `userProfile`, `validationErrors` |\n| Abbreviated names | `usr`, `cfg`, `btn`, `evt` | Use full words unless the abbreviation is universal (`id`, `url`, `api`) |\n| Misleading names | Function named `get` that also mutates state | Rename to reflect actual behavior |\n| Comments explaining \"what\" | `// increment counter` above `count++` | Delete the comment — the code is clear enough |\n| Comments explaining \"why\" | `// Retry because the API is flaky under load` | Keep these — they carry intent the code can't express |\n\n**Redundancy:**\n\n| Pattern | Signal | Simplification |\n|---------|--------|----------------|\n| Duplicated logic | Same 5+ lines in multiple places | Extract to a shared function |\n| Dead code | Unreachable branches, unused variables, commented-out blocks | Remove (after confirming it's truly dead) |\n| Unnecessary abstractions | Wrapper that adds no value | Inline the wrapper, call the underlying function directly |\n| Over-engineered patterns | Factory-for-a-factory, strategy-with-one-strategy | Replace with the simple direct approach |\n| Redundant type assertions | Casting to a type that's already inferred | Remove the assertion |\n\n### Step 3: Apply Changes Incrementally\n\nMake one simplification at a time. Run tests after each change. **Submit refactoring changes separately from feature or bug fix changes.** A PR that refactors and adds a feature is two PRs — split them.\n\n```\nFOR EACH SIMPLIFICATION:\n1. Make the change\n2. Run the test suite\n3. If tests pass → commit (or continue to next simplification)\n4. If tests fail → revert and reconsider\n```\n\nAvoid batching multiple simplifications into a single untested change. If something breaks, you need to know which simplification caused it.\n\n**The Rule of 500:** If a refactoring would touch more than 500 lines, invest in automation (codemods, sed scripts, AST transforms) rather than making the changes by hand. Manual edits at that scale are error-prone and exhausting to review.\n\n### Step 4: Verify the Result\n\nAfter all simplifications, step back and evaluate the whole:\n\n```\nCOMPARE BEFORE AND AFTER:\n- Is the simplified version genuinely easier to understand?\n- Did you introduce any new patterns inconsistent with the codebase?\n- Is the diff clean and reviewable?\n- Would a teammate approve this change?\n```\n\nIf the \"simplified\" version is harder to understand or review, revert. Not every simplification attempt succeeds.\n\n## Language-Specific Guidance\n\n### TypeScript / JavaScript\n\n```typescript\n// SIMPLIFY: Unnecessary async wrapper\n// Before\nasync function getUser(id: string): Promise\u003cUser> {\n  return await userService.findById(id);\n}\n// After\nfunction getUser(id: string): Promise\u003cUser> {\n  return userService.findById(id);\n}\n\n// SIMPLIFY: Verbose conditional assignment\n// Before\nlet displayName: string;\nif (user.nickname) {\n  displayName = user.nickname;\n} else {\n  displayName = user.fullName;\n}\n// After\nconst displayName = user.nickname || user.fullName;\n\n// SIMPLIFY: Manual array building\n// Before\nconst activeUsers: User[] = [];\nfor (const user of users) {\n  if (user.isActive) {\n    activeUsers.push(user);\n  }\n}\n// After\nconst activeUsers = users.filter((user) => user.isActive);\n\n// SIMPLIFY: Redundant boolean return\n// Before\nfunction isValid(input: string): boolean {\n  if (input.length > 0 && input.length \u003c 100) {\n    return true;\n  }\n  return false;\n}\n// After\nfunction isValid(input: string): boolean {\n  return input.length > 0 && input.length \u003c 100;\n}\n```\n\n### Python\n\n```python\n# SIMPLIFY: Verbose dictionary building\n# Before\nresult = {}\nfor item in items:\n    result[item.id] = item.name\n# After\nresult = {item.id: item.name for item in items}\n\n# SIMPLIFY: Nested conditionals with early return\n# Before\ndef process(data):\n    if data is not None:\n        if data.is_valid():\n            if data.has_permission():\n                return do_work(data)\n            else:\n                raise PermissionError(\"No permission\")\n        else:\n            raise ValueError(\"Invalid data\")\n    else:\n        raise TypeError(\"Data is None\")\n# After\ndef process(data):\n    if data is None:\n        raise TypeError(\"Data is None\")\n    if not data.is_valid():\n        raise ValueError(\"Invalid data\")\n    if not data.has_permission():\n        raise PermissionError(\"No permission\")\n    return do_work(data)\n```\n\n### React / JSX\n\n```tsx\n// SIMPLIFY: Verbose conditional rendering\n// Before\nfunction UserBadge({ user }: Props) {\n  if (user.isAdmin) {\n    return \u003cBadge variant=\"admin\">Admin\u003c/Badge>;\n  } else {\n    return \u003cBadge variant=\"default\">User\u003c/Badge>;\n  }\n}\n// After\nfunction UserBadge({ user }: Props) {\n  const variant = user.isAdmin ? 'admin' : 'default';\n  const label = user.isAdmin ? 'Admin' : 'User';\n  return \u003cBadge variant={variant}>{label}\u003c/Badge>;\n}\n\n// SIMPLIFY: Prop drilling through intermediate components\n// Before — consider whether context or composition solves this better.\n// This is a judgment call — flag it, don't auto-refactor.\n```\n\n## Common Rationalizations\n\n| Rationalization | Reality |\n|---|---|\n| \"It's working, no need to touch it\" | Working code that's hard to read will be hard to fix when it breaks. Simplifying now saves time on every future change. |\n| \"Fewer lines is always simpler\" | A 1-line nested ternary is not simpler than a 5-line if/else. Simplicity is about comprehension speed, not line count. |\n| \"I'll just quickly simplify this unrelated code too\" | Unscoped simplification creates noisy diffs and risks regressions in code you didn't intend to change. Stay focused. |\n| \"The types make it self-documenting\" | Types document structure, not intent. A well-named function explains *why* better than a type signature explains *what*. |\n| \"This abstraction might be useful later\" | Don't preserve speculative abstractions. If it's not used now, it's complexity without value. Remove it and re-add when needed. |\n| \"The original author must have had a reason\" | Maybe. Check git blame — apply Chesterton's Fence. But accumulated complexity often has no reason; it's just the residue of iteration under pressure. |\n| \"I'll refactor while adding this feature\" | Separate refactoring from feature work. Mixed changes are harder to review, revert, and understand in history. |\n\n## Red Flags\n\n- Simplification that requires modifying tests to pass (you likely changed behavior)\n- \"Simplified\" code that is longer and harder to follow than the original\n- Renaming things to match your preferences rather than project conventions\n- Removing error handling because \"it makes the code cleaner\"\n- Simplifying code you don't fully understand\n- Batching many simplifications into one large, hard-to-review commit\n- Refactoring code outside the scope of the current task without being asked\n\n## Verification\n\nAfter completing a simplification pass:\n\n- [ ] All existing tests pass without modification\n- [ ] Build succeeds with no new warnings\n- [ ] Linter/formatter passes (no style regressions)\n- [ ] Each simplification is a reviewable, incremental change\n- [ ] The diff is clean — no unrelated changes mixed in\n- [ ] Simplified code follows project conventions (checked against CLAUDE.md or equivalent)\n- [ ] No error handling was removed or weakened\n- [ ] No dead code was left behind (unused imports, unreachable branches)\n- [ ] A teammate or review agent would approve the change as a net improvement\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("code-simplification-zed-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

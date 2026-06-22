@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hunting-for-dcom-lateral-movement - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/hunting-for-dcom-lateral-movement-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>hunting-for-dcom-lateral-movement</h1>
+      <p class="description">'Hunt for DCOM-based lateral movement by detecting abuse of MMC20.Application,</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>hunting-for-dcom-lateral-movement</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>hunting-for-dcom-lateral-movement</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Hunt for DCOM-based lateral movement by detecting abuse of MMC20.Application,</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose hunting-for-dcom-lateral-movement, then write the task. Fallback prompt: Use the hunting-for-dcom-lateral-movement skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Hunting for DCOM Lateral Movement</h2>
+<blockquote><strong>Authorized Testing Disclaimer</strong>: The offensive techniques and attack simulations described in this skill are intended exclusively for authorized penetration testing, red team engagements, purple team exercises, and security research conducted with explicit written permission from the system owner. Unauthorized use of these techniques against systems you do not own or have permission to test is illegal and unethical. Always operate within the scope of your engagement and comply with applicable laws and regulations.</blockquote>
+<h3>Overview</h3>
+<p>Distributed Component Object Model (DCOM) enables remote execution of COM objects across a network using RPC. Adversaries abuse specific DCOM objects -- MMC20.Application (CLSID {49B2791A-B1AE-4C90-9B8E-E860BA07F889}), ShellBrowserWindow (CLSID {C08AFD90-F2A1-11D1-8455-00A0C91F3880}), and ShellWindows (CLSID {9BA05972-F6A8-11CF-A442-00A0C90A8F39}) -- to execute commands on remote hosts without dropping files, making this a stealthy lateral movement technique mapped to MITRE ATT&amp;CK T1021.003. This skill provides detection strategies using Sysmon telemetry, Windows Security Event correlation, network monitoring, and SIEM detection rules to identify DCOM abuse in enterprise environments.</p>
+<h3>When to Use</h3>
+<ul>
+<li>Proactively hunting for lateral movement in Active Directory environments where DCOM is enabled</li>
+<li>Investigating alerts for suspicious mmc.exe, dllhost.exe, or explorer.exe child process creation on servers</li>
+<li>Building detection rules for MITRE ATT&amp;CK T1021.003 (Remote Services: Distributed Component Object Model)</li>
+<li>Correlating Sysmon Event ID 1 (Process Create) and Event ID 3 (Network Connection) to trace DCOM-based command execution chains</li>
+<li>Auditing DCOM exposure across the domain to reduce lateral movement attack surface</li>
+<li>During purple team exercises validating detection coverage for DCOM-based techniques</li>
+</ul>
+<p><strong>Do not use</strong> as a replacement for EDR-based lateral movement detection, without Sysmon or equivalent process telemetry deployed on endpoints, or in isolation without correlating network-level and host-level indicators.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>Sysmon deployed on endpoints with configuration capturing Event ID 1 (Process Create), Event ID 3 (Network Connection), Event ID 7 (Image Loaded), and Event ID 10 (Process Access)</li>
+<li>Windows Security Event Logs forwarded to SIEM (Event IDs 4624, 4672, 4688)</li>
+<li>SIEM platform (Splunk, Elastic, Microsoft Sentinel) with correlation capability</li>
+<li>Network monitoring for RPC traffic (TCP 135 and dynamic high ports 49152-65535)</li>
+<li>Baseline inventory of legitimate DCOM usage in the environment</li>
+<li>Understanding of MITRE ATT&amp;CK Lateral Movement tactic (TA0008) and T1021.003</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Understand DCOM Lateral Movement Attack Vectors</h4>
+<p>DCOM lateral movement exploits three primary COM objects. Each has distinct forensic artifacts.</p>
+<p><strong>MMC20.Application</strong> -- The attacker instantiates the MMC snap-in remotely and calls <code>ExecuteShellCommand</code> to run arbitrary commands on the target. This spawns mmc.exe as a child of svchost.exe (DcomLaunch service) on the target.</p>
+<p><strong>ShellBrowserWindow</strong> -- Uses the <code>Document.Application.ShellExecute</code> method to execute commands through an existing explorer.exe process. Unlike MMC20, this does not create a new process for the COM server itself, making it stealthier.</p>
+<p><strong>ShellWindows</strong> -- Similar to ShellBrowserWindow, it activates within an existing explorer.exe instance and executes child processes from explorer.exe. The absence of a new COM server process makes it harder to detect without proper telemetry.</p>
+<pre><code># ATTACK SIMULATION (authorized testing only)
+# These commands demonstrate what adversaries execute -- use only in lab environments
+
+# MMC20.Application lateral movement
+# $dcom = [System.Activator]::CreateInstance(
+#     [Type]::GetTypeFromProgID(&quot;MMC20.Application&quot;, &quot;TARGET_IP&quot;))
+# $dcom.Document.ActiveView.ExecuteShellCommand(
+#     &quot;cmd.exe&quot;, $null, &quot;/c whoami &gt; C:\temp\output.txt&quot;, &quot;7&quot;)
+
+# ShellWindows lateral movement
+# $dcom = [System.Activator]::CreateInstance(
+#     [Type]::GetTypeFromCLSID(
+#         [guid]&quot;9BA05972-F6A8-11CF-A442-00A0C90A8F39&quot;, &quot;TARGET_IP&quot;))
+# $dcom.item().Document.Application.ShellExecute(
+#     &quot;cmd.exe&quot;, &quot;/c calc.exe&quot;, &quot;C:\windows\system32&quot;, $null, 0)
+
+# ShellBrowserWindow lateral movement
+# $dcom = [System.Activator]::CreateInstance(
+#     [Type]::GetTypeFromCLSID(
+#         [guid]&quot;C08AFD90-F2A1-11D1-8455-00A0C91F3880&quot;, &quot;TARGET_IP&quot;))
+# $dcom.Document.Application.ShellExecute(
+#     &quot;cmd.exe&quot;, &quot;/c net user&quot;, &quot;C:\windows\system32&quot;, $null, 0)</code></pre>
+<h4>Step 2: Configure Sysmon for DCOM Detection</h4>
+<pre><code>&lt;!-- Sysmon configuration excerpt for DCOM lateral movement detection --&gt;
+&lt;!-- Add these rules to your existing Sysmon config --&gt;
+
+&lt;Sysmon schemaversion=&quot;4.90&quot;&gt;
+  &lt;EventFiltering&gt;
+
+    &lt;!-- Event ID 1: Process Creation - Detect DCOM-spawned processes --&gt;
+    &lt;RuleGroup name=&quot;DCOM_ProcessCreate&quot; groupRelation=&quot;or&quot;&gt;
+      &lt;ProcessCreate onmatch=&quot;include&quot;&gt;
+        &lt;!-- MMC20.Application: mmc.exe spawning child processes --&gt;
+        &lt;ParentImage condition=&quot;end with&quot;&gt;mmc.exe&lt;/ParentImage&gt;
+        &lt;!-- DcomLaunch service spawning COM servers --&gt;
+        &lt;ParentCommandLine condition=&quot;contains&quot;&gt;DcomLaunch&lt;/ParentCommandLine&gt;
+        &lt;!-- dllhost.exe spawning suspicious children --&gt;
+        &lt;ParentImage condition=&quot;end with&quot;&gt;dllhost.exe&lt;/ParentImage&gt;
+        &lt;!-- explorer.exe spawning cmd/powershell (ShellWindows/ShellBrowserWindow) --&gt;
+        &lt;Rule groupRelation=&quot;and&quot;&gt;
+          &lt;ParentImage condition=&quot;end with&quot;&gt;explorer.exe&lt;/ParentImage&gt;
+          &lt;Image condition=&quot;end with&quot;&gt;cmd.exe&lt;/Image&gt;
+        &lt;/Rule&gt;
+        &lt;Rule groupRelation=&quot;and&quot;&gt;
+          &lt;ParentImage condition=&quot;end with&quot;&gt;explorer.exe&lt;/ParentImage&gt;
+          &lt;Image condition=&quot;end with&quot;&gt;powershell.exe&lt;/Image&gt;
+        &lt;/Rule&gt;
+      &lt;/ProcessCreate&gt;
+    &lt;/RuleGroup&gt;
+
+    &lt;!-- Event ID 3: Network Connection - Track DCOM RPC connections --&gt;
+    &lt;RuleGroup name=&quot;DCOM_NetworkConnect&quot; groupRelation=&quot;or&quot;&gt;
+      &lt;NetworkConnect onmatch=&quot;include&quot;&gt;
+        &lt;!-- RPC Endpoint Mapper --&gt;
+        &lt;DestinationPort condition=&quot;is&quot;&gt;135&lt;/DestinationPort&gt;
+        &lt;!-- DCOM processes making network connections --&gt;
+        &lt;Image condition=&quot;end with&quot;&gt;mmc.exe&lt;/Image&gt;
+        &lt;Image condition=&quot;end with&quot;&gt;dllhost.exe&lt;/Image&gt;
+        &lt;!-- svchost.exe DcomLaunch connections --&gt;
+        &lt;Rule groupRelation=&quot;and&quot;&gt;
+          &lt;Image condition=&quot;end with&quot;&gt;svchost.exe&lt;/Image&gt;
+          &lt;DestinationPort condition=&quot;more than&quot;&gt;49151&lt;/DestinationPort&gt;
+        &lt;/Rule&gt;
+      &lt;/NetworkConnect&gt;
+    &lt;/RuleGroup&gt;
+
+    &lt;!-- Event ID 7: Image Loaded - DCOM-related DLLs --&gt;
+    &lt;RuleGroup name=&quot;DCOM_ImageLoaded&quot; groupRelation=&quot;or&quot;&gt;
+      &lt;ImageLoad onmatch=&quot;include&quot;&gt;
+        &lt;ImageLoaded condition=&quot;end with&quot;&gt;comsvcs.dll&lt;/ImageLoaded&gt;
+        &lt;ImageLoaded condition=&quot;end with&quot;&gt;ole32.dll&lt;/ImageLoaded&gt;
+        &lt;ImageLoaded condition=&quot;end with&quot;&gt;rpcrt4.dll&lt;/ImageLoaded&gt;
+      &lt;/ImageLoad&gt;
+    &lt;/RuleGroup&gt;
+
+  &lt;/EventFiltering&gt;
+&lt;/Sysmon&gt;</code></pre>
+<pre><code># Deploy or update Sysmon configuration
+# sysmon64.exe -c dcom-detection-sysmon.xml
+
+# Verify Sysmon is capturing DCOM events
+# PowerShell: Get-WinEvent -LogName &quot;Microsoft-Windows-Sysmon/Operational&quot; -MaxEvents 10 |
+#   Where-Object { $_.Id -in @(1,3) } | Format-Table TimeCreated, Id, Message -Wrap</code></pre>
+<h4>Step 3: Build SIEM Detection Rules for DCOM Object Abuse</h4>
+<pre><code># Sigma Rule: MMC20.Application DCOM Lateral Movement
+title: DCOM Lateral Movement via MMC20.Application
+id: 8a3b5f2e-c1d4-4a9f-b237-1e6f8d2c3a4b
+status: stable
+description: &gt;
+  Detects remote instantiation of MMC20.Application DCOM object by monitoring
+  for mmc.exe spawned by svchost.exe DcomLaunch service with subsequent child
+  process creation, indicating T1021.003 lateral movement.
+references:
+    - https://attack.mitre.org/techniques/T1021/003/
+    - https://www.cybereason.com/blog/dcom-lateral-movement-techniques
+    - https://www.mdsec.co.uk/2020/09/i-like-to-move-it-windows-lateral-movement-part-2-dcom/
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_parent:
+        ParentImage|endswith: '\mmc.exe'
+    selection_child:
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+            - '\mshta.exe'
+            - '\rundll32.exe'
+            - '\regsvr32.exe'
+    filter_legitimate:
+        ParentCommandLine|contains:
+            - 'devmgmt.msc'
+            - 'diskmgmt.msc'
+            - 'services.msc'
+            - 'compmgmt.msc'
+    condition: selection_parent and selection_child and not filter_legitimate
+level: high
+tags:
+    - attack.lateral_movement
+    - attack.t1021.003
+falsepositives:
+    - Legitimate remote MMC administration by authorized IT staff
+    - SCCM or other management tools using DCOM for remote management</code></pre>
+<pre><code># Sigma Rule: ShellWindows/ShellBrowserWindow DCOM Lateral Movement
+title: DCOM Lateral Movement via ShellWindows or ShellBrowserWindow
+id: 2f7c9d1e-a8b3-4c5f-9012-3e4d5f6a7b8c
+status: stable
+description: &gt;
+  Detects DCOM lateral movement using ShellWindows (CLSID 9BA05972) or
+  ShellBrowserWindow (CLSID C08AFD90) by monitoring for explorer.exe spawning
+  cmd.exe or powershell.exe on systems where no user is interactively logged on,
+  or where the network logon (Type 3) precedes the process creation.
+references:
+    - https://attack.mitre.org/techniques/T1021/003/
+    - https://www.elastic.co/guide/en/security/8.19/incoming-dcom-lateral-movement-with-shellbrowserwindow-or-shellwindows.html
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        ParentImage|endswith: '\explorer.exe'
+        Image|endswith:
+            - '\cmd.exe'
+            - '\powershell.exe'
+            - '\pwsh.exe'
+            - '\mshta.exe'
+            - '\wscript.exe'
+            - '\cscript.exe'
+    filter_interactive:
+        LogonId: '0x3e7'
+    condition: selection and not filter_interactive
+level: medium
+tags:
+    - attack.lateral_movement
+    - attack.t1021.003
+falsepositives:
+    - Users launching command prompts from Explorer context menus
+    - Software installers launching child processes from explorer.exe</code></pre>
+<pre><code># Sigma Rule: Sysmon Network Connection to RPC Endpoint Mapper from DCOM Process
+title: DCOM Process Inbound RPC Connection Followed by Process Creation
+id: 4d9e2f1a-b3c5-4a7f-8901-2c3d4e5f6a7b
+status: experimental
+description: &gt;
+  Correlates Sysmon Event ID 3 (Network Connection) on port 135 with
+  subsequent Event ID 1 (Process Create) from DCOM parent processes
+  (mmc.exe, dllhost.exe, explorer.exe) within a short time window.
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    network_connection:
+        EventID: 3
+        DestinationPort: 135
+        Initiated: 'false'
+    process_creation:
+        EventID: 1
+        ParentImage|endswith:
+            - '\mmc.exe'
+            - '\dllhost.exe'
+            - '\svchost.exe'
+    timeframe: 30s
+    condition: network_connection | near process_creation
+level: high
+tags:
+    - attack.lateral_movement
+    - attack.t1021.003</code></pre>
+<h4>Step 4: Deploy Splunk and KQL Detection Queries</h4>
+<pre><code># Splunk: Detect MMC20.Application DCOM Lateral Movement
+# Correlates network logon (4624 Type 3) with mmc.exe process creation
+
+index=wineventlog sourcetype=&quot;XmlWinEventLog:Microsoft-Windows-Sysmon/Operational&quot;
+EventCode=1 ParentImage=&quot;*\\mmc.exe&quot;
+(Image=&quot;*\\cmd.exe&quot; OR Image=&quot;*\\powershell.exe&quot; OR Image=&quot;*\\pwsh.exe&quot;
+ OR Image=&quot;*\\wscript.exe&quot; OR Image=&quot;*\\cscript.exe&quot; OR Image=&quot;*\\mshta.exe&quot;)
+| eval target_host=ComputerName
+| join target_host type=inner
+    [search index=wineventlog EventCode=4624 LogonType=3
+    | where AuthenticationPackageName=&quot;NTLM&quot; OR AuthenticationPackageName=&quot;Kerberos&quot;
+    | eval target_host=ComputerName
+    | rename IpAddress as source_ip, TargetUserName as logon_user
+    | fields target_host source_ip logon_user _time]
+| where abs(_time - relative_time(now(), &quot;-5m&quot;)) &lt; 300
+| table _time target_host Image ParentImage CommandLine source_ip logon_user
+| sort -_time</code></pre>
+<pre><code># Splunk: Detect ShellWindows/ShellBrowserWindow DCOM Lateral Movement
+# Identifies explorer.exe spawning suspicious child processes on servers
+
+index=wineventlog sourcetype=&quot;XmlWinEventLog:Microsoft-Windows-Sysmon/Operational&quot;
+EventCode=1 ParentImage=&quot;*\\explorer.exe&quot;
+(Image=&quot;*\\cmd.exe&quot; OR Image=&quot;*\\powershell.exe&quot; OR Image=&quot;*\\pwsh.exe&quot;)
+| eval target_host=ComputerName
+| join target_host type=inner
+    [search index=wineventlog sourcetype=&quot;XmlWinEventLog:Microsoft-Windows-Sysmon/Operational&quot;
+     EventCode=3 DestinationPort=135 Initiated=&quot;false&quot;
+    | eval target_host=ComputerName
+    | rename SourceIp as dcom_source_ip
+    | fields target_host dcom_source_ip _time]
+| where abs(_time - relative_time(now(), &quot;-2m&quot;)) &lt; 120
+| stats count values(Image) as child_processes values(CommandLine) as commands
+    by target_host dcom_source_ip
+| where count &gt; 0
+| table target_host dcom_source_ip child_processes commands count</code></pre>
+<pre><code># Splunk: DCOM RPC Endpoint Mapper Connection Anomaly
+# Identifies hosts receiving unusual volumes of inbound RPC connections
+
+index=wineventlog sourcetype=&quot;XmlWinEventLog:Microsoft-Windows-Sysmon/Operational&quot;
+EventCode=3 DestinationPort=135 Initiated=&quot;false&quot;
+| stats dc(SourceIp) as unique_sources count by ComputerName
+| where unique_sources &gt; 3 OR count &gt; 10
+| sort -unique_sources
+| table ComputerName unique_sources count</code></pre>
+<pre><code>-- Microsoft Sentinel KQL: DCOM Lateral Movement via MMC20.Application
+
+let dcom_network = SysmonEvent
+| where EventID == 3
+| where DestinationPort == 135
+| where InitiatedConnection == false
+| project NetworkTime=TimeGenerated, TargetComputer=Computer,
+    SourceIP=SourceIp, DestPort=DestinationPort;
+
+let dcom_process = SysmonEvent
+| where EventID == 1
+| where ParentImage endswith &quot;\\mmc.exe&quot;
+    or ParentImage endswith &quot;\\dllhost.exe&quot;
+| where Image endswith &quot;\\cmd.exe&quot;
+    or Image endswith &quot;\\powershell.exe&quot;
+    or Image endswith &quot;\\pwsh.exe&quot;
+    or Image endswith &quot;\\wscript.exe&quot;
+    or Image endswith &quot;\\mshta.exe&quot;
+| project ProcessTime=TimeGenerated, TargetComputer=Computer,
+    ParentImage, Image, CommandLine, User;
+
+dcom_network
+| join kind=inner (dcom_process) on TargetComputer
+| where abs(datetime_diff('second', NetworkTime, ProcessTime)) &lt; 60
+| project NetworkTime, ProcessTime, TargetComputer, SourceIP,
+    ParentImage, Image, CommandLine, User
+| sort by NetworkTime desc</code></pre>
+<pre><code>-- Microsoft Sentinel KQL: ShellWindows DCOM Lateral Movement
+
+SecurityEvent
+| where EventID == 4624 and LogonType == 3
+| where AuthenticationPackageName in (&quot;NTLM&quot;, &quot;Kerberos&quot;)
+| project LogonTime=TimeGenerated, TargetComputer=Computer,
+    SourceIP=IpAddress, LogonUser=TargetUserName
+| join kind=inner (
+    SysmonEvent
+    | where EventID == 1
+    | where ParentImage endswith &quot;\\explorer.exe&quot;
+    | where Image endswith &quot;\\cmd.exe&quot;
+        or Image endswith &quot;\\powershell.exe&quot;
+        or Image endswith &quot;\\pwsh.exe&quot;
+    | project ProcessTime=TimeGenerated, TargetComputer=Computer,
+        Image, CommandLine, User
+) on TargetComputer
+| where ProcessTime between (LogonTime .. (LogonTime + 2m))
+| project LogonTime, ProcessTime, TargetComputer, SourceIP,
+    LogonUser, Image, CommandLine
+| sort by LogonTime desc</code></pre>
+<h4>Step 5: WMI Event Correlation for DCOM Activity</h4>
+<pre><code># Splunk: Correlate WMI events with DCOM lateral movement
+# WMI-Activity operational log captures DCOM-triggered WMI calls
+
+index=wineventlog source=&quot;WinEventLog:Microsoft-Windows-WMI-Activity/Operational&quot;
+| where EventCode IN (5857, 5858, 5859, 5860, 5861)
+| eval event_type=case(
+    EventCode=5857, &quot;WMI Provider Loaded&quot;,
+    EventCode=5858, &quot;WMI Query Error&quot;,
+    EventCode=5859, &quot;WMI Provider Event&quot;,
+    EventCode=5860, &quot;WMI Temporary Event Registration&quot;,
+    EventCode=5861, &quot;WMI Permanent Event Registration&quot;)
+| stats count values(event_type) as wmi_events by ComputerName
+| where count &gt; 5
+| table ComputerName wmi_events count</code></pre>
+<pre><code># PowerShell: Query WMI operational log for DCOM-related activity
+# Run on target systems during investigation
+
+Get-WinEvent -LogName &quot;Microsoft-Windows-WMI-Activity/Operational&quot; -MaxEvents 500 |
+    Where-Object {
+        $_.Id -in @(5857, 5858, 5860, 5861) -and
+        $_.Message -match &quot;DCOM|MMC20|ShellWindows|ShellBrowserWindow&quot;
+    } |
+    Select-Object TimeCreated, Id,
+        @{N='Detail'; E={$_.Message.Substring(0, [Math]::Min(200, $_.Message.Length))}} |
+    Format-Table -AutoSize
+
+# Query Sysmon for DCOM parent-child process chains
+Get-WinEvent -LogName &quot;Microsoft-Windows-Sysmon/Operational&quot; -FilterXPath @&quot;
+*[System[(EventID=1)]] and
+*[EventData[
+    (Data[@Name='ParentImage'] and
+     (contains(Data[@Name='ParentImage'],'mmc.exe') or
+      contains(Data[@Name='ParentImage'],'dllhost.exe')))
+]]
+&quot;@ -MaxEvents 100 |
+    Select-Object TimeCreated,
+        @{N='ParentImage'; E={$_.Properties[20].Value}},
+        @{N='Image'; E={$_.Properties[4].Value}},
+        @{N='CommandLine'; E={$_.Properties[10].Value}},
+        @{N='User'; E={$_.Properties[12].Value}} |
+    Format-Table -AutoSize</code></pre>
+<h4>Step 6: Network-Level DCOM Detection with Zeek</h4>
+<pre><code># Zeek script for detecting DCOM lateral movement at the network level
+# Monitors RPC Endpoint Mapper (port 135) and subsequent high-port connections
+
+cat &gt; /opt/zeek/share/zeek/site/custom-detections/dcom-lateral-movement.zeek &lt;&lt; 'ZEEKEOF'
+@load base/frameworks/notice
+@load base/frameworks/sumstats
+@load base/protocols/dce-rpc
+
+module DCOMLateralMovement;
+
+export {
+    redef enum Notice::Type += {
+        DCOM_Lateral_Movement_Suspected,
+        DCOM_RPC_Scan
+    };
+
+    # Threshold for unique targets receiving RPC connections from single source
+    const rpc_target_threshold: count = 3 &amp;redef;
+    const rpc_time_window: interval = 10min &amp;redef;
+}
+
+event zeek_init()
+{
+    local r1 = SumStats::Reducer(
+        $stream=&quot;dcom.rpc_targets&quot;,
+        $apply=set(SumStats::UNIQUE)
+    );
+
+    SumStats::create([
+        $name=&quot;detect-dcom-lateral&quot;,
+        $epoch=rpc_time_window,
+        $reducers=set(r1),
+        $threshold_val(key: SumStats::Key, result: SumStats::Result) = {
+            return result[&quot;dcom.rpc_targets&quot;]$unique + 0.0;
+        },
+        $threshold=rpc_target_threshold + 0.0,
+        $threshold_crossed(key: SumStats::Key, result: SumStats::Result) = {
+            NOTICE([
+                $note=DCOM_RPC_Scan,
+                $msg=fmt(&quot;Host %s connected to %d hosts on RPC/135 in %s - possible DCOM lateral movement&quot;,
+                         key$str, result[&quot;dcom.rpc_targets&quot;]$unique, rpc_time_window),
+                $identifier=key$str
+            ]);
+        }
+    ]);
+}
+
+event connection_state_remove(c: connection)
+{
+    if ( c$id$resp_p == 135/tcp &amp;&amp; c$id$resp_h in Site::local_nets )
+    {
+        SumStats::observe(&quot;dcom.rpc_targets&quot;,
+            [$str=cat(c$id$orig_h)],
+            [$str=cat(c$id$resp_h)]
+        );
+    }
+}
+ZEEKEOF
+
+# Monitor DCE-RPC operations related to DCOM objects
+cat /opt/zeek/logs/current/dce_rpc.log | \
+  zeek-cut ts id.orig_h id.resp_h endpoint operation | \
+  grep -iE &quot;IDispatch|IRemoteActivation|IRemUnknown|IObjectExporter&quot; | \
+  sort -t$'\t' -k2 | uniq -c | sort -rn
+
+# Track RPC endpoint mapper connections between internal hosts
+cat /opt/zeek/logs/current/conn.log | \
+  zeek-cut ts id.orig_h id.resp_h id.resp_p duration | \
+  awk '$4 == 135' | \
+  awk '{print $2, &quot;-&gt;&quot;, $3}' | sort | uniq -c | sort -rn | head -20</code></pre>
+<h4>Step 7: DCOM Attack Surface Audit and Hardening</h4>
+<pre><code># Audit DCOM configuration across the domain
+# Enumerate remotely accessible DCOM objects
+
+# List DCOM applications registered on local system
+Get-CimInstance -ClassName Win32_DCOMApplication |
+    Select-Object AppID, Name |
+    Sort-Object Name |
+    Format-Table -AutoSize
+
+# Check DCOM launch permissions for high-risk objects
+$clsids = @{
+    &quot;MMC20.Application&quot;    = &quot;{49B2791A-B1AE-4C90-9B8E-E860BA07F889}&quot;
+    &quot;ShellWindows&quot;         = &quot;{9BA05972-F6A8-11CF-A442-00A0C90A8F39}&quot;
+    &quot;ShellBrowserWindow&quot;   = &quot;{C08AFD90-F2A1-11D1-8455-00A0C91F3880}&quot;
+    &quot;Excel.Application&quot;    = &quot;{00024500-0000-0000-C000-000000000046}&quot;
+    &quot;Outlook.Application&quot;  = &quot;{0006F03A-0000-0000-C000-000000000046}&quot;
+}
+
+foreach ($name in $clsids.Keys) {
+    $clsid = $clsids[$name]
+    $regPath = &quot;HKLM:\SOFTWARE\Classes\CLSID\$clsid&quot;
+    if (Test-Path $regPath) {
+        $launchPermission = (Get-ItemProperty -Path &quot;$regPath&quot; -Name &quot;LaunchPermission&quot; -ErrorAction SilentlyContinue)
+        Write-Host &quot;[*] $name ($clsid): $(if ($launchPermission) { 'Custom permissions set' } else { 'DEFAULT permissions (potentially exploitable)' })&quot;
+    } else {
+        Write-Host &quot;[-] $name ($clsid): Not found on this system&quot;
+    }
+}
+
+# Check if DCOM is enabled (should be restricted on servers that don't need it)
+$dcomEnabled = (Get-ItemProperty -Path &quot;HKLM:\SOFTWARE\Microsoft\Ole&quot; -Name &quot;EnableDCOM&quot;).EnableDCOM
+Write-Host &quot;`n[*] DCOM Enabled: $dcomEnabled&quot;
+
+# Check remote launch and activation permissions
+$remoteLaunch = (Get-ItemProperty -Path &quot;HKLM:\SOFTWARE\Microsoft\Ole&quot; -Name &quot;DefaultLaunchPermission&quot; -ErrorAction SilentlyContinue)
+Write-Host &quot;[*] Default Launch Permission: $(if ($remoteLaunch) { 'Custom' } else { 'System Default' })&quot;</code></pre>
+<pre><code># Hardening: Restrict DCOM remote access via Group Policy
+# These settings should be applied via GPO in production
+
+# Disable DCOM on systems that do not require it
+# Computer Configuration &gt; Administrative Templates &gt; System &gt; Distributed COM &gt;
+#   Application Compatibility &gt; Enable Distributed COM on this computer = Disabled
+
+# Restrict DCOM launch permissions via registry
+# Set-ItemProperty -Path &quot;HKLM:\SOFTWARE\Microsoft\Ole&quot; -Name &quot;EnableDCOM&quot; -Value &quot;N&quot;
+
+# Block RPC/DCOM at the host firewall for non-admin traffic
+# New-NetFirewallRule -DisplayName &quot;Block Inbound DCOM/RPC&quot; `
+#     -Direction Inbound -LocalPort 135 -Protocol TCP `
+#     -Action Block -RemoteAddress &quot;Any&quot; `
+#     -Group &quot;DCOM Hardening&quot;
+#
+# New-NetFirewallRule -DisplayName &quot;Allow DCOM from Admin Subnets&quot; `
+#     -Direction Inbound -LocalPort 135 -Protocol TCP `
+#     -Action Allow -RemoteAddress &quot;10.10.0.0/24&quot; `
+#     -Group &quot;DCOM Hardening&quot;
+
+# Windows Firewall: Restrict dynamic RPC port range
+# netsh int ipv4 set dynamicport tcp start=49152 num=1024</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | <strong>DCOM (T1021.003)</strong> | Distributed Component Object Model -- extends COM to allow remote object instantiation and method invocation over RPC, abused for lateral movement | | <strong>MMC20.Application</strong> | COM object (CLSID {49B2791A-B1AE-4C90-9B8E-E860BA07F889}) controlling MMC snap-ins; <code>ExecuteShellCommand</code> method enables remote command execution | | <strong>ShellWindows</strong> | COM object (CLSID {9BA05972-F6A8-11CF-A442-00A0C90A8F39}) that activates within an existing explorer.exe process, executing commands without creating a new COM server process | | <strong>ShellBrowserWindow</strong> | COM object (CLSID {C08AFD90-F2A1-11D1-8455-00A0C91F3880}) similar to ShellWindows, uses <code>Document.Application.ShellExecute</code> for stealthy command execution | | <strong>RPC Endpoint Mapper</strong> | Service on TCP port 135 that maps RPC interfaces to dynamic ports; all DCOM communication begins with an endpoint mapper query | | <strong>Sysmon Event ID 1</strong> | Process Create event capturing parent-child process relationships, command lines, and user context -- critical for identifying DCOM-spawned processes | | <strong>Sysmon Event ID 3</strong> | Network Connection event capturing source/destination IPs and ports -- used to correlate RPC connections with subsequent process creation | | <strong>DcomLaunch</strong> | Windows service (svchost.exe -k DcomLaunch) that manages DCOM server process activation; parent process of COM servers spawned via remote DCOM calls | | <strong>WMI-Activity ETW</strong> | Event Tracing for Windows provider that logs WMI method calls, instance creations, and queries -- provides visibility into DCOM-triggered WMI operations |</p>
+<h3>Tools &amp; Systems</h3>
+<p>| Tool | Purpose | |------|---------| | <strong>Sysmon</strong> | Endpoint telemetry for process creation (EID 1), network connections (EID 3), and image loads (EID 7) essential for DCOM detection | | <strong>Splunk / Elastic SIEM</strong> | Log aggregation and correlation platform for DCOM detection rules and threat hunting queries | | <strong>Microsoft Sentinel</strong> | Cloud SIEM with built-in KQL queries and analytics rules for DCOM lateral movement detection | | <strong>Sigma</strong> | Vendor-agnostic detection rule format for portable DCOM detection rules | | <strong>Zeek</strong> | Network security monitor for DCE-RPC protocol analysis and RPC endpoint mapper traffic monitoring | | <strong>Atomic Red Team</strong> | MITRE ATT&amp;CK test framework with T1021.003 atomics for validating DCOM detection coverage | | <strong>Impacket (dcomexec.py)</strong> | Python-based DCOM execution tool used by attackers and red teamers for testing DCOM lateral movement | | <strong>CIMSession / PowerShell</strong> | Native Windows tooling for DCOM object instantiation used in both legitimate administration and attacks |</p>
+<h3>Common Scenarios</h3>
+<h4>Scenario 1: MMC20.Application Lateral Movement to File Server</h4>
+<p><strong>Context</strong>: A SOC analyst receives an alert for mmc.exe spawning cmd.exe on a file server (10.10.20.50) at 03:22 UTC. No administrator activity is scheduled at this time.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Query Sysmon Event ID 1 on 10.10.20.50: confirm mmc.exe (parent: svchost.exe -k DcomLaunch) spawned cmd.exe with command line <code>/c net user /domain &gt; C:\temp\users.txt</code></li>
+<li>Query Sysmon Event ID 3 on 10.10.20.50: identify inbound TCP connection on port 135 from 10.10.5.30 at 03:22:01, followed by a high-port connection at 03:22:02</li>
+<li>Correlate Event ID 4624 on 10.10.20.50: find LogonType 3 from 10.10.5.30 at 03:22:00 with admin credentials</li>
+<li>Investigate 10.10.5.30: check for compromise indicators -- find Mimikatz artifacts in memory, evidence of credential dumping at 03:15</li>
+<li>Trace the attack chain: initial phishing compromise at 02:45, credential theft at 03:15, DCOM lateral movement at 03:22</li>
+<li>Contain: isolate 10.10.5.30 and 10.10.20.50, force password reset for compromised admin account, block inbound RPC from non-admin subnets</li>
+</ol>
+<p><strong>Pitfalls</strong>:</p>
+<ul>
+<li>Dismissing mmc.exe activity as legitimate MMC administration without checking the parent process and command line</li>
+<li>Not correlating the network logon (4624) with the process creation to identify the true source host</li>
+<li>Failing to investigate the source host for initial compromise indicators</li>
+</ul>
+<h4>Scenario 2: ShellWindows Stealthy Lateral Movement</h4>
+<p><strong>Context</strong>: During a threat hunt, an analyst queries for explorer.exe spawning cmd.exe on domain controllers and finds several instances on DC01 with no interactive logon sessions.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Verify no interactive sessions: query Event ID 4624 LogonType 2 or 10 on DC01 -- none found during the time window</li>
+<li>Query Sysmon Event ID 1: explorer.exe spawning cmd.exe with encoded PowerShell commands at 14:05, 14:12, and 14:18</li>
+<li>Decode the PowerShell: reveals reconnaissance commands (Get-ADUser, Get-ADGroup, Get-ADComputer)</li>
+<li>Query Sysmon Event ID 3: inbound RPC connections from 10.10.3.15 preceding each process creation</li>
+<li>Identify the ShellWindows pattern: no new mmc.exe or dllhost.exe process created -- commands execute through existing explorer.exe, consistent with ShellWindows/ShellBrowserWindow DCOM abuse</li>
+<li>Investigate 10.10.3.15: compromised workstation with Cobalt Strike beacon artifacts</li>
+</ol>
+<p><strong>Pitfalls</strong>:</p>
+<ul>
+<li>Missing the attack because ShellWindows does not create a separate COM server process -- requires monitoring explorer.exe child processes</li>
+<li>Not having Sysmon Event ID 3 configured to capture network connections from explorer.exe</li>
+<li>Filtering out explorer.exe as a legitimate parent process without considering the server context</li>
+</ul>
+<h3>Output Format</h3>
+<pre><code>Hunt ID: TH-DCOM-[DATE]-[SEQ]
+Alert Severity: High
+MITRE Technique: T1021.003 (Remote Services: DCOM)
+
+Source Host: [IP/Hostname of attacker's machine]
+Target Host: [IP/Hostname where DCOM executed]
+DCOM Object: [MMC20.Application | ShellWindows | ShellBrowserWindow]
+CLSID: [COM object class identifier]
+
+Process Chain:
+  Parent: [svchost.exe -k DcomLaunch | explorer.exe | mmc.exe]
+  Child:  [cmd.exe | powershell.exe | ...]
+  Command Line: [Full command executed]
+
+Network Indicators:
+  RPC Connection: [Source IP]:port -&gt; [Target IP]:135 at [timestamp]
+  DCOM Port: [Source IP]:port -&gt; [Target IP]:[high-port] at [timestamp]
+
+Authentication Context:
+  Event 4624: LogonType 3 from [Source IP] at [timestamp]
+  Account: [Domain\Username]
+  Logon ID: [Logon session identifier]
+
+Risk Assessment: [Critical/High/Medium]
+Recommended Action: [Isolate, investigate source, reset credentials, restrict DCOM]</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: hunting-for-dcom-lateral-movement\ndisplay_name: hunting-for-dcom-lateral-movement\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# hunting-for-dcom-lateral-movement - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `hunting-for-dcom-lateral-movement` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n> **Authorized Testing Disclaimer**: The offensive techniques and attack simulations described in this skill are intended exclusively for authorized penetration testing, red team engagements, purple team exercises, and s\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose hunting-for-dcom-lateral-movement, then write the task. Fallback prompt: Use the hunting-for-dcom-lateral-movement skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `hunting-for-dcom-lateral-movement` |\n| Canonical name | `hunting-for-dcom-lateral-movement` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n> **Authorized Testing Disclaimer**: The offensive techniques and attack simulations described in this skill are intended exclusively for authorized penetration testing, red team engagements, purple team exercises, and s\n\n## Original SKILL.md\n\n---\nname: hunting-for-dcom-lateral-movement\ndescription: 'Hunt for DCOM-based lateral movement by detecting abuse of MMC20.Application,\n  ShellBrowserWindow, and ShellWindows COM objects through Sysmon Event ID 1 (process\n  creation) and Event ID 3 (network connection) correlation, WMI event analysis, RPC\n  endpoint mapper traffic on port 135, and DCOM-specific parent-child process relationships.\n\n  '\ndomain: cybersecurity\nsubdomain: threat-hunting\ntags:\n- threat-hunting\n- DCOM\n- lateral-movement\n- T1021.003\n- Sysmon\n- MMC20\n- ShellWindows\n- ShellBrowserWindow\n- COM-objects\n- WMI\n- RPC\nversion: '1.0'\nauthor: mukul975\nlicense: Apache-2.0\nd3fend_techniques:\n- Application Protocol Command Analysis\n- Network Isolation\n- Network Traffic Analysis\n- Client-server Payload Profiling\n- Network Traffic Community Deviation\nnist_csf:\n- DE.CM-01\n- DE.AE-02\n- DE.AE-07\n- ID.RA-05\nmitre_attack:\n- T1046\n- T1057\n- T1082\n- T1083\n- T1021\n---\n\n# Hunting for DCOM Lateral Movement\n\n> **Authorized Testing Disclaimer**: The offensive techniques and attack simulations described in this skill are intended exclusively for authorized penetration testing, red team engagements, purple team exercises, and security research conducted with explicit written permission from the system owner. Unauthorized use of these techniques against systems you do not own or have permission to test is illegal and unethical. Always operate within the scope of your engagement and comply with applicable laws and regulations.\n\n## Overview\n\nDistributed Component Object Model (DCOM) enables remote execution of COM objects across a network using RPC. Adversaries abuse specific DCOM objects -- MMC20.Application (CLSID {49B2791A-B1AE-4C90-9B8E-E860BA07F889}), ShellBrowserWindow (CLSID {C08AFD90-F2A1-11D1-8455-00A0C91F3880}), and ShellWindows (CLSID {9BA05972-F6A8-11CF-A442-00A0C90A8F39}) -- to execute commands on remote hosts without dropping files, making this a stealthy lateral movement technique mapped to MITRE ATT&CK T1021.003. This skill provides detection strategies using Sysmon telemetry, Windows Security Event correlation, network monitoring, and SIEM detection rules to identify DCOM abuse in enterprise environments.\n\n## When to Use\n\n- Proactively hunting for lateral movement in Active Directory environments where DCOM is enabled\n- Investigating alerts for suspicious mmc.exe, dllhost.exe, or explorer.exe child process creation on servers\n- Building detection rules for MITRE ATT&CK T1021.003 (Remote Services: Distributed Component Object Model)\n- Correlating Sysmon Event ID 1 (Process Create) and Event ID 3 (Network Connection) to trace DCOM-based command execution chains\n- Auditing DCOM exposure across the domain to reduce lateral movement attack surface\n- During purple team exercises validating detection coverage for DCOM-based techniques\n\n**Do not use** as a replacement for EDR-based lateral movement detection, without Sysmon or equivalent process telemetry deployed on endpoints, or in isolation without correlating network-level and host-level indicators.\n\n## Prerequisites\n\n- Sysmon deployed on endpoints with configuration capturing Event ID 1 (Process Create), Event ID 3 (Network Connection), Event ID 7 (Image Loaded), and Event ID 10 (Process Access)\n- Windows Security Event Logs forwarded to SIEM (Event IDs 4624, 4672, 4688)\n- SIEM platform (Splunk, Elastic, Microsoft Sentinel) with correlation capability\n- Network monitoring for RPC traffic (TCP 135 and dynamic high ports 49152-65535)\n- Baseline inventory of legitimate DCOM usage in the environment\n- Understanding of MITRE ATT&CK Lateral Movement tactic (TA0008) and T1021.003\n\n## Workflow\n\n### Step 1: Understand DCOM Lateral Movement Attack Vectors\n\nDCOM lateral movement exploits three primary COM objects. Each has distinct forensic artifacts.\n\n**MMC20.Application** -- The attacker instantiates the MMC snap-in remotely and calls `ExecuteShellCommand` to run arbitrary commands on the target. This spawns mmc.exe as a child of svchost.exe (DcomLaunch service) on the target.\n\n**ShellBrowserWindow** -- Uses the `Document.Application.ShellExecute` method to execute commands through an existing explorer.exe process. Unlike MMC20, this does not create a new process for the COM server itself, making it stealthier.\n\n**ShellWindows** -- Similar to ShellBrowserWindow, it activates within an existing explorer.exe instance and executes child processes from explorer.exe. The absence of a new COM server process makes it harder to detect without proper telemetry.\n\n```powershell\n# ATTACK SIMULATION (authorized testing only)\n# These commands demonstrate what adversaries execute -- use only in lab environments\n\n# MMC20.Application lateral movement\n# $dcom = [System.Activator]::CreateInstance(\n#     [Type]::GetTypeFromProgID(\"MMC20.Application\", \"TARGET_IP\"))\n# $dcom.Document.ActiveView.ExecuteShellCommand(\n#     \"cmd.exe\", $null, \"/c whoami > C:\\temp\\output.txt\", \"7\")\n\n# ShellWindows lateral movement\n# $dcom = [System.Activator]::CreateInstance(\n#     [Type]::GetTypeFromCLSID(\n#         [guid]\"9BA05972-F6A8-11CF-A442-00A0C90A8F39\", \"TARGET_IP\"))\n# $dcom.item().Document.Application.ShellExecute(\n#     \"cmd.exe\", \"/c calc.exe\", \"C:\\windows\\system32\", $null, 0)\n\n# ShellBrowserWindow lateral movement\n# $dcom = [System.Activator]::CreateInstance(\n#     [Type]::GetTypeFromCLSID(\n#         [guid]\"C08AFD90-F2A1-11D1-8455-00A0C91F3880\", \"TARGET_IP\"))\n# $dcom.Document.Application.ShellExecute(\n#     \"cmd.exe\", \"/c net user\", \"C:\\windows\\system32\", $null, 0)\n```\n\n### Step 2: Configure Sysmon for DCOM Detection\n\n```xml\n\u003c!-- Sysmon configuration excerpt for DCOM lateral movement detection -->\n\u003c!-- Add these rules to your existing Sysmon config -->\n\n\u003cSysmon schemaversion=\"4.90\">\n  \u003cEventFiltering>\n\n    \u003c!-- Event ID 1: Process Creation - Detect DCOM-spawned processes -->\n    \u003cRuleGroup name=\"DCOM_ProcessCreate\" groupRelation=\"or\">\n      \u003cProcessCreate onmatch=\"include\">\n        \u003c!-- MMC20.Application: mmc.exe spawning child processes -->\n        \u003cParentImage condition=\"end with\">mmc.exe\u003c/ParentImage>\n        \u003c!-- DcomLaunch service spawning COM servers -->\n        \u003cParentCommandLine condition=\"contains\">DcomLaunch\u003c/ParentCommandLine>\n        \u003c!-- dllhost.exe spawning suspicious children -->\n        \u003cParentImage condition=\"end with\">dllhost.exe\u003c/ParentImage>\n        \u003c!-- explorer.exe spawning cmd/powershell (ShellWindows/ShellBrowserWindow) -->\n        \u003cRule groupRelation=\"and\">\n          \u003cParentImage condition=\"end with\">explorer.exe\u003c/ParentImage>\n          \u003cImage condition=\"end with\">cmd.exe\u003c/Image>\n        \u003c/Rule>\n        \u003cRule groupRelation=\"and\">\n          \u003cParentImage condition=\"end with\">explorer.exe\u003c/ParentImage>\n          \u003cImage condition=\"end with\">powershell.exe\u003c/Image>\n        \u003c/Rule>\n      \u003c/ProcessCreate>\n    \u003c/RuleGroup>\n\n    \u003c!-- Event ID 3: Network Connection - Track DCOM RPC connections -->\n    \u003cRuleGroup name=\"DCOM_NetworkConnect\" groupRelation=\"or\">\n      \u003cNetworkConnect onmatch=\"include\">\n        \u003c!-- RPC Endpoint Mapper -->\n        \u003cDestinationPort condition=\"is\">135\u003c/DestinationPort>\n        \u003c!-- DCOM processes making network connections -->\n        \u003cImage condition=\"end with\">mmc.exe\u003c/Image>\n        \u003cImage condition=\"end with\">dllhost.exe\u003c/Image>\n        \u003c!-- svchost.exe DcomLaunch connections -->\n        \u003cRule groupRelation=\"and\">\n          \u003cImage condition=\"end with\">svchost.exe\u003c/Image>\n          \u003cDestinationPort condition=\"more than\">49151\u003c/DestinationPort>\n        \u003c/Rule>\n      \u003c/NetworkConnect>\n    \u003c/RuleGroup>\n\n    \u003c!-- Event ID 7: Image Loaded - DCOM-related DLLs -->\n    \u003cRuleGroup name=\"DCOM_ImageLoaded\" groupRelation=\"or\">\n      \u003cImageLoad onmatch=\"include\">\n        \u003cImageLoaded condition=\"end with\">comsvcs.dll\u003c/ImageLoaded>\n        \u003cImageLoaded condition=\"end with\">ole32.dll\u003c/ImageLoaded>\n        \u003cImageLoaded condition=\"end with\">rpcrt4.dll\u003c/ImageLoaded>\n      \u003c/ImageLoad>\n    \u003c/RuleGroup>\n\n  \u003c/EventFiltering>\n\u003c/Sysmon>\n```\n\n```bash\n# Deploy or update Sysmon configuration\n# sysmon64.exe -c dcom-detection-sysmon.xml\n\n# Verify Sysmon is capturing DCOM events\n# PowerShell: Get-WinEvent -LogName \"Microsoft-Windows-Sysmon/Operational\" -MaxEvents 10 |\n#   Where-Object { $_.Id -in @(1,3) } | Format-Table TimeCreated, Id, Message -Wrap\n```\n\n### Step 3: Build SIEM Detection Rules for DCOM Object Abuse\n\n```yaml\n# Sigma Rule: MMC20.Application DCOM Lateral Movement\ntitle: DCOM Lateral Movement via MMC20.Application\nid: 8a3b5f2e-c1d4-4a9f-b237-1e6f8d2c3a4b\nstatus: stable\ndescription: >\n  Detects remote instantiation of MMC20.Application DCOM object by monitoring\n  for mmc.exe spawned by svchost.exe DcomLaunch service with subsequent child\n  process creation, indicating T1021.003 lateral movement.\nreferences:\n    - https://attack.mitre.org/techniques/T1021/003/\n    - https://www.cybereason.com/blog/dcom-lateral-movement-techniques\n    - https://www.mdsec.co.uk/2020/09/i-like-to-move-it-windows-lateral-movement-part-2-dcom/\nlogsource:\n    category: process_creation\n    product: windows\ndetection:\n    selection_parent:\n        ParentImage|endswith: '\\mmc.exe'\n    selection_child:\n        Image|endswith:\n            - '\\cmd.exe'\n            - '\\powershell.exe'\n            - '\\pwsh.exe'\n            - '\\wscript.exe'\n            - '\\cscript.exe'\n            - '\\mshta.exe'\n            - '\\rundll32.exe'\n            - '\\regsvr32.exe'\n    filter_legitimate:\n        ParentCommandLine|contains:\n            - 'devmgmt.msc'\n            - 'diskmgmt.msc'\n            - 'services.msc'\n            - 'compmgmt.msc'\n    condition: selection_parent and selection_child and not filter_legitimate\nlevel: high\ntags:\n    - attack.lateral_movement\n    - attack.t1021.003\nfalsepositives:\n    - Legitimate remote MMC administration by authorized IT staff\n    - SCCM or other management tools using DCOM for remote management\n```\n\n```yaml\n# Sigma Rule: ShellWindows/ShellBrowserWindow DCOM Lateral Movement\ntitle: DCOM Lateral Movement via ShellWindows or ShellBrowserWindow\nid: 2f7c9d1e-a8b3-4c5f-9012-3e4d5f6a7b8c\nstatus: stable\ndescription: >\n  Detects DCOM lateral movement using ShellWindows (CLSID 9BA05972) or\n  ShellBrowserWindow (CLSID C08AFD90) by monitoring for explorer.exe spawning\n  cmd.exe or powershell.exe on systems where no user is interactively logged on,\n  or where the network logon (Type 3) precedes the process creation.\nreferences:\n    - https://attack.mitre.org/techniques/T1021/003/\n    - https://www.elastic.co/guide/en/security/8.19/incoming-dcom-lateral-movement-with-shellbrowserwindow-or-shellwindows.html\nlogsource:\n    category: process_creation\n    product: windows\ndetection:\n    selection:\n        ParentImage|endswith: '\\explorer.exe'\n        Image|endswith:\n            - '\\cmd.exe'\n            - '\\powershell.exe'\n            - '\\pwsh.exe'\n            - '\\mshta.exe'\n            - '\\wscript.exe'\n            - '\\cscript.exe'\n    filter_interactive:\n        LogonId: '0x3e7'\n    condition: selection and not filter_interactive\nlevel: medium\ntags:\n    - attack.lateral_movement\n    - attack.t1021.003\nfalsepositives:\n    - Users launching command prompts from Explorer context menus\n    - Software installers launching child processes from explorer.exe\n```\n\n```yaml\n# Sigma Rule: Sysmon Network Connection to RPC Endpoint Mapper from DCOM Process\ntitle: DCOM Process Inbound RPC Connection Followed by Process Creation\nid: 4d9e2f1a-b3c5-4a7f-8901-2c3d4e5f6a7b\nstatus: experimental\ndescription: >\n  Correlates Sysmon Event ID 3 (Network Connection) on port 135 with\n  subsequent Event ID 1 (Process Create) from DCOM parent processes\n  (mmc.exe, dllhost.exe, explorer.exe) within a short time window.\nlogsource:\n    product: windows\n    service: sysmon\ndetection:\n    network_connection:\n        EventID: 3\n        DestinationPort: 135\n        Initiated: 'false'\n    process_creation:\n        EventID: 1\n        ParentImage|endswith:\n            - '\\mmc.exe'\n            - '\\dllhost.exe'\n            - '\\svchost.exe'\n    timeframe: 30s\n    condition: network_connection | near process_creation\nlevel: high\ntags:\n    - attack.lateral_movement\n    - attack.t1021.003\n```\n\n### Step 4: Deploy Splunk and KQL Detection Queries\n\n```spl\n# Splunk: Detect MMC20.Application DCOM Lateral Movement\n# Correlates network logon (4624 Type 3) with mmc.exe process creation\n\nindex=wineventlog sourcetype=\"XmlWinEventLog:Microsoft-Windows-Sysmon/Operational\"\nEventCode=1 ParentImage=\"*\\\\mmc.exe\"\n(Image=\"*\\\\cmd.exe\" OR Image=\"*\\\\powershell.exe\" OR Image=\"*\\\\pwsh.exe\"\n OR Image=\"*\\\\wscript.exe\" OR Image=\"*\\\\cscript.exe\" OR Image=\"*\\\\mshta.exe\")\n| eval target_host=ComputerName\n| join target_host type=inner\n    [search index=wineventlog EventCode=4624 LogonType=3\n    | where AuthenticationPackageName=\"NTLM\" OR AuthenticationPackageName=\"Kerberos\"\n    | eval target_host=ComputerName\n    | rename IpAddress as source_ip, TargetUserName as logon_user\n    | fields target_host source_ip logon_user _time]\n| where abs(_time - relative_time(now(), \"-5m\")) \u003c 300\n| table _time target_host Image ParentImage CommandLine source_ip logon_user\n| sort -_time\n```\n\n```spl\n# Splunk: Detect ShellWindows/ShellBrowserWindow DCOM Lateral Movement\n# Identifies explorer.exe spawning suspicious child processes on servers\n\nindex=wineventlog sourcetype=\"XmlWinEventLog:Microsoft-Windows-Sysmon/Operational\"\nEventCode=1 ParentImage=\"*\\\\explorer.exe\"\n(Image=\"*\\\\cmd.exe\" OR Image=\"*\\\\powershell.exe\" OR Image=\"*\\\\pwsh.exe\")\n| eval target_host=ComputerName\n| join target_host type=inner\n    [search index=wineventlog sourcetype=\"XmlWinEventLog:Microsoft-Windows-Sysmon/Operational\"\n     EventCode=3 DestinationPort=135 Initiated=\"false\"\n    | eval target_host=ComputerName\n    | rename SourceIp as dcom_source_ip\n    | fields target_host dcom_source_ip _time]\n| where abs(_time - relative_time(now(), \"-2m\")) \u003c 120\n| stats count values(Image) as child_processes values(CommandLine) as commands\n    by target_host dcom_source_ip\n| where count > 0\n| table target_host dcom_source_ip child_processes commands count\n```\n\n```spl\n# Splunk: DCOM RPC Endpoint Mapper Connection Anomaly\n# Identifies hosts receiving unusual volumes of inbound RPC connections\n\nindex=wineventlog sourcetype=\"XmlWinEventLog:Microsoft-Windows-Sysmon/Operational\"\nEventCode=3 DestinationPort=135 Initiated=\"false\"\n| stats dc(SourceIp) as unique_sources count by ComputerName\n| where unique_sources > 3 OR count > 10\n| sort -unique_sources\n| table ComputerName unique_sources count\n```\n\n```kql\n-- Microsoft Sentinel KQL: DCOM Lateral Movement via MMC20.Application\n\nlet dcom_network = SysmonEvent\n| where EventID == 3\n| where DestinationPort == 135\n| where InitiatedConnection == false\n| project NetworkTime=TimeGenerated, TargetComputer=Computer,\n    SourceIP=SourceIp, DestPort=DestinationPort;\n\nlet dcom_process = SysmonEvent\n| where EventID == 1\n| where ParentImage endswith \"\\\\mmc.exe\"\n    or ParentImage endswith \"\\\\dllhost.exe\"\n| where Image endswith \"\\\\cmd.exe\"\n    or Image endswith \"\\\\powershell.exe\"\n    or Image endswith \"\\\\pwsh.exe\"\n    or Image endswith \"\\\\wscript.exe\"\n    or Image endswith \"\\\\mshta.exe\"\n| project ProcessTime=TimeGenerated, TargetComputer=Computer,\n    ParentImage, Image, CommandLine, User;\n\ndcom_network\n| join kind=inner (dcom_process) on TargetComputer\n| where abs(datetime_diff('second', NetworkTime, ProcessTime)) \u003c 60\n| project NetworkTime, ProcessTime, TargetComputer, SourceIP,\n    ParentImage, Image, CommandLine, User\n| sort by NetworkTime desc\n```\n\n```kql\n-- Microsoft Sentinel KQL: ShellWindows DCOM Lateral Movement\n\nSecurityEvent\n| where EventID == 4624 and LogonType == 3\n| where AuthenticationPackageName in (\"NTLM\", \"Kerberos\")\n| project LogonTime=TimeGenerated, TargetComputer=Computer,\n    SourceIP=IpAddress, LogonUser=TargetUserName\n| join kind=inner (\n    SysmonEvent\n    | where EventID == 1\n    | where ParentImage endswith \"\\\\explorer.exe\"\n    | where Image endswith \"\\\\cmd.exe\"\n        or Image endswith \"\\\\powershell.exe\"\n        or Image endswith \"\\\\pwsh.exe\"\n    | project ProcessTime=TimeGenerated, TargetComputer=Computer,\n        Image, CommandLine, User\n) on TargetComputer\n| where ProcessTime between (LogonTime .. (LogonTime + 2m))\n| project LogonTime, ProcessTime, TargetComputer, SourceIP,\n    LogonUser, Image, CommandLine\n| sort by LogonTime desc\n```\n\n### Step 5: WMI Event Correlation for DCOM Activity\n\n```spl\n# Splunk: Correlate WMI events with DCOM lateral movement\n# WMI-Activity operational log captures DCOM-triggered WMI calls\n\nindex=wineventlog source=\"WinEventLog:Microsoft-Windows-WMI-Activity/Operational\"\n| where EventCode IN (5857, 5858, 5859, 5860, 5861)\n| eval event_type=case(\n    EventCode=5857, \"WMI Provider Loaded\",\n    EventCode=5858, \"WMI Query Error\",\n    EventCode=5859, \"WMI Provider Event\",\n    EventCode=5860, \"WMI Temporary Event Registration\",\n    EventCode=5861, \"WMI Permanent Event Registration\")\n| stats count values(event_type) as wmi_events by ComputerName\n| where count > 5\n| table ComputerName wmi_events count\n```\n\n```powershell\n# PowerShell: Query WMI operational log for DCOM-related activity\n# Run on target systems during investigation\n\nGet-WinEvent -LogName \"Microsoft-Windows-WMI-Activity/Operational\" -MaxEvents 500 |\n    Where-Object {\n        $_.Id -in @(5857, 5858, 5860, 5861) -and\n        $_.Message -match \"DCOM|MMC20|ShellWindows|ShellBrowserWindow\"\n    } |\n    Select-Object TimeCreated, Id,\n        @{N='Detail'; E={$_.Message.Substring(0, [Math]::Min(200, $_.Message.Length))}} |\n    Format-Table -AutoSize\n\n# Query Sysmon for DCOM parent-child process chains\nGet-WinEvent -LogName \"Microsoft-Windows-Sysmon/Operational\" -FilterXPath @\"\n*[System[(EventID=1)]] and\n*[EventData[\n    (Data[@Name='ParentImage'] and\n     (contains(Data[@Name='ParentImage'],'mmc.exe') or\n      contains(Data[@Name='ParentImage'],'dllhost.exe')))\n]]\n\"@ -MaxEvents 100 |\n    Select-Object TimeCreated,\n        @{N='ParentImage'; E={$_.Properties[20].Value}},\n        @{N='Image'; E={$_.Properties[4].Value}},\n        @{N='CommandLine'; E={$_.Properties[10].Value}},\n        @{N='User'; E={$_.Properties[12].Value}} |\n    Format-Table -AutoSize\n```\n\n### Step 6: Network-Level DCOM Detection with Zeek\n\n```bash\n# Zeek script for detecting DCOM lateral movement at the network level\n# Monitors RPC Endpoint Mapper (port 135) and subsequent high-port connections\n\ncat > /opt/zeek/share/zeek/site/custom-detections/dcom-lateral-movement.zeek \u003c\u003c 'ZEEKEOF'\n@load base/frameworks/notice\n@load base/frameworks/sumstats\n@load base/protocols/dce-rpc\n\nmodule DCOMLateralMovement;\n\nexport {\n    redef enum Notice::Type += {\n        DCOM_Lateral_Movement_Suspected,\n        DCOM_RPC_Scan\n    };\n\n    # Threshold for unique targets receiving RPC connections from single source\n    const rpc_target_threshold: count = 3 &redef;\n    const rpc_time_window: interval = 10min &redef;\n}\n\nevent zeek_init()\n{\n    local r1 = SumStats::Reducer(\n        $stream=\"dcom.rpc_targets\",\n        $apply=set(SumStats::UNIQUE)\n    );\n\n    SumStats::create([\n        $name=\"detect-dcom-lateral\",\n        $epoch=rpc_time_window,\n        $reducers=set(r1),\n        $threshold_val(key: SumStats::Key, result: SumStats::Result) = {\n            return result[\"dcom.rpc_targets\"]$unique + 0.0;\n        },\n        $threshold=rpc_target_threshold + 0.0,\n        $threshold_crossed(key: SumStats::Key, result: SumStats::Result) = {\n            NOTICE([\n                $note=DCOM_RPC_Scan,\n                $msg=fmt(\"Host %s connected to %d hosts on RPC/135 in %s - possible DCOM lateral movement\",\n                         key$str, result[\"dcom.rpc_targets\"]$unique, rpc_time_window),\n                $identifier=key$str\n            ]);\n        }\n    ]);\n}\n\nevent connection_state_remove(c: connection)\n{\n    if ( c$id$resp_p == 135/tcp && c$id$resp_h in Site::local_nets )\n    {\n        SumStats::observe(\"dcom.rpc_targets\",\n            [$str=cat(c$id$orig_h)],\n            [$str=cat(c$id$resp_h)]\n        );\n    }\n}\nZEEKEOF\n\n# Monitor DCE-RPC operations related to DCOM objects\ncat /opt/zeek/logs/current/dce_rpc.log | \\\n  zeek-cut ts id.orig_h id.resp_h endpoint operation | \\\n  grep -iE \"IDispatch|IRemoteActivation|IRemUnknown|IObjectExporter\" | \\\n  sort -t$'\\t' -k2 | uniq -c | sort -rn\n\n# Track RPC endpoint mapper connections between internal hosts\ncat /opt/zeek/logs/current/conn.log | \\\n  zeek-cut ts id.orig_h id.resp_h id.resp_p duration | \\\n  awk '$4 == 135' | \\\n  awk '{print $2, \"->\", $3}' | sort | uniq -c | sort -rn | head -20\n```\n\n### Step 7: DCOM Attack Surface Audit and Hardening\n\n```powershell\n# Audit DCOM configuration across the domain\n# Enumerate remotely accessible DCOM objects\n\n# List DCOM applications registered on local system\nGet-CimInstance -ClassName Win32_DCOMApplication |\n    Select-Object AppID, Name |\n    Sort-Object Name |\n    Format-Table -AutoSize\n\n# Check DCOM launch permissions for high-risk objects\n$clsids = @{\n    \"MMC20.Application\"    = \"{49B2791A-B1AE-4C90-9B8E-E860BA07F889}\"\n    \"ShellWindows\"         = \"{9BA05972-F6A8-11CF-A442-00A0C90A8F39}\"\n    \"ShellBrowserWindow\"   = \"{C08AFD90-F2A1-11D1-8455-00A0C91F3880}\"\n    \"Excel.Application\"    = \"{00024500-0000-0000-C000-000000000046}\"\n    \"Outlook.Application\"  = \"{0006F03A-0000-0000-C000-000000000046}\"\n}\n\nforeach ($name in $clsids.Keys) {\n    $clsid = $clsids[$name]\n    $regPath = \"HKLM:\\SOFTWARE\\Classes\\CLSID\\$clsid\"\n    if (Test-Path $regPath) {\n        $launchPermission = (Get-ItemProperty -Path \"$regPath\" -Name \"LaunchPermission\" -ErrorAction SilentlyContinue)\n        Write-Host \"[*] $name ($clsid): $(if ($launchPermission) { 'Custom permissions set' } else { 'DEFAULT permissions (potentially exploitable)' })\"\n    } else {\n        Write-Host \"[-] $name ($clsid): Not found on this system\"\n    }\n}\n\n# Check if DCOM is enabled (should be restricted on servers that don't need it)\n$dcomEnabled = (Get-ItemProperty -Path \"HKLM:\\SOFTWARE\\Microsoft\\Ole\" -Name \"EnableDCOM\").EnableDCOM\nWrite-Host \"`n[*] DCOM Enabled: $dcomEnabled\"\n\n# Check remote launch and activation permissions\n$remoteLaunch = (Get-ItemProperty -Path \"HKLM:\\SOFTWARE\\Microsoft\\Ole\" -Name \"DefaultLaunchPermission\" -ErrorAction SilentlyContinue)\nWrite-Host \"[*] Default Launch Permission: $(if ($remoteLaunch) { 'Custom' } else { 'System Default' })\"\n```\n\n```powershell\n# Hardening: Restrict DCOM remote access via Group Policy\n# These settings should be applied via GPO in production\n\n# Disable DCOM on systems that do not require it\n# Computer Configuration > Administrative Templates > System > Distributed COM >\n#   Application Compatibility > Enable Distributed COM on this computer = Disabled\n\n# Restrict DCOM launch permissions via registry\n# Set-ItemProperty -Path \"HKLM:\\SOFTWARE\\Microsoft\\Ole\" -Name \"EnableDCOM\" -Value \"N\"\n\n# Block RPC/DCOM at the host firewall for non-admin traffic\n# New-NetFirewallRule -DisplayName \"Block Inbound DCOM/RPC\" `\n#     -Direction Inbound -LocalPort 135 -Protocol TCP `\n#     -Action Block -RemoteAddress \"Any\" `\n#     -Group \"DCOM Hardening\"\n#\n# New-NetFirewallRule -DisplayName \"Allow DCOM from Admin Subnets\" `\n#     -Direction Inbound -LocalPort 135 -Protocol TCP `\n#     -Action Allow -RemoteAddress \"10.10.0.0/24\" `\n#     -Group \"DCOM Hardening\"\n\n# Windows Firewall: Restrict dynamic RPC port range\n# netsh int ipv4 set dynamicport tcp start=49152 num=1024\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| **DCOM (T1021.003)** | Distributed Component Object Model -- extends COM to allow remote object instantiation and method invocation over RPC, abused for lateral movement |\n| **MMC20.Application** | COM object (CLSID {49B2791A-B1AE-4C90-9B8E-E860BA07F889}) controlling MMC snap-ins; `ExecuteShellCommand` method enables remote command execution |\n| **ShellWindows** | COM object (CLSID {9BA05972-F6A8-11CF-A442-00A0C90A8F39}) that activates within an existing explorer.exe process, executing commands without creating a new COM server process |\n| **ShellBrowserWindow** | COM object (CLSID {C08AFD90-F2A1-11D1-8455-00A0C91F3880}) similar to ShellWindows, uses `Document.Application.ShellExecute` for stealthy command execution |\n| **RPC Endpoint Mapper** | Service on TCP port 135 that maps RPC interfaces to dynamic ports; all DCOM communication begins with an endpoint mapper query |\n| **Sysmon Event ID 1** | Process Create event capturing parent-child process relationships, command lines, and user context -- critical for identifying DCOM-spawned processes |\n| **Sysmon Event ID 3** | Network Connection event capturing source/destination IPs and ports -- used to correlate RPC connections with subsequent process creation |\n| **DcomLaunch** | Windows service (svchost.exe -k DcomLaunch) that manages DCOM server process activation; parent process of COM servers spawned via remote DCOM calls |\n| **WMI-Activity ETW** | Event Tracing for Windows provider that logs WMI method calls, instance creations, and queries -- provides visibility into DCOM-triggered WMI operations |\n\n## Tools & Systems\n\n| Tool | Purpose |\n|------|---------|\n| **Sysmon** | Endpoint telemetry for process creation (EID 1), network connections (EID 3), and image loads (EID 7) essential for DCOM detection |\n| **Splunk / Elastic SIEM** | Log aggregation and correlation platform for DCOM detection rules and threat hunting queries |\n| **Microsoft Sentinel** | Cloud SIEM with built-in KQL queries and analytics rules for DCOM lateral movement detection |\n| **Sigma** | Vendor-agnostic detection rule format for portable DCOM detection rules |\n| **Zeek** | Network security monitor for DCE-RPC protocol analysis and RPC endpoint mapper traffic monitoring |\n| **Atomic Red Team** | MITRE ATT&CK test framework with T1021.003 atomics for validating DCOM detection coverage |\n| **Impacket (dcomexec.py)** | Python-based DCOM execution tool used by attackers and red teamers for testing DCOM lateral movement |\n| **CIMSession / PowerShell** | Native Windows tooling for DCOM object instantiation used in both legitimate administration and attacks |\n\n## Common Scenarios\n\n### Scenario 1: MMC20.Application Lateral Movement to File Server\n\n**Context**: A SOC analyst receives an alert for mmc.exe spawning cmd.exe on a file server (10.10.20.50) at 03:22 UTC. No administrator activity is scheduled at this time.\n\n**Approach**:\n1. Query Sysmon Event ID 1 on 10.10.20.50: confirm mmc.exe (parent: svchost.exe -k DcomLaunch) spawned cmd.exe with command line `/c net user /domain > C:\\temp\\users.txt`\n2. Query Sysmon Event ID 3 on 10.10.20.50: identify inbound TCP connection on port 135 from 10.10.5.30 at 03:22:01, followed by a high-port connection at 03:22:02\n3. Correlate Event ID 4624 on 10.10.20.50: find LogonType 3 from 10.10.5.30 at 03:22:00 with admin credentials\n4. Investigate 10.10.5.30: check for compromise indicators -- find Mimikatz artifacts in memory, evidence of credential dumping at 03:15\n5. Trace the attack chain: initial phishing compromise at 02:45, credential theft at 03:15, DCOM lateral movement at 03:22\n6. Contain: isolate 10.10.5.30 and 10.10.20.50, force password reset for compromised admin account, block inbound RPC from non-admin subnets\n\n**Pitfalls**:\n- Dismissing mmc.exe activity as legitimate MMC administration without checking the parent process and command line\n- Not correlating the network logon (4624) with the process creation to identify the true source host\n- Failing to investigate the source host for initial compromise indicators\n\n### Scenario 2: ShellWindows Stealthy Lateral Movement\n\n**Context**: During a threat hunt, an analyst queries for explorer.exe spawning cmd.exe on domain controllers and finds several instances on DC01 with no interactive logon sessions.\n\n**Approach**:\n1. Verify no interactive sessions: query Event ID 4624 LogonType 2 or 10 on DC01 -- none found during the time window\n2. Query Sysmon Event ID 1: explorer.exe spawning cmd.exe with encoded PowerShell commands at 14:05, 14:12, and 14:18\n3. Decode the PowerShell: reveals reconnaissance commands (Get-ADUser, Get-ADGroup, Get-ADComputer)\n4. Query Sysmon Event ID 3: inbound RPC connections from 10.10.3.15 preceding each process creation\n5. Identify the ShellWindows pattern: no new mmc.exe or dllhost.exe process created -- commands execute through existing explorer.exe, consistent with ShellWindows/ShellBrowserWindow DCOM abuse\n6. Investigate 10.10.3.15: compromised workstation with Cobalt Strike beacon artifacts\n\n**Pitfalls**:\n- Missing the attack because ShellWindows does not create a separate COM server process -- requires monitoring explorer.exe child processes\n- Not having Sysmon Event ID 3 configured to capture network connections from explorer.exe\n- Filtering out explorer.exe as a legitimate parent process without considering the server context\n\n## Output Format\n\n```\nHunt ID: TH-DCOM-[DATE]-[SEQ]\nAlert Severity: High\nMITRE Technique: T1021.003 (Remote Services: DCOM)\n\nSource Host: [IP/Hostname of attacker's machine]\nTarget Host: [IP/Hostname where DCOM executed]\nDCOM Object: [MMC20.Application | ShellWindows | ShellBrowserWindow]\nCLSID: [COM object class identifier]\n\nProcess Chain:\n  Parent: [svchost.exe -k DcomLaunch | explorer.exe | mmc.exe]\n  Child:  [cmd.exe | powershell.exe | ...]\n  Command Line: [Full command executed]\n\nNetwork Indicators:\n  RPC Connection: [Source IP]:port -> [Target IP]:135 at [timestamp]\n  DCOM Port: [Source IP]:port -> [Target IP]:[high-port] at [timestamp]\n\nAuthentication Context:\n  Event 4624: LogonType 3 from [Source IP] at [timestamp]\n  Account: [Domain\\Username]\n  Logon ID: [Logon session identifier]\n\nRisk Assessment: [Critical/High/Medium]\nRecommended Action: [Isolate, investigate source, reset credentials, restrict DCOM]\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("hunting-for-dcom-lateral-movement-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

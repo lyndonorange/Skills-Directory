@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>implementing-devsecops-security-scanning - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/implementing-devsecops-security-scanning-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>implementing-devsecops-security-scanning</h1>
+      <p class="description">'Integrates Static Application Security Testing (SAST), Dynamic Application</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>implementing-devsecops-security-scanning</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>implementing-devsecops-security-scanning</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Integrates Static Application Security Testing (SAST), Dynamic Application</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose implementing-devsecops-security-scanning, then write the task. Fallback prompt: Use the implementing-devsecops-security-scanning skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Implementing DevSecOps Security Scanning</h2>
+<h3>When to Use</h3>
+<ul>
+<li>Setting up automated security scanning in a new or existing CI/CD pipeline</li>
+<li>Shifting security left by catching vulnerabilities before code reaches production</li>
+<li>Meeting compliance requirements (SOC 2, PCI-DSS, ISO 27001) that mandate automated security testing</li>
+<li>Integrating SAST, DAST, and SCA together to achieve comprehensive application security coverage</li>
+<li>Establishing security gates that block deployments containing critical or high-severity vulnerabilities</li>
+</ul>
+<p><strong>Do not use</strong> as a replacement for manual penetration testing. Automated scanning catches common vulnerability patterns but cannot replace human-driven security assessments for business logic flaws and complex attack chains.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>CI/CD platform: GitHub Actions, GitLab CI, Jenkins, or Azure DevOps</li>
+<li>Container runtime (Docker) for running scanning tools</li>
+<li>A staging environment URL for DAST scanning (DAST cannot test static code)</li>
+<li>Repository access with permissions to modify CI/CD workflow files</li>
+<li>Tool-specific requirements:</li>
+<li>Semgrep: free for open-source rulesets (<code>p/security-audit</code>, <code>p/owasp-top-ten</code>)</li>
+<li>Trivy: free, no account required</li>
+<li>OWASP ZAP: free, Docker image available</li>
+<li>Gitleaks: free, no account required</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Add Secrets Detection with Gitleaks</h4>
+<p>Secrets detection runs first because leaked credentials are the highest-priority finding. Add to <code>.github/workflows/security.yml</code>:</p>
+<pre><code>name: DevSecOps Security Pipeline
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  secrets-scan:
+    name: Secrets Detection (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for scanning all commits
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}</code></pre>
+<p>Configure <code>.gitleaks.toml</code> in the repository root for custom rules and allowlists:</p>
+<pre><code>[extend]
+useDefault = true
+
+[allowlist]
+description = &quot;Global allowlist&quot;
+paths = [
+  '''\.gitleaks\.toml''',
+  '''test/fixtures/.*''',
+  '''docs/examples/.*'''
+]
+
+[[rules]]
+id = &quot;custom-internal-api-key&quot;
+description = &quot;Internal API key pattern&quot;
+regex = '''INTERNAL_KEY_[A-Za-z0-9]{32}'''
+tags = [&quot;internal&quot;, &quot;api-key&quot;]</code></pre>
+<h4>Step 2: Add SAST Scanning with Semgrep</h4>
+<p>Semgrep performs static code analysis to find security vulnerabilities, bugs, and code patterns:</p>
+<pre><code>  sast-scan:
+    name: SAST (Semgrep)
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Semgrep SAST scan
+        run: |
+          semgrep scan \
+            --config p/security-audit \
+            --config p/owasp-top-ten \
+            --config p/secrets \
+            --severity ERROR \
+            --error \
+            --json \
+            --output semgrep-results.json \
+            .
+
+      - name: Upload SAST results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-results
+          path: semgrep-results.json</code></pre>
+<p>For custom rules, create <code>.semgrep/custom-rules.yml</code>:</p>
+<pre><code>rules:
+  - id: no-exec-user-input
+    patterns:
+      - pattern: exec($INPUT)
+      - pattern-not: exec(&quot;...&quot;)
+    message: &gt;
+      User input passed to exec(). This is a command injection vulnerability.
+    severity: ERROR
+    languages: [python]
+    metadata:
+      cwe: &quot;CWE-78: OS Command Injection&quot;
+      owasp: &quot;A03:2021 - Injection&quot;
+
+  - id: no-raw-sql-queries
+    patterns:
+      - pattern: cursor.execute(f&quot;...&quot;)
+      - pattern: cursor.execute(&quot;...&quot; + ...)
+    message: &gt;
+      SQL query built with string concatenation or f-strings. Use parameterized queries.
+    severity: ERROR
+    languages: [python]
+    metadata:
+      cwe: &quot;CWE-89: SQL Injection&quot;
+      owasp: &quot;A03:2021 - Injection&quot;</code></pre>
+<h4>Step 3: Add SCA Scanning with Trivy</h4>
+<p>Trivy scans dependencies, container images, IaC files, and generates SBOM:</p>
+<pre><code>  sca-scan:
+    name: SCA &amp; Container Scan (Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy filesystem scan (dependencies)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+          format: 'json'
+          output: 'trivy-fs-results.json'
+
+      - name: Run Trivy IaC scan (Terraform, CloudFormation)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+          format: 'json'
+          output: 'trivy-iac-results.json'
+
+      - name: Upload SCA results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-results
+          path: trivy-*.json
+
+  container-scan:
+    name: Container Image Scan (Trivy)
+    runs-on: ubuntu-latest
+    needs: [sast-scan]  # Build image only after SAST passes
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t app:${{ github.sha }} .
+
+      - name: Scan container image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: 'app:${{ github.sha }}'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+          format: 'json'
+          output: 'trivy-image-results.json'
+
+      - name: Generate SBOM
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: 'app:${{ github.sha }}'
+          format: 'cyclonedx'
+          output: 'sbom.json'
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json</code></pre>
+<h4>Step 4: Add DAST Scanning with OWASP ZAP</h4>
+<p>DAST runs against a deployed staging environment. It is slower than SAST/SCA and should run asynchronously or on a schedule:</p>
+<pre><code>  dast-scan:
+    name: DAST (OWASP ZAP)
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]  # Must run after app is deployed to staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run ZAP Baseline Scan (fast, suitable for CI)
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: ${{ vars.STAGING_URL }}
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j'
+
+      # For nightly full scans, use action-full-scan instead:
+      # - name: Run ZAP Full Scan (comprehensive, 30-60 min)
+      #   uses: zaproxy/action-full-scan@v0.12.0
+      #   with:
+      #     target: ${{ vars.STAGING_URL }}</code></pre>
+<p>Create <code>.zap/rules.tsv</code> to configure alert thresholds:</p>
+<pre><code>10010	IGNORE	(Cookie No HttpOnly Flag - acceptable for non-sensitive cookies)
+10011	IGNORE	(Cookie Without Secure Flag - staging uses HTTP)
+90033	WARN	(Loosely Scoped Cookie)
+10038	FAIL	(Content Security Policy Header Not Set)
+40012	FAIL	(Cross Site Scripting - Reflected)
+40014	FAIL	(Cross Site Scripting - Persistent)
+40018	FAIL	(SQL Injection)
+90019	FAIL	(Server Side Code Injection)
+90020	FAIL	(Remote OS Command Injection)</code></pre>
+<h4>Step 5: Aggregate Results and Enforce Security Gates</h4>
+<p>Create a summary job that aggregates all scan results and enforces pass/fail gates:</p>
+<pre><code>  security-gate:
+    name: Security Gate
+    runs-on: ubuntu-latest
+    needs: [secrets-scan, sast-scan, sca-scan, container-scan]
+    if: always()
+    steps:
+      - name: Check scan results
+        run: |
+          echo &quot;Checking security scan results...&quot;
+
+          # Fail the pipeline if any upstream job failed
+          if [[ &quot;${{ needs.secrets-scan.result }}&quot; == &quot;failure&quot; ]]; then
+            echo &quot;BLOCKED: Secrets detected in repository&quot;
+            exit 1
+          fi
+
+          if [[ &quot;${{ needs.sast-scan.result }}&quot; == &quot;failure&quot; ]]; then
+            echo &quot;BLOCKED: SAST found critical/high vulnerabilities&quot;
+            exit 1
+          fi
+
+          if [[ &quot;${{ needs.sca-scan.result }}&quot; == &quot;failure&quot; ]]; then
+            echo &quot;BLOCKED: SCA found critical/high vulnerable dependencies&quot;
+            exit 1
+          fi
+
+          if [[ &quot;${{ needs.container-scan.result }}&quot; == &quot;failure&quot; ]]; then
+            echo &quot;BLOCKED: Container image has critical/high vulnerabilities&quot;
+            exit 1
+          fi
+
+          echo &quot;All security gates passed&quot;</code></pre>
+<h4>Step 6: Configure Branch Protection Rules</h4>
+<p>Enforce the security pipeline as a required status check:</p>
+<pre><code>GitHub Repository &gt; Settings &gt; Branches &gt; Branch Protection Rules
+
+Branch name pattern: main
+  Require status checks to pass before merging: Enabled
+    Required status checks:
+      - Secrets Detection (Gitleaks)
+      - SAST (Semgrep)
+      - SCA &amp; Container Scan (Trivy)
+      - Security Gate
+  Require branches to be up to date before merging: Enabled</code></pre>
+<h4>Step 7: Set Up Developer Feedback Loop</h4>
+<p>Configure pre-commit hooks so developers catch issues before pushing:</p>
+<pre><code># .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.22.1
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/semgrep/semgrep
+    rev: v1.102.0
+    hooks:
+      - id: semgrep
+        args: ['--config', 'p/security-audit', '--config', 'p/owasp-top-ten', '--error']</code></pre>
+<p>Install and activate pre-commit:</p>
+<pre><code>pip install pre-commit
+pre-commit install
+pre-commit run --all-files  # Test against existing codebase</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | <strong>SAST (Static Application Security Testing)</strong> | Analyzes source code without executing it to find security vulnerabilities; runs fast, catches issues early, but cannot find runtime flaws | | <strong>DAST (Dynamic Application Security Testing)</strong> | Tests a running application by sending requests and analyzing responses; finds runtime issues but requires a deployed environment | | <strong>SCA (Software Composition Analysis)</strong> | Scans project dependencies against vulnerability databases (NVD, GitHub Advisory) to find known-vulnerable libraries | | <strong>SBOM (Software Bill of Materials)</strong> | Machine-readable inventory of all components and dependencies in an application, used for vulnerability tracking and compliance | | <strong>Shift Left</strong> | Security practice of moving security testing earlier in the SDLC, from post-deployment to pre-commit and CI stages | | <strong>Security Gate</strong> | A CI/CD pipeline checkpoint that blocks deployment if security scan results exceed defined severity thresholds | | <strong>Pre-commit Hook</strong> | Local Git hook that runs security checks before code is committed, providing the fastest developer feedback loop |</p>
+<h3>Verification</h3>
+<ul>
+<li>[ ] Gitleaks blocks commits and PRs containing hardcoded secrets (test with a dummy API key)</li>
+<li>[ ] Semgrep scan runs on every PR and reports findings as annotations or comments</li>
+<li>[ ] Trivy filesystem scan detects a known-vulnerable dependency (test by adding a vulnerable package)</li>
+<li>[ ] Trivy container scan runs successfully against the built Docker image</li>
+<li>[ ] SBOM is generated and stored as a build artifact in CycloneDX or SPDX format</li>
+<li>[ ] OWASP ZAP baseline scan runs against the staging URL without crashing</li>
+<li>[ ] Security gate job blocks merges to main when any scan finds critical/high severity issues</li>
+<li>[ ] Branch protection rules enforce required status checks before merge</li>
+<li>[ ] Pre-commit hooks catch secrets and SAST findings locally before push</li>
+<li>[ ] Developer documentation explains how to interpret scan results and fix common findings</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: implementing-devsecops-security-scanning\ndisplay_name: implementing-devsecops-security-scanning\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# implementing-devsecops-security-scanning - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `implementing-devsecops-security-scanning` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- Setting up automated security scanning in a new or existing CI/CD pipeline\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose implementing-devsecops-security-scanning, then write the task. Fallback prompt: Use the implementing-devsecops-security-scanning skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `implementing-devsecops-security-scanning` |\n| Canonical name | `implementing-devsecops-security-scanning` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\n- Setting up automated security scanning in a new or existing CI/CD pipeline\n\n## Original SKILL.md\n\n---\nname: implementing-devsecops-security-scanning\ndescription: 'Integrates Static Application Security Testing (SAST), Dynamic Application\n  Security Testing (DAST), and Software Composition Analysis (SCA) into CI/CD pipelines\n  using open-source tools. Covers Semgrep for SAST, Trivy for SCA and container scanning,\n  OWASP ZAP for DAST, and Gitleaks for secrets detection. Activates for requests involving\n  DevSecOps pipeline setup, automated security scanning in CI/CD, SAST/DAST/SCA integration,\n  or shift-left security implementation.\n\n  '\ndomain: cybersecurity\nsubdomain: application-security\ntags:\n- devsecops\n- SAST\n- DAST\n- SCA\n- semgrep\n- trivy\n- owasp-zap\n- gitleaks\n- CI-CD\n- shift-left\nversion: 1.0.0\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- PR.PS-01\n- PR.PS-04\n- ID.RA-01\n- PR.DS-10\nmitre_attack:\n- T1078\n- T1190\n- T1059\n- T1610\n- T1611\n---\n\n# Implementing DevSecOps Security Scanning\n\n## When to Use\n\n- Setting up automated security scanning in a new or existing CI/CD pipeline\n- Shifting security left by catching vulnerabilities before code reaches production\n- Meeting compliance requirements (SOC 2, PCI-DSS, ISO 27001) that mandate automated security testing\n- Integrating SAST, DAST, and SCA together to achieve comprehensive application security coverage\n- Establishing security gates that block deployments containing critical or high-severity vulnerabilities\n\n**Do not use** as a replacement for manual penetration testing. Automated scanning catches common vulnerability patterns but cannot replace human-driven security assessments for business logic flaws and complex attack chains.\n\n## Prerequisites\n\n- CI/CD platform: GitHub Actions, GitLab CI, Jenkins, or Azure DevOps\n- Container runtime (Docker) for running scanning tools\n- A staging environment URL for DAST scanning (DAST cannot test static code)\n- Repository access with permissions to modify CI/CD workflow files\n- Tool-specific requirements:\n  - Semgrep: free for open-source rulesets (`p/security-audit`, `p/owasp-top-ten`)\n  - Trivy: free, no account required\n  - OWASP ZAP: free, Docker image available\n  - Gitleaks: free, no account required\n\n## Workflow\n\n### Step 1: Add Secrets Detection with Gitleaks\n\nSecrets detection runs first because leaked credentials are the highest-priority finding. Add to `.github/workflows/security.yml`:\n\n```yaml\nname: DevSecOps Security Pipeline\non:\n  push:\n    branches: [main, develop]\n  pull_request:\n    branches: [main]\n\njobs:\n  secrets-scan:\n    name: Secrets Detection (Gitleaks)\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n        with:\n          fetch-depth: 0  # Full history for scanning all commits\n\n      - name: Run Gitleaks\n        uses: gitleaks/gitleaks-action@v2\n        env:\n          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}\n```\n\nConfigure `.gitleaks.toml` in the repository root for custom rules and allowlists:\n\n```toml\n[extend]\nuseDefault = true\n\n[allowlist]\ndescription = \"Global allowlist\"\npaths = [\n  '''\\.gitleaks\\.toml''',\n  '''test/fixtures/.*''',\n  '''docs/examples/.*'''\n]\n\n[[rules]]\nid = \"custom-internal-api-key\"\ndescription = \"Internal API key pattern\"\nregex = '''INTERNAL_KEY_[A-Za-z0-9]{32}'''\ntags = [\"internal\", \"api-key\"]\n```\n\n### Step 2: Add SAST Scanning with Semgrep\n\nSemgrep performs static code analysis to find security vulnerabilities, bugs, and code patterns:\n\n```yaml\n  sast-scan:\n    name: SAST (Semgrep)\n    runs-on: ubuntu-latest\n    container:\n      image: semgrep/semgrep\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: Run Semgrep SAST scan\n        run: |\n          semgrep scan \\\n            --config p/security-audit \\\n            --config p/owasp-top-ten \\\n            --config p/secrets \\\n            --severity ERROR \\\n            --error \\\n            --json \\\n            --output semgrep-results.json \\\n            .\n\n      - name: Upload SAST results\n        if: always()\n        uses: actions/upload-artifact@v4\n        with:\n          name: semgrep-results\n          path: semgrep-results.json\n```\n\nFor custom rules, create `.semgrep/custom-rules.yml`:\n\n```yaml\nrules:\n  - id: no-exec-user-input\n    patterns:\n      - pattern: exec($INPUT)\n      - pattern-not: exec(\"...\")\n    message: >\n      User input passed to exec(). This is a command injection vulnerability.\n    severity: ERROR\n    languages: [python]\n    metadata:\n      cwe: \"CWE-78: OS Command Injection\"\n      owasp: \"A03:2021 - Injection\"\n\n  - id: no-raw-sql-queries\n    patterns:\n      - pattern: cursor.execute(f\"...\")\n      - pattern: cursor.execute(\"...\" + ...)\n    message: >\n      SQL query built with string concatenation or f-strings. Use parameterized queries.\n    severity: ERROR\n    languages: [python]\n    metadata:\n      cwe: \"CWE-89: SQL Injection\"\n      owasp: \"A03:2021 - Injection\"\n```\n\n### Step 3: Add SCA Scanning with Trivy\n\nTrivy scans dependencies, container images, IaC files, and generates SBOM:\n\n```yaml\n  sca-scan:\n    name: SCA & Container Scan (Trivy)\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: Run Trivy filesystem scan (dependencies)\n        uses: aquasecurity/trivy-action@0.28.0\n        with:\n          scan-type: 'fs'\n          scan-ref: '.'\n          severity: 'CRITICAL,HIGH'\n          exit-code: '1'\n          format: 'json'\n          output: 'trivy-fs-results.json'\n\n      - name: Run Trivy IaC scan (Terraform, CloudFormation)\n        uses: aquasecurity/trivy-action@0.28.0\n        with:\n          scan-type: 'config'\n          scan-ref: '.'\n          severity: 'CRITICAL,HIGH'\n          exit-code: '1'\n          format: 'json'\n          output: 'trivy-iac-results.json'\n\n      - name: Upload SCA results\n        if: always()\n        uses: actions/upload-artifact@v4\n        with:\n          name: trivy-results\n          path: trivy-*.json\n\n  container-scan:\n    name: Container Image Scan (Trivy)\n    runs-on: ubuntu-latest\n    needs: [sast-scan]  # Build image only after SAST passes\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: Build Docker image\n        run: docker build -t app:${{ github.sha }} .\n\n      - name: Scan container image\n        uses: aquasecurity/trivy-action@0.28.0\n        with:\n          image-ref: 'app:${{ github.sha }}'\n          severity: 'CRITICAL,HIGH'\n          exit-code: '1'\n          format: 'json'\n          output: 'trivy-image-results.json'\n\n      - name: Generate SBOM\n        uses: aquasecurity/trivy-action@0.28.0\n        with:\n          image-ref: 'app:${{ github.sha }}'\n          format: 'cyclonedx'\n          output: 'sbom.json'\n\n      - name: Upload SBOM\n        uses: actions/upload-artifact@v4\n        with:\n          name: sbom\n          path: sbom.json\n```\n\n### Step 4: Add DAST Scanning with OWASP ZAP\n\nDAST runs against a deployed staging environment. It is slower than SAST/SCA and should run asynchronously or on a schedule:\n\n```yaml\n  dast-scan:\n    name: DAST (OWASP ZAP)\n    runs-on: ubuntu-latest\n    needs: [deploy-staging]  # Must run after app is deployed to staging\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: Run ZAP Baseline Scan (fast, suitable for CI)\n        uses: zaproxy/action-baseline@v0.14.0\n        with:\n          target: ${{ vars.STAGING_URL }}\n          rules_file_name: '.zap/rules.tsv'\n          cmd_options: '-a -j'\n\n      # For nightly full scans, use action-full-scan instead:\n      # - name: Run ZAP Full Scan (comprehensive, 30-60 min)\n      #   uses: zaproxy/action-full-scan@v0.12.0\n      #   with:\n      #     target: ${{ vars.STAGING_URL }}\n```\n\nCreate `.zap/rules.tsv` to configure alert thresholds:\n\n```tsv\n10010\tIGNORE\t(Cookie No HttpOnly Flag - acceptable for non-sensitive cookies)\n10011\tIGNORE\t(Cookie Without Secure Flag - staging uses HTTP)\n90033\tWARN\t(Loosely Scoped Cookie)\n10038\tFAIL\t(Content Security Policy Header Not Set)\n40012\tFAIL\t(Cross Site Scripting - Reflected)\n40014\tFAIL\t(Cross Site Scripting - Persistent)\n40018\tFAIL\t(SQL Injection)\n90019\tFAIL\t(Server Side Code Injection)\n90020\tFAIL\t(Remote OS Command Injection)\n```\n\n### Step 5: Aggregate Results and Enforce Security Gates\n\nCreate a summary job that aggregates all scan results and enforces pass/fail gates:\n\n```yaml\n  security-gate:\n    name: Security Gate\n    runs-on: ubuntu-latest\n    needs: [secrets-scan, sast-scan, sca-scan, container-scan]\n    if: always()\n    steps:\n      - name: Check scan results\n        run: |\n          echo \"Checking security scan results...\"\n\n          # Fail the pipeline if any upstream job failed\n          if [[ \"${{ needs.secrets-scan.result }}\" == \"failure\" ]]; then\n            echo \"BLOCKED: Secrets detected in repository\"\n            exit 1\n          fi\n\n          if [[ \"${{ needs.sast-scan.result }}\" == \"failure\" ]]; then\n            echo \"BLOCKED: SAST found critical/high vulnerabilities\"\n            exit 1\n          fi\n\n          if [[ \"${{ needs.sca-scan.result }}\" == \"failure\" ]]; then\n            echo \"BLOCKED: SCA found critical/high vulnerable dependencies\"\n            exit 1\n          fi\n\n          if [[ \"${{ needs.container-scan.result }}\" == \"failure\" ]]; then\n            echo \"BLOCKED: Container image has critical/high vulnerabilities\"\n            exit 1\n          fi\n\n          echo \"All security gates passed\"\n```\n\n### Step 6: Configure Branch Protection Rules\n\nEnforce the security pipeline as a required status check:\n\n```\nGitHub Repository > Settings > Branches > Branch Protection Rules\n\nBranch name pattern: main\n  Require status checks to pass before merging: Enabled\n    Required status checks:\n      - Secrets Detection (Gitleaks)\n      - SAST (Semgrep)\n      - SCA & Container Scan (Trivy)\n      - Security Gate\n  Require branches to be up to date before merging: Enabled\n```\n\n### Step 7: Set Up Developer Feedback Loop\n\nConfigure pre-commit hooks so developers catch issues before pushing:\n\n```yaml\n# .pre-commit-config.yaml\nrepos:\n  - repo: https://github.com/gitleaks/gitleaks\n    rev: v8.22.1\n    hooks:\n      - id: gitleaks\n\n  - repo: https://github.com/semgrep/semgrep\n    rev: v1.102.0\n    hooks:\n      - id: semgrep\n        args: ['--config', 'p/security-audit', '--config', 'p/owasp-top-ten', '--error']\n```\n\nInstall and activate pre-commit:\n\n```bash\npip install pre-commit\npre-commit install\npre-commit run --all-files  # Test against existing codebase\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| **SAST (Static Application Security Testing)** | Analyzes source code without executing it to find security vulnerabilities; runs fast, catches issues early, but cannot find runtime flaws |\n| **DAST (Dynamic Application Security Testing)** | Tests a running application by sending requests and analyzing responses; finds runtime issues but requires a deployed environment |\n| **SCA (Software Composition Analysis)** | Scans project dependencies against vulnerability databases (NVD, GitHub Advisory) to find known-vulnerable libraries |\n| **SBOM (Software Bill of Materials)** | Machine-readable inventory of all components and dependencies in an application, used for vulnerability tracking and compliance |\n| **Shift Left** | Security practice of moving security testing earlier in the SDLC, from post-deployment to pre-commit and CI stages |\n| **Security Gate** | A CI/CD pipeline checkpoint that blocks deployment if security scan results exceed defined severity thresholds |\n| **Pre-commit Hook** | Local Git hook that runs security checks before code is committed, providing the fastest developer feedback loop |\n\n## Verification\n\n- [ ] Gitleaks blocks commits and PRs containing hardcoded secrets (test with a dummy API key)\n- [ ] Semgrep scan runs on every PR and reports findings as annotations or comments\n- [ ] Trivy filesystem scan detects a known-vulnerable dependency (test by adding a vulnerable package)\n- [ ] Trivy container scan runs successfully against the built Docker image\n- [ ] SBOM is generated and stored as a build artifact in CycloneDX or SPDX format\n- [ ] OWASP ZAP baseline scan runs against the staging URL without crashing\n- [ ] Security gate job blocks merges to main when any scan finds critical/high severity issues\n- [ ] Branch protection rules enforce required status checks before merge\n- [ ] Pre-commit hooks catch secrets and SAST findings locally before push\n- [ ] Developer documentation explains how to interpret scan results and fix common findings\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("implementing-devsecops-security-scanning-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

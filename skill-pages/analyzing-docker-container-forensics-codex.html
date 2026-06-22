@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>analyzing-docker-container-forensics - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/analyzing-docker-container-forensics-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>analyzing-docker-container-forensics</h1>
+      <p class="description">Investigate compromised Docker containers by analyzing images, layers,</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>analyzing-docker-container-forensics</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>analyzing-docker-container-forensics</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Investigate compromised Docker containers by analyzing images, layers,</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose analyzing-docker-container-forensics, then write the task. Fallback prompt: Use the analyzing-docker-container-forensics skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Analyzing Docker Container Forensics</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When investigating a compromised Docker container or container host</li>
+<li>For analyzing malicious Docker images pulled from registries</li>
+<li>During incident response involving containerized application breaches</li>
+<li>When examining container escape attempts or privilege escalation</li>
+<li>For auditing container configurations and identifying misconfigurations</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Docker CLI access on the forensic workstation</li>
+<li>Access to the Docker host file system (forensic image or live)</li>
+<li>Understanding of Docker layered file system (overlay2, aufs)</li>
+<li>dive, docker-explorer, or container-diff for image analysis</li>
+<li>Knowledge of Docker daemon configuration and socket security</li>
+<li>Trivy or Grype for vulnerability scanning of container images</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Preserve Container State and Evidence</h4>
+<pre><code># List all containers (including stopped)
+docker ps -a --no-trunc &gt; /cases/case-2024-001/docker/container_list.txt
+
+# Inspect the compromised container
+CONTAINER_ID=&quot;abc123def456&quot;
+docker inspect $CONTAINER_ID &gt; /cases/case-2024-001/docker/container_inspect.json
+
+# Export container filesystem as tarball (preserves current state)
+docker export $CONTAINER_ID &gt; /cases/case-2024-001/docker/container_export.tar
+
+# Create an image from the container's current state
+docker commit $CONTAINER_ID forensic-evidence:case-2024-001
+docker save forensic-evidence:case-2024-001 &gt; /cases/case-2024-001/docker/container_image.tar
+
+# Capture container logs
+docker logs $CONTAINER_ID --timestamps &gt; /cases/case-2024-001/docker/container_logs.txt 2&gt;&amp;1
+
+# Capture running processes (if container is still running)
+docker top $CONTAINER_ID &gt; /cases/case-2024-001/docker/container_processes.txt
+
+# Capture network connections
+docker exec $CONTAINER_ID netstat -tlnp 2&gt;/dev/null &gt; /cases/case-2024-001/docker/container_network.txt
+
+# Copy specific files from the container
+docker cp $CONTAINER_ID:/var/log/ /cases/case-2024-001/docker/container_var_log/
+docker cp $CONTAINER_ID:/tmp/ /cases/case-2024-001/docker/container_tmp/
+docker cp $CONTAINER_ID:/etc/passwd /cases/case-2024-001/docker/container_passwd
+
+# Hash all exported evidence
+sha256sum /cases/case-2024-001/docker/*.tar &gt; /cases/case-2024-001/docker/evidence_hashes.txt</code></pre>
+<h4>Step 2: Analyze Container Image Layers</h4>
+<pre><code># Install dive for image layer analysis
+wget https://github.com/wagoodman/dive/releases/latest/download/dive_linux_amd64.deb
+sudo dpkg -i dive_linux_amd64.deb
+
+# Analyze image layers interactively
+dive forensic-evidence:case-2024-001
+
+# Non-interactive layer analysis
+dive forensic-evidence:case-2024-001 --ci --json /cases/case-2024-001/docker/dive_analysis.json
+
+# Extract and examine individual layers
+mkdir -p /cases/case-2024-001/docker/layers/
+tar -xf /cases/case-2024-001/docker/container_image.tar -C /cases/case-2024-001/docker/layers/
+
+# List the image manifest and layer order
+cat /cases/case-2024-001/docker/layers/manifest.json | python3 -m json.tool
+
+# Examine each layer for changes
+for layer in /cases/case-2024-001/docker/layers/*/layer.tar; do
+    echo &quot;=== Layer: $(dirname $layer | xargs basename) ===&quot;
+    tar -tf &quot;$layer&quot; | head -20
+    echo &quot;...&quot;
+done
+
+# Use container-diff to compare with original base image
+# Install container-diff
+curl -LO https://storage.googleapis.com/container-diff/latest/container-diff-linux-amd64
+chmod +x container-diff-linux-amd64
+
+# Compare committed image with original
+./container-diff-linux-amd64 diff daemon://nginx:latest daemon://forensic-evidence:case-2024-001 \
+   --type=file --type=apt --type=history --json \
+   &gt; /cases/case-2024-001/docker/container_diff.json</code></pre>
+<h4>Step 3: Examine Docker Host Artifacts</h4>
+<pre><code># Docker data directory (default: /var/lib/docker/)
+DOCKER_ROOT=&quot;/mnt/evidence/var/lib/docker&quot;
+
+# Examine overlay2 filesystem layers
+ls -la $DOCKER_ROOT/overlay2/
+
+# Find the container's merged filesystem
+CONTAINER_HASH=$(docker inspect $CONTAINER_ID --format '{{.GraphDriver.Data.MergedDir}}' 2&gt;/dev/null)
+# Or manually from forensic image:
+# Look in /var/lib/docker/containers/&lt;container_id&gt;/config.v2.json
+
+# Analyze container configuration files
+cat $DOCKER_ROOT/containers/$CONTAINER_ID/config.v2.json | python3 -m json.tool \
+   &gt; /cases/case-2024-001/docker/container_config.json
+
+# Check Docker daemon configuration
+cat /mnt/evidence/etc/docker/daemon.json 2&gt;/dev/null &gt; /cases/case-2024-001/docker/daemon_config.json
+
+# Examine Docker events log
+cat $DOCKER_ROOT/containers/$CONTAINER_ID/*.log &gt; /cases/case-2024-001/docker/container_json_logs.txt
+
+# Check for volume mounts (potential host filesystem access)
+python3 &lt;&lt; 'PYEOF'
+import json
+
+with open('/cases/case-2024-001/docker/container_inspect.json') as f:
+    data = json.load(f)
+
+inspect = data[0] if isinstance(data, list) else data
+
+print(&quot;=== CONTAINER SECURITY ANALYSIS ===\n&quot;)
+
+# Check mounts
+print(&quot;Volume Mounts:&quot;)
+for mount in inspect.get('Mounts', []):
+    rw = &quot;READ-WRITE&quot; if mount.get('RW') else &quot;READ-ONLY&quot;
+    print(f&quot;  {mount.get('Source', 'N/A')} -&gt; {mount.get('Destination', 'N/A')} ({rw})&quot;)
+    if mount.get('Source') in ('/', '/etc', '/var', '/root') and mount.get('RW'):
+        print(f&quot;    WARNING: Sensitive host path mounted read-write!&quot;)
+
+# Check privileged mode
+host_config = inspect.get('HostConfig', {})
+if host_config.get('Privileged'):
+    print(&quot;\nWARNING: Container was running in PRIVILEGED mode!&quot;)
+
+# Check capabilities
+cap_add = host_config.get('CapAdd', [])
+if cap_add:
+    print(f&quot;\nAdded Capabilities: {cap_add}&quot;)
+    dangerous_caps = ['SYS_ADMIN', 'SYS_PTRACE', 'NET_ADMIN', 'SYS_MODULE']
+    for cap in cap_add:
+        if cap in dangerous_caps:
+            print(f&quot;  WARNING: Dangerous capability: {cap}&quot;)
+
+# Check PID namespace
+if host_config.get('PidMode') == 'host':
+    print(&quot;\nWARNING: Container shares host PID namespace!&quot;)
+
+# Check network mode
+if host_config.get('NetworkMode') == 'host':
+    print(&quot;\nWARNING: Container shares host network namespace!&quot;)
+
+# Check user
+user = inspect.get('Config', {}).get('User', 'root (default)')
+print(f&quot;\nRunning as user: {user}&quot;)
+
+# Check environment variables for secrets
+env_vars = inspect.get('Config', {}).get('Env', [])
+print(f&quot;\nEnvironment Variables: {len(env_vars)}&quot;)
+for env in env_vars:
+    key = env.split('=')[0]
+    if any(s in key.upper() for s in ['PASSWORD', 'SECRET', 'KEY', 'TOKEN', 'CREDENTIAL']):
+        print(f&quot;  SENSITIVE: {key}=***REDACTED***&quot;)
+PYEOF</code></pre>
+<h4>Step 4: Analyze Container File System Changes</h4>
+<pre><code># Compare container filesystem to original image
+docker diff $CONTAINER_ID &gt; /cases/case-2024-001/docker/filesystem_changes.txt
+
+# A = Added, C = Changed, D = Deleted
+# Analyze changes
+python3 &lt;&lt; 'PYEOF'
+added = []
+changed = []
+deleted = []
+
+with open('/cases/case-2024-001/docker/filesystem_changes.txt') as f:
+    for line in f:
+        line = line.strip()
+        if line.startswith('A '):
+            added.append(line[2:])
+        elif line.startswith('C '):
+            changed.append(line[2:])
+        elif line.startswith('D '):
+            deleted.append(line[2:])
+
+print(f&quot;Files Added: {len(added)}&quot;)
+print(f&quot;Files Changed: {len(changed)}&quot;)
+print(f&quot;Files Deleted: {len(deleted)}&quot;)
+
+# Flag suspicious additions
+suspicious = [f for f in added if any(s in f for s in
+    ['/tmp/', '/dev/shm/', '/root/', '.sh', '.py', '.elf', 'reverse', 'shell', 'backdoor'])]
+if suspicious:
+    print(f&quot;\nSuspicious Added Files:&quot;)
+    for f in suspicious:
+        print(f&quot;  {f}&quot;)
+
+# Flag suspicious changes
+sus_changed = [f for f in changed if any(s in f for s in
+    ['/etc/passwd', '/etc/shadow', '/etc/crontab', '/etc/ssh', '.bashrc'])]
+if sus_changed:
+    print(f&quot;\nSuspicious Changed Files:&quot;)
+    for f in sus_changed:
+        print(f&quot;  {f}&quot;)
+PYEOF
+
+# Extract and examine the container export
+mkdir -p /cases/case-2024-001/docker/container_fs/
+tar -xf /cases/case-2024-001/docker/container_export.tar -C /cases/case-2024-001/docker/container_fs/
+
+# Scan for webshells and malicious files
+find /cases/case-2024-001/docker/container_fs/tmp/ -type f -exec file {} \;
+find /cases/case-2024-001/docker/container_fs/ -name &quot;*.php&quot; -newer /cases/case-2024-001/docker/container_fs/etc/hostname</code></pre>
+<h4>Step 5: Scan for Vulnerabilities and Generate Report</h4>
+<pre><code># Scan the image for known vulnerabilities
+trivy image forensic-evidence:case-2024-001 \
+   --format json \
+   --output /cases/case-2024-001/docker/vulnerability_scan.json
+
+# Scan the exported filesystem
+trivy fs /cases/case-2024-001/docker/container_fs/ \
+   --format table \
+   --output /cases/case-2024-001/docker/fs_vulnerabilities.txt
+
+# Check for secrets in the image
+trivy image forensic-evidence:case-2024-001 \
+   --scanners secret \
+   --format json \
+   --output /cases/case-2024-001/docker/secrets_scan.json</code></pre>
+<h3>Key Concepts</h3>
+<p>| Concept | Description | |---------|-------------| | Image layers | Read-only filesystem layers stacked to form the container image | | overlay2 | Default Docker storage driver using union filesystem for layers | | Container diff | Comparison of runtime filesystem changes against the original image | | Privileged mode | Container with full host capabilities (bypasses most isolation) | | Docker socket | Unix socket (/var/run/docker.sock) controlling the Docker daemon | | Container escape | Technique for breaking out of container isolation to the host | | Volume mounts | Host filesystem paths made accessible inside the container | | Image history | Record of Dockerfile instructions used to build each layer |</p>
+<h3>Tools &amp; Systems</h3>
+<p>| Tool | Purpose | |------|---------| | docker inspect | Detailed container configuration and state information | | docker diff | Show filesystem changes made in a running/stopped container | | dive | Interactive Docker image layer analysis tool | | container-diff | Google tool for comparing container image contents | | Trivy | Vulnerability scanner for container images and filesystems | | docker-explorer | Forensic tool for offline Docker artifact analysis | | Sysdig | Container runtime security monitoring and forensics | | Falco | Runtime threat detection for containers and Kubernetes |</p>
+<h3>Common Scenarios</h3>
+<p><strong>Scenario 1: Web Application Container Compromise</strong> Export the container filesystem, identify webshells in web root, analyze access logs for exploitation attempts, check for added files and modified configurations, examine network connections for C2 communication, review container capabilities for escalation paths.</p>
+<p><strong>Scenario 2: Supply Chain Attack via Malicious Image</strong> Analyze image layers with dive to identify which layer added malicious content, compare with the official base image using container-diff, check image history for suspicious RUN commands, scan for embedded backdoors and cryptocurrency miners, trace the image pull from registry logs.</p>
+<p><strong>Scenario 3: Container Escape Investigation</strong> Check if container ran privileged or with dangerous capabilities, examine host filesystem mount points for unauthorized access, review Docker socket mount enabling Docker-in-Docker abuse, analyze host system logs for container escape indicators, check for kernel exploit artifacts.</p>
+<p><strong>Scenario 4: Cryptojacking in Container Environment</strong> Identify high-CPU containers, export and analyze the container image for mining binaries, check for unauthorized images in the registry, review container creation events for rogue deployments, examine network connections for mining pool communications.</p>
+<h3>Output Format</h3>
+<pre><code>Docker Container Forensics Summary:
+  Container: abc123def456 (nginx-app)
+  Image: company/web-app:v2.1
+  Status: Running (started 2024-01-10 09:00 UTC)
+  Host: docker-host-01.corp.local
+
+  Security Configuration:
+    Privileged: No
+    Capabilities Added: NET_ADMIN (WARNING)
+    Volume Mounts: /var/log -&gt; /host-logs (RW)
+    Network Mode: bridge
+    User: root (WARNING)
+
+  Filesystem Changes:
+    Added: 23 files (5 suspicious)
+    Changed: 12 files (2 suspicious)
+    Deleted: 0 files
+
+  Suspicious Findings:
+    /tmp/reverse.sh - Reverse shell script (Added)
+    /var/www/html/.hidden/shell.php - PHP webshell (Added)
+    /etc/crontab - Modified (persistence cron entry added)
+    /root/.ssh/authorized_keys - Modified (unauthorized key added)
+
+  Vulnerability Scan:
+    Critical: 3 (CVE-2024-xxxx in base image)
+    High: 12
+    Medium: 34
+
+  Evidence: /cases/case-2024-001/docker/</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: analyzing-docker-container-forensics\ndisplay_name: analyzing-docker-container-forensics\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# analyzing-docker-container-forensics - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `analyzing-docker-container-forensics` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When investigating a compromised Docker container or container host\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose analyzing-docker-container-forensics, then write the task. Fallback prompt: Use the analyzing-docker-container-forensics skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `analyzing-docker-container-forensics` |\n| Canonical name | `analyzing-docker-container-forensics` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n- When investigating a compromised Docker container or container host\n\n## Original SKILL.md\n\n---\nname: analyzing-docker-container-forensics\ndescription: Investigate compromised Docker containers by analyzing images, layers,\n  volumes, logs, and runtime artifacts to identify malicious activity and evidence.\ndomain: cybersecurity\nsubdomain: digital-forensics\ntags:\n- forensics\n- docker\n- container-forensics\n- container-security\n- image-analysis\n- runtime-investigation\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- RS.AN-01\n- RS.AN-03\n- DE.AE-02\n- RS.MA-01\nmitre_attack:\n- T1610\n- T1611\n- T1613\n- T1612\n---\n\n# Analyzing Docker Container Forensics\n\n## When to Use\n- When investigating a compromised Docker container or container host\n- For analyzing malicious Docker images pulled from registries\n- During incident response involving containerized application breaches\n- When examining container escape attempts or privilege escalation\n- For auditing container configurations and identifying misconfigurations\n\n## Prerequisites\n- Docker CLI access on the forensic workstation\n- Access to the Docker host file system (forensic image or live)\n- Understanding of Docker layered file system (overlay2, aufs)\n- dive, docker-explorer, or container-diff for image analysis\n- Knowledge of Docker daemon configuration and socket security\n- Trivy or Grype for vulnerability scanning of container images\n\n## Workflow\n\n### Step 1: Preserve Container State and Evidence\n\n```bash\n# List all containers (including stopped)\ndocker ps -a --no-trunc > /cases/case-2024-001/docker/container_list.txt\n\n# Inspect the compromised container\nCONTAINER_ID=\"abc123def456\"\ndocker inspect $CONTAINER_ID > /cases/case-2024-001/docker/container_inspect.json\n\n# Export container filesystem as tarball (preserves current state)\ndocker export $CONTAINER_ID > /cases/case-2024-001/docker/container_export.tar\n\n# Create an image from the container's current state\ndocker commit $CONTAINER_ID forensic-evidence:case-2024-001\ndocker save forensic-evidence:case-2024-001 > /cases/case-2024-001/docker/container_image.tar\n\n# Capture container logs\ndocker logs $CONTAINER_ID --timestamps > /cases/case-2024-001/docker/container_logs.txt 2>&1\n\n# Capture running processes (if container is still running)\ndocker top $CONTAINER_ID > /cases/case-2024-001/docker/container_processes.txt\n\n# Capture network connections\ndocker exec $CONTAINER_ID netstat -tlnp 2>/dev/null > /cases/case-2024-001/docker/container_network.txt\n\n# Copy specific files from the container\ndocker cp $CONTAINER_ID:/var/log/ /cases/case-2024-001/docker/container_var_log/\ndocker cp $CONTAINER_ID:/tmp/ /cases/case-2024-001/docker/container_tmp/\ndocker cp $CONTAINER_ID:/etc/passwd /cases/case-2024-001/docker/container_passwd\n\n# Hash all exported evidence\nsha256sum /cases/case-2024-001/docker/*.tar > /cases/case-2024-001/docker/evidence_hashes.txt\n```\n\n### Step 2: Analyze Container Image Layers\n\n```bash\n# Install dive for image layer analysis\nwget https://github.com/wagoodman/dive/releases/latest/download/dive_linux_amd64.deb\nsudo dpkg -i dive_linux_amd64.deb\n\n# Analyze image layers interactively\ndive forensic-evidence:case-2024-001\n\n# Non-interactive layer analysis\ndive forensic-evidence:case-2024-001 --ci --json /cases/case-2024-001/docker/dive_analysis.json\n\n# Extract and examine individual layers\nmkdir -p /cases/case-2024-001/docker/layers/\ntar -xf /cases/case-2024-001/docker/container_image.tar -C /cases/case-2024-001/docker/layers/\n\n# List the image manifest and layer order\ncat /cases/case-2024-001/docker/layers/manifest.json | python3 -m json.tool\n\n# Examine each layer for changes\nfor layer in /cases/case-2024-001/docker/layers/*/layer.tar; do\n    echo \"=== Layer: $(dirname $layer | xargs basename) ===\"\n    tar -tf \"$layer\" | head -20\n    echo \"...\"\ndone\n\n# Use container-diff to compare with original base image\n# Install container-diff\ncurl -LO https://storage.googleapis.com/container-diff/latest/container-diff-linux-amd64\nchmod +x container-diff-linux-amd64\n\n# Compare committed image with original\n./container-diff-linux-amd64 diff daemon://nginx:latest daemon://forensic-evidence:case-2024-001 \\\n   --type=file --type=apt --type=history --json \\\n   > /cases/case-2024-001/docker/container_diff.json\n```\n\n### Step 3: Examine Docker Host Artifacts\n\n```bash\n# Docker data directory (default: /var/lib/docker/)\nDOCKER_ROOT=\"/mnt/evidence/var/lib/docker\"\n\n# Examine overlay2 filesystem layers\nls -la $DOCKER_ROOT/overlay2/\n\n# Find the container's merged filesystem\nCONTAINER_HASH=$(docker inspect $CONTAINER_ID --format '{{.GraphDriver.Data.MergedDir}}' 2>/dev/null)\n# Or manually from forensic image:\n# Look in /var/lib/docker/containers/\u003ccontainer_id>/config.v2.json\n\n# Analyze container configuration files\ncat $DOCKER_ROOT/containers/$CONTAINER_ID/config.v2.json | python3 -m json.tool \\\n   > /cases/case-2024-001/docker/container_config.json\n\n# Check Docker daemon configuration\ncat /mnt/evidence/etc/docker/daemon.json 2>/dev/null > /cases/case-2024-001/docker/daemon_config.json\n\n# Examine Docker events log\ncat $DOCKER_ROOT/containers/$CONTAINER_ID/*.log > /cases/case-2024-001/docker/container_json_logs.txt\n\n# Check for volume mounts (potential host filesystem access)\npython3 \u003c\u003c 'PYEOF'\nimport json\n\nwith open('/cases/case-2024-001/docker/container_inspect.json') as f:\n    data = json.load(f)\n\ninspect = data[0] if isinstance(data, list) else data\n\nprint(\"=== CONTAINER SECURITY ANALYSIS ===\\n\")\n\n# Check mounts\nprint(\"Volume Mounts:\")\nfor mount in inspect.get('Mounts', []):\n    rw = \"READ-WRITE\" if mount.get('RW') else \"READ-ONLY\"\n    print(f\"  {mount.get('Source', 'N/A')} -> {mount.get('Destination', 'N/A')} ({rw})\")\n    if mount.get('Source') in ('/', '/etc', '/var', '/root') and mount.get('RW'):\n        print(f\"    WARNING: Sensitive host path mounted read-write!\")\n\n# Check privileged mode\nhost_config = inspect.get('HostConfig', {})\nif host_config.get('Privileged'):\n    print(\"\\nWARNING: Container was running in PRIVILEGED mode!\")\n\n# Check capabilities\ncap_add = host_config.get('CapAdd', [])\nif cap_add:\n    print(f\"\\nAdded Capabilities: {cap_add}\")\n    dangerous_caps = ['SYS_ADMIN', 'SYS_PTRACE', 'NET_ADMIN', 'SYS_MODULE']\n    for cap in cap_add:\n        if cap in dangerous_caps:\n            print(f\"  WARNING: Dangerous capability: {cap}\")\n\n# Check PID namespace\nif host_config.get('PidMode') == 'host':\n    print(\"\\nWARNING: Container shares host PID namespace!\")\n\n# Check network mode\nif host_config.get('NetworkMode') == 'host':\n    print(\"\\nWARNING: Container shares host network namespace!\")\n\n# Check user\nuser = inspect.get('Config', {}).get('User', 'root (default)')\nprint(f\"\\nRunning as user: {user}\")\n\n# Check environment variables for secrets\nenv_vars = inspect.get('Config', {}).get('Env', [])\nprint(f\"\\nEnvironment Variables: {len(env_vars)}\")\nfor env in env_vars:\n    key = env.split('=')[0]\n    if any(s in key.upper() for s in ['PASSWORD', 'SECRET', 'KEY', 'TOKEN', 'CREDENTIAL']):\n        print(f\"  SENSITIVE: {key}=***REDACTED***\")\nPYEOF\n```\n\n### Step 4: Analyze Container File System Changes\n\n```bash\n# Compare container filesystem to original image\ndocker diff $CONTAINER_ID > /cases/case-2024-001/docker/filesystem_changes.txt\n\n# A = Added, C = Changed, D = Deleted\n# Analyze changes\npython3 \u003c\u003c 'PYEOF'\nadded = []\nchanged = []\ndeleted = []\n\nwith open('/cases/case-2024-001/docker/filesystem_changes.txt') as f:\n    for line in f:\n        line = line.strip()\n        if line.startswith('A '):\n            added.append(line[2:])\n        elif line.startswith('C '):\n            changed.append(line[2:])\n        elif line.startswith('D '):\n            deleted.append(line[2:])\n\nprint(f\"Files Added: {len(added)}\")\nprint(f\"Files Changed: {len(changed)}\")\nprint(f\"Files Deleted: {len(deleted)}\")\n\n# Flag suspicious additions\nsuspicious = [f for f in added if any(s in f for s in\n    ['/tmp/', '/dev/shm/', '/root/', '.sh', '.py', '.elf', 'reverse', 'shell', 'backdoor'])]\nif suspicious:\n    print(f\"\\nSuspicious Added Files:\")\n    for f in suspicious:\n        print(f\"  {f}\")\n\n# Flag suspicious changes\nsus_changed = [f for f in changed if any(s in f for s in\n    ['/etc/passwd', '/etc/shadow', '/etc/crontab', '/etc/ssh', '.bashrc'])]\nif sus_changed:\n    print(f\"\\nSuspicious Changed Files:\")\n    for f in sus_changed:\n        print(f\"  {f}\")\nPYEOF\n\n# Extract and examine the container export\nmkdir -p /cases/case-2024-001/docker/container_fs/\ntar -xf /cases/case-2024-001/docker/container_export.tar -C /cases/case-2024-001/docker/container_fs/\n\n# Scan for webshells and malicious files\nfind /cases/case-2024-001/docker/container_fs/tmp/ -type f -exec file {} \\;\nfind /cases/case-2024-001/docker/container_fs/ -name \"*.php\" -newer /cases/case-2024-001/docker/container_fs/etc/hostname\n```\n\n### Step 5: Scan for Vulnerabilities and Generate Report\n\n```bash\n# Scan the image for known vulnerabilities\ntrivy image forensic-evidence:case-2024-001 \\\n   --format json \\\n   --output /cases/case-2024-001/docker/vulnerability_scan.json\n\n# Scan the exported filesystem\ntrivy fs /cases/case-2024-001/docker/container_fs/ \\\n   --format table \\\n   --output /cases/case-2024-001/docker/fs_vulnerabilities.txt\n\n# Check for secrets in the image\ntrivy image forensic-evidence:case-2024-001 \\\n   --scanners secret \\\n   --format json \\\n   --output /cases/case-2024-001/docker/secrets_scan.json\n```\n\n## Key Concepts\n\n| Concept | Description |\n|---------|-------------|\n| Image layers | Read-only filesystem layers stacked to form the container image |\n| overlay2 | Default Docker storage driver using union filesystem for layers |\n| Container diff | Comparison of runtime filesystem changes against the original image |\n| Privileged mode | Container with full host capabilities (bypasses most isolation) |\n| Docker socket | Unix socket (/var/run/docker.sock) controlling the Docker daemon |\n| Container escape | Technique for breaking out of container isolation to the host |\n| Volume mounts | Host filesystem paths made accessible inside the container |\n| Image history | Record of Dockerfile instructions used to build each layer |\n\n## Tools & Systems\n\n| Tool | Purpose |\n|------|---------|\n| docker inspect | Detailed container configuration and state information |\n| docker diff | Show filesystem changes made in a running/stopped container |\n| dive | Interactive Docker image layer analysis tool |\n| container-diff | Google tool for comparing container image contents |\n| Trivy | Vulnerability scanner for container images and filesystems |\n| docker-explorer | Forensic tool for offline Docker artifact analysis |\n| Sysdig | Container runtime security monitoring and forensics |\n| Falco | Runtime threat detection for containers and Kubernetes |\n\n## Common Scenarios\n\n**Scenario 1: Web Application Container Compromise**\nExport the container filesystem, identify webshells in web root, analyze access logs for exploitation attempts, check for added files and modified configurations, examine network connections for C2 communication, review container capabilities for escalation paths.\n\n**Scenario 2: Supply Chain Attack via Malicious Image**\nAnalyze image layers with dive to identify which layer added malicious content, compare with the official base image using container-diff, check image history for suspicious RUN commands, scan for embedded backdoors and cryptocurrency miners, trace the image pull from registry logs.\n\n**Scenario 3: Container Escape Investigation**\nCheck if container ran privileged or with dangerous capabilities, examine host filesystem mount points for unauthorized access, review Docker socket mount enabling Docker-in-Docker abuse, analyze host system logs for container escape indicators, check for kernel exploit artifacts.\n\n**Scenario 4: Cryptojacking in Container Environment**\nIdentify high-CPU containers, export and analyze the container image for mining binaries, check for unauthorized images in the registry, review container creation events for rogue deployments, examine network connections for mining pool communications.\n\n## Output Format\n\n```\nDocker Container Forensics Summary:\n  Container: abc123def456 (nginx-app)\n  Image: company/web-app:v2.1\n  Status: Running (started 2024-01-10 09:00 UTC)\n  Host: docker-host-01.corp.local\n\n  Security Configuration:\n    Privileged: No\n    Capabilities Added: NET_ADMIN (WARNING)\n    Volume Mounts: /var/log -> /host-logs (RW)\n    Network Mode: bridge\n    User: root (WARNING)\n\n  Filesystem Changes:\n    Added: 23 files (5 suspicious)\n    Changed: 12 files (2 suspicious)\n    Deleted: 0 files\n\n  Suspicious Findings:\n    /tmp/reverse.sh - Reverse shell script (Added)\n    /var/www/html/.hidden/shell.php - PHP webshell (Added)\n    /etc/crontab - Modified (persistence cron entry added)\n    /root/.ssh/authorized_keys - Modified (unauthorized key added)\n\n  Vulnerability Scan:\n    Critical: 3 (CVE-2024-xxxx in base image)\n    High: 12\n    Medium: 34\n\n  Evidence: /cases/case-2024-001/docker/\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("analyzing-docker-container-forensics-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

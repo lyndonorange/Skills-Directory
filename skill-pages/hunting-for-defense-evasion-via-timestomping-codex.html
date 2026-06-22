@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hunting-for-defense-evasion-via-timestomping - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/hunting-for-defense-evasion-via-timestomping-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>hunting-for-defense-evasion-via-timestomping</h1>
+      <p class="description">'Detect NTFS timestamp manipulation (MITRE T1070.006) by comparing $STANDARD_INFORMATION</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>hunting-for-defense-evasion-via-timestomping</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>hunting-for-defense-evasion-via-timestomping</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Detect NTFS timestamp manipulation (MITRE T1070.006) by comparing $STANDARD_INFORMATION</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose hunting-for-defense-evasion-via-timestomping, then write the task. Fallback prompt: Use the hunting-for-defense-evasion-via-timestomping skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Hunting for Defense Evasion via Timestomping</h2>
+<p>Detect timestamp manipulation by analyzing NTFS MFT entries for discrepancies between $STANDARD_INFORMATION and $FILE_NAME attributes.</p>
+<h3>When to Use</h3>
+<ul>
+<li>Investigating suspected anti-forensic activity where an adversary may have altered file timestamps to blend malware into legitimate directories</li>
+<li>Threat hunting for defense evasion (MITRE ATT&amp;CK T1070.006) across compromised Windows systems</li>
+<li>Validating timeline integrity during forensic examinations of disk images or live acquisitions</li>
+<li>Triaging suspicious files that appear to have creation dates older than the OS installation or inconsistent with known deployment timelines</li>
+<li>Detecting tools like Timestomp (Metasploit), NTimeStomp, SetMACE, or PowerShell Set-ItemProperty used to alter timestamps</li>
+<li>Building automated detection pipelines that flag temporal anomalies in MFT data for SOC analysts</li>
+</ul>
+<p><strong>Do not use</strong> as the sole detection method; advanced adversaries can manipulate both $STANDARD_INFORMATION and $FILE_NAME timestamps (though the latter requires raw disk access and is much harder). Combine with USN Journal, $LogFile, and ShimCache/Amcache analysis for corroboration.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>Raw $MFT file extracted from a Windows system (via FTK Imager, KAPE, or live extraction)</li>
+<li><code>MFTECmd</code> (Eric Zimmerman tool) or <code>analyzeMFT</code> for MFT parsing</li>
+<li>Python 3.8+ with <code>pandas</code> for analysis</li>
+<li>Optional: <code>mft</code> Python library (<code>pip install mft</code>) for programmatic MFT parsing</li>
+<li>Optional: KAPE (Kroll Artifact Parser and Extractor) for automated artifact collection</li>
+<li>Timeline Explorer or Excel for visual analysis of parsed MFT output</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Extract the $MFT from a Live System or Disk Image</h4>
+<pre><code># Method 1: Using KAPE to collect MFT and related artifacts
+.\kape.exe --tsource C: --tdest D:\Evidence\MFT_Collection --target !SANS_Triage
+
+# Method 2: Using FTK Imager CLI to extract $MFT
+ftkimager.exe \\.\C: D:\Evidence\mft_raw.bin --e01 --include $MFT
+
+# Method 3: Raw copy using RawCopy (handles locked NTFS system files)
+RawCopy.exe /FileNamePath:C:0 /OutputPath:D:\Evidence\ /OutputName:$MFT</code></pre>
+<pre><code># Method 4: On a mounted forensic image in Linux
+sudo mount -o ro,norecovery /dev/sdb1 /mnt/evidence
+sudo icat -o 2048 /dev/sdb 0 &gt; /mnt/output/$MFT
+
+# Method 5: Using sleuthkit to extract MFT from disk image
+icat -o 2048 evidence.E01 0 &gt; extracted_MFT</code></pre>
+<h4>Step 2: Parse the MFT with MFTECmd</h4>
+<p>Use Eric Zimmerman's MFTECmd to produce a CSV with both $STANDARD_INFORMATION and $FILE_NAME timestamps:</p>
+<pre><code># Parse MFT to CSV with all timestamp columns
+MFTECmd.exe -f &quot;D:\Evidence\$MFT&quot; --csv D:\Evidence\Parsed\ --csvf mft_parsed.csv
+
+# The output CSV contains these critical columns:
+# Created0x10         - $STANDARD_INFORMATION Created timestamp
+# LastModified0x10    - $STANDARD_INFORMATION Modified timestamp
+# LastAccess0x10      - $STANDARD_INFORMATION Accessed timestamp
+# LastRecordChange0x10 - $STANDARD_INFORMATION Entry Modified timestamp
+# Created0x30         - $FILE_NAME Created timestamp
+# LastModified0x30    - $FILE_NAME Modified timestamp
+# LastAccess0x30      - $FILE_NAME Accessed timestamp
+# LastRecordChange0x30 - $FILE_NAME Entry Modified timestamp</code></pre>
+<h4>Step 3: Detect Timestomping via SI vs FN Comparison</h4>
+<p>The core detection: $STANDARD_INFORMATION timestamps are easily modified by user-mode tools, but $FILE_NAME timestamps are updated only by the NTFS driver (kernel-mode). When SI timestamps are OLDER than FN timestamps, timestomping is likely:</p>
+<pre><code>import pandas as pd
+from datetime import datetime, timedelta
+
+def load_mft_data(csv_path):
+    &quot;&quot;&quot;Load MFTECmd parsed CSV output.&quot;&quot;&quot;
+    df = pd.read_csv(csv_path, low_memory=False)
+
+    # Parse timestamp columns
+    timestamp_cols = [
+        &quot;Created0x10&quot;, &quot;LastModified0x10&quot;, &quot;LastAccess0x10&quot;, &quot;LastRecordChange0x10&quot;,
+        &quot;Created0x30&quot;, &quot;LastModified0x30&quot;, &quot;LastAccess0x30&quot;, &quot;LastRecordChange0x30&quot;
+    ]
+
+    for col in timestamp_cols:
+        if col in df.columns:
+            df[col] = pd.to_datetime(df[col], errors=&quot;coerce&quot;)
+
+    return df
+
+def detect_timestomping(df):
+    &quot;&quot;&quot;Detect timestamp manipulation by comparing SI and FN attributes.
+
+    Key indicators:
+    1. SI Created &lt; FN Created (SI timestamp pushed back in time)
+    2. SI timestamps have nanoseconds = 0000000 (tool artifact)
+    3. SI Created &lt; FN Entry Modified (impossible under normal NTFS behavior)
+    4. Large gap between SI and FN timestamps
+    &quot;&quot;&quot;
+    results = []
+
+    for idx, row in df.iterrows():
+        si_created = row.get(&quot;Created0x10&quot;)
+        fn_created = row.get(&quot;Created0x30&quot;)
+        si_modified = row.get(&quot;LastModified0x10&quot;)
+        fn_modified = row.get(&quot;LastModified0x30&quot;)
+        si_entry = row.get(&quot;LastRecordChange0x10&quot;)
+        fn_entry = row.get(&quot;LastRecordChange0x30&quot;)
+
+        if pd.isna(si_created) or pd.isna(fn_created):
+            continue
+
+        filepath = row.get(&quot;FileName&quot;, &quot;unknown&quot;)
+        parent_path = row.get(&quot;ParentPath&quot;, &quot;&quot;)
+        full_path = f&quot;{parent_path}\\{filepath}&quot; if parent_path else filepath
+        indicators = []
+
+        # Detection 1: SI Created is BEFORE FN Created
+        # Under normal NTFS operations, SI Created &gt;= FN Created
+        if si_created &lt; fn_created:
+            delta = fn_created - si_created
+            indicators.append({
+                &quot;check&quot;: &quot;SI_Created &lt; FN_Created&quot;,
+                &quot;si_value&quot;: str(si_created),
+                &quot;fn_value&quot;: str(fn_created),
+                &quot;delta&quot;: str(delta),
+                &quot;confidence&quot;: &quot;high&quot;
+            })
+
+        # Detection 2: SI Modified is BEFORE FN Created
+        # A file cannot be modified before it was created
+        if pd.notna(si_modified) and si_modified &lt; fn_created:
+            indicators.append({
+                &quot;check&quot;: &quot;SI_Modified &lt; FN_Created&quot;,
+                &quot;si_value&quot;: str(si_modified),
+                &quot;fn_value&quot;: str(fn_created),
+                &quot;confidence&quot;: &quot;high&quot;
+            })
+
+        # Detection 3: Nanosecond precision check
+        # Many timestomping tools set timestamps with zero nanoseconds
+        if pd.notna(si_created):
+            si_created_str = str(si_created)
+            if &quot;.000000&quot; in si_created_str or si_created_str.endswith(&quot;00:00:00&quot;):
+                # Check if FN has normal nanosecond precision
+                fn_str = str(fn_created)
+                if &quot;.000000&quot; not in fn_str:
+                    indicators.append({
+                        &quot;check&quot;: &quot;SI_nanoseconds_zeroed&quot;,
+                        &quot;si_value&quot;: si_created_str,
+                        &quot;fn_value&quot;: fn_str,
+                        &quot;confidence&quot;: &quot;medium&quot;
+                    })
+
+        # Detection 4: Large time gap between SI and FN
+        # Normal gap is seconds to minutes, not years
+        if abs((si_created - fn_created).days) &gt; 365:
+            indicators.append({
+                &quot;check&quot;: &quot;SI_FN_gap_exceeds_1_year&quot;,
+                &quot;si_value&quot;: str(si_created),
+                &quot;fn_value&quot;: str(fn_created),
+                &quot;delta_days&quot;: abs((si_created - fn_created).days),
+                &quot;confidence&quot;: &quot;high&quot;
+            })
+
+        # Detection 5: SI Entry Modified much later than SI Created
+        # Indicates the SI attribute was rewritten
+        if pd.notna(si_entry) and pd.notna(si_created):
+            entry_delta = si_entry - si_created
+            if entry_delta.days &gt; 365 * 5:  # Entry modified years after creation
+                indicators.append({
+                    &quot;check&quot;: &quot;SI_entry_modified_years_after_creation&quot;,
+                    &quot;si_created&quot;: str(si_created),
+                    &quot;si_entry_modified&quot;: str(si_entry),
+                    &quot;confidence&quot;: &quot;medium&quot;
+                })
+
+        if indicators:
+            results.append({
+                &quot;file_path&quot;: full_path,
+                &quot;entry_number&quot;: row.get(&quot;EntryNumber&quot;, &quot;&quot;),
+                &quot;in_use&quot;: row.get(&quot;InUse&quot;, True),
+                &quot;si_created&quot;: str(si_created),
+                &quot;fn_created&quot;: str(fn_created),
+                &quot;indicators&quot;: indicators,
+                &quot;highest_confidence&quot;: max(i[&quot;confidence&quot;] for i in indicators),
+            })
+
+    return results
+
+# Run detection
+df = load_mft_data(&quot;D:\\Evidence\\Parsed\\mft_parsed.csv&quot;)
+stomped_files = detect_timestomping(df)
+
+print(f&quot;\nTimestomping Detection Results&quot;)
+print(f&quot;{'='*60}&quot;)
+print(f&quot;Total MFT entries analyzed: {len(df)}&quot;)
+print(f&quot;Suspicious entries found: {len(stomped_files)}&quot;)
+print()
+
+for entry in sorted(stomped_files, key=lambda x: x[&quot;highest_confidence&quot;], reverse=True):
+    print(f&quot;[{entry['highest_confidence'].upper()}] {entry['file_path']}&quot;)
+    print(f&quot;  SI Created: {entry['si_created']}&quot;)
+    print(f&quot;  FN Created: {entry['fn_created']}&quot;)
+    for ind in entry[&quot;indicators&quot;]:
+        print(f&quot;  Check: {ind['check']} (confidence: {ind['confidence']})&quot;)
+    print()</code></pre>
+<h4>Step 4: Corroborate with USN Journal Analysis</h4>
+<p>The USN Journal records metadata change events that persist even after timestomping:</p>
+<pre><code>def correlate_with_usn_journal(stomped_files, usn_csv_path):
+    &quot;&quot;&quot;Cross-reference timestomped files with USN Journal entries.
+
+    The USN Journal records a BASIC_INFO_CHANGE reason when timestamps
+    are modified, providing corroborating evidence of timestomping.
+    &quot;&quot;&quot;
+    usn_df = pd.read_csv(usn_csv_path, low_memory=False)
+    usn_df[&quot;UpdateTimestamp&quot;] = pd.to_datetime(usn_df[&quot;UpdateTimestamp&quot;], errors=&quot;coerce&quot;)
+
+    corroborated = []
+    for entry in stomped_files:
+        filename = entry[&quot;file_path&quot;].split(&quot;\\&quot;)[-1]
+
+        # Find USN entries for this file with BASIC_INFO_CHANGE
+        usn_matches = usn_df[
+            (usn_df[&quot;Name&quot;] == filename) &amp;
+            (usn_df[&quot;UpdateReasons&quot;].str.contains(&quot;BASIC_INFO_CHANGE&quot;, na=False))
+        ]
+
+        if not usn_matches.empty:
+            entry[&quot;usn_corroboration&quot;] = True
+            entry[&quot;usn_change_times&quot;] = usn_matches[&quot;UpdateTimestamp&quot;].tolist()
+            entry[&quot;highest_confidence&quot;] = &quot;critical&quot;
+            corroborated.append(entry)
+            print(f&quot;[CORROBORATED] {filename} - USN Journal confirms &quot;
+                  f&quot;BASIC_INFO_CHANGE at {usn_matches['UpdateTimestamp'].iloc[0]}&quot;)
+
+    return corroborated
+
+# Parse USN Journal (use MFTECmd or ANJP)
+# MFTECmd.exe -f &quot;$J&quot; --csv D:\Evidence\Parsed\ --csvf usn_parsed.csv</code></pre>
+<h4>Step 5: Check ShimCache and Amcache for Timeline Validation</h4>
+<pre><code>def check_shimcache_timeline(stomped_files, shimcache_csv):
+    &quot;&quot;&quot;Validate timestamps against ShimCache (AppCompatCache) entries.
+
+    ShimCache records the last modification time of executables
+    independently of NTFS timestamps, providing another corroboration point.
+    &quot;&quot;&quot;
+    shim_df = pd.read_csv(shimcache_csv, low_memory=False)
+    shim_df[&quot;LastModifiedTimeUTC&quot;] = pd.to_datetime(
+        shim_df[&quot;LastModifiedTimeUTC&quot;], errors=&quot;coerce&quot;
+    )
+
+    for entry in stomped_files:
+        filepath = entry[&quot;file_path&quot;]
+        shim_match = shim_df[
+            shim_df[&quot;Path&quot;].str.lower() == filepath.lower()
+        ]
+
+        if not shim_match.empty:
+            shim_time = shim_match[&quot;LastModifiedTimeUTC&quot;].iloc[0]
+            si_modified = pd.to_datetime(entry.get(&quot;si_created&quot;))
+
+            if pd.notna(shim_time) and pd.notna(si_modified):
+                delta = abs((shim_time - si_modified).days)
+                if delta &gt; 30:
+                    entry[&quot;shimcache_mismatch&quot;] = True
+                    entry[&quot;shimcache_time&quot;] = str(shim_time)
+                    print(f&quot;[SHIMCACHE MISMATCH] {filepath}&quot;)
+                    print(f&quot;  SI timestamp: {si_modified}&quot;)
+                    print(f&quot;  ShimCache timestamp: {shim_time}&quot;)
+                    print(f&quot;  Delta: {delta} days&quot;)
+
+    return stomped_files</code></pre>
+<h4>Step 6: Generate a Timestomping Detection Report</h4>
+<pre><code>import json
+
+def generate_report(stomped_files, output_path):
+    &quot;&quot;&quot;Generate a structured JSON report of all timestomping detections.&quot;&quot;&quot;
+    report = {
+        &quot;report_title&quot;: &quot;Timestomping Detection Analysis&quot;,
+        &quot;generated_at&quot;: datetime.utcnow().isoformat() + &quot;Z&quot;,
+        &quot;mitre_technique&quot;: &quot;T1070.006 - Indicator Removal: Timestomp&quot;,
+        &quot;total_suspicious_files&quot;: len(stomped_files),
+        &quot;critical_findings&quot;: len([f for f in stomped_files if f[&quot;highest_confidence&quot;] == &quot;critical&quot;]),
+        &quot;high_findings&quot;: len([f for f in stomped_files if f[&quot;highest_confidence&quot;] == &quot;high&quot;]),
+        &quot;medium_findings&quot;: len([f for f in stomped_files if f[&quot;highest_confidence&quot;] == &quot;medium&quot;]),
+        &quot;findings&quot;: stomped_files,
+    }
+
+    with open(output_path, &quot;w&quot;) as f:
+        json.dump(report, f, indent=2, default=str)
+    print(f&quot;Report written to {output_path}&quot;)
+    print(f&quot;  Critical: {report['critical_findings']}&quot;)
+    print(f&quot;  High: {report['high_findings']}&quot;)
+    print(f&quot;  Medium: {report['medium_findings']}&quot;)
+
+generate_report(stomped_files, &quot;D:\\Evidence\\timestomping_report.json&quot;)</code></pre>
+<h3>Verification</h3>
+<ul>
+<li>Confirm MFTECmd parses the $MFT without errors and produces both 0x10 (SI) and 0x30 (FN) timestamp columns</li>
+<li>Create a test file and use a timestomping tool (e.g., NTimeStomp) in a lab to verify the detection logic catches the manipulation</li>
+<li>Validate that the nanosecond-zeroed check does not produce excessive false positives on files created by installers that legitimately set timestamps</li>
+<li>Cross-reference flagged files with the USN Journal to confirm BASIC_INFO_CHANGE events exist at the expected times</li>
+<li>Verify ShimCache and Amcache timestamps provide independent corroboration of timeline inconsistencies</li>
+<li>Test against known-clean system images to establish a false-positive baseline (some backup/imaging software legitimately resets timestamps)</li>
+<li>Confirm the detection pipeline correctly handles deleted MFT entries (InUse=false) which may contain evidence of timestomped files that were later removed</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: hunting-for-defense-evasion-via-timestomping\ndisplay_name: hunting-for-defense-evasion-via-timestomping\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# hunting-for-defense-evasion-via-timestomping - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `hunting-for-defense-evasion-via-timestomping` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nDetect timestamp manipulation by analyzing NTFS MFT entries for\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose hunting-for-defense-evasion-via-timestomping, then write the task. Fallback prompt: Use the hunting-for-defense-evasion-via-timestomping skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `hunting-for-defense-evasion-via-timestomping` |\n| Canonical name | `hunting-for-defense-evasion-via-timestomping` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\nDetect timestamp manipulation by analyzing NTFS MFT entries for\n\n## Original SKILL.md\n\n---\nname: hunting-for-defense-evasion-via-timestomping\ndescription: 'Detect NTFS timestamp manipulation (MITRE T1070.006) by comparing $STANDARD_INFORMATION\n  vs $FILE_NAME timestamps in the MFT. Uses analyzeMFT and Python to identify files\n  with anomalous temporal patterns indicating anti-forensic timestomping activity.\n\n  '\ndomain: cybersecurity\nsubdomain: threat-hunting\ntags:\n- timestomping\n- ntfs-forensics\n- mft-analysis\n- defense-evasion\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nd3fend_techniques:\n- File Metadata Consistency Validation\n- Content Format Conversion\n- File Content Analysis\n- Platform Hardening\n- File Format Verification\nnist_csf:\n- DE.CM-01\n- DE.AE-02\n- DE.AE-07\n- ID.RA-05\nmitre_attack:\n- T1046\n- T1057\n- T1082\n- T1083\n- T1027\n---\n\n# Hunting for Defense Evasion via Timestomping\n\nDetect timestamp manipulation by analyzing NTFS MFT entries for\ndiscrepancies between $STANDARD_INFORMATION and $FILE_NAME attributes.\n\n## When to Use\n\n- Investigating suspected anti-forensic activity where an adversary may have altered file timestamps to blend malware into legitimate directories\n- Threat hunting for defense evasion (MITRE ATT&CK T1070.006) across compromised Windows systems\n- Validating timeline integrity during forensic examinations of disk images or live acquisitions\n- Triaging suspicious files that appear to have creation dates older than the OS installation or inconsistent with known deployment timelines\n- Detecting tools like Timestomp (Metasploit), NTimeStomp, SetMACE, or PowerShell Set-ItemProperty used to alter timestamps\n- Building automated detection pipelines that flag temporal anomalies in MFT data for SOC analysts\n\n**Do not use** as the sole detection method; advanced adversaries can manipulate both $STANDARD_INFORMATION and $FILE_NAME timestamps (though the latter requires raw disk access and is much harder). Combine with USN Journal, $LogFile, and ShimCache/Amcache analysis for corroboration.\n\n## Prerequisites\n\n- Raw $MFT file extracted from a Windows system (via FTK Imager, KAPE, or live extraction)\n- `MFTECmd` (Eric Zimmerman tool) or `analyzeMFT` for MFT parsing\n- Python 3.8+ with `pandas` for analysis\n- Optional: `mft` Python library (`pip install mft`) for programmatic MFT parsing\n- Optional: KAPE (Kroll Artifact Parser and Extractor) for automated artifact collection\n- Timeline Explorer or Excel for visual analysis of parsed MFT output\n\n## Workflow\n\n### Step 1: Extract the $MFT from a Live System or Disk Image\n\n```powershell\n# Method 1: Using KAPE to collect MFT and related artifacts\n.\\kape.exe --tsource C: --tdest D:\\Evidence\\MFT_Collection --target !SANS_Triage\n\n# Method 2: Using FTK Imager CLI to extract $MFT\nftkimager.exe \\\\.\\C: D:\\Evidence\\mft_raw.bin --e01 --include $MFT\n\n# Method 3: Raw copy using RawCopy (handles locked NTFS system files)\nRawCopy.exe /FileNamePath:C:0 /OutputPath:D:\\Evidence\\ /OutputName:$MFT\n```\n\n```bash\n# Method 4: On a mounted forensic image in Linux\nsudo mount -o ro,norecovery /dev/sdb1 /mnt/evidence\nsudo icat -o 2048 /dev/sdb 0 > /mnt/output/$MFT\n\n# Method 5: Using sleuthkit to extract MFT from disk image\nicat -o 2048 evidence.E01 0 > extracted_MFT\n```\n\n### Step 2: Parse the MFT with MFTECmd\n\nUse Eric Zimmerman's MFTECmd to produce a CSV with both $STANDARD_INFORMATION and $FILE_NAME timestamps:\n\n```powershell\n# Parse MFT to CSV with all timestamp columns\nMFTECmd.exe -f \"D:\\Evidence\\$MFT\" --csv D:\\Evidence\\Parsed\\ --csvf mft_parsed.csv\n\n# The output CSV contains these critical columns:\n# Created0x10         - $STANDARD_INFORMATION Created timestamp\n# LastModified0x10    - $STANDARD_INFORMATION Modified timestamp\n# LastAccess0x10      - $STANDARD_INFORMATION Accessed timestamp\n# LastRecordChange0x10 - $STANDARD_INFORMATION Entry Modified timestamp\n# Created0x30         - $FILE_NAME Created timestamp\n# LastModified0x30    - $FILE_NAME Modified timestamp\n# LastAccess0x30      - $FILE_NAME Accessed timestamp\n# LastRecordChange0x30 - $FILE_NAME Entry Modified timestamp\n```\n\n### Step 3: Detect Timestomping via SI vs FN Comparison\n\nThe core detection: $STANDARD_INFORMATION timestamps are easily modified by user-mode tools, but $FILE_NAME timestamps are updated only by the NTFS driver (kernel-mode). When SI timestamps are OLDER than FN timestamps, timestomping is likely:\n\n```python\nimport pandas as pd\nfrom datetime import datetime, timedelta\n\ndef load_mft_data(csv_path):\n    \"\"\"Load MFTECmd parsed CSV output.\"\"\"\n    df = pd.read_csv(csv_path, low_memory=False)\n\n    # Parse timestamp columns\n    timestamp_cols = [\n        \"Created0x10\", \"LastModified0x10\", \"LastAccess0x10\", \"LastRecordChange0x10\",\n        \"Created0x30\", \"LastModified0x30\", \"LastAccess0x30\", \"LastRecordChange0x30\"\n    ]\n\n    for col in timestamp_cols:\n        if col in df.columns:\n            df[col] = pd.to_datetime(df[col], errors=\"coerce\")\n\n    return df\n\ndef detect_timestomping(df):\n    \"\"\"Detect timestamp manipulation by comparing SI and FN attributes.\n\n    Key indicators:\n    1. SI Created \u003c FN Created (SI timestamp pushed back in time)\n    2. SI timestamps have nanoseconds = 0000000 (tool artifact)\n    3. SI Created \u003c FN Entry Modified (impossible under normal NTFS behavior)\n    4. Large gap between SI and FN timestamps\n    \"\"\"\n    results = []\n\n    for idx, row in df.iterrows():\n        si_created = row.get(\"Created0x10\")\n        fn_created = row.get(\"Created0x30\")\n        si_modified = row.get(\"LastModified0x10\")\n        fn_modified = row.get(\"LastModified0x30\")\n        si_entry = row.get(\"LastRecordChange0x10\")\n        fn_entry = row.get(\"LastRecordChange0x30\")\n\n        if pd.isna(si_created) or pd.isna(fn_created):\n            continue\n\n        filepath = row.get(\"FileName\", \"unknown\")\n        parent_path = row.get(\"ParentPath\", \"\")\n        full_path = f\"{parent_path}\\\\{filepath}\" if parent_path else filepath\n        indicators = []\n\n        # Detection 1: SI Created is BEFORE FN Created\n        # Under normal NTFS operations, SI Created >= FN Created\n        if si_created \u003c fn_created:\n            delta = fn_created - si_created\n            indicators.append({\n                \"check\": \"SI_Created \u003c FN_Created\",\n                \"si_value\": str(si_created),\n                \"fn_value\": str(fn_created),\n                \"delta\": str(delta),\n                \"confidence\": \"high\"\n            })\n\n        # Detection 2: SI Modified is BEFORE FN Created\n        # A file cannot be modified before it was created\n        if pd.notna(si_modified) and si_modified \u003c fn_created:\n            indicators.append({\n                \"check\": \"SI_Modified \u003c FN_Created\",\n                \"si_value\": str(si_modified),\n                \"fn_value\": str(fn_created),\n                \"confidence\": \"high\"\n            })\n\n        # Detection 3: Nanosecond precision check\n        # Many timestomping tools set timestamps with zero nanoseconds\n        if pd.notna(si_created):\n            si_created_str = str(si_created)\n            if \".000000\" in si_created_str or si_created_str.endswith(\"00:00:00\"):\n                # Check if FN has normal nanosecond precision\n                fn_str = str(fn_created)\n                if \".000000\" not in fn_str:\n                    indicators.append({\n                        \"check\": \"SI_nanoseconds_zeroed\",\n                        \"si_value\": si_created_str,\n                        \"fn_value\": fn_str,\n                        \"confidence\": \"medium\"\n                    })\n\n        # Detection 4: Large time gap between SI and FN\n        # Normal gap is seconds to minutes, not years\n        if abs((si_created - fn_created).days) > 365:\n            indicators.append({\n                \"check\": \"SI_FN_gap_exceeds_1_year\",\n                \"si_value\": str(si_created),\n                \"fn_value\": str(fn_created),\n                \"delta_days\": abs((si_created - fn_created).days),\n                \"confidence\": \"high\"\n            })\n\n        # Detection 5: SI Entry Modified much later than SI Created\n        # Indicates the SI attribute was rewritten\n        if pd.notna(si_entry) and pd.notna(si_created):\n            entry_delta = si_entry - si_created\n            if entry_delta.days > 365 * 5:  # Entry modified years after creation\n                indicators.append({\n                    \"check\": \"SI_entry_modified_years_after_creation\",\n                    \"si_created\": str(si_created),\n                    \"si_entry_modified\": str(si_entry),\n                    \"confidence\": \"medium\"\n                })\n\n        if indicators:\n            results.append({\n                \"file_path\": full_path,\n                \"entry_number\": row.get(\"EntryNumber\", \"\"),\n                \"in_use\": row.get(\"InUse\", True),\n                \"si_created\": str(si_created),\n                \"fn_created\": str(fn_created),\n                \"indicators\": indicators,\n                \"highest_confidence\": max(i[\"confidence\"] for i in indicators),\n            })\n\n    return results\n\n# Run detection\ndf = load_mft_data(\"D:\\\\Evidence\\\\Parsed\\\\mft_parsed.csv\")\nstomped_files = detect_timestomping(df)\n\nprint(f\"\\nTimestomping Detection Results\")\nprint(f\"{'='*60}\")\nprint(f\"Total MFT entries analyzed: {len(df)}\")\nprint(f\"Suspicious entries found: {len(stomped_files)}\")\nprint()\n\nfor entry in sorted(stomped_files, key=lambda x: x[\"highest_confidence\"], reverse=True):\n    print(f\"[{entry['highest_confidence'].upper()}] {entry['file_path']}\")\n    print(f\"  SI Created: {entry['si_created']}\")\n    print(f\"  FN Created: {entry['fn_created']}\")\n    for ind in entry[\"indicators\"]:\n        print(f\"  Check: {ind['check']} (confidence: {ind['confidence']})\")\n    print()\n```\n\n### Step 4: Corroborate with USN Journal Analysis\n\nThe USN Journal records metadata change events that persist even after timestomping:\n\n```python\ndef correlate_with_usn_journal(stomped_files, usn_csv_path):\n    \"\"\"Cross-reference timestomped files with USN Journal entries.\n\n    The USN Journal records a BASIC_INFO_CHANGE reason when timestamps\n    are modified, providing corroborating evidence of timestomping.\n    \"\"\"\n    usn_df = pd.read_csv(usn_csv_path, low_memory=False)\n    usn_df[\"UpdateTimestamp\"] = pd.to_datetime(usn_df[\"UpdateTimestamp\"], errors=\"coerce\")\n\n    corroborated = []\n    for entry in stomped_files:\n        filename = entry[\"file_path\"].split(\"\\\\\")[-1]\n\n        # Find USN entries for this file with BASIC_INFO_CHANGE\n        usn_matches = usn_df[\n            (usn_df[\"Name\"] == filename) &\n            (usn_df[\"UpdateReasons\"].str.contains(\"BASIC_INFO_CHANGE\", na=False))\n        ]\n\n        if not usn_matches.empty:\n            entry[\"usn_corroboration\"] = True\n            entry[\"usn_change_times\"] = usn_matches[\"UpdateTimestamp\"].tolist()\n            entry[\"highest_confidence\"] = \"critical\"\n            corroborated.append(entry)\n            print(f\"[CORROBORATED] {filename} - USN Journal confirms \"\n                  f\"BASIC_INFO_CHANGE at {usn_matches['UpdateTimestamp'].iloc[0]}\")\n\n    return corroborated\n\n# Parse USN Journal (use MFTECmd or ANJP)\n# MFTECmd.exe -f \"$J\" --csv D:\\Evidence\\Parsed\\ --csvf usn_parsed.csv\n```\n\n### Step 5: Check ShimCache and Amcache for Timeline Validation\n\n```python\ndef check_shimcache_timeline(stomped_files, shimcache_csv):\n    \"\"\"Validate timestamps against ShimCache (AppCompatCache) entries.\n\n    ShimCache records the last modification time of executables\n    independently of NTFS timestamps, providing another corroboration point.\n    \"\"\"\n    shim_df = pd.read_csv(shimcache_csv, low_memory=False)\n    shim_df[\"LastModifiedTimeUTC\"] = pd.to_datetime(\n        shim_df[\"LastModifiedTimeUTC\"], errors=\"coerce\"\n    )\n\n    for entry in stomped_files:\n        filepath = entry[\"file_path\"]\n        shim_match = shim_df[\n            shim_df[\"Path\"].str.lower() == filepath.lower()\n        ]\n\n        if not shim_match.empty:\n            shim_time = shim_match[\"LastModifiedTimeUTC\"].iloc[0]\n            si_modified = pd.to_datetime(entry.get(\"si_created\"))\n\n            if pd.notna(shim_time) and pd.notna(si_modified):\n                delta = abs((shim_time - si_modified).days)\n                if delta > 30:\n                    entry[\"shimcache_mismatch\"] = True\n                    entry[\"shimcache_time\"] = str(shim_time)\n                    print(f\"[SHIMCACHE MISMATCH] {filepath}\")\n                    print(f\"  SI timestamp: {si_modified}\")\n                    print(f\"  ShimCache timestamp: {shim_time}\")\n                    print(f\"  Delta: {delta} days\")\n\n    return stomped_files\n```\n\n### Step 6: Generate a Timestomping Detection Report\n\n```python\nimport json\n\ndef generate_report(stomped_files, output_path):\n    \"\"\"Generate a structured JSON report of all timestomping detections.\"\"\"\n    report = {\n        \"report_title\": \"Timestomping Detection Analysis\",\n        \"generated_at\": datetime.utcnow().isoformat() + \"Z\",\n        \"mitre_technique\": \"T1070.006 - Indicator Removal: Timestomp\",\n        \"total_suspicious_files\": len(stomped_files),\n        \"critical_findings\": len([f for f in stomped_files if f[\"highest_confidence\"] == \"critical\"]),\n        \"high_findings\": len([f for f in stomped_files if f[\"highest_confidence\"] == \"high\"]),\n        \"medium_findings\": len([f for f in stomped_files if f[\"highest_confidence\"] == \"medium\"]),\n        \"findings\": stomped_files,\n    }\n\n    with open(output_path, \"w\") as f:\n        json.dump(report, f, indent=2, default=str)\n    print(f\"Report written to {output_path}\")\n    print(f\"  Critical: {report['critical_findings']}\")\n    print(f\"  High: {report['high_findings']}\")\n    print(f\"  Medium: {report['medium_findings']}\")\n\ngenerate_report(stomped_files, \"D:\\\\Evidence\\\\timestomping_report.json\")\n```\n\n## Verification\n\n- Confirm MFTECmd parses the $MFT without errors and produces both 0x10 (SI) and 0x30 (FN) timestamp columns\n- Create a test file and use a timestomping tool (e.g., NTimeStomp) in a lab to verify the detection logic catches the manipulation\n- Validate that the nanosecond-zeroed check does not produce excessive false positives on files created by installers that legitimately set timestamps\n- Cross-reference flagged files with the USN Journal to confirm BASIC_INFO_CHANGE events exist at the expected times\n- Verify ShimCache and Amcache timestamps provide independent corroboration of timeline inconsistencies\n- Test against known-clean system images to establish a false-positive baseline (some backup/imaging software legitimately resets timestamps)\n- Confirm the detection pipeline correctly handles deleted MFT entries (InUse=false) which may contain evidence of timestomped files that were later removed\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("hunting-for-defense-evasion-via-timestomping-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>detecting-container-escape-attempts - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/detecting-container-escape-attempts-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>detecting-container-escape-attempts</h1>
+      <p class="description">Container escape is a critical attack technique where an adversary breaks</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>detecting-container-escape-attempts</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>detecting-container-escape-attempts</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Container escape is a critical attack technique where an adversary breaks</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose detecting-container-escape-attempts, then write the task. Fallback prompt: Use the detecting-container-escape-attempts skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Detecting Container Escape Attempts</h2>
+<h3>Overview</h3>
+<p>Container escape is a critical attack technique where an adversary breaks out of container isolation to access the host system or other containers. Detection involves monitoring for escape indicators such as namespace manipulation, capability abuse, kernel exploits, mounted sensitive paths, and anomalous syscall patterns using runtime security tools like Falco, Sysdig, and custom seccomp/audit rules.</p>
+<h3>When to Use</h3>
+<ul>
+<li>When investigating security incidents that require detecting container escape attempts</li>
+<li>When building detection rules or threat hunting queries for this domain</li>
+<li>When SOC analysts need structured procedures for this analysis type</li>
+<li>When validating security monitoring coverage for related attack techniques</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Linux host with kernel 5.10+ (eBPF support)</li>
+<li>Falco 0.37+ installed (kernel module or eBPF probe)</li>
+<li>Docker Engine or containerd runtime</li>
+<li>auditd configured</li>
+<li>Root access for eBPF/kernel module loading</li>
+</ul>
+<h3>Core Concepts</h3>
+<h4>Common Container Escape Vectors</h4>
+<p>| Vector | Technique | MITRE ID | |--------|-----------|----------| | Privileged containers | Mount host filesystem, load kernel modules | T1611 | | Docker socket mount | Create privileged container from within | T1610 | | Kernel exploits | CVE-2022-0185 (fsconfig), Dirty Pipe, runc CVEs | T1068 | | Capability abuse | CAP_SYS_ADMIN, CAP_SYS_PTRACE, CAP_NET_ADMIN | T1548 | | Sensitive mounts | /proc/sysrq-trigger, /proc/kcore, cgroup release_agent | T1611 | | Namespace escape | nsenter, unshare to host namespaces | T1611 | | Symlink/bind mount | Escape through /proc/self/root | T1611 |</p>
+<h4>Detection Layers</h4>
+<ol>
+<li><strong>Syscall monitoring</strong> - eBPF/kernel module captures syscalls in real-time</li>
+<li><strong>File integrity</strong> - Detect modification of escape-enabling paths</li>
+<li><strong>Process monitoring</strong> - Track process creation, namespace changes</li>
+<li><strong>Network monitoring</strong> - Detect container-to-host connections</li>
+<li><strong>Audit logging</strong> - Linux auditd for capability and mount operations</li>
+</ol>
+<h3>Workflow</h3>
+<h4>Step 1: Deploy Falco for Runtime Detection</h4>
+<pre><code># falco-values.yaml for Helm deployment
+falco:
+  driver:
+    kind: ebpf   # or modern_ebpf for kernel 5.8+
+  rules_files:
+    - /etc/falco/falco_rules.yaml
+    - /etc/falco/falco_rules.local.yaml
+    - /etc/falco/rules.d
+  json_output: true
+  json_include_output_property: true
+  http_output:
+    enabled: true
+    url: &quot;http://falcosidekick:2801&quot;
+  grpc:
+    enabled: true
+  priority: warning</code></pre>
+<pre><code># Install Falco via Helm
+helm repo add falcosecurity https://falcosecurity.github.io/charts
+helm install falco falcosecurity/falco \
+  --namespace falco-system --create-namespace \
+  -f falco-values.yaml</code></pre>
+<h4>Step 2: Custom Falco Rules for Escape Detection</h4>
+<pre><code># /etc/falco/rules.d/container_escape.yaml
+
+# Detect container escape via privileged container
+- rule: Container Escape via Privileged Mode
+  desc: Detect attempts to escape container using privileged capabilities
+  condition: &gt;
+    spawned_process and container and
+    (proc.name in (nsenter, unshare, mount, umount, modprobe, insmod) or
+     (proc.name = chroot and proc.args contains &quot;/host&quot;))
+  output: &gt;
+    Container escape attempt via privileged operation
+    (user=%user.name container=%container.name image=%container.image.repository
+     command=%proc.cmdline pid=%proc.pid %container.info)
+  priority: CRITICAL
+  tags: [container, escape, T1611]
+
+# Detect Docker socket access from container
+- rule: Container Access to Docker Socket
+  desc: Detect container reading/writing to Docker socket
+  condition: &gt;
+    (open_read or open_write) and container and
+    fd.name = /var/run/docker.sock
+  output: &gt;
+    Docker socket accessed from container
+    (user=%user.name container=%container.name image=%container.image.repository
+     fd=%fd.name command=%proc.cmdline %container.info)
+  priority: CRITICAL
+  tags: [container, escape, docker_socket]
+
+# Detect sensitive proc filesystem access
+- rule: Container Access to Sensitive Proc Paths
+  desc: Detect container accessing host-sensitive proc paths
+  condition: &gt;
+    open_read and container and
+    (fd.name startswith /proc/sysrq-trigger or
+     fd.name startswith /proc/kcore or
+     fd.name startswith /proc/kmsg or
+     fd.name startswith /proc/kallsyms or
+     fd.name startswith /sys/kernel)
+  output: &gt;
+    Sensitive proc/sys access from container
+    (user=%user.name container=%container.name path=%fd.name
+     command=%proc.cmdline %container.info)
+  priority: CRITICAL
+  tags: [container, escape, proc_access]
+
+# Detect cgroup escape technique
+- rule: Container Cgroup Escape Attempt
+  desc: Detect writing to cgroup release_agent (escape technique)
+  condition: &gt;
+    open_write and container and
+    (fd.name contains release_agent or
+     fd.name contains notify_on_release)
+  output: &gt;
+    Cgroup escape attempt detected
+    (user=%user.name container=%container.name path=%fd.name
+     command=%proc.cmdline %container.info)
+  priority: CRITICAL
+  tags: [container, escape, cgroup]
+
+# Detect kernel module loading from container
+- rule: Container Loading Kernel Module
+  desc: Detect container attempting to load kernel modules
+  condition: &gt;
+    spawned_process and container and
+    (proc.name in (modprobe, insmod, rmmod) or
+     (evt.type = init_module or evt.type = finit_module))
+  output: &gt;
+    Kernel module load attempt from container
+    (user=%user.name container=%container.name command=%proc.cmdline
+     %container.info)
+  priority: CRITICAL
+  tags: [container, escape, kernel_module]
+
+# Detect namespace manipulation
+- rule: Container Namespace Manipulation
+  desc: Detect setns/unshare syscalls from container
+  condition: &gt;
+    container and (evt.type = setns or evt.type = unshare) and
+    not proc.name in (containerd-shim, runc)
+  output: &gt;
+    Namespace manipulation from container
+    (user=%user.name container=%container.name syscall=%evt.type
+     command=%proc.cmdline %container.info)
+  priority: CRITICAL
+  tags: [container, escape, namespace]
+
+# Detect mount operations from container
+- rule: Container Mount Sensitive Filesystem
+  desc: Detect container mounting host filesystems
+  condition: &gt;
+    spawned_process and container and proc.name = mount and
+    (proc.args contains &quot;/dev/&quot; or proc.args contains &quot;proc&quot; or
+     proc.args contains &quot;sysfs&quot;)
+  output: &gt;
+    Sensitive mount operation from container
+    (user=%user.name container=%container.name command=%proc.cmdline
+     %container.info)
+  priority: HIGH
+  tags: [container, escape, mount]</code></pre>
+<h4>Step 3: Configure Seccomp Profile for Escape Prevention</h4>
+<pre><code>{
+  &quot;defaultAction&quot;: &quot;SCMP_ACT_ERRNO&quot;,
+  &quot;archMap&quot;: [
+    { &quot;architecture&quot;: &quot;SCMP_ARCH_X86_64&quot;, &quot;subArchitectures&quot;: [&quot;SCMP_ARCH_X86&quot;, &quot;SCMP_ARCH_X32&quot;] }
+  ],
+  &quot;syscalls&quot;: [
+    {
+      &quot;names&quot;: [
+        &quot;read&quot;, &quot;write&quot;, &quot;open&quot;, &quot;close&quot;, &quot;stat&quot;, &quot;fstat&quot;, &quot;lstat&quot;,
+        &quot;poll&quot;, &quot;lseek&quot;, &quot;mmap&quot;, &quot;mprotect&quot;, &quot;munmap&quot;, &quot;brk&quot;,
+        &quot;rt_sigaction&quot;, &quot;rt_sigprocmask&quot;, &quot;ioctl&quot;, &quot;access&quot;,
+        &quot;pipe&quot;, &quot;select&quot;, &quot;sched_yield&quot;, &quot;dup&quot;, &quot;dup2&quot;,
+        &quot;nanosleep&quot;, &quot;getpid&quot;, &quot;socket&quot;, &quot;connect&quot;, &quot;accept&quot;,
+        &quot;sendto&quot;, &quot;recvfrom&quot;, &quot;bind&quot;, &quot;listen&quot;, &quot;getsockname&quot;,
+        &quot;getpeername&quot;, &quot;socketpair&quot;, &quot;setsockopt&quot;, &quot;getsockopt&quot;,
+        &quot;clone&quot;, &quot;fork&quot;, &quot;vfork&quot;, &quot;execve&quot;, &quot;exit&quot;, &quot;wait4&quot;,
+        &quot;kill&quot;, &quot;getuid&quot;, &quot;getgid&quot;, &quot;geteuid&quot;, &quot;getegid&quot;,
+        &quot;epoll_create&quot;, &quot;epoll_wait&quot;, &quot;epoll_ctl&quot;, &quot;epoll_create1&quot;,
+        &quot;futex&quot;, &quot;set_tid_address&quot;, &quot;set_robust_list&quot;,
+        &quot;openat&quot;, &quot;newfstatat&quot;, &quot;readlinkat&quot;, &quot;fchownat&quot;,
+        &quot;clock_gettime&quot;, &quot;clock_getres&quot;, &quot;clock_nanosleep&quot;,
+        &quot;getrandom&quot;, &quot;memfd_create&quot;, &quot;statx&quot;, &quot;rseq&quot;
+      ],
+      &quot;action&quot;: &quot;SCMP_ACT_ALLOW&quot;
+    },
+    {
+      &quot;names&quot;: [&quot;unshare&quot;, &quot;setns&quot;, &quot;mount&quot;, &quot;umount2&quot;, &quot;pivot_root&quot;,
+                &quot;init_module&quot;, &quot;finit_module&quot;, &quot;delete_module&quot;,
+                &quot;kexec_load&quot;, &quot;kexec_file_load&quot;, &quot;ptrace&quot;,
+                &quot;reboot&quot;, &quot;swapon&quot;, &quot;swapoff&quot;, &quot;sethostname&quot;,
+                &quot;setdomainname&quot;, &quot;keyctl&quot;, &quot;bpf&quot;],
+      &quot;action&quot;: &quot;SCMP_ACT_LOG&quot;,
+      &quot;comment&quot;: &quot;Log escape-relevant syscalls for detection&quot;
+    }
+  ]
+}</code></pre>
+<h4>Step 4: Audit Rules for Container Escape</h4>
+<pre><code># /etc/audit/rules.d/container-escape.rules
+
+# Monitor namespace operations
+-a always,exit -F arch=b64 -S setns -S unshare -k container_escape
+-a always,exit -F arch=b64 -S mount -S umount2 -k container_mount
+-a always,exit -F arch=b64 -S init_module -S finit_module -S delete_module -k kernel_module
+-a always,exit -F arch=b64 -S ptrace -k process_trace
+
+# Monitor sensitive paths
+-w /var/run/docker.sock -p rwxa -k docker_socket
+-w /proc/sysrq-trigger -p w -k sysrq
+-w /proc/kcore -p r -k kcore_read
+
+# Monitor container runtime
+-w /usr/bin/runc -p x -k container_runtime
+-w /usr/bin/containerd -p x -k container_runtime
+-w /usr/bin/docker -p x -k container_runtime</code></pre>
+<h4>Step 5: Real-Time Alert Pipeline</h4>
+<pre><code># Falcosidekick configuration for alert routing
+config:
+  slack:
+    webhookurl: &quot;https://hooks.slack.com/services/xxx&quot;
+    minimumpriority: &quot;critical&quot;
+    messageformat: |
+      *Container Escape Alert*
+      Rule: {{ .Rule }}
+      Priority: {{ .Priority }}
+      Output: {{ .Output }}
+
+  elasticsearch:
+    hostport: &quot;https://elasticsearch:9200&quot;
+    index: &quot;falco-alerts&quot;
+    minimumpriority: &quot;warning&quot;
+
+  pagerduty:
+    routingkey: &quot;xxxx&quot;
+    minimumpriority: &quot;critical&quot;</code></pre>
+<h3>Validation Commands</h3>
+<pre><code># Test Falco rules with event generator
+kubectl run falco-event-generator \
+  --image=falcosecurity/event-generator \
+  --restart=Never \
+  -- run syscall --action PtraceAttachContainer
+
+# Check Falco alerts
+kubectl logs -n falco-system -l app.kubernetes.io/name=falco --tail=50
+
+# Verify seccomp profile is loaded
+docker inspect --format '{{.HostConfig.SecurityOpt}}' &lt;container-id&gt;
+
+# Check audit logs for escape-related events
+ausearch -k container_escape --interpret</code></pre>
+<h3>References</h3>
+<ul>
+<li>[Falco Runtime Security](https://falco.org/docs/)</li>
+<li>[Container Escape Techniques - HackTricks](https://book.hacktricks.xyz/linux-hardening/privilege-escalation/docker-security/docker-breakout-privilege-escalation)</li>
+<li>[MITRE ATT&amp;CK T1611 - Escape to Host](https://attack.mitre.org/techniques/T1611/)</li>
+<li>[Sysdig Container Security](https://sysdig.com/products/secure/)</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: detecting-container-escape-attempts\ndisplay_name: detecting-container-escape-attempts\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# detecting-container-escape-attempts - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `detecting-container-escape-attempts` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nContainer escape is a critical attack technique where an adversary breaks out of container isolation to access the host system or other containers. Detection involves monitoring for escape indicators such as namespace ma\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose detecting-container-escape-attempts, then write the task. Fallback prompt: Use the detecting-container-escape-attempts skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `detecting-container-escape-attempts` |\n| Canonical name | `detecting-container-escape-attempts` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\nContainer escape is a critical attack technique where an adversary breaks out of container isolation to access the host system or other containers. Detection involves monitoring for escape indicators such as namespace ma\n\n## Original SKILL.md\n\n---\nname: detecting-container-escape-attempts\ndescription: Container escape is a critical attack technique where an adversary breaks\n  out of container isolation to access the host system or other containers. Detection\n  involves monitoring for escape indicators\ndomain: cybersecurity\nsubdomain: container-security\ntags:\n- containers\n- kubernetes\n- docker\n- security\n- runtime-security\n- escape-detection\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nd3fend_techniques:\n- Platform Monitoring\n- Process Code Segment Verification\n- Stack Frame Canary Validation\n- Segment Address Offset Randomization\n- Process Analysis\nnist_csf:\n- PR.PS-01\n- PR.IR-01\n- ID.AM-08\n- DE.CM-01\nmitre_attack:\n- T1610\n- T1611\n- T1609\n- T1525\n---\n# Detecting Container Escape Attempts\n\n## Overview\n\nContainer escape is a critical attack technique where an adversary breaks out of container isolation to access the host system or other containers. Detection involves monitoring for escape indicators such as namespace manipulation, capability abuse, kernel exploits, mounted sensitive paths, and anomalous syscall patterns using runtime security tools like Falco, Sysdig, and custom seccomp/audit rules.\n\n\n## When to Use\n\n- When investigating security incidents that require detecting container escape attempts\n- When building detection rules or threat hunting queries for this domain\n- When SOC analysts need structured procedures for this analysis type\n- When validating security monitoring coverage for related attack techniques\n\n## Prerequisites\n\n- Linux host with kernel 5.10+ (eBPF support)\n- Falco 0.37+ installed (kernel module or eBPF probe)\n- Docker Engine or containerd runtime\n- auditd configured\n- Root access for eBPF/kernel module loading\n\n## Core Concepts\n\n### Common Container Escape Vectors\n\n| Vector | Technique | MITRE ID |\n|--------|-----------|----------|\n| Privileged containers | Mount host filesystem, load kernel modules | T1611 |\n| Docker socket mount | Create privileged container from within | T1610 |\n| Kernel exploits | CVE-2022-0185 (fsconfig), Dirty Pipe, runc CVEs | T1068 |\n| Capability abuse | CAP_SYS_ADMIN, CAP_SYS_PTRACE, CAP_NET_ADMIN | T1548 |\n| Sensitive mounts | /proc/sysrq-trigger, /proc/kcore, cgroup release_agent | T1611 |\n| Namespace escape | nsenter, unshare to host namespaces | T1611 |\n| Symlink/bind mount | Escape through /proc/self/root | T1611 |\n\n### Detection Layers\n\n1. **Syscall monitoring** - eBPF/kernel module captures syscalls in real-time\n2. **File integrity** - Detect modification of escape-enabling paths\n3. **Process monitoring** - Track process creation, namespace changes\n4. **Network monitoring** - Detect container-to-host connections\n5. **Audit logging** - Linux auditd for capability and mount operations\n\n## Workflow\n\n### Step 1: Deploy Falco for Runtime Detection\n\n```yaml\n# falco-values.yaml for Helm deployment\nfalco:\n  driver:\n    kind: ebpf   # or modern_ebpf for kernel 5.8+\n  rules_files:\n    - /etc/falco/falco_rules.yaml\n    - /etc/falco/falco_rules.local.yaml\n    - /etc/falco/rules.d\n  json_output: true\n  json_include_output_property: true\n  http_output:\n    enabled: true\n    url: \"http://falcosidekick:2801\"\n  grpc:\n    enabled: true\n  priority: warning\n```\n\n```bash\n# Install Falco via Helm\nhelm repo add falcosecurity https://falcosecurity.github.io/charts\nhelm install falco falcosecurity/falco \\\n  --namespace falco-system --create-namespace \\\n  -f falco-values.yaml\n```\n\n### Step 2: Custom Falco Rules for Escape Detection\n\n```yaml\n# /etc/falco/rules.d/container_escape.yaml\n\n# Detect container escape via privileged container\n- rule: Container Escape via Privileged Mode\n  desc: Detect attempts to escape container using privileged capabilities\n  condition: >\n    spawned_process and container and\n    (proc.name in (nsenter, unshare, mount, umount, modprobe, insmod) or\n     (proc.name = chroot and proc.args contains \"/host\"))\n  output: >\n    Container escape attempt via privileged operation\n    (user=%user.name container=%container.name image=%container.image.repository\n     command=%proc.cmdline pid=%proc.pid %container.info)\n  priority: CRITICAL\n  tags: [container, escape, T1611]\n\n# Detect Docker socket access from container\n- rule: Container Access to Docker Socket\n  desc: Detect container reading/writing to Docker socket\n  condition: >\n    (open_read or open_write) and container and\n    fd.name = /var/run/docker.sock\n  output: >\n    Docker socket accessed from container\n    (user=%user.name container=%container.name image=%container.image.repository\n     fd=%fd.name command=%proc.cmdline %container.info)\n  priority: CRITICAL\n  tags: [container, escape, docker_socket]\n\n# Detect sensitive proc filesystem access\n- rule: Container Access to Sensitive Proc Paths\n  desc: Detect container accessing host-sensitive proc paths\n  condition: >\n    open_read and container and\n    (fd.name startswith /proc/sysrq-trigger or\n     fd.name startswith /proc/kcore or\n     fd.name startswith /proc/kmsg or\n     fd.name startswith /proc/kallsyms or\n     fd.name startswith /sys/kernel)\n  output: >\n    Sensitive proc/sys access from container\n    (user=%user.name container=%container.name path=%fd.name\n     command=%proc.cmdline %container.info)\n  priority: CRITICAL\n  tags: [container, escape, proc_access]\n\n# Detect cgroup escape technique\n- rule: Container Cgroup Escape Attempt\n  desc: Detect writing to cgroup release_agent (escape technique)\n  condition: >\n    open_write and container and\n    (fd.name contains release_agent or\n     fd.name contains notify_on_release)\n  output: >\n    Cgroup escape attempt detected\n    (user=%user.name container=%container.name path=%fd.name\n     command=%proc.cmdline %container.info)\n  priority: CRITICAL\n  tags: [container, escape, cgroup]\n\n# Detect kernel module loading from container\n- rule: Container Loading Kernel Module\n  desc: Detect container attempting to load kernel modules\n  condition: >\n    spawned_process and container and\n    (proc.name in (modprobe, insmod, rmmod) or\n     (evt.type = init_module or evt.type = finit_module))\n  output: >\n    Kernel module load attempt from container\n    (user=%user.name container=%container.name command=%proc.cmdline\n     %container.info)\n  priority: CRITICAL\n  tags: [container, escape, kernel_module]\n\n# Detect namespace manipulation\n- rule: Container Namespace Manipulation\n  desc: Detect setns/unshare syscalls from container\n  condition: >\n    container and (evt.type = setns or evt.type = unshare) and\n    not proc.name in (containerd-shim, runc)\n  output: >\n    Namespace manipulation from container\n    (user=%user.name container=%container.name syscall=%evt.type\n     command=%proc.cmdline %container.info)\n  priority: CRITICAL\n  tags: [container, escape, namespace]\n\n# Detect mount operations from container\n- rule: Container Mount Sensitive Filesystem\n  desc: Detect container mounting host filesystems\n  condition: >\n    spawned_process and container and proc.name = mount and\n    (proc.args contains \"/dev/\" or proc.args contains \"proc\" or\n     proc.args contains \"sysfs\")\n  output: >\n    Sensitive mount operation from container\n    (user=%user.name container=%container.name command=%proc.cmdline\n     %container.info)\n  priority: HIGH\n  tags: [container, escape, mount]\n```\n\n### Step 3: Configure Seccomp Profile for Escape Prevention\n\n```json\n{\n  \"defaultAction\": \"SCMP_ACT_ERRNO\",\n  \"archMap\": [\n    { \"architecture\": \"SCMP_ARCH_X86_64\", \"subArchitectures\": [\"SCMP_ARCH_X86\", \"SCMP_ARCH_X32\"] }\n  ],\n  \"syscalls\": [\n    {\n      \"names\": [\n        \"read\", \"write\", \"open\", \"close\", \"stat\", \"fstat\", \"lstat\",\n        \"poll\", \"lseek\", \"mmap\", \"mprotect\", \"munmap\", \"brk\",\n        \"rt_sigaction\", \"rt_sigprocmask\", \"ioctl\", \"access\",\n        \"pipe\", \"select\", \"sched_yield\", \"dup\", \"dup2\",\n        \"nanosleep\", \"getpid\", \"socket\", \"connect\", \"accept\",\n        \"sendto\", \"recvfrom\", \"bind\", \"listen\", \"getsockname\",\n        \"getpeername\", \"socketpair\", \"setsockopt\", \"getsockopt\",\n        \"clone\", \"fork\", \"vfork\", \"execve\", \"exit\", \"wait4\",\n        \"kill\", \"getuid\", \"getgid\", \"geteuid\", \"getegid\",\n        \"epoll_create\", \"epoll_wait\", \"epoll_ctl\", \"epoll_create1\",\n        \"futex\", \"set_tid_address\", \"set_robust_list\",\n        \"openat\", \"newfstatat\", \"readlinkat\", \"fchownat\",\n        \"clock_gettime\", \"clock_getres\", \"clock_nanosleep\",\n        \"getrandom\", \"memfd_create\", \"statx\", \"rseq\"\n      ],\n      \"action\": \"SCMP_ACT_ALLOW\"\n    },\n    {\n      \"names\": [\"unshare\", \"setns\", \"mount\", \"umount2\", \"pivot_root\",\n                \"init_module\", \"finit_module\", \"delete_module\",\n                \"kexec_load\", \"kexec_file_load\", \"ptrace\",\n                \"reboot\", \"swapon\", \"swapoff\", \"sethostname\",\n                \"setdomainname\", \"keyctl\", \"bpf\"],\n      \"action\": \"SCMP_ACT_LOG\",\n      \"comment\": \"Log escape-relevant syscalls for detection\"\n    }\n  ]\n}\n```\n\n### Step 4: Audit Rules for Container Escape\n\n```bash\n# /etc/audit/rules.d/container-escape.rules\n\n# Monitor namespace operations\n-a always,exit -F arch=b64 -S setns -S unshare -k container_escape\n-a always,exit -F arch=b64 -S mount -S umount2 -k container_mount\n-a always,exit -F arch=b64 -S init_module -S finit_module -S delete_module -k kernel_module\n-a always,exit -F arch=b64 -S ptrace -k process_trace\n\n# Monitor sensitive paths\n-w /var/run/docker.sock -p rwxa -k docker_socket\n-w /proc/sysrq-trigger -p w -k sysrq\n-w /proc/kcore -p r -k kcore_read\n\n# Monitor container runtime\n-w /usr/bin/runc -p x -k container_runtime\n-w /usr/bin/containerd -p x -k container_runtime\n-w /usr/bin/docker -p x -k container_runtime\n```\n\n### Step 5: Real-Time Alert Pipeline\n\n```yaml\n# Falcosidekick configuration for alert routing\nconfig:\n  slack:\n    webhookurl: \"https://hooks.slack.com/services/xxx\"\n    minimumpriority: \"critical\"\n    messageformat: |\n      *Container Escape Alert*\n      Rule: {{ .Rule }}\n      Priority: {{ .Priority }}\n      Output: {{ .Output }}\n\n  elasticsearch:\n    hostport: \"https://elasticsearch:9200\"\n    index: \"falco-alerts\"\n    minimumpriority: \"warning\"\n\n  pagerduty:\n    routingkey: \"xxxx\"\n    minimumpriority: \"critical\"\n```\n\n## Validation Commands\n\n```bash\n# Test Falco rules with event generator\nkubectl run falco-event-generator \\\n  --image=falcosecurity/event-generator \\\n  --restart=Never \\\n  -- run syscall --action PtraceAttachContainer\n\n# Check Falco alerts\nkubectl logs -n falco-system -l app.kubernetes.io/name=falco --tail=50\n\n# Verify seccomp profile is loaded\ndocker inspect --format '{{.HostConfig.SecurityOpt}}' \u003ccontainer-id>\n\n# Check audit logs for escape-related events\nausearch -k container_escape --interpret\n```\n\n## References\n\n- [Falco Runtime Security](https://falco.org/docs/)\n- [Container Escape Techniques - HackTricks](https://book.hacktricks.xyz/linux-hardening/privilege-escalation/docker-security/docker-breakout-privilege-escalation)\n- [MITRE ATT&CK T1611 - Escape to Host](https://attack.mitre.org/techniques/T1611/)\n- [Sysdig Container Security](https://sysdig.com/products/secure/)\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("detecting-container-escape-attempts-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

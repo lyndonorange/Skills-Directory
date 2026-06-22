@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>kw-data-analyze - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/kw-data-analyze-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>kw-data-analyze</h1>
+      <p class="description">Answer data questions -- from quick lookups to full analyses. Use when looking up a single metric, investigating what's driving a trend or drop, comparing segments over time, or preparing a formal data report for stakeholders.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>kw-data-analyze</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>kw-data-analyze</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Answer data questions -- from quick lookups to full analyses. Use when looking up a single metric, investigating what's driving a trend or drop, comparing segments over time, or preparing a formal data report for stakeholders.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose kw-data-analyze, then write the task. Fallback prompt: Use the kw-data-analyze skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>/analyze - Answer Data Questions</h2>
+<blockquote>If you see unfamiliar placeholders or need to check which tools are connected, see [CONNECTORS.md](../../CONNECTORS.md).</blockquote>
+<p>Answer a data question, from a quick lookup to a full analysis to a formal report.</p>
+<h3>Usage</h3>
+<pre><code>/analyze &lt;natural language question&gt;</code></pre>
+<h3>Workflow</h3>
+<h4>1. Understand the Question</h4>
+<p>Parse the user's question and determine:</p>
+<ul>
+<li><strong>Complexity level</strong>:</li>
+<li><strong>Quick answer</strong>: Single metric, simple filter, factual lookup (e.g., &quot;How many users signed up last week?&quot;)</li>
+<li><strong>Full analysis</strong>: Multi-dimensional exploration, trend analysis, comparison (e.g., &quot;What's driving the drop in conversion rate?&quot;)</li>
+<li><strong>Formal report</strong>: Comprehensive investigation with methodology, caveats, and recommendations (e.g., &quot;Prepare a quarterly business review of our subscription metrics&quot;)</li>
+<li><strong>Data requirements</strong>: Which tables, metrics, dimensions, and time ranges are needed</li>
+<li><strong>Output format</strong>: Number, table, chart, narrative, or combination</li>
+</ul>
+<h4>2. Gather Data</h4>
+<p><strong>If a data warehouse MCP server is connected:</strong></p>
+<ol>
+<li>Explore the schema to find relevant tables and columns</li>
+<li>Write SQL query(ies) to extract the needed data</li>
+<li>Execute the query and retrieve results</li>
+<li>If the query fails, debug and retry (check column names, table references, syntax for the specific dialect)</li>
+<li>If results look unexpected, run sanity checks before proceeding</li>
+</ol>
+<p><strong>If no data warehouse is connected:</strong></p>
+<ol>
+<li>Ask the user to provide data in one of these ways:</li>
+</ol>
+<ul>
+<li>Paste query results directly</li>
+<li>Upload a CSV or Excel file</li>
+<li>Describe the schema so you can write queries for them to run</li>
+</ul>
+<ol>
+<li>If writing queries for manual execution, use the <code>sql-queries</code> skill for dialect-specific best practices</li>
+<li>Once data is provided, proceed with analysis</li>
+</ol>
+<h4>3. Analyze</h4>
+<ul>
+<li>Calculate relevant metrics, aggregations, and comparisons</li>
+<li>Identify patterns, trends, outliers, and anomalies</li>
+<li>Compare across dimensions (time periods, segments, categories)</li>
+<li>For complex analyses, break the problem into sub-questions and address each</li>
+</ul>
+<h4>4. Validate Before Presenting</h4>
+<p>Before sharing results, run through validation checks:</p>
+<ul>
+<li><strong>Row count sanity</strong>: Does the number of records make sense?</li>
+<li><strong>Null check</strong>: Are there unexpected nulls that could skew results?</li>
+<li><strong>Magnitude check</strong>: Are the numbers in a reasonable range?</li>
+<li><strong>Trend continuity</strong>: Do time series have unexpected gaps?</li>
+<li><strong>Aggregation logic</strong>: Do subtotals sum to totals correctly?</li>
+</ul>
+<p>If any check raises concerns, investigate and note caveats.</p>
+<h4>5. Present Findings</h4>
+<p><strong>For quick answers:</strong></p>
+<ul>
+<li>State the answer directly with relevant context</li>
+<li>Include the query used (collapsed or in a code block) for reproducibility</li>
+</ul>
+<p><strong>For full analyses:</strong></p>
+<ul>
+<li>Lead with the key finding or insight</li>
+<li>Support with data tables and/or visualizations</li>
+<li>Note methodology and any caveats</li>
+<li>Suggest follow-up questions</li>
+</ul>
+<p><strong>For formal reports:</strong></p>
+<ul>
+<li>Executive summary with key takeaways</li>
+<li>Methodology section explaining approach and data sources</li>
+<li>Detailed findings with supporting evidence</li>
+<li>Caveats, limitations, and data quality notes</li>
+<li>Recommendations and suggested next steps</li>
+</ul>
+<h4>6. Visualize Where Helpful</h4>
+<p>When a chart would communicate results more effectively than a table:</p>
+<ul>
+<li>Use the <code>data-visualization</code> skill to select the right chart type</li>
+<li>Generate a Python visualization or build it into an HTML dashboard</li>
+<li>Follow visualization best practices for clarity and accuracy</li>
+</ul>
+<h3>Examples</h3>
+<p><strong>Quick answer:</strong></p>
+<pre><code>/analyze How many new users signed up in December?</code></pre>
+<p><strong>Full analysis:</strong></p>
+<pre><code>/analyze What's causing the increase in support ticket volume over the past 3 months? Break down by category and priority.</code></pre>
+<p><strong>Formal report:</strong></p>
+<pre><code>/analyze Prepare a data quality assessment of our customer table -- completeness, consistency, and any issues we should address.</code></pre>
+<h3>Tips</h3>
+<ul>
+<li>Be specific about time ranges, segments, or metrics when possible</li>
+<li>If you know the table names, mention them to speed up the process</li>
+<li>For complex questions, Claude may break them into multiple queries</li>
+<li>Results are always validated before presentation -- if something looks off, Claude will flag it</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: kw-data-analyze\ndisplay_name: kw-data-analyze\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# kw-data-analyze - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `kw-data-analyze` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n> If you see unfamiliar placeholders or need to check which tools are connected, see [CONNECTORS.md](../../CONNECTORS.md).\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose kw-data-analyze, then write the task. Fallback prompt: Use the kw-data-analyze skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `kw-data-analyze` |\n| Canonical name | `kw-data-analyze` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\n> If you see unfamiliar placeholders or need to check which tools are connected, see [CONNECTORS.md](../../CONNECTORS.md).\n\n## Original SKILL.md\n\n---\nknowledge-work-plugin: data\nupstream-skill: analyze\nname: kw-data-analyze\ndescription: Answer data questions -- from quick lookups to full analyses. Use when looking up a single metric, investigating what's driving a trend or drop, comparing segments over time, or preparing a formal data report for stakeholders.\nargument-hint: \"\u003cquestion>\"\n---\n\n# /analyze - Answer Data Questions\n\n> If you see unfamiliar placeholders or need to check which tools are connected, see [CONNECTORS.md](../../CONNECTORS.md).\n\nAnswer a data question, from a quick lookup to a full analysis to a formal report.\n\n## Usage\n\n```\n/analyze \u003cnatural language question>\n```\n\n## Workflow\n\n### 1. Understand the Question\n\nParse the user's question and determine:\n\n- **Complexity level**:\n  - **Quick answer**: Single metric, simple filter, factual lookup (e.g., \"How many users signed up last week?\")\n  - **Full analysis**: Multi-dimensional exploration, trend analysis, comparison (e.g., \"What's driving the drop in conversion rate?\")\n  - **Formal report**: Comprehensive investigation with methodology, caveats, and recommendations (e.g., \"Prepare a quarterly business review of our subscription metrics\")\n- **Data requirements**: Which tables, metrics, dimensions, and time ranges are needed\n- **Output format**: Number, table, chart, narrative, or combination\n\n### 2. Gather Data\n\n**If a data warehouse MCP server is connected:**\n\n1. Explore the schema to find relevant tables and columns\n2. Write SQL query(ies) to extract the needed data\n3. Execute the query and retrieve results\n4. If the query fails, debug and retry (check column names, table references, syntax for the specific dialect)\n5. If results look unexpected, run sanity checks before proceeding\n\n**If no data warehouse is connected:**\n\n1. Ask the user to provide data in one of these ways:\n   - Paste query results directly\n   - Upload a CSV or Excel file\n   - Describe the schema so you can write queries for them to run\n2. If writing queries for manual execution, use the `sql-queries` skill for dialect-specific best practices\n3. Once data is provided, proceed with analysis\n\n### 3. Analyze\n\n- Calculate relevant metrics, aggregations, and comparisons\n- Identify patterns, trends, outliers, and anomalies\n- Compare across dimensions (time periods, segments, categories)\n- For complex analyses, break the problem into sub-questions and address each\n\n### 4. Validate Before Presenting\n\nBefore sharing results, run through validation checks:\n\n- **Row count sanity**: Does the number of records make sense?\n- **Null check**: Are there unexpected nulls that could skew results?\n- **Magnitude check**: Are the numbers in a reasonable range?\n- **Trend continuity**: Do time series have unexpected gaps?\n- **Aggregation logic**: Do subtotals sum to totals correctly?\n\nIf any check raises concerns, investigate and note caveats.\n\n### 5. Present Findings\n\n**For quick answers:**\n- State the answer directly with relevant context\n- Include the query used (collapsed or in a code block) for reproducibility\n\n**For full analyses:**\n- Lead with the key finding or insight\n- Support with data tables and/or visualizations\n- Note methodology and any caveats\n- Suggest follow-up questions\n\n**For formal reports:**\n- Executive summary with key takeaways\n- Methodology section explaining approach and data sources\n- Detailed findings with supporting evidence\n- Caveats, limitations, and data quality notes\n- Recommendations and suggested next steps\n\n### 6. Visualize Where Helpful\n\nWhen a chart would communicate results more effectively than a table:\n\n- Use the `data-visualization` skill to select the right chart type\n- Generate a Python visualization or build it into an HTML dashboard\n- Follow visualization best practices for clarity and accuracy\n\n## Examples\n\n**Quick answer:**\n```\n/analyze How many new users signed up in December?\n```\n\n**Full analysis:**\n```\n/analyze What's causing the increase in support ticket volume over the past 3 months? Break down by category and priority.\n```\n\n**Formal report:**\n```\n/analyze Prepare a data quality assessment of our customer table -- completeness, consistency, and any issues we should address.\n```\n\n## Tips\n\n- Be specific about time ranges, segments, or metrics when possible\n- If you know the table names, mention them to speed up the process\n- For complex questions, Claude may break them into multiple queries\n- Results are always validated before presentation -- if something looks off, Claude will flag it\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("kw-data-analyze-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

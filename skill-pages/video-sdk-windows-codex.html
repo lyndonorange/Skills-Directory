@@ -1,0 +1,1056 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>video-sdk/windows - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/video-sdk-windows-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>video-sdk/windows</h1>
+      <p class="description">Zoom Video SDK for Windows - C++ integration for video sessions, raw audio/video capture, screen sharing, recording, and real-time communication</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>video-sdk/windows</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>video-sdk/windows</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Zoom Video SDK for Windows - C++ integration for video sessions, raw audio/video capture, screen sharing, recording, and real-time communication</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose video-sdk/windows, then write the task. Fallback prompt: Use the video-sdk/windows skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Zoom Video SDK - Windows Development</h2>
+<p>Expert guidance for developing with the Zoom Video SDK on Windows. This SDK enables custom video applications, raw media capture/injection, cloud recording, live streaming, and real-time transcription on Windows platforms.</p>
+<p><strong>Official Documentation</strong>: https://developers.zoom.us/docs/video-sdk/windows/ <strong>API Reference</strong>: https://marketplacefront.zoom.us/sdk/custom/windows/ <strong>Sample Repository</strong>: https://github.com/zoom/videosdk-windows-rawdata-sample</p>
+<h3>Quick Links</h3>
+<p><strong>New to Video SDK? Follow this path:</strong></p>
+<ol>
+<li><strong>[SDK Architecture Pattern](concepts/sdk-architecture-pattern.md)</strong> - Universal 3-step pattern for ANY feature</li>
+<li><strong>[Session Join Pattern](examples/session-join-pattern.md)</strong> - Complete working code to join a session</li>
+<li><strong>[Windows Message Loop](troubleshooting/windows-message-loop.md)</strong> - <strong>CRITICAL</strong>: Fix callbacks not firing</li>
+<li><strong>[Video Rendering](examples/video-rendering.md)</strong> - Display video with Canvas API</li>
+</ol>
+<p><strong>Reference:</strong></p>
+<ul>
+<li><strong>[Singleton Hierarchy](concepts/singleton-hierarchy.md)</strong> - 5-level SDK navigation map</li>
+<li><strong>[API Reference](references/windows-reference.md)</strong> - Methods, error codes, timing rules</li>
+<li><strong>[Delegate Methods](references/delegate-methods.md)</strong> - All 80+ callback methods</li>
+<li><strong>[Sample Applications](references/samples.md)</strong> - Official samples guide</li>
+<li><strong>[windows.md](windows.md)</strong> - Secondary overview doc (pointer-style)</li>
+<li><strong>[SKILL.md](SKILL.md)</strong> - Complete documentation navigation</li>
+</ul>
+<p><strong>Having issues?</strong></p>
+<ul>
+<li>Callbacks not firing → [Windows Message Loop](troubleshooting/windows-message-loop.md)</li>
+<li>Build errors → [Build Errors Guide](troubleshooting/build-errors.md)</li>
+<li>Video subscribe fails → [Video Rendering](examples/video-rendering.md) (subscribe in <code>onUserVideoStatusChanged</code>)</li>
+<li>Quick diagnostics → [Common Issues](troubleshooting/common-issues.md)</li>
+</ul>
+<p><strong>Building a Custom UI?</strong></p>
+<ul>
+<li>[Canvas vs Raw Data](concepts/canvas-vs-raw-data.md) - Choose your rendering approach</li>
+<li>[Raw Video Capture](examples/raw-video-capture.md) - YUV420 frame processing</li>
+</ul>
+<h3>SDK Overview</h3>
+<p>The Zoom Video SDK for Windows is a C++ library that provides:</p>
+<ul>
+<li><strong>Session Management</strong>: Join/leave video SDK sessions</li>
+<li><strong>Raw Data Access</strong>: Capture raw audio/video frames (YUV420, PCM)</li>
+<li><strong>Raw Data Injection</strong>: Send custom audio/video into sessions</li>
+<li><strong>Screen Sharing</strong>: Share screens or inject custom share sources</li>
+<li><strong>Cloud Recording</strong>: Record sessions to Zoom cloud</li>
+<li><strong>Live Streaming</strong>: Stream to RTMP endpoints (YouTube, etc.)</li>
+<li><strong>Chat &amp; Commands</strong>: In-session messaging and command channels</li>
+<li><strong>Live Transcription</strong>: Real-time speech-to-text</li>
+<li><strong>Subsessions</strong>: Breakout room support</li>
+<li><strong>Whiteboard</strong>: Collaborative whiteboard features</li>
+<li><strong>Annotations</strong>: Screen share annotations</li>
+<li><strong>C# Integration</strong>: C++/CLI wrapper for .NET applications</li>
+</ul>
+<h3>Prerequisites</h3>
+<h4>System Requirements</h4>
+<ul>
+<li><strong>OS</strong>: Windows 10 (1903 or later) or Windows 11</li>
+<li><strong>Architecture</strong>: x64 (recommended), x86, or ARM64</li>
+<li><strong>Visual Studio</strong>: 2019 or 2022 (Community, Professional, or Enterprise)</li>
+<li><strong>Windows SDK</strong>: 10.0.19041.0 or later</li>
+<li><strong>.NET Framework</strong>: 4.8 or later (for C# applications)</li>
+</ul>
+<h4>Visual Studio Workloads</h4>
+<p>Install these workloads via Visual Studio Installer:</p>
+<ol>
+<li><strong>Desktop development with C++</strong></li>
+</ol>
+<ul>
+<li>MSVC v142 or v143 compiler</li>
+<li>Windows 10/11 SDK</li>
+<li>C++ CMake tools (optional)</li>
+</ul>
+<ol>
+<li><strong>.NET desktop development</strong> (for C# applications)</li>
+</ol>
+<ul>
+<li>.NET Framework 4.8 targeting pack</li>
+<li>C++/CLI support</li>
+</ul>
+<h3>Quick Start</h3>
+<h4>C++ Application</h4>
+<pre><code>#include &lt;windows.h&gt;
+#include &quot;zoom_video_sdk_api.h&quot;
+#include &quot;zoom_video_sdk_interface.h&quot;
+#include &quot;zoom_video_sdk_delegate_interface.h&quot;
+
+USING_ZOOM_VIDEO_SDK_NAMESPACE
+
+// 1. Create SDK object
+IZoomVideoSDK* video_sdk_obj = CreateZoomVideoSDKObj();
+
+// 2. Initialize
+ZoomVideoSDKInitParams init_params;
+init_params.domain = L&quot;https://zoom.us&quot;;
+init_params.enableLog = true;
+init_params.logFilePrefix = L&quot;zoom_win_video&quot;;
+init_params.videoRawDataMemoryMode = ZoomVideoSDKRawDataMemoryModeHeap;
+init_params.shareRawDataMemoryMode = ZoomVideoSDKRawDataMemoryModeHeap;
+init_params.audioRawDataMemoryMode = ZoomVideoSDKRawDataMemoryModeHeap;
+
+ZoomVideoSDKErrors err = video_sdk_obj-&gt;initialize(init_params);
+
+// 3. Add event listener
+video_sdk_obj-&gt;addListener(myDelegate);
+
+// 4. Join session (IMPORTANT: set audioOption.connect = false)
+ZoomVideoSDKSessionContext session_context;
+session_context.sessionName = L&quot;my-session&quot;;
+session_context.userName = L&quot;Windows User&quot;;
+session_context.token = L&quot;your-jwt-token&quot;;
+session_context.videoOption.localVideoOn = false;
+session_context.audioOption.connect = false;  // Connect audio after join
+session_context.audioOption.mute = true;
+
+IZoomVideoSDKSession* session = video_sdk_obj-&gt;joinSession(session_context);
+
+// 5. CRITICAL: Add Windows message pump for callbacks to work
+bool running = true;
+while (running) {
+    // Process Windows messages (required for SDK callbacks)
+    MSG msg;
+    while (PeekMessage(&amp;msg, NULL, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&amp;msg);
+        DispatchMessage(&amp;msg);
+    }
+    
+    // Your application logic here
+    Sleep(10);
+}</code></pre>
+<h4>C# Application</h4>
+<pre><code>using ZoomVideoSDK;
+
+var sdkManager = new ZoomSDKManager();
+sdkManager.Initialize();
+sdkManager.JoinSession(&quot;my-session&quot;, &quot;jwt-token&quot;, &quot;User Name&quot;, &quot;&quot;);</code></pre>
+<h3>Key Features</h3>
+<p>| Feature | Description | |---------|-------------| | <strong>Session Management</strong> | Join, leave, and manage video sessions | | <strong>Raw Video (YUV I420)</strong> | Capture and inject raw video frames | | <strong>Raw Audio (PCM)</strong> | Capture and inject raw audio data | | <strong>Screen Sharing</strong> | Share screens or custom content | | <strong>Cloud Recording</strong> | Record sessions to Zoom cloud | | <strong>Live Streaming</strong> | Stream to RTMP endpoints | | <strong>Chat</strong> | Send/receive chat messages | | <strong>Command Channel</strong> | Custom command messaging | | <strong>Live Transcription</strong> | Real-time speech-to-text | | <strong>C# Support</strong> | Full .NET Framework integration |</p>
+<h3>Sample Applications</h3>
+<p><strong>Official Repository</strong>: https://github.com/zoom/videosdk-windows-rawdata-sample</p>
+<p>| Sample | Description | |--------|-------------| | VSDK_SkeletonDemo | Minimal session join - <strong>start here</strong> | | VSDK_getRawVideo | Capture YUV420 video frames | | VSDK_getRawAudio | Capture PCM audio | | VSDK_sendRawVideo | Inject custom video (virtual camera) | | VSDK_sendRawAudio | Inject custom audio (virtual mic) | | VSDK_CloudRecording | Cloud recording control | | VSDK_CommandChannel | Custom command messaging | | VSDK_TranscriptionAndTranslation | Live captions |</p>
+<p><strong>See complete guide</strong>: [Sample Applications Reference](references/samples.md)</p>
+<h3>Critical Gotchas and Best Practices</h3>
+<h4>⚠️ CRITICAL: Windows Message Pump Required</h4>
+<p><strong>The #1 issue that causes session joins to hang with no callbacks:</strong></p>
+<p>All Windows applications using the Zoom SDK <strong>MUST</strong> process Windows messages. The SDK uses Windows messages to deliver callbacks like <code>onSessionJoin()</code>, <code>onError()</code>, etc.</p>
+<p><strong>Problem</strong>: Without a message pump, <code>joinSession()</code> appears to succeed but callbacks never fire.</p>
+<p><strong>Solution</strong>: Add this to your main loop:</p>
+<pre><code>while (running) {
+    // REQUIRED: Process Windows messages
+    MSG msg;
+    while (PeekMessage(&amp;msg, NULL, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&amp;msg);
+        DispatchMessage(&amp;msg);
+    }
+    
+    // Your application logic
+    Sleep(10);
+}</code></pre>
+<p><strong>Applies to</strong>:</p>
+<ul>
+<li>Console applications (no automatic message pump)</li>
+<li>Custom main loops</li>
+<li>Applications that don't use standard WinMain/WndProc</li>
+</ul>
+<p><strong>GUI applications</strong> using WinMain with standard message loop already have this.</p>
+<h4>Audio Connection Strategy</h4>
+<p><strong>Best Practice</strong>: Set <code>audioOption.connect = false</code> when joining, then connect audio in the <code>onSessionJoin()</code> callback.</p>
+<pre><code>// During join
+session_context.audioOption.connect = false;  // Don't connect yet
+session_context.audioOption.mute = true;
+
+// In onSessionJoin() callback
+void onSessionJoin() override {
+    IZoomVideoSDKAudioHelper* audioHelper = video_sdk_obj-&gt;getAudioHelper();
+    if (audioHelper) {
+        audioHelper-&gt;startAudio();  // Connect now
+    }
+}</code></pre>
+<p><strong>Why</strong>: This pattern is used in all official Zoom samples. It separates session join from audio initialization for better reliability and error handling.</p>
+<h4>All Delegate Callbacks Must Be Implemented</h4>
+<p>The <code>IZoomVideoSDKDelegate</code> interface has 70+ pure virtual methods. <strong>ALL must be implemented</strong>, even if empty:</p>
+<pre><code>// Required even if you don't use them
+void onProxyDetectComplete() override {}
+void onUserWhiteboardShareStatusChanged(IZoomVideoSDKUser*, IZoomVideoSDKWhiteboardHelper*) override {}
+// ... etc</code></pre>
+<p><strong>Tip</strong>: Check the SDK version's <code>zoom_video_sdk_delegate_interface.h</code> for the complete list. The interface changes between SDK versions.</p>
+<h4>Memory Mode for Raw Data</h4>
+<p>Always use heap mode for raw data memory:</p>
+<pre><code>init_params.videoRawDataMemoryMode = ZoomVideoSDKRawDataMemoryModeHeap;
+init_params.shareRawDataMemoryMode = ZoomVideoSDKRawDataMemoryModeHeap;
+init_params.audioRawDataMemoryMode = ZoomVideoSDKRawDataMemoryModeHeap;</code></pre>
+<p>Stack mode can cause issues with large video frames.</p>
+<h4>Thread Safety</h4>
+<p>SDK callbacks execute on SDK threads, not your main thread:</p>
+<ul>
+<li>Don't perform heavy operations in callbacks</li>
+<li>Don't call <code>cleanup()</code> from within callbacks</li>
+<li>Use thread-safe queues for passing data to UI thread</li>
+<li>Use mutexes when accessing shared state</li>
+</ul>
+<h4>Consult Official Samples First</h4>
+<p>When SDK behavior is unexpected, <strong>always check the official samples</strong> before troubleshooting:</p>
+<p><strong>Local samples</strong>:</p>
+<ul>
+<li><code>C:\tempsdk\Zoom_VideoSDK_Windows_RawDataDemos\VSDK_SkeletonDemo\</code> (simplest)</li>
+<li><code>C:\tempsdk\sdksamples\zoom-video-sdk-windows-2.4.12\Sample-Libs\x64\demo\</code></li>
+</ul>
+<p>Official samples show correct patterns for:</p>
+<ul>
+<li>Message pump implementation ✓</li>
+<li>Audio connection strategy ✓</li>
+<li>Error handling ✓</li>
+<li>Memory management ✓</li>
+</ul>
+<h3>Video Rendering - Two Approaches</h3>
+<p>The Zoom SDK provides <strong>two different ways</strong> to render video. Choose based on your needs.</p>
+<h4>🎯 Canvas API (Recommended for Most Use Cases)</h4>
+<p><strong>Best for</strong>: Standard applications, clean video quality, ease of implementation</p>
+<p>The SDK renders video directly to your HWND. <strong>No YUV conversion needed</strong>.</p>
+<pre><code>// Subscribe to a user's video with Canvas API
+IZoomVideoSDKCanvas* canvas = user-&gt;GetVideoCanvas();
+if (canvas) {
+    ZoomVideoSDKErrors ret = canvas-&gt;subscribeWithView(
+        hwnd,                                    // Your window handle
+        ZoomVideoSDKVideoAspect_PanAndScan,     // Fit to window, may crop
+        ZoomVideoSDKResolution_Auto              // Let SDK choose best resolution
+    );
+    
+    if (ret == ZoomVideoSDKErrors_Success) {
+        // SDK is now rendering directly to your window!
+    }
+}
+
+// Unsubscribe when done
+canvas-&gt;unSubscribeWithView(hwnd);</code></pre>
+<p><strong>Advantages</strong>:</p>
+<ul>
+<li>✅ <strong>Best quality</strong> - SDK uses optimized, hardware-accelerated rendering</li>
+<li>✅ <strong>No artifacts</strong> - Professional video quality</li>
+<li>✅ <strong>Simple code</strong> - 3 lines to subscribe</li>
+<li>✅ <strong>Better performance</strong> - No CPU-intensive YUV conversion</li>
+<li>✅ <strong>Automatic scaling</strong> - SDK handles window resizing</li>
+<li>✅ <strong>Aspect ratio</strong> - Built-in aspect ratio handling</li>
+</ul>
+<p><strong>Example from official .NET sample</strong>:</p>
+<pre><code>// Self video preview
+IZoomVideoSDKCanvas* canvas = myself-&gt;GetVideoCanvas();
+canvas-&gt;subscribeWithView(selfVideoHwnd, aspect, resolution);
+
+// Remote user video
+IZoomVideoSDKCanvas* remoteCanvas = remoteUser-&gt;GetVideoCanvas();
+remoteCanvas-&gt;subscribeWithView(remoteVideoHwnd, aspect, resolution);</code></pre>
+<p><strong>Video Aspect Options</strong>:</p>
+<ul>
+<li><code>ZoomVideoSDKVideoAspect_Original</code> - Letterbox/pillarbox, no cropping</li>
+<li><code>ZoomVideoSDKVideoAspect_FullFilled</code> - Fill window, may crop edges</li>
+<li><code>ZoomVideoSDKVideoAspect_PanAndScan</code> - Smart crop to fill window</li>
+<li><code>ZoomVideoSDKVideoAspect_LetterBox</code> - Show full video with black bars</li>
+</ul>
+<p><strong>Resolution Options</strong>:</p>
+<ul>
+<li><code>ZoomVideoSDKResolution_90P</code></li>
+<li><code>ZoomVideoSDKResolution_180P</code></li>
+<li><code>ZoomVideoSDKResolution_360P</code> - Good balance</li>
+<li><code>ZoomVideoSDKResolution_720P</code> - HD quality</li>
+<li><code>ZoomVideoSDKResolution_1080P</code></li>
+<li><code>ZoomVideoSDKResolution_Auto</code> - Let SDK decide (recommended)</li>
+</ul>
+<h4>🔧 Raw Data Pipe (Advanced Use Cases)</h4>
+<p><strong>Best for</strong>: Custom video processing, effects, recording, computer vision</p>
+<p>You receive raw YUV420 frames and handle rendering yourself.</p>
+<pre><code>// 1. Create a delegate to receive frames
+class VideoRenderer : public IZoomVideoSDKRawDataPipeDelegate {
+public:
+    void onRawDataFrameReceived(YUVRawDataI420* data) override {
+        int width = data-&gt;GetStreamWidth();
+        int height = data-&gt;GetStreamHeight();
+        
+        char* yBuffer = data-&gt;GetYBuffer();
+        char* uBuffer = data-&gt;GetUBuffer();
+        char* vBuffer = data-&gt;GetVBuffer();
+        
+        // Convert YUV420 to RGB and render
+        ConvertYUVToRGB(yBuffer, uBuffer, vBuffer, width, height);
+        RenderToWindow(rgbBuffer, width, height);
+    }
+    
+    void onRawDataStatusChanged(RawDataStatus status) override {
+        // Handle video on/off
+    }
+};
+
+// 2. Subscribe to raw data
+IZoomVideoSDKRawDataPipe* pipe = user-&gt;GetVideoPipe();
+VideoRenderer* renderer = new VideoRenderer();
+pipe-&gt;subscribe(ZoomVideoSDKResolution_720P, renderer);</code></pre>
+<p><strong>YUV420 to RGB Conversion</strong> (ITU-R BT.601):</p>
+<pre><code>void ConvertYUV420ToRGB(char* yBuffer, char* uBuffer, char* vBuffer, 
+                        int width, int height) {
+    for (int y = 0; y &lt; height; y++) {
+        for (int x = 0; x &lt; width; x++) {
+            int yIndex = y * width + x;
+            int uvIndex = (y / 2) * (width / 2) + (x / 2);
+            
+            int Y = (unsigned char)yBuffer[yIndex];
+            int U = (unsigned char)uBuffer[uvIndex];
+            int V = (unsigned char)vBuffer[uvIndex];
+            
+            // YUV to RGB conversion
+            int C = Y - 16;
+            int D = U - 128;
+            int E = V - 128;
+            
+            int R = (298 * C + 409 * E + 128) &gt;&gt; 8;
+            int G = (298 * C - 100 * D - 208 * E + 128) &gt;&gt; 8;
+            int B = (298 * C + 516 * D + 128) &gt;&gt; 8;
+            
+            // Clamp to [0, 255]
+            R = (R &lt; 0) ? 0 : (R &gt; 255) ? 255 : R;
+            G = (G &lt; 0) ? 0 : (G &gt; 255) ? 255 : G;
+            B = (B &lt; 0) ? 0 : (B &gt; 255) ? 255 : B;
+            
+            // Store RGB (BGR format for Windows)
+            rgbBuffer[yIndex * 3 + 0] = (unsigned char)B;
+            rgbBuffer[yIndex * 3 + 1] = (unsigned char)G;
+            rgbBuffer[yIndex * 3 + 2] = (unsigned char)R;
+        }
+    }
+}</code></pre>
+<p><strong>Render with GDI</strong>:</p>
+<pre><code>void RenderToWindow(unsigned char* rgbBuffer, int width, int height) {
+    HDC hdc = GetDC(hwnd);
+    
+    BITMAPINFO bmi = {};
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth = width;
+    bmi.bmiHeader.biHeight = -height;  // Negative for top-down
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 24;     // 24-bit RGB
+    bmi.bmiHeader.biCompression = BI_RGB;
+    
+    RECT rect;
+    GetClientRect(hwnd, &amp;rect);
+    
+    StretchDIBits(hdc,
+        0, 0, rect.right, rect.bottom,  // Destination
+        0, 0, width, height,              // Source
+        rgbBuffer, &amp;bmi,
+        DIB_RGB_COLORS, SRCCOPY);
+    
+    ReleaseDC(hwnd, hdc);
+}</code></pre>
+<p><strong>Disadvantages</strong>:</p>
+<ul>
+<li>⚠️ <strong>CPU intensive</strong> - YUV conversion can cause frame drops</li>
+<li>⚠️ <strong>Artifacts</strong> - Manual rendering may show tearing/artifacts</li>
+<li>⚠️ <strong>Complex</strong> - More code to maintain</li>
+<li>⚠️ <strong>Performance</strong> - Slower than Canvas API</li>
+</ul>
+<p><strong>Use Raw Data When</strong>:</p>
+<ul>
+<li>Adding video filters/effects</li>
+<li>Recording to custom formats</li>
+<li>Computer vision processing</li>
+<li>Custom compositing</li>
+<li>Streaming to non-standard outputs</li>
+</ul>
+<h4>Self Video vs Remote Users</h4>
+<p><strong>Self Video</strong> (your own camera):</p>
+<p><strong>Option A: Canvas API</strong></p>
+<pre><code>IZoomVideoSDKSession* session = sdk-&gt;getSessionInfo();
+IZoomVideoSDKUser* myself = session-&gt;getMyself();
+IZoomVideoSDKCanvas* canvas = myself-&gt;GetVideoCanvas();
+canvas-&gt;subscribeWithView(selfVideoHwnd, aspect, resolution);</code></pre>
+<p><strong>Option B: Video Preview</strong> (for self only)</p>
+<pre><code>IZoomVideoSDKVideoHelper* videoHelper = sdk-&gt;getVideoHelper();
+videoHelper-&gt;startVideo();  // Start transmission
+
+// For preview rendering
+videoHelper-&gt;startVideoCanvasPreview(selfVideoHwnd, aspect, resolution);</code></pre>
+<p><strong>Remote Users</strong> (other participants):</p>
+<p><strong>Canvas API</strong> (recommended):</p>
+<pre><code>// In onUserJoin callback
+void onUserJoin(IZoomVideoSDKUserHelper*, IVideoSDKVector&lt;IZoomVideoSDKUser*&gt;* userList) {
+    for (int i = 0; i &lt; userList-&gt;GetCount(); i++) {
+        IZoomVideoSDKUser* user = userList-&gt;GetItem(i);
+        IZoomVideoSDKCanvas* canvas = user-&gt;GetVideoCanvas();
+        canvas-&gt;subscribeWithView(userVideoHwnd, aspect, resolution);
+    }
+}</code></pre>
+<h4>Event-Driven Subscription Pattern</h4>
+<p>⚠️ <strong>CRITICAL</strong>: Video subscription must be <strong>event-driven</strong> and <strong>manual</strong>.</p>
+<p><strong>Key Events</strong>:</p>
+<ol>
+<li><strong><code>onSessionJoin</code></strong> - Subscribe to self video</li>
+<li><strong><code>onUserJoin</code></strong> - Subscribe to new remote users</li>
+<li><strong><code>onUserVideoStatusChanged</code></strong> - Re-subscribe when video turns on/off</li>
+<li><strong><code>onUserLeave</code></strong> - Unsubscribe and cleanup</li>
+</ol>
+<p><strong>Complete Pattern</strong>:</p>
+<pre><code>class MainFrame : public IZoomVideoSDKDelegate {
+private:
+    std::map&lt;IZoomVideoSDKUser*, IZoomVideoSDKCanvas*&gt; subscribedUsers_;
+    HWND videoWindow_;
+    
+public:
+    void onSessionJoin() override {
+        // Start your own video
+        IZoomVideoSDKVideoHelper* videoHelper = sdk-&gt;getVideoHelper();
+        videoHelper-&gt;startVideo();
+        
+        // Subscribe to self video
+        IZoomVideoSDKUser* myself = sdk-&gt;getSessionInfo()-&gt;getMyself();
+        SubscribeToUser(myself);
+    }
+    
+    void onUserJoin(IZoomVideoSDKUserHelper*, 
+                    IVideoSDKVector&lt;IZoomVideoSDKUser*&gt;* userList) override {
+        // Get current user to exclude self
+        IZoomVideoSDKUser* myself = sdk-&gt;getSessionInfo()-&gt;getMyself();
+        
+        for (int i = 0; i &lt; userList-&gt;GetCount(); i++) {
+            IZoomVideoSDKUser* user = userList-&gt;GetItem(i);
+            
+            // IMPORTANT: Only subscribe to REMOTE users!
+            if (user != myself) {
+                SubscribeToUser(user);
+            }
+        }
+    }
+    
+    void onUserVideoStatusChanged(IZoomVideoSDKVideoHelper*, 
+                                  IVideoSDKVector&lt;IZoomVideoSDKUser*&gt;* userList) override {
+        IZoomVideoSDKUser* myself = sdk-&gt;getSessionInfo()-&gt;getMyself();
+        
+        for (int i = 0; i &lt; userList-&gt;GetCount(); i++) {
+            IZoomVideoSDKUser* user = userList-&gt;GetItem(i);
+            if (user != myself) {
+                // Re-subscribe when video status changes
+                SubscribeToUser(user);
+            }
+        }
+    }
+    
+    void onUserLeave(IZoomVideoSDKUserHelper*, 
+                    IVideoSDKVector&lt;IZoomVideoSDKUser*&gt;* userList) override {
+        for (int i = 0; i &lt; userList-&gt;GetCount(); i++) {
+            IZoomVideoSDKUser* user = userList-&gt;GetItem(i);
+            UnsubscribeFromUser(user);
+        }
+    }
+    
+    void onSessionLeave() override {
+        // Cleanup all subscriptions
+        for (auto&amp; pair : subscribedUsers_) {
+            IZoomVideoSDKCanvas* canvas = pair.second;
+            if (canvas) {
+                canvas-&gt;unSubscribeWithView(videoWindow_);
+            }
+        }
+        subscribedUsers_.clear();
+    }
+    
+private:
+    void SubscribeToUser(IZoomVideoSDKUser* user) {
+        if (!user || subscribedUsers_.find(user) != subscribedUsers_.end())
+            return;
+            
+        IZoomVideoSDKCanvas* canvas = user-&gt;GetVideoCanvas();
+        if (canvas) {
+            ZoomVideoSDKErrors ret = canvas-&gt;subscribeWithView(
+                videoWindow_,
+                ZoomVideoSDKVideoAspect_PanAndScan,
+                ZoomVideoSDKResolution_Auto
+            );
+            
+            if (ret == ZoomVideoSDKErrors_Success) {
+                subscribedUsers_[user] = canvas;
+            }
+        }
+    }
+    
+    void UnsubscribeFromUser(IZoomVideoSDKUser* user) {
+        auto it = subscribedUsers_.find(user);
+        if (it != subscribedUsers_.end()) {
+            IZoomVideoSDKCanvas* canvas = it-&gt;second;
+            if (canvas) {
+                canvas-&gt;unSubscribeWithView(videoWindow_);
+            }
+            subscribedUsers_.erase(it);
+        }
+    }
+};</code></pre>
+<p><strong>Key Points</strong>:</p>
+<ul>
+<li>✅ Subscribe in response to events (onUserJoin, onUserVideoStatusChanged)</li>
+<li>✅ Always exclude current user from remote subscriptions</li>
+<li>✅ Unsubscribe on onUserLeave</li>
+<li>✅ Clean up all subscriptions on onSessionLeave</li>
+<li>✅ Track subscriptions in a map for lifecycle management</li>
+</ul>
+<h4>⚠️ Screen Share Subscription (DIFFERENT from Video!)</h4>
+<p><strong>CRITICAL</strong>: Screen share subscription uses <code>IZoomVideoSDKShareAction</code> from the callback, NOT <code>user-&gt;GetShareCanvas()</code>!</p>
+<pre><code>// WRONG - This won't work for remote screen shares!
+user-&gt;GetShareCanvas()-&gt;subscribeWithView(hwnd, ...);
+
+// CORRECT - Use IZoomVideoSDKShareAction from onUserShareStatusChanged callback
+void onUserShareStatusChanged(IZoomVideoSDKShareHelper* pShareHelper,
+                               IZoomVideoSDKUser* pUser,
+                               IZoomVideoSDKShareAction* pShareAction) {
+    if (!pShareAction) return;
+    
+    ZoomVideoSDKShareStatus status = pShareAction-&gt;getShareStatus();
+    
+    if (status == ZoomVideoSDKShareStatus_Start || 
+        status == ZoomVideoSDKShareStatus_Resume) {
+        // Subscribe to the share using Canvas API
+        IZoomVideoSDKCanvas* shareCanvas = pShareAction-&gt;getShareCanvas();
+        if (shareCanvas) {
+            shareCanvas-&gt;subscribeWithView(shareWindow_, 
+                ZoomVideoSDKVideoAspect_Original);
+        }
+    }
+    else if (status == ZoomVideoSDKShareStatus_Stop) {
+        // Unsubscribe when share stops
+        IZoomVideoSDKCanvas* shareCanvas = pShareAction-&gt;getShareCanvas();
+        if (shareCanvas) {
+            shareCanvas-&gt;unSubscribeWithView(shareWindow_);
+        }
+    }
+}</code></pre>
+<p><strong>Why is share different from video?</strong></p>
+<ul>
+<li><strong>Video</strong>: Each user has one video stream → use <code>user-&gt;GetVideoCanvas()</code></li>
+<li><strong>Share</strong>: A user can have multiple share actions (multi-share) → use <code>IZoomVideoSDKShareAction*</code> from callback</li>
+<li>The <code>IZoomVideoSDKShareAction</code> object represents a specific share stream and contains the share status, type, and rendering interfaces</li>
+</ul>
+<p><strong>See also</strong>: [Screen Share Subscription Example](examples/screen-share-subscription.md)</p>
+<h4>Multi-User Video Layout</h4>
+<p>For multiple participants, you need <strong>one HWND per user</strong>:</p>
+<pre><code>// Create separate windows/panels for each user
+HWND selfVideoWindow = CreateWindow(...);   // Your video
+HWND user1Window = CreateWindow(...);       // User 1's video
+HWND user2Window = CreateWindow(...);       // User 2's video
+
+// Subscribe each user to their own window
+myself-&gt;GetVideoCanvas()-&gt;subscribeWithView(selfVideoWindow, ...);
+user1-&gt;GetVideoCanvas()-&gt;subscribeWithView(user1Window, ...);
+user2-&gt;GetVideoCanvas()-&gt;subscribeWithView(user2Window, ...);</code></pre>
+<p><strong>Layout Strategies</strong>:</p>
+<ul>
+<li>Grid layout (2x2, 3x3)</li>
+<li>Gallery view (scrollable)</li>
+<li>Active speaker (large) + thumbnails</li>
+<li>Picture-in-picture</li>
+</ul>
+<h4>Common Video Issues</h4>
+<p>| Issue | Cause | Solution | |-------|-------|----------| | Video not showing | Not calling <code>startVideo()</code> | Call <code>videoHelper-&gt;startVideo()</code> in <code>onSessionJoin</code> | | Artifacts/tearing | Using Raw Data Pipe | Switch to Canvas API | | Poor performance | YUV conversion on UI thread | Use Canvas API or move conversion to worker thread | | Video freezes | Not processing Windows messages | Add message pump to main loop | | Can't see self | Subscribing to wrong user | Use <code>session-&gt;getMyself()</code> for self video | | Seeing self in remote list | Not excluding self | Check <code>if (user != myself)</code> before subscribing |</p>
+<h3>Complete Documentation Library</h3>
+<p>This skill includes comprehensive guides organized by category:</p>
+<h4>Core Concepts (Start Here!)</h4>
+<ul>
+<li><strong>[SDK Architecture Pattern](concepts/sdk-architecture-pattern.md)</strong> - Universal 3-step pattern for ANY feature</li>
+<li><strong>[Singleton Hierarchy](concepts/singleton-hierarchy.md)</strong> - 5-level navigation guide</li>
+<li><strong>[Canvas vs Raw Data](concepts/canvas-vs-raw-data.md)</strong> - Choose your rendering approach</li>
+</ul>
+<h4>Complete Examples</h4>
+<ul>
+<li><strong>[Session Join Pattern](examples/session-join-pattern.md)</strong> - JWT auth + session join with full code</li>
+<li><strong>[Video Rendering](examples/video-rendering.md)</strong> - Canvas API video display</li>
+<li><strong>[Screen Share Subscription](examples/screen-share-subscription.md)</strong> - View remote screen shares (DIFFERENT from video!)</li>
+<li><strong>[Raw Video Capture](examples/raw-video-capture.md)</strong> - YUV420 frame capture</li>
+<li><strong>[Raw Audio Capture](examples/raw-audio-capture.md)</strong> - PCM audio capture</li>
+<li><strong>[Send Raw Video](examples/send-raw-video.md)</strong> - Virtual camera (inject custom video)</li>
+<li><strong>[Send Raw Audio](examples/send-raw-audio.md)</strong> - Virtual mic (inject custom audio)</li>
+<li><strong>[Cloud Recording](examples/cloud-recording.md)</strong> - Cloud recording control</li>
+<li><strong>[Command Channel](examples/command-channel.md)</strong> - Custom command messaging</li>
+<li><strong>[Transcription](examples/transcription.md)</strong> - Live transcription/captions</li>
+</ul>
+<h4>UI Framework Integration</h4>
+<ul>
+<li><strong>[Win32 Native](examples/dotnet-winforms/README.md#option-1-win32-native-c---direct-sdk)</strong> - Direct SDK usage with Canvas API (best performance)</li>
+<li><strong>[WinForms (.NET)](examples/dotnet-winforms/README.md#option-2-winforms-c--ccli-wrapper)</strong> - C++/CLI wrapper + Raw Data Pipe</li>
+<li><strong>[WPF (.NET)](examples/dotnet-winforms/README.md#option-3-wpf-c--ccli-wrapper)</strong> - C++/CLI wrapper + BitmapSource conversion</li>
+<li><strong>[Production Quality Guidelines](examples/dotnet-winforms/README.md#production-quality-review)</strong> - Checklist and common issues</li>
+</ul>
+<h4>C++/CLI Wrapper Patterns (Wrapping ANY Native Library)</h4>
+<ul>
+<li><strong>[Complete Guide](examples/dotnet-winforms/README.md#ccli-wrapper-patterns-for-net-integration)</strong> - 8 patterns for native→.NET interop</li>
+<li><strong>[Pattern 1: Basic Structure](examples/dotnet-winforms/README.md#pattern-1-basic-wrapper-structure)</strong> - Project setup, class layout</li>
+<li>*<em>[Pattern 2: void</em> Pointers](examples/dotnet-winforms/README.md#pattern-2-opaque-void-pointers)** - Hide native types</li>
+<li><strong>[Pattern 3: gcroot Callbacks](examples/dotnet-winforms/README.md#pattern-3-gcrootT-for-nativemanaged-callbacks)</strong> - Native→Managed events</li>
+<li><strong>[Pattern 4: IDisposable](examples/dotnet-winforms/README.md#pattern-4-destructor--finalizer-idisposable)</strong> - Cleanup pattern</li>
+<li><strong>[Pattern 5: Strings](examples/dotnet-winforms/README.md#pattern-5-string-conversion)</strong> - String^ ↔ wstring/string</li>
+<li><strong>[Pattern 6: Arrays](examples/dotnet-winforms/README.md#pattern-6-arraybuffer-conversion)</strong> - pin_ptr, Marshal::Copy</li>
+<li><strong>[Pattern 7: Threading](examples/dotnet-winforms/README.md#pattern-7-thread-marshaling-native-thread--ui-thread)</strong> - UI thread dispatch</li>
+<li><strong>[Pattern 8: LockBits](examples/dotnet-winforms/README.md#pattern-8-lockbits-for-fast-image-manipulation)</strong> - Fast image conversion</li>
+<li><strong>[Common Errors](examples/dotnet-winforms/README.md#common-wrapper-errors)</strong> - Troubleshooting</li>
+</ul>
+<h4>Troubleshooting</h4>
+<ul>
+<li><strong>[Windows Message Loop](troubleshooting/windows-message-loop.md)</strong> - <strong>CRITICAL</strong>: Why callbacks don't fire</li>
+<li><strong>[Build Errors](troubleshooting/build-errors.md)</strong> - SDK header dependency fixes</li>
+<li><strong>[Common Issues](troubleshooting/common-issues.md)</strong> - Quick diagnostics &amp; error codes</li>
+</ul>
+<h4>References</h4>
+<ul>
+<li><strong>[API Reference](references/windows-reference.md)</strong> - 5-level API hierarchy, methods, error codes</li>
+<li><strong>[Delegate Methods](references/delegate-methods.md)</strong> - All 80+ callback methods</li>
+<li><strong>[SKILL.md](SKILL.md)</strong> - Complete navigation guide</li>
+</ul>
+<h4>Most Critical Issues (From Real Debugging)</h4>
+<ol>
+<li><strong>Callbacks not firing</strong> → Missing Windows message loop (99% of issues)</li>
+</ol>
+<ul>
+<li>See: [Windows Message Loop Guide](troubleshooting/windows-message-loop.md)</li>
+</ul>
+<ol>
+<li><strong>Video subscribe returns error 2</strong> → Subscribing too early</li>
+</ol>
+<ul>
+<li>See: [Video Rendering](examples/video-rendering.md) - Subscribe in <code>onUserVideoStatusChanged</code></li>
+</ul>
+<ol>
+<li><strong>Abstract class errors</strong> → Missing virtual method implementations</li>
+</ol>
+<ul>
+<li>See: [Delegate Methods](references/delegate-methods.md)</li>
+</ul>
+<h4>Key Insight</h4>
+<p><strong>Once you learn the 3-step pattern, you can implement ANY feature:</strong></p>
+<ol>
+<li>Get singleton → 2. Implement delegate → 3. Subscribe &amp; use</li>
+</ol>
+<p>See: [SDK Architecture Pattern](concepts/sdk-architecture-pattern.md)</p>
+<h3>Resources</h3>
+<ul>
+<li><strong>Official Docs</strong>: https://developers.zoom.us/docs/video-sdk/windows/</li>
+<li><strong>API Reference</strong>: https://marketplacefront.zoom.us/sdk/custom/windows/</li>
+<li><strong>Dev Forum</strong>: https://devforum.zoom.us/</li>
+<li><strong>GitHub Samples</strong>: https://github.com/zoom/videosdk-windows-rawdata-sample</li>
+<li><strong>Working Sample</strong>: <code>C:\tempsdk\zoom-video-sdk-windows-sample\</code> (complete implementation)</li>
+</ul>
+<hr>
+<p><strong>Need help?</strong> Start with [SKILL.md](SKILL.md) for complete navigation.</p>
+<h3>Merged from video-sdk/windows/SKILL.md</h3>
+<h2>Zoom Video SDK Windows - Complete Documentation Index</h2>
+<h3>Quick Start Path</h3>
+<p><strong>If you're new to the SDK, follow this order:</strong></p>
+<ol>
+<li><strong>Overview</strong> → [windows.md](windows.md)</li>
+<li><strong>Read the architecture pattern</strong> → [concepts/sdk-architecture-pattern.md](concepts/sdk-architecture-pattern.md)</li>
+</ol>
+<ul>
+<li>Universal formula: Singleton → Delegate → Subscribe</li>
+<li>Once you understand this, you can implement any feature</li>
+</ul>
+<ol>
+<li><strong>Fix build errors</strong> → [troubleshooting/build-errors.md](troubleshooting/build-errors.md)</li>
+</ol>
+<ul>
+<li>SDK header dependencies</li>
+<li>Required include order</li>
+</ul>
+<ol>
+<li><strong>Implement session join</strong> → [examples/session-join-pattern.md](examples/session-join-pattern.md)</li>
+</ol>
+<ul>
+<li>Complete working JWT + session join code</li>
+</ul>
+<ol>
+<li><strong>Fix callback issues</strong> → [troubleshooting/windows-message-loop.md](troubleshooting/windows-message-loop.md)</li>
+</ol>
+<ul>
+<li><strong>CRITICAL</strong>: Why callbacks don't fire without Windows message loop</li>
+</ul>
+<ol>
+<li><strong>Implement video</strong> → [examples/video-rendering.md](examples/video-rendering.md)</li>
+</ol>
+<ul>
+<li>Canvas API (SDK-rendered) vs Raw Data Pipe</li>
+</ul>
+<ol>
+<li><strong>Troubleshoot any issues</strong> → [troubleshooting/common-issues.md](troubleshooting/common-issues.md)</li>
+</ol>
+<ul>
+<li>Quick diagnostic checklist</li>
+<li>Error code tables</li>
+</ul>
+<hr>
+<h3>Documentation Structure</h3>
+<pre><code>video-sdk/windows/
+├── SKILL.md                           # Main skill overview
+├── SKILL.md                           # This file - navigation guide
+├── windows.md                          # Secondary overview doc (pointer-style)
+│
+├── concepts/                          # Core architectural patterns
+│   ├── sdk-architecture-pattern.md   # Universal formula for ANY feature
+│   ├── singleton-hierarchy.md        # 5-level navigation guide
+│   └── canvas-vs-raw-data.md         # SDK-rendered vs self-rendered choice
+│
+├── examples/                          # Complete working code
+│   ├── session-join-pattern.md       # JWT auth + session join
+│   ├── video-rendering.md            # Canvas API video display
+│   ├── screen-share-subscription.md  # View remote screen shares
+│   ├── raw-video-capture.md          # YUV420 raw frame capture
+│   ├── raw-audio-capture.md          # PCM audio capture
+│   ├── send-raw-video.md             # Virtual camera (inject video)
+│   ├── send-raw-audio.md             # Virtual mic (inject audio)
+│   ├── cloud-recording.md            # Cloud recording control
+│   ├── command-channel.md            # Custom command messaging
+│   ├── transcription.md              # Live transcription/captions
+│   └── dotnet-winforms/              # UI Framework integration
+│       └── README.md                 # Win32, WinForms, WPF patterns
+│                                     # C++/CLI wrapper patterns
+│                                     # Production quality guidelines
+│
+├── troubleshooting/                   # Problem solving guides
+│   ├── windows-message-loop.md       # CRITICAL - Why callbacks fail
+│   ├── build-errors.md               # Header dependency fixes
+│   └── common-issues.md              # Quick diagnostic workflow
+│
+└── references/                        # Reference documentation
+    ├── windows-reference.md           # API hierarchy, methods, error codes
+    ├── delegate-methods.md            # All 80+ callback methods
+    └── samples.md                     # Official samples guide</code></pre>
+<hr>
+<h3>By Use Case</h3>
+<h4>I want to build a video app</h4>
+<ol>
+<li>[SDK Architecture Pattern](concepts/sdk-architecture-pattern.md) - Understand the pattern</li>
+<li>[Session Join Pattern](examples/session-join-pattern.md) - Join sessions</li>
+<li>[Video Rendering](examples/video-rendering.md) - Display video</li>
+<li>[Windows Message Loop](troubleshooting/windows-message-loop.md) - Fix callback issues</li>
+</ol>
+<h4>I'm getting build errors</h4>
+<ol>
+<li>[Build Errors Guide](troubleshooting/build-errors.md) - SDK header dependencies</li>
+<li>[Delegate Methods](references/delegate-methods.md) - Abstract class errors</li>
+<li>[Common Issues](troubleshooting/common-issues.md) - Linker errors</li>
+</ol>
+<h4>I'm getting runtime errors</h4>
+<ol>
+<li>[Windows Message Loop](troubleshooting/windows-message-loop.md) - Callbacks not firing</li>
+<li>[Common Issues](troubleshooting/common-issues.md) - Error code tables</li>
+</ol>
+<h4>I want to view screen shares</h4>
+<ol>
+<li>[Screen Share Subscription](examples/screen-share-subscription.md) - <strong>DIFFERENT from video!</strong></li>
+<li>[SDK Architecture Pattern](concepts/sdk-architecture-pattern.md) - Event-driven pattern</li>
+<li>[Video Rendering](examples/video-rendering.md) - Compare with video subscription</li>
+</ol>
+<h4>I want to capture raw video/audio</h4>
+<ol>
+<li>[Canvas vs Raw Data](concepts/canvas-vs-raw-data.md) - Choose your approach</li>
+<li>[Raw Video Capture](examples/raw-video-capture.md) - YUV420 frame capture</li>
+<li>[Raw Audio Capture](examples/raw-audio-capture.md) - PCM audio capture</li>
+<li>[SDK Architecture Pattern](concepts/sdk-architecture-pattern.md) - Subscription pattern</li>
+</ol>
+<h4>I want to send custom video/audio (virtual camera/mic)</h4>
+<ol>
+<li>[Send Raw Video](examples/send-raw-video.md) - Inject custom video frames</li>
+<li>[Send Raw Audio](examples/send-raw-audio.md) - Inject custom audio</li>
+<li>[SDK Architecture Pattern](concepts/sdk-architecture-pattern.md) - External source pattern</li>
+</ol>
+<h4>I want to record sessions</h4>
+<ol>
+<li>[Cloud Recording](examples/cloud-recording.md) - Start/stop cloud recording</li>
+<li>[API Reference](references/windows-reference.md) - Recording helper methods</li>
+</ol>
+<h4>I want to use live transcription</h4>
+<ol>
+<li>[Transcription](examples/transcription.md) - Enable live captions</li>
+<li>[Delegate Methods](references/delegate-methods.md) - Transcription callbacks</li>
+</ol>
+<h4>I want custom messaging between participants</h4>
+<ol>
+<li>[Command Channel](examples/command-channel.md) - Send custom commands</li>
+<li>[API Reference](references/windows-reference.md) - Command channel methods</li>
+</ol>
+<h4>I want to build a Win32 native app</h4>
+<ol>
+<li>[Win32 Integration](examples/dotnet-winforms/README.md#option-1-win32-native-c---direct-sdk) - Direct SDK + Canvas API</li>
+<li>[Video Rendering](examples/video-rendering.md) - Canvas API patterns</li>
+<li>[Production Guidelines](examples/dotnet-winforms/README.md#production-quality-review) - Best practices</li>
+</ol>
+<h4>I want to build a WinForms (.NET) app</h4>
+<ol>
+<li>[WinForms Integration](examples/dotnet-winforms/README.md#option-2-winforms-c--ccli-wrapper) - C++/CLI wrapper + Raw Data</li>
+<li>[C++/CLI Patterns](examples/dotnet-winforms/README.md#ccli-wrapper-patterns-for-net-integration) - gcroot, Finalizer, LockBits</li>
+<li>[Production Guidelines](examples/dotnet-winforms/README.md#production-quality-review) - IDisposable, thread safety</li>
+</ol>
+<h4>I want to build a WPF (.NET) app</h4>
+<ol>
+<li>[WPF Integration](examples/dotnet-winforms/README.md#option-3-wpf-c--ccli-wrapper) - C++/CLI + BitmapSource</li>
+<li>[Bitmap Conversion](examples/dotnet-winforms/README.md#2-bitmap--bitmapsource-conversion) - Freeze(), Dispatcher</li>
+<li>[Production Guidelines](examples/dotnet-winforms/README.md#production-quality-review) - Performance optimization</li>
+</ol>
+<h4>I want to use C# / .NET Framework (general)</h4>
+<ol>
+<li>[.NET Integration Overview](examples/dotnet-winforms/README.md) - <strong>Complete C++/CLI wrapper guide</strong></li>
+<li>[Raw Video Capture](examples/raw-video-capture.md) - YUV→RGB conversion patterns</li>
+<li>[Session Join Pattern](examples/session-join-pattern.md) - SDK initialization flow</li>
+</ol>
+<h4>I want to wrap ANY native C++ library for .NET</h4>
+<ol>
+<li>[C++/CLI Wrapper Patterns](examples/dotnet-winforms/README.md#ccli-wrapper-patterns-for-net-integration) - <strong>Complete 8-pattern guide</strong></li>
+<li>[Pattern 1: Basic Structure](examples/dotnet-winforms/README.md#pattern-1-basic-wrapper-structure) - Project setup + class layout</li>
+<li>[Pattern 3: gcroot Callbacks](examples/dotnet-winforms/README.md#pattern-3-gcrootT-for-nativemanaged-callbacks) - Native→Managed events</li>
+<li>[Pattern 4: IDisposable](examples/dotnet-winforms/README.md#pattern-4-destructor--finalizer-idisposable) - Cleanup pattern</li>
+<li>[Common Errors](examples/dotnet-winforms/README.md#common-wrapper-errors) - Troubleshooting</li>
+</ol>
+<h4>I want to implement a specific feature</h4>
+<ol>
+<li>[SDK Architecture Pattern](concepts/sdk-architecture-pattern.md) - <strong>START HERE!</strong></li>
+<li>[Singleton Hierarchy](concepts/singleton-hierarchy.md) - Navigate to the feature</li>
+<li>[API Reference](references/windows-reference.md) - Method signatures</li>
+</ol>
+<hr>
+<h3>Most Critical Documents</h3>
+<h4>1. SDK Architecture Pattern (MASTER DOCUMENT)</h4>
+<p><strong>[concepts/sdk-architecture-pattern.md](concepts/sdk-architecture-pattern.md)</strong></p>
+<p>The universal 3-step pattern:</p>
+<ol>
+<li>Get singleton (SDK, helpers, session, users)</li>
+<li>Implement delegate (event callbacks)</li>
+<li>Subscribe and use</li>
+</ol>
+<h4>2. Windows Message Loop (MOST COMMON ISSUE)</h4>
+<p><strong>[troubleshooting/windows-message-loop.md](troubleshooting/windows-message-loop.md)</strong></p>
+<p>99% of &quot;callbacks not firing&quot; issues are caused by missing Windows message loop.</p>
+<h4>3. Singleton Hierarchy (NAVIGATION MAP)</h4>
+<p><strong>[concepts/singleton-hierarchy.md](concepts/singleton-hierarchy.md)</strong></p>
+<p>5-level deep navigation showing how to reach every feature.</p>
+<hr>
+<h3>Key Learnings</h3>
+<h4>Critical Discoveries:</h4>
+<ol>
+<li><strong>Windows Message Loop is MANDATORY</strong></li>
+</ol>
+<ul>
+<li>SDK uses Windows message pump for callbacks</li>
+<li>Without it, callbacks are queued but never fire</li>
+<li>See: [Windows Message Loop Guide](troubleshooting/windows-message-loop.md)</li>
+</ul>
+<ol>
+<li><strong>Subscribe in onUserVideoStatusChanged, NOT onUserJoin</strong></li>
+</ol>
+<ul>
+<li>Video may not be ready when user joins</li>
+<li>Wait for video status change callback</li>
+<li>See: [Video Rendering](examples/video-rendering.md)</li>
+</ul>
+<ol>
+<li><strong>Two Rendering Paths</strong></li>
+</ol>
+<ul>
+<li>Canvas API: SDK renders to your HWND (recommended)</li>
+<li>Raw Data Pipe: You receive YUV frames (advanced)</li>
+<li>See: [Canvas vs Raw Data](concepts/canvas-vs-raw-data.md)</li>
+</ul>
+<ol>
+<li><strong>Helpers Control YOUR Streams Only</strong></li>
+</ol>
+<ul>
+<li><code>videoHelper-&gt;startVideo()</code> starts YOUR camera</li>
+<li>To see others, subscribe to their Canvas/Pipe</li>
+<li>See: [Singleton Hierarchy](concepts/singleton-hierarchy.md)</li>
+</ul>
+<ol>
+<li><strong>UI Framework Integration Differs by Platform</strong></li>
+</ol>
+<ul>
+<li><strong>Win32</strong>: Direct SDK, Canvas API (SDK renders to HWND) - best performance</li>
+<li><strong>WinForms</strong>: C++/CLI wrapper, Raw Data Pipe, YUV→Bitmap, InvokeRequired</li>
+<li><strong>WPF</strong>: Same wrapper + Bitmap→BitmapSource, Dispatcher, Freeze()</li>
+<li>See: [UI Framework Integration](examples/dotnet-winforms/README.md)</li>
+</ul>
+<ol>
+<li><strong>C++/CLI Wrapper Patterns (for ANY native library → .NET)</strong></li>
+</ol>
+<ul>
+<li><code>void*</code> pointers - hide native types from managed headers</li>
+<li><code>gcroot&lt;T^&gt;</code> - prevent GC from collecting managed references in native code</li>
+<li>Finalizer + Destructor - <code>~Class()</code> and <code>!Class()</code> for IDisposable cleanup</li>
+<li><code>pin_ptr</code> + <code>Marshal::Copy</code> - array/buffer conversion</li>
+<li><code>LockBits</code> - 100x faster than SetPixel for image manipulation</li>
+<li>Thread marshaling - InvokeRequired (WinForms) / Dispatcher (WPF)</li>
+<li>See: [C++/CLI Wrapper Guide](examples/dotnet-winforms/README.md#ccli-wrapper-patterns-for-net-integration)</li>
+</ul>
+<ol>
+<li><strong>Audio Connection Timing</strong></li>
+</ol>
+<ul>
+<li>Set <code>audioOption.connect = false</code> during join</li>
+<li>Call <code>startAudio()</code> in <code>onSessionJoin</code> callback</li>
+<li>See: [Production Guidelines](examples/dotnet-winforms/README.md#production-quality-review)</li>
+</ul>
+<hr>
+<h3>Quick Reference</h3>
+<h4>&quot;My code won't compile&quot;</h4>
+<p>→ [Build Errors Guide](troubleshooting/build-errors.md)</p>
+<h4>&quot;Callbacks never fire&quot;</h4>
+<p>→ [Windows Message Loop](troubleshooting/windows-message-loop.md)</p>
+<h4>&quot;Video subscription returns error 2&quot;</h4>
+<p>→ [Video Rendering](examples/video-rendering.md) - Subscribe in onUserVideoStatusChanged</p>
+<h4>&quot;Abstract class error&quot;</h4>
+<p>→ [Delegate Methods](references/delegate-methods.md)</p>
+<h4>&quot;How do I implement [feature]?&quot;</h4>
+<p>→ [SDK Architecture Pattern](concepts/sdk-architecture-pattern.md)</p>
+<h4>&quot;How do I navigate to [controller]?&quot;</h4>
+<p>→ [Singleton Hierarchy](concepts/singleton-hierarchy.md)</p>
+<h4>&quot;What error code means what?&quot;</h4>
+<p>→ [Common Issues](troubleshooting/common-issues.md)</p>
+<hr>
+<h3>Document Version</h3>
+<p>Based on <strong>Zoom Video SDK for Windows v2.x</strong></p>
+<hr>
+<p><strong>Happy coding!</strong></p>
+<p>Remember: The [SDK Architecture Pattern](concepts/sdk-architecture-pattern.md) is your key to unlocking the entire SDK. Read it first!</p>
+<h3>Operations</h3>
+<ul>
+<li>[RUNBOOK.md](RUNBOOK.md) - 5-minute preflight and debugging checklist.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: video-sdk/windows\ndisplay_name: video-sdk/windows\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# video-sdk/windows - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `video-sdk/windows` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nExpert guidance for developing with the Zoom Video SDK on Windows. This SDK enables custom video applications, raw media capture/injection, cloud recording, live streaming, and real-time transcription on Windows platform\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose video-sdk/windows, then write the task. Fallback prompt: Use the video-sdk/windows skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `video-sdk/windows` |\n| Canonical name | `video-sdk/windows` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nExpert guidance for developing with the Zoom Video SDK on Windows. This SDK enables custom video applications, raw media capture/injection, cloud recording, live streaming, and real-time transcription on Windows platform\n\n## Original SKILL.md\n\n---\nname: video-sdk/windows\ndescription: \"Zoom Video SDK for Windows - C++ integration for video sessions, raw audio/video capture, screen sharing, recording, and real-time communication\"\nuser-invocable: false\ntriggers:\n  - \"video sdk windows\"\n  - \"windows video sdk\"\n  - \"video sdk raw data windows\"\n  - \"windows custom video\"\n  - \"c++ video sdk\"\n---\n\n# Zoom Video SDK - Windows Development\n\nExpert guidance for developing with the Zoom Video SDK on Windows. This SDK enables custom video applications, raw media capture/injection, cloud recording, live streaming, and real-time transcription on Windows platforms.\n\n**Official Documentation**: https://developers.zoom.us/docs/video-sdk/windows/\n**API Reference**: https://marketplacefront.zoom.us/sdk/custom/windows/\n**Sample Repository**: https://github.com/zoom/videosdk-windows-rawdata-sample\n\n## Quick Links\n\n**New to Video SDK? Follow this path:**\n\n1. **[SDK Architecture Pattern](concepts/sdk-architecture-pattern.md)** - Universal 3-step pattern for ANY feature\n2. **[Session Join Pattern](examples/session-join-pattern.md)** - Complete working code to join a session\n3. **[Windows Message Loop](troubleshooting/windows-message-loop.md)** - **CRITICAL**: Fix callbacks not firing\n4. **[Video Rendering](examples/video-rendering.md)** - Display video with Canvas API\n\n**Reference:**\n- **[Singleton Hierarchy](concepts/singleton-hierarchy.md)** - 5-level SDK navigation map\n- **[API Reference](references/windows-reference.md)** - Methods, error codes, timing rules\n- **[Delegate Methods](references/delegate-methods.md)** - All 80+ callback methods\n- **[Sample Applications](references/samples.md)** - Official samples guide\n- **[windows.md](windows.md)** - Secondary overview doc (pointer-style)\n- **[SKILL.md](SKILL.md)** - Complete documentation navigation\n\n**Having issues?**\n- Callbacks not firing → [Windows Message Loop](troubleshooting/windows-message-loop.md)\n- Build errors → [Build Errors Guide](troubleshooting/build-errors.md)\n- Video subscribe fails → [Video Rendering](examples/video-rendering.md) (subscribe in `onUserVideoStatusChanged`)\n- Quick diagnostics → [Common Issues](troubleshooting/common-issues.md)\n\n**Building a Custom UI?**\n- [Canvas vs Raw Data](concepts/canvas-vs-raw-data.md) - Choose your rendering approach\n- [Raw Video Capture](examples/raw-video-capture.md) - YUV420 frame processing\n\n## SDK Overview\n\nThe Zoom Video SDK for Windows is a C++ library that provides:\n- **Session Management**: Join/leave video SDK sessions\n- **Raw Data Access**: Capture raw audio/video frames (YUV420, PCM)\n- **Raw Data Injection**: Send custom audio/video into sessions\n- **Screen Sharing**: Share screens or inject custom share sources\n- **Cloud Recording**: Record sessions to Zoom cloud\n- **Live Streaming**: Stream to RTMP endpoints (YouTube, etc.)\n- **Chat & Commands**: In-session messaging and command channels\n- **Live Transcription**: Real-time speech-to-text\n- **Subsessions**: Breakout room support\n- **Whiteboard**: Collaborative whiteboard features\n- **Annotations**: Screen share annotations\n- **C# Integration**: C++/CLI wrapper for .NET applications\n\n## Prerequisites\n\n### System Requirements\n\n- **OS**: Windows 10 (1903 or later) or Windows 11\n- **Architecture**: x64 (recommended), x86, or ARM64\n- **Visual Studio**: 2019 or 2022 (Community, Professional, or Enterprise)\n- **Windows SDK**: 10.0.19041.0 or later\n- **.NET Framework**: 4.8 or later (for C# applications)\n\n### Visual Studio Workloads\n\nInstall these workloads via Visual Studio Installer:\n\n1. **Desktop development with C++**\n   - MSVC v142 or v143 compiler\n   - Windows 10/11 SDK\n   - C++ CMake tools (optional)\n\n2. **.NET desktop development** (for C# applications)\n   - .NET Framework 4.8 targeting pack\n   - C++/CLI support\n\n## Quick Start\n\n### C++ Application\n\n```cpp\n#include \u003cwindows.h>\n#include \"zoom_video_sdk_api.h\"\n#include \"zoom_video_sdk_interface.h\"\n#include \"zoom_video_sdk_delegate_interface.h\"\n\nUSING_ZOOM_VIDEO_SDK_NAMESPACE\n\n// 1. Create SDK object\nIZoomVideoSDK* video_sdk_obj = CreateZoomVideoSDKObj();\n\n// 2. Initialize\nZoomVideoSDKInitParams init_params;\ninit_params.domain = L\"https://zoom.us\";\ninit_params.enableLog = true;\ninit_params.logFilePrefix = L\"zoom_win_video\";\ninit_params.videoRawDataMemoryMode = ZoomVideoSDKRawDataMemoryModeHeap;\ninit_params.shareRawDataMemoryMode = ZoomVideoSDKRawDataMemoryModeHeap;\ninit_params.audioRawDataMemoryMode = ZoomVideoSDKRawDataMemoryModeHeap;\n\nZoomVideoSDKErrors err = video_sdk_obj->initialize(init_params);\n\n// 3. Add event listener\nvideo_sdk_obj->addListener(myDelegate);\n\n// 4. Join session (IMPORTANT: set audioOption.connect = false)\nZoomVideoSDKSessionContext session_context;\nsession_context.sessionName = L\"my-session\";\nsession_context.userName = L\"Windows User\";\nsession_context.token = L\"your-jwt-token\";\nsession_context.videoOption.localVideoOn = false;\nsession_context.audioOption.connect = false;  // Connect audio after join\nsession_context.audioOption.mute = true;\n\nIZoomVideoSDKSession* session = video_sdk_obj->joinSession(session_context);\n\n// 5. CRITICAL: Add Windows message pump for callbacks to work\nbool running = true;\nwhile (running) {\n    // Process Windows messages (required for SDK callbacks)\n    MSG msg;\n    while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {\n        TranslateMessage(&msg);\n        DispatchMessage(&msg);\n    }\n    \n    // Your application logic here\n    Sleep(10);\n}\n```\n\n### C# Application\n\n```csharp\nusing ZoomVideoSDK;\n\nvar sdkManager = new ZoomSDKManager();\nsdkManager.Initialize();\nsdkManager.JoinSession(\"my-session\", \"jwt-token\", \"User Name\", \"\");\n```\n\n## Key Features\n\n| Feature | Description |\n|---------|-------------|\n| **Session Management** | Join, leave, and manage video sessions |\n| **Raw Video (YUV I420)** | Capture and inject raw video frames |\n| **Raw Audio (PCM)** | Capture and inject raw audio data |\n| **Screen Sharing** | Share screens or custom content |\n| **Cloud Recording** | Record sessions to Zoom cloud |\n| **Live Streaming** | Stream to RTMP endpoints |\n| **Chat** | Send/receive chat messages |\n| **Command Channel** | Custom command messaging |\n| **Live Transcription** | Real-time speech-to-text |\n| **C# Support** | Full .NET Framework integration |\n\n## Sample Applications\n\n**Official Repository**: https://github.com/zoom/videosdk-windows-rawdata-sample\n\n| Sample | Description |\n|--------|-------------|\n| VSDK_SkeletonDemo | Minimal session join - **start here** |\n| VSDK_getRawVideo | Capture YUV420 video frames |\n| VSDK_getRawAudio | Capture PCM audio |\n| VSDK_sendRawVideo | Inject custom video (virtual camera) |\n| VSDK_sendRawAudio | Inject custom audio (virtual mic) |\n| VSDK_CloudRecording | Cloud recording control |\n| VSDK_CommandChannel | Custom command messaging |\n| VSDK_TranscriptionAndTranslation | Live captions |\n\n**See complete guide**: [Sample Applications Reference](references/samples.md)\n\n## Critical Gotchas and Best Practices\n\n### ⚠️ CRITICAL: Windows Message Pump Required\n\n**The #1 issue that causes session joins to hang with no callbacks:**\n\nAll Windows applications using the Zoom SDK **MUST** process Windows messages. The SDK uses Windows messages to deliver callbacks like `onSessionJoin()`, `onError()`, etc.\n\n**Problem**: Without a message pump, `joinSession()` appears to succeed but callbacks never fire.\n\n**Solution**: Add this to your main loop:\n\n```cpp\nwhile (running) {\n    // REQUIRED: Process Windows messages\n    MSG msg;\n    while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {\n        TranslateMessage(&msg);\n        DispatchMessage(&msg);\n    }\n    \n    // Your application logic\n    Sleep(10);\n}\n```\n\n**Applies to**:\n- Console applications (no automatic message pump)\n- Custom main loops\n- Applications that don't use standard WinMain/WndProc\n\n**GUI applications** using WinMain with standard message loop already have this.\n\n### Audio Connection Strategy\n\n**Best Practice**: Set `audioOption.connect = false` when joining, then connect audio in the `onSessionJoin()` callback.\n\n```cpp\n// During join\nsession_context.audioOption.connect = false;  // Don't connect yet\nsession_context.audioOption.mute = true;\n\n// In onSessionJoin() callback\nvoid onSessionJoin() override {\n    IZoomVideoSDKAudioHelper* audioHelper = video_sdk_obj->getAudioHelper();\n    if (audioHelper) {\n        audioHelper->startAudio();  // Connect now\n    }\n}\n```\n\n**Why**: This pattern is used in all official Zoom samples. It separates session join from audio initialization for better reliability and error handling.\n\n### All Delegate Callbacks Must Be Implemented\n\nThe `IZoomVideoSDKDelegate` interface has 70+ pure virtual methods. **ALL must be implemented**, even if empty:\n\n```cpp\n// Required even if you don't use them\nvoid onProxyDetectComplete() override {}\nvoid onUserWhiteboardShareStatusChanged(IZoomVideoSDKUser*, IZoomVideoSDKWhiteboardHelper*) override {}\n// ... etc\n```\n\n**Tip**: Check the SDK version's `zoom_video_sdk_delegate_interface.h` for the complete list. The interface changes between SDK versions.\n\n### Memory Mode for Raw Data\n\nAlways use heap mode for raw data memory:\n\n```cpp\ninit_params.videoRawDataMemoryMode = ZoomVideoSDKRawDataMemoryModeHeap;\ninit_params.shareRawDataMemoryMode = ZoomVideoSDKRawDataMemoryModeHeap;\ninit_params.audioRawDataMemoryMode = ZoomVideoSDKRawDataMemoryModeHeap;\n```\n\nStack mode can cause issues with large video frames.\n\n### Thread Safety\n\nSDK callbacks execute on SDK threads, not your main thread:\n- Don't perform heavy operations in callbacks\n- Don't call `cleanup()` from within callbacks\n- Use thread-safe queues for passing data to UI thread\n- Use mutexes when accessing shared state\n\n### Consult Official Samples First\n\nWhen SDK behavior is unexpected, **always check the official samples** before troubleshooting:\n\n**Local samples**:\n- `C:\\tempsdk\\Zoom_VideoSDK_Windows_RawDataDemos\\VSDK_SkeletonDemo\\` (simplest)\n- `C:\\tempsdk\\sdksamples\\zoom-video-sdk-windows-2.4.12\\Sample-Libs\\x64\\demo\\`\n\nOfficial samples show correct patterns for:\n- Message pump implementation ✓\n- Audio connection strategy ✓\n- Error handling ✓\n- Memory management ✓\n\n## Video Rendering - Two Approaches\n\nThe Zoom SDK provides **two different ways** to render video. Choose based on your needs.\n\n### 🎯 Canvas API (Recommended for Most Use Cases)\n\n**Best for**: Standard applications, clean video quality, ease of implementation\n\nThe SDK renders video directly to your HWND. **No YUV conversion needed**.\n\n```cpp\n// Subscribe to a user's video with Canvas API\nIZoomVideoSDKCanvas* canvas = user->GetVideoCanvas();\nif (canvas) {\n    ZoomVideoSDKErrors ret = canvas->subscribeWithView(\n        hwnd,                                    // Your window handle\n        ZoomVideoSDKVideoAspect_PanAndScan,     // Fit to window, may crop\n        ZoomVideoSDKResolution_Auto              // Let SDK choose best resolution\n    );\n    \n    if (ret == ZoomVideoSDKErrors_Success) {\n        // SDK is now rendering directly to your window!\n    }\n}\n\n// Unsubscribe when done\ncanvas->unSubscribeWithView(hwnd);\n```\n\n**Advantages**:\n- ✅ **Best quality** - SDK uses optimized, hardware-accelerated rendering\n- ✅ **No artifacts** - Professional video quality\n- ✅ **Simple code** - 3 lines to subscribe\n- ✅ **Better performance** - No CPU-intensive YUV conversion\n- ✅ **Automatic scaling** - SDK handles window resizing\n- ✅ **Aspect ratio** - Built-in aspect ratio handling\n\n**Example from official .NET sample**:\n```cpp\n// Self video preview\nIZoomVideoSDKCanvas* canvas = myself->GetVideoCanvas();\ncanvas->subscribeWithView(selfVideoHwnd, aspect, resolution);\n\n// Remote user video\nIZoomVideoSDKCanvas* remoteCanvas = remoteUser->GetVideoCanvas();\nremoteCanvas->subscribeWithView(remoteVideoHwnd, aspect, resolution);\n```\n\n**Video Aspect Options**:\n- `ZoomVideoSDKVideoAspect_Original` - Letterbox/pillarbox, no cropping\n- `ZoomVideoSDKVideoAspect_FullFilled` - Fill window, may crop edges\n- `ZoomVideoSDKVideoAspect_PanAndScan` - Smart crop to fill window\n- `ZoomVideoSDKVideoAspect_LetterBox` - Show full video with black bars\n\n**Resolution Options**:\n- `ZoomVideoSDKResolution_90P`\n- `ZoomVideoSDKResolution_180P`\n- `ZoomVideoSDKResolution_360P` - Good balance\n- `ZoomVideoSDKResolution_720P` - HD quality\n- `ZoomVideoSDKResolution_1080P`\n- `ZoomVideoSDKResolution_Auto` - Let SDK decide (recommended)\n\n### 🔧 Raw Data Pipe (Advanced Use Cases)\n\n**Best for**: Custom video processing, effects, recording, computer vision\n\nYou receive raw YUV420 frames and handle rendering yourself.\n\n```cpp\n// 1. Create a delegate to receive frames\nclass VideoRenderer : public IZoomVideoSDKRawDataPipeDelegate {\npublic:\n    void onRawDataFrameReceived(YUVRawDataI420* data) override {\n        int width = data->GetStreamWidth();\n        int height = data->GetStreamHeight();\n        \n        char* yBuffer = data->GetYBuffer();\n        char* uBuffer = data->GetUBuffer();\n        char* vBuffer = data->GetVBuffer();\n        \n        // Convert YUV420 to RGB and render\n        ConvertYUVToRGB(yBuffer, uBuffer, vBuffer, width, height);\n        RenderToWindow(rgbBuffer, width, height);\n    }\n    \n    void onRawDataStatusChanged(RawDataStatus status) override {\n        // Handle video on/off\n    }\n};\n\n// 2. Subscribe to raw data\nIZoomVideoSDKRawDataPipe* pipe = user->GetVideoPipe();\nVideoRenderer* renderer = new VideoRenderer();\npipe->subscribe(ZoomVideoSDKResolution_720P, renderer);\n```\n\n**YUV420 to RGB Conversion** (ITU-R BT.601):\n```cpp\nvoid ConvertYUV420ToRGB(char* yBuffer, char* uBuffer, char* vBuffer, \n                        int width, int height) {\n    for (int y = 0; y \u003c height; y++) {\n        for (int x = 0; x \u003c width; x++) {\n            int yIndex = y * width + x;\n            int uvIndex = (y / 2) * (width / 2) + (x / 2);\n            \n            int Y = (unsigned char)yBuffer[yIndex];\n            int U = (unsigned char)uBuffer[uvIndex];\n            int V = (unsigned char)vBuffer[uvIndex];\n            \n            // YUV to RGB conversion\n            int C = Y - 16;\n            int D = U - 128;\n            int E = V - 128;\n            \n            int R = (298 * C + 409 * E + 128) >> 8;\n            int G = (298 * C - 100 * D - 208 * E + 128) >> 8;\n            int B = (298 * C + 516 * D + 128) >> 8;\n            \n            // Clamp to [0, 255]\n            R = (R \u003c 0) ? 0 : (R > 255) ? 255 : R;\n            G = (G \u003c 0) ? 0 : (G > 255) ? 255 : G;\n            B = (B \u003c 0) ? 0 : (B > 255) ? 255 : B;\n            \n            // Store RGB (BGR format for Windows)\n            rgbBuffer[yIndex * 3 + 0] = (unsigned char)B;\n            rgbBuffer[yIndex * 3 + 1] = (unsigned char)G;\n            rgbBuffer[yIndex * 3 + 2] = (unsigned char)R;\n        }\n    }\n}\n```\n\n**Render with GDI**:\n```cpp\nvoid RenderToWindow(unsigned char* rgbBuffer, int width, int height) {\n    HDC hdc = GetDC(hwnd);\n    \n    BITMAPINFO bmi = {};\n    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);\n    bmi.bmiHeader.biWidth = width;\n    bmi.bmiHeader.biHeight = -height;  // Negative for top-down\n    bmi.bmiHeader.biPlanes = 1;\n    bmi.bmiHeader.biBitCount = 24;     // 24-bit RGB\n    bmi.bmiHeader.biCompression = BI_RGB;\n    \n    RECT rect;\n    GetClientRect(hwnd, &rect);\n    \n    StretchDIBits(hdc,\n        0, 0, rect.right, rect.bottom,  // Destination\n        0, 0, width, height,              // Source\n        rgbBuffer, &bmi,\n        DIB_RGB_COLORS, SRCCOPY);\n    \n    ReleaseDC(hwnd, hdc);\n}\n```\n\n**Disadvantages**:\n- ⚠️ **CPU intensive** - YUV conversion can cause frame drops\n- ⚠️ **Artifacts** - Manual rendering may show tearing/artifacts\n- ⚠️ **Complex** - More code to maintain\n- ⚠️ **Performance** - Slower than Canvas API\n\n**Use Raw Data When**:\n- Adding video filters/effects\n- Recording to custom formats\n- Computer vision processing\n- Custom compositing\n- Streaming to non-standard outputs\n\n### Self Video vs Remote Users\n\n**Self Video** (your own camera):\n\n**Option A: Canvas API**\n```cpp\nIZoomVideoSDKSession* session = sdk->getSessionInfo();\nIZoomVideoSDKUser* myself = session->getMyself();\nIZoomVideoSDKCanvas* canvas = myself->GetVideoCanvas();\ncanvas->subscribeWithView(selfVideoHwnd, aspect, resolution);\n```\n\n**Option B: Video Preview** (for self only)\n```cpp\nIZoomVideoSDKVideoHelper* videoHelper = sdk->getVideoHelper();\nvideoHelper->startVideo();  // Start transmission\n\n// For preview rendering\nvideoHelper->startVideoCanvasPreview(selfVideoHwnd, aspect, resolution);\n```\n\n**Remote Users** (other participants):\n\n**Canvas API** (recommended):\n```cpp\n// In onUserJoin callback\nvoid onUserJoin(IZoomVideoSDKUserHelper*, IVideoSDKVector\u003cIZoomVideoSDKUser*>* userList) {\n    for (int i = 0; i \u003c userList->GetCount(); i++) {\n        IZoomVideoSDKUser* user = userList->GetItem(i);\n        IZoomVideoSDKCanvas* canvas = user->GetVideoCanvas();\n        canvas->subscribeWithView(userVideoHwnd, aspect, resolution);\n    }\n}\n```\n\n### Event-Driven Subscription Pattern\n\n⚠️ **CRITICAL**: Video subscription must be **event-driven** and **manual**.\n\n**Key Events**:\n\n1. **`onSessionJoin`** - Subscribe to self video\n2. **`onUserJoin`** - Subscribe to new remote users\n3. **`onUserVideoStatusChanged`** - Re-subscribe when video turns on/off\n4. **`onUserLeave`** - Unsubscribe and cleanup\n\n**Complete Pattern**:\n\n```cpp\nclass MainFrame : public IZoomVideoSDKDelegate {\nprivate:\n    std::map\u003cIZoomVideoSDKUser*, IZoomVideoSDKCanvas*> subscribedUsers_;\n    HWND videoWindow_;\n    \npublic:\n    void onSessionJoin() override {\n        // Start your own video\n        IZoomVideoSDKVideoHelper* videoHelper = sdk->getVideoHelper();\n        videoHelper->startVideo();\n        \n        // Subscribe to self video\n        IZoomVideoSDKUser* myself = sdk->getSessionInfo()->getMyself();\n        SubscribeToUser(myself);\n    }\n    \n    void onUserJoin(IZoomVideoSDKUserHelper*, \n                    IVideoSDKVector\u003cIZoomVideoSDKUser*>* userList) override {\n        // Get current user to exclude self\n        IZoomVideoSDKUser* myself = sdk->getSessionInfo()->getMyself();\n        \n        for (int i = 0; i \u003c userList->GetCount(); i++) {\n            IZoomVideoSDKUser* user = userList->GetItem(i);\n            \n            // IMPORTANT: Only subscribe to REMOTE users!\n            if (user != myself) {\n                SubscribeToUser(user);\n            }\n        }\n    }\n    \n    void onUserVideoStatusChanged(IZoomVideoSDKVideoHelper*, \n                                  IVideoSDKVector\u003cIZoomVideoSDKUser*>* userList) override {\n        IZoomVideoSDKUser* myself = sdk->getSessionInfo()->getMyself();\n        \n        for (int i = 0; i \u003c userList->GetCount(); i++) {\n            IZoomVideoSDKUser* user = userList->GetItem(i);\n            if (user != myself) {\n                // Re-subscribe when video status changes\n                SubscribeToUser(user);\n            }\n        }\n    }\n    \n    void onUserLeave(IZoomVideoSDKUserHelper*, \n                    IVideoSDKVector\u003cIZoomVideoSDKUser*>* userList) override {\n        for (int i = 0; i \u003c userList->GetCount(); i++) {\n            IZoomVideoSDKUser* user = userList->GetItem(i);\n            UnsubscribeFromUser(user);\n        }\n    }\n    \n    void onSessionLeave() override {\n        // Cleanup all subscriptions\n        for (auto& pair : subscribedUsers_) {\n            IZoomVideoSDKCanvas* canvas = pair.second;\n            if (canvas) {\n                canvas->unSubscribeWithView(videoWindow_);\n            }\n        }\n        subscribedUsers_.clear();\n    }\n    \nprivate:\n    void SubscribeToUser(IZoomVideoSDKUser* user) {\n        if (!user || subscribedUsers_.find(user) != subscribedUsers_.end())\n            return;\n            \n        IZoomVideoSDKCanvas* canvas = user->GetVideoCanvas();\n        if (canvas) {\n            ZoomVideoSDKErrors ret = canvas->subscribeWithView(\n                videoWindow_,\n                ZoomVideoSDKVideoAspect_PanAndScan,\n                ZoomVideoSDKResolution_Auto\n            );\n            \n            if (ret == ZoomVideoSDKErrors_Success) {\n                subscribedUsers_[user] = canvas;\n            }\n        }\n    }\n    \n    void UnsubscribeFromUser(IZoomVideoSDKUser* user) {\n        auto it = subscribedUsers_.find(user);\n        if (it != subscribedUsers_.end()) {\n            IZoomVideoSDKCanvas* canvas = it->second;\n            if (canvas) {\n                canvas->unSubscribeWithView(videoWindow_);\n            }\n            subscribedUsers_.erase(it);\n        }\n    }\n};\n```\n\n**Key Points**:\n- ✅ Subscribe in response to events (onUserJoin, onUserVideoStatusChanged)\n- ✅ Always exclude current user from remote subscriptions\n- ✅ Unsubscribe on onUserLeave\n- ✅ Clean up all subscriptions on onSessionLeave\n- ✅ Track subscriptions in a map for lifecycle management\n\n### ⚠️ Screen Share Subscription (DIFFERENT from Video!)\n\n**CRITICAL**: Screen share subscription uses `IZoomVideoSDKShareAction` from the callback, NOT `user->GetShareCanvas()`!\n\n```cpp\n// WRONG - This won't work for remote screen shares!\nuser->GetShareCanvas()->subscribeWithView(hwnd, ...);\n\n// CORRECT - Use IZoomVideoSDKShareAction from onUserShareStatusChanged callback\nvoid onUserShareStatusChanged(IZoomVideoSDKShareHelper* pShareHelper,\n                               IZoomVideoSDKUser* pUser,\n                               IZoomVideoSDKShareAction* pShareAction) {\n    if (!pShareAction) return;\n    \n    ZoomVideoSDKShareStatus status = pShareAction->getShareStatus();\n    \n    if (status == ZoomVideoSDKShareStatus_Start || \n        status == ZoomVideoSDKShareStatus_Resume) {\n        // Subscribe to the share using Canvas API\n        IZoomVideoSDKCanvas* shareCanvas = pShareAction->getShareCanvas();\n        if (shareCanvas) {\n            shareCanvas->subscribeWithView(shareWindow_, \n                ZoomVideoSDKVideoAspect_Original);\n        }\n    }\n    else if (status == ZoomVideoSDKShareStatus_Stop) {\n        // Unsubscribe when share stops\n        IZoomVideoSDKCanvas* shareCanvas = pShareAction->getShareCanvas();\n        if (shareCanvas) {\n            shareCanvas->unSubscribeWithView(shareWindow_);\n        }\n    }\n}\n```\n\n**Why is share different from video?**\n- **Video**: Each user has one video stream → use `user->GetVideoCanvas()`\n- **Share**: A user can have multiple share actions (multi-share) → use `IZoomVideoSDKShareAction*` from callback\n- The `IZoomVideoSDKShareAction` object represents a specific share stream and contains the share status, type, and rendering interfaces\n\n**See also**: [Screen Share Subscription Example](examples/screen-share-subscription.md)\n\n### Multi-User Video Layout\n\nFor multiple participants, you need **one HWND per user**:\n\n```cpp\n// Create separate windows/panels for each user\nHWND selfVideoWindow = CreateWindow(...);   // Your video\nHWND user1Window = CreateWindow(...);       // User 1's video\nHWND user2Window = CreateWindow(...);       // User 2's video\n\n// Subscribe each user to their own window\nmyself->GetVideoCanvas()->subscribeWithView(selfVideoWindow, ...);\nuser1->GetVideoCanvas()->subscribeWithView(user1Window, ...);\nuser2->GetVideoCanvas()->subscribeWithView(user2Window, ...);\n```\n\n**Layout Strategies**:\n- Grid layout (2x2, 3x3)\n- Gallery view (scrollable)\n- Active speaker (large) + thumbnails\n- Picture-in-picture\n\n### Common Video Issues\n\n| Issue | Cause | Solution |\n|-------|-------|----------|\n| Video not showing | Not calling `startVideo()` | Call `videoHelper->startVideo()` in `onSessionJoin` |\n| Artifacts/tearing | Using Raw Data Pipe | Switch to Canvas API |\n| Poor performance | YUV conversion on UI thread | Use Canvas API or move conversion to worker thread |\n| Video freezes | Not processing Windows messages | Add message pump to main loop |\n| Can't see self | Subscribing to wrong user | Use `session->getMyself()` for self video |\n| Seeing self in remote list | Not excluding self | Check `if (user != myself)` before subscribing |\n\n## Complete Documentation Library\n\nThis skill includes comprehensive guides organized by category:\n\n### Core Concepts (Start Here!)\n- **[SDK Architecture Pattern](concepts/sdk-architecture-pattern.md)** - Universal 3-step pattern for ANY feature\n- **[Singleton Hierarchy](concepts/singleton-hierarchy.md)** - 5-level navigation guide\n- **[Canvas vs Raw Data](concepts/canvas-vs-raw-data.md)** - Choose your rendering approach\n\n### Complete Examples\n- **[Session Join Pattern](examples/session-join-pattern.md)** - JWT auth + session join with full code\n- **[Video Rendering](examples/video-rendering.md)** - Canvas API video display\n- **[Screen Share Subscription](examples/screen-share-subscription.md)** - View remote screen shares (DIFFERENT from video!)\n- **[Raw Video Capture](examples/raw-video-capture.md)** - YUV420 frame capture\n- **[Raw Audio Capture](examples/raw-audio-capture.md)** - PCM audio capture\n- **[Send Raw Video](examples/send-raw-video.md)** - Virtual camera (inject custom video)\n- **[Send Raw Audio](examples/send-raw-audio.md)** - Virtual mic (inject custom audio)\n- **[Cloud Recording](examples/cloud-recording.md)** - Cloud recording control\n- **[Command Channel](examples/command-channel.md)** - Custom command messaging\n- **[Transcription](examples/transcription.md)** - Live transcription/captions\n\n### UI Framework Integration\n- **[Win32 Native](examples/dotnet-winforms/README.md#option-1-win32-native-c---direct-sdk)** - Direct SDK usage with Canvas API (best performance)\n- **[WinForms (.NET)](examples/dotnet-winforms/README.md#option-2-winforms-c--ccli-wrapper)** - C++/CLI wrapper + Raw Data Pipe\n- **[WPF (.NET)](examples/dotnet-winforms/README.md#option-3-wpf-c--ccli-wrapper)** - C++/CLI wrapper + BitmapSource conversion\n- **[Production Quality Guidelines](examples/dotnet-winforms/README.md#production-quality-review)** - Checklist and common issues\n\n### C++/CLI Wrapper Patterns (Wrapping ANY Native Library)\n- **[Complete Guide](examples/dotnet-winforms/README.md#ccli-wrapper-patterns-for-net-integration)** - 8 patterns for native→.NET interop\n- **[Pattern 1: Basic Structure](examples/dotnet-winforms/README.md#pattern-1-basic-wrapper-structure)** - Project setup, class layout\n- **[Pattern 2: void* Pointers](examples/dotnet-winforms/README.md#pattern-2-opaque-void-pointers)** - Hide native types\n- **[Pattern 3: gcroot Callbacks](examples/dotnet-winforms/README.md#pattern-3-gcrootT-for-nativemanaged-callbacks)** - Native→Managed events\n- **[Pattern 4: IDisposable](examples/dotnet-winforms/README.md#pattern-4-destructor--finalizer-idisposable)** - Cleanup pattern\n- **[Pattern 5: Strings](examples/dotnet-winforms/README.md#pattern-5-string-conversion)** - String^ ↔ wstring/string\n- **[Pattern 6: Arrays](examples/dotnet-winforms/README.md#pattern-6-arraybuffer-conversion)** - pin_ptr, Marshal::Copy\n- **[Pattern 7: Threading](examples/dotnet-winforms/README.md#pattern-7-thread-marshaling-native-thread--ui-thread)** - UI thread dispatch\n- **[Pattern 8: LockBits](examples/dotnet-winforms/README.md#pattern-8-lockbits-for-fast-image-manipulation)** - Fast image conversion\n- **[Common Errors](examples/dotnet-winforms/README.md#common-wrapper-errors)** - Troubleshooting\n\n### Troubleshooting\n- **[Windows Message Loop](troubleshooting/windows-message-loop.md)** - **CRITICAL**: Why callbacks don't fire\n- **[Build Errors](troubleshooting/build-errors.md)** - SDK header dependency fixes\n- **[Common Issues](troubleshooting/common-issues.md)** - Quick diagnostics & error codes\n\n### References\n- **[API Reference](references/windows-reference.md)** - 5-level API hierarchy, methods, error codes\n- **[Delegate Methods](references/delegate-methods.md)** - All 80+ callback methods\n- **[SKILL.md](SKILL.md)** - Complete navigation guide\n\n### Most Critical Issues (From Real Debugging)\n\n1. **Callbacks not firing** → Missing Windows message loop (99% of issues)\n   - See: [Windows Message Loop Guide](troubleshooting/windows-message-loop.md)\n\n2. **Video subscribe returns error 2** → Subscribing too early\n   - See: [Video Rendering](examples/video-rendering.md) - Subscribe in `onUserVideoStatusChanged`\n\n3. **Abstract class errors** → Missing virtual method implementations\n   - See: [Delegate Methods](references/delegate-methods.md)\n\n### Key Insight\n\n**Once you learn the 3-step pattern, you can implement ANY feature:**\n1. Get singleton → 2. Implement delegate → 3. Subscribe & use\n\nSee: [SDK Architecture Pattern](concepts/sdk-architecture-pattern.md)\n\n## Resources\n\n- **Official Docs**: https://developers.zoom.us/docs/video-sdk/windows/\n- **API Reference**: https://marketplacefront.zoom.us/sdk/custom/windows/\n- **Dev Forum**: https://devforum.zoom.us/\n- **GitHub Samples**: https://github.com/zoom/videosdk-windows-rawdata-sample\n- **Working Sample**: `C:\\tempsdk\\zoom-video-sdk-windows-sample\\` (complete implementation)\n\n---\n\n**Need help?** Start with [SKILL.md](SKILL.md) for complete navigation.\n\n\n## Merged from video-sdk/windows/SKILL.md\n\n# Zoom Video SDK Windows - Complete Documentation Index\n\n## Quick Start Path\n\n**If you're new to the SDK, follow this order:**\n\n0. **Overview** → [windows.md](windows.md)\n1. **Read the architecture pattern** → [concepts/sdk-architecture-pattern.md](concepts/sdk-architecture-pattern.md)\n   - Universal formula: Singleton → Delegate → Subscribe\n   - Once you understand this, you can implement any feature\n\n2. **Fix build errors** → [troubleshooting/build-errors.md](troubleshooting/build-errors.md)\n   - SDK header dependencies\n   - Required include order\n\n3. **Implement session join** → [examples/session-join-pattern.md](examples/session-join-pattern.md)\n   - Complete working JWT + session join code\n\n4. **Fix callback issues** → [troubleshooting/windows-message-loop.md](troubleshooting/windows-message-loop.md)\n   - **CRITICAL**: Why callbacks don't fire without Windows message loop\n\n5. **Implement video** → [examples/video-rendering.md](examples/video-rendering.md)\n   - Canvas API (SDK-rendered) vs Raw Data Pipe\n\n6. **Troubleshoot any issues** → [troubleshooting/common-issues.md](troubleshooting/common-issues.md)\n   - Quick diagnostic checklist\n   - Error code tables\n\n---\n\n## Documentation Structure\n\n```\nvideo-sdk/windows/\n├── SKILL.md                           # Main skill overview\n├── SKILL.md                           # This file - navigation guide\n├── windows.md                          # Secondary overview doc (pointer-style)\n│\n├── concepts/                          # Core architectural patterns\n│   ├── sdk-architecture-pattern.md   # Universal formula for ANY feature\n│   ├── singleton-hierarchy.md        # 5-level navigation guide\n│   └── canvas-vs-raw-data.md         # SDK-rendered vs self-rendered choice\n│\n├── examples/                          # Complete working code\n│   ├── session-join-pattern.md       # JWT auth + session join\n│   ├── video-rendering.md            # Canvas API video display\n│   ├── screen-share-subscription.md  # View remote screen shares\n│   ├── raw-video-capture.md          # YUV420 raw frame capture\n│   ├── raw-audio-capture.md          # PCM audio capture\n│   ├── send-raw-video.md             # Virtual camera (inject video)\n│   ├── send-raw-audio.md             # Virtual mic (inject audio)\n│   ├── cloud-recording.md            # Cloud recording control\n│   ├── command-channel.md            # Custom command messaging\n│   ├── transcription.md              # Live transcription/captions\n│   └── dotnet-winforms/              # UI Framework integration\n│       └── README.md                 # Win32, WinForms, WPF patterns\n│                                     # C++/CLI wrapper patterns\n│                                     # Production quality guidelines\n│\n├── troubleshooting/                   # Problem solving guides\n│   ├── windows-message-loop.md       # CRITICAL - Why callbacks fail\n│   ├── build-errors.md               # Header dependency fixes\n│   └── common-issues.md              # Quick diagnostic workflow\n│\n└── references/                        # Reference documentation\n    ├── windows-reference.md           # API hierarchy, methods, error codes\n    ├── delegate-methods.md            # All 80+ callback methods\n    └── samples.md                     # Official samples guide\n```\n\n---\n\n## By Use Case\n\n### I want to build a video app\n1. [SDK Architecture Pattern](concepts/sdk-architecture-pattern.md) - Understand the pattern\n2. [Session Join Pattern](examples/session-join-pattern.md) - Join sessions\n3. [Video Rendering](examples/video-rendering.md) - Display video\n4. [Windows Message Loop](troubleshooting/windows-message-loop.md) - Fix callback issues\n\n### I'm getting build errors\n1. [Build Errors Guide](troubleshooting/build-errors.md) - SDK header dependencies\n2. [Delegate Methods](references/delegate-methods.md) - Abstract class errors\n3. [Common Issues](troubleshooting/common-issues.md) - Linker errors\n\n### I'm getting runtime errors\n1. [Windows Message Loop](troubleshooting/windows-message-loop.md) - Callbacks not firing\n2. [Common Issues](troubleshooting/common-issues.md) - Error code tables\n\n### I want to view screen shares\n1. [Screen Share Subscription](examples/screen-share-subscription.md) - **DIFFERENT from video!**\n2. [SDK Architecture Pattern](concepts/sdk-architecture-pattern.md) - Event-driven pattern\n3. [Video Rendering](examples/video-rendering.md) - Compare with video subscription\n\n### I want to capture raw video/audio\n1. [Canvas vs Raw Data](concepts/canvas-vs-raw-data.md) - Choose your approach\n2. [Raw Video Capture](examples/raw-video-capture.md) - YUV420 frame capture\n3. [Raw Audio Capture](examples/raw-audio-capture.md) - PCM audio capture\n4. [SDK Architecture Pattern](concepts/sdk-architecture-pattern.md) - Subscription pattern\n\n### I want to send custom video/audio (virtual camera/mic)\n1. [Send Raw Video](examples/send-raw-video.md) - Inject custom video frames\n2. [Send Raw Audio](examples/send-raw-audio.md) - Inject custom audio\n3. [SDK Architecture Pattern](concepts/sdk-architecture-pattern.md) - External source pattern\n\n### I want to record sessions\n1. [Cloud Recording](examples/cloud-recording.md) - Start/stop cloud recording\n2. [API Reference](references/windows-reference.md) - Recording helper methods\n\n### I want to use live transcription\n1. [Transcription](examples/transcription.md) - Enable live captions\n2. [Delegate Methods](references/delegate-methods.md) - Transcription callbacks\n\n### I want custom messaging between participants\n1. [Command Channel](examples/command-channel.md) - Send custom commands\n2. [API Reference](references/windows-reference.md) - Command channel methods\n\n### I want to build a Win32 native app\n1. [Win32 Integration](examples/dotnet-winforms/README.md#option-1-win32-native-c---direct-sdk) - Direct SDK + Canvas API\n2. [Video Rendering](examples/video-rendering.md) - Canvas API patterns\n3. [Production Guidelines](examples/dotnet-winforms/README.md#production-quality-review) - Best practices\n\n### I want to build a WinForms (.NET) app\n1. [WinForms Integration](examples/dotnet-winforms/README.md#option-2-winforms-c--ccli-wrapper) - C++/CLI wrapper + Raw Data\n2. [C++/CLI Patterns](examples/dotnet-winforms/README.md#ccli-wrapper-patterns-for-net-integration) - gcroot, Finalizer, LockBits\n3. [Production Guidelines](examples/dotnet-winforms/README.md#production-quality-review) - IDisposable, thread safety\n\n### I want to build a WPF (.NET) app\n1. [WPF Integration](examples/dotnet-winforms/README.md#option-3-wpf-c--ccli-wrapper) - C++/CLI + BitmapSource\n2. [Bitmap Conversion](examples/dotnet-winforms/README.md#2-bitmap--bitmapsource-conversion) - Freeze(), Dispatcher\n3. [Production Guidelines](examples/dotnet-winforms/README.md#production-quality-review) - Performance optimization\n\n### I want to use C# / .NET Framework (general)\n1. [.NET Integration Overview](examples/dotnet-winforms/README.md) - **Complete C++/CLI wrapper guide**\n2. [Raw Video Capture](examples/raw-video-capture.md) - YUV→RGB conversion patterns\n3. [Session Join Pattern](examples/session-join-pattern.md) - SDK initialization flow\n\n### I want to wrap ANY native C++ library for .NET\n1. [C++/CLI Wrapper Patterns](examples/dotnet-winforms/README.md#ccli-wrapper-patterns-for-net-integration) - **Complete 8-pattern guide**\n2. [Pattern 1: Basic Structure](examples/dotnet-winforms/README.md#pattern-1-basic-wrapper-structure) - Project setup + class layout\n3. [Pattern 3: gcroot Callbacks](examples/dotnet-winforms/README.md#pattern-3-gcrootT-for-nativemanaged-callbacks) - Native→Managed events\n4. [Pattern 4: IDisposable](examples/dotnet-winforms/README.md#pattern-4-destructor--finalizer-idisposable) - Cleanup pattern\n5. [Common Errors](examples/dotnet-winforms/README.md#common-wrapper-errors) - Troubleshooting\n\n### I want to implement a specific feature\n1. [SDK Architecture Pattern](concepts/sdk-architecture-pattern.md) - **START HERE!**\n2. [Singleton Hierarchy](concepts/singleton-hierarchy.md) - Navigate to the feature\n3. [API Reference](references/windows-reference.md) - Method signatures\n\n---\n\n## Most Critical Documents\n\n### 1. SDK Architecture Pattern (MASTER DOCUMENT)\n**[concepts/sdk-architecture-pattern.md](concepts/sdk-architecture-pattern.md)**\n\nThe universal 3-step pattern:\n1. Get singleton (SDK, helpers, session, users)\n2. Implement delegate (event callbacks)\n3. Subscribe and use\n\n### 2. Windows Message Loop (MOST COMMON ISSUE)\n**[troubleshooting/windows-message-loop.md](troubleshooting/windows-message-loop.md)**\n\n99% of \"callbacks not firing\" issues are caused by missing Windows message loop.\n\n### 3. Singleton Hierarchy (NAVIGATION MAP)\n**[concepts/singleton-hierarchy.md](concepts/singleton-hierarchy.md)**\n\n5-level deep navigation showing how to reach every feature.\n\n---\n\n## Key Learnings\n\n### Critical Discoveries:\n\n1. **Windows Message Loop is MANDATORY**\n   - SDK uses Windows message pump for callbacks\n   - Without it, callbacks are queued but never fire\n   - See: [Windows Message Loop Guide](troubleshooting/windows-message-loop.md)\n\n2. **Subscribe in onUserVideoStatusChanged, NOT onUserJoin**\n   - Video may not be ready when user joins\n   - Wait for video status change callback\n   - See: [Video Rendering](examples/video-rendering.md)\n\n3. **Two Rendering Paths**\n   - Canvas API: SDK renders to your HWND (recommended)\n   - Raw Data Pipe: You receive YUV frames (advanced)\n   - See: [Canvas vs Raw Data](concepts/canvas-vs-raw-data.md)\n\n4. **Helpers Control YOUR Streams Only**\n   - `videoHelper->startVideo()` starts YOUR camera\n   - To see others, subscribe to their Canvas/Pipe\n   - See: [Singleton Hierarchy](concepts/singleton-hierarchy.md)\n\n5. **UI Framework Integration Differs by Platform**\n   - **Win32**: Direct SDK, Canvas API (SDK renders to HWND) - best performance\n   - **WinForms**: C++/CLI wrapper, Raw Data Pipe, YUV→Bitmap, InvokeRequired\n   - **WPF**: Same wrapper + Bitmap→BitmapSource, Dispatcher, Freeze()\n   - See: [UI Framework Integration](examples/dotnet-winforms/README.md)\n\n6. **C++/CLI Wrapper Patterns (for ANY native library → .NET)**\n   - `void*` pointers - hide native types from managed headers\n   - `gcroot\u003cT^>` - prevent GC from collecting managed references in native code\n   - Finalizer + Destructor - `~Class()` and `!Class()` for IDisposable cleanup\n   - `pin_ptr` + `Marshal::Copy` - array/buffer conversion\n   - `LockBits` - 100x faster than SetPixel for image manipulation\n   - Thread marshaling - InvokeRequired (WinForms) / Dispatcher (WPF)\n   - See: [C++/CLI Wrapper Guide](examples/dotnet-winforms/README.md#ccli-wrapper-patterns-for-net-integration)\n\n7. **Audio Connection Timing**\n   - Set `audioOption.connect = false` during join\n   - Call `startAudio()` in `onSessionJoin` callback\n   - See: [Production Guidelines](examples/dotnet-winforms/README.md#production-quality-review)\n\n---\n\n## Quick Reference\n\n### \"My code won't compile\"\n→ [Build Errors Guide](troubleshooting/build-errors.md)\n\n### \"Callbacks never fire\"\n→ [Windows Message Loop](troubleshooting/windows-message-loop.md)\n\n### \"Video subscription returns error 2\"\n→ [Video Rendering](examples/video-rendering.md) - Subscribe in onUserVideoStatusChanged\n\n### \"Abstract class error\"\n→ [Delegate Methods](references/delegate-methods.md)\n\n### \"How do I implement [feature]?\"\n→ [SDK Architecture Pattern](concepts/sdk-architecture-pattern.md)\n\n### \"How do I navigate to [controller]?\"\n→ [Singleton Hierarchy](concepts/singleton-hierarchy.md)\n\n### \"What error code means what?\"\n→ [Common Issues](troubleshooting/common-issues.md)\n\n---\n\n## Document Version\n\nBased on **Zoom Video SDK for Windows v2.x**\n\n---\n\n**Happy coding!**\n\nRemember: The [SDK Architecture Pattern](concepts/sdk-architecture-pattern.md) is your key to unlocking the entire SDK. Read it first!\n\n## Operations\n\n- [RUNBOOK.md](RUNBOOK.md) - 5-minute preflight and debugging checklist.\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("video-sdk-windows-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

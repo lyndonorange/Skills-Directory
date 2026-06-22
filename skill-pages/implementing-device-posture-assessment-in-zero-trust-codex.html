@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>implementing-device-posture-assessment-in-zero-trust - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/implementing-device-posture-assessment-in-zero-trust-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>implementing-device-posture-assessment-in-zero-trust</h1>
+      <p class="description">'Implementing device posture assessment as a zero trust access control</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>implementing-device-posture-assessment-in-zero-trust</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>implementing-device-posture-assessment-in-zero-trust</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Implementing device posture assessment as a zero trust access control</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose implementing-device-posture-assessment-in-zero-trust, then write the task. Fallback prompt: Use the implementing-device-posture-assessment-in-zero-trust skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Implementing Device Posture Assessment in Zero Trust</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When enforcing device health as a prerequisite for accessing corporate applications</li>
+<li>When integrating CrowdStrike ZTA scores, Intune compliance, or Jamf device status into access decisions</li>
+<li>When implementing CISA Zero Trust Maturity Model device pillar requirements</li>
+<li>When building conditional access policies that adapt based on real-time endpoint security posture</li>
+<li>When detecting and blocking access from compromised, unmanaged, or non-compliant devices</li>
+</ul>
+<p><strong>Do not use</strong> for IoT or headless devices that cannot run posture agents, as a standalone security control without identity verification, or when real-time posture data is unavailable and stale compliance data would create false trust.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>Endpoint Detection and Response (EDR): CrowdStrike Falcon with ZTA module, or Microsoft Defender for Endpoint</li>
+<li>Mobile Device Management (MDM): Microsoft Intune, Jamf Pro, or VMware Workspace ONE</li>
+<li>Identity Provider: Microsoft Entra ID, Okta, or Ping Identity with conditional access capability</li>
+<li>ZTNA Platform: Zscaler ZPA, Cloudflare Access, Palo Alto Prisma Access, or cloud-native IAP</li>
+<li>API access to EDR/MDM platforms for posture signal ingestion</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Define Device Compliance Baselines</h4>
+<p>Establish minimum security requirements for each device category.</p>
+<pre><code># Microsoft Intune: Create device compliance policy via Graph API
+Connect-MgGraph -Scopes &quot;DeviceManagementConfiguration.ReadWrite.All&quot;
+
+# Windows 10/11 Compliance Policy
+$compliancePolicy = @{
+    &quot;@odata.type&quot; = &quot;#microsoft.graph.windows10CompliancePolicy&quot;
+    displayName = &quot;Zero Trust - Windows Compliance&quot;
+    description = &quot;Minimum device requirements for zero trust access&quot;
+    osMinimumVersion = &quot;10.0.19045&quot;
+    bitLockerEnabled = $true
+    secureBootEnabled = $true
+    codeIntegrityEnabled = $true
+    tpmRequired = $true
+    antivirusRequired = $true
+    antiSpywareRequired = $true
+    defenderEnabled = $true
+    firewallEnabled = $true
+    passwordRequired = $true
+    passwordMinimumLength = 12
+    passwordRequiredType = &quot;alphanumeric&quot;
+    storageRequireEncryption = $true
+    scheduledActionsForRule = @(
+        @{
+            ruleName = &quot;PasswordRequired&quot;
+            scheduledActionConfigurations = @(
+                @{
+                    actionType = &quot;block&quot;
+                    gracePeriodHours = 24
+                    notificationTemplateId = &quot;&quot;
+                    notificationMessageCCList = @()
+                }
+            )
+        }
+    )
+}
+
+New-MgDeviceManagementDeviceCompliancePolicy -BodyParameter $compliancePolicy
+
+# macOS Compliance Policy via Jamf Pro API
+curl -X POST &quot;https://jamf.company.com/api/v1/compliance-policies&quot; \
+  -H &quot;Authorization: Bearer ${JAMF_TOKEN}&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  --data '{
+    &quot;name&quot;: &quot;Zero Trust - macOS Compliance&quot;,
+    &quot;rules&quot;: [
+      {&quot;type&quot;: &quot;os_version&quot;, &quot;operator&quot;: &quot;&gt;=&quot;, &quot;value&quot;: &quot;14.0&quot;},
+      {&quot;type&quot;: &quot;filevault_enabled&quot;, &quot;value&quot;: true},
+      {&quot;type&quot;: &quot;firewall_enabled&quot;, &quot;value&quot;: true},
+      {&quot;type&quot;: &quot;gatekeeper_enabled&quot;, &quot;value&quot;: true},
+      {&quot;type&quot;: &quot;sip_enabled&quot;, &quot;value&quot;: true},
+      {&quot;type&quot;: &quot;auto_update_enabled&quot;, &quot;value&quot;: true},
+      {&quot;type&quot;: &quot;screen_lock_timeout&quot;, &quot;operator&quot;: &quot;&lt;=&quot;, &quot;value&quot;: 300},
+      {&quot;type&quot;: &quot;falcon_sensor_running&quot;, &quot;value&quot;: true}
+    ]
+  }'</code></pre>
+<h4>Step 2: Configure CrowdStrike Zero Trust Assessment</h4>
+<p>Enable ZTA scoring and configure score thresholds for access tiers.</p>
+<pre><code># CrowdStrike Falcon API: Query ZTA scores for all endpoints
+curl -X GET &quot;https://api.crowdstrike.com/zero-trust-assessment/entities/assessments/v1?ids=${DEVICE_AID}&quot; \
+  -H &quot;Authorization: Bearer ${CS_TOKEN}&quot; \
+  -H &quot;Content-Type: application/json&quot;
+
+# Response includes:
+# {
+#   &quot;aid&quot;: &quot;device-agent-id&quot;,
+#   &quot;assessment&quot;: {
+#     &quot;overall&quot;: 82,
+#     &quot;os&quot;: 90,
+#     &quot;sensor_config&quot;: 85,
+#     &quot;version&quot;: &quot;7.14.16703&quot;
+#   },
+#   &quot;assessment_items&quot;: {
+#     &quot;os_signals&quot;: [
+#       {&quot;signal_id&quot;: &quot;firmware_protection&quot;, &quot;meets_criteria&quot;: &quot;yes&quot;},
+#       {&quot;signal_id&quot;: &quot;disk_encryption&quot;, &quot;meets_criteria&quot;: &quot;yes&quot;},
+#       {&quot;signal_id&quot;: &quot;kernel_protection&quot;, &quot;meets_criteria&quot;: &quot;yes&quot;}
+#     ],
+#     &quot;sensor_signals&quot;: [
+#       {&quot;signal_id&quot;: &quot;sensor_version&quot;, &quot;meets_criteria&quot;: &quot;yes&quot;},
+#       {&quot;signal_id&quot;: &quot;prevention_policies&quot;, &quot;meets_criteria&quot;: &quot;yes&quot;}
+#     ]
+#   }
+# }
+
+# Define ZTA score thresholds for access tiers
+# Tier 1 (Basic Access):      ZTA &gt;= 50
+# Tier 2 (Standard Access):   ZTA &gt;= 65
+# Tier 3 (Sensitive Access):  ZTA &gt;= 80
+# Tier 4 (Critical Access):   ZTA &gt;= 90
+
+# Query devices below minimum threshold
+curl -X GET &quot;https://api.crowdstrike.com/zero-trust-assessment/queries/assessments/v1?filter=assessment.overall:&lt;50&quot; \
+  -H &quot;Authorization: Bearer ${CS_TOKEN}&quot;
+
+# CrowdStrike ZTA signals evaluated:
+# - OS patch level and version
+# - Disk encryption (BitLocker/FileVault)
+# - Sensor version and configuration
+# - Prevention policy enforcement
+# - Firmware protection (Secure Boot)
+# - Kernel protection (SIP, Code Integrity)
+# - Firewall status</code></pre>
+<h4>Step 3: Integrate Device Posture with Entra ID Conditional Access</h4>
+<p>Create conditional access policies that require compliant devices.</p>
+<pre><code># Create Conditional Access policy requiring compliant device
+Connect-MgGraph -Scopes &quot;Policy.ReadWrite.ConditionalAccess&quot;
+
+$caPolicy = @{
+    displayName = &quot;Zero Trust - Require Compliant Device&quot;
+    state = &quot;enabled&quot;
+    conditions = @{
+        applications = @{
+            includeApplications = @(&quot;All&quot;)
+        }
+        users = @{
+            includeUsers = @(&quot;All&quot;)
+            excludeGroups = @(&quot;BreakGlass-Admins-Group-ID&quot;)
+        }
+        platforms = @{
+            includePlatforms = @(&quot;all&quot;)
+        }
+        clientAppTypes = @(&quot;browser&quot;, &quot;mobileAppsAndDesktopClients&quot;)
+    }
+    grantControls = @{
+        operator = &quot;AND&quot;
+        builtInControls = @(&quot;mfa&quot;, &quot;compliantDevice&quot;)
+    }
+    sessionControls = @{
+        signInFrequency = @{
+            value = 4
+            type = &quot;hours&quot;
+            isEnabled = $true
+            authenticationType = &quot;primaryAndSecondaryAuthentication&quot;
+            frequencyInterval = &quot;timeBased&quot;
+        }
+        persistentBrowser = @{
+            mode = &quot;never&quot;
+            isEnabled = $true
+        }
+    }
+}
+
+New-MgIdentityConditionalAccessPolicy -BodyParameter $caPolicy
+
+# Create risk-based policy using device compliance + sign-in risk
+$riskPolicy = @{
+    displayName = &quot;Zero Trust - Block High Risk Sign-Ins on Non-Compliant Devices&quot;
+    state = &quot;enabled&quot;
+    conditions = @{
+        applications = @{ includeApplications = @(&quot;All&quot;) }
+        users = @{ includeUsers = @(&quot;All&quot;) }
+        signInRiskLevels = @(&quot;high&quot;, &quot;medium&quot;)
+        devices = @{
+            deviceFilter = @{
+                mode = &quot;include&quot;
+                rule = &quot;device.isCompliant -ne True&quot;
+            }
+        }
+    }
+    grantControls = @{
+        operator = &quot;OR&quot;
+        builtInControls = @(&quot;block&quot;)
+    }
+}
+
+New-MgIdentityConditionalAccessPolicy -BodyParameter $riskPolicy</code></pre>
+<h4>Step 4: Configure Okta Device Trust with CrowdStrike Integration</h4>
+<p>Set up Okta device trust policies using CrowdStrike posture signals.</p>
+<pre><code># Okta: Configure CrowdStrike device trust integration
+# Admin Console &gt; Security &gt; Device Integrations &gt; Add Integration
+
+# Okta API: Create device assurance policy
+curl -X POST &quot;https://company.okta.com/api/v1/device-assurances&quot; \
+  -H &quot;Authorization: SSWS ${OKTA_API_TOKEN}&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  --data '{
+    &quot;name&quot;: &quot;Corporate Device Assurance&quot;,
+    &quot;platform&quot;: &quot;WINDOWS&quot;,
+    &quot;osVersion&quot;: {
+      &quot;minimum&quot;: &quot;10.0.19045&quot;
+    },
+    &quot;diskEncryptionType&quot;: {
+      &quot;include&quot;: [&quot;ALL_INTERNAL_VOLUMES&quot;]
+    },
+    &quot;screenLockType&quot;: {
+      &quot;include&quot;: [&quot;BIOMETRIC&quot;, &quot;PASSCODE&quot;]
+    },
+    &quot;secureHardwarePresent&quot;: true,
+    &quot;thirdPartySignalProviders&quot;: {
+      &quot;dtc&quot;: {
+        &quot;browserVersion&quot;: {
+          &quot;minimum&quot;: &quot;120.0&quot;
+        },
+        &quot;builtInDnsClientEnabled&quot;: true,
+        &quot;chromeRemoteDesktopAppBlocked&quot;: true,
+        &quot;crowdStrikeCustomerId&quot;: &quot;CS_CUSTOMER_ID&quot;,
+        &quot;crowdStrikeAgentId&quot;: &quot;REQUIRED&quot;,
+        &quot;crowdStrikeVerifiedState&quot;: {
+          &quot;include&quot;: [&quot;RUNNING&quot;]
+        }
+      }
+    }
+  }'
+
+# Create Okta authentication policy with device assurance
+curl -X POST &quot;https://company.okta.com/api/v1/policies&quot; \
+  -H &quot;Authorization: SSWS ${OKTA_API_TOKEN}&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  --data '{
+    &quot;name&quot;: &quot;Zero Trust Application Policy&quot;,
+    &quot;type&quot;: &quot;ACCESS_POLICY&quot;,
+    &quot;conditions&quot;: null,
+    &quot;rules&quot;: [
+      {
+        &quot;name&quot;: &quot;Managed Device Access&quot;,
+        &quot;conditions&quot;: {
+          &quot;device&quot;: {
+            &quot;assurance&quot;: {
+              &quot;include&quot;: [&quot;DEVICE_ASSURANCE_POLICY_ID&quot;]
+            },
+            &quot;managed&quot;: true,
+            &quot;registered&quot;: true
+          },
+          &quot;people&quot;: {
+            &quot;groups&quot;: {&quot;include&quot;: [&quot;EMPLOYEES_GROUP_ID&quot;]}
+          }
+        },
+        &quot;actions&quot;: {
+          &quot;appSignOn&quot;: {
+            &quot;access&quot;: &quot;ALLOW&quot;,
+            &quot;verificationMethod&quot;: {
+              &quot;factorMode&quot;: &quot;1FA&quot;,
+              &quot;type&quot;: &quot;ASSURANCE&quot;
+            }
+          }
+        }
+      },
+      {
+        &quot;name&quot;: &quot;Unmanaged Device - Block&quot;,
+        &quot;conditions&quot;: {
+          &quot;device&quot;: { &quot;managed&quot;: false }
+        },
+        &quot;actions&quot;: {
+          &quot;appSignOn&quot;: { &quot;access&quot;: &quot;DENY&quot; }
+        }
+      }
+    ]
+  }'</code></pre>
+<h4>Step 5: Implement Continuous Posture Monitoring</h4>
+<p>Set up real-time monitoring of device compliance state changes.</p>
+<pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Monitor device posture compliance drift in real-time.&quot;&quot;&quot;
+
+import requests
+import time
+import json
+from datetime import datetime, timezone
+
+CROWDSTRIKE_BASE = &quot;https://api.crowdstrike.com&quot;
+INTUNE_BASE = &quot;https://graph.microsoft.com/v1.0&quot;
+
+def get_cs_token(client_id: str, client_secret: str) -&gt; str:
+    resp = requests.post(f&quot;{CROWDSTRIKE_BASE}/oauth2/token&quot;, data={
+        &quot;client_id&quot;: client_id,
+        &quot;client_secret&quot;: client_secret
+    })
+    return resp.json()[&quot;access_token&quot;]
+
+def get_low_zta_devices(token: str, threshold: int = 50) -&gt; list:
+    resp = requests.get(
+        f&quot;{CROWDSTRIKE_BASE}/zero-trust-assessment/queries/assessments/v1&quot;,
+        headers={&quot;Authorization&quot;: f&quot;Bearer {token}&quot;},
+        params={&quot;filter&quot;: f&quot;assessment.overall:&lt;{threshold}&quot;, &quot;limit&quot;: 100}
+    )
+    return resp.json().get(&quot;resources&quot;, [])
+
+def get_intune_noncompliant(token: str) -&gt; list:
+    resp = requests.get(
+        f&quot;{INTUNE_BASE}/deviceManagement/managedDevices&quot;,
+        headers={&quot;Authorization&quot;: f&quot;Bearer {token}&quot;},
+        params={
+            &quot;$filter&quot;: &quot;complianceState eq 'noncompliant'&quot;,
+            &quot;$select&quot;: &quot;id,deviceName,userPrincipalName,complianceState,lastSyncDateTime,operatingSystem&quot;
+        }
+    )
+    return resp.json().get(&quot;value&quot;, [])
+
+def check_posture_drift(cs_token: str, intune_token: str):
+    print(f&quot;\n[{datetime.now(timezone.utc).isoformat()}] Device Posture Check&quot;)
+    print(&quot;=&quot; * 60)
+
+    low_zta = get_low_zta_devices(cs_token, threshold=50)
+    print(f&quot;CrowdStrike ZTA &lt; 50: {len(low_zta)} devices&quot;)
+
+    noncompliant = get_intune_noncompliant(intune_token)
+    print(f&quot;Intune Non-Compliant: {len(noncompliant)} devices&quot;)
+
+    for device in noncompliant[:10]:
+        print(f&quot;  - {device['deviceName']} ({device['userPrincipalName']}): &quot;
+              f&quot;{device['complianceState']} | Last sync: {device['lastSyncDateTime']}&quot;)
+
+    return {&quot;low_zta_count&quot;: len(low_zta), &quot;noncompliant_count&quot;: len(noncompliant)}</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | Device Posture | Collection of endpoint security attributes (OS version, encryption, EDR status, patch level) evaluated before granting access | | CrowdStrike ZTA Score | Numerical score (1-100) calculated by CrowdStrike Falcon assessing endpoint security posture based on OS signals and sensor configuration | | Device Compliance Policy | MDM-defined rules specifying minimum security requirements (encryption, PIN, OS version) that devices must meet | | Conditional Access | Policy engine (Entra ID, Okta) that evaluates user identity, device compliance, location, and risk before allowing access | | Device Trust | Verification that an endpoint is managed, enrolled, and meets security baselines before treating it as trusted | | Posture Drift | Degradation of device security posture over time (expired patches, disabled encryption) that should trigger access revocation |</p>
+<h3>Tools &amp; Systems</h3>
+<ul>
+<li><strong>CrowdStrike Falcon ZTA</strong>: Real-time endpoint posture scoring based on OS and sensor security signals</li>
+<li><strong>Microsoft Intune</strong>: MDM platform enforcing device compliance policies and reporting to Entra ID Conditional Access</li>
+<li><strong>Jamf Pro</strong>: Apple device management with compliance rules for macOS and iOS endpoints</li>
+<li><strong>Microsoft Entra ID Conditional Access</strong>: Policy engine consuming Intune compliance and risk signals for access decisions</li>
+<li><strong>Okta Device Trust</strong>: Device assurance policies integrating with CrowdStrike, Chrome Enterprise, and MDM platforms</li>
+<li><strong>Cloudflare Device Posture</strong>: WARP client-based posture checks for disk encryption, OS version, and third-party EDR</li>
+</ul>
+<h3>Common Scenarios</h3>
+<h4>Scenario: Enforcing Device Compliance for 2,000 Endpoints Across Windows and macOS</h4>
+<p><strong>Context</strong>: A healthcare company with 2,000 endpoints (70% Windows, 30% macOS) must enforce HIPAA-compliant device posture before allowing access to patient data systems. Devices are managed by Intune (Windows) and Jamf (macOS) with CrowdStrike Falcon deployed on all endpoints.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Define Windows compliance policy in Intune: BitLocker, Secure Boot, TPM, Defender enabled, OS &gt;= 10.0.19045</li>
+<li>Define macOS compliance policy in Jamf: FileVault, Gatekeeper, SIP, Firewall, OS &gt;= 14.0</li>
+<li>Configure CrowdStrike ZTA thresholds: &gt;= 70 for general apps, &gt;= 85 for patient data systems</li>
+<li>Create Entra ID Conditional Access policies requiring compliant device + MFA for all cloud apps</li>
+<li>Configure 24-hour grace period for newly non-compliant devices before blocking</li>
+<li>Set up weekly compliance report for IT showing non-compliant devices and remediation actions</li>
+<li>Implement automated remediation via Intune: push BitLocker enablement, deploy pending patches</li>
+</ol>
+<p><strong>Pitfalls</strong>: Grace periods must be long enough for IT to remediate but short enough to limit risk exposure. CrowdStrike ZTA scores can fluctuate with sensor updates; avoid setting thresholds too aggressively initially. BYOD devices may lack MDM enrollment; provide a separate Browser Access path with reduced functionality for unmanaged devices.</p>
+<h3>Output Format</h3>
+<pre><code>Device Posture Assessment Report
+==================================================
+Organization: HealthCorp
+Report Date: 2026-02-23
+Total Managed Devices: 2,000
+
+COMPLIANCE BY PLATFORM:
+  Windows (1,400 devices):
+    Compliant:              1,302 (93.0%)
+    Non-compliant:            98 (7.0%)
+    Top Issue: Missing patches (45), BitLocker disabled (23)
+
+  macOS (600 devices):
+    Compliant:                567 (94.5%)
+    Non-compliant:             33 (5.5%)
+    Top Issue: OS outdated (18), FileVault disabled (8)
+
+CROWDSTRIKE ZTA SCORES:
+  Average Score:              78.4
+  Devices &gt;= 85 (Critical):  1,456 (72.8%)
+  Devices &gt;= 70 (Standard):  1,812 (90.6%)
+  Devices &lt; 50 (Blocked):       34 (1.7%)
+
+CONDITIONAL ACCESS IMPACT (last 7 days):
+  Total sign-in attempts:    45,678
+  Blocked by posture:           312 (0.7%)
+  Remediated within 24h:        289 (92.6%)
+  Still non-compliant:           23
+
+POSTURE DRIFT ALERTS:
+  Encryption disabled:            5
+  EDR sensor stopped:             3
+  OS downgraded:                  1</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: implementing-device-posture-assessment-in-zero-trust\ndisplay_name: implementing-device-posture-assessment-in-zero-trust\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# implementing-device-posture-assessment-in-zero-trust - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `implementing-device-posture-assessment-in-zero-trust` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When enforcing device health as a prerequisite for accessing corporate applications\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose implementing-device-posture-assessment-in-zero-trust, then write the task. Fallback prompt: Use the implementing-device-posture-assessment-in-zero-trust skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `implementing-device-posture-assessment-in-zero-trust` |\n| Canonical name | `implementing-device-posture-assessment-in-zero-trust` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\n- When enforcing device health as a prerequisite for accessing corporate applications\n\n## Original SKILL.md\n\n---\nname: implementing-device-posture-assessment-in-zero-trust\ndescription: 'Implementing device posture assessment as a zero trust access control\n  by integrating endpoint health signals from CrowdStrike ZTA, Microsoft Intune, and\n  Jamf into conditional access policies that enforce compliance before granting resource\n  access.\n\n  '\ndomain: cybersecurity\nsubdomain: zero-trust-architecture\ntags:\n- device-posture\n- zero-trust\n- endpoint-compliance\n- crowdstrike-zta\n- intune\n- conditional-access\n- jamf\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- PR.AA-01\n- PR.AA-05\n- PR.IR-01\n- GV.PO-01\nmitre_attack:\n- T1078\n- T1190\n- T1059\n---\n\n# Implementing Device Posture Assessment in Zero Trust\n\n## When to Use\n\n- When enforcing device health as a prerequisite for accessing corporate applications\n- When integrating CrowdStrike ZTA scores, Intune compliance, or Jamf device status into access decisions\n- When implementing CISA Zero Trust Maturity Model device pillar requirements\n- When building conditional access policies that adapt based on real-time endpoint security posture\n- When detecting and blocking access from compromised, unmanaged, or non-compliant devices\n\n**Do not use** for IoT or headless devices that cannot run posture agents, as a standalone security control without identity verification, or when real-time posture data is unavailable and stale compliance data would create false trust.\n\n## Prerequisites\n\n- Endpoint Detection and Response (EDR): CrowdStrike Falcon with ZTA module, or Microsoft Defender for Endpoint\n- Mobile Device Management (MDM): Microsoft Intune, Jamf Pro, or VMware Workspace ONE\n- Identity Provider: Microsoft Entra ID, Okta, or Ping Identity with conditional access capability\n- ZTNA Platform: Zscaler ZPA, Cloudflare Access, Palo Alto Prisma Access, or cloud-native IAP\n- API access to EDR/MDM platforms for posture signal ingestion\n\n## Workflow\n\n### Step 1: Define Device Compliance Baselines\n\nEstablish minimum security requirements for each device category.\n\n```powershell\n# Microsoft Intune: Create device compliance policy via Graph API\nConnect-MgGraph -Scopes \"DeviceManagementConfiguration.ReadWrite.All\"\n\n# Windows 10/11 Compliance Policy\n$compliancePolicy = @{\n    \"@odata.type\" = \"#microsoft.graph.windows10CompliancePolicy\"\n    displayName = \"Zero Trust - Windows Compliance\"\n    description = \"Minimum device requirements for zero trust access\"\n    osMinimumVersion = \"10.0.19045\"\n    bitLockerEnabled = $true\n    secureBootEnabled = $true\n    codeIntegrityEnabled = $true\n    tpmRequired = $true\n    antivirusRequired = $true\n    antiSpywareRequired = $true\n    defenderEnabled = $true\n    firewallEnabled = $true\n    passwordRequired = $true\n    passwordMinimumLength = 12\n    passwordRequiredType = \"alphanumeric\"\n    storageRequireEncryption = $true\n    scheduledActionsForRule = @(\n        @{\n            ruleName = \"PasswordRequired\"\n            scheduledActionConfigurations = @(\n                @{\n                    actionType = \"block\"\n                    gracePeriodHours = 24\n                    notificationTemplateId = \"\"\n                    notificationMessageCCList = @()\n                }\n            )\n        }\n    )\n}\n\nNew-MgDeviceManagementDeviceCompliancePolicy -BodyParameter $compliancePolicy\n\n# macOS Compliance Policy via Jamf Pro API\ncurl -X POST \"https://jamf.company.com/api/v1/compliance-policies\" \\\n  -H \"Authorization: Bearer ${JAMF_TOKEN}\" \\\n  -H \"Content-Type: application/json\" \\\n  --data '{\n    \"name\": \"Zero Trust - macOS Compliance\",\n    \"rules\": [\n      {\"type\": \"os_version\", \"operator\": \">=\", \"value\": \"14.0\"},\n      {\"type\": \"filevault_enabled\", \"value\": true},\n      {\"type\": \"firewall_enabled\", \"value\": true},\n      {\"type\": \"gatekeeper_enabled\", \"value\": true},\n      {\"type\": \"sip_enabled\", \"value\": true},\n      {\"type\": \"auto_update_enabled\", \"value\": true},\n      {\"type\": \"screen_lock_timeout\", \"operator\": \"\u003c=\", \"value\": 300},\n      {\"type\": \"falcon_sensor_running\", \"value\": true}\n    ]\n  }'\n```\n\n### Step 2: Configure CrowdStrike Zero Trust Assessment\n\nEnable ZTA scoring and configure score thresholds for access tiers.\n\n```bash\n# CrowdStrike Falcon API: Query ZTA scores for all endpoints\ncurl -X GET \"https://api.crowdstrike.com/zero-trust-assessment/entities/assessments/v1?ids=${DEVICE_AID}\" \\\n  -H \"Authorization: Bearer ${CS_TOKEN}\" \\\n  -H \"Content-Type: application/json\"\n\n# Response includes:\n# {\n#   \"aid\": \"device-agent-id\",\n#   \"assessment\": {\n#     \"overall\": 82,\n#     \"os\": 90,\n#     \"sensor_config\": 85,\n#     \"version\": \"7.14.16703\"\n#   },\n#   \"assessment_items\": {\n#     \"os_signals\": [\n#       {\"signal_id\": \"firmware_protection\", \"meets_criteria\": \"yes\"},\n#       {\"signal_id\": \"disk_encryption\", \"meets_criteria\": \"yes\"},\n#       {\"signal_id\": \"kernel_protection\", \"meets_criteria\": \"yes\"}\n#     ],\n#     \"sensor_signals\": [\n#       {\"signal_id\": \"sensor_version\", \"meets_criteria\": \"yes\"},\n#       {\"signal_id\": \"prevention_policies\", \"meets_criteria\": \"yes\"}\n#     ]\n#   }\n# }\n\n# Define ZTA score thresholds for access tiers\n# Tier 1 (Basic Access):      ZTA >= 50\n# Tier 2 (Standard Access):   ZTA >= 65\n# Tier 3 (Sensitive Access):  ZTA >= 80\n# Tier 4 (Critical Access):   ZTA >= 90\n\n# Query devices below minimum threshold\ncurl -X GET \"https://api.crowdstrike.com/zero-trust-assessment/queries/assessments/v1?filter=assessment.overall:\u003c50\" \\\n  -H \"Authorization: Bearer ${CS_TOKEN}\"\n\n# CrowdStrike ZTA signals evaluated:\n# - OS patch level and version\n# - Disk encryption (BitLocker/FileVault)\n# - Sensor version and configuration\n# - Prevention policy enforcement\n# - Firmware protection (Secure Boot)\n# - Kernel protection (SIP, Code Integrity)\n# - Firewall status\n```\n\n### Step 3: Integrate Device Posture with Entra ID Conditional Access\n\nCreate conditional access policies that require compliant devices.\n\n```powershell\n# Create Conditional Access policy requiring compliant device\nConnect-MgGraph -Scopes \"Policy.ReadWrite.ConditionalAccess\"\n\n$caPolicy = @{\n    displayName = \"Zero Trust - Require Compliant Device\"\n    state = \"enabled\"\n    conditions = @{\n        applications = @{\n            includeApplications = @(\"All\")\n        }\n        users = @{\n            includeUsers = @(\"All\")\n            excludeGroups = @(\"BreakGlass-Admins-Group-ID\")\n        }\n        platforms = @{\n            includePlatforms = @(\"all\")\n        }\n        clientAppTypes = @(\"browser\", \"mobileAppsAndDesktopClients\")\n    }\n    grantControls = @{\n        operator = \"AND\"\n        builtInControls = @(\"mfa\", \"compliantDevice\")\n    }\n    sessionControls = @{\n        signInFrequency = @{\n            value = 4\n            type = \"hours\"\n            isEnabled = $true\n            authenticationType = \"primaryAndSecondaryAuthentication\"\n            frequencyInterval = \"timeBased\"\n        }\n        persistentBrowser = @{\n            mode = \"never\"\n            isEnabled = $true\n        }\n    }\n}\n\nNew-MgIdentityConditionalAccessPolicy -BodyParameter $caPolicy\n\n# Create risk-based policy using device compliance + sign-in risk\n$riskPolicy = @{\n    displayName = \"Zero Trust - Block High Risk Sign-Ins on Non-Compliant Devices\"\n    state = \"enabled\"\n    conditions = @{\n        applications = @{ includeApplications = @(\"All\") }\n        users = @{ includeUsers = @(\"All\") }\n        signInRiskLevels = @(\"high\", \"medium\")\n        devices = @{\n            deviceFilter = @{\n                mode = \"include\"\n                rule = \"device.isCompliant -ne True\"\n            }\n        }\n    }\n    grantControls = @{\n        operator = \"OR\"\n        builtInControls = @(\"block\")\n    }\n}\n\nNew-MgIdentityConditionalAccessPolicy -BodyParameter $riskPolicy\n```\n\n### Step 4: Configure Okta Device Trust with CrowdStrike Integration\n\nSet up Okta device trust policies using CrowdStrike posture signals.\n\n```bash\n# Okta: Configure CrowdStrike device trust integration\n# Admin Console > Security > Device Integrations > Add Integration\n\n# Okta API: Create device assurance policy\ncurl -X POST \"https://company.okta.com/api/v1/device-assurances\" \\\n  -H \"Authorization: SSWS ${OKTA_API_TOKEN}\" \\\n  -H \"Content-Type: application/json\" \\\n  --data '{\n    \"name\": \"Corporate Device Assurance\",\n    \"platform\": \"WINDOWS\",\n    \"osVersion\": {\n      \"minimum\": \"10.0.19045\"\n    },\n    \"diskEncryptionType\": {\n      \"include\": [\"ALL_INTERNAL_VOLUMES\"]\n    },\n    \"screenLockType\": {\n      \"include\": [\"BIOMETRIC\", \"PASSCODE\"]\n    },\n    \"secureHardwarePresent\": true,\n    \"thirdPartySignalProviders\": {\n      \"dtc\": {\n        \"browserVersion\": {\n          \"minimum\": \"120.0\"\n        },\n        \"builtInDnsClientEnabled\": true,\n        \"chromeRemoteDesktopAppBlocked\": true,\n        \"crowdStrikeCustomerId\": \"CS_CUSTOMER_ID\",\n        \"crowdStrikeAgentId\": \"REQUIRED\",\n        \"crowdStrikeVerifiedState\": {\n          \"include\": [\"RUNNING\"]\n        }\n      }\n    }\n  }'\n\n# Create Okta authentication policy with device assurance\ncurl -X POST \"https://company.okta.com/api/v1/policies\" \\\n  -H \"Authorization: SSWS ${OKTA_API_TOKEN}\" \\\n  -H \"Content-Type: application/json\" \\\n  --data '{\n    \"name\": \"Zero Trust Application Policy\",\n    \"type\": \"ACCESS_POLICY\",\n    \"conditions\": null,\n    \"rules\": [\n      {\n        \"name\": \"Managed Device Access\",\n        \"conditions\": {\n          \"device\": {\n            \"assurance\": {\n              \"include\": [\"DEVICE_ASSURANCE_POLICY_ID\"]\n            },\n            \"managed\": true,\n            \"registered\": true\n          },\n          \"people\": {\n            \"groups\": {\"include\": [\"EMPLOYEES_GROUP_ID\"]}\n          }\n        },\n        \"actions\": {\n          \"appSignOn\": {\n            \"access\": \"ALLOW\",\n            \"verificationMethod\": {\n              \"factorMode\": \"1FA\",\n              \"type\": \"ASSURANCE\"\n            }\n          }\n        }\n      },\n      {\n        \"name\": \"Unmanaged Device - Block\",\n        \"conditions\": {\n          \"device\": { \"managed\": false }\n        },\n        \"actions\": {\n          \"appSignOn\": { \"access\": \"DENY\" }\n        }\n      }\n    ]\n  }'\n```\n\n### Step 5: Implement Continuous Posture Monitoring\n\nSet up real-time monitoring of device compliance state changes.\n\n```python\n#!/usr/bin/env python3\n\"\"\"Monitor device posture compliance drift in real-time.\"\"\"\n\nimport requests\nimport time\nimport json\nfrom datetime import datetime, timezone\n\nCROWDSTRIKE_BASE = \"https://api.crowdstrike.com\"\nINTUNE_BASE = \"https://graph.microsoft.com/v1.0\"\n\ndef get_cs_token(client_id: str, client_secret: str) -> str:\n    resp = requests.post(f\"{CROWDSTRIKE_BASE}/oauth2/token\", data={\n        \"client_id\": client_id,\n        \"client_secret\": client_secret\n    })\n    return resp.json()[\"access_token\"]\n\ndef get_low_zta_devices(token: str, threshold: int = 50) -> list:\n    resp = requests.get(\n        f\"{CROWDSTRIKE_BASE}/zero-trust-assessment/queries/assessments/v1\",\n        headers={\"Authorization\": f\"Bearer {token}\"},\n        params={\"filter\": f\"assessment.overall:\u003c{threshold}\", \"limit\": 100}\n    )\n    return resp.json().get(\"resources\", [])\n\ndef get_intune_noncompliant(token: str) -> list:\n    resp = requests.get(\n        f\"{INTUNE_BASE}/deviceManagement/managedDevices\",\n        headers={\"Authorization\": f\"Bearer {token}\"},\n        params={\n            \"$filter\": \"complianceState eq 'noncompliant'\",\n            \"$select\": \"id,deviceName,userPrincipalName,complianceState,lastSyncDateTime,operatingSystem\"\n        }\n    )\n    return resp.json().get(\"value\", [])\n\ndef check_posture_drift(cs_token: str, intune_token: str):\n    print(f\"\\n[{datetime.now(timezone.utc).isoformat()}] Device Posture Check\")\n    print(\"=\" * 60)\n\n    low_zta = get_low_zta_devices(cs_token, threshold=50)\n    print(f\"CrowdStrike ZTA \u003c 50: {len(low_zta)} devices\")\n\n    noncompliant = get_intune_noncompliant(intune_token)\n    print(f\"Intune Non-Compliant: {len(noncompliant)} devices\")\n\n    for device in noncompliant[:10]:\n        print(f\"  - {device['deviceName']} ({device['userPrincipalName']}): \"\n              f\"{device['complianceState']} | Last sync: {device['lastSyncDateTime']}\")\n\n    return {\"low_zta_count\": len(low_zta), \"noncompliant_count\": len(noncompliant)}\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| Device Posture | Collection of endpoint security attributes (OS version, encryption, EDR status, patch level) evaluated before granting access |\n| CrowdStrike ZTA Score | Numerical score (1-100) calculated by CrowdStrike Falcon assessing endpoint security posture based on OS signals and sensor configuration |\n| Device Compliance Policy | MDM-defined rules specifying minimum security requirements (encryption, PIN, OS version) that devices must meet |\n| Conditional Access | Policy engine (Entra ID, Okta) that evaluates user identity, device compliance, location, and risk before allowing access |\n| Device Trust | Verification that an endpoint is managed, enrolled, and meets security baselines before treating it as trusted |\n| Posture Drift | Degradation of device security posture over time (expired patches, disabled encryption) that should trigger access revocation |\n\n## Tools & Systems\n\n- **CrowdStrike Falcon ZTA**: Real-time endpoint posture scoring based on OS and sensor security signals\n- **Microsoft Intune**: MDM platform enforcing device compliance policies and reporting to Entra ID Conditional Access\n- **Jamf Pro**: Apple device management with compliance rules for macOS and iOS endpoints\n- **Microsoft Entra ID Conditional Access**: Policy engine consuming Intune compliance and risk signals for access decisions\n- **Okta Device Trust**: Device assurance policies integrating with CrowdStrike, Chrome Enterprise, and MDM platforms\n- **Cloudflare Device Posture**: WARP client-based posture checks for disk encryption, OS version, and third-party EDR\n\n## Common Scenarios\n\n### Scenario: Enforcing Device Compliance for 2,000 Endpoints Across Windows and macOS\n\n**Context**: A healthcare company with 2,000 endpoints (70% Windows, 30% macOS) must enforce HIPAA-compliant device posture before allowing access to patient data systems. Devices are managed by Intune (Windows) and Jamf (macOS) with CrowdStrike Falcon deployed on all endpoints.\n\n**Approach**:\n1. Define Windows compliance policy in Intune: BitLocker, Secure Boot, TPM, Defender enabled, OS >= 10.0.19045\n2. Define macOS compliance policy in Jamf: FileVault, Gatekeeper, SIP, Firewall, OS >= 14.0\n3. Configure CrowdStrike ZTA thresholds: >= 70 for general apps, >= 85 for patient data systems\n4. Create Entra ID Conditional Access policies requiring compliant device + MFA for all cloud apps\n5. Configure 24-hour grace period for newly non-compliant devices before blocking\n6. Set up weekly compliance report for IT showing non-compliant devices and remediation actions\n7. Implement automated remediation via Intune: push BitLocker enablement, deploy pending patches\n\n**Pitfalls**: Grace periods must be long enough for IT to remediate but short enough to limit risk exposure. CrowdStrike ZTA scores can fluctuate with sensor updates; avoid setting thresholds too aggressively initially. BYOD devices may lack MDM enrollment; provide a separate Browser Access path with reduced functionality for unmanaged devices.\n\n## Output Format\n\n```\nDevice Posture Assessment Report\n==================================================\nOrganization: HealthCorp\nReport Date: 2026-02-23\nTotal Managed Devices: 2,000\n\nCOMPLIANCE BY PLATFORM:\n  Windows (1,400 devices):\n    Compliant:              1,302 (93.0%)\n    Non-compliant:            98 (7.0%)\n    Top Issue: Missing patches (45), BitLocker disabled (23)\n\n  macOS (600 devices):\n    Compliant:                567 (94.5%)\n    Non-compliant:             33 (5.5%)\n    Top Issue: OS outdated (18), FileVault disabled (8)\n\nCROWDSTRIKE ZTA SCORES:\n  Average Score:              78.4\n  Devices >= 85 (Critical):  1,456 (72.8%)\n  Devices >= 70 (Standard):  1,812 (90.6%)\n  Devices \u003c 50 (Blocked):       34 (1.7%)\n\nCONDITIONAL ACCESS IMPACT (last 7 days):\n  Total sign-in attempts:    45,678\n  Blocked by posture:           312 (0.7%)\n  Remediated within 24h:        289 (92.6%)\n  Still non-compliant:           23\n\nPOSTURE DRIFT ALERTS:\n  Encryption disabled:            5\n  EDR sensor stopped:             3\n  OS downgraded:                  1\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("implementing-device-posture-assessment-in-zero-trust-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

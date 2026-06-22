@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>implementing-iec-62443-security-zones - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/implementing-iec-62443-security-zones-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>implementing-iec-62443-security-zones</h1>
+      <p class="description">'This skill covers designing and implementing security zones and conduits</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>implementing-iec-62443-security-zones</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>implementing-iec-62443-security-zones</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'This skill covers designing and implementing security zones and conduits</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose implementing-iec-62443-security-zones, then write the task. Fallback prompt: Use the implementing-iec-62443-security-zones skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Implementing IEC 62443 Security Zones</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When designing a greenfield OT network architecture for a new industrial facility</li>
+<li>When retrofitting security zones into an existing flat OT network after an assessment finding</li>
+<li>When implementing network segmentation to comply with IEC 62443-3-2 certification requirements</li>
+<li>When upgrading from basic VLAN segmentation to policy-enforced zone/conduit architecture</li>
+<li>When an IT/OT convergence project requires defining security boundaries between enterprise and operational networks</li>
+</ul>
+<p><strong>Do not use</strong> for IT-only network segmentation (see implementing-network-microsegmentation), for cloud-native workload segmentation (see securing-kubernetes-on-cloud), or for physical security zone design without a cyber component.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>Completed OT network security assessment with asset inventory and traffic flow analysis</li>
+<li>Understanding of IEC 62443-3-2 zone/conduit design process and the Purdue Reference Model</li>
+<li>Industrial firewalls capable of deep packet inspection for OT protocols (Palo Alto with OT Security, Fortinet OT, Cisco ISA-3000)</li>
+<li>Network switches supporting VLANs, 802.1Q trunking, and port security</li>
+<li>Approval from operations management for network architecture changes during maintenance windows</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Perform Zone Partitioning Based on Risk Assessment</h4>
+<p>Partition the IACS into zones based on functional requirements, security requirements, criticality, and consequence of compromise. Each zone contains assets with common security requirements.</p>
+<pre><code># IEC 62443-3-2 Zone Definition Document
+facility: &quot;Petrochemical Refinery - Unit 3&quot;
+assessment_date: &quot;2026-02-23&quot;
+standard: &quot;IEC 62443-3-2:2020&quot;
+
+zones:
+  - zone_id: &quot;Z1-SIS&quot;
+    name: &quot;Safety Instrumented Systems&quot;
+    purdue_level: 1
+    security_level_target: &quot;SL 3&quot;
+    criticality: &quot;Safety Critical&quot;
+    assets:
+      - &quot;Triconex 3008 Safety Controller (SIS-01)&quot;
+      - &quot;Triconex 3008 Safety Controller (SIS-02)&quot;
+      - &quot;SIS Engineering Workstation&quot;
+    security_requirements:
+      - &quot;Physically isolated from all other zones (air-gapped)&quot;
+      - &quot;Dedicated engineering workstation with removable media controls&quot;
+      - &quot;No remote access permitted under any circumstances&quot;
+      - &quot;Change management requires dual authorization&quot;
+    allowed_conduits: []  # No network conduits - fully air-gapped
+
+  - zone_id: &quot;Z2-BPCS&quot;
+    name: &quot;Basic Process Control System&quot;
+    purdue_level: &quot;1-2&quot;
+    security_level_target: &quot;SL 2&quot;
+    criticality: &quot;High&quot;
+    assets:
+      - &quot;Allen-Bradley ControlLogix PLCs (PLC-01 through PLC-12)&quot;
+      - &quot;Rockwell FactoryTalk View HMIs (HMI-01 through HMI-06)&quot;
+      - &quot;Engineering Workstation (EWS-01)&quot;
+    security_requirements:
+      - &quot;Industrial firewall at zone boundary with protocol inspection&quot;
+      - &quot;Read-only access from Level 3 for data acquisition&quot;
+      - &quot;Write access restricted to engineering workstation subnet&quot;
+      - &quot;USB ports disabled on HMIs&quot;
+    allowed_conduits: [&quot;C1-BPCS-OPS&quot;]
+
+  - zone_id: &quot;Z3-OPS&quot;
+    name: &quot;Site Operations&quot;
+    purdue_level: 3
+    security_level_target: &quot;SL 2&quot;
+    criticality: &quot;Medium&quot;
+    assets:
+      - &quot;OSIsoft PI Historian (HIST-01)&quot;
+      - &quot;OPC UA Server (OPC-01)&quot;
+      - &quot;MES Application Server (MES-01)&quot;
+      - &quot;Alarm Management Server (ALM-01)&quot;
+    security_requirements:
+      - &quot;Firewall between operations and control zones&quot;
+      - &quot;Firewall between operations and DMZ&quot;
+      - &quot;No direct internet access&quot;
+      - &quot;Antivirus with OT-approved signatures&quot;
+    allowed_conduits: [&quot;C1-BPCS-OPS&quot;, &quot;C2-OPS-DMZ&quot;]
+
+  - zone_id: &quot;Z4-DMZ&quot;
+    name: &quot;Industrial Demilitarized Zone&quot;
+    purdue_level: 3.5
+    security_level_target: &quot;SL 2&quot;
+    criticality: &quot;Medium&quot;
+    assets:
+      - &quot;PI-to-PI Interface (DMZ-HIST-01)&quot;
+      - &quot;Patch Management Server (DMZ-WSUS-01)&quot;
+      - &quot;Remote Access Jump Server (DMZ-JUMP-01)&quot;
+      - &quot;Data Diode - Waterfall Security (DMZ-DD-01)&quot;
+    security_requirements:
+      - &quot;Dual-homed firewalls on both sides&quot;
+      - &quot;No direct traffic traversal - all connections terminate in DMZ&quot;
+      - &quot;Data diode for unidirectional historian replication&quot;
+      - &quot;Jump server with MFA for remote access&quot;
+    allowed_conduits: [&quot;C2-OPS-DMZ&quot;, &quot;C3-DMZ-ENT&quot;]
+
+  - zone_id: &quot;Z5-ENT&quot;
+    name: &quot;Enterprise Network&quot;
+    purdue_level: 4
+    security_level_target: &quot;SL 1&quot;
+    criticality: &quot;Low (from OT perspective)&quot;
+    assets:
+      - &quot;Corporate systems accessing OT data&quot;
+    security_requirements:
+      - &quot;Firewall between enterprise and DMZ&quot;
+      - &quot;No direct access to any OT zone below DMZ&quot;
+    allowed_conduits: [&quot;C3-DMZ-ENT&quot;]
+
+conduits:
+  - conduit_id: &quot;C1-BPCS-OPS&quot;
+    name: &quot;Control-to-Operations Conduit&quot;
+    connects: [&quot;Z2-BPCS&quot;, &quot;Z3-OPS&quot;]
+    security_level: &quot;SL 2&quot;
+    protocols_allowed:
+      - protocol: &quot;OPC UA&quot;
+        port: 4840
+        direction: &quot;Z2 -&gt; Z3 (read only)&quot;
+        security_mode: &quot;SignAndEncrypt&quot;
+      - protocol: &quot;Modbus/TCP&quot;
+        port: 502
+        direction: &quot;Z3 -&gt; Z2 (read only, FC 3/4 only)&quot;
+        security_mode: &quot;Firewall-enforced function code filtering&quot;
+    controls:
+      - &quot;Industrial firewall with OT protocol DPI&quot;
+      - &quot;Allowlisted source/destination IP pairs&quot;
+      - &quot;Function code filtering (block all write operations from L3)&quot;
+      - &quot;Connection rate limiting&quot;
+
+  - conduit_id: &quot;C2-OPS-DMZ&quot;
+    name: &quot;Operations-to-DMZ Conduit&quot;
+    connects: [&quot;Z3-OPS&quot;, &quot;Z4-DMZ&quot;]
+    security_level: &quot;SL 2&quot;
+    protocols_allowed:
+      - protocol: &quot;PI-to-PI&quot;
+        port: 5450
+        direction: &quot;Z3 -&gt; Z4 (unidirectional via data diode)&quot;
+      - protocol: &quot;HTTPS&quot;
+        port: 443
+        direction: &quot;Z4 -&gt; Z3 (patch downloads only)&quot;
+    controls:
+      - &quot;Data diode for historian replication (Waterfall Security)&quot;
+      - &quot;Firewall with application-layer inspection&quot;
+      - &quot;Patch server pulls only from approved vendor repositories&quot;
+
+  - conduit_id: &quot;C3-DMZ-ENT&quot;
+    name: &quot;DMZ-to-Enterprise Conduit&quot;
+    connects: [&quot;Z4-DMZ&quot;, &quot;Z5-ENT&quot;]
+    security_level: &quot;SL 1&quot;
+    protocols_allowed:
+      - protocol: &quot;HTTPS&quot;
+        port: 443
+        direction: &quot;Z5 -&gt; Z4 (historian read, remote access portal)&quot;
+      - protocol: &quot;RDP&quot;
+        port: 3389
+        direction: &quot;Z5 -&gt; Z4 (jump server with MFA)&quot;
+    controls:
+      - &quot;Next-gen firewall with SSL inspection&quot;
+      - &quot;MFA required for all remote access sessions&quot;
+      - &quot;Session recording on jump server&quot;</code></pre>
+<h4>Step 2: Configure Industrial Firewalls for Zone Boundaries</h4>
+<p>Deploy and configure industrial-grade firewalls at each zone boundary with OT protocol-aware deep packet inspection.</p>
+<pre><code># Cisco ISA-3000 Industrial Firewall Configuration
+# Conduit C1: BPCS (Zone 2) &lt;-&gt; Operations (Zone 3)
+
+# Define zone interfaces
+interface GigabitEthernet1/1
+  nameif zone-bpcs
+  security-level 90
+  ip address 10.20.1.1 255.255.0.0
+
+interface GigabitEthernet1/2
+  nameif zone-ops
+  security-level 70
+  ip address 10.30.1.1 255.255.0.0
+
+# OPC UA from BPCS to Operations (read-only data flow)
+access-list BPCS-to-OPS extended permit tcp 10.20.0.0 255.255.0.0 host 10.30.1.50 eq 4840
+# Modbus read from Operations historian to PLCs (FC 3,4 only)
+access-list OPS-to-BPCS extended permit tcp host 10.30.1.50 10.20.0.0 255.255.0.0 eq 502
+
+# Deny all other traffic between zones
+access-list BPCS-to-OPS extended deny ip any any log
+access-list OPS-to-BPCS extended deny ip any any log
+
+# Apply access lists
+access-group BPCS-to-OPS in interface zone-bpcs
+access-group OPS-to-BPCS in interface zone-ops
+
+# Enable Modbus protocol inspection with function code filtering
+policy-map type inspect modbus MODBUS-INSPECT
+  parameters
+    # Allow read operations only from Operations zone
+    match func-code read-coils
+    match func-code read-discrete-inputs
+    match func-code read-holding-registers
+    match func-code read-input-registers
+    # Block all write function codes
+    match func-code force-single-coil  action drop log
+    match func-code preset-single-register  action drop log
+    match func-code force-multiple-coils  action drop log
+    match func-code preset-multiple-registers  action drop log
+
+# Apply to service policy
+policy-map global_policy
+  class inspection_default
+    inspect modbus MODBUS-INSPECT
+
+# Logging to OT SIEM
+logging host zone-ops 10.30.1.60
+logging trap informational
+logging enable</code></pre>
+<h4>Step 3: Implement VLAN Segmentation at Switch Level</h4>
+<p>Configure network switches to enforce zone boundaries at Layer 2, preventing broadcast domain overlap between Purdue levels.</p>
+<pre><code># Cisco Industrial Ethernet Switch Configuration
+# Zone-based VLAN assignment
+
+# VLAN definitions aligned with zones
+vlan 10
+  name Z1-SIS-Safety
+vlan 20
+  name Z2-BPCS-Control
+vlan 30
+  name Z3-OPS-Operations
+vlan 35
+  name Z4-DMZ
+vlan 40
+  name Z5-Enterprise
+
+# PLC ports - Zone 2 BPCS
+interface range GigabitEthernet1/0/1-12
+  description PLC connections - Zone 2
+  switchport mode access
+  switchport access vlan 20
+  switchport port-security
+  switchport port-security maximum 1
+  switchport port-security mac-address sticky
+  switchport port-security violation shutdown
+  spanning-tree portfast
+  spanning-tree bpduguard enable
+  no cdp enable
+  no lldp transmit
+
+# HMI ports - Zone 2 BPCS
+interface range GigabitEthernet1/0/13-18
+  description HMI connections - Zone 2
+  switchport mode access
+  switchport access vlan 20
+  switchport port-security
+  switchport port-security maximum 1
+  switchport port-security mac-address sticky
+  switchport port-security violation restrict
+  spanning-tree portfast
+
+# Trunk to industrial firewall
+interface GigabitEthernet1/0/24
+  description Trunk to ISA-3000 Firewall
+  switchport mode trunk
+  switchport trunk allowed vlan 20,30,35
+  switchport trunk native vlan 999
+
+# Disable unused ports
+interface range GigabitEthernet1/0/19-23
+  shutdown
+  switchport access vlan 999</code></pre>
+<h4>Step 4: Deploy Data Diode for Unidirectional Historian Replication</h4>
+<p>Install a hardware-enforced data diode between the operations zone and DMZ to ensure unidirectional data flow from OT to IT. Data diodes physically prevent any data from flowing back into the OT network.</p>
+<pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Data Diode Configuration Validator.
+
+Validates that historian replication across the data diode
+(Waterfall Security, Owl Cyber Defense, or Siemens) is
+functioning correctly with unidirectional enforcement.
+&quot;&quot;&quot;
+
+import socket
+import struct
+import time
+import json
+from datetime import datetime
+
+
+class DataDiodeValidator:
+    &quot;&quot;&quot;Validates data diode unidirectional enforcement.&quot;&quot;&quot;
+
+    def __init__(self, diode_tx_ip, diode_rx_ip, historian_port=5450):
+        self.tx_ip = diode_tx_ip  # OT side (transmit)
+        self.rx_ip = diode_rx_ip  # IT/DMZ side (receive)
+        self.port = historian_port
+        self.results = []
+
+    def test_forward_flow(self):
+        &quot;&quot;&quot;Verify data flows from OT (TX) to DMZ (RX) through diode.&quot;&quot;&quot;
+        test_payload = f&quot;DIODE_TEST_{datetime.now().isoformat()}&quot;
+
+        try:
+            # Send test data to TX interface
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.settimeout(5)
+            sock.sendto(test_payload.encode(), (self.tx_ip, self.port))
+            sock.close()
+
+            self.results.append({
+                &quot;test&quot;: &quot;forward_flow&quot;,
+                &quot;status&quot;: &quot;PASS&quot;,
+                &quot;detail&quot;: f&quot;Data sent to TX interface {self.tx_ip}:{self.port}&quot;,
+            })
+        except Exception as e:
+            self.results.append({
+                &quot;test&quot;: &quot;forward_flow&quot;,
+                &quot;status&quot;: &quot;FAIL&quot;,
+                &quot;detail&quot;: f&quot;Cannot reach TX interface: {e}&quot;,
+            })
+
+    def test_reverse_flow_blocked(self):
+        &quot;&quot;&quot;Verify reverse flow (DMZ to OT) is physically blocked by diode.&quot;&quot;&quot;
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(3)
+            result = sock.connect_ex((self.tx_ip, self.port))
+            sock.close()
+
+            if result != 0:
+                self.results.append({
+                    &quot;test&quot;: &quot;reverse_flow_blocked&quot;,
+                    &quot;status&quot;: &quot;PASS&quot;,
+                    &quot;detail&quot;: &quot;Reverse connection to OT side correctly rejected&quot;,
+                })
+            else:
+                self.results.append({
+                    &quot;test&quot;: &quot;reverse_flow_blocked&quot;,
+                    &quot;status&quot;: &quot;CRITICAL_FAIL&quot;,
+                    &quot;detail&quot;: &quot;REVERSE FLOW POSSIBLE - Data diode bypass detected!&quot;,
+                })
+        except (socket.timeout, ConnectionRefusedError):
+            self.results.append({
+                &quot;test&quot;: &quot;reverse_flow_blocked&quot;,
+                &quot;status&quot;: &quot;PASS&quot;,
+                &quot;detail&quot;: &quot;Reverse connection timed out (expected with hardware diode)&quot;,
+            })
+
+    def test_historian_replication_latency(self):
+        &quot;&quot;&quot;Measure replication latency across the data diode.&quot;&quot;&quot;
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(10)
+            start = time.time()
+            sock.connect((self.rx_ip, self.port))
+            latency = (time.time() - start) * 1000
+            sock.close()
+
+            status = &quot;PASS&quot; if latency &lt; 1000 else &quot;WARN&quot;
+            self.results.append({
+                &quot;test&quot;: &quot;replication_latency&quot;,
+                &quot;status&quot;: status,
+                &quot;detail&quot;: f&quot;Replication endpoint latency: {latency:.1f}ms&quot;,
+            })
+        except Exception as e:
+            self.results.append({
+                &quot;test&quot;: &quot;replication_latency&quot;,
+                &quot;status&quot;: &quot;FAIL&quot;,
+                &quot;detail&quot;: f&quot;Cannot reach RX historian: {e}&quot;,
+            })
+
+    def run_all_tests(self):
+        &quot;&quot;&quot;Run complete data diode validation suite.&quot;&quot;&quot;
+        print(&quot;=&quot; * 60)
+        print(&quot;DATA DIODE VALIDATION REPORT&quot;)
+        print(&quot;=&quot; * 60)
+
+        self.test_forward_flow()
+        self.test_reverse_flow_blocked()
+        self.test_historian_replication_latency()
+
+        for r in self.results:
+            status_icon = &quot;+&quot; if r[&quot;status&quot;] == &quot;PASS&quot; else &quot;-&quot;
+            print(f&quot;  [{status_icon}] {r['test']}: {r['status']}&quot;)
+            print(f&quot;      {r['detail']}&quot;)
+
+        return self.results
+
+
+if __name__ == &quot;__main__&quot;:
+    validator = DataDiodeValidator(
+        diode_tx_ip=&quot;10.30.1.100&quot;,   # Operations zone TX
+        diode_rx_ip=&quot;172.16.1.100&quot;,  # DMZ zone RX
+    )
+    validator.run_all_tests()</code></pre>
+<h4>Step 5: Validate Zone Architecture</h4>
+<p>After implementation, validate the zone architecture by verifying that only authorized conduit traffic passes between zones and that all prohibited cross-zone paths are blocked.</p>
+<pre><code># Validation test from Enterprise zone - should be blocked from reaching BPCS
+nmap -sT -p 502,44818,102,4840 10.20.0.0/16 --reason
+# Expected: All ports filtered/closed
+
+# Validation test from Operations zone - read-only Modbus should work
+python3 -c &quot;
+from pymodbus.client import ModbusTcpClient
+client = ModbusTcpClient('10.20.1.10', port=502)
+client.connect()
+# Read should succeed
+result = client.read_holding_registers(0, 10, slave=1)
+print(f'Read test: {\&quot;PASS\&quot; if not result.isError() else \&quot;FAIL\&quot;}')
+# Write should be blocked by firewall
+result = client.write_register(0, 100, slave=1)
+print(f'Write blocked: {\&quot;PASS\&quot; if result.isError() else \&quot;FAIL - WRITE PERMITTED!\&quot;}')
+client.close()
+&quot;
+
+# Verify data diode blocks reverse traffic
+ping -c 3 10.30.1.100  # From DMZ to OT - should timeout
+# Expected: 100% packet loss (hardware diode blocks ICMP)</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | Security Zone | A grouping of logical or physical assets that share common security requirements, as defined by IEC 62443-3-2 | | Conduit | A logical grouping of communication channels connecting two or more zones, subject to common security policies | | Security Level Target (SL-T) | The desired security level for a zone, ranging from SL 1 (casual violation) to SL 4 (state-sponsored attack) | | Data Diode | Hardware-enforced unidirectional network gateway that physically prevents data from flowing in the reverse direction | | Microsegmentation | Granular network segmentation at the device level, managing communication device-by-device based on roles and functions | | Deep Packet Inspection (DPI) | Firewall capability to inspect industrial protocol payloads (Modbus function codes, OPC UA service calls) beyond Layer 4 | | Defense in Depth | Layered security approach where multiple security controls protect assets at different levels of the architecture |</p>
+<h3>Tools &amp; Systems</h3>
+<ul>
+<li><strong>Cisco ISA-3000</strong>: Industrial security appliance providing OT-aware firewall, IPS, and VPN capabilities with Modbus, DNP3, and EtherNet/IP inspection</li>
+<li><strong>Fortinet FortiGate Rugged</strong>: Ruggedized next-gen firewall with OT protocol support for industrial environments</li>
+<li><strong>Palo Alto IoT/OT Security</strong>: Cloud-delivered OT security subscription providing device identification and protocol-aware policy enforcement</li>
+<li><strong>Waterfall Security Solutions</strong>: Hardware-enforced unidirectional security gateways (data diodes) for OT-to-IT data transfer</li>
+<li><strong>Tofino Xenon</strong>: Industrial security appliance providing deep packet inspection for Modbus, OPC, and EtherNet/IP protocols</li>
+</ul>
+<h3>Common Scenarios</h3>
+<h4>Scenario: Migrating Flat OT Network to Zone Architecture</h4>
+<p><strong>Context</strong>: A manufacturing plant operates all OT devices on a single VLAN (10.10.0.0/16) with no segmentation between PLCs, HMIs, historians, and the corporate network. An IEC 62443 gap assessment identified this as a critical finding requiring zone implementation.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Capture complete traffic baseline for 4 weeks using passive monitoring to identify all legitimate communication flows</li>
+<li>Classify all assets into Purdue levels and group into logical zones based on function and security requirements</li>
+<li>Design VLAN architecture with one VLAN per zone and inter-zone firewall rules based on observed legitimate traffic</li>
+<li>Deploy industrial firewalls at zone boundaries with initial &quot;monitor only&quot; mode (log but do not block)</li>
+<li>Analyze firewall logs for 2 weeks to identify any legitimate traffic that would be blocked</li>
+<li>Switch firewalls to enforcement mode during a scheduled maintenance window</li>
+<li>Validate that all process control communications function correctly post-segmentation</li>
+<li>Implement data diode between operations and DMZ for historian replication</li>
+</ol>
+<p><strong>Pitfalls</strong>: Implementing zone firewalls without a complete traffic baseline will break unknown but legitimate communication paths. Scheduling zone cutover during production instead of maintenance windows risks process disruptions. Placing SIS controllers in the same zone as BPCS violates IEC 62443 safety system isolation requirements.</p>
+<h3>Output Format</h3>
+<pre><code>IEC 62443 Zone Implementation Report
+=====================================
+Facility: [Name]
+Implementation Date: YYYY-MM-DD
+Standard: IEC 62443-3-2/3-3
+
+ZONE ARCHITECTURE:
+  Zone [ID]: [Name] (SL-T: [1-4])
+    Assets: [count]
+    Conduits: [list]
+    Controls: [firewall type, data diode, etc.]
+
+CONDUIT CONFIGURATION:
+  Conduit [ID]: [Zone A] &lt;-&gt; [Zone B]
+    Protocols: [allowed protocols with direction]
+    Firewall Rules: [count allow / count deny]
+    DPI Enabled: Yes/No
+
+VALIDATION RESULTS:
+  Cross-zone tests: [pass/fail count]
+  Prohibited path tests: [all blocked / exceptions]
+  Protocol enforcement: [function code filtering verified]</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: implementing-iec-62443-security-zones\ndisplay_name: implementing-iec-62443-security-zones\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# implementing-iec-62443-security-zones - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `implementing-iec-62443-security-zones` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When designing a greenfield OT network architecture for a new industrial facility\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose implementing-iec-62443-security-zones, then write the task. Fallback prompt: Use the implementing-iec-62443-security-zones skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `implementing-iec-62443-security-zones` |\n| Canonical name | `implementing-iec-62443-security-zones` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\n- When designing a greenfield OT network architecture for a new industrial facility\n\n## Original SKILL.md\n\n---\nname: implementing-iec-62443-security-zones\ndescription: 'This skill covers designing and implementing security zones and conduits\n  for industrial automation and control systems (IACS) per IEC 62443-3-2. It addresses\n  zone partitioning based on risk assessment, assigning Security Level targets (SL-T),\n  designing conduit security controls, implementing microsegmentation with industrial\n  firewalls, and validating zone architecture through traffic analysis and penetration\n  testing against the Purdue Reference Model.\n\n  '\ndomain: cybersecurity\nsubdomain: ot-ics-security\ntags:\n- ot-security\n- ics\n- scada\n- industrial-control\n- iec62443\n- network-segmentation\n- zones-conduits\nversion: 1.0.0\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- PR.IR-01\n- DE.CM-01\n- ID.AM-05\n- GV.OC-02\nmitre_attack:\n- T1078\n- T1190\n- T1059\n- T0816\n- T0836\n---\n\n# Implementing IEC 62443 Security Zones\n\n## When to Use\n\n- When designing a greenfield OT network architecture for a new industrial facility\n- When retrofitting security zones into an existing flat OT network after an assessment finding\n- When implementing network segmentation to comply with IEC 62443-3-2 certification requirements\n- When upgrading from basic VLAN segmentation to policy-enforced zone/conduit architecture\n- When an IT/OT convergence project requires defining security boundaries between enterprise and operational networks\n\n**Do not use** for IT-only network segmentation (see implementing-network-microsegmentation), for cloud-native workload segmentation (see securing-kubernetes-on-cloud), or for physical security zone design without a cyber component.\n\n## Prerequisites\n\n- Completed OT network security assessment with asset inventory and traffic flow analysis\n- Understanding of IEC 62443-3-2 zone/conduit design process and the Purdue Reference Model\n- Industrial firewalls capable of deep packet inspection for OT protocols (Palo Alto with OT Security, Fortinet OT, Cisco ISA-3000)\n- Network switches supporting VLANs, 802.1Q trunking, and port security\n- Approval from operations management for network architecture changes during maintenance windows\n\n## Workflow\n\n### Step 1: Perform Zone Partitioning Based on Risk Assessment\n\nPartition the IACS into zones based on functional requirements, security requirements, criticality, and consequence of compromise. Each zone contains assets with common security requirements.\n\n```yaml\n# IEC 62443-3-2 Zone Definition Document\nfacility: \"Petrochemical Refinery - Unit 3\"\nassessment_date: \"2026-02-23\"\nstandard: \"IEC 62443-3-2:2020\"\n\nzones:\n  - zone_id: \"Z1-SIS\"\n    name: \"Safety Instrumented Systems\"\n    purdue_level: 1\n    security_level_target: \"SL 3\"\n    criticality: \"Safety Critical\"\n    assets:\n      - \"Triconex 3008 Safety Controller (SIS-01)\"\n      - \"Triconex 3008 Safety Controller (SIS-02)\"\n      - \"SIS Engineering Workstation\"\n    security_requirements:\n      - \"Physically isolated from all other zones (air-gapped)\"\n      - \"Dedicated engineering workstation with removable media controls\"\n      - \"No remote access permitted under any circumstances\"\n      - \"Change management requires dual authorization\"\n    allowed_conduits: []  # No network conduits - fully air-gapped\n\n  - zone_id: \"Z2-BPCS\"\n    name: \"Basic Process Control System\"\n    purdue_level: \"1-2\"\n    security_level_target: \"SL 2\"\n    criticality: \"High\"\n    assets:\n      - \"Allen-Bradley ControlLogix PLCs (PLC-01 through PLC-12)\"\n      - \"Rockwell FactoryTalk View HMIs (HMI-01 through HMI-06)\"\n      - \"Engineering Workstation (EWS-01)\"\n    security_requirements:\n      - \"Industrial firewall at zone boundary with protocol inspection\"\n      - \"Read-only access from Level 3 for data acquisition\"\n      - \"Write access restricted to engineering workstation subnet\"\n      - \"USB ports disabled on HMIs\"\n    allowed_conduits: [\"C1-BPCS-OPS\"]\n\n  - zone_id: \"Z3-OPS\"\n    name: \"Site Operations\"\n    purdue_level: 3\n    security_level_target: \"SL 2\"\n    criticality: \"Medium\"\n    assets:\n      - \"OSIsoft PI Historian (HIST-01)\"\n      - \"OPC UA Server (OPC-01)\"\n      - \"MES Application Server (MES-01)\"\n      - \"Alarm Management Server (ALM-01)\"\n    security_requirements:\n      - \"Firewall between operations and control zones\"\n      - \"Firewall between operations and DMZ\"\n      - \"No direct internet access\"\n      - \"Antivirus with OT-approved signatures\"\n    allowed_conduits: [\"C1-BPCS-OPS\", \"C2-OPS-DMZ\"]\n\n  - zone_id: \"Z4-DMZ\"\n    name: \"Industrial Demilitarized Zone\"\n    purdue_level: 3.5\n    security_level_target: \"SL 2\"\n    criticality: \"Medium\"\n    assets:\n      - \"PI-to-PI Interface (DMZ-HIST-01)\"\n      - \"Patch Management Server (DMZ-WSUS-01)\"\n      - \"Remote Access Jump Server (DMZ-JUMP-01)\"\n      - \"Data Diode - Waterfall Security (DMZ-DD-01)\"\n    security_requirements:\n      - \"Dual-homed firewalls on both sides\"\n      - \"No direct traffic traversal - all connections terminate in DMZ\"\n      - \"Data diode for unidirectional historian replication\"\n      - \"Jump server with MFA for remote access\"\n    allowed_conduits: [\"C2-OPS-DMZ\", \"C3-DMZ-ENT\"]\n\n  - zone_id: \"Z5-ENT\"\n    name: \"Enterprise Network\"\n    purdue_level: 4\n    security_level_target: \"SL 1\"\n    criticality: \"Low (from OT perspective)\"\n    assets:\n      - \"Corporate systems accessing OT data\"\n    security_requirements:\n      - \"Firewall between enterprise and DMZ\"\n      - \"No direct access to any OT zone below DMZ\"\n    allowed_conduits: [\"C3-DMZ-ENT\"]\n\nconduits:\n  - conduit_id: \"C1-BPCS-OPS\"\n    name: \"Control-to-Operations Conduit\"\n    connects: [\"Z2-BPCS\", \"Z3-OPS\"]\n    security_level: \"SL 2\"\n    protocols_allowed:\n      - protocol: \"OPC UA\"\n        port: 4840\n        direction: \"Z2 -> Z3 (read only)\"\n        security_mode: \"SignAndEncrypt\"\n      - protocol: \"Modbus/TCP\"\n        port: 502\n        direction: \"Z3 -> Z2 (read only, FC 3/4 only)\"\n        security_mode: \"Firewall-enforced function code filtering\"\n    controls:\n      - \"Industrial firewall with OT protocol DPI\"\n      - \"Allowlisted source/destination IP pairs\"\n      - \"Function code filtering (block all write operations from L3)\"\n      - \"Connection rate limiting\"\n\n  - conduit_id: \"C2-OPS-DMZ\"\n    name: \"Operations-to-DMZ Conduit\"\n    connects: [\"Z3-OPS\", \"Z4-DMZ\"]\n    security_level: \"SL 2\"\n    protocols_allowed:\n      - protocol: \"PI-to-PI\"\n        port: 5450\n        direction: \"Z3 -> Z4 (unidirectional via data diode)\"\n      - protocol: \"HTTPS\"\n        port: 443\n        direction: \"Z4 -> Z3 (patch downloads only)\"\n    controls:\n      - \"Data diode for historian replication (Waterfall Security)\"\n      - \"Firewall with application-layer inspection\"\n      - \"Patch server pulls only from approved vendor repositories\"\n\n  - conduit_id: \"C3-DMZ-ENT\"\n    name: \"DMZ-to-Enterprise Conduit\"\n    connects: [\"Z4-DMZ\", \"Z5-ENT\"]\n    security_level: \"SL 1\"\n    protocols_allowed:\n      - protocol: \"HTTPS\"\n        port: 443\n        direction: \"Z5 -> Z4 (historian read, remote access portal)\"\n      - protocol: \"RDP\"\n        port: 3389\n        direction: \"Z5 -> Z4 (jump server with MFA)\"\n    controls:\n      - \"Next-gen firewall with SSL inspection\"\n      - \"MFA required for all remote access sessions\"\n      - \"Session recording on jump server\"\n```\n\n### Step 2: Configure Industrial Firewalls for Zone Boundaries\n\nDeploy and configure industrial-grade firewalls at each zone boundary with OT protocol-aware deep packet inspection.\n\n```bash\n# Cisco ISA-3000 Industrial Firewall Configuration\n# Conduit C1: BPCS (Zone 2) \u003c-> Operations (Zone 3)\n\n# Define zone interfaces\ninterface GigabitEthernet1/1\n  nameif zone-bpcs\n  security-level 90\n  ip address 10.20.1.1 255.255.0.0\n\ninterface GigabitEthernet1/2\n  nameif zone-ops\n  security-level 70\n  ip address 10.30.1.1 255.255.0.0\n\n# OPC UA from BPCS to Operations (read-only data flow)\naccess-list BPCS-to-OPS extended permit tcp 10.20.0.0 255.255.0.0 host 10.30.1.50 eq 4840\n# Modbus read from Operations historian to PLCs (FC 3,4 only)\naccess-list OPS-to-BPCS extended permit tcp host 10.30.1.50 10.20.0.0 255.255.0.0 eq 502\n\n# Deny all other traffic between zones\naccess-list BPCS-to-OPS extended deny ip any any log\naccess-list OPS-to-BPCS extended deny ip any any log\n\n# Apply access lists\naccess-group BPCS-to-OPS in interface zone-bpcs\naccess-group OPS-to-BPCS in interface zone-ops\n\n# Enable Modbus protocol inspection with function code filtering\npolicy-map type inspect modbus MODBUS-INSPECT\n  parameters\n    # Allow read operations only from Operations zone\n    match func-code read-coils\n    match func-code read-discrete-inputs\n    match func-code read-holding-registers\n    match func-code read-input-registers\n    # Block all write function codes\n    match func-code force-single-coil  action drop log\n    match func-code preset-single-register  action drop log\n    match func-code force-multiple-coils  action drop log\n    match func-code preset-multiple-registers  action drop log\n\n# Apply to service policy\npolicy-map global_policy\n  class inspection_default\n    inspect modbus MODBUS-INSPECT\n\n# Logging to OT SIEM\nlogging host zone-ops 10.30.1.60\nlogging trap informational\nlogging enable\n```\n\n### Step 3: Implement VLAN Segmentation at Switch Level\n\nConfigure network switches to enforce zone boundaries at Layer 2, preventing broadcast domain overlap between Purdue levels.\n\n```bash\n# Cisco Industrial Ethernet Switch Configuration\n# Zone-based VLAN assignment\n\n# VLAN definitions aligned with zones\nvlan 10\n  name Z1-SIS-Safety\nvlan 20\n  name Z2-BPCS-Control\nvlan 30\n  name Z3-OPS-Operations\nvlan 35\n  name Z4-DMZ\nvlan 40\n  name Z5-Enterprise\n\n# PLC ports - Zone 2 BPCS\ninterface range GigabitEthernet1/0/1-12\n  description PLC connections - Zone 2\n  switchport mode access\n  switchport access vlan 20\n  switchport port-security\n  switchport port-security maximum 1\n  switchport port-security mac-address sticky\n  switchport port-security violation shutdown\n  spanning-tree portfast\n  spanning-tree bpduguard enable\n  no cdp enable\n  no lldp transmit\n\n# HMI ports - Zone 2 BPCS\ninterface range GigabitEthernet1/0/13-18\n  description HMI connections - Zone 2\n  switchport mode access\n  switchport access vlan 20\n  switchport port-security\n  switchport port-security maximum 1\n  switchport port-security mac-address sticky\n  switchport port-security violation restrict\n  spanning-tree portfast\n\n# Trunk to industrial firewall\ninterface GigabitEthernet1/0/24\n  description Trunk to ISA-3000 Firewall\n  switchport mode trunk\n  switchport trunk allowed vlan 20,30,35\n  switchport trunk native vlan 999\n\n# Disable unused ports\ninterface range GigabitEthernet1/0/19-23\n  shutdown\n  switchport access vlan 999\n```\n\n### Step 4: Deploy Data Diode for Unidirectional Historian Replication\n\nInstall a hardware-enforced data diode between the operations zone and DMZ to ensure unidirectional data flow from OT to IT. Data diodes physically prevent any data from flowing back into the OT network.\n\n```python\n#!/usr/bin/env python3\n\"\"\"Data Diode Configuration Validator.\n\nValidates that historian replication across the data diode\n(Waterfall Security, Owl Cyber Defense, or Siemens) is\nfunctioning correctly with unidirectional enforcement.\n\"\"\"\n\nimport socket\nimport struct\nimport time\nimport json\nfrom datetime import datetime\n\n\nclass DataDiodeValidator:\n    \"\"\"Validates data diode unidirectional enforcement.\"\"\"\n\n    def __init__(self, diode_tx_ip, diode_rx_ip, historian_port=5450):\n        self.tx_ip = diode_tx_ip  # OT side (transmit)\n        self.rx_ip = diode_rx_ip  # IT/DMZ side (receive)\n        self.port = historian_port\n        self.results = []\n\n    def test_forward_flow(self):\n        \"\"\"Verify data flows from OT (TX) to DMZ (RX) through diode.\"\"\"\n        test_payload = f\"DIODE_TEST_{datetime.now().isoformat()}\"\n\n        try:\n            # Send test data to TX interface\n            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n            sock.settimeout(5)\n            sock.sendto(test_payload.encode(), (self.tx_ip, self.port))\n            sock.close()\n\n            self.results.append({\n                \"test\": \"forward_flow\",\n                \"status\": \"PASS\",\n                \"detail\": f\"Data sent to TX interface {self.tx_ip}:{self.port}\",\n            })\n        except Exception as e:\n            self.results.append({\n                \"test\": \"forward_flow\",\n                \"status\": \"FAIL\",\n                \"detail\": f\"Cannot reach TX interface: {e}\",\n            })\n\n    def test_reverse_flow_blocked(self):\n        \"\"\"Verify reverse flow (DMZ to OT) is physically blocked by diode.\"\"\"\n        try:\n            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n            sock.settimeout(3)\n            result = sock.connect_ex((self.tx_ip, self.port))\n            sock.close()\n\n            if result != 0:\n                self.results.append({\n                    \"test\": \"reverse_flow_blocked\",\n                    \"status\": \"PASS\",\n                    \"detail\": \"Reverse connection to OT side correctly rejected\",\n                })\n            else:\n                self.results.append({\n                    \"test\": \"reverse_flow_blocked\",\n                    \"status\": \"CRITICAL_FAIL\",\n                    \"detail\": \"REVERSE FLOW POSSIBLE - Data diode bypass detected!\",\n                })\n        except (socket.timeout, ConnectionRefusedError):\n            self.results.append({\n                \"test\": \"reverse_flow_blocked\",\n                \"status\": \"PASS\",\n                \"detail\": \"Reverse connection timed out (expected with hardware diode)\",\n            })\n\n    def test_historian_replication_latency(self):\n        \"\"\"Measure replication latency across the data diode.\"\"\"\n        try:\n            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n            sock.settimeout(10)\n            start = time.time()\n            sock.connect((self.rx_ip, self.port))\n            latency = (time.time() - start) * 1000\n            sock.close()\n\n            status = \"PASS\" if latency \u003c 1000 else \"WARN\"\n            self.results.append({\n                \"test\": \"replication_latency\",\n                \"status\": status,\n                \"detail\": f\"Replication endpoint latency: {latency:.1f}ms\",\n            })\n        except Exception as e:\n            self.results.append({\n                \"test\": \"replication_latency\",\n                \"status\": \"FAIL\",\n                \"detail\": f\"Cannot reach RX historian: {e}\",\n            })\n\n    def run_all_tests(self):\n        \"\"\"Run complete data diode validation suite.\"\"\"\n        print(\"=\" * 60)\n        print(\"DATA DIODE VALIDATION REPORT\")\n        print(\"=\" * 60)\n\n        self.test_forward_flow()\n        self.test_reverse_flow_blocked()\n        self.test_historian_replication_latency()\n\n        for r in self.results:\n            status_icon = \"+\" if r[\"status\"] == \"PASS\" else \"-\"\n            print(f\"  [{status_icon}] {r['test']}: {r['status']}\")\n            print(f\"      {r['detail']}\")\n\n        return self.results\n\n\nif __name__ == \"__main__\":\n    validator = DataDiodeValidator(\n        diode_tx_ip=\"10.30.1.100\",   # Operations zone TX\n        diode_rx_ip=\"172.16.1.100\",  # DMZ zone RX\n    )\n    validator.run_all_tests()\n```\n\n### Step 5: Validate Zone Architecture\n\nAfter implementation, validate the zone architecture by verifying that only authorized conduit traffic passes between zones and that all prohibited cross-zone paths are blocked.\n\n```bash\n# Validation test from Enterprise zone - should be blocked from reaching BPCS\nnmap -sT -p 502,44818,102,4840 10.20.0.0/16 --reason\n# Expected: All ports filtered/closed\n\n# Validation test from Operations zone - read-only Modbus should work\npython3 -c \"\nfrom pymodbus.client import ModbusTcpClient\nclient = ModbusTcpClient('10.20.1.10', port=502)\nclient.connect()\n# Read should succeed\nresult = client.read_holding_registers(0, 10, slave=1)\nprint(f'Read test: {\\\"PASS\\\" if not result.isError() else \\\"FAIL\\\"}')\n# Write should be blocked by firewall\nresult = client.write_register(0, 100, slave=1)\nprint(f'Write blocked: {\\\"PASS\\\" if result.isError() else \\\"FAIL - WRITE PERMITTED!\\\"}')\nclient.close()\n\"\n\n# Verify data diode blocks reverse traffic\nping -c 3 10.30.1.100  # From DMZ to OT - should timeout\n# Expected: 100% packet loss (hardware diode blocks ICMP)\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| Security Zone | A grouping of logical or physical assets that share common security requirements, as defined by IEC 62443-3-2 |\n| Conduit | A logical grouping of communication channels connecting two or more zones, subject to common security policies |\n| Security Level Target (SL-T) | The desired security level for a zone, ranging from SL 1 (casual violation) to SL 4 (state-sponsored attack) |\n| Data Diode | Hardware-enforced unidirectional network gateway that physically prevents data from flowing in the reverse direction |\n| Microsegmentation | Granular network segmentation at the device level, managing communication device-by-device based on roles and functions |\n| Deep Packet Inspection (DPI) | Firewall capability to inspect industrial protocol payloads (Modbus function codes, OPC UA service calls) beyond Layer 4 |\n| Defense in Depth | Layered security approach where multiple security controls protect assets at different levels of the architecture |\n\n## Tools & Systems\n\n- **Cisco ISA-3000**: Industrial security appliance providing OT-aware firewall, IPS, and VPN capabilities with Modbus, DNP3, and EtherNet/IP inspection\n- **Fortinet FortiGate Rugged**: Ruggedized next-gen firewall with OT protocol support for industrial environments\n- **Palo Alto IoT/OT Security**: Cloud-delivered OT security subscription providing device identification and protocol-aware policy enforcement\n- **Waterfall Security Solutions**: Hardware-enforced unidirectional security gateways (data diodes) for OT-to-IT data transfer\n- **Tofino Xenon**: Industrial security appliance providing deep packet inspection for Modbus, OPC, and EtherNet/IP protocols\n\n## Common Scenarios\n\n### Scenario: Migrating Flat OT Network to Zone Architecture\n\n**Context**: A manufacturing plant operates all OT devices on a single VLAN (10.10.0.0/16) with no segmentation between PLCs, HMIs, historians, and the corporate network. An IEC 62443 gap assessment identified this as a critical finding requiring zone implementation.\n\n**Approach**:\n1. Capture complete traffic baseline for 4 weeks using passive monitoring to identify all legitimate communication flows\n2. Classify all assets into Purdue levels and group into logical zones based on function and security requirements\n3. Design VLAN architecture with one VLAN per zone and inter-zone firewall rules based on observed legitimate traffic\n4. Deploy industrial firewalls at zone boundaries with initial \"monitor only\" mode (log but do not block)\n5. Analyze firewall logs for 2 weeks to identify any legitimate traffic that would be blocked\n6. Switch firewalls to enforcement mode during a scheduled maintenance window\n7. Validate that all process control communications function correctly post-segmentation\n8. Implement data diode between operations and DMZ for historian replication\n\n**Pitfalls**: Implementing zone firewalls without a complete traffic baseline will break unknown but legitimate communication paths. Scheduling zone cutover during production instead of maintenance windows risks process disruptions. Placing SIS controllers in the same zone as BPCS violates IEC 62443 safety system isolation requirements.\n\n## Output Format\n\n```\nIEC 62443 Zone Implementation Report\n=====================================\nFacility: [Name]\nImplementation Date: YYYY-MM-DD\nStandard: IEC 62443-3-2/3-3\n\nZONE ARCHITECTURE:\n  Zone [ID]: [Name] (SL-T: [1-4])\n    Assets: [count]\n    Conduits: [list]\n    Controls: [firewall type, data diode, etc.]\n\nCONDUIT CONFIGURATION:\n  Conduit [ID]: [Zone A] \u003c-> [Zone B]\n    Protocols: [allowed protocols with direction]\n    Firewall Rules: [count allow / count deny]\n    DPI Enabled: Yes/No\n\nVALIDATION RESULTS:\n  Cross-zone tests: [pass/fail count]\n  Prohibited path tests: [all blocked / exceptions]\n  Protocol enforcement: [function code filtering verified]\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("implementing-iec-62443-security-zones-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

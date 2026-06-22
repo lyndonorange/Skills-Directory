@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>detecting-container-escape-with-falco-rules - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/detecting-container-escape-with-falco-rules-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>detecting-container-escape-with-falco-rules</h1>
+      <p class="description">Detect container escape attempts in real-time using Falco runtime security</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>detecting-container-escape-with-falco-rules</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>detecting-container-escape-with-falco-rules</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Detect container escape attempts in real-time using Falco runtime security</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose detecting-container-escape-with-falco-rules, then write the task. Fallback prompt: Use the detecting-container-escape-with-falco-rules skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Detecting Container Escape with Falco Rules</h2>
+<h3>Overview</h3>
+<p>Falco is a CNCF-graduated runtime security tool that monitors Linux syscalls to detect anomalous container behavior. It uses a rules engine to identify container escape techniques such as mounting host filesystems, accessing sensitive host paths, loading kernel modules, and exploiting privileged container capabilities.</p>
+<h3>When to Use</h3>
+<ul>
+<li>When investigating security incidents that require detecting container escape with falco rules</li>
+<li>When building detection rules or threat hunting queries for this domain</li>
+<li>When SOC analysts need structured procedures for this analysis type</li>
+<li>When validating security monitoring coverage for related attack techniques</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Linux host with kernel 5.8+ (for eBPF driver) or kernel module support</li>
+<li>Kubernetes cluster (v1.24+) or standalone Docker/containerd</li>
+<li>Helm 3 for Kubernetes deployment</li>
+<li>Root or privileged access for driver installation</li>
+</ul>
+<h3>Installing Falco</h3>
+<h4>Kubernetes Deployment with Helm</h4>
+<pre><code># Add Falco Helm chart
+helm repo add falcosecurity https://falcosecurity.github.io/charts
+helm repo update
+
+# Install Falco with eBPF driver
+helm install falco falcosecurity/falco \
+  --namespace falco --create-namespace \
+  --set falcosidekick.enabled=true \
+  --set falcosidekick.webui.enabled=true \
+  --set driver.kind=ebpf \
+  --set collectors.containerd.enabled=true \
+  --set collectors.containerd.socket=/run/containerd/containerd.sock
+
+# Verify
+kubectl get pods -n falco
+kubectl logs -n falco -l app.kubernetes.io/name=falco --tail=20</code></pre>
+<h4>Standalone Installation (Debian/Ubuntu)</h4>
+<pre><code># Add Falco GPG key and repo
+curl -fsSL https://falco.org/repo/falcosecurity-packages.asc | \
+  sudo gpg --dearmor -o /usr/share/keyrings/falco-archive-keyring.gpg
+
+echo &quot;deb [signed-by=/usr/share/keyrings/falco-archive-keyring.gpg] https://download.falco.org/packages/deb stable main&quot; | \
+  sudo tee /etc/apt/sources.list.d/falcosecurity.list
+
+sudo apt-get update
+sudo apt-get install -y falco
+
+# Start Falco
+sudo systemctl enable falco
+sudo systemctl start falco</code></pre>
+<h3>Container Escape Detection Rules</h3>
+<h4>Rule 1: Detect Host Mount from Container</h4>
+<pre><code>- rule: Container Mounting Host Filesystem
+  desc: Detect a container attempting to mount the host filesystem
+  condition: &gt;
+    spawned_process and container and
+    proc.name = mount and
+    (proc.args contains &quot;/host&quot; or proc.args contains &quot;nsenter&quot;)
+  output: &gt;
+    Container mounting host filesystem
+    (user=%user.name container_id=%container.id container_name=%container.name
+     image=%container.image.repository command=%proc.cmdline %evt.args)
+  priority: CRITICAL
+  tags: [container, escape, T1611]</code></pre>
+<h4>Rule 2: Detect nsenter Usage (Namespace Escape)</h4>
+<pre><code>- rule: Nsenter Execution in Container
+  desc: Detect nsenter being used to escape container namespaces
+  condition: &gt;
+    spawned_process and container and proc.name = nsenter
+  output: &gt;
+    nsenter executed in container - potential escape attempt
+    (user=%user.name container_id=%container.id image=%container.image.repository
+     command=%proc.cmdline parent=%proc.pname)
+  priority: CRITICAL
+  tags: [container, escape, namespace, T1611]</code></pre>
+<h4>Rule 3: Detect Privileged Container Launch</h4>
+<pre><code>- rule: Launch Privileged Container
+  desc: Detect a privileged container being launched
+  condition: &gt;
+    container_started and container and container.privileged=true
+  output: &gt;
+    Privileged container started
+    (user=%user.name container_id=%container.id container_name=%container.name
+     image=%container.image.repository)
+  priority: WARNING
+  tags: [container, privileged, T1610]</code></pre>
+<h4>Rule 4: Detect /proc/sysrq-trigger Write</h4>
+<pre><code>- rule: Write to Sysrq Trigger
+  desc: Detect writes to /proc/sysrq-trigger which can crash or control the host
+  condition: &gt;
+    open_write and container and fd.name = /proc/sysrq-trigger
+  output: &gt;
+    Write to /proc/sysrq-trigger from container
+    (user=%user.name container_id=%container.id image=%container.image.repository
+     command=%proc.cmdline)
+  priority: CRITICAL
+  tags: [container, escape, host-manipulation]</code></pre>
+<h4>Rule 5: Detect Kernel Module Loading from Container</h4>
+<pre><code>- rule: Container Loading Kernel Module
+  desc: Detect a container attempting to load a kernel module
+  condition: &gt;
+    spawned_process and container and
+    (proc.name in (insmod, modprobe) or
+     (proc.name = init_module))
+  output: &gt;
+    Kernel module loading from container
+    (user=%user.name container_id=%container.id image=%container.image.repository
+     command=%proc.cmdline)
+  priority: CRITICAL
+  tags: [container, escape, kernel, T1611]</code></pre>
+<h4>Rule 6: Detect Container Breakout via cgroups</h4>
+<pre><code>- rule: Write to Cgroup Release Agent
+  desc: Detect writes to cgroup release_agent which is a known container escape vector
+  condition: &gt;
+    open_write and container and
+    fd.name endswith release_agent
+  output: &gt;
+    Container writing to cgroup release_agent - escape attempt
+    (user=%user.name container_id=%container.id image=%container.image.repository
+     file=%fd.name command=%proc.cmdline)
+  priority: CRITICAL
+  tags: [container, escape, cgroup, CVE-2022-0492]</code></pre>
+<h4>Rule 7: Detect Access to Host /etc/shadow</h4>
+<pre><code>- rule: Container Reading Host Shadow File
+  desc: Detect a container reading /etc/shadow on the host via mounted volume
+  condition: &gt;
+    open_read and container and
+    (fd.name = /etc/shadow or fd.name startswith /host/etc/shadow)
+  output: &gt;
+    Container reading host shadow file
+    (user=%user.name container_id=%container.id image=%container.image.repository
+     file=%fd.name command=%proc.cmdline)
+  priority: CRITICAL
+  tags: [container, credential-access, T1003]</code></pre>
+<h4>Rule 8: Detect Docker Socket Access</h4>
+<pre><code>- rule: Container Accessing Docker Socket
+  desc: Detect a container accessing the Docker socket which allows host control
+  condition: &gt;
+    (open_read or open_write) and container and
+    fd.name = /var/run/docker.sock
+  output: &gt;
+    Container accessing Docker socket
+    (user=%user.name container_id=%container.id image=%container.image.repository
+     command=%proc.cmdline)
+  priority: CRITICAL
+  tags: [container, escape, docker-socket, T1610]</code></pre>
+<h3>Complete Custom Rules File</h3>
+<pre><code># /etc/falco/rules.d/container-escape.yaml
+- list: escape_binaries
+  items: [nsenter, chroot, unshare, mount, umount, pivot_root]
+
+- macro: container_escape_attempt
+  condition: &gt;
+    spawned_process and container and
+    proc.name in (escape_binaries)
+
+- rule: Container Escape Binary Execution
+  desc: Detect execution of binaries commonly used for container escape
+  condition: container_escape_attempt
+  output: &gt;
+    Escape-related binary executed in container
+    (user=%user.name container=%container.name image=%container.image.repository
+     command=%proc.cmdline parent=%proc.pname pid=%proc.pid)
+  priority: CRITICAL
+  tags: [container, escape, mitre_T1611]
+
+- rule: Sensitive File Access from Container
+  desc: Detect container access to sensitive host files
+  condition: &gt;
+    (open_read or open_write) and container and
+    (fd.name startswith /proc/1/ or
+     fd.name = /etc/shadow or
+     fd.name = /etc/kubernetes/admin.conf or
+     fd.name startswith /var/lib/kubelet/)
+  output: &gt;
+    Sensitive file accessed from container
+    (container=%container.name image=%container.image.repository
+     file=%fd.name command=%proc.cmdline user=%user.name)
+  priority: CRITICAL
+  tags: [container, sensitive-file, mitre_T1005]</code></pre>
+<h3>Falco Configuration</h3>
+<pre><code># /etc/falco/falco.yaml (key settings)
+rules_files:
+  - /etc/falco/falco_rules.yaml
+  - /etc/falco/rules.d/container-escape.yaml
+
+json_output: true
+json_include_output_property: true
+json_include_tags_property: true
+
+log_stderr: true
+log_syslog: true
+log_level: info
+
+priority: WARNING
+
+stdout_output:
+  enabled: true
+
+syslog_output:
+  enabled: true
+
+http_output:
+  enabled: true
+  url: http://falcosidekick:2801
+  insecure: true
+
+grpc:
+  enabled: true
+  bind_address: &quot;unix:///run/falco/falco.sock&quot;
+  threadiness: 8
+
+grpc_output:
+  enabled: true</code></pre>
+<h3>Alert Integration</h3>
+<h4>Forward to Slack via Falcosidekick</h4>
+<pre><code># Falcosidekick values.yaml
+config:
+  slack:
+    webhookurl: &quot;https://hooks.slack.com/services/XXXXX&quot;
+    minimumpriority: &quot;warning&quot;
+    messageformat: |
+      *{{.Priority}}* - {{.Rule}}
+      Container: {{.OutputFields.container_name}}
+      Image: {{.OutputFields.container_image_repository}}
+      Command: {{.OutputFields.proc_cmdline}}</code></pre>
+<h3>Testing Rules</h3>
+<pre><code># Simulate container escape attempt (in a test container)
+kubectl run test-escape --image=alpine --restart=Never -- sh -c &quot;cat /etc/shadow&quot;
+
+# Simulate nsenter
+kubectl run test-nsenter --image=alpine --restart=Never --overrides='{&quot;spec&quot;:{&quot;hostPID&quot;:true}}' -- nsenter -t 1 -m -u -i -n -- cat /etc/hostname
+
+# Check Falco alerts
+kubectl logs -n falco -l app.kubernetes.io/name=falco --tail=50 | grep -i escape</code></pre>
+<h3>Best Practices</h3>
+<ol>
+<li><strong>Deploy Falco as DaemonSet</strong> to ensure coverage on all nodes</li>
+<li><strong>Use eBPF driver</strong> over kernel module for safer operation</li>
+<li><strong>Start with default rules</strong> (maturity_stable) then add custom rules</li>
+<li><strong>Forward alerts</strong> to SIEM/SOAR via Falcosidekick</li>
+<li><strong>Tag rules with MITRE ATT&amp;CK</strong> technique IDs for correlation</li>
+<li><strong>Test rules</strong> in permissive mode before enforcing</li>
+<li><strong>Tune false positives</strong> by adding exception lists for known good processes</li>
+<li><strong>Monitor Falco health</strong> with Prometheus metrics endpoint</li>
+</ol>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: detecting-container-escape-with-falco-rules\ndisplay_name: detecting-container-escape-with-falco-rules\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# detecting-container-escape-with-falco-rules - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `detecting-container-escape-with-falco-rules` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nFalco is a CNCF-graduated runtime security tool that monitors Linux syscalls to detect anomalous container behavior. It uses a rules engine to identify container escape techniques such as mounting host filesystems, acces\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose detecting-container-escape-with-falco-rules, then write the task. Fallback prompt: Use the detecting-container-escape-with-falco-rules skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `detecting-container-escape-with-falco-rules` |\n| Canonical name | `detecting-container-escape-with-falco-rules` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\nFalco is a CNCF-graduated runtime security tool that monitors Linux syscalls to detect anomalous container behavior. It uses a rules engine to identify container escape techniques such as mounting host filesystems, acces\n\n## Original SKILL.md\n\n---\nname: detecting-container-escape-with-falco-rules\ndescription: Detect container escape attempts in real-time using Falco runtime security\n  rules that monitor syscalls, file access, and privilege escalation.\ndomain: cybersecurity\nsubdomain: container-security\ntags:\n- falco\n- container-escape\n- runtime-security\n- syscall-monitoring\n- kubernetes\n- detection\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nd3fend_techniques:\n- Token Binding\n- Execution Isolation\n- File Metadata Consistency Validation\n- Restore Access\n- Application Protocol Command Analysis\nnist_csf:\n- PR.PS-01\n- PR.IR-01\n- ID.AM-08\n- DE.CM-01\nmitre_attack:\n- T1610\n- T1611\n- T1609\n- T1525\n- T1068\n---\n\n# Detecting Container Escape with Falco Rules\n\n## Overview\n\nFalco is a CNCF-graduated runtime security tool that monitors Linux syscalls to detect anomalous container behavior. It uses a rules engine to identify container escape techniques such as mounting host filesystems, accessing sensitive host paths, loading kernel modules, and exploiting privileged container capabilities.\n\n\n## When to Use\n\n- When investigating security incidents that require detecting container escape with falco rules\n- When building detection rules or threat hunting queries for this domain\n- When SOC analysts need structured procedures for this analysis type\n- When validating security monitoring coverage for related attack techniques\n\n## Prerequisites\n\n- Linux host with kernel 5.8+ (for eBPF driver) or kernel module support\n- Kubernetes cluster (v1.24+) or standalone Docker/containerd\n- Helm 3 for Kubernetes deployment\n- Root or privileged access for driver installation\n\n## Installing Falco\n\n### Kubernetes Deployment with Helm\n\n```bash\n# Add Falco Helm chart\nhelm repo add falcosecurity https://falcosecurity.github.io/charts\nhelm repo update\n\n# Install Falco with eBPF driver\nhelm install falco falcosecurity/falco \\\n  --namespace falco --create-namespace \\\n  --set falcosidekick.enabled=true \\\n  --set falcosidekick.webui.enabled=true \\\n  --set driver.kind=ebpf \\\n  --set collectors.containerd.enabled=true \\\n  --set collectors.containerd.socket=/run/containerd/containerd.sock\n\n# Verify\nkubectl get pods -n falco\nkubectl logs -n falco -l app.kubernetes.io/name=falco --tail=20\n```\n\n### Standalone Installation (Debian/Ubuntu)\n\n```bash\n# Add Falco GPG key and repo\ncurl -fsSL https://falco.org/repo/falcosecurity-packages.asc | \\\n  sudo gpg --dearmor -o /usr/share/keyrings/falco-archive-keyring.gpg\n\necho \"deb [signed-by=/usr/share/keyrings/falco-archive-keyring.gpg] https://download.falco.org/packages/deb stable main\" | \\\n  sudo tee /etc/apt/sources.list.d/falcosecurity.list\n\nsudo apt-get update\nsudo apt-get install -y falco\n\n# Start Falco\nsudo systemctl enable falco\nsudo systemctl start falco\n```\n\n## Container Escape Detection Rules\n\n### Rule 1: Detect Host Mount from Container\n\n```yaml\n- rule: Container Mounting Host Filesystem\n  desc: Detect a container attempting to mount the host filesystem\n  condition: >\n    spawned_process and container and\n    proc.name = mount and\n    (proc.args contains \"/host\" or proc.args contains \"nsenter\")\n  output: >\n    Container mounting host filesystem\n    (user=%user.name container_id=%container.id container_name=%container.name\n     image=%container.image.repository command=%proc.cmdline %evt.args)\n  priority: CRITICAL\n  tags: [container, escape, T1611]\n```\n\n### Rule 2: Detect nsenter Usage (Namespace Escape)\n\n```yaml\n- rule: Nsenter Execution in Container\n  desc: Detect nsenter being used to escape container namespaces\n  condition: >\n    spawned_process and container and proc.name = nsenter\n  output: >\n    nsenter executed in container - potential escape attempt\n    (user=%user.name container_id=%container.id image=%container.image.repository\n     command=%proc.cmdline parent=%proc.pname)\n  priority: CRITICAL\n  tags: [container, escape, namespace, T1611]\n```\n\n### Rule 3: Detect Privileged Container Launch\n\n```yaml\n- rule: Launch Privileged Container\n  desc: Detect a privileged container being launched\n  condition: >\n    container_started and container and container.privileged=true\n  output: >\n    Privileged container started\n    (user=%user.name container_id=%container.id container_name=%container.name\n     image=%container.image.repository)\n  priority: WARNING\n  tags: [container, privileged, T1610]\n```\n\n### Rule 4: Detect /proc/sysrq-trigger Write\n\n```yaml\n- rule: Write to Sysrq Trigger\n  desc: Detect writes to /proc/sysrq-trigger which can crash or control the host\n  condition: >\n    open_write and container and fd.name = /proc/sysrq-trigger\n  output: >\n    Write to /proc/sysrq-trigger from container\n    (user=%user.name container_id=%container.id image=%container.image.repository\n     command=%proc.cmdline)\n  priority: CRITICAL\n  tags: [container, escape, host-manipulation]\n```\n\n### Rule 5: Detect Kernel Module Loading from Container\n\n```yaml\n- rule: Container Loading Kernel Module\n  desc: Detect a container attempting to load a kernel module\n  condition: >\n    spawned_process and container and\n    (proc.name in (insmod, modprobe) or\n     (proc.name = init_module))\n  output: >\n    Kernel module loading from container\n    (user=%user.name container_id=%container.id image=%container.image.repository\n     command=%proc.cmdline)\n  priority: CRITICAL\n  tags: [container, escape, kernel, T1611]\n```\n\n### Rule 6: Detect Container Breakout via cgroups\n\n```yaml\n- rule: Write to Cgroup Release Agent\n  desc: Detect writes to cgroup release_agent which is a known container escape vector\n  condition: >\n    open_write and container and\n    fd.name endswith release_agent\n  output: >\n    Container writing to cgroup release_agent - escape attempt\n    (user=%user.name container_id=%container.id image=%container.image.repository\n     file=%fd.name command=%proc.cmdline)\n  priority: CRITICAL\n  tags: [container, escape, cgroup, CVE-2022-0492]\n```\n\n### Rule 7: Detect Access to Host /etc/shadow\n\n```yaml\n- rule: Container Reading Host Shadow File\n  desc: Detect a container reading /etc/shadow on the host via mounted volume\n  condition: >\n    open_read and container and\n    (fd.name = /etc/shadow or fd.name startswith /host/etc/shadow)\n  output: >\n    Container reading host shadow file\n    (user=%user.name container_id=%container.id image=%container.image.repository\n     file=%fd.name command=%proc.cmdline)\n  priority: CRITICAL\n  tags: [container, credential-access, T1003]\n```\n\n### Rule 8: Detect Docker Socket Access\n\n```yaml\n- rule: Container Accessing Docker Socket\n  desc: Detect a container accessing the Docker socket which allows host control\n  condition: >\n    (open_read or open_write) and container and\n    fd.name = /var/run/docker.sock\n  output: >\n    Container accessing Docker socket\n    (user=%user.name container_id=%container.id image=%container.image.repository\n     command=%proc.cmdline)\n  priority: CRITICAL\n  tags: [container, escape, docker-socket, T1610]\n```\n\n## Complete Custom Rules File\n\n```yaml\n# /etc/falco/rules.d/container-escape.yaml\n- list: escape_binaries\n  items: [nsenter, chroot, unshare, mount, umount, pivot_root]\n\n- macro: container_escape_attempt\n  condition: >\n    spawned_process and container and\n    proc.name in (escape_binaries)\n\n- rule: Container Escape Binary Execution\n  desc: Detect execution of binaries commonly used for container escape\n  condition: container_escape_attempt\n  output: >\n    Escape-related binary executed in container\n    (user=%user.name container=%container.name image=%container.image.repository\n     command=%proc.cmdline parent=%proc.pname pid=%proc.pid)\n  priority: CRITICAL\n  tags: [container, escape, mitre_T1611]\n\n- rule: Sensitive File Access from Container\n  desc: Detect container access to sensitive host files\n  condition: >\n    (open_read or open_write) and container and\n    (fd.name startswith /proc/1/ or\n     fd.name = /etc/shadow or\n     fd.name = /etc/kubernetes/admin.conf or\n     fd.name startswith /var/lib/kubelet/)\n  output: >\n    Sensitive file accessed from container\n    (container=%container.name image=%container.image.repository\n     file=%fd.name command=%proc.cmdline user=%user.name)\n  priority: CRITICAL\n  tags: [container, sensitive-file, mitre_T1005]\n```\n\n## Falco Configuration\n\n```yaml\n# /etc/falco/falco.yaml (key settings)\nrules_files:\n  - /etc/falco/falco_rules.yaml\n  - /etc/falco/rules.d/container-escape.yaml\n\njson_output: true\njson_include_output_property: true\njson_include_tags_property: true\n\nlog_stderr: true\nlog_syslog: true\nlog_level: info\n\npriority: WARNING\n\nstdout_output:\n  enabled: true\n\nsyslog_output:\n  enabled: true\n\nhttp_output:\n  enabled: true\n  url: http://falcosidekick:2801\n  insecure: true\n\ngrpc:\n  enabled: true\n  bind_address: \"unix:///run/falco/falco.sock\"\n  threadiness: 8\n\ngrpc_output:\n  enabled: true\n```\n\n## Alert Integration\n\n### Forward to Slack via Falcosidekick\n\n```yaml\n# Falcosidekick values.yaml\nconfig:\n  slack:\n    webhookurl: \"https://hooks.slack.com/services/XXXXX\"\n    minimumpriority: \"warning\"\n    messageformat: |\n      *{{.Priority}}* - {{.Rule}}\n      Container: {{.OutputFields.container_name}}\n      Image: {{.OutputFields.container_image_repository}}\n      Command: {{.OutputFields.proc_cmdline}}\n```\n\n## Testing Rules\n\n```bash\n# Simulate container escape attempt (in a test container)\nkubectl run test-escape --image=alpine --restart=Never -- sh -c \"cat /etc/shadow\"\n\n# Simulate nsenter\nkubectl run test-nsenter --image=alpine --restart=Never --overrides='{\"spec\":{\"hostPID\":true}}' -- nsenter -t 1 -m -u -i -n -- cat /etc/hostname\n\n# Check Falco alerts\nkubectl logs -n falco -l app.kubernetes.io/name=falco --tail=50 | grep -i escape\n```\n\n## Best Practices\n\n1. **Deploy Falco as DaemonSet** to ensure coverage on all nodes\n2. **Use eBPF driver** over kernel module for safer operation\n3. **Start with default rules** (maturity_stable) then add custom rules\n4. **Forward alerts** to SIEM/SOAR via Falcosidekick\n5. **Tag rules with MITRE ATT&CK** technique IDs for correlation\n6. **Test rules** in permissive mode before enforcing\n7. **Tune false positives** by adding exception lists for known good processes\n8. **Monitor Falco health** with Prometheus metrics endpoint\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("detecting-container-escape-with-falco-rules-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

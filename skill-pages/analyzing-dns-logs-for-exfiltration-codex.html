@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>analyzing-dns-logs-for-exfiltration - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/analyzing-dns-logs-for-exfiltration-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>analyzing-dns-logs-for-exfiltration</h1>
+      <p class="description">'Analyzes DNS query logs to detect data exfiltration via DNS tunneling,</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>analyzing-dns-logs-for-exfiltration</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>analyzing-dns-logs-for-exfiltration</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Analyzes DNS query logs to detect data exfiltration via DNS tunneling,</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose analyzing-dns-logs-for-exfiltration, then write the task. Fallback prompt: Use the analyzing-dns-logs-for-exfiltration skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Analyzing DNS Logs for Exfiltration</h2>
+<h3>When to Use</h3>
+<p>Use this skill when:</p>
+<ul>
+<li>SOC teams suspect data exfiltration through DNS tunneling to bypass firewall/proxy controls</li>
+<li>Threat intelligence indicates adversaries using DNS-based C2 channels (e.g., Cobalt Strike DNS beacon)</li>
+<li>UEBA detects anomalous DNS query volumes from specific hosts</li>
+<li>Malware analysis reveals DNS-over-HTTPS (DoH) or DNS tunneling capabilities</li>
+</ul>
+<p><strong>Do not use</strong> for standard DNS troubleshooting or availability monitoring — this skill focuses on security-relevant DNS abuse detection.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>DNS query logging enabled (Windows DNS Server, Bind, Infoblox, or Cisco Umbrella)</li>
+<li>DNS logs ingested into SIEM (Splunk with <code>Stream:DNS</code>, <code>dns</code> sourcetype, or Zeek DNS logs)</li>
+<li>Passive DNS data for historical domain resolution analysis</li>
+<li>Baseline of normal DNS behavior (query volume, domain distribution, TXT record frequency)</li>
+<li>Python with <code>math</code> and <code>collections</code> libraries for entropy calculation</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Detect DNS Tunneling via Subdomain Length Analysis</h4>
+<p>DNS tunneling encodes data in subdomain labels, creating unusually long queries:</p>
+<pre><code>index=dns sourcetype=&quot;stream:dns&quot; query_type IN (&quot;A&quot;, &quot;AAAA&quot;, &quot;TXT&quot;, &quot;CNAME&quot;, &quot;MX&quot;)
+| eval domain_parts = split(query, &quot;.&quot;)
+| eval subdomain = mvindex(domain_parts, 0, mvcount(domain_parts)-3)
+| eval subdomain_str = mvjoin(subdomain, &quot;.&quot;)
+| eval subdomain_len = len(subdomain_str)
+| eval tld = mvindex(domain_parts, -1)
+| eval registered_domain = mvindex(domain_parts, -2).&quot;.&quot;.tld
+| where subdomain_len &gt; 50
+| stats count AS queries, dc(query) AS unique_queries,
+        avg(subdomain_len) AS avg_subdomain_len,
+        max(subdomain_len) AS max_subdomain_len,
+        values(src_ip) AS sources
+  by registered_domain
+| where queries &gt; 20
+| sort - avg_subdomain_len
+| table registered_domain, queries, unique_queries, avg_subdomain_len, max_subdomain_len, sources</code></pre>
+<h4>Step 2: Detect High-Entropy Domain Queries (DGA Detection)</h4>
+<p>Domain Generation Algorithms produce random-looking domains:</p>
+<pre><code>index=dns sourcetype=&quot;stream:dns&quot;
+| eval domain_parts = split(query, &quot;.&quot;)
+| eval sld = mvindex(domain_parts, -2)
+| eval sld_len = len(sld)
+| eval char_count = sld_len
+| eval vowels = len(replace(sld, &quot;[^aeiou]&quot;, &quot;&quot;))
+| eval consonants = len(replace(sld, &quot;[^bcdfghjklmnpqrstvwxyz]&quot;, &quot;&quot;))
+| eval digits = len(replace(sld, &quot;[^0-9]&quot;, &quot;&quot;))
+| eval vowel_ratio = if(char_count &gt; 0, vowels / char_count, 0)
+| eval digit_ratio = if(char_count &gt; 0, digits / char_count, 0)
+| where sld_len &gt; 12 AND (vowel_ratio &lt; 0.2 OR digit_ratio &gt; 0.3)
+| stats count AS queries, dc(query) AS unique_domains, values(src_ip) AS sources
+  by query
+| where unique_domains &gt; 10
+| sort - queries</code></pre>
+<p><strong>Python-based Shannon Entropy Calculation for DNS queries:</strong></p>
+<pre><code>import math
+from collections import Counter
+
+def shannon_entropy(text):
+    &quot;&quot;&quot;Calculate Shannon entropy of a string&quot;&quot;&quot;
+    if not text:
+        return 0
+    counter = Counter(text.lower())
+    length = len(text)
+    entropy = -sum(
+        (count / length) * math.log2(count / length)
+        for count in counter.values()
+    )
+    return round(entropy, 4)
+
+# Test with examples
+normal_domain = &quot;google&quot;           # Low entropy
+dga_domain = &quot;x8kj2m9p4qw7n&quot;      # High entropy
+tunnel_subdomain = &quot;aGVsbG8gd29ybGQ.evil.com&quot;  # Base64 encoded data
+
+print(f&quot;Normal: {shannon_entropy(normal_domain)}&quot;)     # ~2.25
+print(f&quot;DGA:    {shannon_entropy(dga_domain)}&quot;)         # ~3.70
+print(f&quot;Tunnel: {shannon_entropy(tunnel_subdomain)}&quot;)   # ~3.50
+
+# Threshold: entropy &gt; 3.5 for subdomain = likely tunneling/DGA</code></pre>
+<p><strong>Splunk implementation of entropy scoring:</strong></p>
+<pre><code>index=dns sourcetype=&quot;stream:dns&quot;
+| eval domain_parts = split(query, &quot;.&quot;)
+| eval check_string = mvindex(domain_parts, 0)
+| eval check_len = len(check_string)
+| where check_len &gt; 8
+| eval chars = split(check_string, &quot;&quot;)
+| stats count AS total_chars, dc(chars) AS unique_chars by query, src_ip, check_string, check_len
+| eval entropy_estimate = log(unique_chars, 2) * (unique_chars / check_len)
+| where entropy_estimate &gt; 3.5
+| stats count AS high_entropy_queries, dc(query) AS unique_queries by src_ip
+| where high_entropy_queries &gt; 50
+| sort - high_entropy_queries</code></pre>
+<h4>Step 3: Detect Anomalous DNS Query Volume</h4>
+<p>Identify hosts generating abnormal DNS traffic:</p>
+<pre><code>index=dns sourcetype=&quot;stream:dns&quot; earliest=-24h
+| bin _time span=1h
+| stats count AS queries, dc(query) AS unique_domains by src_ip, _time
+| eventstats avg(queries) AS avg_queries, stdev(queries) AS stdev_queries by src_ip
+| eval z_score = (queries - avg_queries) / stdev_queries
+| where z_score &gt; 3 OR queries &gt; 5000
+| sort - z_score
+| table _time, src_ip, queries, unique_domains, avg_queries, z_score</code></pre>
+<p><strong>Detect TXT record abuse (common tunneling method):</strong></p>
+<pre><code>index=dns sourcetype=&quot;stream:dns&quot; query_type=&quot;TXT&quot;
+| stats count AS txt_queries, dc(query) AS unique_txt_domains,
+        values(query) AS domains by src_ip
+| where txt_queries &gt; 100
+| eval suspicion = case(
+    txt_queries &gt; 1000, &quot;CRITICAL — Likely DNS tunneling&quot;,
+    txt_queries &gt; 500, &quot;HIGH — Possible DNS tunneling&quot;,
+    txt_queries &gt; 100, &quot;MEDIUM — Unusual TXT volume&quot;
+  )
+| sort - txt_queries
+| table src_ip, txt_queries, unique_txt_domains, suspicion</code></pre>
+<h4>Step 4: Detect Known DNS Tunneling Tools</h4>
+<p>Search for signatures of common DNS tunneling tools:</p>
+<pre><code>index=dns sourcetype=&quot;stream:dns&quot;
+| eval query_lower = lower(query)
+| where (
+    match(query_lower, &quot;\.dnscat\.&quot;) OR
+    match(query_lower, &quot;\.dns2tcp\.&quot;) OR
+    match(query_lower, &quot;\.iodine\.&quot;) OR
+    match(query_lower, &quot;\.dnscapy\.&quot;) OR
+    match(query_lower, &quot;\.cobalt.*\.beacon&quot;) OR
+    query_type=&quot;NULL&quot; OR
+    (query_type=&quot;TXT&quot; AND len(query) &gt; 100)
+  )
+| stats count by src_ip, query, query_type
+| sort - count</code></pre>
+<p><strong>Detect DNS over HTTPS (DoH) bypassing local DNS:</strong></p>
+<pre><code>index=proxy OR index=firewall
+dest IN (&quot;1.1.1.1&quot;, &quot;1.0.0.1&quot;, &quot;8.8.8.8&quot;, &quot;8.8.4.4&quot;,
+         &quot;9.9.9.9&quot;, &quot;149.112.112.112&quot;, &quot;208.67.222.222&quot;)
+dest_port=443
+| stats sum(bytes_out) AS total_bytes, count AS connections by src_ip, dest
+| where connections &gt; 100 OR total_bytes &gt; 10485760
+| eval alert = &quot;Possible DoH bypass — DNS queries sent over HTTPS to public resolver&quot;
+| sort - total_bytes</code></pre>
+<h4>Step 5: Correlate DNS Findings with Endpoint Data</h4>
+<p>Cross-reference suspicious DNS with process data:</p>
+<pre><code>index=dns src_ip=&quot;192.168.1.105&quot; query=&quot;*.evil-tunnel.com&quot; earliest=-24h
+| stats count AS dns_queries, earliest(_time) AS first_query, latest(_time) AS last_query
+  by src_ip, query
+| join src_ip [
+    search index=sysmon EventCode=3 DestinationPort=53 Computer=&quot;WORKSTATION-042&quot;
+    | stats count AS connections, values(Image) AS processes by SourceIp
+    | rename SourceIp AS src_ip
+  ]
+| table src_ip, query, dns_queries, first_query, last_query, processes</code></pre>
+<h4>Step 6: Calculate Data Exfiltration Volume Estimate</h4>
+<p>Estimate data volume encoded in DNS queries:</p>
+<pre><code>index=dns src_ip=&quot;192.168.1.105&quot; query=&quot;*.evil-tunnel.com&quot; earliest=-24h
+| eval domain_parts = split(query, &quot;.&quot;)
+| eval encoded_data = mvindex(domain_parts, 0)
+| eval encoded_bytes = len(encoded_data)
+| eval decoded_bytes = encoded_bytes * 0.75  -- Base64 decoding factor
+| stats sum(decoded_bytes) AS total_bytes_estimated, count AS total_queries,
+        earliest(_time) AS first_seen, latest(_time) AS last_seen
+| eval estimated_kb = round(total_bytes_estimated / 1024, 1)
+| eval estimated_mb = round(total_bytes_estimated / 1048576, 2)
+| eval duration_hours = round((last_seen - first_seen) / 3600, 1)
+| eval rate_kbps = round(estimated_kb / (duration_hours * 3600) * 8, 2)
+| table total_queries, estimated_mb, duration_hours, rate_kbps, first_seen, last_seen</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|-----------| | <strong>DNS Tunneling</strong> | Technique encoding data within DNS queries/responses to exfiltrate data or establish C2 channels through DNS | | <strong>DGA</strong> | Domain Generation Algorithm — malware technique generating pseudo-random domain names for C2 resilience | | <strong>Shannon Entropy</strong> | Mathematical measure of randomness in a string — high entropy (&gt;3.5) in domain names indicates DGA or tunneling | | <strong>TXT Record Abuse</strong> | Using DNS TXT records (designed for text data) as a high-bandwidth channel for data tunneling | | <strong>DNS over HTTPS (DoH)</strong> | DNS queries encrypted over HTTPS (port 443), bypassing traditional DNS monitoring | | <strong>Passive DNS</strong> | Historical record of DNS resolutions showing which IPs a domain resolved to over time |</p>
+<h3>Tools &amp; Systems</h3>
+<ul>
+<li><strong>Splunk Stream</strong>: Network traffic capture add-on providing parsed DNS query data for SIEM analysis</li>
+<li><strong>Zeek (Bro)</strong>: Network security monitor generating detailed DNS transaction logs for analysis</li>
+<li><strong>Cisco Umbrella (OpenDNS)</strong>: Cloud DNS security platform blocking malicious domains and logging query data</li>
+<li><strong>Infoblox DNS Firewall</strong>: DNS-layer security providing RPZ-based blocking and detailed query logging</li>
+<li><strong>Farsight DNSDB</strong>: Passive DNS database for historical domain resolution lookups and infrastructure mapping</li>
+</ul>
+<h3>Common Scenarios</h3>
+<ul>
+<li><strong>Cobalt Strike DNS Beacon</strong>: Detect periodic TXT queries with encoded payloads to C2 domain</li>
+<li><strong>Data Exfiltration</strong>: Large volumes of unique subdomain queries encoding stolen data in Base64/hex</li>
+<li><strong>DGA Malware</strong>: Detect DNS queries to algorithmically generated domains (high entropy, no web content)</li>
+<li><strong>DNS-over-HTTPS Bypass</strong>: Employee using DoH to bypass corporate DNS filtering and monitoring</li>
+<li><strong>Slow Drip Exfiltration</strong>: Low-volume DNS tunneling staying below threshold alerts (requires baseline comparison)</li>
+</ul>
+<h3>Output Format</h3>
+<pre><code>DNS EXFILTRATION ANALYSIS — WORKSTATION-042
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Period:       2024-03-14 to 2024-03-15
+Source:       192.168.1.105 (WORKSTATION-042, Finance Dept)
+
+Findings:
+  [CRITICAL] DNS tunneling detected to evil-tunnel[.]com
+    Query Volume:       12,847 queries in 18 hours
+    Avg Subdomain Len:  63 characters (normal: &lt;20)
+    Avg Entropy:        3.82 (threshold: 3.5)
+    Query Types:        TXT (89%), A (11%)
+    Estimated Data:     ~4.7 MB exfiltrated via DNS
+    Rate:               0.58 kbps (slow drip pattern)
+
+  [HIGH] DGA-like domains resolved
+    Unique DGA Domains: 247 domains resolved
+    Pattern:            15-char random alphanumeric.xyz TLD
+    Entropy Range:      3.6 - 4.1
+
+Process Attribution:
+  Process:   svchost_update.exe (masquerading — not legitimate svchost)
+  PID:       4892
+  Parent:    explorer.exe
+  Hash:      SHA256: a1b2c3d4... (VT: 34/72 malicious — Cobalt Strike beacon)
+
+Containment:
+  [DONE] Host isolated via EDR
+  [DONE] Domain evil-tunnel[.]com added to DNS sinkhole
+  [DONE] Incident IR-2024-0448 created</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: analyzing-dns-logs-for-exfiltration\ndisplay_name: analyzing-dns-logs-for-exfiltration\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# analyzing-dns-logs-for-exfiltration - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `analyzing-dns-logs-for-exfiltration` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nUse this skill when:\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose analyzing-dns-logs-for-exfiltration, then write the task. Fallback prompt: Use the analyzing-dns-logs-for-exfiltration skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `analyzing-dns-logs-for-exfiltration` |\n| Canonical name | `analyzing-dns-logs-for-exfiltration` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\nUse this skill when:\n\n## Original SKILL.md\n\n---\nname: analyzing-dns-logs-for-exfiltration\ndescription: 'Analyzes DNS query logs to detect data exfiltration via DNS tunneling,\n  DGA domain communication, and covert C2 channels using entropy analysis, query volume\n  anomalies, and subdomain length detection in SIEM platforms. Use when SOC teams\n  need to identify DNS-based threats that bypass traditional network security controls.\n\n  '\ndomain: cybersecurity\nsubdomain: soc-operations\ntags:\n- soc\n- dns\n- exfiltration\n- dns-tunneling\n- dga\n- c2-detection\n- splunk\n- threat-detection\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\natlas_techniques:\n- AML.T0024\n- AML.T0056\n- AML.T0086\nnist_csf:\n- DE.CM-01\n- DE.AE-02\n- RS.MA-01\n- DE.AE-06\nmitre_attack:\n- T1048.003\n- T1071.004\n- T1567\n---\n# Analyzing DNS Logs for Exfiltration\n\n## When to Use\n\nUse this skill when:\n- SOC teams suspect data exfiltration through DNS tunneling to bypass firewall/proxy controls\n- Threat intelligence indicates adversaries using DNS-based C2 channels (e.g., Cobalt Strike DNS beacon)\n- UEBA detects anomalous DNS query volumes from specific hosts\n- Malware analysis reveals DNS-over-HTTPS (DoH) or DNS tunneling capabilities\n\n**Do not use** for standard DNS troubleshooting or availability monitoring — this skill focuses on security-relevant DNS abuse detection.\n\n## Prerequisites\n\n- DNS query logging enabled (Windows DNS Server, Bind, Infoblox, or Cisco Umbrella)\n- DNS logs ingested into SIEM (Splunk with `Stream:DNS`, `dns` sourcetype, or Zeek DNS logs)\n- Passive DNS data for historical domain resolution analysis\n- Baseline of normal DNS behavior (query volume, domain distribution, TXT record frequency)\n- Python with `math` and `collections` libraries for entropy calculation\n\n## Workflow\n\n### Step 1: Detect DNS Tunneling via Subdomain Length Analysis\n\nDNS tunneling encodes data in subdomain labels, creating unusually long queries:\n\n```spl\nindex=dns sourcetype=\"stream:dns\" query_type IN (\"A\", \"AAAA\", \"TXT\", \"CNAME\", \"MX\")\n| eval domain_parts = split(query, \".\")\n| eval subdomain = mvindex(domain_parts, 0, mvcount(domain_parts)-3)\n| eval subdomain_str = mvjoin(subdomain, \".\")\n| eval subdomain_len = len(subdomain_str)\n| eval tld = mvindex(domain_parts, -1)\n| eval registered_domain = mvindex(domain_parts, -2).\".\".tld\n| where subdomain_len > 50\n| stats count AS queries, dc(query) AS unique_queries,\n        avg(subdomain_len) AS avg_subdomain_len,\n        max(subdomain_len) AS max_subdomain_len,\n        values(src_ip) AS sources\n  by registered_domain\n| where queries > 20\n| sort - avg_subdomain_len\n| table registered_domain, queries, unique_queries, avg_subdomain_len, max_subdomain_len, sources\n```\n\n### Step 2: Detect High-Entropy Domain Queries (DGA Detection)\n\nDomain Generation Algorithms produce random-looking domains:\n\n```spl\nindex=dns sourcetype=\"stream:dns\"\n| eval domain_parts = split(query, \".\")\n| eval sld = mvindex(domain_parts, -2)\n| eval sld_len = len(sld)\n| eval char_count = sld_len\n| eval vowels = len(replace(sld, \"[^aeiou]\", \"\"))\n| eval consonants = len(replace(sld, \"[^bcdfghjklmnpqrstvwxyz]\", \"\"))\n| eval digits = len(replace(sld, \"[^0-9]\", \"\"))\n| eval vowel_ratio = if(char_count > 0, vowels / char_count, 0)\n| eval digit_ratio = if(char_count > 0, digits / char_count, 0)\n| where sld_len > 12 AND (vowel_ratio \u003c 0.2 OR digit_ratio > 0.3)\n| stats count AS queries, dc(query) AS unique_domains, values(src_ip) AS sources\n  by query\n| where unique_domains > 10\n| sort - queries\n```\n\n**Python-based Shannon Entropy Calculation for DNS queries:**\n\n```python\nimport math\nfrom collections import Counter\n\ndef shannon_entropy(text):\n    \"\"\"Calculate Shannon entropy of a string\"\"\"\n    if not text:\n        return 0\n    counter = Counter(text.lower())\n    length = len(text)\n    entropy = -sum(\n        (count / length) * math.log2(count / length)\n        for count in counter.values()\n    )\n    return round(entropy, 4)\n\n# Test with examples\nnormal_domain = \"google\"           # Low entropy\ndga_domain = \"x8kj2m9p4qw7n\"      # High entropy\ntunnel_subdomain = \"aGVsbG8gd29ybGQ.evil.com\"  # Base64 encoded data\n\nprint(f\"Normal: {shannon_entropy(normal_domain)}\")     # ~2.25\nprint(f\"DGA:    {shannon_entropy(dga_domain)}\")         # ~3.70\nprint(f\"Tunnel: {shannon_entropy(tunnel_subdomain)}\")   # ~3.50\n\n# Threshold: entropy > 3.5 for subdomain = likely tunneling/DGA\n```\n\n**Splunk implementation of entropy scoring:**\n\n```spl\nindex=dns sourcetype=\"stream:dns\"\n| eval domain_parts = split(query, \".\")\n| eval check_string = mvindex(domain_parts, 0)\n| eval check_len = len(check_string)\n| where check_len > 8\n| eval chars = split(check_string, \"\")\n| stats count AS total_chars, dc(chars) AS unique_chars by query, src_ip, check_string, check_len\n| eval entropy_estimate = log(unique_chars, 2) * (unique_chars / check_len)\n| where entropy_estimate > 3.5\n| stats count AS high_entropy_queries, dc(query) AS unique_queries by src_ip\n| where high_entropy_queries > 50\n| sort - high_entropy_queries\n```\n\n### Step 3: Detect Anomalous DNS Query Volume\n\nIdentify hosts generating abnormal DNS traffic:\n\n```spl\nindex=dns sourcetype=\"stream:dns\" earliest=-24h\n| bin _time span=1h\n| stats count AS queries, dc(query) AS unique_domains by src_ip, _time\n| eventstats avg(queries) AS avg_queries, stdev(queries) AS stdev_queries by src_ip\n| eval z_score = (queries - avg_queries) / stdev_queries\n| where z_score > 3 OR queries > 5000\n| sort - z_score\n| table _time, src_ip, queries, unique_domains, avg_queries, z_score\n```\n\n**Detect TXT record abuse (common tunneling method):**\n\n```spl\nindex=dns sourcetype=\"stream:dns\" query_type=\"TXT\"\n| stats count AS txt_queries, dc(query) AS unique_txt_domains,\n        values(query) AS domains by src_ip\n| where txt_queries > 100\n| eval suspicion = case(\n    txt_queries > 1000, \"CRITICAL — Likely DNS tunneling\",\n    txt_queries > 500, \"HIGH — Possible DNS tunneling\",\n    txt_queries > 100, \"MEDIUM — Unusual TXT volume\"\n  )\n| sort - txt_queries\n| table src_ip, txt_queries, unique_txt_domains, suspicion\n```\n\n### Step 4: Detect Known DNS Tunneling Tools\n\nSearch for signatures of common DNS tunneling tools:\n\n```spl\nindex=dns sourcetype=\"stream:dns\"\n| eval query_lower = lower(query)\n| where (\n    match(query_lower, \"\\.dnscat\\.\") OR\n    match(query_lower, \"\\.dns2tcp\\.\") OR\n    match(query_lower, \"\\.iodine\\.\") OR\n    match(query_lower, \"\\.dnscapy\\.\") OR\n    match(query_lower, \"\\.cobalt.*\\.beacon\") OR\n    query_type=\"NULL\" OR\n    (query_type=\"TXT\" AND len(query) > 100)\n  )\n| stats count by src_ip, query, query_type\n| sort - count\n```\n\n**Detect DNS over HTTPS (DoH) bypassing local DNS:**\n\n```spl\nindex=proxy OR index=firewall\ndest IN (\"1.1.1.1\", \"1.0.0.1\", \"8.8.8.8\", \"8.8.4.4\",\n         \"9.9.9.9\", \"149.112.112.112\", \"208.67.222.222\")\ndest_port=443\n| stats sum(bytes_out) AS total_bytes, count AS connections by src_ip, dest\n| where connections > 100 OR total_bytes > 10485760\n| eval alert = \"Possible DoH bypass — DNS queries sent over HTTPS to public resolver\"\n| sort - total_bytes\n```\n\n### Step 5: Correlate DNS Findings with Endpoint Data\n\nCross-reference suspicious DNS with process data:\n\n```spl\nindex=dns src_ip=\"192.168.1.105\" query=\"*.evil-tunnel.com\" earliest=-24h\n| stats count AS dns_queries, earliest(_time) AS first_query, latest(_time) AS last_query\n  by src_ip, query\n| join src_ip [\n    search index=sysmon EventCode=3 DestinationPort=53 Computer=\"WORKSTATION-042\"\n    | stats count AS connections, values(Image) AS processes by SourceIp\n    | rename SourceIp AS src_ip\n  ]\n| table src_ip, query, dns_queries, first_query, last_query, processes\n```\n\n### Step 6: Calculate Data Exfiltration Volume Estimate\n\nEstimate data volume encoded in DNS queries:\n\n```spl\nindex=dns src_ip=\"192.168.1.105\" query=\"*.evil-tunnel.com\" earliest=-24h\n| eval domain_parts = split(query, \".\")\n| eval encoded_data = mvindex(domain_parts, 0)\n| eval encoded_bytes = len(encoded_data)\n| eval decoded_bytes = encoded_bytes * 0.75  -- Base64 decoding factor\n| stats sum(decoded_bytes) AS total_bytes_estimated, count AS total_queries,\n        earliest(_time) AS first_seen, latest(_time) AS last_seen\n| eval estimated_kb = round(total_bytes_estimated / 1024, 1)\n| eval estimated_mb = round(total_bytes_estimated / 1048576, 2)\n| eval duration_hours = round((last_seen - first_seen) / 3600, 1)\n| eval rate_kbps = round(estimated_kb / (duration_hours * 3600) * 8, 2)\n| table total_queries, estimated_mb, duration_hours, rate_kbps, first_seen, last_seen\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|-----------|\n| **DNS Tunneling** | Technique encoding data within DNS queries/responses to exfiltrate data or establish C2 channels through DNS |\n| **DGA** | Domain Generation Algorithm — malware technique generating pseudo-random domain names for C2 resilience |\n| **Shannon Entropy** | Mathematical measure of randomness in a string — high entropy (>3.5) in domain names indicates DGA or tunneling |\n| **TXT Record Abuse** | Using DNS TXT records (designed for text data) as a high-bandwidth channel for data tunneling |\n| **DNS over HTTPS (DoH)** | DNS queries encrypted over HTTPS (port 443), bypassing traditional DNS monitoring |\n| **Passive DNS** | Historical record of DNS resolutions showing which IPs a domain resolved to over time |\n\n## Tools & Systems\n\n- **Splunk Stream**: Network traffic capture add-on providing parsed DNS query data for SIEM analysis\n- **Zeek (Bro)**: Network security monitor generating detailed DNS transaction logs for analysis\n- **Cisco Umbrella (OpenDNS)**: Cloud DNS security platform blocking malicious domains and logging query data\n- **Infoblox DNS Firewall**: DNS-layer security providing RPZ-based blocking and detailed query logging\n- **Farsight DNSDB**: Passive DNS database for historical domain resolution lookups and infrastructure mapping\n\n## Common Scenarios\n\n- **Cobalt Strike DNS Beacon**: Detect periodic TXT queries with encoded payloads to C2 domain\n- **Data Exfiltration**: Large volumes of unique subdomain queries encoding stolen data in Base64/hex\n- **DGA Malware**: Detect DNS queries to algorithmically generated domains (high entropy, no web content)\n- **DNS-over-HTTPS Bypass**: Employee using DoH to bypass corporate DNS filtering and monitoring\n- **Slow Drip Exfiltration**: Low-volume DNS tunneling staying below threshold alerts (requires baseline comparison)\n\n## Output Format\n\n```\nDNS EXFILTRATION ANALYSIS — WORKSTATION-042\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nPeriod:       2024-03-14 to 2024-03-15\nSource:       192.168.1.105 (WORKSTATION-042, Finance Dept)\n\nFindings:\n  [CRITICAL] DNS tunneling detected to evil-tunnel[.]com\n    Query Volume:       12,847 queries in 18 hours\n    Avg Subdomain Len:  63 characters (normal: \u003c20)\n    Avg Entropy:        3.82 (threshold: 3.5)\n    Query Types:        TXT (89%), A (11%)\n    Estimated Data:     ~4.7 MB exfiltrated via DNS\n    Rate:               0.58 kbps (slow drip pattern)\n\n  [HIGH] DGA-like domains resolved\n    Unique DGA Domains: 247 domains resolved\n    Pattern:            15-char random alphanumeric.xyz TLD\n    Entropy Range:      3.6 - 4.1\n\nProcess Attribution:\n  Process:   svchost_update.exe (masquerading — not legitimate svchost)\n  PID:       4892\n  Parent:    explorer.exe\n  Hash:      SHA256: a1b2c3d4... (VT: 34/72 malicious — Cobalt Strike beacon)\n\nContainment:\n  [DONE] Host isolated via EDR\n  [DONE] Domain evil-tunnel[.]com added to DNS sinkhole\n  [DONE] Incident IR-2024-0448 created\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("analyzing-dns-logs-for-exfiltration-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

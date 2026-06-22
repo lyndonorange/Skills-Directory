@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>kw-zoom-plugin-rtms - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/kw-zoom-plugin-rtms-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>kw-zoom-plugin-rtms</h1>
+      <p class="description">Reference skill for Zoom RTMS. Use after routing to a live-media workflow when processing real-time audio, video, chat, transcripts, screen share, or contact-center voice streams.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>kw-zoom-plugin-rtms</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>kw-zoom-plugin-rtms</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Reference skill for Zoom RTMS. Use after routing to a live-media workflow when processing real-time audio, video, chat, transcripts, screen share, or contact-center voice streams.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose kw-zoom-plugin-rtms, then write the task. Fallback prompt: Use the kw-zoom-plugin-rtms skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Zoom Realtime Media Streams (RTMS)</h2>
+<p>Background reference for live Zoom media pipelines. Prefer <code>build-zoom-bot</code> first, then use this skill for stream types, capabilities, and RTMS-specific implementation constraints.</p>
+<h2>Zoom Realtime Media Streams (RTMS)</h2>
+<p>Expert guidance for accessing live audio, video, transcript, chat, and screen share data from Zoom meetings, webinars, Video SDK sessions, and Zoom Contact Center Voice in real-time. RTMS uses a WebSocket-based protocol with open standards and does not require a meeting bot to capture the media plane.</p>
+<h3>Read This First (Critical)</h3>
+<p>RTMS is primarily a <strong>backend media ingestion service</strong>.</p>
+<ul>
+<li>Your backend receives and processes live media: <strong>audio, video, screen share, chat, transcript</strong>.</li>
+<li>RTMS is not a frontend UI SDK by itself.</li>
+<li>Processing is <strong>event-triggered</strong>: backend waits for RTMS start webhook events before stream handling begins.</li>
+</ul>
+<p>Optional architecture (common):</p>
+<ul>
+<li>Add a <strong>Zoom App SDK</strong> frontend for in-client UI/controls.</li>
+<li>Stream backend RTMS outputs to frontend via <strong>WebSocket</strong> (or SSE, gRPC, queue workers, etc.).</li>
+</ul>
+<p>Use RTMS for media/data plane, and use frontend frameworks/Zoom Apps for presentation + user interactions.</p>
+<p><strong>Official Documentation</strong>: https://developers.zoom.us/docs/rtms/ <strong>SDK Reference (JS)</strong>: https://zoom.github.io/rtms/js/ <strong>SDK Reference (Python)</strong>: https://zoom.github.io/rtms/py/ <strong>Sample Repository</strong>: https://github.com/zoom/rtms-samples</p>
+<h3>Quick Links</h3>
+<p><strong>New to RTMS? Follow this path:</strong></p>
+<ol>
+<li><strong>[Connection Architecture](concepts/connection-architecture.md)</strong> - Two-phase WebSocket design</li>
+<li><strong>[SDK Quickstart](examples/sdk-quickstart.md)</strong> - Fastest way to receive media (recommended)</li>
+<li><strong>[Manual WebSocket](examples/manual-websocket.md)</strong> - Full protocol control without SDK</li>
+<li><strong>[Media Types](references/media-types.md)</strong> - Audio, video, transcript, chat, screen share</li>
+</ol>
+<p><strong>Complete Implementation:</strong></p>
+<ul>
+<li><strong>[RTMS Bot](examples/rtms-bot.md)</strong> - End-to-end bot implementation guide</li>
+</ul>
+<p><strong>Reference:</strong></p>
+<ul>
+<li><strong>[Lifecycle Flow](concepts/lifecycle-flow.md)</strong> - Complete webhook-to-streaming flow</li>
+<li><strong>[Data Types](references/data-types.md)</strong> - All enums and constants</li>
+<li><strong>[Webhooks](references/webhooks.md)</strong> - Event subscription details</li>
+<li><strong>[Environment Variables](references/environment-variables.md)</strong> - credential modes and runtime knobs</li>
+<li><strong>[Quickstart Notes](references/quickstart.md)</strong> - Secondary quickstart guide</li>
+<li><strong>Integrated Index</strong> - see the section below in this file</li>
+</ul>
+<p><strong>Having issues?</strong></p>
+<ul>
+<li>Connection fails -&gt; [Common Issues](troubleshooting/common-issues.md)</li>
+<li>Duplicate connections -&gt; [Webhook Gotchas](troubleshooting/common-issues.md#webhook-response-timing)</li>
+<li>No audio/video -&gt; [Media Configuration](references/media-types.md)</li>
+<li>Start with preflight checks -&gt; [5-Minute Runbook](RUNBOOK.md)</li>
+</ul>
+<h3>Supported Products</h3>
+<p>| Product | Webhook Event | Payload ID | App Type | |---------|--------------|------------|----------| | <strong>Meetings</strong> | <code>meeting.rtms_started</code> / <code>meeting.rtms_stopped</code> | <code>meeting_uuid</code> | General App | | <strong>Webinars</strong> | <code>webinar.rtms_started</code> / <code>webinar.rtms_stopped</code> | <code>meeting_uuid</code> (same!) | General App | | <strong>Video SDK</strong> | <code>session.rtms_started</code> / <code>session.rtms_stopped</code> | <code>session_id</code> | Video SDK App | | <strong>Zoom Contact Center Voice</strong> | Product-specific RTMS/ZCC Voice events | Product-specific stream/session identifiers | Contact Center / approved RTMS integration |</p>
+<p>Once connected, the core signaling/media socket model is shared across products. Meetings, webinars, and Video SDK sessions use the familiar start/stop webhooks. Zoom Contact Center Voice adds its own RTMS/ZCC Voice event family and should be treated as the same transport model with product-specific event payloads.</p>
+<h3>RTMS Overview</h3>
+<p>RTMS is a data pipeline that gives your app access to live media from Zoom meetings, webinars, and Video SDK sessions <strong>without participant bots</strong>. Instead of having automated clients join meetings, use RTMS to collect media data directly from Zoom's infrastructure.</p>
+<h4>What RTMS Provides</h4>
+<p>| Media Type | Format | Use Cases | |------------|--------|-----------| | <strong>Audio</strong> | PCM (L16), G.711, G.722, Opus | Transcription, voice analysis, recording | | <strong>Video</strong> | H.264, JPG, PNG | Recording, AI vision, thumbnails, active participant selection | | <strong>Screen Share</strong> | H.264, JPG, PNG | Content capture, slide extraction | | <strong>Transcript</strong> | JSON text | Meeting notes, search, compliance | | <strong>Chat</strong> | JSON text | Archive, sentiment analysis |</p>
+<h4>March 2026 Protocol Changes</h4>
+<ul>
+<li><strong>Zoom Contact Center Voice support</strong>: RTMS now covers Contact Center Voice audio and transcript scenarios.</li>
+<li><strong>Transcript Language Identification control</strong>: transcript media handshakes now support <code>src_language</code> and <code>enable_lid</code>. Default behavior is LID enabled. Set <code>enable_lid: false</code> to force a fixed language.</li>
+<li><strong>Single individual video stream subscription</strong>: RTMS can now stream one participant's camera feed at a time when <code>data_opt</code> is set to <code>VIDEO_SINGLE_INDIVIDUAL_STREAM</code>.</li>
+<li><strong>Graceful client-initiated shutdown</strong>: backends can send <code>STREAM_CLOSE_REQ</code> over the signaling socket and wait for <code>STREAM_CLOSE_RESP</code>.</li>
+<li><strong>Media keep-alive tolerance increased</strong>: media socket keep-alive timeout is now <strong>65 seconds</strong>, not 35.</li>
+</ul>
+<h4>Two Approaches</h4>
+<p>| Approach | Best For | Complexity | |----------|----------|------------| | <strong>SDK</strong> (<code>@zoom/rtms</code>) | Most use cases | Low - handles WebSocket complexity | | <strong>Manual WebSocket</strong> | Custom protocols, other languages | High - full protocol implementation |</p>
+<h3>Prerequisites</h3>
+<ul>
+<li><strong>Node.js 20.3.0+</strong> (24 LTS recommended) for JavaScript SDK</li>
+<li><strong>Python 3.10+</strong> for Python SDK</li>
+<li>Zoom General App (for meetings/webinars) or Video SDK App (for Video SDK) with RTMS feature enabled</li>
+<li>Webhook endpoint for RTMS events</li>
+<li>Server to receive WebSocket streams</li>
+</ul>
+<blockquote><strong>Need RTMS access?</strong> Post in [Zoom Developer Forum](https://devforum.zoom.us/) requesting RTMS access with your use case.</blockquote>
+<h3>Quick Start (SDK - Recommended)</h3>
+<pre><code>import rtms from &quot;@zoom/rtms&quot;;
+
+// All RTMS start/stop events across products
+const RTMS_EVENTS = [&quot;meeting.rtms_started&quot;, &quot;webinar.rtms_started&quot;, &quot;session.rtms_started&quot;];
+
+// Handle webhook events
+rtms.onWebhookEvent(({ event, payload }) =&gt; {
+  if (!RTMS_EVENTS.includes(event)) return;
+
+  const client = new rtms.Client();
+
+  client.onAudioData((data, timestamp, metadata) =&gt; {
+    console.log(`Audio from ${metadata.userName}: ${data.length} bytes`);
+  });
+
+  client.onTranscriptData((data, timestamp, metadata) =&gt; {
+    const text = data.toString('utf8');
+    console.log(`${metadata.userName}: ${text}`);
+  });
+
+  client.onJoinConfirm((reason) =&gt; {
+    console.log(`Joined session: ${reason}`);
+  });
+
+  // SDK handles all WebSocket connections automatically
+  // Accepts both meeting_uuid and session_id transparently
+  client.join(payload);
+});</code></pre>
+<h3>Quick Start (Manual WebSocket)</h3>
+<p>For full control or non-SDK languages, implement the two-phase WebSocket protocol:</p>
+<pre><code>const WebSocket = require('ws');
+const crypto = require('crypto');
+
+const RTMS_EVENTS = ['meeting.rtms_started', 'webinar.rtms_started', 'session.rtms_started'];
+
+// 1. Generate signature
+// For meetings/webinars: uses meeting_uuid. For Video SDK: uses session_id.
+function generateSignature(clientId, idValue, streamId, clientSecret) {
+  const message = `${clientId},${idValue},${streamId}`;
+  return crypto.createHmac('sha256', clientSecret).update(message).digest('hex');
+}
+
+// 2. Handle webhook
+app.post('/webhook', (req, res) =&gt; {
+  res.status(200).send();  // CRITICAL: Respond immediately!
+  
+  const { event, payload } = req.body;
+  if (RTMS_EVENTS.includes(event)) {
+    connectToRTMS(payload);
+  }
+});
+
+// 3. Connect to signaling WebSocket
+function connectToRTMS(payload) {
+  const { server_urls, rtms_stream_id } = payload;
+  // meeting_uuid for meetings/webinars, session_id for Video SDK
+  const idValue = payload.meeting_uuid || payload.session_id;
+  const signature = generateSignature(CLIENT_ID, idValue, rtms_stream_id, CLIENT_SECRET);
+  
+  const signalingWs = new WebSocket(server_urls);
+  
+  signalingWs.on('open', () =&gt; {
+    signalingWs.send(JSON.stringify({
+      msg_type: 1,  // Handshake request
+      protocol_version: 1,
+      meeting_uuid: idValue,
+      rtms_stream_id,
+      signature,
+      media_type: 9  // AUDIO(1) | TRANSCRIPT(8)
+    }));
+  });
+  
+  // ... handle responses, connect to media WebSocket
+}</code></pre>
+<p><strong>See</strong>: [Manual WebSocket Guide](examples/manual-websocket.md) for complete implementation.</p>
+<h3>Media Type Bitmask</h3>
+<p>Combine types with bitwise OR:</p>
+<p>| Type | Value | Description | |------|-------|-------------| | Audio | 1 | PCM audio samples | | Video | 2 | H.264/JPG video frames | | Screen Share | 4 | <strong>Separate from video!</strong> | | Transcript | 8 | Real-time speech-to-text | | Chat | 16 | In-meeting chat messages | | All | 32 | All media types |</p>
+<p><strong>Example</strong>: Audio + Transcript = <code>1 | 8</code> = <code>9</code></p>
+<h3>Critical Gotchas</h3>
+<p>| Issue | Solution | |-------|----------| | <strong>Only 1 connection allowed</strong> | New connections kick out existing ones. Track active sessions! | | <strong>Respond 200 immediately</strong> | If webhook delays, Zoom retries creating duplicate connections | | <strong>Heartbeat mandatory</strong> | Respond to msg_type 12 with msg_type 13, or connection dies | | <strong>Reconnection is YOUR job</strong> | RTMS doesn't auto-reconnect. Media keep-alive tolerance is now about <strong>65s</strong>; signaling remains around <strong>60s</strong> | | <strong>Transcript language drift</strong> | Use <code>src_language</code> plus <code>enable_lid: false</code> when you want fixed-language transcription instead of automatic language switching | | <strong>Single participant video only</strong> | <code>VIDEO_SINGLE_INDIVIDUAL_STREAM</code> supports one participant at a time. A new <code>VIDEO_SUBSCRIPTION_REQ</code> overrides the previous selection | | <strong>Graceful close is explicit now</strong> | Use <code>STREAM_CLOSE_REQ</code> / <code>STREAM_CLOSE_RESP</code> when your backend wants to terminate the stream cleanly |</p>
+<h3>Environment Variables</h3>
+<h4>SDK Environment Variables</h4>
+<pre><code># Required - Authentication
+ZM_RTMS_CLIENT=your_client_id          # Zoom OAuth Client ID
+ZM_RTMS_SECRET=your_client_secret      # Zoom OAuth Client Secret
+
+# Optional - Webhook server
+ZM_RTMS_PORT=8080                      # Default: 8080
+ZM_RTMS_PATH=/webhook                  # Default: /
+
+# Optional - Logging
+ZM_RTMS_LOG_LEVEL=info                 # error, warn, info, debug, trace
+ZM_RTMS_LOG_FORMAT=progressive         # progressive or json
+ZM_RTMS_LOG_ENABLED=true</code></pre>
+<h4>Manual Implementation Variables</h4>
+<pre><code>ZOOM_CLIENT_ID=your_client_id
+ZOOM_CLIENT_SECRET=your_client_secret
+ZOOM_SECRET_TOKEN=your_webhook_token   # For webhook validation</code></pre>
+<h3>Zoom App Setup</h3>
+<h4>For Meetings and Webinars (General App)</h4>
+<ol>
+<li>Go to [marketplace.zoom.us](https://marketplace.zoom.us) -&gt; Develop -&gt; Build App</li>
+<li>Choose <strong>General App</strong> -&gt; <strong>User-Managed</strong></li>
+<li>Features -&gt; Access -&gt; <strong>Enable Event Subscription</strong></li>
+<li>Add Events -&gt; Search &quot;rtms&quot; -&gt; Select:</li>
+</ol>
+<ul>
+<li><code>meeting.rtms_started</code></li>
+<li><code>meeting.rtms_stopped</code></li>
+<li><code>webinar.rtms_started</code> (if using webinars)</li>
+<li><code>webinar.rtms_stopped</code> (if using webinars)</li>
+</ul>
+<ol>
+<li>Scopes -&gt; Add Scopes -&gt; Search &quot;rtms&quot; -&gt; Add:</li>
+</ol>
+<ul>
+<li><code>meeting:read:meeting_audio</code></li>
+<li><code>meeting:read:meeting_video</code></li>
+<li><code>meeting:read:meeting_transcript</code></li>
+<li><code>meeting:read:meeting_chat</code></li>
+<li><code>webinar:read:webinar_audio</code> (if using webinars)</li>
+<li><code>webinar:read:webinar_video</code> (if using webinars)</li>
+<li><code>webinar:read:webinar_transcript</code> (if using webinars)</li>
+<li><code>webinar:read:webinar_chat</code> (if using webinars)</li>
+</ul>
+<h4>For Video SDK (Video SDK App)</h4>
+<ol>
+<li>Go to [marketplace.zoom.us](https://marketplace.zoom.us) -&gt; Develop -&gt; Build App</li>
+<li>Choose <strong>Video SDK App</strong></li>
+<li>Use your SDK Key and SDK Secret (not OAuth Client ID/Secret)</li>
+<li>Add Events:</li>
+</ol>
+<ul>
+<li><code>session.rtms_started</code></li>
+<li><code>session.rtms_stopped</code></li>
+</ul>
+<h3>Sample Repositories</h3>
+<h4>Official Samples</h4>
+<p>| Repository | Description | |------------|-------------| | [rtms-samples](https://github.com/zoom/rtms-samples) | RTMSManager, boilerplates, AI samples | | [rtms-quickstart-js](https://github.com/zoom/rtms-quickstart-js) | JavaScript SDK quickstart | | [rtms-quickstart-py](https://github.com/zoom/rtms-quickstart-py) | Python SDK quickstart | | [rtms-sdk-cpp](https://github.com/zoom/rtms-sdk-cpp) | C++ SDK | | [zoom-rtms](https://github.com/zoom/rtms) | Main SDK repository |</p>
+<h4>AI Integration Samples</h4>
+<p>| Sample | Description | |--------|-------------| | [rtms-meeting-assistant-starter-kit](https://github.com/zoom/rtms-meeting-assistant-starter-kit) | AI meeting assistant with summaries | | [arlo-meeting-assistant](https://github.com/zoom/arlo-meeting-assistant) | Production meeting assistant with DB | | [videosdk-rtms-transcribe-audio](https://github.com/zoom/videosdk-rtms-transcribe-audio) | Whisper transcription |</p>
+<h3>Complete Documentation</h3>
+<h4>Concepts</h4>
+<ul>
+<li><strong>[Connection Architecture](concepts/connection-architecture.md)</strong> - Two-phase WebSocket design</li>
+<li><strong>[Lifecycle Flow](concepts/lifecycle-flow.md)</strong> - Webhook to streaming flow</li>
+</ul>
+<h4>Examples</h4>
+<ul>
+<li><strong>[SDK Quickstart](examples/sdk-quickstart.md)</strong> - Using @zoom/rtms SDK</li>
+<li><strong>[Manual WebSocket](examples/manual-websocket.md)</strong> - Raw protocol implementation</li>
+<li><strong>[RTMS Bot](examples/rtms-bot.md)</strong> - Complete bot implementation guide</li>
+<li><strong>[AI Integration](examples/ai-integration.md)</strong> - Transcription and analysis patterns</li>
+</ul>
+<h4>References</h4>
+<ul>
+<li><strong>[Media Types](references/media-types.md)</strong> - Audio, video, transcript, chat, screen share</li>
+<li><strong>[Data Types](references/data-types.md)</strong> - All enums and constants</li>
+<li><strong>[Connection](references/connection.md)</strong> - WebSocket protocol details</li>
+<li><strong>[Webhooks](references/webhooks.md)</strong> - Event subscription</li>
+</ul>
+<h4>Troubleshooting</h4>
+<ul>
+<li><strong>[Common Issues](troubleshooting/common-issues.md)</strong> - FAQ and solutions</li>
+</ul>
+<h3>Resources</h3>
+<ul>
+<li><strong>Official docs</strong>: https://developers.zoom.us/docs/rtms/</li>
+<li><strong>Data types</strong>: https://developers.zoom.us/docs/rtms/data-types/</li>
+<li><strong>Media params</strong>: https://developers.zoom.us/docs/rtms/media-parameter-definition/</li>
+<li><strong>Developer forum</strong>: https://devforum.zoom.us/</li>
+</ul>
+<hr>
+<p><strong>Need help?</strong> Start with Integrated Index section below for complete navigation.</p>
+<hr>
+<h3>Integrated Index</h3>
+<p>_This section was migrated from <code>SKILL.md</code>._</p>
+<p>RTMS provides real-time access to live audio, video, transcript, chat, and screen share from Zoom meetings, webinars, and Video SDK sessions.</p>
+<h3>Critical Positioning</h3>
+<p>Treat RTMS as a <strong>backend service</strong> for receiving and processing media streams.</p>
+<ul>
+<li>Backend role: ingest audio/video/share/chat/transcript, run AI/analytics, persist/forward data.</li>
+<li>Optional frontend role: Zoom App SDK or web dashboard that consumes processed stream data from backend transport (WebSocket/SSE/other).</li>
+<li>Kickoff model: backend waits for RTMS start webhook events, then starts stream processing.</li>
+</ul>
+<p>Do not model RTMS as a frontend-only SDK.</p>
+<h3>Quick Start Path</h3>
+<p><strong>If you're new to RTMS, follow this order:</strong></p>
+<ol>
+<li><strong>Run preflight checks first</strong> -&gt; [RUNBOOK.md](RUNBOOK.md)</li>
+<li><strong>Understand the architecture</strong> -&gt; [concepts/connection-architecture.md](concepts/connection-architecture.md)</li>
+</ol>
+<ul>
+<li>Two-phase WebSocket: Signaling + Media</li>
+<li>Why RTMS doesn't use bots</li>
+</ul>
+<ol>
+<li><strong>Choose your approach</strong> -&gt; SDK or Manual</li>
+</ol>
+<ul>
+<li>SDK (recommended): [examples/sdk-quickstart.md](examples/sdk-quickstart.md)</li>
+<li>Manual WebSocket: [examples/manual-websocket.md](examples/manual-websocket.md)</li>
+</ul>
+<ol>
+<li><strong>Understand the lifecycle</strong> -&gt; [concepts/lifecycle-flow.md](concepts/lifecycle-flow.md)</li>
+</ol>
+<ul>
+<li>Webhook -&gt; Signaling -&gt; Media -&gt; Streaming</li>
+</ul>
+<ol>
+<li><strong>Configure media types</strong> -&gt; [references/media-types.md](references/media-types.md)</li>
+</ol>
+<ul>
+<li>Audio, video, transcript, chat, screen share</li>
+</ul>
+<ol>
+<li><strong>Troubleshoot issues</strong> -&gt; [troubleshooting/common-issues.md](troubleshooting/common-issues.md)</li>
+</ol>
+<ul>
+<li>Connection problems, duplicate webhooks, missing data</li>
+</ul>
+<hr>
+<h3>Documentation Structure</h3>
+<pre><code>rtms/
+├── SKILL.md                           # Main skill overview
+├── SKILL.md                           # This file - navigation guide
+│
+├── concepts/                          # Core architectural patterns
+│   ├── connection-architecture.md     # Two-phase WebSocket design
+│   └── lifecycle-flow.md              # Webhook to streaming flow
+│
+├── examples/                          # Complete working code
+│   ├── sdk-quickstart.md              # Using @zoom/rtms SDK
+│   ├── manual-websocket.md            # Raw protocol implementation
+│   ├── rtms-bot.md                    # Complete RTMS bot implementation
+│   └── ai-integration.md              # Transcription and analysis
+│
+├── references/                        # Reference documentation
+│   ├── media-types.md                 # Audio, video, transcript, chat, share
+│   ├── data-types.md                  # All enums and constants
+│   ├── connection.md                  # WebSocket protocol details
+│   └── webhooks.md                    # Event subscription
+│
+└── troubleshooting/                   # Problem solving guides
+    └── common-issues.md               # FAQ and solutions</code></pre>
+<hr>
+<h3>By Use Case</h3>
+<h4>I want to get meeting transcripts</h4>
+<ol>
+<li>[SDK Quickstart](examples/sdk-quickstart.md) - Fastest approach</li>
+<li>[Media Types](references/media-types.md#transcript) - Transcript configuration</li>
+<li>[AI Integration](examples/ai-integration.md) - Whisper, Deepgram, AssemblyAI</li>
+</ol>
+<h4>I want to record meetings</h4>
+<ol>
+<li>[Media Types](references/media-types.md) - Audio + Video configuration</li>
+<li>[SDK Quickstart](examples/sdk-quickstart.md) - Receiving media</li>
+<li>[AI Integration](examples/ai-integration.md#audio-recording) - Gap-filled recording</li>
+</ol>
+<h4>I want to build an AI meeting assistant</h4>
+<ol>
+<li>[AI Integration](examples/ai-integration.md) - Complete patterns</li>
+<li>[SDK Quickstart](examples/sdk-quickstart.md) - Media ingestion</li>
+<li>[Lifecycle Flow](concepts/lifecycle-flow.md) - Event handling</li>
+</ol>
+<h4>I want to build a complete RTMS bot</h4>
+<ol>
+<li>[RTMS Bot](examples/rtms-bot.md) - <strong>Complete implementation guide</strong></li>
+<li>[Lifecycle Flow](concepts/lifecycle-flow.md) - Webhook to streaming flow</li>
+<li>[Connection Architecture](concepts/connection-architecture.md) - Two-phase design</li>
+</ol>
+<h4>I need full protocol control</h4>
+<ol>
+<li>[Manual WebSocket](examples/manual-websocket.md) - <strong>START HERE</strong></li>
+<li>[Connection Architecture](concepts/connection-architecture.md) - Two-phase design</li>
+<li>[Data Types](references/data-types.md) - All message types and enums</li>
+<li>[Connection](references/connection.md) - Protocol details</li>
+</ol>
+<h4>I'm getting connection errors</h4>
+<ol>
+<li>[Common Issues](troubleshooting/common-issues.md) - Diagnostic checklist</li>
+<li>[Connection Architecture](concepts/connection-architecture.md) - Verify flow</li>
+<li>[Webhooks](references/webhooks.md) - Validation and timing</li>
+</ol>
+<h4>I want to understand the architecture</h4>
+<ol>
+<li>[Connection Architecture](concepts/connection-architecture.md) - Two-phase WebSocket</li>
+<li>[Lifecycle Flow](concepts/lifecycle-flow.md) - Complete flow diagram</li>
+<li>[Data Types](references/data-types.md) - Protocol constants</li>
+</ol>
+<hr>
+<h3>By Product</h3>
+<h4>I'm building for Zoom Meetings</h4>
+<ul>
+<li>Standard RTMS setup. Webhook event: <code>meeting.rtms_started</code>. Uses General App with OAuth.</li>
+<li>Start with [SDK Quickstart](examples/sdk-quickstart.md) or [Manual WebSocket](examples/manual-websocket.md).</li>
+</ul>
+<h4>I'm building for Zoom Webinars</h4>
+<ul>
+<li>Same as meetings, but webhook event is <code>webinar.rtms_started</code>. Payload still uses <code>meeting_uuid</code> (NOT <code>webinar_uuid</code>).</li>
+<li>Add webinar scopes and event subscriptions. See [Webhooks](references/webhooks.md).</li>
+<li>Only <strong>panelist</strong> streams are confirmed available. Attendee streams may not be individual.</li>
+</ul>
+<h4>I'm building for Zoom Video SDK</h4>
+<ul>
+<li>Webhook event: <code>session.rtms_started</code>. Payload uses <code>session_id</code> (NOT <code>meeting_uuid</code>).</li>
+<li>Requires a <strong>Video SDK App</strong> with SDK Key/Secret (not OAuth Client ID/Secret).</li>
+<li>Once connected, the protocol is <strong>identical</strong> to meetings.</li>
+<li>See [Webhooks](references/webhooks.md) for payload details.</li>
+</ul>
+<hr>
+<h3>Key Documents</h3>
+<h4>1. Connection Architecture (CRITICAL)</h4>
+<p><strong>[concepts/connection-architecture.md](concepts/connection-architecture.md)</strong></p>
+<p>RTMS uses <strong>two separate WebSocket connections</strong>:</p>
+<ul>
+<li><strong>Signaling WebSocket</strong>: Authentication, control, heartbeats</li>
+<li><strong>Media WebSocket</strong>: Actual audio/video/transcript data</li>
+</ul>
+<h4>2. SDK vs Manual (DECISION POINT)</h4>
+<p><strong>[examples/sdk-quickstart.md](examples/sdk-quickstart.md)</strong> vs <strong>[examples/manual-websocket.md](examples/manual-websocket.md)</strong></p>
+<p>| SDK | Manual | |-----|--------| | Handles WebSocket complexity | Full protocol control | | Automatic reconnection | DIY reconnection | | Less code | More code | | Best for most use cases | Best for custom requirements |</p>
+<h4>3. Critical Gotchas (MOST COMMON ISSUES)</h4>
+<p><strong>[troubleshooting/common-issues.md](troubleshooting/common-issues.md)</strong></p>
+<ol>
+<li><strong>Respond 200 immediately</strong> - Delayed webhook responses cause duplicates</li>
+<li><strong>Only 1 connection per stream</strong> - New connections kick out existing</li>
+<li><strong>Heartbeat required</strong> - Must respond to keep-alive or connection dies</li>
+<li><strong>Track active sessions</strong> - Prevent duplicate join attempts</li>
+</ol>
+<hr>
+<h3>Key Learnings</h3>
+<h4>Critical Discoveries:</h4>
+<ol>
+<li><strong>Two-Phase WebSocket Design</strong></li>
+</ol>
+<ul>
+<li>Signaling: Control plane (handshake, heartbeat, start/stop)</li>
+<li>Media: Data plane (audio, video, transcript, chat, share)</li>
+<li>See: [Connection Architecture](concepts/connection-architecture.md)</li>
+</ul>
+<ol>
+<li><strong>Webhook Response Timing</strong></li>
+</ol>
+<ul>
+<li>MUST respond 200 BEFORE any processing</li>
+<li>Delayed response -&gt; Zoom retries -&gt; duplicate connections</li>
+<li>See: [Common Issues](troubleshooting/common-issues.md#webhook-response-timing)</li>
+</ul>
+<ol>
+<li><strong>Heartbeat is Mandatory</strong></li>
+</ol>
+<ul>
+<li>Signaling: Receive msg_type 12, respond with msg_type 13</li>
+<li>Media: Same pattern</li>
+<li>Failure to respond = connection closed</li>
+<li>See: [Connection](references/connection.md#heartbeat)</li>
+</ul>
+<ol>
+<li><strong>Signature Generation</strong></li>
+</ol>
+<ul>
+<li>Format: <code>HMAC-SHA256(clientSecret, &quot;clientId,meetingUuid,streamId&quot;)</code></li>
+<li>For Video SDK, use <code>session_id</code> in place of <code>meetingUuid</code></li>
+<li>Webinars still use <code>meeting_uuid</code> (not <code>webinar_uuid</code>)</li>
+<li>Required for both signaling and media handshakes</li>
+<li>See: [Manual WebSocket](examples/manual-websocket.md#signature-generation)</li>
+</ul>
+<ol>
+<li><strong>Media Types are Bitmasks</strong></li>
+</ol>
+<ul>
+<li>Audio=1, Video=2, Share=4, Transcript=8, Chat=16, All=32</li>
+<li>Combine with OR: Audio+Transcript = 1|8 = 9</li>
+<li>See: [Media Types](references/media-types.md)</li>
+</ul>
+<ol>
+<li><strong>Screen Share is SEPARATE from Video</strong></li>
+</ol>
+<ul>
+<li>Different msg_type (16 vs 15)</li>
+<li>Different media flag (4 vs 2)</li>
+<li>Must subscribe separately</li>
+<li>See: [Media Types](references/media-types.md#screen-share)</li>
+</ul>
+<hr>
+<h3>Quick Reference</h3>
+<h4>&quot;Connection fails&quot;</h4>
+<p>-&gt; [Common Issues](troubleshooting/common-issues.md)</p>
+<h4>&quot;Duplicate connections&quot;</h4>
+<p>-&gt; [Webhook timing](troubleshooting/common-issues.md#webhook-response-timing)</p>
+<h4>&quot;No audio/video data&quot;</h4>
+<p>-&gt; [Media Types](references/media-types.md) - Check configuration</p>
+<h4>&quot;How do I implement manually?&quot;</h4>
+<p>-&gt; [Manual WebSocket](examples/manual-websocket.md)</p>
+<h4>&quot;What message types exist?&quot;</h4>
+<p>-&gt; [Data Types](references/data-types.md)</p>
+<h4>&quot;How do I integrate AI?&quot;</h4>
+<p>-&gt; [AI Integration](examples/ai-integration.md)</p>
+<hr>
+<h3>Document Version</h3>
+<p>Based on <strong>Zoom RTMS SDK v1.x</strong> and official documentation as of 2026.</p>
+<hr>
+<p><strong>Happy coding!</strong></p>
+<p>Remember: Start with [SDK Quickstart](examples/sdk-quickstart.md) for the fastest path, or [Manual WebSocket](examples/manual-websocket.md) if you need full control.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: kw-zoom-plugin-rtms\ndisplay_name: kw-zoom-plugin-rtms\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# kw-zoom-plugin-rtms - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `kw-zoom-plugin-rtms` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nBackground reference for live Zoom media pipelines. Prefer `build-zoom-bot` first, then use this skill for stream types, capabilities, and RTMS-specific implementation constraints.\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose kw-zoom-plugin-rtms, then write the task. Fallback prompt: Use the kw-zoom-plugin-rtms skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `kw-zoom-plugin-rtms` |\n| Canonical name | `kw-zoom-plugin-rtms` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nBackground reference for live Zoom media pipelines. Prefer `build-zoom-bot` first, then use this skill for stream types, capabilities, and RTMS-specific implementation constraints.\n\n## Original SKILL.md\n\n---\nknowledge-work-plugin: zoom-plugin\nupstream-skill: rtms\nname: kw-zoom-plugin-rtms\ndescription: Reference skill for Zoom RTMS. Use after routing to a live-media workflow when processing real-time audio, video, chat, transcripts, screen share, or contact-center voice streams.\nuser-invocable: false\ntriggers:\n  - \"real-time media\"\n  - \"rtms\"\n  - \"live audio stream\"\n  - \"live video stream\"\n  - \"meeting transcription\"\n  - \"raw audio\"\n  - \"raw video\"\n  - \"websocket media\"\n  - \"live transcript\"\n  - \"streaming audio\"\n  - \"streaming video\"\n  - \"meeting bot media\"\n  - \"contact center voice media\"\n  - \"participant video on\"\n  - \"participant video off\"\n  - \"single individual video stream\"\n---\n\n# Zoom Realtime Media Streams (RTMS)\n\nBackground reference for live Zoom media pipelines. Prefer `build-zoom-bot` first, then use this skill for stream types, capabilities, and RTMS-specific implementation constraints.\n\n# Zoom Realtime Media Streams (RTMS)\n\nExpert guidance for accessing live audio, video, transcript, chat, and screen share data from Zoom meetings, webinars, Video SDK sessions, and Zoom Contact Center Voice in real-time. RTMS uses a WebSocket-based protocol with open standards and does not require a meeting bot to capture the media plane.\n\n## Read This First (Critical)\n\nRTMS is primarily a **backend media ingestion service**.\n\n- Your backend receives and processes live media: **audio, video, screen share, chat, transcript**.\n- RTMS is not a frontend UI SDK by itself.\n- Processing is **event-triggered**: backend waits for RTMS start webhook events before stream handling begins.\n\nOptional architecture (common):\n\n- Add a **Zoom App SDK** frontend for in-client UI/controls.\n- Stream backend RTMS outputs to frontend via **WebSocket** (or SSE, gRPC, queue workers, etc.).\n\nUse RTMS for media/data plane, and use frontend frameworks/Zoom Apps for presentation + user interactions.\n\n**Official Documentation**: https://developers.zoom.us/docs/rtms/\n**SDK Reference (JS)**: https://zoom.github.io/rtms/js/\n**SDK Reference (Python)**: https://zoom.github.io/rtms/py/\n**Sample Repository**: https://github.com/zoom/rtms-samples\n\n## Quick Links\n\n**New to RTMS? Follow this path:**\n\n1. **[Connection Architecture](concepts/connection-architecture.md)** - Two-phase WebSocket design\n2. **[SDK Quickstart](examples/sdk-quickstart.md)** - Fastest way to receive media (recommended)\n3. **[Manual WebSocket](examples/manual-websocket.md)** - Full protocol control without SDK\n4. **[Media Types](references/media-types.md)** - Audio, video, transcript, chat, screen share\n\n**Complete Implementation:**\n- **[RTMS Bot](examples/rtms-bot.md)** - End-to-end bot implementation guide\n\n**Reference:**\n- **[Lifecycle Flow](concepts/lifecycle-flow.md)** - Complete webhook-to-streaming flow\n- **[Data Types](references/data-types.md)** - All enums and constants\n- **[Webhooks](references/webhooks.md)** - Event subscription details\n- **[Environment Variables](references/environment-variables.md)** - credential modes and runtime knobs\n- **[Quickstart Notes](references/quickstart.md)** - Secondary quickstart guide\n- **Integrated Index** - see the section below in this file\n\n**Having issues?**\n- Connection fails -> [Common Issues](troubleshooting/common-issues.md)\n- Duplicate connections -> [Webhook Gotchas](troubleshooting/common-issues.md#webhook-response-timing)\n- No audio/video -> [Media Configuration](references/media-types.md)\n- Start with preflight checks -> [5-Minute Runbook](RUNBOOK.md)\n\n## Supported Products\n\n| Product | Webhook Event | Payload ID | App Type |\n|---------|--------------|------------|----------|\n| **Meetings** | `meeting.rtms_started` / `meeting.rtms_stopped` | `meeting_uuid` | General App |\n| **Webinars** | `webinar.rtms_started` / `webinar.rtms_stopped` | `meeting_uuid` (same!) | General App |\n| **Video SDK** | `session.rtms_started` / `session.rtms_stopped` | `session_id` | Video SDK App |\n| **Zoom Contact Center Voice** | Product-specific RTMS/ZCC Voice events | Product-specific stream/session identifiers | Contact Center / approved RTMS integration |\n\nOnce connected, the core signaling/media socket model is shared across products. Meetings, webinars, and Video SDK sessions use the familiar start/stop webhooks. Zoom Contact Center Voice adds its own RTMS/ZCC Voice event family and should be treated as the same transport model with product-specific event payloads.\n\n## RTMS Overview\n\nRTMS is a data pipeline that gives your app access to live media from Zoom meetings, webinars, and Video SDK sessions **without participant bots**. Instead of having automated clients join meetings, use RTMS to collect media data directly from Zoom's infrastructure.\n\n### What RTMS Provides\n\n| Media Type | Format | Use Cases |\n|------------|--------|-----------|\n| **Audio** | PCM (L16), G.711, G.722, Opus | Transcription, voice analysis, recording |\n| **Video** | H.264, JPG, PNG | Recording, AI vision, thumbnails, active participant selection |\n| **Screen Share** | H.264, JPG, PNG | Content capture, slide extraction |\n| **Transcript** | JSON text | Meeting notes, search, compliance |\n| **Chat** | JSON text | Archive, sentiment analysis |\n\n### March 2026 Protocol Changes\n\n- **Zoom Contact Center Voice support**: RTMS now covers Contact Center Voice audio and transcript scenarios.\n- **Transcript Language Identification control**: transcript media handshakes now support `src_language` and `enable_lid`. Default behavior is LID enabled. Set `enable_lid: false` to force a fixed language.\n- **Single individual video stream subscription**: RTMS can now stream one participant's camera feed at a time when `data_opt` is set to `VIDEO_SINGLE_INDIVIDUAL_STREAM`.\n- **Graceful client-initiated shutdown**: backends can send `STREAM_CLOSE_REQ` over the signaling socket and wait for `STREAM_CLOSE_RESP`.\n- **Media keep-alive tolerance increased**: media socket keep-alive timeout is now **65 seconds**, not 35.\n\n### Two Approaches\n\n| Approach | Best For | Complexity |\n|----------|----------|------------|\n| **SDK** (`@zoom/rtms`) | Most use cases | Low - handles WebSocket complexity |\n| **Manual WebSocket** | Custom protocols, other languages | High - full protocol implementation |\n\n## Prerequisites\n\n- **Node.js 20.3.0+** (24 LTS recommended) for JavaScript SDK\n- **Python 3.10+** for Python SDK\n- Zoom General App (for meetings/webinars) or Video SDK App (for Video SDK) with RTMS feature enabled\n- Webhook endpoint for RTMS events\n- Server to receive WebSocket streams\n\n> **Need RTMS access?** Post in [Zoom Developer Forum](https://devforum.zoom.us/) requesting RTMS access with your use case.\n\n## Quick Start (SDK - Recommended)\n\n```javascript\nimport rtms from \"@zoom/rtms\";\n\n// All RTMS start/stop events across products\nconst RTMS_EVENTS = [\"meeting.rtms_started\", \"webinar.rtms_started\", \"session.rtms_started\"];\n\n// Handle webhook events\nrtms.onWebhookEvent(({ event, payload }) => {\n  if (!RTMS_EVENTS.includes(event)) return;\n\n  const client = new rtms.Client();\n\n  client.onAudioData((data, timestamp, metadata) => {\n    console.log(`Audio from ${metadata.userName}: ${data.length} bytes`);\n  });\n\n  client.onTranscriptData((data, timestamp, metadata) => {\n    const text = data.toString('utf8');\n    console.log(`${metadata.userName}: ${text}`);\n  });\n\n  client.onJoinConfirm((reason) => {\n    console.log(`Joined session: ${reason}`);\n  });\n\n  // SDK handles all WebSocket connections automatically\n  // Accepts both meeting_uuid and session_id transparently\n  client.join(payload);\n});\n```\n\n## Quick Start (Manual WebSocket)\n\nFor full control or non-SDK languages, implement the two-phase WebSocket protocol:\n\n```javascript\nconst WebSocket = require('ws');\nconst crypto = require('crypto');\n\nconst RTMS_EVENTS = ['meeting.rtms_started', 'webinar.rtms_started', 'session.rtms_started'];\n\n// 1. Generate signature\n// For meetings/webinars: uses meeting_uuid. For Video SDK: uses session_id.\nfunction generateSignature(clientId, idValue, streamId, clientSecret) {\n  const message = `${clientId},${idValue},${streamId}`;\n  return crypto.createHmac('sha256', clientSecret).update(message).digest('hex');\n}\n\n// 2. Handle webhook\napp.post('/webhook', (req, res) => {\n  res.status(200).send();  // CRITICAL: Respond immediately!\n  \n  const { event, payload } = req.body;\n  if (RTMS_EVENTS.includes(event)) {\n    connectToRTMS(payload);\n  }\n});\n\n// 3. Connect to signaling WebSocket\nfunction connectToRTMS(payload) {\n  const { server_urls, rtms_stream_id } = payload;\n  // meeting_uuid for meetings/webinars, session_id for Video SDK\n  const idValue = payload.meeting_uuid || payload.session_id;\n  const signature = generateSignature(CLIENT_ID, idValue, rtms_stream_id, CLIENT_SECRET);\n  \n  const signalingWs = new WebSocket(server_urls);\n  \n  signalingWs.on('open', () => {\n    signalingWs.send(JSON.stringify({\n      msg_type: 1,  // Handshake request\n      protocol_version: 1,\n      meeting_uuid: idValue,\n      rtms_stream_id,\n      signature,\n      media_type: 9  // AUDIO(1) | TRANSCRIPT(8)\n    }));\n  });\n  \n  // ... handle responses, connect to media WebSocket\n}\n```\n\n**See**: [Manual WebSocket Guide](examples/manual-websocket.md) for complete implementation.\n\n## Media Type Bitmask\n\nCombine types with bitwise OR:\n\n| Type | Value | Description |\n|------|-------|-------------|\n| Audio | 1 | PCM audio samples |\n| Video | 2 | H.264/JPG video frames |\n| Screen Share | 4 | **Separate from video!** |\n| Transcript | 8 | Real-time speech-to-text |\n| Chat | 16 | In-meeting chat messages |\n| All | 32 | All media types |\n\n**Example**: Audio + Transcript = `1 | 8` = `9`\n\n## Critical Gotchas\n\n| Issue | Solution |\n|-------|----------|\n| **Only 1 connection allowed** | New connections kick out existing ones. Track active sessions! |\n| **Respond 200 immediately** | If webhook delays, Zoom retries creating duplicate connections |\n| **Heartbeat mandatory** | Respond to msg_type 12 with msg_type 13, or connection dies |\n| **Reconnection is YOUR job** | RTMS doesn't auto-reconnect. Media keep-alive tolerance is now about **65s**; signaling remains around **60s** |\n| **Transcript language drift** | Use `src_language` plus `enable_lid: false` when you want fixed-language transcription instead of automatic language switching |\n| **Single participant video only** | `VIDEO_SINGLE_INDIVIDUAL_STREAM` supports one participant at a time. A new `VIDEO_SUBSCRIPTION_REQ` overrides the previous selection |\n| **Graceful close is explicit now** | Use `STREAM_CLOSE_REQ` / `STREAM_CLOSE_RESP` when your backend wants to terminate the stream cleanly |\n\n## Environment Variables\n\n### SDK Environment Variables\n\n```bash\n# Required - Authentication\nZM_RTMS_CLIENT=your_client_id          # Zoom OAuth Client ID\nZM_RTMS_SECRET=your_client_secret      # Zoom OAuth Client Secret\n\n# Optional - Webhook server\nZM_RTMS_PORT=8080                      # Default: 8080\nZM_RTMS_PATH=/webhook                  # Default: /\n\n# Optional - Logging\nZM_RTMS_LOG_LEVEL=info                 # error, warn, info, debug, trace\nZM_RTMS_LOG_FORMAT=progressive         # progressive or json\nZM_RTMS_LOG_ENABLED=true\n```\n\n### Manual Implementation Variables\n\n```bash\nZOOM_CLIENT_ID=your_client_id\nZOOM_CLIENT_SECRET=your_client_secret\nZOOM_SECRET_TOKEN=your_webhook_token   # For webhook validation\n```\n\n## Zoom App Setup\n\n### For Meetings and Webinars (General App)\n\n1. Go to [marketplace.zoom.us](https://marketplace.zoom.us) -> Develop -> Build App\n2. Choose **General App** -> **User-Managed**\n3. Features -> Access -> **Enable Event Subscription**\n4. Add Events -> Search \"rtms\" -> Select:\n   - `meeting.rtms_started`\n   - `meeting.rtms_stopped`\n   - `webinar.rtms_started` (if using webinars)\n   - `webinar.rtms_stopped` (if using webinars)\n5. Scopes -> Add Scopes -> Search \"rtms\" -> Add:\n   - `meeting:read:meeting_audio`\n   - `meeting:read:meeting_video`\n   - `meeting:read:meeting_transcript`\n   - `meeting:read:meeting_chat`\n   - `webinar:read:webinar_audio` (if using webinars)\n   - `webinar:read:webinar_video` (if using webinars)\n   - `webinar:read:webinar_transcript` (if using webinars)\n   - `webinar:read:webinar_chat` (if using webinars)\n\n### For Video SDK (Video SDK App)\n\n1. Go to [marketplace.zoom.us](https://marketplace.zoom.us) -> Develop -> Build App\n2. Choose **Video SDK App**\n3. Use your SDK Key and SDK Secret (not OAuth Client ID/Secret)\n4. Add Events:\n   - `session.rtms_started`\n   - `session.rtms_stopped`\n\n## Sample Repositories\n\n### Official Samples\n\n| Repository | Description |\n|------------|-------------|\n| [rtms-samples](https://github.com/zoom/rtms-samples) | RTMSManager, boilerplates, AI samples |\n| [rtms-quickstart-js](https://github.com/zoom/rtms-quickstart-js) | JavaScript SDK quickstart |\n| [rtms-quickstart-py](https://github.com/zoom/rtms-quickstart-py) | Python SDK quickstart |\n| [rtms-sdk-cpp](https://github.com/zoom/rtms-sdk-cpp) | C++ SDK |\n| [zoom-rtms](https://github.com/zoom/rtms) | Main SDK repository |\n\n### AI Integration Samples\n\n| Sample | Description |\n|--------|-------------|\n| [rtms-meeting-assistant-starter-kit](https://github.com/zoom/rtms-meeting-assistant-starter-kit) | AI meeting assistant with summaries |\n| [arlo-meeting-assistant](https://github.com/zoom/arlo-meeting-assistant) | Production meeting assistant with DB |\n| [videosdk-rtms-transcribe-audio](https://github.com/zoom/videosdk-rtms-transcribe-audio) | Whisper transcription |\n\n## Complete Documentation\n\n### Concepts\n- **[Connection Architecture](concepts/connection-architecture.md)** - Two-phase WebSocket design\n- **[Lifecycle Flow](concepts/lifecycle-flow.md)** - Webhook to streaming flow\n\n### Examples\n- **[SDK Quickstart](examples/sdk-quickstart.md)** - Using @zoom/rtms SDK\n- **[Manual WebSocket](examples/manual-websocket.md)** - Raw protocol implementation\n- **[RTMS Bot](examples/rtms-bot.md)** - Complete bot implementation guide\n- **[AI Integration](examples/ai-integration.md)** - Transcription and analysis patterns\n\n### References\n- **[Media Types](references/media-types.md)** - Audio, video, transcript, chat, screen share\n- **[Data Types](references/data-types.md)** - All enums and constants\n- **[Connection](references/connection.md)** - WebSocket protocol details\n- **[Webhooks](references/webhooks.md)** - Event subscription\n\n### Troubleshooting\n- **[Common Issues](troubleshooting/common-issues.md)** - FAQ and solutions\n\n## Resources\n\n- **Official docs**: https://developers.zoom.us/docs/rtms/\n- **Data types**: https://developers.zoom.us/docs/rtms/data-types/\n- **Media params**: https://developers.zoom.us/docs/rtms/media-parameter-definition/\n- **Developer forum**: https://devforum.zoom.us/\n\n---\n\n**Need help?** Start with Integrated Index section below for complete navigation.\n\n---\n\n## Integrated Index\n\n_This section was migrated from `SKILL.md`._\n\nRTMS provides real-time access to live audio, video, transcript, chat, and screen share from Zoom meetings, webinars, and Video SDK sessions.\n\n## Critical Positioning\n\nTreat RTMS as a **backend service** for receiving and processing media streams.\n\n- Backend role: ingest audio/video/share/chat/transcript, run AI/analytics, persist/forward data.\n- Optional frontend role: Zoom App SDK or web dashboard that consumes processed stream data from backend transport (WebSocket/SSE/other).\n- Kickoff model: backend waits for RTMS start webhook events, then starts stream processing.\n\nDo not model RTMS as a frontend-only SDK.\n\n## Quick Start Path\n\n**If you're new to RTMS, follow this order:**\n\n1. **Run preflight checks first** -> [RUNBOOK.md](RUNBOOK.md)\n2. **Understand the architecture** -> [concepts/connection-architecture.md](concepts/connection-architecture.md)\n   - Two-phase WebSocket: Signaling + Media\n   - Why RTMS doesn't use bots\n\n3. **Choose your approach** -> SDK or Manual\n   - SDK (recommended): [examples/sdk-quickstart.md](examples/sdk-quickstart.md)\n   - Manual WebSocket: [examples/manual-websocket.md](examples/manual-websocket.md)\n\n4. **Understand the lifecycle** -> [concepts/lifecycle-flow.md](concepts/lifecycle-flow.md)\n   - Webhook -> Signaling -> Media -> Streaming\n\n5. **Configure media types** -> [references/media-types.md](references/media-types.md)\n   - Audio, video, transcript, chat, screen share\n\n6. **Troubleshoot issues** -> [troubleshooting/common-issues.md](troubleshooting/common-issues.md)\n   - Connection problems, duplicate webhooks, missing data\n\n---\n\n## Documentation Structure\n\n```\nrtms/\n├── SKILL.md                           # Main skill overview\n├── SKILL.md                           # This file - navigation guide\n│\n├── concepts/                          # Core architectural patterns\n│   ├── connection-architecture.md     # Two-phase WebSocket design\n│   └── lifecycle-flow.md              # Webhook to streaming flow\n│\n├── examples/                          # Complete working code\n│   ├── sdk-quickstart.md              # Using @zoom/rtms SDK\n│   ├── manual-websocket.md            # Raw protocol implementation\n│   ├── rtms-bot.md                    # Complete RTMS bot implementation\n│   └── ai-integration.md              # Transcription and analysis\n│\n├── references/                        # Reference documentation\n│   ├── media-types.md                 # Audio, video, transcript, chat, share\n│   ├── data-types.md                  # All enums and constants\n│   ├── connection.md                  # WebSocket protocol details\n│   └── webhooks.md                    # Event subscription\n│\n└── troubleshooting/                   # Problem solving guides\n    └── common-issues.md               # FAQ and solutions\n```\n\n---\n\n## By Use Case\n\n### I want to get meeting transcripts\n1. [SDK Quickstart](examples/sdk-quickstart.md) - Fastest approach\n2. [Media Types](references/media-types.md#transcript) - Transcript configuration\n3. [AI Integration](examples/ai-integration.md) - Whisper, Deepgram, AssemblyAI\n\n### I want to record meetings\n1. [Media Types](references/media-types.md) - Audio + Video configuration\n2. [SDK Quickstart](examples/sdk-quickstart.md) - Receiving media\n3. [AI Integration](examples/ai-integration.md#audio-recording) - Gap-filled recording\n\n### I want to build an AI meeting assistant\n1. [AI Integration](examples/ai-integration.md) - Complete patterns\n2. [SDK Quickstart](examples/sdk-quickstart.md) - Media ingestion\n3. [Lifecycle Flow](concepts/lifecycle-flow.md) - Event handling\n\n### I want to build a complete RTMS bot\n1. [RTMS Bot](examples/rtms-bot.md) - **Complete implementation guide**\n2. [Lifecycle Flow](concepts/lifecycle-flow.md) - Webhook to streaming flow\n3. [Connection Architecture](concepts/connection-architecture.md) - Two-phase design\n\n### I need full protocol control\n1. [Manual WebSocket](examples/manual-websocket.md) - **START HERE**\n2. [Connection Architecture](concepts/connection-architecture.md) - Two-phase design\n3. [Data Types](references/data-types.md) - All message types and enums\n4. [Connection](references/connection.md) - Protocol details\n\n### I'm getting connection errors\n1. [Common Issues](troubleshooting/common-issues.md) - Diagnostic checklist\n2. [Connection Architecture](concepts/connection-architecture.md) - Verify flow\n3. [Webhooks](references/webhooks.md) - Validation and timing\n\n### I want to understand the architecture\n1. [Connection Architecture](concepts/connection-architecture.md) - Two-phase WebSocket\n2. [Lifecycle Flow](concepts/lifecycle-flow.md) - Complete flow diagram\n3. [Data Types](references/data-types.md) - Protocol constants\n\n---\n\n## By Product\n\n### I'm building for Zoom Meetings\n- Standard RTMS setup. Webhook event: `meeting.rtms_started`. Uses General App with OAuth.\n- Start with [SDK Quickstart](examples/sdk-quickstart.md) or [Manual WebSocket](examples/manual-websocket.md).\n\n### I'm building for Zoom Webinars\n- Same as meetings, but webhook event is `webinar.rtms_started`. Payload still uses `meeting_uuid` (NOT `webinar_uuid`).\n- Add webinar scopes and event subscriptions. See [Webhooks](references/webhooks.md).\n- Only **panelist** streams are confirmed available. Attendee streams may not be individual.\n\n### I'm building for Zoom Video SDK\n- Webhook event: `session.rtms_started`. Payload uses `session_id` (NOT `meeting_uuid`).\n- Requires a **Video SDK App** with SDK Key/Secret (not OAuth Client ID/Secret).\n- Once connected, the protocol is **identical** to meetings.\n- See [Webhooks](references/webhooks.md) for payload details.\n\n---\n\n## Key Documents\n\n### 1. Connection Architecture (CRITICAL)\n**[concepts/connection-architecture.md](concepts/connection-architecture.md)**\n\nRTMS uses **two separate WebSocket connections**:\n- **Signaling WebSocket**: Authentication, control, heartbeats\n- **Media WebSocket**: Actual audio/video/transcript data\n\n### 2. SDK vs Manual (DECISION POINT)\n**[examples/sdk-quickstart.md](examples/sdk-quickstart.md)** vs **[examples/manual-websocket.md](examples/manual-websocket.md)**\n\n| SDK | Manual |\n|-----|--------|\n| Handles WebSocket complexity | Full protocol control |\n| Automatic reconnection | DIY reconnection |\n| Less code | More code |\n| Best for most use cases | Best for custom requirements |\n\n### 3. Critical Gotchas (MOST COMMON ISSUES)\n**[troubleshooting/common-issues.md](troubleshooting/common-issues.md)**\n\n1. **Respond 200 immediately** - Delayed webhook responses cause duplicates\n2. **Only 1 connection per stream** - New connections kick out existing\n3. **Heartbeat required** - Must respond to keep-alive or connection dies\n4. **Track active sessions** - Prevent duplicate join attempts\n\n---\n\n## Key Learnings\n\n### Critical Discoveries:\n\n1. **Two-Phase WebSocket Design**\n   - Signaling: Control plane (handshake, heartbeat, start/stop)\n   - Media: Data plane (audio, video, transcript, chat, share)\n   - See: [Connection Architecture](concepts/connection-architecture.md)\n\n2. **Webhook Response Timing**\n   - MUST respond 200 BEFORE any processing\n   - Delayed response -> Zoom retries -> duplicate connections\n   - See: [Common Issues](troubleshooting/common-issues.md#webhook-response-timing)\n\n3. **Heartbeat is Mandatory**\n   - Signaling: Receive msg_type 12, respond with msg_type 13\n   - Media: Same pattern\n   - Failure to respond = connection closed\n   - See: [Connection](references/connection.md#heartbeat)\n\n4. **Signature Generation**\n   - Format: `HMAC-SHA256(clientSecret, \"clientId,meetingUuid,streamId\")`\n   - For Video SDK, use `session_id` in place of `meetingUuid`\n   - Webinars still use `meeting_uuid` (not `webinar_uuid`)\n   - Required for both signaling and media handshakes\n   - See: [Manual WebSocket](examples/manual-websocket.md#signature-generation)\n\n5. **Media Types are Bitmasks**\n   - Audio=1, Video=2, Share=4, Transcript=8, Chat=16, All=32\n   - Combine with OR: Audio+Transcript = 1|8 = 9\n   - See: [Media Types](references/media-types.md)\n\n6. **Screen Share is SEPARATE from Video**\n   - Different msg_type (16 vs 15)\n   - Different media flag (4 vs 2)\n   - Must subscribe separately\n   - See: [Media Types](references/media-types.md#screen-share)\n\n---\n\n## Quick Reference\n\n### \"Connection fails\"\n-> [Common Issues](troubleshooting/common-issues.md)\n\n### \"Duplicate connections\"\n-> [Webhook timing](troubleshooting/common-issues.md#webhook-response-timing)\n\n### \"No audio/video data\"\n-> [Media Types](references/media-types.md) - Check configuration\n\n### \"How do I implement manually?\"\n-> [Manual WebSocket](examples/manual-websocket.md)\n\n### \"What message types exist?\"\n-> [Data Types](references/data-types.md)\n\n### \"How do I integrate AI?\"\n-> [AI Integration](examples/ai-integration.md)\n\n---\n\n## Document Version\n\nBased on **Zoom RTMS SDK v1.x** and official documentation as of 2026.\n\n---\n\n**Happy coding!**\n\nRemember: Start with [SDK Quickstart](examples/sdk-quickstart.md) for the fastest path, or [Manual WebSocket](examples/manual-websocket.md) if you need full control.\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("kw-zoom-plugin-rtms-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

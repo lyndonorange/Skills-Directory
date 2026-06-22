@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>implementing-patch-management-workflow - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/implementing-patch-management-workflow-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>implementing-patch-management-workflow</h1>
+      <p class="description">Patch management is the systematic process of identifying, testing, deploying,</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>implementing-patch-management-workflow</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>implementing-patch-management-workflow</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Patch management is the systematic process of identifying, testing, deploying,</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose implementing-patch-management-workflow, then write the task. Fallback prompt: Use the implementing-patch-management-workflow skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Implementing Patch Management Workflow</h2>
+<h3>Overview</h3>
+<p>Patch management is the systematic process of identifying, testing, deploying, and verifying software updates to remediate vulnerabilities across an organization's IT infrastructure. An effective patch management workflow reduces the attack surface while minimizing operational disruption through structured testing, approval gates, and phased rollouts.</p>
+<h3>When to Use</h3>
+<ul>
+<li>When deploying or configuring implementing patch management workflow capabilities in your environment</li>
+<li>When establishing security controls aligned to compliance requirements</li>
+<li>When building or improving security architecture for this domain</li>
+<li>When conducting security assessments that require this implementation</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Vulnerability scan results identifying missing patches</li>
+<li>Patch management tools (WSUS, SCCM/MECM, Ansible, Intune, Jamf)</li>
+<li>Test environment mirroring production</li>
+<li>Change management process (ITIL or equivalent)</li>
+<li>Asset inventory with OS and application versions</li>
+</ul>
+<h3>Core Concepts</h3>
+<h4>Patch Lifecycle Phases</h4>
+<ol>
+<li><strong>Discovery</strong>: Identify available patches from vendors and vulnerability scans</li>
+<li><strong>Assessment</strong>: Evaluate patch applicability and risk</li>
+<li><strong>Prioritization</strong>: Rank patches by severity, exploitability, and asset criticality</li>
+<li><strong>Testing</strong>: Validate patches in non-production environment</li>
+<li><strong>Approval</strong>: Change advisory board (CAB) review and approval</li>
+<li><strong>Deployment</strong>: Phased rollout to production systems</li>
+<li><strong>Verification</strong>: Confirm successful installation and no regressions</li>
+<li><strong>Reporting</strong>: Document compliance metrics and exceptions</li>
+</ol>
+<h4>Patch Categories</h4>
+<ul>
+<li><strong>Security Patches</strong>: Address CVEs and security vulnerabilities</li>
+<li><strong>Critical Updates</strong>: Non-security bug fixes affecting stability</li>
+<li><strong>Service Packs</strong>: Cumulative update collections</li>
+<li><strong>Feature Updates</strong>: New functionality (Windows feature updates, etc.)</li>
+<li><strong>Firmware Updates</strong>: BIOS/UEFI, NIC, storage controller firmware</li>
+<li><strong>Third-Party Patches</strong>: Adobe, Java, Chrome, Firefox, etc.</li>
+</ul>
+<h4>Deployment Rings (Phased Rollout)</h4>
+<p>| Ring | Environment | % of Fleet | Soak Time | Purpose | |------|------------|------------|-----------|---------| | Ring 0 | Lab/Test | N/A | 24-48 hrs | Functional validation | | Ring 1 | IT Early Adopters | 5% | 48-72 hrs | Real-world pilot | | Ring 2 | Business Pilot | 15% | 5-7 days | Broader compatibility | | Ring 3 | General Deployment | 50% | 7-14 days | Main rollout | | Ring 4 | Mission Critical | 30% | After Ring 3 | Final deployment |</p>
+<h3>Workflow</h3>
+<h4>Step 1: Configure Patch Sources</h4>
+<pre><code># WSUS (Windows Server Update Services)
+# Configure WSUS server to sync with Microsoft Update
+# Via PowerShell on WSUS server:
+Install-WindowsFeature -Name UpdateServices -IncludeManagementTools
+&amp; &quot;C:\Program Files\Update Services\Tools\WsusUtil.exe&quot; postinstall CONTENT_DIR=D:\WSUS
+
+# Configure GPO for WSUS clients
+# Computer Configuration &gt; Administrative Templates &gt; Windows Components &gt; Windows Update
+# Specify intranet Microsoft update service location: http://wsus-server:8530</code></pre>
+<pre><code># Ansible: Configure patch repositories for Linux
+# roles/patch-management/tasks/configure_repos.yml
+---
+- name: Configure RHEL patch repository
+  yum_repository:
+    name: rhel-patches
+    description: RHEL Security Patches
+    baseurl: https://satellite.corp.local/pulp/repos/patches
+    gpgcheck: yes
+    gpgkey: [local file URL removed]
+    enabled: yes
+
+- name: Configure Ubuntu patch sources
+  apt_repository:
+    repo: &quot;deb https://apt-mirror.corp.local/ubuntu {{ ansible_distribution_release }}-security main&quot;
+    state: present
+  when: ansible_os_family == &quot;Debian&quot;</code></pre>
+<h4>Step 2: Automated Patch Assessment</h4>
+<pre><code># patch_assessment.py - Correlate vulnerability scans with available patches
+import subprocess
+import platform
+import json
+
+def get_windows_pending_patches():
+    &quot;&quot;&quot;Query Windows Update for pending patches via PowerShell.&quot;&quot;&quot;
+    ps_cmd = &quot;&quot;&quot;
+    $Session = New-Object -ComObject Microsoft.Update.Session
+    $Searcher = $Session.CreateUpdateSearcher()
+    $Results = $Searcher.Search(&quot;IsInstalled=0 AND Type='Software'&quot;)
+    $Results.Updates | ForEach-Object {
+        [PSCustomObject]@{
+            Title = $_.Title
+            KB = ($_.KBArticleIDs -join ',')
+            Severity = $_.MsrcSeverity
+            Size = [math]::Round($_.MaxDownloadSize / 1MB, 2)
+            Published = $_.LastDeploymentChangeTime.ToString('yyyy-MM-dd')
+            CVE = ($_.CveIDs -join ',')
+        }
+    } | ConvertTo-Json
+    &quot;&quot;&quot;
+    result = subprocess.run(
+        [&quot;powershell&quot;, &quot;-Command&quot;, ps_cmd],
+        capture_output=True, text=True, timeout=120
+    )
+    return json.loads(result.stdout) if result.stdout.strip() else []
+
+def get_linux_pending_patches():
+    &quot;&quot;&quot;Query package manager for available security updates.&quot;&quot;&quot;
+    if platform.system() != &quot;Linux&quot;:
+        return []
+
+    # Try apt (Debian/Ubuntu)
+    try:
+        result = subprocess.run(
+            [&quot;apt&quot;, &quot;list&quot;, &quot;--upgradable&quot;],
+            capture_output=True, text=True, timeout=60
+        )
+        packages = []
+        for line in result.stdout.strip().split(&quot;\n&quot;)[1:]:
+            if line:
+                parts = line.split(&quot;/&quot;)
+                packages.append({
+                    &quot;package&quot;: parts[0],
+                    &quot;available_version&quot;: parts[1].split()[0] if len(parts) &gt; 1 else &quot;&quot;,
+                    &quot;source&quot;: &quot;apt&quot;
+                })
+        return packages
+    except FileNotFoundError:
+        pass
+
+    # Try yum/dnf (RHEL/CentOS)
+    try:
+        result = subprocess.run(
+            [&quot;dnf&quot;, &quot;updateinfo&quot;, &quot;list&quot;, &quot;security&quot;, &quot;--available&quot;],
+            capture_output=True, text=True, timeout=60
+        )
+        packages = []
+        for line in result.stdout.strip().split(&quot;\n&quot;):
+            parts = line.split()
+            if len(parts) &gt;= 3:
+                packages.append({
+                    &quot;advisory&quot;: parts[0],
+                    &quot;severity&quot;: parts[1],
+                    &quot;package&quot;: parts[2],
+                    &quot;source&quot;: &quot;dnf&quot;
+                })
+        return packages
+    except FileNotFoundError:
+        return []</code></pre>
+<h4>Step 3: Patch Testing Automation</h4>
+<pre><code># Ansible playbook: test_patches.yml
+---
+- name: Test Patches in Lab Environment
+  hosts: test_servers
+  become: yes
+  vars:
+    rollback_snapshot: &quot;pre-patch-{{ ansible_date_time.date }}&quot;
+
+  tasks:
+    - name: Create VM snapshot before patching
+      community.vmware.vmware_guest_snapshot:
+        hostname: &quot;{{ vcenter_host }}&quot;
+        username: &quot;{{ vcenter_user }}&quot;
+        password: &quot;{{ vcenter_pass }}&quot;
+        datacenter: &quot;{{ datacenter }}&quot;
+        name: &quot;{{ inventory_hostname }}&quot;
+        snapshot_name: &quot;{{ rollback_snapshot }}&quot;
+        state: present
+      delegate_to: localhost
+
+    - name: Apply security patches (RHEL/CentOS)
+      dnf:
+        name: &quot;*&quot;
+        state: latest
+        security: yes
+        update_cache: yes
+      when: ansible_os_family == &quot;RedHat&quot;
+      register: patch_result
+
+    - name: Apply security patches (Ubuntu/Debian)
+      apt:
+        upgrade: dist
+        update_cache: yes
+        only_upgrade: yes
+      when: ansible_os_family == &quot;Debian&quot;
+      register: patch_result
+
+    - name: Reboot if required
+      reboot:
+        reboot_timeout: 600
+        msg: &quot;Rebooting for patch installation&quot;
+      when: patch_result.changed
+
+    - name: Run post-patch validation
+      include_tasks: validate_services.yml
+
+    - name: Report patch results
+      debug:
+        msg: &quot;Patching {{ 'succeeded' if patch_result.changed else 'no updates' }} on {{ inventory_hostname }}&quot;</code></pre>
+<h4>Step 4: Production Deployment</h4>
+<pre><code># deploy_patches.yml - Phased production rollout
+---
+- name: Ring 1 - IT Early Adopters
+  hosts: ring1_hosts
+  serial: &quot;25%&quot;
+  max_fail_percentage: 10
+  become: yes
+  tasks:
+    - import_tasks: apply_patches.yml
+    - import_tasks: validate_services.yml
+    - name: Wait for soak period
+      pause:
+        hours: 48
+      run_once: true
+
+- name: Ring 2 - Business Pilot
+  hosts: ring2_hosts
+  serial: &quot;20%&quot;
+  max_fail_percentage: 5
+  become: yes
+  tasks:
+    - import_tasks: apply_patches.yml
+    - import_tasks: validate_services.yml
+
+- name: Ring 3 - General Deployment
+  hosts: ring3_hosts
+  serial: &quot;10%&quot;
+  max_fail_percentage: 3
+  become: yes
+  tasks:
+    - import_tasks: apply_patches.yml
+    - import_tasks: validate_services.yml</code></pre>
+<h4>Step 5: Verification and Reporting</h4>
+<p>Run a post-patch vulnerability scan to confirm patch installation:</p>
+<pre><code># Trigger post-patch verification scan
+curl -k -X POST &quot;https://nessus:8834/scans/$VERIFY_SCAN_ID/launch&quot; \
+  -H &quot;X-Cookie: token=$TOKEN&quot;
+
+# Compare pre-patch and post-patch results
+# Expecting reduction in vulnerabilities matching deployed patches</code></pre>
+<h3>Patch Management SLAs</h3>
+<p>| Severity | SLA (Internet-Facing) | SLA (Internal) | SLA (Air-Gapped) | |----------|----------------------|----------------|-------------------| | Critical (CVSS 9+) | 48 hours | 7 days | 14 days | | High (CVSS 7-8.9) | 7 days | 14 days | 30 days | | Medium (CVSS 4-6.9) | 30 days | 30 days | 60 days | | Low (CVSS 0.1-3.9) | 90 days | 90 days | 90 days |</p>
+<h3>Best Practices</h3>
+<ol>
+<li>Maintain current asset inventory to ensure complete patch coverage</li>
+<li>Test all patches in a non-production environment before deployment</li>
+<li>Use phased rollouts with automatic rollback capabilities</li>
+<li>Coordinate patch windows with change management process</li>
+<li>Track patch compliance metrics and report to leadership</li>
+<li>Automate where possible to reduce manual effort and human error</li>
+<li>Maintain exception documentation for systems that cannot be patched</li>
+<li>Include third-party application patching (not just OS patches)</li>
+</ol>
+<h3>Common Pitfalls</h3>
+<ul>
+<li>Patching only operating systems and ignoring third-party applications</li>
+<li>No rollback plan if patches cause service disruption</li>
+<li>Treating all patches with equal urgency (no risk-based prioritization)</li>
+<li>Manual patch processes that cannot scale</li>
+<li>No post-patch verification to confirm successful installation</li>
+<li>Ignoring firmware and BIOS updates</li>
+</ul>
+<h3>Related Skills</h3>
+<ul>
+<li>prioritizing-vulnerabilities-with-cvss-scoring</li>
+<li>implementing-vulnerability-remediation-sla</li>
+<li>implementing-continuous-vulnerability-monitoring</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: implementing-patch-management-workflow\ndisplay_name: implementing-patch-management-workflow\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# implementing-patch-management-workflow - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `implementing-patch-management-workflow` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nPatch management is the systematic process of identifying, testing, deploying, and verifying software updates to remediate vulnerabilities across an organization's IT infrastructure. An effective patch management workflo\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose implementing-patch-management-workflow, then write the task. Fallback prompt: Use the implementing-patch-management-workflow skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `implementing-patch-management-workflow` |\n| Canonical name | `implementing-patch-management-workflow` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nPatch management is the systematic process of identifying, testing, deploying, and verifying software updates to remediate vulnerabilities across an organization's IT infrastructure. An effective patch management workflo\n\n## Original SKILL.md\n\n---\nname: implementing-patch-management-workflow\ndescription: Patch management is the systematic process of identifying, testing, deploying,\n  and verifying software updates to remediate vulnerabilities across an organization's\n  IT infrastructure. An effective patc\ndomain: cybersecurity\nsubdomain: vulnerability-management\ntags:\n- vulnerability-management\n- patch-management\n- wsus\n- sccm\n- ansible\n- risk\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- ID.RA-01\n- ID.RA-02\n- ID.IM-02\n- ID.RA-06\nmitre_attack:\n- T1190\n- T1203\n- T1068\n---\n# Implementing Patch Management Workflow\n\n## Overview\nPatch management is the systematic process of identifying, testing, deploying, and verifying software updates to remediate vulnerabilities across an organization's IT infrastructure. An effective patch management workflow reduces the attack surface while minimizing operational disruption through structured testing, approval gates, and phased rollouts.\n\n\n## When to Use\n\n- When deploying or configuring implementing patch management workflow capabilities in your environment\n- When establishing security controls aligned to compliance requirements\n- When building or improving security architecture for this domain\n- When conducting security assessments that require this implementation\n\n## Prerequisites\n- Vulnerability scan results identifying missing patches\n- Patch management tools (WSUS, SCCM/MECM, Ansible, Intune, Jamf)\n- Test environment mirroring production\n- Change management process (ITIL or equivalent)\n- Asset inventory with OS and application versions\n\n## Core Concepts\n\n### Patch Lifecycle Phases\n1. **Discovery**: Identify available patches from vendors and vulnerability scans\n2. **Assessment**: Evaluate patch applicability and risk\n3. **Prioritization**: Rank patches by severity, exploitability, and asset criticality\n4. **Testing**: Validate patches in non-production environment\n5. **Approval**: Change advisory board (CAB) review and approval\n6. **Deployment**: Phased rollout to production systems\n7. **Verification**: Confirm successful installation and no regressions\n8. **Reporting**: Document compliance metrics and exceptions\n\n### Patch Categories\n- **Security Patches**: Address CVEs and security vulnerabilities\n- **Critical Updates**: Non-security bug fixes affecting stability\n- **Service Packs**: Cumulative update collections\n- **Feature Updates**: New functionality (Windows feature updates, etc.)\n- **Firmware Updates**: BIOS/UEFI, NIC, storage controller firmware\n- **Third-Party Patches**: Adobe, Java, Chrome, Firefox, etc.\n\n### Deployment Rings (Phased Rollout)\n| Ring | Environment | % of Fleet | Soak Time | Purpose |\n|------|------------|------------|-----------|---------|\n| Ring 0 | Lab/Test | N/A | 24-48 hrs | Functional validation |\n| Ring 1 | IT Early Adopters | 5% | 48-72 hrs | Real-world pilot |\n| Ring 2 | Business Pilot | 15% | 5-7 days | Broader compatibility |\n| Ring 3 | General Deployment | 50% | 7-14 days | Main rollout |\n| Ring 4 | Mission Critical | 30% | After Ring 3 | Final deployment |\n\n## Workflow\n\n### Step 1: Configure Patch Sources\n\n```bash\n# WSUS (Windows Server Update Services)\n# Configure WSUS server to sync with Microsoft Update\n# Via PowerShell on WSUS server:\nInstall-WindowsFeature -Name UpdateServices -IncludeManagementTools\n& \"C:\\Program Files\\Update Services\\Tools\\WsusUtil.exe\" postinstall CONTENT_DIR=D:\\WSUS\n\n# Configure GPO for WSUS clients\n# Computer Configuration > Administrative Templates > Windows Components > Windows Update\n# Specify intranet Microsoft update service location: http://wsus-server:8530\n```\n\n```yaml\n# Ansible: Configure patch repositories for Linux\n# roles/patch-management/tasks/configure_repos.yml\n---\n- name: Configure RHEL patch repository\n  yum_repository:\n    name: rhel-patches\n    description: RHEL Security Patches\n    baseurl: https://satellite.corp.local/pulp/repos/patches\n    gpgcheck: yes\n    gpgkey: [local file URL removed]\n    enabled: yes\n\n- name: Configure Ubuntu patch sources\n  apt_repository:\n    repo: \"deb https://apt-mirror.corp.local/ubuntu {{ ansible_distribution_release }}-security main\"\n    state: present\n  when: ansible_os_family == \"Debian\"\n```\n\n### Step 2: Automated Patch Assessment\n\n```python\n# patch_assessment.py - Correlate vulnerability scans with available patches\nimport subprocess\nimport platform\nimport json\n\ndef get_windows_pending_patches():\n    \"\"\"Query Windows Update for pending patches via PowerShell.\"\"\"\n    ps_cmd = \"\"\"\n    $Session = New-Object -ComObject Microsoft.Update.Session\n    $Searcher = $Session.CreateUpdateSearcher()\n    $Results = $Searcher.Search(\"IsInstalled=0 AND Type='Software'\")\n    $Results.Updates | ForEach-Object {\n        [PSCustomObject]@{\n            Title = $_.Title\n            KB = ($_.KBArticleIDs -join ',')\n            Severity = $_.MsrcSeverity\n            Size = [math]::Round($_.MaxDownloadSize / 1MB, 2)\n            Published = $_.LastDeploymentChangeTime.ToString('yyyy-MM-dd')\n            CVE = ($_.CveIDs -join ',')\n        }\n    } | ConvertTo-Json\n    \"\"\"\n    result = subprocess.run(\n        [\"powershell\", \"-Command\", ps_cmd],\n        capture_output=True, text=True, timeout=120\n    )\n    return json.loads(result.stdout) if result.stdout.strip() else []\n\ndef get_linux_pending_patches():\n    \"\"\"Query package manager for available security updates.\"\"\"\n    if platform.system() != \"Linux\":\n        return []\n\n    # Try apt (Debian/Ubuntu)\n    try:\n        result = subprocess.run(\n            [\"apt\", \"list\", \"--upgradable\"],\n            capture_output=True, text=True, timeout=60\n        )\n        packages = []\n        for line in result.stdout.strip().split(\"\\n\")[1:]:\n            if line:\n                parts = line.split(\"/\")\n                packages.append({\n                    \"package\": parts[0],\n                    \"available_version\": parts[1].split()[0] if len(parts) > 1 else \"\",\n                    \"source\": \"apt\"\n                })\n        return packages\n    except FileNotFoundError:\n        pass\n\n    # Try yum/dnf (RHEL/CentOS)\n    try:\n        result = subprocess.run(\n            [\"dnf\", \"updateinfo\", \"list\", \"security\", \"--available\"],\n            capture_output=True, text=True, timeout=60\n        )\n        packages = []\n        for line in result.stdout.strip().split(\"\\n\"):\n            parts = line.split()\n            if len(parts) >= 3:\n                packages.append({\n                    \"advisory\": parts[0],\n                    \"severity\": parts[1],\n                    \"package\": parts[2],\n                    \"source\": \"dnf\"\n                })\n        return packages\n    except FileNotFoundError:\n        return []\n```\n\n### Step 3: Patch Testing Automation\n\n```yaml\n# Ansible playbook: test_patches.yml\n---\n- name: Test Patches in Lab Environment\n  hosts: test_servers\n  become: yes\n  vars:\n    rollback_snapshot: \"pre-patch-{{ ansible_date_time.date }}\"\n\n  tasks:\n    - name: Create VM snapshot before patching\n      community.vmware.vmware_guest_snapshot:\n        hostname: \"{{ vcenter_host }}\"\n        username: \"{{ vcenter_user }}\"\n        password: \"{{ vcenter_pass }}\"\n        datacenter: \"{{ datacenter }}\"\n        name: \"{{ inventory_hostname }}\"\n        snapshot_name: \"{{ rollback_snapshot }}\"\n        state: present\n      delegate_to: localhost\n\n    - name: Apply security patches (RHEL/CentOS)\n      dnf:\n        name: \"*\"\n        state: latest\n        security: yes\n        update_cache: yes\n      when: ansible_os_family == \"RedHat\"\n      register: patch_result\n\n    - name: Apply security patches (Ubuntu/Debian)\n      apt:\n        upgrade: dist\n        update_cache: yes\n        only_upgrade: yes\n      when: ansible_os_family == \"Debian\"\n      register: patch_result\n\n    - name: Reboot if required\n      reboot:\n        reboot_timeout: 600\n        msg: \"Rebooting for patch installation\"\n      when: patch_result.changed\n\n    - name: Run post-patch validation\n      include_tasks: validate_services.yml\n\n    - name: Report patch results\n      debug:\n        msg: \"Patching {{ 'succeeded' if patch_result.changed else 'no updates' }} on {{ inventory_hostname }}\"\n```\n\n### Step 4: Production Deployment\n\n```yaml\n# deploy_patches.yml - Phased production rollout\n---\n- name: Ring 1 - IT Early Adopters\n  hosts: ring1_hosts\n  serial: \"25%\"\n  max_fail_percentage: 10\n  become: yes\n  tasks:\n    - import_tasks: apply_patches.yml\n    - import_tasks: validate_services.yml\n    - name: Wait for soak period\n      pause:\n        hours: 48\n      run_once: true\n\n- name: Ring 2 - Business Pilot\n  hosts: ring2_hosts\n  serial: \"20%\"\n  max_fail_percentage: 5\n  become: yes\n  tasks:\n    - import_tasks: apply_patches.yml\n    - import_tasks: validate_services.yml\n\n- name: Ring 3 - General Deployment\n  hosts: ring3_hosts\n  serial: \"10%\"\n  max_fail_percentage: 3\n  become: yes\n  tasks:\n    - import_tasks: apply_patches.yml\n    - import_tasks: validate_services.yml\n```\n\n### Step 5: Verification and Reporting\n\nRun a post-patch vulnerability scan to confirm patch installation:\n```bash\n# Trigger post-patch verification scan\ncurl -k -X POST \"https://nessus:8834/scans/$VERIFY_SCAN_ID/launch\" \\\n  -H \"X-Cookie: token=$TOKEN\"\n\n# Compare pre-patch and post-patch results\n# Expecting reduction in vulnerabilities matching deployed patches\n```\n\n## Patch Management SLAs\n| Severity | SLA (Internet-Facing) | SLA (Internal) | SLA (Air-Gapped) |\n|----------|----------------------|----------------|-------------------|\n| Critical (CVSS 9+) | 48 hours | 7 days | 14 days |\n| High (CVSS 7-8.9) | 7 days | 14 days | 30 days |\n| Medium (CVSS 4-6.9) | 30 days | 30 days | 60 days |\n| Low (CVSS 0.1-3.9) | 90 days | 90 days | 90 days |\n\n## Best Practices\n1. Maintain current asset inventory to ensure complete patch coverage\n2. Test all patches in a non-production environment before deployment\n3. Use phased rollouts with automatic rollback capabilities\n4. Coordinate patch windows with change management process\n5. Track patch compliance metrics and report to leadership\n6. Automate where possible to reduce manual effort and human error\n7. Maintain exception documentation for systems that cannot be patched\n8. Include third-party application patching (not just OS patches)\n\n## Common Pitfalls\n- Patching only operating systems and ignoring third-party applications\n- No rollback plan if patches cause service disruption\n- Treating all patches with equal urgency (no risk-based prioritization)\n- Manual patch processes that cannot scale\n- No post-patch verification to confirm successful installation\n- Ignoring firmware and BIOS updates\n\n## Related Skills\n- prioritizing-vulnerabilities-with-cvss-scoring\n- implementing-vulnerability-remediation-sla\n- implementing-continuous-vulnerability-monitoring\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("implementing-patch-management-workflow-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

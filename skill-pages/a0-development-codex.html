@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>a0-development - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/a0-development-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Agent platforms, tools, and automation</div>
+      <h1>a0-development</h1>
+      <p class="description">Development guide for extending and building features for the Agent Zero AI framework. Covers architecture, tools, extensions, API endpoints, agent profiles, projects, prompts, and skills — with correct paths, imports, and patterns matching the current codebase.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Agent platforms, tools, and automation</span></div>
+<div class="meta-card"><strong>display name</strong><span>a0-development</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>a0-development</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Development guide for extending and building features for the Agent Zero AI framework. Covers architecture, tools, extensions, API endpoints, agent profiles, projects, prompts, and skills — with correct paths, imports, and patterns matching the current codebase.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose a0-development, then write the task. Fallback prompt: Use the a0-development skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Agent Zero Development Guide</h2>
+<p>This skill provides comprehensive, accurate guidance for extending and building features for Agent Zero. Use it when you need to:</p>
+<ul>
+<li>Understand the <strong>architecture</strong> and project layout</li>
+<li>Create new <strong>Tools</strong> for agent capabilities</li>
+<li>Add <strong>Extensions</strong> to hook into the framework lifecycle</li>
+<li>Build <strong>API Endpoints</strong> for the Web UI</li>
+<li>Create <strong>Agent Profiles</strong> (subordinates) with custom prompts</li>
+<li>Understand and extend the <strong>Prompt System</strong></li>
+<li>Create <strong>Skills</strong> (see the dedicated <code>build-skill</code> skill for the full wizard)</li>
+<li>Work with <strong>Projects</strong> and workspace configuration</li>
+</ul>
+<blockquote><strong>Path convention:</strong> Throughout this guide, <code>/a0/</code> refers to the framework root — this is <code>/a0/</code> inside Docker, or your local repository root in development. All paths are relative to this root.</blockquote>
+<blockquote>[!IMPORTANT]</blockquote>
+<blockquote><strong>Plugins are the primary way to extend Agent Zero.</strong> Most new tools, extensions, and prompts should be packaged as plugins. For all plugin tasks (create, review, manage, debug, contribute), load the <code>a0-plugin-router</code> skill which routes to the appropriate specialist. This guide covers the underlying framework patterns that plugins build upon.</blockquote>
+<p>Related skills: <code>a0-plugin-router</code> (plugin tasks) | <code>build-skill</code> (skill creation wizard) | <code>a0-create-plugin</code> | <code>a0-review-plugin</code> | <code>a0-manage-plugin</code> | <code>a0-contribute-plugin</code> | <code>a0-debug-plugin</code></p>
+<hr>
+<h3>Architecture Overview</h3>
+<h4>Project Layout</h4>
+<pre><code>/a0/                              # Framework root
+├── agent.py                      # Core Agent + AgentContext + AgentConfig classes
+├── initialize.py                 # Agent initialization logic
+├── models.py                     # Model definitions
+├── run_ui.py                     # Web UI entry point
+│
+├── tools/                        # Core tools (search, response, browser, etc.)
+├── extensions/
+│   ├── python/                   # Python lifecycle extensions
+│   │   ├── &lt;hook_point&gt;/         # e.g., agent_init/, system_prompt/, etc.
+│   │   │   └── _NN_name.py       # Numbered extension files
+│   │   └── _functions/           # Implicit @extensible decorator extensions
+│   └── webui/                    # JavaScript WebUI extensions
+│       └── &lt;hook_point&gt;/         # e.g., json_api_call_before/
+│           └── name.js
+├── api/                          # Flask API endpoint handlers
+├── helpers/                      # Framework utilities and base classes
+│   ├── tool.py                   # Tool + Response base classes
+│   ├── extension.py              # Extension base class + @extensible decorator
+│   ├── api.py                    # ApiHandler base class
+│   ├── files.py                  # File operations + prompt reading
+│   ├── plugins.py                # Plugin system manager
+│   ├── print_style.py            # Console output formatting
+│   └── ...                       # Many more utility modules
+│
+├── prompts/                      # Core prompt fragments (system, tools, framework)
+├── agents/                       # Agent profiles (subordinate specializations)
+│   ├── default/                  # Base profile (inherited by others)
+│   ├── agent0/                   # Main user-facing agent
+│   ├── developer/                # Developer subordinate
+│   ├── hacker/                   # Security subordinate
+│   ├── researcher/               # Research subordinate
+│   └── _example/                 # Example profile with tool + extension samples
+│
+├── plugins/                      # Core plugins (tools, extensions, prompts)
+│   ├── _code_execution/          # Terminal/Python/Node.js execution
+│   ├── _memory/                  # Persistent memory system
+│   ├── _text_editor/             # File read/write/patch
+│   ├── _model_config/            # LLM model selection
+│   ├── _infection_check/         # Prompt injection safety
+│   └── ...                       # More core plugins
+│
+├── skills/                       # Core skills (SKILL.md bundles)
+├── knowledge/                    # Knowledge base files
+├── webui/                        # Web UI frontend
+├── docs/                         # Documentation
+│
+└── usr/                          # User-space (survives updates)
+    ├── agents/                   # User-created agent profiles
+    ├── plugins/                  # User-installed plugins
+    ├── skills/                   # User-created skills
+    ├── knowledge/                # User knowledge base files
+    ├── extensions/               # Standalone user extensions (created on demand; prefer plugins instead)
+    ├── projects/                 # Project workspaces (created on demand when user adds projects via UI)
+    └── workdir/                  # Default working directory</code></pre>
+<h4>Key Architecture Patterns</h4>
+<ol>
+<li><strong>Plugin-first design</strong> — Most capabilities (tools, extensions, prompts) are delivered via plugins in <code>/a0/plugins/</code> (core) or <code>/a0/usr/plugins/</code> (user).</li>
+<li><strong>Extensions execute in numeric order</strong> — Files named <code>_10_<em>.py</code>, <code>_20_</em>.py</code>, etc. run sequentially within each hook point.</li>
+<li><strong>Tools inherit from <code>Tool</code></strong> — All tools implement the <code>execute()</code> method returning a <code>Response</code>.</li>
+<li><strong>Shared <code>AgentContext</code></strong> — Enables state persistence across agents in a conversation.</li>
+<li><strong>Async/await throughout</strong> — All tool execution, extensions, and API handlers are async.</li>
+<li><strong>Prompt fragments compose</strong> — System prompts are assembled from named fragments with includes and variable substitution.</li>
+<li><strong>Profile inheritance</strong> — Agent profiles inherit from <code>default/</code> and override specific prompt fragments.</li>
+<li><strong>User-space separation</strong> — Everything under <code>/a0/usr/</code> survives framework updates.</li>
+</ol>
+<h4>Agent Loop</h4>
+<p>The core execution cycle works as follows:</p>
+<ol>
+<li><strong>User message</strong> arrives (via UI or API)</li>
+<li><strong>System prompt assembly</strong> — prompt fragments are composed with includes and variable substitution</li>
+<li><strong>LLM call</strong> — the assembled prompt + conversation history is sent to the model</li>
+<li><strong>Response parsing</strong> — the framework parses the LLM response looking for JSON tool calls</li>
+<li><strong>Tool execution</strong> — if tool calls are found, each tool's <code>execute()</code> method is called and the result is appended to history</li>
+<li><strong>Loop continues</strong> — steps 3-5 repeat until the agent produces a <code>response</code> tool call (which ends the loop) or a loop limit is reached</li>
+</ol>
+<p>Extensions fire at each stage (e.g., <code>monologue_start</code>, <code>before_main_llm_call</code>, <code>tool_execute_before</code>, etc.), allowing plugins to observe and modify behavior at every point.</p>
+<hr>
+<h3>Creating Tools</h3>
+<p>Tools are how agents interact with the world. Each tool inherits from the <code>Tool</code> base class.</p>
+<h4>Import Path</h4>
+<pre><code>from helpers.tool import Tool, Response</code></pre>
+<h4>Tool Base Class</h4>
+<pre><code># /a0/helpers/tool.py
+
+@dataclass
+class Response:
+    message: str              # Text response shown to agent
+    break_loop: bool          # True = stop agent message loop
+    additional: dict[str, Any] | None = None  # Extra metadata for history
+
+class Tool:
+    def __init__(self, agent: Agent, name: str, method: str | None,
+                 args: dict[str,str], message: str,
+                 loop_data: LoopData | None, **kwargs) -&gt; None:
+        self.agent = agent
+        self.name = name
+        self.method = method   # For tools with sub-methods (e.g., &quot;skills_tool:load&quot;)
+        self.args = args
+        self.loop_data = loop_data
+        self.message = message
+
+    async def execute(self, **kwargs) -&gt; Response:
+        pass  # Override this
+
+    # Lifecycle hooks (called automatically):
+    async def before_execution(self, **kwargs): ...
+    async def after_execution(self, response: Response, **kwargs): ...</code></pre>
+<h4>Where Tools Live</h4>
+<p>| Location | Purpose | |---|---| | <code>/a0/tools/</code> | Core framework tools (search, response, call_subordinate, etc.) | | <code>/a0/plugins/&lt;plugin&gt;/tools/</code> | Plugin-provided tools (code_execution, memory, text_editor) | | <code>/a0/agents/&lt;profile&gt;/tools/</code> | Profile-specific tool overrides | | <code>/a0/usr/plugins/&lt;plugin&gt;/tools/</code> | User plugin tools |</p>
+<h4>Example: Creating a Tool</h4>
+<p>Based on the actual <code>_example</code> profile in <code>/a0/agents/_example/tools/example_tool.py</code>:</p>
+<pre><code># my_tool.py
+from helpers.tool import Tool, Response
+
+class MyTool(Tool):
+    async def execute(self, **kwargs):
+        # Get arguments — kwargs contains the tool_args from the agent's JSON
+        input_data = kwargs.get(&quot;input&quot;, &quot;&quot;)
+
+        # Do something
+        result = f&quot;Processed: {input_data}&quot;
+
+        # Return response
+        return Response(
+            message=result,        # Shown to the agent
+            break_loop=False,      # Don't stop the agent loop
+        )</code></pre>
+<blockquote>[!IMPORTANT]</blockquote>
+<blockquote>Every tool needs a corresponding <strong>prompt fragment</strong> so the agent knows how to use it. Create a file named <code>agent.system.tool.&lt;tool_name&gt;.md</code> in the appropriate <code>prompts/</code> directory. See the [Prompt System](#prompt-system) section.</blockquote>
+<h4>Tool Best Practices</h4>
+<ul>
+<li>Always handle errors gracefully — return error messages in <code>Response</code>, don't crash</li>
+<li>Access agent context via <code>self.agent.context</code></li>
+<li>Use <code>self.method</code> to support sub-methods (e.g., <code>my_tool:action1</code>, <code>my_tool:action2</code>)</li>
+<li>Use <code>kwargs.get()</code> to read arguments with defaults</li>
+<li>For long operations, use <code>self.set_progress()</code> or <code>self.add_progress()</code> to show status</li>
+<li>Access <code>self.loop_data</code> for loop state (iteration count, timing, etc.) — this is the <code>LoopData</code> instance passed during tool dispatch</li>
+</ul>
+<hr>
+<h3>Creating Extensions</h3>
+<p>Extensions hook into specific lifecycle points in the agent framework.</p>
+<h4>Import Path</h4>
+<pre><code>from helpers.extension import Extension</code></pre>
+<h4>Extension Base Class</h4>
+<pre><code>class Extension:
+    def __init__(self, agent: &quot;Agent | None&quot;, **kwargs):
+        self.agent: &quot;Agent | None&quot; = agent
+        self.kwargs = kwargs
+
+    def execute(self, **kwargs) -&gt; None | Awaitable[None]:
+        pass  # Override this — kwargs are hook-point-specific</code></pre>
+<blockquote>Extensions can be sync or async. If <code>execute()</code> returns an <code>Awaitable</code>, the framework will <code>await</code> it automatically. The <code>agent</code> parameter is nullable because some hook points (like <code>startup_migration</code> or <code>banners</code>) fire before an agent exists.</blockquote>
+<h4>Extension File Location</h4>
+<p>Extensions live in directories named by their hook point. The path structure is:</p>
+<pre><code>extensions/python/&lt;hook_point&gt;/_NN_name.py</code></pre>
+<p>Where <code>_NN_</code> is a numeric prefix controlling execution order (e.g., <code>_10_</code>, <code>_20_</code>, <code>_50_</code>).</p>
+<p>| Source | Path | |---|---| | Core extensions | <code>/a0/extensions/python/&lt;hook_point&gt;/</code> | | Plugin extensions | <code>/a0/plugins/&lt;plugin&gt;/extensions/python/&lt;hook_point&gt;/</code> | | User extensions | <code>/a0/usr/extensions/python/&lt;hook_point&gt;/</code> | | Agent profile extensions | <code>/a0/agents/&lt;profile&gt;/extensions/&lt;hook_point&gt;/</code> | | User plugin extensions | <code>/a0/usr/plugins/&lt;plugin&gt;/extensions/python/&lt;hook_point&gt;/</code> |</p>
+<h4>Python Extension Hook Points</h4>
+<p>Complete list of available hook points:</p>
+<p>| Hook Point | When It Fires | Common Use | |---|---|---| | <code>agent_init</code> | Agent is initialized | Load configs, set defaults | | <code>system_prompt</code> | System prompt is being assembled | Inject prompt content | | <code>monologue_start</code> | Agent monologue begins | Pre-processing, state setup | | <code>message_loop_start</code> | Before message processing loop | Pre-loop setup | | <code>message_loop_prompts_before</code> | Before prompt assembly in loop | Modify prompt inputs | | <code>message_loop_prompts_after</code> | After prompt assembly in loop | Add context (memory recall lives here) | | <code>before_main_llm_call</code> | Before the LLM API call | Modify prompts, add context | | <code>util_model_call_before</code> | Before utility model calls | Modify utility prompts | | <code>response_stream</code> | When response streaming begins | Initialize stream handlers | | <code>response_stream_chunk</code> | Per response chunk received | Transform output, collect data | | <code>response_stream_end</code> | Response streaming complete | Finalize, analyze full response | | <code>reasoning_stream</code> | Reasoning/thinking stream begins | Monitor reasoning | | <code>reasoning_stream_chunk</code> | Per reasoning chunk | Collect reasoning data | | <code>reasoning_stream_end</code> | Reasoning stream complete | Analyze reasoning | | <code>tool_execute_before</code> | Before a tool runs | Validation, logging, safety checks | | <code>tool_execute_after</code> | After a tool runs | Post-process results | | <code>hist_add_before</code> | Before adding to history | Modify history entries | | <code>hist_add_tool_result</code> | After tool result added to history | Log tool results | | <code>message_loop_end</code> | After message processing loop | Post-loop cleanup | | <code>monologue_end</code> | Agent monologue complete | Memorization, cleanup | | <code>process_chain_end</code> | Entire processing chain done | Final cleanup | | <code>job_loop</code> | Background job loop tick | Periodic background tasks | | <code>error_format</code> | Error is being formatted | Custom error messages | | <code>startup_migration</code> | Framework startup | Data migrations | | <code>banners</code> | Startup banners displayed | Add custom banners | | <code>embedding_model_changed</code> | Embedding model changed | Reload vector stores (fired programmatically, not a directory-based hook) | | <code>user_message_ui</code> | User message from UI | Pre-process user input | | <code>webui_ws_connect</code> | WebSocket client connects | Session setup | | <code>webui_ws_disconnect</code> | WebSocket client disconnects | Session cleanup | | <code>webui_ws_event</code> | WebSocket event received | Handle custom WS events |</p>
+<h4>The <code>@extensible</code> Decorator (Implicit Extension Points)</h4>
+<p>Any framework function decorated with <code>@extensible</code> automatically gets two extension points:</p>
+<pre><code>_functions/&lt;module_path&gt;/&lt;qualname_path&gt;/start
+_functions/&lt;module_path&gt;/&lt;qualname_path&gt;/end</code></pre>
+<p>The path mapping converts Python module paths and qualified names using <code>/</code> separators:</p>
+<ul>
+<li>Module <code>agent.py</code> → <code>agent</code></li>
+<li>Class method <code>Agent.handle_exception</code> → <code>Agent/handle_exception</code></li>
+<li>Full path: <code>_functions/agent/Agent/handle_exception/start</code></li>
+</ul>
+<p>For nested modules like <code>helpers.history</code>, a method <code>History.add</code> would map to <code>_functions/helpers/history/History/add/start</code>.</p>
+<p>For example, a function <code>Agent.handle_exception</code> in module <code>agent</code> creates:</p>
+<ul>
+<li><code>_functions/agent/Agent/handle_exception/start</code></li>
+<li><code>_functions/agent/Agent/handle_exception/end</code></li>
+</ul>
+<p>Extensions in these directories receive a <code>data</code> dict with:</p>
+<ul>
+<li><code>data[&quot;args&quot;]</code> — positional args (mutable)</li>
+<li><code>data[&quot;kwargs&quot;]</code> — keyword args (mutable)</li>
+<li><code>data[&quot;result&quot;]</code> — set this to short-circuit the function</li>
+<li><code>data[&quot;exception&quot;]</code> — set to a <code>BaseException</code> to force-raise</li>
+</ul>
+<p>This is used by plugins like <code>_error_retry</code> to wrap core agent methods.</p>
+<h4>WebUI Extensions (JavaScript)</h4>
+<p>Client-side extensions live under <code>extensions/webui/&lt;hook_point&gt;/</code>:</p>
+<p>| Hook Point | When It Fires | |---|---| | <code>json_api_call_before</code> | Before a JSON API request | | <code>json_api_call_after</code> | After a JSON API response | | <code>fetch_api_call_before</code> | Before a fetch API request | | <code>fetch_api_call_after</code> | After a fetch API response | | <code>get_message_handler</code> | Register custom message renderers | | <code>set_messages_before_loop</code> | Before messages are rendered | | <code>set_messages_after_loop</code> | After messages are rendered | | <code>webui_ws_push</code> | WebSocket push to client |</p>
+<h4>Example: Creating an Extension</h4>
+<p>Based on the actual <code>_example</code> profile in <code>/a0/agents/_example/extensions/agent_init/_10_example_extension.py</code>:</p>
+<pre><code># extensions/python/agent_init/_15_my_extension.py
+from helpers.extension import Extension
+
+class MyExtension(Extension):
+    async def execute(self, **kwargs):
+        # Access the agent
+        agent = self.agent
+        context = agent.context
+
+        # Extension logic — kwargs content depends on the hook point
+        agent.agent_name = &quot;CustomAgent&quot; + str(agent.number)</code></pre>
+<h4>Extension Execution Order</h4>
+<p>Extensions execute in numeric order based on filename prefix:</p>
+<pre><code>_10_first.py      # Runs first
+_20_second.py     # Runs second
+_50_third.py      # Runs third</code></pre>
+<p>Use 10-number increments to leave room for future extensions.</p>
+<hr>
+<h3>Creating API Endpoints</h3>
+<p>API endpoints serve the Web UI and external clients using Flask.</p>
+<h4>Import Path</h4>
+<pre><code>from helpers.api import ApiHandler
+from flask import Request, Response</code></pre>
+<h4>ApiHandler Base Class</h4>
+<pre><code>class ApiHandler:
+    def __init__(self, app: Flask, thread_lock: ThreadLockType):
+        self.app = app
+        self.thread_lock = thread_lock
+
+    # Override these class methods to configure behavior:
+    @classmethod
+    def requires_loopback(cls) -&gt; bool: return False   # Restrict to localhost
+    @classmethod
+    def requires_api_key(cls) -&gt; bool: return False     # Require API key
+    @classmethod
+    def requires_auth(cls) -&gt; bool: return True         # Require auth session
+    @classmethod
+    def get_methods(cls) -&gt; list[str]: return [&quot;POST&quot;]   # HTTP methods
+    @classmethod
+    def requires_csrf(cls) -&gt; bool: return cls.requires_auth()  # CSRF protection
+
+    # Implement this:
+    async def process(self, input: dict, request: Request) -&gt; dict | Response:
+        pass
+
+    # Utility: get or create an agent context
+    def use_context(self, ctxid: str, create_if_not_exists: bool = True) -&gt; AgentContext:
+        ...</code></pre>
+<h4>Where API Endpoints Live</h4>
+<p>| Location | Purpose | |---|---| | <code>/a0/api/</code> | Core API endpoints | | <code>/a0/plugins/&lt;plugin&gt;/api/</code> | Plugin API endpoints | | <code>/a0/usr/plugins/&lt;plugin&gt;/api/</code> | User plugin API endpoints |</p>
+<p>Endpoints are auto-discovered by filename. The route is derived from the filename (e.g., <code>my_endpoint.py</code> -&gt; <code>/api/my_endpoint</code>).</p>
+<h4>Example: API Endpoint</h4>
+<pre><code># api/my_endpoint.py
+from helpers.api import ApiHandler
+from flask import Request, Response
+from agent import AgentContext
+
+class MyEndpoint(ApiHandler):
+    @classmethod
+    def get_methods(cls) -&gt; list[str]:
+        return [&quot;GET&quot;, &quot;POST&quot;]
+
+    async def process(self, input: dict, request: Request) -&gt; dict:
+        param = input.get(&quot;param&quot;, &quot;default&quot;)
+
+        # Get or create agent context
+        ctxid = input.get(&quot;context&quot;, &quot;&quot;)
+        context = self.use_context(ctxid)
+
+        return {
+            &quot;result&quot;: f&quot;processed {param}&quot;,
+            &quot;context&quot;: context.id,
+        }</code></pre>
+<hr>
+<h3>Creating Agent Profiles</h3>
+<p>Agent profiles define specialized subordinates with custom prompts and behaviors.</p>
+<blockquote>For a guided, step-by-step wizard (scope selection, <code>agent.yaml</code> schema, prompt overrides, tool/extension stubs, test checklist) use the dedicated <code>/a0/skills/a0-create-agent/SKILL.md</code> skill.</blockquote>
+<h4>Profile Directory Structure</h4>
+<pre><code>agents/&lt;profile-name&gt;/
++-- agent.yaml                    # Required: profile metadata
++-- prompts/                      # Optional: prompt overrides
+|   +-- agent.system.main.role.md         # Role definition (most common override)
+|   +-- agent.system.main.communication.md # Communication style
+|   +-- agent.system.tool.&lt;name&gt;.md       # Tool-specific prompts
++-- tools/                        # Optional: profile-specific tools
+|   +-- my_tool.py
++-- extensions/                   # Optional: profile-specific extensions
+    +-- &lt;hook_point&gt;/
+        +-- _NN_extension.py</code></pre>
+<h4>agent.yaml Format</h4>
+<p>The actual format is simple YAML with only three fields:</p>
+<pre><code>title: Developer
+description: Agent specialized in complex software development.
+context: Use this agent for software development tasks, including writing code,
+  debugging, refactoring, and architectural design.</code></pre>
+<p>| Field | Purpose | |---|---| | <code>title</code> | Display name shown in UI and agent selection | | <code>description</code> | Brief description of the agent's specialization | | <code>context</code> | Instructions for when to delegate to this profile |</p>
+<blockquote>[!NOTE]</blockquote>
+<blockquote>There is <strong>no</strong> model configuration, temperature, or allowed_tools in the profile YAML. <code>agent.yaml</code> contains only <code>title</code>, <code>description</code>, and <code>context</code>. Profile-specific Main/Utility model settings are managed by the <code>_model_config</code> plugin in <code>usr/agents/&lt;profile&gt;/plugins/_model_config/config.json</code>. Tool availability is controlled by plugin activation.</blockquote>
+<h4>Where Profiles Live</h4>
+<p>| Location | Purpose | |---|---| | <code>/a0/agents/</code> | Core profiles (default, agent0, developer, hacker, researcher) | | <code>/a0/usr/agents/</code> | User-created profiles (survives updates) |</p>
+<h4>Prompt Override Mechanism</h4>
+<p>Profiles inherit all prompts from the <code>default/</code> profile. To customize behavior, place prompt files with the <strong>same name</strong> in your profile's <code>prompts/</code> directory. The framework searches profile-specific prompts first, then falls back to the default.</p>
+<p>The most common override is <code>agent.system.main.role.md</code> which defines the agent's role and specialization.</p>
+<h4>Example: Creating a Profile</h4>
+<pre><code># /a0/usr/agents/data-analyst/agent.yaml
+title: Data Analyst
+description: Agent specialized in data analysis, visualization, and statistical modeling.
+context: Use this agent for data analysis tasks, creating visualizations, statistical
+  analysis, and working with datasets in Python.</code></pre>
+<pre><code>&lt;!-- /a0/usr/agents/data-analyst/prompts/agent.system.main.role.md --&gt;
+
+## Your role
+You are a specialized data analysis agent.
+Your expertise includes:
+- Python data analysis (pandas, numpy, scipy)
+- Data visualization (matplotlib, seaborn, plotly)
+- Statistical modeling and hypothesis testing
+- SQL queries and database analysis
+- Data cleaning and preprocessing
+
+## Process
+1. Understand the data and the question
+2. Choose appropriate tools and methods
+3. Execute analysis with code_execution_tool
+4. Visualize results when applicable
+5. Provide clear interpretation of findings</code></pre>
+<h4>Reference: The <code>_example</code> Profile</h4>
+<p>The framework includes a complete example profile at <code>/a0/agents/_example/</code> that demonstrates:</p>
+<ul>
+<li>Custom tool: <code>/a0/agents/_example/tools/example_tool.py</code></li>
+<li>Custom extension: <code>/a0/agents/_example/extensions/agent_init/_10_example_extension.py</code></li>
+<li>Tool prompt: <code>/a0/agents/_example/prompts/agent.system.tool.example_tool.md</code></li>
+<li>Role prompt: <code>/a0/agents/_example/prompts/agent.system.main.role.md</code></li>
+</ul>
+<hr>
+<h3>Prompt System</h3>
+<p>Agent Zero assembles system prompts from <strong>named fragments</strong> using includes and variable substitution.</p>
+<h4>Prompt File Naming Convention</h4>
+<p>Prompt files follow a dot-separated naming scheme:</p>
+<pre><code>agent.system.main.md            # Main system prompt (entry point)
+agent.system.main.role.md       # Role definition
+agent.system.main.communication.md  # Communication style
+agent.system.tool.&lt;name&gt;.md     # Tool usage instructions
+agent.system.tools.md           # Tools overview
+agent.system.projects.main.md   # Project system
+agent.system.secrets.md         # Secret handling
+agent.system.skills.md          # Skills listing
+agent.system.datetime.md        # Current date/time
+agent.context.extras.md         # Context extras
+fw.*.md                         # Framework messages (errors, hints, etc.)</code></pre>
+<h4>Where Prompts Live</h4>
+<p>| Location | Priority | Purpose | |---|---|---| | <code>/a0/agents/&lt;profile&gt;/prompts/</code> | Highest | Profile-specific overrides | | <code>/a0/usr/agents/&lt;profile&gt;/prompts/</code> | High | User profile overrides | | <code>/a0/plugins/&lt;plugin&gt;/prompts/</code> | Normal | Plugin-provided prompts | | <code>/a0/usr/plugins/&lt;plugin&gt;/prompts/</code> | Normal | User plugin prompts | | <code>/a0/prompts/</code> | Base | Core framework prompts |</p>
+<p>The framework searches directories in priority order and uses the <strong>first match</strong> found.</p>
+<h4>Include Mechanism</h4>
+<p>Prompts can include other fragments using double-brace <code>include</code> directives.</p>
+<p>The syntax uses opening double-brace, the keyword, and closing double-brace:</p>
+<p>| Directive | Purpose | |---|---| | <code>{{include &quot;agent.system.main.role.md&quot;}}</code> | Include a named prompt fragment | | <code>{{include &quot;agent.system.main.communication.md&quot;}}</code> | Include another fragment | | <code>{{include original}}</code> | Include the same file from the next lower-priority directory |</p>
+<p>The <code>include original</code> directive is particularly useful for <strong>extending</strong> rather than fully <strong>replacing</strong> a prompt — your override can include the base version and add to it.</p>
+<h4>Variable Substitution</h4>
+<p>Prompts support <code>{{variable_name}}</code> placeholders that are replaced at render time with values passed from the framework or plugin configuration.</p>
+<h4>Conditional Blocks</h4>
+<p>Prompts support conditional rendering based on variables.</p>
+<h4>Reading Prompts in Code</h4>
+<pre><code># From within an Agent method:
+content = self.read_prompt(&quot;fw.some_message.md&quot;, variable1=&quot;value1&quot;)
+
+# From helpers:
+from helpers.files import read_prompt_file
+content = read_prompt_file(&quot;template.md&quot;, _directories=[...], var=&quot;value&quot;)</code></pre>
+<hr>
+<h3>Creating Skills</h3>
+<p>Skills are reusable instruction bundles that the agent loads on demand via the <code>skills_tool</code>. Each skill lives in a directory containing a <code>SKILL.md</code> file with YAML frontmatter.</p>
+<p>| Location | Purpose | |---|---| | <code>/a0/skills/</code> | Core skills (shipped with framework) | | <code>/a0/usr/skills/</code> | User-created skills (survives updates) |</p>
+<p>The agent interacts with skills through JSON tool calls:</p>
+<pre><code>{&quot;tool_name&quot;: &quot;skills_tool:list&quot;, &quot;tool_args&quot;: {}}
+{&quot;tool_name&quot;: &quot;skills_tool:load&quot;, &quot;tool_args&quot;: {&quot;skill_name&quot;: &quot;my-skill&quot;}}</code></pre>
+<blockquote>For the complete skill creation wizard — including SKILL.md format, frontmatter fields, directory structure, best practices, and examples — load the <code>build-skill</code> skill.</blockquote>
+<hr>
+<h3>Working with Projects</h3>
+<p>Projects provide isolated workspaces with custom configuration.</p>
+<blockquote>Projects are typically created and managed via the Web UI. The <code>.a0proj/</code> directory and <code>project.json</code> are auto-generated when you create a project through the UI.</blockquote>
+<h4>Project Structure</h4>
+<pre><code>/a0/usr/projects/&lt;project-name&gt;/
++-- .a0proj/
+|   +-- project.json          # Project configuration
+|   +-- agents.json           # Per-project agent overrides
+|   +-- variables.env         # Non-sensitive variables
+|   +-- secrets.env           # Encrypted secrets
+|   +-- memory/               # Project-specific memory
+|       +-- index.faiss
+|       +-- index.pkl
+|       +-- embedding.json
++-- &lt;project-files&gt;/          # Your project files (working directory)</code></pre>
+<h4>project.json Format</h4>
+<pre><code>{
+    &quot;title&quot;: &quot;My Project&quot;,
+    &quot;description&quot;: &quot;Project description&quot;,
+    &quot;instructions&quot;: &quot;Markdown instructions for the agent when this project is active&quot;,
+    &quot;color&quot;: &quot;#3a86ff&quot;,
+    &quot;git_url&quot;: &quot;&quot;,
+    &quot;memory&quot;: &quot;own&quot;,
+    &quot;file_structure&quot;: {
+        &quot;enabled&quot;: true,
+        &quot;max_depth&quot;: 5,
+        &quot;max_files&quot;: 20,
+        &quot;max_folders&quot;: 20,
+        &quot;max_lines&quot;: 250,
+        &quot;gitignore&quot;: &quot;.a0proj/\nvenv/\n**/__pycache__/\n**/node_modules/\n**/.git/\n&quot;
+    }
+}</code></pre>
+<p>| Field | Purpose | |---|---| | <code>title</code> | Display name | | <code>description</code> | Brief description | | <code>instructions</code> | Markdown injected into agent system prompt when project is active | | <code>color</code> | UI accent color (hex) | | <code>git_url</code> | Optional Git repository URL | | <code>memory</code> | <code>&quot;own&quot;</code> for project-specific memory, or shared | | <code>file_structure</code> | Controls the working directory tree shown to the agent |</p>
+<hr>
+<h3>Plugin System Overview</h3>
+<p>Plugins are the <strong>primary extension mechanism</strong> in Agent Zero. A plugin can bundle tools, extensions, prompts, API endpoints, helpers, and UI components into a self-contained package.</p>
+<blockquote>For all plugin tasks — creating, reviewing, managing, contributing, or debugging plugins — load the <code>a0-plugin-router</code> skill, which routes to the appropriate specialist skill.</blockquote>
+<h4>Core Plugins</h4>
+<p>The framework ships with these core plugins in <code>/a0/plugins/</code>:</p>
+<p>| Plugin | Purpose | |---|---| | <code>_code_execution</code> | Terminal, Python, Node.js code execution | | <code>_memory</code> | Persistent vector memory system | | <code>_text_editor</code> | File read/write/patch with line numbers | | <code>_model_config</code> | LLM model selection and configuration | | <code>_browser</code> | Direct browser automation and WebUI viewing | | <code>_infection_check</code> | Prompt injection safety checks | | <code>_error_retry</code> | Retry on critical exceptions | | <code>_email_integration</code> | Email communication via IMAP/SMTP | | <code>_telegram_integration</code> | Telegram bot integration | | <code>_chat_branching</code> | Branch chats from any message | | <code>_promptinclude</code> | Persistent behavioral rules (*.promptinclude.md) | | <code>_plugin_installer</code> | Install plugins from ZIP/Git/Hub | | <code>_plugin_scan</code> | Security scanning for plugins | | <code>_plugin_validator</code> | Plugin manifest and code validation |</p>
+<hr>
+<h3>Common Patterns Reference</h3>
+<h4>Accessing Agent Context</h4>
+<pre><code># Shared across all agents in a conversation
+context = self.agent.context
+data = context.data  # dict-like shared state
+
+# Store data
+data[&quot;my_key&quot;] = my_value
+
+# Retrieve data
+value = data.get(&quot;my_key&quot;, default)</code></pre>
+<h4>Using File Helpers</h4>
+<pre><code>from helpers import files
+
+# File operations
+content = files.read_file(&quot;path/to/file&quot;)
+files.write_file(&quot;path/to/file&quot;, content)
+exists = files.exists(&quot;path/to/file&quot;)
+
+# Read and render a prompt file
+content = files.read_prompt_file(&quot;template.md&quot;, _directories=[...], var=&quot;value&quot;)</code></pre>
+<h4>Console Output</h4>
+<pre><code>from helpers.print_style import PrintStyle
+
+PrintStyle.hint(&quot;Informational message&quot;)
+PrintStyle.warning(&quot;Warning message&quot;)
+PrintStyle.error(&quot;Error message&quot;)
+PrintStyle(font_color=&quot;#85C1E9&quot;).print(&quot;Custom styled output&quot;)</code></pre>
+<h4>Error Handling</h4>
+<pre><code>from helpers.tool import Response
+
+try:
+    result = await risky_operation()
+except Exception as e:
+    PrintStyle.error(f&quot;Operation failed: {e}&quot;)
+    return Response(message=f&quot;Error: {e}&quot;, break_loop=False)</code></pre>
+<hr>
+<h3>Development Workflow</h3>
+<p>When building features for Agent Zero:</p>
+<h4>1. Choose Your Extension Point</h4>
+<p>| Want to... | Use | |---|---| | Add a new agent capability | <strong>Tool</strong> (in a plugin) | | Hook into agent lifecycle | <strong>Extension</strong> (in a plugin) | | Add Web UI functionality | <strong>API endpoint</strong> + <strong>WebUI extension</strong> | | Create a specialized agent | <strong>Agent profile</strong> | | Bundle reusable instructions | <strong>Skill</strong> | | Package everything together | <strong>Plugin</strong> (recommended) |</p>
+<h4>2. Develop in User Space</h4>
+<ul>
+<li>New plugins -&gt; <code>/a0/usr/plugins/&lt;name&gt;/</code></li>
+<li>New profiles -&gt; <code>/a0/usr/agents/&lt;name&gt;/</code></li>
+<li>New skills -&gt; <code>/a0/usr/skills/&lt;name&gt;/</code></li>
+<li>New extensions -&gt; <code>/a0/usr/extensions/python/&lt;hook_point&gt;/</code></li>
+</ul>
+<h4>3. Test and Iterate</h4>
+<ul>
+<li><strong>Local dev</strong>: Run <code>python run_ui.py</code> (default port 50001 at <code>http://localhost:50001</code>)</li>
+<li><strong>Docker</strong>: Restart the container or use the UI restart button; check logs with <code>docker logs -f &lt;container_name&gt;</code></li>
+<li>Test with minimal input first</li>
+<li>Verify in the Web UI</li>
+</ul>
+<h4>4. Contributing</h4>
+<p>For contribution guidelines, see <code>/a0/docs/contribution.md</code>. For plugin contributions to the community Plugin Index, load the <code>a0-contribute-plugin</code> skill.</p>
+<hr>
+<h3>Best Practices</h3>
+<h4>DO</h4>
+<ul>
+<li>Use the <strong>plugin system</strong> for new features (see <code>a0-create-plugin</code> skill)</li>
+<li>Follow existing code patterns and conventions</li>
+<li>Write clear docstrings and comments</li>
+<li>Handle errors gracefully in tools and extensions</li>
+<li>Create prompt fragments for every tool (<code>agent.system.tool.&lt;name&gt;.md</code>)</li>
+<li>Develop in <code>/a0/usr/</code> directories to survive updates</li>
+<li>Test with the <code>_example</code> profile as a reference</li>
+<li>Use <code>from helpers.<em></code> imports (not <code>from python.helpers.</em></code>)</li>
+</ul>
+<h4>DON'T</h4>
+<ul>
+<li>Modify files in <code>/a0/plugins/</code> or <code>/a0/tools/</code> directly (use usr/ space)</li>
+<li>Hardcode paths or configuration values</li>
+<li>Skip creating prompt files for tools</li>
+<li>Ignore the plugin system (it's the intended extension mechanism)</li>
+<li>Mix sync and async code carelessly</li>
+<li>Access internal structures when helpers exist</li>
+</ul>
+<hr>
+<h3>Quick Reference: Key Files</h3>
+<p>| File | Purpose | |---|---| | <code>/a0/agent.py</code> | Core <code>Agent</code>, <code>AgentContext</code>, <code>AgentConfig</code> classes | | <code>/a0/helpers/tool.py</code> | <code>Tool</code> + <code>Response</code> base classes | | <code>/a0/helpers/extension.py</code> | <code>Extension</code> base + <code>@extensible</code> decorator | | <code>/a0/helpers/api.py</code> | <code>ApiHandler</code> base class | | <code>/a0/helpers/files.py</code> | File ops + prompt reading | | <code>/a0/helpers/plugins.py</code> | Plugin system manager | | <code>/a0/helpers/print_style.py</code> | Console output formatting | | <code>/a0/agents/_example/</code> | Reference example profile with tool + extension | | <code>/a0/prompts/agent.system.main.md</code> | Main system prompt entry point |</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: a0-development\ndisplay_name: a0-development\nplatform: Codex\ncategory: Agent platforms, tools, and automation\n---\n\n# a0-development - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `a0-development` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nThis skill provides comprehensive, accurate guidance for extending and building features for Agent Zero. Use it when you need to:\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose a0-development, then write the task. Fallback prompt: Use the a0-development skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `a0-development` |\n| Canonical name | `a0-development` |\n| Platform | `Codex` |\n| Category | Agent platforms, tools, and automation |\n\n## Description\n\nThis skill provides comprehensive, accurate guidance for extending and building features for Agent Zero. Use it when you need to:\n\n## Original SKILL.md\n\n---\nname: a0-development\ndescription: Development guide for extending and building features for the Agent Zero AI framework. Covers architecture, tools, extensions, API endpoints, agent profiles, projects, prompts, and skills — with correct paths, imports, and patterns matching the current codebase.\nversion: 1.0.0\nauthor: Agent Zero Team\ntags: [\"development\", \"framework\", \"agent-zero\", \"extending\", \"tools\", \"extensions\", \"skills\", \"api\", \"agents\", \"prompts\"]\ntrigger_patterns:\n  - \"extend agent zero\"\n  - \"agent zero development\"\n  - \"build agent zero feature\"\n  - \"create agent zero tool\"\n  - \"add extension\"\n  - \"framework development\"\n  - \"agent zero architecture\"\n  - \"how does agent zero work\"\n  - \"create agent zero extension\"\n  - \"add api endpoint\"\n  - \"create agent profile\"\n  - \"agent zero internals\"\n  - \"how does the agent loop work\"\n  - \"extension hook points\"\n  - \"prompt system\"\n  - \"agent profile\"\n---\n\n# Agent Zero Development Guide\n\nThis skill provides comprehensive, accurate guidance for extending and building features for Agent Zero. Use it when you need to:\n\n- Understand the **architecture** and project layout\n- Create new **Tools** for agent capabilities\n- Add **Extensions** to hook into the framework lifecycle\n- Build **API Endpoints** for the Web UI\n- Create **Agent Profiles** (subordinates) with custom prompts\n- Understand and extend the **Prompt System**\n- Create **Skills** (see the dedicated `build-skill` skill for the full wizard)\n- Work with **Projects** and workspace configuration\n\n> **Path convention:** Throughout this guide, `/a0/` refers to the framework root — this is `/a0/` inside Docker, or your local repository root in development. All paths are relative to this root.\n\n> [!IMPORTANT]\n> **Plugins are the primary way to extend Agent Zero.** Most new tools, extensions, and prompts should be packaged as plugins. For all plugin tasks (create, review, manage, debug, contribute), load the `a0-plugin-router` skill which routes to the appropriate specialist. This guide covers the underlying framework patterns that plugins build upon.\n\nRelated skills: `a0-plugin-router` (plugin tasks) | `build-skill` (skill creation wizard) | `a0-create-plugin` | `a0-review-plugin` | `a0-manage-plugin` | `a0-contribute-plugin` | `a0-debug-plugin`\n\n---\n\n## Architecture Overview\n\n### Project Layout\n\n```\n/a0/                              # Framework root\n├── agent.py                      # Core Agent + AgentContext + AgentConfig classes\n├── initialize.py                 # Agent initialization logic\n├── models.py                     # Model definitions\n├── run_ui.py                     # Web UI entry point\n│\n├── tools/                        # Core tools (search, response, browser, etc.)\n├── extensions/\n│   ├── python/                   # Python lifecycle extensions\n│   │   ├── \u003chook_point>/         # e.g., agent_init/, system_prompt/, etc.\n│   │   │   └── _NN_name.py       # Numbered extension files\n│   │   └── _functions/           # Implicit @extensible decorator extensions\n│   └── webui/                    # JavaScript WebUI extensions\n│       └── \u003chook_point>/         # e.g., json_api_call_before/\n│           └── name.js\n├── api/                          # Flask API endpoint handlers\n├── helpers/                      # Framework utilities and base classes\n│   ├── tool.py                   # Tool + Response base classes\n│   ├── extension.py              # Extension base class + @extensible decorator\n│   ├── api.py                    # ApiHandler base class\n│   ├── files.py                  # File operations + prompt reading\n│   ├── plugins.py                # Plugin system manager\n│   ├── print_style.py            # Console output formatting\n│   └── ...                       # Many more utility modules\n│\n├── prompts/                      # Core prompt fragments (system, tools, framework)\n├── agents/                       # Agent profiles (subordinate specializations)\n│   ├── default/                  # Base profile (inherited by others)\n│   ├── agent0/                   # Main user-facing agent\n│   ├── developer/                # Developer subordinate\n│   ├── hacker/                   # Security subordinate\n│   ├── researcher/               # Research subordinate\n│   └── _example/                 # Example profile with tool + extension samples\n│\n├── plugins/                      # Core plugins (tools, extensions, prompts)\n│   ├── _code_execution/          # Terminal/Python/Node.js execution\n│   ├── _memory/                  # Persistent memory system\n│   ├── _text_editor/             # File read/write/patch\n│   ├── _model_config/            # LLM model selection\n│   ├── _infection_check/         # Prompt injection safety\n│   └── ...                       # More core plugins\n│\n├── skills/                       # Core skills (SKILL.md bundles)\n├── knowledge/                    # Knowledge base files\n├── webui/                        # Web UI frontend\n├── docs/                         # Documentation\n│\n└── usr/                          # User-space (survives updates)\n    ├── agents/                   # User-created agent profiles\n    ├── plugins/                  # User-installed plugins\n    ├── skills/                   # User-created skills\n    ├── knowledge/                # User knowledge base files\n    ├── extensions/               # Standalone user extensions (created on demand; prefer plugins instead)\n    ├── projects/                 # Project workspaces (created on demand when user adds projects via UI)\n    └── workdir/                  # Default working directory\n```\n\n### Key Architecture Patterns\n\n1. **Plugin-first design** — Most capabilities (tools, extensions, prompts) are delivered via plugins in `/a0/plugins/` (core) or `/a0/usr/plugins/` (user).\n2. **Extensions execute in numeric order** — Files named `_10_*.py`, `_20_*.py`, etc. run sequentially within each hook point.\n3. **Tools inherit from `Tool`** — All tools implement the `execute()` method returning a `Response`.\n4. **Shared `AgentContext`** — Enables state persistence across agents in a conversation.\n5. **Async/await throughout** — All tool execution, extensions, and API handlers are async.\n6. **Prompt fragments compose** — System prompts are assembled from named fragments with includes and variable substitution.\n7. **Profile inheritance** — Agent profiles inherit from `default/` and override specific prompt fragments.\n8. **User-space separation** — Everything under `/a0/usr/` survives framework updates.\n\n### Agent Loop\n\nThe core execution cycle works as follows:\n\n1. **User message** arrives (via UI or API)\n2. **System prompt assembly** — prompt fragments are composed with includes and variable substitution\n3. **LLM call** — the assembled prompt + conversation history is sent to the model\n4. **Response parsing** — the framework parses the LLM response looking for JSON tool calls\n5. **Tool execution** — if tool calls are found, each tool's `execute()` method is called and the result is appended to history\n6. **Loop continues** — steps 3-5 repeat until the agent produces a `response` tool call (which ends the loop) or a loop limit is reached\n\nExtensions fire at each stage (e.g., `monologue_start`, `before_main_llm_call`, `tool_execute_before`, etc.), allowing plugins to observe and modify behavior at every point.\n\n---\n\n## Creating Tools\n\nTools are how agents interact with the world. Each tool inherits from the `Tool` base class.\n\n### Import Path\n\n```python\nfrom helpers.tool import Tool, Response\n```\n\n### Tool Base Class\n\n```python\n# /a0/helpers/tool.py\n\n@dataclass\nclass Response:\n    message: str              # Text response shown to agent\n    break_loop: bool          # True = stop agent message loop\n    additional: dict[str, Any] | None = None  # Extra metadata for history\n\nclass Tool:\n    def __init__(self, agent: Agent, name: str, method: str | None,\n                 args: dict[str,str], message: str,\n                 loop_data: LoopData | None, **kwargs) -> None:\n        self.agent = agent\n        self.name = name\n        self.method = method   # For tools with sub-methods (e.g., \"skills_tool:load\")\n        self.args = args\n        self.loop_data = loop_data\n        self.message = message\n\n    async def execute(self, **kwargs) -> Response:\n        pass  # Override this\n\n    # Lifecycle hooks (called automatically):\n    async def before_execution(self, **kwargs): ...\n    async def after_execution(self, response: Response, **kwargs): ...\n```\n\n### Where Tools Live\n\n| Location | Purpose |\n|---|---|\n| `/a0/tools/` | Core framework tools (search, response, call_subordinate, etc.) |\n| `/a0/plugins/\u003cplugin>/tools/` | Plugin-provided tools (code_execution, memory, text_editor) |\n| `/a0/agents/\u003cprofile>/tools/` | Profile-specific tool overrides |\n| `/a0/usr/plugins/\u003cplugin>/tools/` | User plugin tools |\n\n### Example: Creating a Tool\n\nBased on the actual `_example` profile in `/a0/agents/_example/tools/example_tool.py`:\n\n```python\n# my_tool.py\nfrom helpers.tool import Tool, Response\n\nclass MyTool(Tool):\n    async def execute(self, **kwargs):\n        # Get arguments — kwargs contains the tool_args from the agent's JSON\n        input_data = kwargs.get(\"input\", \"\")\n\n        # Do something\n        result = f\"Processed: {input_data}\"\n\n        # Return response\n        return Response(\n            message=result,        # Shown to the agent\n            break_loop=False,      # Don't stop the agent loop\n        )\n```\n\n> [!IMPORTANT]\n> Every tool needs a corresponding **prompt fragment** so the agent knows how to use it. Create a file named `agent.system.tool.\u003ctool_name>.md` in the appropriate `prompts/` directory. See the [Prompt System](#prompt-system) section.\n\n### Tool Best Practices\n\n- Always handle errors gracefully — return error messages in `Response`, don't crash\n- Access agent context via `self.agent.context`\n- Use `self.method` to support sub-methods (e.g., `my_tool:action1`, `my_tool:action2`)\n- Use `kwargs.get()` to read arguments with defaults\n- For long operations, use `self.set_progress()` or `self.add_progress()` to show status\n- Access `self.loop_data` for loop state (iteration count, timing, etc.) — this is the `LoopData` instance passed during tool dispatch\n\n---\n\n## Creating Extensions\n\nExtensions hook into specific lifecycle points in the agent framework.\n\n### Import Path\n\n```python\nfrom helpers.extension import Extension\n```\n\n### Extension Base Class\n\n```python\nclass Extension:\n    def __init__(self, agent: \"Agent | None\", **kwargs):\n        self.agent: \"Agent | None\" = agent\n        self.kwargs = kwargs\n\n    def execute(self, **kwargs) -> None | Awaitable[None]:\n        pass  # Override this — kwargs are hook-point-specific\n```\n\n> Extensions can be sync or async. If `execute()` returns an `Awaitable`, the framework will `await` it automatically. The `agent` parameter is nullable because some hook points (like `startup_migration` or `banners`) fire before an agent exists.\n\n### Extension File Location\n\nExtensions live in directories named by their hook point. The path structure is:\n\n```\nextensions/python/\u003chook_point>/_NN_name.py\n```\n\nWhere `_NN_` is a numeric prefix controlling execution order (e.g., `_10_`, `_20_`, `_50_`).\n\n| Source | Path |\n|---|---|\n| Core extensions | `/a0/extensions/python/\u003chook_point>/` |\n| Plugin extensions | `/a0/plugins/\u003cplugin>/extensions/python/\u003chook_point>/` |\n| User extensions | `/a0/usr/extensions/python/\u003chook_point>/` |\n| Agent profile extensions | `/a0/agents/\u003cprofile>/extensions/\u003chook_point>/` |\n| User plugin extensions | `/a0/usr/plugins/\u003cplugin>/extensions/python/\u003chook_point>/` |\n\n### Python Extension Hook Points\n\nComplete list of available hook points:\n\n| Hook Point | When It Fires | Common Use |\n|---|---|---|\n| `agent_init` | Agent is initialized | Load configs, set defaults |\n| `system_prompt` | System prompt is being assembled | Inject prompt content |\n| `monologue_start` | Agent monologue begins | Pre-processing, state setup |\n| `message_loop_start` | Before message processing loop | Pre-loop setup |\n| `message_loop_prompts_before` | Before prompt assembly in loop | Modify prompt inputs |\n| `message_loop_prompts_after` | After prompt assembly in loop | Add context (memory recall lives here) |\n| `before_main_llm_call` | Before the LLM API call | Modify prompts, add context |\n| `util_model_call_before` | Before utility model calls | Modify utility prompts |\n| `response_stream` | When response streaming begins | Initialize stream handlers |\n| `response_stream_chunk` | Per response chunk received | Transform output, collect data |\n| `response_stream_end` | Response streaming complete | Finalize, analyze full response |\n| `reasoning_stream` | Reasoning/thinking stream begins | Monitor reasoning |\n| `reasoning_stream_chunk` | Per reasoning chunk | Collect reasoning data |\n| `reasoning_stream_end` | Reasoning stream complete | Analyze reasoning |\n| `tool_execute_before` | Before a tool runs | Validation, logging, safety checks |\n| `tool_execute_after` | After a tool runs | Post-process results |\n| `hist_add_before` | Before adding to history | Modify history entries |\n| `hist_add_tool_result` | After tool result added to history | Log tool results |\n| `message_loop_end` | After message processing loop | Post-loop cleanup |\n| `monologue_end` | Agent monologue complete | Memorization, cleanup |\n| `process_chain_end` | Entire processing chain done | Final cleanup |\n| `job_loop` | Background job loop tick | Periodic background tasks |\n| `error_format` | Error is being formatted | Custom error messages |\n| `startup_migration` | Framework startup | Data migrations |\n| `banners` | Startup banners displayed | Add custom banners |\n| `embedding_model_changed` | Embedding model changed | Reload vector stores (fired programmatically, not a directory-based hook) |\n| `user_message_ui` | User message from UI | Pre-process user input |\n| `webui_ws_connect` | WebSocket client connects | Session setup |\n| `webui_ws_disconnect` | WebSocket client disconnects | Session cleanup |\n| `webui_ws_event` | WebSocket event received | Handle custom WS events |\n\n### The `@extensible` Decorator (Implicit Extension Points)\n\nAny framework function decorated with `@extensible` automatically gets two extension points:\n\n```\n_functions/\u003cmodule_path>/\u003cqualname_path>/start\n_functions/\u003cmodule_path>/\u003cqualname_path>/end\n```\n\nThe path mapping converts Python module paths and qualified names using `/` separators:\n- Module `agent.py` → `agent`\n- Class method `Agent.handle_exception` → `Agent/handle_exception`\n- Full path: `_functions/agent/Agent/handle_exception/start`\n\nFor nested modules like `helpers.history`, a method `History.add` would map to `_functions/helpers/history/History/add/start`.\n\nFor example, a function `Agent.handle_exception` in module `agent` creates:\n- `_functions/agent/Agent/handle_exception/start`\n- `_functions/agent/Agent/handle_exception/end`\n\nExtensions in these directories receive a `data` dict with:\n- `data[\"args\"]` — positional args (mutable)\n- `data[\"kwargs\"]` — keyword args (mutable)\n- `data[\"result\"]` — set this to short-circuit the function\n- `data[\"exception\"]` — set to a `BaseException` to force-raise\n\nThis is used by plugins like `_error_retry` to wrap core agent methods.\n\n### WebUI Extensions (JavaScript)\n\nClient-side extensions live under `extensions/webui/\u003chook_point>/`:\n\n| Hook Point | When It Fires |\n|---|---|\n| `json_api_call_before` | Before a JSON API request |\n| `json_api_call_after` | After a JSON API response |\n| `fetch_api_call_before` | Before a fetch API request |\n| `fetch_api_call_after` | After a fetch API response |\n| `get_message_handler` | Register custom message renderers |\n| `set_messages_before_loop` | Before messages are rendered |\n| `set_messages_after_loop` | After messages are rendered |\n| `webui_ws_push` | WebSocket push to client |\n\n### Example: Creating an Extension\n\nBased on the actual `_example` profile in `/a0/agents/_example/extensions/agent_init/_10_example_extension.py`:\n\n```python\n# extensions/python/agent_init/_15_my_extension.py\nfrom helpers.extension import Extension\n\nclass MyExtension(Extension):\n    async def execute(self, **kwargs):\n        # Access the agent\n        agent = self.agent\n        context = agent.context\n\n        # Extension logic — kwargs content depends on the hook point\n        agent.agent_name = \"CustomAgent\" + str(agent.number)\n```\n\n### Extension Execution Order\n\nExtensions execute in numeric order based on filename prefix:\n\n```\n_10_first.py      # Runs first\n_20_second.py     # Runs second\n_50_third.py      # Runs third\n```\n\nUse 10-number increments to leave room for future extensions.\n\n---\n\n## Creating API Endpoints\n\nAPI endpoints serve the Web UI and external clients using Flask.\n\n### Import Path\n\n```python\nfrom helpers.api import ApiHandler\nfrom flask import Request, Response\n```\n\n### ApiHandler Base Class\n\n```python\nclass ApiHandler:\n    def __init__(self, app: Flask, thread_lock: ThreadLockType):\n        self.app = app\n        self.thread_lock = thread_lock\n\n    # Override these class methods to configure behavior:\n    @classmethod\n    def requires_loopback(cls) -> bool: return False   # Restrict to localhost\n    @classmethod\n    def requires_api_key(cls) -> bool: return False     # Require API key\n    @classmethod\n    def requires_auth(cls) -> bool: return True         # Require auth session\n    @classmethod\n    def get_methods(cls) -> list[str]: return [\"POST\"]   # HTTP methods\n    @classmethod\n    def requires_csrf(cls) -> bool: return cls.requires_auth()  # CSRF protection\n\n    # Implement this:\n    async def process(self, input: dict, request: Request) -> dict | Response:\n        pass\n\n    # Utility: get or create an agent context\n    def use_context(self, ctxid: str, create_if_not_exists: bool = True) -> AgentContext:\n        ...\n```\n\n### Where API Endpoints Live\n\n| Location | Purpose |\n|---|---|\n| `/a0/api/` | Core API endpoints |\n| `/a0/plugins/\u003cplugin>/api/` | Plugin API endpoints |\n| `/a0/usr/plugins/\u003cplugin>/api/` | User plugin API endpoints |\n\nEndpoints are auto-discovered by filename. The route is derived from the filename (e.g., `my_endpoint.py` -> `/api/my_endpoint`).\n\n### Example: API Endpoint\n\n```python\n# api/my_endpoint.py\nfrom helpers.api import ApiHandler\nfrom flask import Request, Response\nfrom agent import AgentContext\n\nclass MyEndpoint(ApiHandler):\n    @classmethod\n    def get_methods(cls) -> list[str]:\n        return [\"GET\", \"POST\"]\n\n    async def process(self, input: dict, request: Request) -> dict:\n        param = input.get(\"param\", \"default\")\n\n        # Get or create agent context\n        ctxid = input.get(\"context\", \"\")\n        context = self.use_context(ctxid)\n\n        return {\n            \"result\": f\"processed {param}\",\n            \"context\": context.id,\n        }\n```\n\n---\n\n## Creating Agent Profiles\n\nAgent profiles define specialized subordinates with custom prompts and behaviors.\n\n> For a guided, step-by-step wizard (scope selection, `agent.yaml` schema, prompt overrides, tool/extension stubs, test checklist) use the dedicated `/a0/skills/a0-create-agent/SKILL.md` skill.\n\n### Profile Directory Structure\n\n```\nagents/\u003cprofile-name>/\n+-- agent.yaml                    # Required: profile metadata\n+-- prompts/                      # Optional: prompt overrides\n|   +-- agent.system.main.role.md         # Role definition (most common override)\n|   +-- agent.system.main.communication.md # Communication style\n|   +-- agent.system.tool.\u003cname>.md       # Tool-specific prompts\n+-- tools/                        # Optional: profile-specific tools\n|   +-- my_tool.py\n+-- extensions/                   # Optional: profile-specific extensions\n    +-- \u003chook_point>/\n        +-- _NN_extension.py\n```\n\n### agent.yaml Format\n\nThe actual format is simple YAML with only three fields:\n\n```yaml\ntitle: Developer\ndescription: Agent specialized in complex software development.\ncontext: Use this agent for software development tasks, including writing code,\n  debugging, refactoring, and architectural design.\n```\n\n| Field | Purpose |\n|---|---|\n| `title` | Display name shown in UI and agent selection |\n| `description` | Brief description of the agent's specialization |\n| `context` | Instructions for when to delegate to this profile |\n\n> [!NOTE]\n> There is **no** model configuration, temperature, or allowed_tools in the profile YAML. `agent.yaml` contains only `title`, `description`, and `context`. Profile-specific Main/Utility model settings are managed by the `_model_config` plugin in `usr/agents/\u003cprofile>/plugins/_model_config/config.json`. Tool availability is controlled by plugin activation.\n\n### Where Profiles Live\n\n| Location | Purpose |\n|---|---|\n| `/a0/agents/` | Core profiles (default, agent0, developer, hacker, researcher) |\n| `/a0/usr/agents/` | User-created profiles (survives updates) |\n\n### Prompt Override Mechanism\n\nProfiles inherit all prompts from the `default/` profile. To customize behavior, place prompt files with the **same name** in your profile's `prompts/` directory. The framework searches profile-specific prompts first, then falls back to the default.\n\nThe most common override is `agent.system.main.role.md` which defines the agent's role and specialization.\n\n### Example: Creating a Profile\n\n```yaml\n# /a0/usr/agents/data-analyst/agent.yaml\ntitle: Data Analyst\ndescription: Agent specialized in data analysis, visualization, and statistical modeling.\ncontext: Use this agent for data analysis tasks, creating visualizations, statistical\n  analysis, and working with datasets in Python.\n```\n\n```markdown\n\u003c!-- /a0/usr/agents/data-analyst/prompts/agent.system.main.role.md -->\n\n## Your role\nYou are a specialized data analysis agent.\nYour expertise includes:\n- Python data analysis (pandas, numpy, scipy)\n- Data visualization (matplotlib, seaborn, plotly)\n- Statistical modeling and hypothesis testing\n- SQL queries and database analysis\n- Data cleaning and preprocessing\n\n## Process\n1. Understand the data and the question\n2. Choose appropriate tools and methods\n3. Execute analysis with code_execution_tool\n4. Visualize results when applicable\n5. Provide clear interpretation of findings\n```\n\n### Reference: The `_example` Profile\n\nThe framework includes a complete example profile at `/a0/agents/_example/` that demonstrates:\n- Custom tool: `/a0/agents/_example/tools/example_tool.py`\n- Custom extension: `/a0/agents/_example/extensions/agent_init/_10_example_extension.py`\n- Tool prompt: `/a0/agents/_example/prompts/agent.system.tool.example_tool.md`\n- Role prompt: `/a0/agents/_example/prompts/agent.system.main.role.md`\n\n---\n\n## Prompt System\n\nAgent Zero assembles system prompts from **named fragments** using includes and variable substitution.\n\n### Prompt File Naming Convention\n\nPrompt files follow a dot-separated naming scheme:\n\n```\nagent.system.main.md            # Main system prompt (entry point)\nagent.system.main.role.md       # Role definition\nagent.system.main.communication.md  # Communication style\nagent.system.tool.\u003cname>.md     # Tool usage instructions\nagent.system.tools.md           # Tools overview\nagent.system.projects.main.md   # Project system\nagent.system.secrets.md         # Secret handling\nagent.system.skills.md          # Skills listing\nagent.system.datetime.md        # Current date/time\nagent.context.extras.md         # Context extras\nfw.*.md                         # Framework messages (errors, hints, etc.)\n```\n\n### Where Prompts Live\n\n| Location | Priority | Purpose |\n|---|---|---|\n| `/a0/agents/\u003cprofile>/prompts/` | Highest | Profile-specific overrides |\n| `/a0/usr/agents/\u003cprofile>/prompts/` | High | User profile overrides |\n| `/a0/plugins/\u003cplugin>/prompts/` | Normal | Plugin-provided prompts |\n| `/a0/usr/plugins/\u003cplugin>/prompts/` | Normal | User plugin prompts |\n| `/a0/prompts/` | Base | Core framework prompts |\n\nThe framework searches directories in priority order and uses the **first match** found.\n\n### Include Mechanism\n\nPrompts can include other fragments using double-brace `include` directives.\n\nThe syntax uses opening double-brace, the keyword, and closing double-brace:\n\n| Directive | Purpose |\n|---|---|\n| `{{include \"agent.system.main.role.md\"}}` | Include a named prompt fragment |\n| `{{include \"agent.system.main.communication.md\"}}` | Include another fragment |\n| `{{include original}}` | Include the same file from the next lower-priority directory |\n\nThe `include original` directive is particularly useful for **extending** rather than fully **replacing** a prompt — your override can include the base version and add to it.\n\n### Variable Substitution\n\nPrompts support `{{variable_name}}` placeholders that are replaced at render time with values passed from the framework or plugin configuration.\n\n### Conditional Blocks\n\nPrompts support conditional rendering based on variables.\n\n### Reading Prompts in Code\n\n```python\n# From within an Agent method:\ncontent = self.read_prompt(\"fw.some_message.md\", variable1=\"value1\")\n\n# From helpers:\nfrom helpers.files import read_prompt_file\ncontent = read_prompt_file(\"template.md\", _directories=[...], var=\"value\")\n```\n\n---\n\n## Creating Skills\n\nSkills are reusable instruction bundles that the agent loads on demand via the `skills_tool`. Each skill lives in a directory containing a `SKILL.md` file with YAML frontmatter.\n\n| Location | Purpose |\n|---|---|\n| `/a0/skills/` | Core skills (shipped with framework) |\n| `/a0/usr/skills/` | User-created skills (survives updates) |\n\nThe agent interacts with skills through JSON tool calls:\n\n```json\n{\"tool_name\": \"skills_tool:list\", \"tool_args\": {}}\n{\"tool_name\": \"skills_tool:load\", \"tool_args\": {\"skill_name\": \"my-skill\"}}\n```\n\n> For the complete skill creation wizard — including SKILL.md format, frontmatter fields, directory structure, best practices, and examples — load the `build-skill` skill.\n\n---\n\n## Working with Projects\n\nProjects provide isolated workspaces with custom configuration.\n\n> Projects are typically created and managed via the Web UI. The `.a0proj/` directory and `project.json` are auto-generated when you create a project through the UI.\n\n### Project Structure\n\n```\n/a0/usr/projects/\u003cproject-name>/\n+-- .a0proj/\n|   +-- project.json          # Project configuration\n|   +-- agents.json           # Per-project agent overrides\n|   +-- variables.env         # Non-sensitive variables\n|   +-- secrets.env           # Encrypted secrets\n|   +-- memory/               # Project-specific memory\n|       +-- index.faiss\n|       +-- index.pkl\n|       +-- embedding.json\n+-- \u003cproject-files>/          # Your project files (working directory)\n```\n\n### project.json Format\n\n```json\n{\n    \"title\": \"My Project\",\n    \"description\": \"Project description\",\n    \"instructions\": \"Markdown instructions for the agent when this project is active\",\n    \"color\": \"#3a86ff\",\n    \"git_url\": \"\",\n    \"memory\": \"own\",\n    \"file_structure\": {\n        \"enabled\": true,\n        \"max_depth\": 5,\n        \"max_files\": 20,\n        \"max_folders\": 20,\n        \"max_lines\": 250,\n        \"gitignore\": \".a0proj/\\nvenv/\\n**/__pycache__/\\n**/node_modules/\\n**/.git/\\n\"\n    }\n}\n```\n\n| Field | Purpose |\n|---|---|\n| `title` | Display name |\n| `description` | Brief description |\n| `instructions` | Markdown injected into agent system prompt when project is active |\n| `color` | UI accent color (hex) |\n| `git_url` | Optional Git repository URL |\n| `memory` | `\"own\"` for project-specific memory, or shared |\n| `file_structure` | Controls the working directory tree shown to the agent |\n\n---\n\n## Plugin System Overview\n\nPlugins are the **primary extension mechanism** in Agent Zero. A plugin can bundle tools, extensions, prompts, API endpoints, helpers, and UI components into a self-contained package.\n\n> For all plugin tasks — creating, reviewing, managing, contributing, or debugging plugins — load the `a0-plugin-router` skill, which routes to the appropriate specialist skill.\n\n### Core Plugins\n\nThe framework ships with these core plugins in `/a0/plugins/`:\n\n| Plugin | Purpose |\n|---|---|\n| `_code_execution` | Terminal, Python, Node.js code execution |\n| `_memory` | Persistent vector memory system |\n| `_text_editor` | File read/write/patch with line numbers |\n| `_model_config` | LLM model selection and configuration |\n| `_browser` | Direct browser automation and WebUI viewing |\n| `_infection_check` | Prompt injection safety checks |\n| `_error_retry` | Retry on critical exceptions |\n| `_email_integration` | Email communication via IMAP/SMTP |\n| `_telegram_integration` | Telegram bot integration |\n| `_chat_branching` | Branch chats from any message |\n| `_promptinclude` | Persistent behavioral rules (*.promptinclude.md) |\n| `_plugin_installer` | Install plugins from ZIP/Git/Hub |\n| `_plugin_scan` | Security scanning for plugins |\n| `_plugin_validator` | Plugin manifest and code validation |\n\n---\n\n## Common Patterns Reference\n\n### Accessing Agent Context\n\n```python\n# Shared across all agents in a conversation\ncontext = self.agent.context\ndata = context.data  # dict-like shared state\n\n# Store data\ndata[\"my_key\"] = my_value\n\n# Retrieve data\nvalue = data.get(\"my_key\", default)\n```\n\n### Using File Helpers\n\n```python\nfrom helpers import files\n\n# File operations\ncontent = files.read_file(\"path/to/file\")\nfiles.write_file(\"path/to/file\", content)\nexists = files.exists(\"path/to/file\")\n\n# Read and render a prompt file\ncontent = files.read_prompt_file(\"template.md\", _directories=[...], var=\"value\")\n```\n\n### Console Output\n\n```python\nfrom helpers.print_style import PrintStyle\n\nPrintStyle.hint(\"Informational message\")\nPrintStyle.warning(\"Warning message\")\nPrintStyle.error(\"Error message\")\nPrintStyle(font_color=\"#85C1E9\").print(\"Custom styled output\")\n```\n\n### Error Handling\n\n```python\nfrom helpers.tool import Response\n\ntry:\n    result = await risky_operation()\nexcept Exception as e:\n    PrintStyle.error(f\"Operation failed: {e}\")\n    return Response(message=f\"Error: {e}\", break_loop=False)\n```\n\n---\n\n## Development Workflow\n\nWhen building features for Agent Zero:\n\n### 1. Choose Your Extension Point\n\n| Want to... | Use |\n|---|---|\n| Add a new agent capability | **Tool** (in a plugin) |\n| Hook into agent lifecycle | **Extension** (in a plugin) |\n| Add Web UI functionality | **API endpoint** + **WebUI extension** |\n| Create a specialized agent | **Agent profile** |\n| Bundle reusable instructions | **Skill** |\n| Package everything together | **Plugin** (recommended) |\n\n### 2. Develop in User Space\n\n- New plugins -> `/a0/usr/plugins/\u003cname>/`\n- New profiles -> `/a0/usr/agents/\u003cname>/`\n- New skills -> `/a0/usr/skills/\u003cname>/`\n- New extensions -> `/a0/usr/extensions/python/\u003chook_point>/`\n\n### 3. Test and Iterate\n\n- **Local dev**: Run `python run_ui.py` (default port 50001 at `http://localhost:50001`)\n- **Docker**: Restart the container or use the UI restart button; check logs with `docker logs -f \u003ccontainer_name>`\n- Test with minimal input first\n- Verify in the Web UI\n\n### 4. Contributing\n\nFor contribution guidelines, see `/a0/docs/contribution.md`. For plugin contributions to the community Plugin Index, load the `a0-contribute-plugin` skill.\n\n---\n\n## Best Practices\n\n### DO\n- Use the **plugin system** for new features (see `a0-create-plugin` skill)\n- Follow existing code patterns and conventions\n- Write clear docstrings and comments\n- Handle errors gracefully in tools and extensions\n- Create prompt fragments for every tool (`agent.system.tool.\u003cname>.md`)\n- Develop in `/a0/usr/` directories to survive updates\n- Test with the `_example` profile as a reference\n- Use `from helpers.*` imports (not `from python.helpers.*`)\n\n### DON'T\n- Modify files in `/a0/plugins/` or `/a0/tools/` directly (use usr/ space)\n- Hardcode paths or configuration values\n- Skip creating prompt files for tools\n- Ignore the plugin system (it's the intended extension mechanism)\n- Mix sync and async code carelessly\n- Access internal structures when helpers exist\n\n---\n\n## Quick Reference: Key Files\n\n| File | Purpose |\n|---|---|\n| `/a0/agent.py` | Core `Agent`, `AgentContext`, `AgentConfig` classes |\n| `/a0/helpers/tool.py` | `Tool` + `Response` base classes |\n| `/a0/helpers/extension.py` | `Extension` base + `@extensible` decorator |\n| `/a0/helpers/api.py` | `ApiHandler` base class |\n| `/a0/helpers/files.py` | File ops + prompt reading |\n| `/a0/helpers/plugins.py` | Plugin system manager |\n| `/a0/helpers/print_style.py` | Console output formatting |\n| `/a0/agents/_example/` | Reference example profile with tool + extension |\n| `/a0/prompts/agent.system.main.md` | Main system prompt entry point |\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("a0-development-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

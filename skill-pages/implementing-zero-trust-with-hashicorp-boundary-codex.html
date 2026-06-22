@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>implementing-zero-trust-with-hashicorp-boundary - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/implementing-zero-trust-with-hashicorp-boundary-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>implementing-zero-trust-with-hashicorp-boundary</h1>
+      <p class="description">Implement HashiCorp Boundary for identity-aware zero trust infrastructure</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>implementing-zero-trust-with-hashicorp-boundary</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>implementing-zero-trust-with-hashicorp-boundary</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Implement HashiCorp Boundary for identity-aware zero trust infrastructure</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose implementing-zero-trust-with-hashicorp-boundary, then write the task. Fallback prompt: Use the implementing-zero-trust-with-hashicorp-boundary skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Implementing Zero Trust with HashiCorp Boundary</h2>
+<h3>Overview</h3>
+<p>HashiCorp Boundary is an identity-aware proxy that provides secure, zero trust access to infrastructure resources without traditional VPNs or direct network access. Boundary operates on a default-deny model -- users start with no access and must be explicitly granted permissions for specific resources. When integrated with HashiCorp Vault, Boundary can dynamically broker credentials, ensuring users never see or manage underlying secrets. This eliminates credential sprawl and enables just-in-time access with automatic credential revocation when sessions end. Boundary supports session recording for audit compliance, OIDC/LDAP authentication, and manages access through a hierarchical scope model of organizations and projects.</p>
+<h3>When to Use</h3>
+<ul>
+<li>When deploying or configuring implementing zero trust with hashicorp boundary capabilities in your environment</li>
+<li>When establishing security controls aligned to compliance requirements</li>
+<li>When building or improving security architecture for this domain</li>
+<li>When conducting security assessments that require this implementation</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>HashiCorp Boundary server (self-hosted or HCP Boundary)</li>
+<li>HashiCorp Vault (for credential brokering)</li>
+<li>Identity provider supporting OIDC (Okta, Azure AD, Auth0)</li>
+<li>PostgreSQL database for Boundary's backend</li>
+<li>TLS certificates for secure communication</li>
+<li>Understanding of PKI and X.509 certificate management</li>
+</ul>
+<h3>Architecture</h3>
+<pre><code>                    Identity Provider (OIDC)
+                           |
+                    Authentication
+                           |
+                  +--------+--------+
+                  |   Boundary      |
+                  |   Controller    |
+                  |  (Control Plane)|
+                  +--------+--------+
+                           |
+              +------------+------------+
+              |                         |
+     +--------+--------+      +--------+--------+
+     | Boundary Worker |      | Boundary Worker |
+     | (Data Plane)    |      | (Data Plane)    |
+     +--------+--------+      +--------+--------+
+              |                         |
+     +--------+--------+      +--------+--------+
+     |  Target Hosts   |      |  Target Hosts   |
+     |  (SSH, RDP,     |      |  (Databases,    |
+     |   K8s, HTTP)    |      |   APIs)         |
+     +-----------------+      +-----------------+
+
+     Vault (Credential Brokering)
+     - Dynamic database credentials
+     - SSH certificate signing
+     - Credential libraries</code></pre>
+<h3>Installation and Configuration</h3>
+<h4>Boundary Server Setup</h4>
+<pre><code># Install Boundary
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+sudo apt-add-repository &quot;deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main&quot;
+sudo apt-get update &amp;&amp; sudo apt-get install boundary
+
+# Initialize the database
+boundary database init \
+  -config=/etc/boundary/controller.hcl
+
+# Start the controller
+boundary server -config=/etc/boundary/controller.hcl</code></pre>
+<h4>Controller Configuration</h4>
+<pre><code># /etc/boundary/controller.hcl
+controller {
+  name = &quot;boundary-controller-1&quot;
+  description = &quot;Primary Boundary Controller&quot;
+  database {
+    url = &quot;postgresql://boundary:password@localhost:5432/boundary?sslmode=require&quot;
+  }
+  public_cluster_addr = &quot;boundary.example.com&quot;
+}
+
+listener &quot;tcp&quot; {
+  address = &quot;0.0.0.0:9200&quot;
+  purpose = &quot;api&quot;
+  tls_cert_file = &quot;/etc/boundary/tls/cert.pem&quot;
+  tls_key_file  = &quot;/etc/boundary/tls/key.pem&quot;
+}
+
+listener &quot;tcp&quot; {
+  address = &quot;0.0.0.0:9201&quot;
+  purpose = &quot;cluster&quot;
+  tls_cert_file = &quot;/etc/boundary/tls/cert.pem&quot;
+  tls_key_file  = &quot;/etc/boundary/tls/key.pem&quot;
+}
+
+kms &quot;aead&quot; {
+  purpose = &quot;root&quot;
+  aead_type = &quot;aes-gcm&quot;
+  key = &quot;sP1fnF5Xz85RrXM...&quot;  # Use Vault Transit in production
+  key_id = &quot;global_root&quot;
+}
+
+kms &quot;aead&quot; {
+  purpose = &quot;worker-auth&quot;
+  aead_type = &quot;aes-gcm&quot;
+  key = &quot;8fZBjCUfN0TzjEG...&quot;
+  key_id = &quot;global_worker-auth&quot;
+}
+
+kms &quot;aead&quot; {
+  purpose = &quot;recovery&quot;
+  aead_type = &quot;aes-gcm&quot;
+  key = &quot;8fZBjCUfN0TzjEG...&quot;
+  key_id = &quot;global_recovery&quot;
+}</code></pre>
+<h4>Worker Configuration</h4>
+<pre><code># /etc/boundary/worker.hcl
+worker {
+  name = &quot;boundary-worker-1&quot;
+  description = &quot;Worker in production VPC&quot;
+  public_addr = &quot;worker1.example.com&quot;
+
+  controllers = [
+    &quot;boundary.example.com:9201&quot;
+  ]
+
+  tags {
+    type = [&quot;production&quot;]
+    region = [&quot;us-east-1&quot;]
+  }
+}
+
+listener &quot;tcp&quot; {
+  address = &quot;0.0.0.0:9202&quot;
+  purpose = &quot;proxy&quot;
+}
+
+kms &quot;aead&quot; {
+  purpose = &quot;worker-auth&quot;
+  aead_type = &quot;aes-gcm&quot;
+  key = &quot;8fZBjCUfN0TzjEG...&quot;
+  key_id = &quot;global_worker-auth&quot;
+}</code></pre>
+<h3>Terraform Configuration</h3>
+<h4>Scope and Auth Configuration</h4>
+<pre><code># main.tf - Boundary resources via Terraform
+terraform {
+  required_providers {
+    boundary = {
+      source  = &quot;hashicorp/boundary&quot;
+      version = &quot;~&gt; 1.1&quot;
+    }
+  }
+}
+
+provider &quot;boundary&quot; {
+  addr             = &quot;https://boundary.example.com:9200&quot;
+  recovery_kms_hcl = file(&quot;recovery_kms.hcl&quot;)
+}
+
+# Organization scope
+resource &quot;boundary_scope&quot; &quot;org&quot; {
+  scope_id                 = &quot;global&quot;
+  name                     = &quot;production-org&quot;
+  description              = &quot;Production organization scope&quot;
+  auto_create_admin_role   = true
+  auto_create_default_role = true
+}
+
+# Project scope
+resource &quot;boundary_scope&quot; &quot;production&quot; {
+  name                     = &quot;production&quot;
+  description              = &quot;Production infrastructure project&quot;
+  scope_id                 = boundary_scope.org.id
+  auto_create_admin_role   = true
+  auto_create_default_role = true
+}
+
+# OIDC Auth Method (Okta example)
+resource &quot;boundary_auth_method_oidc&quot; &quot;okta&quot; {
+  scope_id               = boundary_scope.org.id
+  name                   = &quot;okta&quot;
+  description            = &quot;Okta OIDC authentication&quot;
+  issuer                 = &quot;https://company.okta.com/oauth2/default&quot;
+  client_id              = var.okta_client_id
+  client_secret          = var.okta_client_secret
+  signing_algorithms     = [&quot;RS256&quot;]
+  api_url_prefix         = &quot;https://boundary.example.com:9200&quot;
+  claims_scopes          = [&quot;groups&quot;]
+  account_claim_maps     = [&quot;oid=sub&quot;]
+  is_primary_for_scope   = true
+}
+
+# Managed group for auto-assignment
+resource &quot;boundary_managed_group&quot; &quot;sre_team&quot; {
+  auth_method_id = boundary_auth_method_oidc.okta.id
+  name           = &quot;sre-team&quot;
+  description    = &quot;SRE team members from Okta&quot;
+  filter         = &quot;\&quot;sre-team\&quot; in \&quot;/token/groups\&quot;&quot;
+}
+
+resource &quot;boundary_managed_group&quot; &quot;dev_team&quot; {
+  auth_method_id = boundary_auth_method_oidc.okta.id
+  name           = &quot;dev-team&quot;
+  description    = &quot;Development team from Okta&quot;
+  filter         = &quot;\&quot;dev-team\&quot; in \&quot;/token/groups\&quot;&quot;
+}</code></pre>
+<h4>Host Catalogs and Targets</h4>
+<pre><code># Static host catalog for known infrastructure
+resource &quot;boundary_host_catalog_static&quot; &quot;production_servers&quot; {
+  name     = &quot;production-servers&quot;
+  scope_id = boundary_scope.production.id
+}
+
+resource &quot;boundary_host_static&quot; &quot;web_server&quot; {
+  name            = &quot;web-server-1&quot;
+  host_catalog_id = boundary_host_catalog_static.production_servers.id
+  address         = &quot;10.0.1.10&quot;
+}
+
+resource &quot;boundary_host_static&quot; &quot;db_server&quot; {
+  name            = &quot;db-server-1&quot;
+  host_catalog_id = boundary_host_catalog_static.production_servers.id
+  address         = &quot;10.0.2.20&quot;
+}
+
+# Host set grouping
+resource &quot;boundary_host_set_static&quot; &quot;web_servers&quot; {
+  name            = &quot;web-servers&quot;
+  host_catalog_id = boundary_host_catalog_static.production_servers.id
+  host_ids        = [boundary_host_static.web_server.id]
+}
+
+resource &quot;boundary_host_set_static&quot; &quot;db_servers&quot; {
+  name            = &quot;database-servers&quot;
+  host_catalog_id = boundary_host_catalog_static.production_servers.id
+  host_ids        = [boundary_host_static.db_server.id]
+}
+
+# SSH target
+resource &quot;boundary_target&quot; &quot;ssh_production&quot; {
+  name         = &quot;ssh-production-servers&quot;
+  description  = &quot;SSH access to production servers&quot;
+  type         = &quot;ssh&quot;
+  scope_id     = boundary_scope.production.id
+  default_port = 22
+
+  host_source_ids = [
+    boundary_host_set_static.web_servers.id
+  ]
+
+  session_max_seconds          = 3600  # 1 hour max session
+  session_connection_limit     = 1
+  enable_session_recording     = true
+  storage_bucket_id            = boundary_storage_bucket.sessions.id
+
+  injected_application_credential_source_ids = [
+    boundary_credential_library_vault_ssh_certificate.ssh_cert.id
+  ]
+}
+
+# Database target with Vault credential brokering
+resource &quot;boundary_target&quot; &quot;postgres_production&quot; {
+  name         = &quot;postgres-production&quot;
+  description  = &quot;PostgreSQL production database&quot;
+  type         = &quot;tcp&quot;
+  scope_id     = boundary_scope.production.id
+  default_port = 5432
+
+  host_source_ids = [
+    boundary_host_set_static.db_servers.id
+  ]
+
+  session_max_seconds      = 1800  # 30 min max
+  session_connection_limit = 5
+
+  brokered_credential_source_ids = [
+    boundary_credential_library_vault.postgres_creds.id
+  ]
+}</code></pre>
+<h4>Vault Integration for Credential Brokering</h4>
+<pre><code># Vault credential store
+resource &quot;boundary_credential_store_vault&quot; &quot;vault&quot; {
+  name        = &quot;vault-store&quot;
+  scope_id    = boundary_scope.production.id
+  address     = &quot;https://vault.example.com:8200&quot;
+  token       = var.vault_token
+  namespace   = &quot;production&quot;
+}
+
+# Dynamic database credentials from Vault
+resource &quot;boundary_credential_library_vault&quot; &quot;postgres_creds&quot; {
+  name                = &quot;postgres-dynamic-creds&quot;
+  credential_store_id = boundary_credential_store_vault.vault.id
+  path                = &quot;database/creds/readonly&quot;
+  http_method         = &quot;GET&quot;
+  credential_type     = &quot;username_password&quot;
+}
+
+# SSH certificate signing via Vault
+resource &quot;boundary_credential_library_vault_ssh_certificate&quot; &quot;ssh_cert&quot; {
+  name                = &quot;ssh-certificate&quot;
+  credential_store_id = boundary_credential_store_vault.vault.id
+  path                = &quot;ssh-client-signer/sign/production&quot;
+  username            = &quot;admin&quot;
+  key_type            = &quot;ed25519&quot;
+  key_bits            = 256
+  extensions = {
+    &quot;permit-pty&quot; = &quot;&quot;
+  }
+}
+
+# Session recording storage
+resource &quot;boundary_storage_bucket&quot; &quot;sessions&quot; {
+  name        = &quot;session-recordings&quot;
+  scope_id    = &quot;global&quot;
+  plugin_name = &quot;aws&quot;
+  bucket_name = &quot;boundary-session-recordings&quot;
+  attributes_json = jsonencode({
+    &quot;region&quot;                      = &quot;us-east-1&quot;
+    &quot;disable_credential_rotation&quot; = true
+  })
+  secrets_json = jsonencode({
+    &quot;access_key_id&quot;     = var.aws_access_key
+    &quot;secret_access_key&quot; = var.aws_secret_key
+  })
+}</code></pre>
+<h4>Role-Based Access Control</h4>
+<pre><code># SRE team role - full production access
+resource &quot;boundary_role&quot; &quot;sre_production&quot; {
+  name          = &quot;sre-production-access&quot;
+  scope_id      = boundary_scope.production.id
+  grant_strings = [
+    &quot;ids=*;type=target;actions=list,read,authorize-session&quot;,
+    &quot;ids=*;type=session;actions=list,read,cancel&quot;,
+    &quot;ids=*;type=host;actions=list,read&quot;,
+  ]
+  principal_ids = [
+    boundary_managed_group.sre_team.id
+  ]
+}
+
+# Dev team role - limited access
+resource &quot;boundary_role&quot; &quot;dev_staging&quot; {
+  name          = &quot;dev-staging-access&quot;
+  scope_id      = boundary_scope.production.id
+  grant_strings = [
+    &quot;ids=${boundary_target.ssh_production.id};type=target;actions=read,authorize-session&quot;,
+  ]
+  principal_ids = [
+    boundary_managed_group.dev_team.id
+  ]
+}</code></pre>
+<h3>Connecting to Targets</h3>
+<pre><code># Authenticate via OIDC
+boundary authenticate oidc \
+  -auth-method-id amoidc_xxxxx
+
+# List available targets
+boundary targets list -scope-id p_xxxxx
+
+# Connect to SSH target (credentials injected by Vault)
+boundary connect ssh \
+  -target-id ttcp_xxxxx
+
+# Connect to database (credentials brokered by Vault)
+boundary connect postgres \
+  -target-id ttcp_xxxxx \
+  -dbname production
+
+# Use Boundary Desktop client for GUI access
+# Download from: https://developer.hashicorp.com/boundary/install</code></pre>
+<h3>Session Recording and Auditing</h3>
+<pre><code># List session recordings
+boundary session-recordings list \
+  -scope-id p_xxxxx
+
+# Download session recording for review
+boundary session-recordings download \
+  -id sr_xxxxx \
+  -output recording.cast
+
+# Play back with asciinema
+asciinema play recording.cast</code></pre>
+<h3>Dynamic Host Catalogs</h3>
+<pre><code># AWS dynamic host catalog - auto-discovers EC2 instances
+resource &quot;boundary_host_catalog_plugin&quot; &quot;aws_catalog&quot; {
+  scope_id    = boundary_scope.production.id
+  name        = &quot;aws-production&quot;
+  plugin_name = &quot;aws&quot;
+
+  attributes_json = jsonencode({
+    &quot;region&quot;                      = &quot;us-east-1&quot;
+    &quot;disable_credential_rotation&quot; = true
+  })
+
+  secrets_json = jsonencode({
+    &quot;access_key_id&quot;     = var.aws_access_key
+    &quot;secret_access_key&quot; = var.aws_secret_key
+  })
+}
+
+resource &quot;boundary_host_set_plugin&quot; &quot;web_tier&quot; {
+  host_catalog_id = boundary_host_catalog_plugin.aws_catalog.id
+  name            = &quot;web-tier&quot;
+  attributes_json = jsonencode({
+    &quot;filters&quot; = [
+      &quot;tag:Environment=production&quot;,
+      &quot;tag:Tier=web&quot;
+    ]
+  })
+}</code></pre>
+<h3>Security Best Practices</h3>
+<ol>
+<li><strong>Use Vault KMS for key management</strong> instead of static AEAD keys in production</li>
+<li><strong>Enable session recording</strong> for all privileged access targets</li>
+<li><strong>Set session time limits</strong> appropriate to the resource sensitivity</li>
+<li><strong>Use OIDC managed groups</strong> for automatic role assignment from IdP</li>
+<li><strong>Deploy multi-hop workers</strong> for accessing resources across network boundaries</li>
+<li><strong>Rotate Vault tokens</strong> used by credential stores regularly</li>
+<li><strong>Enable audit logging</strong> on both controllers and workers</li>
+<li><strong>Use credential injection</strong> (SSH certificates) over brokering when possible</li>
+<li><strong>Implement least-privilege grants</strong> -- avoid wildcard permissions</li>
+<li><strong>Review session recordings</strong> regularly for compliance and incident response</li>
+</ol>
+<h3>References</h3>
+<ul>
+<li>[HashiCorp Boundary Documentation](https://developer.hashicorp.com/boundary/docs)</li>
+<li>[Boundary and Vault Integration](https://developer.hashicorp.com/boundary/docs/concepts/credential-management)</li>
+<li>[From Zero to Hero with Boundary](https://www.hashicorp.com/en/blog/from-zero-to-hero-hashicorp-boundary)</li>
+<li>[Boundary Terraform Provider](https://registry.terraform.io/providers/hashicorp/boundary/latest/docs)</li>
+<li>[Zero Trust with Vault, Consul, and Boundary](https://www.hashicorp.com/en/resources/zero-trust-security-with-hashicorp-vault-consul-and-boundary)</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: implementing-zero-trust-with-hashicorp-boundary\ndisplay_name: implementing-zero-trust-with-hashicorp-boundary\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# implementing-zero-trust-with-hashicorp-boundary - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `implementing-zero-trust-with-hashicorp-boundary` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nHashiCorp Boundary is an identity-aware proxy that provides secure, zero trust access to infrastructure resources without traditional VPNs or direct network access. Boundary operates on a default-deny model -- users star\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose implementing-zero-trust-with-hashicorp-boundary, then write the task. Fallback prompt: Use the implementing-zero-trust-with-hashicorp-boundary skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `implementing-zero-trust-with-hashicorp-boundary` |\n| Canonical name | `implementing-zero-trust-with-hashicorp-boundary` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nHashiCorp Boundary is an identity-aware proxy that provides secure, zero trust access to infrastructure resources without traditional VPNs or direct network access. Boundary operates on a default-deny model -- users star\n\n## Original SKILL.md\n\n---\nname: implementing-zero-trust-with-hashicorp-boundary\ndescription: Implement HashiCorp Boundary for identity-aware zero trust infrastructure\n  access management with dynamic credential brokering, session recording, and Vault\n  integration.\ndomain: cybersecurity\nsubdomain: zero-trust-architecture\ntags:\n- zero-trust\n- hashicorp\n- boundary\n- privileged-access\n- vault\n- identity-aware-proxy\n- session-recording\n- just-in-time-access\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- PR.AA-01\n- PR.AA-05\n- PR.IR-01\n- GV.PO-01\nmitre_attack:\n- T1078\n- T1190\n- T1059\n- T1003\n- T1110\n---\n\n# Implementing Zero Trust with HashiCorp Boundary\n\n## Overview\n\nHashiCorp Boundary is an identity-aware proxy that provides secure, zero trust access to infrastructure resources without traditional VPNs or direct network access. Boundary operates on a default-deny model -- users start with no access and must be explicitly granted permissions for specific resources. When integrated with HashiCorp Vault, Boundary can dynamically broker credentials, ensuring users never see or manage underlying secrets. This eliminates credential sprawl and enables just-in-time access with automatic credential revocation when sessions end. Boundary supports session recording for audit compliance, OIDC/LDAP authentication, and manages access through a hierarchical scope model of organizations and projects.\n\n\n## When to Use\n\n- When deploying or configuring implementing zero trust with hashicorp boundary capabilities in your environment\n- When establishing security controls aligned to compliance requirements\n- When building or improving security architecture for this domain\n- When conducting security assessments that require this implementation\n\n## Prerequisites\n\n- HashiCorp Boundary server (self-hosted or HCP Boundary)\n- HashiCorp Vault (for credential brokering)\n- Identity provider supporting OIDC (Okta, Azure AD, Auth0)\n- PostgreSQL database for Boundary's backend\n- TLS certificates for secure communication\n- Understanding of PKI and X.509 certificate management\n\n## Architecture\n\n```\n                    Identity Provider (OIDC)\n                           |\n                    Authentication\n                           |\n                  +--------+--------+\n                  |   Boundary      |\n                  |   Controller    |\n                  |  (Control Plane)|\n                  +--------+--------+\n                           |\n              +------------+------------+\n              |                         |\n     +--------+--------+      +--------+--------+\n     | Boundary Worker |      | Boundary Worker |\n     | (Data Plane)    |      | (Data Plane)    |\n     +--------+--------+      +--------+--------+\n              |                         |\n     +--------+--------+      +--------+--------+\n     |  Target Hosts   |      |  Target Hosts   |\n     |  (SSH, RDP,     |      |  (Databases,    |\n     |   K8s, HTTP)    |      |   APIs)         |\n     +-----------------+      +-----------------+\n\n     Vault (Credential Brokering)\n     - Dynamic database credentials\n     - SSH certificate signing\n     - Credential libraries\n```\n\n## Installation and Configuration\n\n### Boundary Server Setup\n\n```bash\n# Install Boundary\ncurl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -\nsudo apt-add-repository \"deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main\"\nsudo apt-get update && sudo apt-get install boundary\n\n# Initialize the database\nboundary database init \\\n  -config=/etc/boundary/controller.hcl\n\n# Start the controller\nboundary server -config=/etc/boundary/controller.hcl\n```\n\n### Controller Configuration\n\n```hcl\n# /etc/boundary/controller.hcl\ncontroller {\n  name = \"boundary-controller-1\"\n  description = \"Primary Boundary Controller\"\n  database {\n    url = \"postgresql://boundary:password@localhost:5432/boundary?sslmode=require\"\n  }\n  public_cluster_addr = \"boundary.example.com\"\n}\n\nlistener \"tcp\" {\n  address = \"0.0.0.0:9200\"\n  purpose = \"api\"\n  tls_cert_file = \"/etc/boundary/tls/cert.pem\"\n  tls_key_file  = \"/etc/boundary/tls/key.pem\"\n}\n\nlistener \"tcp\" {\n  address = \"0.0.0.0:9201\"\n  purpose = \"cluster\"\n  tls_cert_file = \"/etc/boundary/tls/cert.pem\"\n  tls_key_file  = \"/etc/boundary/tls/key.pem\"\n}\n\nkms \"aead\" {\n  purpose = \"root\"\n  aead_type = \"aes-gcm\"\n  key = \"sP1fnF5Xz85RrXM...\"  # Use Vault Transit in production\n  key_id = \"global_root\"\n}\n\nkms \"aead\" {\n  purpose = \"worker-auth\"\n  aead_type = \"aes-gcm\"\n  key = \"8fZBjCUfN0TzjEG...\"\n  key_id = \"global_worker-auth\"\n}\n\nkms \"aead\" {\n  purpose = \"recovery\"\n  aead_type = \"aes-gcm\"\n  key = \"8fZBjCUfN0TzjEG...\"\n  key_id = \"global_recovery\"\n}\n```\n\n### Worker Configuration\n\n```hcl\n# /etc/boundary/worker.hcl\nworker {\n  name = \"boundary-worker-1\"\n  description = \"Worker in production VPC\"\n  public_addr = \"worker1.example.com\"\n\n  controllers = [\n    \"boundary.example.com:9201\"\n  ]\n\n  tags {\n    type = [\"production\"]\n    region = [\"us-east-1\"]\n  }\n}\n\nlistener \"tcp\" {\n  address = \"0.0.0.0:9202\"\n  purpose = \"proxy\"\n}\n\nkms \"aead\" {\n  purpose = \"worker-auth\"\n  aead_type = \"aes-gcm\"\n  key = \"8fZBjCUfN0TzjEG...\"\n  key_id = \"global_worker-auth\"\n}\n```\n\n## Terraform Configuration\n\n### Scope and Auth Configuration\n\n```hcl\n# main.tf - Boundary resources via Terraform\nterraform {\n  required_providers {\n    boundary = {\n      source  = \"hashicorp/boundary\"\n      version = \"~> 1.1\"\n    }\n  }\n}\n\nprovider \"boundary\" {\n  addr             = \"https://boundary.example.com:9200\"\n  recovery_kms_hcl = file(\"recovery_kms.hcl\")\n}\n\n# Organization scope\nresource \"boundary_scope\" \"org\" {\n  scope_id                 = \"global\"\n  name                     = \"production-org\"\n  description              = \"Production organization scope\"\n  auto_create_admin_role   = true\n  auto_create_default_role = true\n}\n\n# Project scope\nresource \"boundary_scope\" \"production\" {\n  name                     = \"production\"\n  description              = \"Production infrastructure project\"\n  scope_id                 = boundary_scope.org.id\n  auto_create_admin_role   = true\n  auto_create_default_role = true\n}\n\n# OIDC Auth Method (Okta example)\nresource \"boundary_auth_method_oidc\" \"okta\" {\n  scope_id               = boundary_scope.org.id\n  name                   = \"okta\"\n  description            = \"Okta OIDC authentication\"\n  issuer                 = \"https://company.okta.com/oauth2/default\"\n  client_id              = var.okta_client_id\n  client_secret          = var.okta_client_secret\n  signing_algorithms     = [\"RS256\"]\n  api_url_prefix         = \"https://boundary.example.com:9200\"\n  claims_scopes          = [\"groups\"]\n  account_claim_maps     = [\"oid=sub\"]\n  is_primary_for_scope   = true\n}\n\n# Managed group for auto-assignment\nresource \"boundary_managed_group\" \"sre_team\" {\n  auth_method_id = boundary_auth_method_oidc.okta.id\n  name           = \"sre-team\"\n  description    = \"SRE team members from Okta\"\n  filter         = \"\\\"sre-team\\\" in \\\"/token/groups\\\"\"\n}\n\nresource \"boundary_managed_group\" \"dev_team\" {\n  auth_method_id = boundary_auth_method_oidc.okta.id\n  name           = \"dev-team\"\n  description    = \"Development team from Okta\"\n  filter         = \"\\\"dev-team\\\" in \\\"/token/groups\\\"\"\n}\n```\n\n### Host Catalogs and Targets\n\n```hcl\n# Static host catalog for known infrastructure\nresource \"boundary_host_catalog_static\" \"production_servers\" {\n  name     = \"production-servers\"\n  scope_id = boundary_scope.production.id\n}\n\nresource \"boundary_host_static\" \"web_server\" {\n  name            = \"web-server-1\"\n  host_catalog_id = boundary_host_catalog_static.production_servers.id\n  address         = \"10.0.1.10\"\n}\n\nresource \"boundary_host_static\" \"db_server\" {\n  name            = \"db-server-1\"\n  host_catalog_id = boundary_host_catalog_static.production_servers.id\n  address         = \"10.0.2.20\"\n}\n\n# Host set grouping\nresource \"boundary_host_set_static\" \"web_servers\" {\n  name            = \"web-servers\"\n  host_catalog_id = boundary_host_catalog_static.production_servers.id\n  host_ids        = [boundary_host_static.web_server.id]\n}\n\nresource \"boundary_host_set_static\" \"db_servers\" {\n  name            = \"database-servers\"\n  host_catalog_id = boundary_host_catalog_static.production_servers.id\n  host_ids        = [boundary_host_static.db_server.id]\n}\n\n# SSH target\nresource \"boundary_target\" \"ssh_production\" {\n  name         = \"ssh-production-servers\"\n  description  = \"SSH access to production servers\"\n  type         = \"ssh\"\n  scope_id     = boundary_scope.production.id\n  default_port = 22\n\n  host_source_ids = [\n    boundary_host_set_static.web_servers.id\n  ]\n\n  session_max_seconds          = 3600  # 1 hour max session\n  session_connection_limit     = 1\n  enable_session_recording     = true\n  storage_bucket_id            = boundary_storage_bucket.sessions.id\n\n  injected_application_credential_source_ids = [\n    boundary_credential_library_vault_ssh_certificate.ssh_cert.id\n  ]\n}\n\n# Database target with Vault credential brokering\nresource \"boundary_target\" \"postgres_production\" {\n  name         = \"postgres-production\"\n  description  = \"PostgreSQL production database\"\n  type         = \"tcp\"\n  scope_id     = boundary_scope.production.id\n  default_port = 5432\n\n  host_source_ids = [\n    boundary_host_set_static.db_servers.id\n  ]\n\n  session_max_seconds      = 1800  # 30 min max\n  session_connection_limit = 5\n\n  brokered_credential_source_ids = [\n    boundary_credential_library_vault.postgres_creds.id\n  ]\n}\n```\n\n### Vault Integration for Credential Brokering\n\n```hcl\n# Vault credential store\nresource \"boundary_credential_store_vault\" \"vault\" {\n  name        = \"vault-store\"\n  scope_id    = boundary_scope.production.id\n  address     = \"https://vault.example.com:8200\"\n  token       = var.vault_token\n  namespace   = \"production\"\n}\n\n# Dynamic database credentials from Vault\nresource \"boundary_credential_library_vault\" \"postgres_creds\" {\n  name                = \"postgres-dynamic-creds\"\n  credential_store_id = boundary_credential_store_vault.vault.id\n  path                = \"database/creds/readonly\"\n  http_method         = \"GET\"\n  credential_type     = \"username_password\"\n}\n\n# SSH certificate signing via Vault\nresource \"boundary_credential_library_vault_ssh_certificate\" \"ssh_cert\" {\n  name                = \"ssh-certificate\"\n  credential_store_id = boundary_credential_store_vault.vault.id\n  path                = \"ssh-client-signer/sign/production\"\n  username            = \"admin\"\n  key_type            = \"ed25519\"\n  key_bits            = 256\n  extensions = {\n    \"permit-pty\" = \"\"\n  }\n}\n\n# Session recording storage\nresource \"boundary_storage_bucket\" \"sessions\" {\n  name        = \"session-recordings\"\n  scope_id    = \"global\"\n  plugin_name = \"aws\"\n  bucket_name = \"boundary-session-recordings\"\n  attributes_json = jsonencode({\n    \"region\"                      = \"us-east-1\"\n    \"disable_credential_rotation\" = true\n  })\n  secrets_json = jsonencode({\n    \"access_key_id\"     = var.aws_access_key\n    \"secret_access_key\" = var.aws_secret_key\n  })\n}\n```\n\n### Role-Based Access Control\n\n```hcl\n# SRE team role - full production access\nresource \"boundary_role\" \"sre_production\" {\n  name          = \"sre-production-access\"\n  scope_id      = boundary_scope.production.id\n  grant_strings = [\n    \"ids=*;type=target;actions=list,read,authorize-session\",\n    \"ids=*;type=session;actions=list,read,cancel\",\n    \"ids=*;type=host;actions=list,read\",\n  ]\n  principal_ids = [\n    boundary_managed_group.sre_team.id\n  ]\n}\n\n# Dev team role - limited access\nresource \"boundary_role\" \"dev_staging\" {\n  name          = \"dev-staging-access\"\n  scope_id      = boundary_scope.production.id\n  grant_strings = [\n    \"ids=${boundary_target.ssh_production.id};type=target;actions=read,authorize-session\",\n  ]\n  principal_ids = [\n    boundary_managed_group.dev_team.id\n  ]\n}\n```\n\n## Connecting to Targets\n\n```bash\n# Authenticate via OIDC\nboundary authenticate oidc \\\n  -auth-method-id amoidc_xxxxx\n\n# List available targets\nboundary targets list -scope-id p_xxxxx\n\n# Connect to SSH target (credentials injected by Vault)\nboundary connect ssh \\\n  -target-id ttcp_xxxxx\n\n# Connect to database (credentials brokered by Vault)\nboundary connect postgres \\\n  -target-id ttcp_xxxxx \\\n  -dbname production\n\n# Use Boundary Desktop client for GUI access\n# Download from: https://developer.hashicorp.com/boundary/install\n```\n\n## Session Recording and Auditing\n\n```bash\n# List session recordings\nboundary session-recordings list \\\n  -scope-id p_xxxxx\n\n# Download session recording for review\nboundary session-recordings download \\\n  -id sr_xxxxx \\\n  -output recording.cast\n\n# Play back with asciinema\nasciinema play recording.cast\n```\n\n## Dynamic Host Catalogs\n\n```hcl\n# AWS dynamic host catalog - auto-discovers EC2 instances\nresource \"boundary_host_catalog_plugin\" \"aws_catalog\" {\n  scope_id    = boundary_scope.production.id\n  name        = \"aws-production\"\n  plugin_name = \"aws\"\n\n  attributes_json = jsonencode({\n    \"region\"                      = \"us-east-1\"\n    \"disable_credential_rotation\" = true\n  })\n\n  secrets_json = jsonencode({\n    \"access_key_id\"     = var.aws_access_key\n    \"secret_access_key\" = var.aws_secret_key\n  })\n}\n\nresource \"boundary_host_set_plugin\" \"web_tier\" {\n  host_catalog_id = boundary_host_catalog_plugin.aws_catalog.id\n  name            = \"web-tier\"\n  attributes_json = jsonencode({\n    \"filters\" = [\n      \"tag:Environment=production\",\n      \"tag:Tier=web\"\n    ]\n  })\n}\n```\n\n## Security Best Practices\n\n1. **Use Vault KMS for key management** instead of static AEAD keys in production\n2. **Enable session recording** for all privileged access targets\n3. **Set session time limits** appropriate to the resource sensitivity\n4. **Use OIDC managed groups** for automatic role assignment from IdP\n5. **Deploy multi-hop workers** for accessing resources across network boundaries\n6. **Rotate Vault tokens** used by credential stores regularly\n7. **Enable audit logging** on both controllers and workers\n8. **Use credential injection** (SSH certificates) over brokering when possible\n9. **Implement least-privilege grants** -- avoid wildcard permissions\n10. **Review session recordings** regularly for compliance and incident response\n\n## References\n\n- [HashiCorp Boundary Documentation](https://developer.hashicorp.com/boundary/docs)\n- [Boundary and Vault Integration](https://developer.hashicorp.com/boundary/docs/concepts/credential-management)\n- [From Zero to Hero with Boundary](https://www.hashicorp.com/en/blog/from-zero-to-hero-hashicorp-boundary)\n- [Boundary Terraform Provider](https://registry.terraform.io/providers/hashicorp/boundary/latest/docs)\n- [Zero Trust with Vault, Consul, and Boundary](https://www.hashicorp.com/en/resources/zero-trust-security-with-hashicorp-vault-consul-and-boundary)\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("implementing-zero-trust-with-hashicorp-boundary-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

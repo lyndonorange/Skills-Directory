@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>analyzing-uefi-bootkit-persistence - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/analyzing-uefi-bootkit-persistence-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>analyzing-uefi-bootkit-persistence</h1>
+      <p class="description">'Analyzes UEFI bootkit persistence mechanisms including firmware implants</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>analyzing-uefi-bootkit-persistence</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>analyzing-uefi-bootkit-persistence</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Analyzes UEFI bootkit persistence mechanisms including firmware implants</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose analyzing-uefi-bootkit-persistence, then write the task. Fallback prompt: Use the analyzing-uefi-bootkit-persistence skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Analyzing UEFI Bootkit Persistence</h2>
+<h3>When to Use</h3>
+<ul>
+<li>A compromised system re-establishes C2 communication after OS reinstallation or disk replacement</li>
+<li>Secure Boot has been tampered with, disabled, or shows unexpected Machine Owner Key (MOK) enrollment</li>
+<li>Firmware integrity verification fails against vendor-provided baselines</li>
+<li>Memory forensics reveals rootkit components loading during early boot phase</li>
+<li>Investigating advanced persistent threat (APT) campaigns known to deploy UEFI implants</li>
+<li>Auditing firmware security posture for enterprise endpoint hardening</li>
+</ul>
+<p><strong>Do not use</strong> for standard MBR-based bootkits on legacy BIOS systems without UEFI; use MBR/VBR bootkit analysis instead.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>chipsec framework for SPI flash dumping, UEFI variable inspection, and firmware security modules</li>
+<li>UEFITool / UEFIExtract for firmware volume parsing and DXE driver extraction</li>
+<li>Python 3.8+ with struct, hashlib, subprocess, and os modules</li>
+<li>Bootable Linux live USB for offline analysis (avoid running compromised OS)</li>
+<li>Volatility 3 for memory forensics of boot-phase artifacts</li>
+<li>YARA with UEFI malware rule sets for pattern-based detection</li>
+<li>Access to vendor firmware baselines for integrity comparison</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Dump SPI Flash Firmware</h4>
+<p>Acquire the UEFI firmware from the SPI flash chip for offline analysis:</p>
+<pre><code># Using chipsec to dump SPI flash contents
+python chipsec_util.py spi dump firmware_dump.rom
+
+# Using flashrom as an alternative
+flashrom -p internal -r firmware_dump.rom
+
+# Verify dump integrity
+sha256sum firmware_dump.rom
+
+# Read SPI flash descriptor information
+python chipsec_util.py spi info
+
+# Check SPI flash region access permissions
+python chipsec_main.py -m common.spi_access
+
+# Verify BIOS write protection is enabled
+python chipsec_main.py -m common.bios_wp
+
+# Check SPI flash controller lock
+python chipsec_main.py -m common.spi_lock</code></pre>
+<h4>Step 2: Inspect UEFI Variables</h4>
+<p>Enumerate and analyze UEFI variables for unauthorized modifications:</p>
+<pre><code># List all UEFI variables on a live system
+python chipsec_util.py uefi var-list
+
+# List UEFI variables from a SPI flash dump
+python chipsec_util.py uefi var-list-spi firmware_dump.rom
+
+# Read specific Secure Boot variables
+python chipsec_util.py uefi var-read SecureBoot 8BE4DF61-93CA-11D2-AA0D-00E098032B8C
+python chipsec_util.py uefi var-read SetupMode 8BE4DF61-93CA-11D2-AA0D-00E098032B8C
+python chipsec_util.py uefi var-read PK 8BE4DF61-93CA-11D2-AA0D-00E098032B8C
+python chipsec_util.py uefi var-read KEK 8BE4DF61-93CA-11D2-AA0D-00E098032B8C
+python chipsec_util.py uefi var-read db D719B2CB-3D3A-4596-A3BC-DAD00E67656F
+
+# Dump UEFI key databases for analysis
+python chipsec_util.py uefi keys
+
+# Check Secure Boot configuration module
+python chipsec_main.py -m common.secureboot.variables</code></pre>
+<h4>Step 3: Analyze EFI System Partition (ESP)</h4>
+<p>Inspect the ESP for unauthorized or modified boot components:</p>
+<pre><code># Mount ESP (typically the first FAT32 partition, ~100-500MB)
+mkdir /mnt/esp
+mount /dev/sda1 /mnt/esp
+
+# List all files on ESP with timestamps
+find /mnt/esp -type f -exec ls -la {} \;
+
+# Check for BlackLotus indicators - custom directory under ESP:/system32/
+ls -la /mnt/esp/system32/ 2&gt;/dev/null
+
+# Verify Windows Boot Manager signature
+sigcheck -a /mnt/esp/EFI/Microsoft/Boot/bootmgfw.efi
+
+# Hash all EFI binaries for comparison against known-good values
+find /mnt/esp -name &quot;*.efi&quot; -exec sha256sum {} \;
+
+# Check for unauthorized .efi files outside standard directories
+find /mnt/esp -name &quot;*.efi&quot; | grep -v &quot;Microsoft\|Boot\|ubuntu\|grub&quot;
+
+# Look for grubx64.efi planted by BlackLotus
+find /mnt/esp -name &quot;grubx64.efi&quot; -exec sha256sum {} \;
+
+# Examine MeasuredBoot logs for anomalies (Windows)
+# Logs located at C:\Windows\Logs\MeasuredBoot\</code></pre>
+<h4>Step 4: Scan Firmware for Known Bootkit Signatures</h4>
+<p>Analyze the firmware dump for known UEFI malware patterns:</p>
+<pre><code># Extract all firmware modules with UEFIExtract
+UEFIExtract firmware_dump.rom all
+
+# Generate firmware module whitelist from vendor baseline
+python chipsec_main.py -m tools.uefi.whitelist -a generate,baseline.json,firmware_vendor.rom
+
+# Compare current firmware against whitelist
+python chipsec_main.py -m tools.uefi.whitelist -a check,baseline.json,firmware_dump.rom
+
+# Scan firmware with UEFI-specific YARA rules
+yara -r uefi_bootkits.yar firmware_dump.rom
+
+# Scan extracted modules individually
+find firmware_dump.rom.dump -name &quot;*.efi&quot; -exec yara -r uefi_bootkits.yar {} \;
+
+# Check for modified CORE_DXE module (targeted by MoonBounce, CosmicStrand)
+# Compare GUID and hash against vendor baseline</code></pre>
+<h4>Step 5: Detect Secure Boot Bypass Mechanisms</h4>
+<p>Check for known Secure Boot bypass techniques:</p>
+<pre><code># Check if Secure Boot is enabled
+python chipsec_main.py -m common.secureboot.variables
+
+# Verify SMM (System Management Mode) protections
+python chipsec_main.py -m common.smm
+
+# Check SMM BIOS write protection
+python chipsec_main.py -m common.bios_smi
+
+# On Windows - check boot configuration for bypass indicators
+bcdedit /enum firmware
+bcdedit /v
+
+# Check for testsigning/nointegritychecks/debug flags
+bcdedit | findstr /i &quot;testsigning nointegritychecks debug&quot;
+
+# Verify HVCI (Hypervisor-enforced Code Integrity) is not disabled
+# BlackLotus sets HKLM:\...\DeviceGuard\...\HypervisorEnforcedCodeIntegrity Enabled=0
+reg query &quot;HKLM\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity&quot; /v Enabled
+
+# Check Secure Boot state via PowerShell
+# Confirm-SecureBootUEFI returns True if properly enabled</code></pre>
+<h4>Step 6: Perform Boot Chain Integrity Verification</h4>
+<p>Verify every component in the boot chain from firmware through kernel:</p>
+<pre><code># Verify firmware integrity against vendor hash
+sha256sum firmware_dump.rom
+# Compare with vendor-published hash
+
+# Verify bootloader signatures
+sigcheck -a C:\Windows\Boot\EFI\bootmgfw.efi
+sigcheck -a C:\Windows\System32\winload.efi
+sigcheck -a C:\Windows\System32\ntoskrnl.exe
+
+# Check for unsigned or invalid boot drivers
+sigcheck -u -e C:\Windows\System32\drivers\
+
+# Analyze Measured Boot logs for unexpected EFI_Boot_Services_Application entries
+# BlackLotus components appear as EV_EFI_Boot_Services_Application
+
+# Memory forensics for boot-phase artifacts
+vol3 -f memory.dmp windows.modules
+vol3 -f memory.dmp windows.driverscan</code></pre>
+<h4>Step 7: Document UEFI Bootkit Analysis Findings</h4>
+<p>Compile a comprehensive analysis report:</p>
+<pre><code>Report should include:
+- Firmware version, vendor, and platform identification
+- SPI flash protection status (write protect, lock bits, access control)
+- Secure Boot configuration and any bypass indicators detected
+- UEFI variable anomalies (unauthorized keys, modified db/dbx, MOK enrollment)
+- ESP contents inventory with hash verification against known-good baselines
+- Firmware module comparison against vendor whitelist (added, modified, removed)
+- Known bootkit family attribution with confidence level
+- Boot chain integrity verification results for each component
+- Remediation steps (reflash, key rotation, hardware replacement)
+- MITRE ATT&amp;CK mapping (T1542.001 - System Firmware, T1542.003 - Bootkit)</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | <strong>UEFI Bootkit</strong> | Malware that persists in UEFI firmware or the boot process, executing before the operating system loads and surviving OS reinstallation | | <strong>SPI Flash</strong> | Serial Peripheral Interface flash memory chip on the motherboard storing UEFI firmware; firmware-level bootkits like LoJax and MoonBounce modify SPI flash contents | | <strong>EFI System Partition (ESP)</strong> | FAT32 partition containing EFI bootloaders and drivers; bootkits like BlackLotus and ESPecter modify files on the ESP for persistence | | <strong>Secure Boot</strong> | UEFI security feature that verifies digital signatures of boot components; can be bypassed via vulnerabilities (CVE-2022-21894) or MOK enrollment | | <strong>DXE Driver</strong> | Driver Execution Environment driver loaded during UEFI boot; firmware implants inject malicious DXE drivers that execute before the OS | | <strong>Machine Owner Key (MOK)</strong> | User-installable Secure Boot key; BlackLotus enrolls attacker-controlled MOKs to sign malicious bootloaders | | <strong>chipsec</strong> | Intel platform security assessment framework for analyzing SPI flash, UEFI variables, Secure Boot, and hardware security configurations | | <strong>HVCI</strong> | Hypervisor-enforced Code Integrity, a Windows security feature that bootkits disable to load unsigned kernel drivers |</p>
+<h3>Tools &amp; Systems</h3>
+<ul>
+<li><strong>chipsec</strong>: Intel framework for dumping SPI flash, reading UEFI variables, verifying firmware write protection, and Secure Boot configuration auditing</li>
+<li><strong>UEFITool</strong>: Open-source UEFI firmware image parser for inspecting firmware volumes, extracting DXE drivers, and comparing module GUIDs</li>
+<li><strong>sigcheck</strong>: Sysinternals utility for verifying digital signatures of EFI binaries and boot chain components</li>
+<li><strong>flashrom</strong>: Open-source SPI flash programmer for reading and writing firmware chips on supported platforms</li>
+<li><strong>YARA</strong>: Pattern matching engine used with UEFI-specific rule sets to detect known bootkit signatures in firmware dumps</li>
+</ul>
+<h3>Common Scenarios</h3>
+<h4>Scenario: Investigating Persistent Compromise Surviving OS Reinstallation</h4>
+<p><strong>Context</strong>: An enterprise endpoint was reimaged after a confirmed breach, but identical C2 beaconing resumed within hours. The endpoint has UEFI firmware with Secure Boot enabled, and a TPM 2.0 chip. The security team suspects a UEFI-level implant similar to BlackLotus or LoJax.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Boot the system from a trusted Linux live USB to avoid executing any compromised OS components</li>
+<li>Dump SPI flash firmware using <code>chipsec_util.py spi dump</code> for offline analysis</li>
+<li>Mount the ESP and hash all <code>.efi</code> files for comparison against known-good values from identical hardware</li>
+<li>Check for the <code>ESP:/system32/</code> directory (BlackLotus indicator) and unauthorized <code>grubx64.efi</code></li>
+<li>Extract firmware modules with UEFIExtract and compare GUID inventory against vendor baseline</li>
+<li>Verify Secure Boot variables -- look for unauthorized MOK enrollment or modified db/dbx</li>
+<li>Check SPI flash write protection and lock bits using chipsec modules</li>
+<li>Scan firmware dump and extracted modules with UEFI-specific YARA rules</li>
+<li>If BlackLotus is suspected, check registry for HVCI disabled and MeasuredBoot logs for anomalous entries</li>
+</ol>
+<p><strong>Pitfalls</strong>:</p>
+<ul>
+<li>Running analysis from the compromised OS (rootkit components hide from live analysis)</li>
+<li>Only checking the ESP without examining SPI flash firmware (misses firmware-level implants like LoJax, MoonBounce)</li>
+<li>Assuming Secure Boot prevents all bootkits (CVE-2022-21894 and other bypasses exist)</li>
+<li>Not preserving the original firmware dump before remediation (critical forensic evidence)</li>
+<li>Reflashing firmware without verifying the vendor image is authentic and unmodified</li>
+</ul>
+<h3>Output Format</h3>
+<pre><code>UEFI BOOTKIT PERSISTENCE ANALYSIS REPORT
+============================================
+System:           Lenovo ThinkPad X1 Carbon Gen 11
+Firmware:         N3HET82W (1.54) - Lenovo UEFI BIOS
+Platform:         Intel 13th Gen (Raptor Lake)
+TPM:              2.0 (Infineon SLB 9672)
+Secure Boot:      ENABLED (BYPASSED via CVE-2022-21894)
+Analysis Method:  Linux live USB + chipsec + UEFITool
+
+SPI FLASH PROTECTION STATUS
+BIOS Write Protection:    DISABLED [!]
+SPI Flash Lock (FLOCKDN): SET [OK]
+SMM BIOS Write Protect:   DISABLED [!]
+SPI Protected Ranges:     Region 0 only (descriptor)
+
+UEFI VARIABLE ANALYSIS
+SecureBoot:        Enabled (value=1)
+SetupMode:         Disabled (value=0)
+PK:                Lenovo Ltd. (legitimate)
+KEK:               Microsoft + Lenovo (legitimate)
+db:                MODIFIED - contains unauthorized entry [!]
+  [!] Unknown certificate: CN=Secure Boot Signing, O=Unknown
+  [!] Not present in vendor baseline db
+MOK:               1 unauthorized key enrolled [!]
+  [!] MOK enrolled: CN=shim, self-signed, not from distro vendor
+
+ESP PARTITION ANALYSIS
+Total EFI binaries:     12
+Verified (signed):      9
+Modified (hash mismatch): 2 [!]
+Unauthorized:           1 [!]
+
+  [!] EFI/Microsoft/Boot/bootmgfw.efi - MODIFIED
+      Expected SHA-256: a3f2c8...
+      Current SHA-256:  7b1e4d...
+      Signature:        Valid (signed with unauthorized MOK)
+
+  [!] EFI/Microsoft/Boot/grubx64.efi - UNAUTHORIZED
+      SHA-256:  e9c1a7...
+      Not present in vendor baseline
+      Matches BlackLotus stage-2 loader signature
+
+  [!] system32/ directory present on ESP (BlackLotus artifact)
+      Directory empty (files deleted post-installation)
+
+FIRMWARE MODULE ANALYSIS
+Total firmware modules:   312
+Vendor baseline modules:  312
+Added modules:            0
+Modified modules:         0
+SPI flash integrity:      CLEAN (no firmware-level implant detected)
+
+BOOTKIT ATTRIBUTION
+Family:           BlackLotus
+Confidence:       HIGH
+Persistence:      ESP-based (not SPI flash)
+Bypass Method:    CVE-2022-21894 (baton drop)
+MITRE ATT&amp;CK:    T1542.003 (Bootkit), T1553.006 (Code Signing Policy Modification)
+
+INDICATORS OF COMPROMISE
+- ESP:/system32/ directory (empty, post-cleanup artifact)
+- ESP:/EFI/Microsoft/Boot/grubx64.efi (unauthorized, BlackLotus loader)
+- Modified bootmgfw.efi (re-signed with attacker MOK)
+- HVCI disabled via registry: DeviceGuard\...\Enabled = 0
+- Unauthorized MOK enrollment in UEFI variable store
+- MeasuredBoot log shows EV_EFI_Boot_Services_Application for grubx64.efi
+
+REMEDIATION
+1. Replace bootmgfw.efi with authentic copy from Windows installation media
+2. Delete unauthorized grubx64.efi and system32/ directory from ESP
+3. Reset Secure Boot keys to factory defaults (clear MOK, restore PK/KEK/db)
+4. Enable BIOS write protection and verify SPI flash lock bits
+5. Apply firmware update to latest version (patches CVE-2022-21894)
+6. Enable HVCI and verify via Group Policy
+7. Reimport only trusted certificates into Secure Boot db
+8. Monitor MeasuredBoot logs for anomalous boot component loading</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: analyzing-uefi-bootkit-persistence\ndisplay_name: analyzing-uefi-bootkit-persistence\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# analyzing-uefi-bootkit-persistence - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `analyzing-uefi-bootkit-persistence` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- A compromised system re-establishes C2 communication after OS reinstallation or disk replacement\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose analyzing-uefi-bootkit-persistence, then write the task. Fallback prompt: Use the analyzing-uefi-bootkit-persistence skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `analyzing-uefi-bootkit-persistence` |\n| Canonical name | `analyzing-uefi-bootkit-persistence` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n- A compromised system re-establishes C2 communication after OS reinstallation or disk replacement\n\n## Original SKILL.md\n\n---\nname: analyzing-uefi-bootkit-persistence\ndescription: 'Analyzes UEFI bootkit persistence mechanisms including firmware implants\n  in SPI flash, EFI System Partition (ESP) modifications, Secure Boot bypass techniques,\n  and UEFI variable manipulation. Covers detection of known bootkit families (BlackLotus,\n  LoJax, MosaicRegressor, MoonBounce, CosmicStrand), ESP partition forensic inspection,\n  chipsec-based firmware integrity verification, and Secure Boot configuration auditing.\n  Activates for requests involving UEFI malware analysis, firmware persistence investigation,\n  boot chain integrity verification, or Secure Boot bypass detection.\n\n  '\ndomain: cybersecurity\nsubdomain: firmware-security\ntags:\n- UEFI\n- bootkit\n- firmware\n- Secure-Boot\n- chipsec\n- ESP\n- persistence\nversion: 1.0.0\nauthor: mukul975\nlicense: Apache-2.0\nd3fend_techniques:\n- Platform Hardening\n- Restore Object\n- Platform Monitoring\n- Firmware Verification\n- Firmware Embedded Monitoring Code\nnist_csf:\n- ID.RA-01\n- PR.PS-01\n- PR.PS-02\nmitre_attack:\n- T1542.001\n- T1542.003\n- T1553.006\n- T1542\n- T1014\n---\n\n# Analyzing UEFI Bootkit Persistence\n\n## When to Use\n\n- A compromised system re-establishes C2 communication after OS reinstallation or disk replacement\n- Secure Boot has been tampered with, disabled, or shows unexpected Machine Owner Key (MOK) enrollment\n- Firmware integrity verification fails against vendor-provided baselines\n- Memory forensics reveals rootkit components loading during early boot phase\n- Investigating advanced persistent threat (APT) campaigns known to deploy UEFI implants\n- Auditing firmware security posture for enterprise endpoint hardening\n\n**Do not use** for standard MBR-based bootkits on legacy BIOS systems without UEFI; use MBR/VBR bootkit analysis instead.\n\n## Prerequisites\n\n- chipsec framework for SPI flash dumping, UEFI variable inspection, and firmware security modules\n- UEFITool / UEFIExtract for firmware volume parsing and DXE driver extraction\n- Python 3.8+ with struct, hashlib, subprocess, and os modules\n- Bootable Linux live USB for offline analysis (avoid running compromised OS)\n- Volatility 3 for memory forensics of boot-phase artifacts\n- YARA with UEFI malware rule sets for pattern-based detection\n- Access to vendor firmware baselines for integrity comparison\n\n## Workflow\n\n### Step 1: Dump SPI Flash Firmware\n\nAcquire the UEFI firmware from the SPI flash chip for offline analysis:\n\n```bash\n# Using chipsec to dump SPI flash contents\npython chipsec_util.py spi dump firmware_dump.rom\n\n# Using flashrom as an alternative\nflashrom -p internal -r firmware_dump.rom\n\n# Verify dump integrity\nsha256sum firmware_dump.rom\n\n# Read SPI flash descriptor information\npython chipsec_util.py spi info\n\n# Check SPI flash region access permissions\npython chipsec_main.py -m common.spi_access\n\n# Verify BIOS write protection is enabled\npython chipsec_main.py -m common.bios_wp\n\n# Check SPI flash controller lock\npython chipsec_main.py -m common.spi_lock\n```\n\n### Step 2: Inspect UEFI Variables\n\nEnumerate and analyze UEFI variables for unauthorized modifications:\n\n```bash\n# List all UEFI variables on a live system\npython chipsec_util.py uefi var-list\n\n# List UEFI variables from a SPI flash dump\npython chipsec_util.py uefi var-list-spi firmware_dump.rom\n\n# Read specific Secure Boot variables\npython chipsec_util.py uefi var-read SecureBoot 8BE4DF61-93CA-11D2-AA0D-00E098032B8C\npython chipsec_util.py uefi var-read SetupMode 8BE4DF61-93CA-11D2-AA0D-00E098032B8C\npython chipsec_util.py uefi var-read PK 8BE4DF61-93CA-11D2-AA0D-00E098032B8C\npython chipsec_util.py uefi var-read KEK 8BE4DF61-93CA-11D2-AA0D-00E098032B8C\npython chipsec_util.py uefi var-read db D719B2CB-3D3A-4596-A3BC-DAD00E67656F\n\n# Dump UEFI key databases for analysis\npython chipsec_util.py uefi keys\n\n# Check Secure Boot configuration module\npython chipsec_main.py -m common.secureboot.variables\n```\n\n### Step 3: Analyze EFI System Partition (ESP)\n\nInspect the ESP for unauthorized or modified boot components:\n\n```bash\n# Mount ESP (typically the first FAT32 partition, ~100-500MB)\nmkdir /mnt/esp\nmount /dev/sda1 /mnt/esp\n\n# List all files on ESP with timestamps\nfind /mnt/esp -type f -exec ls -la {} \\;\n\n# Check for BlackLotus indicators - custom directory under ESP:/system32/\nls -la /mnt/esp/system32/ 2>/dev/null\n\n# Verify Windows Boot Manager signature\nsigcheck -a /mnt/esp/EFI/Microsoft/Boot/bootmgfw.efi\n\n# Hash all EFI binaries for comparison against known-good values\nfind /mnt/esp -name \"*.efi\" -exec sha256sum {} \\;\n\n# Check for unauthorized .efi files outside standard directories\nfind /mnt/esp -name \"*.efi\" | grep -v \"Microsoft\\|Boot\\|ubuntu\\|grub\"\n\n# Look for grubx64.efi planted by BlackLotus\nfind /mnt/esp -name \"grubx64.efi\" -exec sha256sum {} \\;\n\n# Examine MeasuredBoot logs for anomalies (Windows)\n# Logs located at C:\\Windows\\Logs\\MeasuredBoot\\\n```\n\n### Step 4: Scan Firmware for Known Bootkit Signatures\n\nAnalyze the firmware dump for known UEFI malware patterns:\n\n```bash\n# Extract all firmware modules with UEFIExtract\nUEFIExtract firmware_dump.rom all\n\n# Generate firmware module whitelist from vendor baseline\npython chipsec_main.py -m tools.uefi.whitelist -a generate,baseline.json,firmware_vendor.rom\n\n# Compare current firmware against whitelist\npython chipsec_main.py -m tools.uefi.whitelist -a check,baseline.json,firmware_dump.rom\n\n# Scan firmware with UEFI-specific YARA rules\nyara -r uefi_bootkits.yar firmware_dump.rom\n\n# Scan extracted modules individually\nfind firmware_dump.rom.dump -name \"*.efi\" -exec yara -r uefi_bootkits.yar {} \\;\n\n# Check for modified CORE_DXE module (targeted by MoonBounce, CosmicStrand)\n# Compare GUID and hash against vendor baseline\n```\n\n### Step 5: Detect Secure Boot Bypass Mechanisms\n\nCheck for known Secure Boot bypass techniques:\n\n```bash\n# Check if Secure Boot is enabled\npython chipsec_main.py -m common.secureboot.variables\n\n# Verify SMM (System Management Mode) protections\npython chipsec_main.py -m common.smm\n\n# Check SMM BIOS write protection\npython chipsec_main.py -m common.bios_smi\n\n# On Windows - check boot configuration for bypass indicators\nbcdedit /enum firmware\nbcdedit /v\n\n# Check for testsigning/nointegritychecks/debug flags\nbcdedit | findstr /i \"testsigning nointegritychecks debug\"\n\n# Verify HVCI (Hypervisor-enforced Code Integrity) is not disabled\n# BlackLotus sets HKLM:\\...\\DeviceGuard\\...\\HypervisorEnforcedCodeIntegrity Enabled=0\nreg query \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\\Scenarios\\HypervisorEnforcedCodeIntegrity\" /v Enabled\n\n# Check Secure Boot state via PowerShell\n# Confirm-SecureBootUEFI returns True if properly enabled\n```\n\n### Step 6: Perform Boot Chain Integrity Verification\n\nVerify every component in the boot chain from firmware through kernel:\n\n```bash\n# Verify firmware integrity against vendor hash\nsha256sum firmware_dump.rom\n# Compare with vendor-published hash\n\n# Verify bootloader signatures\nsigcheck -a C:\\Windows\\Boot\\EFI\\bootmgfw.efi\nsigcheck -a C:\\Windows\\System32\\winload.efi\nsigcheck -a C:\\Windows\\System32\\ntoskrnl.exe\n\n# Check for unsigned or invalid boot drivers\nsigcheck -u -e C:\\Windows\\System32\\drivers\\\n\n# Analyze Measured Boot logs for unexpected EFI_Boot_Services_Application entries\n# BlackLotus components appear as EV_EFI_Boot_Services_Application\n\n# Memory forensics for boot-phase artifacts\nvol3 -f memory.dmp windows.modules\nvol3 -f memory.dmp windows.driverscan\n```\n\n### Step 7: Document UEFI Bootkit Analysis Findings\n\nCompile a comprehensive analysis report:\n\n```\nReport should include:\n- Firmware version, vendor, and platform identification\n- SPI flash protection status (write protect, lock bits, access control)\n- Secure Boot configuration and any bypass indicators detected\n- UEFI variable anomalies (unauthorized keys, modified db/dbx, MOK enrollment)\n- ESP contents inventory with hash verification against known-good baselines\n- Firmware module comparison against vendor whitelist (added, modified, removed)\n- Known bootkit family attribution with confidence level\n- Boot chain integrity verification results for each component\n- Remediation steps (reflash, key rotation, hardware replacement)\n- MITRE ATT&CK mapping (T1542.001 - System Firmware, T1542.003 - Bootkit)\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| **UEFI Bootkit** | Malware that persists in UEFI firmware or the boot process, executing before the operating system loads and surviving OS reinstallation |\n| **SPI Flash** | Serial Peripheral Interface flash memory chip on the motherboard storing UEFI firmware; firmware-level bootkits like LoJax and MoonBounce modify SPI flash contents |\n| **EFI System Partition (ESP)** | FAT32 partition containing EFI bootloaders and drivers; bootkits like BlackLotus and ESPecter modify files on the ESP for persistence |\n| **Secure Boot** | UEFI security feature that verifies digital signatures of boot components; can be bypassed via vulnerabilities (CVE-2022-21894) or MOK enrollment |\n| **DXE Driver** | Driver Execution Environment driver loaded during UEFI boot; firmware implants inject malicious DXE drivers that execute before the OS |\n| **Machine Owner Key (MOK)** | User-installable Secure Boot key; BlackLotus enrolls attacker-controlled MOKs to sign malicious bootloaders |\n| **chipsec** | Intel platform security assessment framework for analyzing SPI flash, UEFI variables, Secure Boot, and hardware security configurations |\n| **HVCI** | Hypervisor-enforced Code Integrity, a Windows security feature that bootkits disable to load unsigned kernel drivers |\n\n## Tools & Systems\n\n- **chipsec**: Intel framework for dumping SPI flash, reading UEFI variables, verifying firmware write protection, and Secure Boot configuration auditing\n- **UEFITool**: Open-source UEFI firmware image parser for inspecting firmware volumes, extracting DXE drivers, and comparing module GUIDs\n- **sigcheck**: Sysinternals utility for verifying digital signatures of EFI binaries and boot chain components\n- **flashrom**: Open-source SPI flash programmer for reading and writing firmware chips on supported platforms\n- **YARA**: Pattern matching engine used with UEFI-specific rule sets to detect known bootkit signatures in firmware dumps\n\n## Common Scenarios\n\n### Scenario: Investigating Persistent Compromise Surviving OS Reinstallation\n\n**Context**: An enterprise endpoint was reimaged after a confirmed breach, but identical C2 beaconing resumed within hours. The endpoint has UEFI firmware with Secure Boot enabled, and a TPM 2.0 chip. The security team suspects a UEFI-level implant similar to BlackLotus or LoJax.\n\n**Approach**:\n1. Boot the system from a trusted Linux live USB to avoid executing any compromised OS components\n2. Dump SPI flash firmware using `chipsec_util.py spi dump` for offline analysis\n3. Mount the ESP and hash all `.efi` files for comparison against known-good values from identical hardware\n4. Check for the `ESP:/system32/` directory (BlackLotus indicator) and unauthorized `grubx64.efi`\n5. Extract firmware modules with UEFIExtract and compare GUID inventory against vendor baseline\n6. Verify Secure Boot variables -- look for unauthorized MOK enrollment or modified db/dbx\n7. Check SPI flash write protection and lock bits using chipsec modules\n8. Scan firmware dump and extracted modules with UEFI-specific YARA rules\n9. If BlackLotus is suspected, check registry for HVCI disabled and MeasuredBoot logs for anomalous entries\n\n**Pitfalls**:\n- Running analysis from the compromised OS (rootkit components hide from live analysis)\n- Only checking the ESP without examining SPI flash firmware (misses firmware-level implants like LoJax, MoonBounce)\n- Assuming Secure Boot prevents all bootkits (CVE-2022-21894 and other bypasses exist)\n- Not preserving the original firmware dump before remediation (critical forensic evidence)\n- Reflashing firmware without verifying the vendor image is authentic and unmodified\n\n## Output Format\n\n```\nUEFI BOOTKIT PERSISTENCE ANALYSIS REPORT\n============================================\nSystem:           Lenovo ThinkPad X1 Carbon Gen 11\nFirmware:         N3HET82W (1.54) - Lenovo UEFI BIOS\nPlatform:         Intel 13th Gen (Raptor Lake)\nTPM:              2.0 (Infineon SLB 9672)\nSecure Boot:      ENABLED (BYPASSED via CVE-2022-21894)\nAnalysis Method:  Linux live USB + chipsec + UEFITool\n\nSPI FLASH PROTECTION STATUS\nBIOS Write Protection:    DISABLED [!]\nSPI Flash Lock (FLOCKDN): SET [OK]\nSMM BIOS Write Protect:   DISABLED [!]\nSPI Protected Ranges:     Region 0 only (descriptor)\n\nUEFI VARIABLE ANALYSIS\nSecureBoot:        Enabled (value=1)\nSetupMode:         Disabled (value=0)\nPK:                Lenovo Ltd. (legitimate)\nKEK:               Microsoft + Lenovo (legitimate)\ndb:                MODIFIED - contains unauthorized entry [!]\n  [!] Unknown certificate: CN=Secure Boot Signing, O=Unknown\n  [!] Not present in vendor baseline db\nMOK:               1 unauthorized key enrolled [!]\n  [!] MOK enrolled: CN=shim, self-signed, not from distro vendor\n\nESP PARTITION ANALYSIS\nTotal EFI binaries:     12\nVerified (signed):      9\nModified (hash mismatch): 2 [!]\nUnauthorized:           1 [!]\n\n  [!] EFI/Microsoft/Boot/bootmgfw.efi - MODIFIED\n      Expected SHA-256: a3f2c8...\n      Current SHA-256:  7b1e4d...\n      Signature:        Valid (signed with unauthorized MOK)\n\n  [!] EFI/Microsoft/Boot/grubx64.efi - UNAUTHORIZED\n      SHA-256:  e9c1a7...\n      Not present in vendor baseline\n      Matches BlackLotus stage-2 loader signature\n\n  [!] system32/ directory present on ESP (BlackLotus artifact)\n      Directory empty (files deleted post-installation)\n\nFIRMWARE MODULE ANALYSIS\nTotal firmware modules:   312\nVendor baseline modules:  312\nAdded modules:            0\nModified modules:         0\nSPI flash integrity:      CLEAN (no firmware-level implant detected)\n\nBOOTKIT ATTRIBUTION\nFamily:           BlackLotus\nConfidence:       HIGH\nPersistence:      ESP-based (not SPI flash)\nBypass Method:    CVE-2022-21894 (baton drop)\nMITRE ATT&CK:    T1542.003 (Bootkit), T1553.006 (Code Signing Policy Modification)\n\nINDICATORS OF COMPROMISE\n- ESP:/system32/ directory (empty, post-cleanup artifact)\n- ESP:/EFI/Microsoft/Boot/grubx64.efi (unauthorized, BlackLotus loader)\n- Modified bootmgfw.efi (re-signed with attacker MOK)\n- HVCI disabled via registry: DeviceGuard\\...\\Enabled = 0\n- Unauthorized MOK enrollment in UEFI variable store\n- MeasuredBoot log shows EV_EFI_Boot_Services_Application for grubx64.efi\n\nREMEDIATION\n1. Replace bootmgfw.efi with authentic copy from Windows installation media\n2. Delete unauthorized grubx64.efi and system32/ directory from ESP\n3. Reset Secure Boot keys to factory defaults (clear MOK, restore PK/KEK/db)\n4. Enable BIOS write protection and verify SPI flash lock bits\n5. Apply firmware update to latest version (patches CVE-2022-21894)\n6. Enable HVCI and verify via Group Policy\n7. Reimport only trusted certificates into Secure Boot db\n8. Monitor MeasuredBoot logs for anomalous boot component loading\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("analyzing-uefi-bootkit-persistence-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

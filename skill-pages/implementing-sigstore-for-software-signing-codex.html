@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>implementing-sigstore-for-software-signing - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/implementing-sigstore-for-software-signing-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>implementing-sigstore-for-software-signing</h1>
+      <p class="description">'Implements Sigstore-based software signing and verification using Cosign</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>implementing-sigstore-for-software-signing</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>implementing-sigstore-for-software-signing</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Implements Sigstore-based software signing and verification using Cosign</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose implementing-sigstore-for-software-signing, then write the task. Fallback prompt: Use the implementing-sigstore-for-software-signing skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Implementing Sigstore for Software Signing</h2>
+<h3>When to Use</h3>
+<ul>
+<li>Signing container images and software artifacts without managing long-lived cryptographic keys</li>
+<li>Establishing verifiable provenance for build outputs in CI/CD pipelines using OIDC identity binding</li>
+<li>Querying the Rekor transparency log to audit when and by whom an artifact was signed</li>
+<li>Verifying that container images pulled from registries were signed by authorized identities and issuers</li>
+<li>Integrating Sigstore verification into Kubernetes admission controllers to enforce signed-image policies</li>
+</ul>
+<p><strong>Do not use</strong> for signing artifacts that require air-gapped or offline signing workflows where OIDC authentication is unavailable, for environments that cannot reach the public Sigstore infrastructure (Fulcio, Rekor) and have no private instance deployed, or as a replacement for traditional PGP/GPG signing where regulatory compliance mandates specific key management procedures.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>Cosign CLI v2.4+ installed (<code>go install github.com/sigstore/cosign/v2/cmd/cosign@latest</code> or binary release)</li>
+<li>Access to an OIDC identity provider supported by Fulcio (Google, GitHub, Microsoft, or a custom OIDC issuer)</li>
+<li>Container registry credentials (for signing container images) with push access to store signature objects</li>
+<li>Python 3.9+ with <code>sigstore</code>, <code>requests</code>, and <code>cryptography</code> packages for the automation agent</li>
+<li>Network access to <code>fulcio.sigstore.dev</code>, <code>rekor.sigstore.dev</code>, and <code>tuf-repo-cdn.sigstore.dev</code> (or private Sigstore instance URLs)</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Install and Configure Cosign</h4>
+<p>Install Cosign and verify it can reach the Sigstore infrastructure:</p>
+<ul>
+<li><strong>Install from binary release</strong>: Download the appropriate binary from the Cosign GitHub releases page and verify its checksum. On Linux: <code>curl -LO https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64 &amp;&amp; chmod +x cosign-linux-amd64 &amp;&amp; sudo mv cosign-linux-amd64 /usr/local/bin/cosign</code></li>
+<li><strong>Verify installation</strong>: Run <code>cosign version</code> to confirm the version and check connectivity to Sigstore services with <code>cosign initialize</code> which fetches the TUF root of trust</li>
+<li><strong>Configure custom infrastructure</strong> (optional): If running a private Sigstore stack, set <code>--fulcio-url</code>, <code>--rekor-url</code>, and <code>--oidc-issuer</code> flags or use environment variables <code>COSIGN_REKOR_URL</code> and <code>COSIGN_FULCIO_URL</code></li>
+</ul>
+<h4>Step 2: Keyless Signing with Cosign and Fulcio</h4>
+<p>Perform identity-based signing where Fulcio issues a short-lived certificate bound to your OIDC identity:</p>
+<ul>
+<li><strong>Sign a container image</strong>: Run <code>cosign sign &lt;IMAGE_DIGEST&gt;</code> which triggers an OIDC authentication flow. Cosign generates an ephemeral key pair, obtains a short-lived certificate from Fulcio binding the public key to the OIDC identity, signs the image digest, and records the signing event in Rekor. The private key is destroyed immediately after signing.</li>
+<li><strong>Sign a blob (file)</strong>: Run <code>cosign sign-blob &lt;file&gt; --bundle artifact.sigstore.json</code> to sign arbitrary files. The bundle contains the signature, certificate, timestamp, and Rekor inclusion proof.</li>
+<li><strong>Non-interactive signing in CI</strong>: Set <code>SIGSTORE_ID_TOKEN</code> environment variable with a valid OIDC token (e.g., from GitHub Actions OIDC or GCP workload identity) to skip the browser-based authentication flow:</li>
+</ul>
+<pre><code>  export SIGSTORE_ID_TOKEN=$(curl -sH &quot;Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN&quot; \
+    &quot;$ACTIONS_ID_TOKEN_REQUEST_URL&amp;audience=sigstore&quot; | jq -r '.value')
+  cosign sign $IMAGE_DIGEST</code></pre>
+<ul>
+<li><strong>Supported OIDC providers</strong>: Google (<code>https://accounts.google.com</code>), GitHub (<code>https://github.com/login/oauth</code>), Microsoft (<code>https://login.microsoftonline.com</code>), GitLab (<code>https://gitlab.com</code>), and custom providers registered with a private Fulcio instance</li>
+</ul>
+<h4>Step 3: Verify Signed Artifacts</h4>
+<p>Verify that artifacts were signed by expected identities from expected OIDC issuers:</p>
+<ul>
+<li><strong>Verify a container image</strong>: Run <code>cosign verify &lt;IMAGE_URI&gt; --certificate-identity=name@example.com --certificate-oidc-issuer=https://accounts.google.com</code> to confirm the image was signed by the specified identity. Cosign validates the certificate chain, checks the Rekor inclusion proof, and verifies the signature matches the current image digest.</li>
+<li><strong>Verify a signed blob</strong>: Run <code>cosign verify-blob &lt;file&gt; --bundle artifact.sigstore.json --certificate-identity=name@example.com --certificate-oidc-issuer=https://accounts.google.com</code></li>
+<li><strong>Regex matching for CI identities</strong>: Use <code>--certificate-identity-regexp</code> to match CI workflow identities:</li>
+</ul>
+<pre><code>  cosign verify $IMAGE --certificate-identity-regexp=&quot;https://github.com/myorg/myrepo/.*&quot; \
+    --certificate-oidc-issuer=https://token.actions.githubusercontent.com</code></pre>
+<ul>
+<li><strong>Verification failure modes</strong>: Cosign returns a non-zero exit code on failure. Common failures include certificate identity mismatch, expired certificates without a valid Rekor timestamp, missing Rekor entry, and image digest mismatch (image was modified after signing).</li>
+</ul>
+<h4>Step 4: Query the Rekor Transparency Log</h4>
+<p>Search and verify entries in the Rekor transparency log to audit signing events:</p>
+<ul>
+<li><strong>Search by email identity</strong>: Use <code>rekor-cli search --email user@example.com</code> to find all signing events for an identity</li>
+<li><strong>Search by artifact hash</strong>: Use <code>rekor-cli search --sha sha256:&lt;hash&gt;</code> to find signing events for a specific artifact</li>
+<li><strong>Retrieve and verify an entry</strong>: Use <code>rekor-cli get --uuid &lt;entry_uuid&gt;</code> to retrieve full entry details including the certificate, signature, and artifact hash</li>
+<li><strong>Verify log inclusion</strong>: Use <code>rekor-cli verify --entry-uuid &lt;uuid&gt;</code> to verify the entry's inclusion proof against the signed tree head, confirming the entry exists in the append-only log and has not been tampered with</li>
+<li><strong>REST API queries</strong>: Query <code>https://rekor.sigstore.dev/api/v1/index/retrieve</code> with POST body <code>{&quot;hash&quot;: &quot;sha256:&lt;hash&gt;&quot;}</code> to retrieve entry UUIDs, then fetch full entries from <code>/api/v1/log/entries/&lt;uuid&gt;</code></li>
+<li><strong>Monitor for consistency</strong>: Use the rekor-monitor tool or Omniwitness to continuously verify the log remains append-only and entries are never mutated or removed</li>
+</ul>
+<h4>Step 5: Integrate into CI/CD Pipelines</h4>
+<p>Embed signing and verification into build and deployment pipelines:</p>
+<ul>
+<li><strong>GitHub Actions</strong>: Use <code>sigstore/cosign-installer</code> action to install Cosign, then sign images using the GitHub OIDC token as the identity. The signing identity will be the workflow URL (e.g., <code>https://github.com/org/repo/.github/workflows/build.yml@refs/heads/main</code>).</li>
+<li><strong>Kubernetes admission enforcement</strong>: Deploy Sigstore Policy Controller or Kyverno with Cosign verification policies to reject unsigned or incorrectly signed images at admission time</li>
+<li><strong>Supply chain metadata</strong>: Use <code>cosign attest</code> to attach in-toto attestations (SLSA provenance, SBOM, vulnerability scan results) to images, signed with the same keyless flow, enabling consumers to verify both the artifact and its build metadata</li>
+</ul>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | <strong>Keyless Signing</strong> | Identity-based signing that uses short-lived certificates from Fulcio bound to OIDC identities instead of long-lived cryptographic keys, eliminating key management overhead | | <strong>Fulcio</strong> | Sigstore's certificate authority that issues short-lived X.509 certificates after verifying OIDC tokens, binding an ephemeral public key to a verified identity | | <strong>Rekor</strong> | Sigstore's immutable, append-only transparency log that records signing events with timestamps, enabling auditors to verify when and by whom an artifact was signed | | <strong>Cosign</strong> | The primary CLI tool for signing and verifying container images and blobs using the Sigstore infrastructure (Fulcio + Rekor) | | <strong>TUF Root of Trust</strong> | The Update Framework distribution mechanism for Sigstore's root CA certificate and Rekor public key, ensuring clients trust the correct Sigstore infrastructure | | <strong>OIDC Identity Binding</strong> | The process where Fulcio verifies a user's identity through an OpenID Connect token and binds it to a short-lived signing certificate | | <strong>Inclusion Proof</strong> | A cryptographic proof from Rekor demonstrating that a signing event entry exists within the transparency log's Merkle tree |</p>
+<h3>Tools &amp; Systems</h3>
+<ul>
+<li><strong>Cosign</strong>: CLI tool for signing containers and blobs, verifying signatures, and attaching attestations using Sigstore keyless signing or traditional key-based signing</li>
+<li><strong>Fulcio</strong>: Free root certificate authority for code signing certificates issued based on OIDC identity verification with a validity period of approximately 10 minutes</li>
+<li><strong>Rekor</strong>: Transparency log server providing tamper-evident storage of signing metadata, searchable by identity, artifact hash, or public key</li>
+<li><strong>Sigstore Policy Controller</strong>: Kubernetes admission webhook that enforces image signing policies by verifying Cosign signatures and attestations before allowing pod creation</li>
+<li><strong>rekor-cli</strong>: Command-line client for querying, uploading, and verifying entries in the Rekor transparency log</li>
+</ul>
+<h3>Common Scenarios</h3>
+<h4>Scenario: Securing a Container Image Build Pipeline with Keyless Signing</h4>
+<p><strong>Context</strong>: A DevOps team builds container images in GitHub Actions and deploys to a Kubernetes cluster. They need to ensure only images built by their CI pipeline can be deployed, preventing supply chain attacks from compromised registries or unauthorized pushes.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Add <code>sigstore/cosign-installer@v3</code> to the GitHub Actions workflow and enable OIDC token permissions with <code>id-token: write</code></li>
+<li>After building and pushing the image, sign it with <code>cosign sign $IMAGE_DIGEST</code> using the GitHub Actions OIDC identity automatically</li>
+<li>Deploy Sigstore Policy Controller to the Kubernetes cluster with a ClusterImagePolicy requiring signatures from <code>--certificate-identity-regexp=https://github.com/myorg/myrepo/.*</code> and <code>--certificate-oidc-issuer=https://token.actions.githubusercontent.com</code></li>
+<li>Verify the signing entry appears in Rekor by querying with the image digest hash to confirm the transparency log recorded the event</li>
+<li>Test the admission controller by attempting to deploy an unsigned image and confirming it is rejected with a policy violation error</li>
+</ol>
+<p><strong>Pitfalls</strong>:</p>
+<ul>
+<li>Signing the image tag instead of the digest (<code>cosign sign myimage:latest</code> vs <code>cosign sign myimage@sha256:abc...</code>) means verification breaks when the tag is updated to point to a different digest</li>
+<li>Not pinning the <code>--certificate-oidc-issuer</code> during verification allows signatures from any OIDC provider to pass, defeating the purpose of identity binding</li>
+<li>Forgetting to set <code>id-token: write</code> permission in GitHub Actions results in OIDC token retrieval failure and signing errors</li>
+<li>Using <code>--certificate-identity-regexp=.*</code> in production verification policies effectively disables identity verification</li>
+</ul>
+<h3>Output Format</h3>
+<pre><code>## Sigstore Signing Verification Report
+
+**Artifact**: ghcr.io/myorg/myapp@sha256:a1b2c3d4...
+**Verification Status**: PASSED
+
+**Certificate Details**:
+  Subject: https://github.com/myorg/myapp/.github/workflows/build.yml@refs/heads/main
+  Issuer: https://token.actions.githubusercontent.com
+  Valid From: 2026-03-19T10:00:00Z
+  Valid To: 2026-03-19T10:10:00Z
+
+**Rekor Entry**:
+  UUID: 24296fb24b8ad77a8d52...
+  Log Index: 89234567
+  Integrated Time: 2026-03-19T10:00:05Z
+  Inclusion Proof: VERIFIED (tree size: 92000000, root hash: e4f5a6...)
+
+**Policy Check**: Image signed by authorized CI workflow identity</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: implementing-sigstore-for-software-signing\ndisplay_name: implementing-sigstore-for-software-signing\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# implementing-sigstore-for-software-signing - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `implementing-sigstore-for-software-signing` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- Signing container images and software artifacts without managing long-lived cryptographic keys\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose implementing-sigstore-for-software-signing, then write the task. Fallback prompt: Use the implementing-sigstore-for-software-signing skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `implementing-sigstore-for-software-signing` |\n| Canonical name | `implementing-sigstore-for-software-signing` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\n- Signing container images and software artifacts without managing long-lived cryptographic keys\n\n## Original SKILL.md\n\n---\nname: implementing-sigstore-for-software-signing\ndescription: 'Implements Sigstore-based software signing and verification using Cosign\n  keyless signing, Rekor transparency log verification, and Fulcio certificate authority\n  integration to establish cryptographic provenance for container images, binaries,\n  and software artifacts. The practitioner configures OIDC-based identity binding,\n  verifies signing events against the Rekor transparency log, and integrates signing\n  workflows into CI/CD pipelines. Activates for requests involving software supply\n  chain signing, keyless container signing, Sigstore deployment, or artifact provenance\n  verification.\n\n  '\ndomain: cybersecurity\nsubdomain: supply-chain-security\ntags:\n- sigstore\n- cosign\n- rekor\n- fulcio\n- software-signing\n- supply-chain\n- keyless-signing\n- OIDC\n- transparency-log\nversion: 1.0.0\nauthor: mukul975\nlicense: Apache-2.0\nnist_csf:\n- GV.SC-01\n- GV.SC-03\n- GV.SC-06\n- GV.SC-07\nmitre_attack:\n- T1078\n- T1190\n- T1059\n- T1610\n- T1611\n---\n# Implementing Sigstore for Software Signing\n\n## When to Use\n\n- Signing container images and software artifacts without managing long-lived cryptographic keys\n- Establishing verifiable provenance for build outputs in CI/CD pipelines using OIDC identity binding\n- Querying the Rekor transparency log to audit when and by whom an artifact was signed\n- Verifying that container images pulled from registries were signed by authorized identities and issuers\n- Integrating Sigstore verification into Kubernetes admission controllers to enforce signed-image policies\n\n**Do not use** for signing artifacts that require air-gapped or offline signing workflows where OIDC authentication is unavailable, for environments that cannot reach the public Sigstore infrastructure (Fulcio, Rekor) and have no private instance deployed, or as a replacement for traditional PGP/GPG signing where regulatory compliance mandates specific key management procedures.\n\n## Prerequisites\n\n- Cosign CLI v2.4+ installed (`go install github.com/sigstore/cosign/v2/cmd/cosign@latest` or binary release)\n- Access to an OIDC identity provider supported by Fulcio (Google, GitHub, Microsoft, or a custom OIDC issuer)\n- Container registry credentials (for signing container images) with push access to store signature objects\n- Python 3.9+ with `sigstore`, `requests`, and `cryptography` packages for the automation agent\n- Network access to `fulcio.sigstore.dev`, `rekor.sigstore.dev`, and `tuf-repo-cdn.sigstore.dev` (or private Sigstore instance URLs)\n\n## Workflow\n\n### Step 1: Install and Configure Cosign\n\nInstall Cosign and verify it can reach the Sigstore infrastructure:\n\n- **Install from binary release**: Download the appropriate binary from the Cosign GitHub releases page and verify its checksum. On Linux: `curl -LO https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64 && chmod +x cosign-linux-amd64 && sudo mv cosign-linux-amd64 /usr/local/bin/cosign`\n- **Verify installation**: Run `cosign version` to confirm the version and check connectivity to Sigstore services with `cosign initialize` which fetches the TUF root of trust\n- **Configure custom infrastructure** (optional): If running a private Sigstore stack, set `--fulcio-url`, `--rekor-url`, and `--oidc-issuer` flags or use environment variables `COSIGN_REKOR_URL` and `COSIGN_FULCIO_URL`\n\n### Step 2: Keyless Signing with Cosign and Fulcio\n\nPerform identity-based signing where Fulcio issues a short-lived certificate bound to your OIDC identity:\n\n- **Sign a container image**: Run `cosign sign \u003cIMAGE_DIGEST>` which triggers an OIDC authentication flow. Cosign generates an ephemeral key pair, obtains a short-lived certificate from Fulcio binding the public key to the OIDC identity, signs the image digest, and records the signing event in Rekor. The private key is destroyed immediately after signing.\n- **Sign a blob (file)**: Run `cosign sign-blob \u003cfile> --bundle artifact.sigstore.json` to sign arbitrary files. The bundle contains the signature, certificate, timestamp, and Rekor inclusion proof.\n- **Non-interactive signing in CI**: Set `SIGSTORE_ID_TOKEN` environment variable with a valid OIDC token (e.g., from GitHub Actions OIDC or GCP workload identity) to skip the browser-based authentication flow:\n  ```bash\n  export SIGSTORE_ID_TOKEN=$(curl -sH \"Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN\" \\\n    \"$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sigstore\" | jq -r '.value')\n  cosign sign $IMAGE_DIGEST\n  ```\n- **Supported OIDC providers**: Google (`https://accounts.google.com`), GitHub (`https://github.com/login/oauth`), Microsoft (`https://login.microsoftonline.com`), GitLab (`https://gitlab.com`), and custom providers registered with a private Fulcio instance\n\n### Step 3: Verify Signed Artifacts\n\nVerify that artifacts were signed by expected identities from expected OIDC issuers:\n\n- **Verify a container image**: Run `cosign verify \u003cIMAGE_URI> --certificate-identity=name@example.com --certificate-oidc-issuer=https://accounts.google.com` to confirm the image was signed by the specified identity. Cosign validates the certificate chain, checks the Rekor inclusion proof, and verifies the signature matches the current image digest.\n- **Verify a signed blob**: Run `cosign verify-blob \u003cfile> --bundle artifact.sigstore.json --certificate-identity=name@example.com --certificate-oidc-issuer=https://accounts.google.com`\n- **Regex matching for CI identities**: Use `--certificate-identity-regexp` to match CI workflow identities:\n  ```bash\n  cosign verify $IMAGE --certificate-identity-regexp=\"https://github.com/myorg/myrepo/.*\" \\\n    --certificate-oidc-issuer=https://token.actions.githubusercontent.com\n  ```\n- **Verification failure modes**: Cosign returns a non-zero exit code on failure. Common failures include certificate identity mismatch, expired certificates without a valid Rekor timestamp, missing Rekor entry, and image digest mismatch (image was modified after signing).\n\n### Step 4: Query the Rekor Transparency Log\n\nSearch and verify entries in the Rekor transparency log to audit signing events:\n\n- **Search by email identity**: Use `rekor-cli search --email user@example.com` to find all signing events for an identity\n- **Search by artifact hash**: Use `rekor-cli search --sha sha256:\u003chash>` to find signing events for a specific artifact\n- **Retrieve and verify an entry**: Use `rekor-cli get --uuid \u003centry_uuid>` to retrieve full entry details including the certificate, signature, and artifact hash\n- **Verify log inclusion**: Use `rekor-cli verify --entry-uuid \u003cuuid>` to verify the entry's inclusion proof against the signed tree head, confirming the entry exists in the append-only log and has not been tampered with\n- **REST API queries**: Query `https://rekor.sigstore.dev/api/v1/index/retrieve` with POST body `{\"hash\": \"sha256:\u003chash>\"}` to retrieve entry UUIDs, then fetch full entries from `/api/v1/log/entries/\u003cuuid>`\n- **Monitor for consistency**: Use the rekor-monitor tool or Omniwitness to continuously verify the log remains append-only and entries are never mutated or removed\n\n### Step 5: Integrate into CI/CD Pipelines\n\nEmbed signing and verification into build and deployment pipelines:\n\n- **GitHub Actions**: Use `sigstore/cosign-installer` action to install Cosign, then sign images using the GitHub OIDC token as the identity. The signing identity will be the workflow URL (e.g., `https://github.com/org/repo/.github/workflows/build.yml@refs/heads/main`).\n- **Kubernetes admission enforcement**: Deploy Sigstore Policy Controller or Kyverno with Cosign verification policies to reject unsigned or incorrectly signed images at admission time\n- **Supply chain metadata**: Use `cosign attest` to attach in-toto attestations (SLSA provenance, SBOM, vulnerability scan results) to images, signed with the same keyless flow, enabling consumers to verify both the artifact and its build metadata\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| **Keyless Signing** | Identity-based signing that uses short-lived certificates from Fulcio bound to OIDC identities instead of long-lived cryptographic keys, eliminating key management overhead |\n| **Fulcio** | Sigstore's certificate authority that issues short-lived X.509 certificates after verifying OIDC tokens, binding an ephemeral public key to a verified identity |\n| **Rekor** | Sigstore's immutable, append-only transparency log that records signing events with timestamps, enabling auditors to verify when and by whom an artifact was signed |\n| **Cosign** | The primary CLI tool for signing and verifying container images and blobs using the Sigstore infrastructure (Fulcio + Rekor) |\n| **TUF Root of Trust** | The Update Framework distribution mechanism for Sigstore's root CA certificate and Rekor public key, ensuring clients trust the correct Sigstore infrastructure |\n| **OIDC Identity Binding** | The process where Fulcio verifies a user's identity through an OpenID Connect token and binds it to a short-lived signing certificate |\n| **Inclusion Proof** | A cryptographic proof from Rekor demonstrating that a signing event entry exists within the transparency log's Merkle tree |\n\n## Tools & Systems\n\n- **Cosign**: CLI tool for signing containers and blobs, verifying signatures, and attaching attestations using Sigstore keyless signing or traditional key-based signing\n- **Fulcio**: Free root certificate authority for code signing certificates issued based on OIDC identity verification with a validity period of approximately 10 minutes\n- **Rekor**: Transparency log server providing tamper-evident storage of signing metadata, searchable by identity, artifact hash, or public key\n- **Sigstore Policy Controller**: Kubernetes admission webhook that enforces image signing policies by verifying Cosign signatures and attestations before allowing pod creation\n- **rekor-cli**: Command-line client for querying, uploading, and verifying entries in the Rekor transparency log\n\n## Common Scenarios\n\n### Scenario: Securing a Container Image Build Pipeline with Keyless Signing\n\n**Context**: A DevOps team builds container images in GitHub Actions and deploys to a Kubernetes cluster. They need to ensure only images built by their CI pipeline can be deployed, preventing supply chain attacks from compromised registries or unauthorized pushes.\n\n**Approach**:\n1. Add `sigstore/cosign-installer@v3` to the GitHub Actions workflow and enable OIDC token permissions with `id-token: write`\n2. After building and pushing the image, sign it with `cosign sign $IMAGE_DIGEST` using the GitHub Actions OIDC identity automatically\n3. Deploy Sigstore Policy Controller to the Kubernetes cluster with a ClusterImagePolicy requiring signatures from `--certificate-identity-regexp=https://github.com/myorg/myrepo/.*` and `--certificate-oidc-issuer=https://token.actions.githubusercontent.com`\n4. Verify the signing entry appears in Rekor by querying with the image digest hash to confirm the transparency log recorded the event\n5. Test the admission controller by attempting to deploy an unsigned image and confirming it is rejected with a policy violation error\n\n**Pitfalls**:\n- Signing the image tag instead of the digest (`cosign sign myimage:latest` vs `cosign sign myimage@sha256:abc...`) means verification breaks when the tag is updated to point to a different digest\n- Not pinning the `--certificate-oidc-issuer` during verification allows signatures from any OIDC provider to pass, defeating the purpose of identity binding\n- Forgetting to set `id-token: write` permission in GitHub Actions results in OIDC token retrieval failure and signing errors\n- Using `--certificate-identity-regexp=.*` in production verification policies effectively disables identity verification\n\n## Output Format\n\n```\n## Sigstore Signing Verification Report\n\n**Artifact**: ghcr.io/myorg/myapp@sha256:a1b2c3d4...\n**Verification Status**: PASSED\n\n**Certificate Details**:\n  Subject: https://github.com/myorg/myapp/.github/workflows/build.yml@refs/heads/main\n  Issuer: https://token.actions.githubusercontent.com\n  Valid From: 2026-03-19T10:00:00Z\n  Valid To: 2026-03-19T10:10:00Z\n\n**Rekor Entry**:\n  UUID: 24296fb24b8ad77a8d52...\n  Log Index: 89234567\n  Integrated Time: 2026-03-19T10:00:05Z\n  Inclusion Proof: VERIFIED (tree size: 92000000, root hash: e4f5a6...)\n\n**Policy Check**: Image signed by authorized CI workflow identity\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("implementing-sigstore-for-software-signing-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

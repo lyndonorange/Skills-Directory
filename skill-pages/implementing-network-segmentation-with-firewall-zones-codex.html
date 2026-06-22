@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>implementing-network-segmentation-with-firewall-zones - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/implementing-network-segmentation-with-firewall-zones-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>implementing-network-segmentation-with-firewall-zones</h1>
+      <p class="description">Design and implement network segmentation using firewall security zones,</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>implementing-network-segmentation-with-firewall-zones</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>implementing-network-segmentation-with-firewall-zones</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Design and implement network segmentation using firewall security zones,</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose implementing-network-segmentation-with-firewall-zones, then write the task. Fallback prompt: Use the implementing-network-segmentation-with-firewall-zones skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Implementing Network Segmentation with Firewall Zones</h2>
+<h3>Overview</h3>
+<p>Network segmentation divides a flat network into isolated security zones with firewall-enforced boundaries to contain breaches, restrict lateral movement, and enforce least-privilege access between workloads. Segmentation is a foundational control required by PCI DSS, HIPAA, NIST 800-53, and zero trust architectures. Modern segmentation combines traditional VLAN-based approaches with microsegmentation at the workload level for granular east-west traffic control. This skill covers designing zone architectures, configuring inter-zone firewall policies, implementing VLAN segmentation on switches, and deploying microsegmentation for dynamic environments.</p>
+<h3>When to Use</h3>
+<ul>
+<li>When deploying or configuring implementing network segmentation with firewall zones capabilities in your environment</li>
+<li>When establishing security controls aligned to compliance requirements</li>
+<li>When building or improving security architecture for this domain</li>
+<li>When conducting security assessments that require this implementation</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Network topology documentation with asset inventory</li>
+<li>Firewall supporting zone-based policies (Palo Alto, Fortinet, Cisco Firepower)</li>
+<li>Managed switches with VLAN support (802.1Q trunking)</li>
+<li>Traffic flow documentation or NetFlow data for baseline analysis</li>
+<li>Compliance requirements (PCI DSS scope, HIPAA ePHI boundaries)</li>
+</ul>
+<h3>Core Concepts</h3>
+<h4>Zone Architecture Tiers</h4>
+<p>| Zone | Trust Level | Examples | Access Policy | |------|-------------|----------|---------------| | <strong>Internet</strong> | None | Public internet | Default deny inbound | | <strong>DMZ</strong> | Low | Web servers, mail relays, DNS | Limited inbound, restricted outbound | | <strong>Guest</strong> | Low | Guest WiFi, visitor network | Internet only, no internal access | | <strong>Corporate</strong> | Medium | Employee workstations, printers | Controlled access to internal resources | | <strong>Server/Data Center</strong> | High | Application servers, databases | Strict ACLs, limited admin access | | <strong>PCI CDE</strong> | Critical | Payment systems, card data | PCI DSS compliant isolation | | <strong>Management</strong> | Critical | Network devices, hypervisors, IPMI | Highly restricted, jump box only | | <strong>OT/SCADA</strong> | Critical | Industrial control systems | Air-gapped or strictly firewalled |</p>
+<h4>Segmentation Approaches</h4>
+<p>| Approach | Scope | Granularity | Use Case | |----------|-------|-------------|----------| | <strong>VLAN Segmentation</strong> | Layer 2 | Subnet-level | Department separation, guest isolation | | <strong>Firewall Zones</strong> | Layer 3-7 | Zone-to-zone | Inter-zone policy enforcement | | <strong>ACLs on Routers</strong> | Layer 3-4 | Subnet/port | Quick filtering at routing boundaries | | <strong>Microsegmentation</strong> | Layer 3-7 | Workload-level | Zero trust, container environments | | <strong>SGT/TrustSec</strong> | Layer 2-7 | Tag-based | Identity-based segmentation |</p>
+<h3>Workflow</h3>
+<h4>Step 1: Map Traffic Flows and Define Zones</h4>
+<p>Before implementing segmentation, capture baseline traffic:</p>
+<pre><code># Capture NetFlow data to understand existing traffic patterns
+nfdump -R /var/cache/nfdump/ -s srcip/bytes -n 50
+
+# Identify east-west traffic between subnets
+nfdump -R /var/cache/nfdump/ -s record/bytes \
+  'src net 10.0.0.0/8 and dst net 10.0.0.0/8' -n 100
+
+# Map application dependencies
+# Document which servers need to communicate with which other servers</code></pre>
+<h4>Step 2: Configure VLANs on Switches</h4>
+<pre><code>! Core switch VLAN configuration
+vlan 10
+ name Management
+vlan 20
+ name Corporate-Users
+vlan 30
+ name Servers
+vlan 40
+ name PCI-CDE
+vlan 50
+ name Guest
+vlan 60
+ name DMZ
+vlan 99
+ name Native-Unused
+
+! Trunk port to firewall
+interface GigabitEthernet1/0/1
+ description Trunk-to-Firewall
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20,30,40,50,60
+ switchport trunk native vlan 99
+ switchport nonegotiate
+
+! Access port for corporate users
+interface range GigabitEthernet1/0/2-24
+ switchport mode access
+ switchport access vlan 20
+ spanning-tree portfast
+
+! Access port for servers
+interface range GigabitEthernet1/0/25-36
+ switchport mode access
+ switchport access vlan 30
+
+! Prevent VLAN hopping
+interface range GigabitEthernet1/0/37-48
+ switchport mode access
+ switchport access vlan 99
+ shutdown</code></pre>
+<h4>Step 3: Configure Firewall Zone Policies</h4>
+<p><strong>Palo Alto zone-based policy:</strong></p>
+<pre><code># Define zones on firewall sub-interfaces
+set network interface ethernet ethernet1/1 layer3 units ethernet1/1.10 tag 10 ip 10.0.10.1/24
+set network interface ethernet ethernet1/1 layer3 units ethernet1/1.20 tag 20 ip 10.0.20.1/24
+set network interface ethernet ethernet1/1 layer3 units ethernet1/1.30 tag 30 ip 10.0.30.1/24
+set network interface ethernet ethernet1/1 layer3 units ethernet1/1.40 tag 40 ip 10.0.40.1/24
+
+set zone Management network layer3 ethernet1/1.10
+set zone Corporate network layer3 ethernet1/1.20
+set zone Servers network layer3 ethernet1/1.30
+set zone PCI-CDE network layer3 ethernet1/1.40
+
+# Inter-zone policies (deny by default, explicitly allow)
+
+# Corporate -&gt; Servers (only specific apps)
+set rulebase security rules Corp-to-Servers from Corporate to Servers
+set rulebase security rules Corp-to-Servers application [ web-browsing ssl dns smtp ]
+set rulebase security rules Corp-to-Servers action allow
+set rulebase security rules Corp-to-Servers profile-setting group Standard-Profiles
+
+# Corporate -&gt; PCI (DENY)
+set rulebase security rules Corp-to-PCI from Corporate to PCI-CDE
+set rulebase security rules Corp-to-PCI action deny log-end yes
+
+# Servers -&gt; PCI (only payment processing)
+set rulebase security rules Servers-to-PCI from Servers to PCI-CDE
+set rulebase security rules Servers-to-PCI source [ 10.0.30.10 ]
+set rulebase security rules Servers-to-PCI destination [ 10.0.40.10 ]
+set rulebase security rules Servers-to-PCI application [ ssl ]
+set rulebase security rules Servers-to-PCI service service-https
+set rulebase security rules Servers-to-PCI action allow
+
+# Management -&gt; All (admin access via jump box)
+set rulebase security rules Mgmt-Admin from Management to [ Servers PCI-CDE ]
+set rulebase security rules Mgmt-Admin source [ 10.0.10.50 ]
+set rulebase security rules Mgmt-Admin application [ ssh rdp ]
+set rulebase security rules Mgmt-Admin source-user [ admin-group ]
+set rulebase security rules Mgmt-Admin action allow
+
+# Intra-zone deny (prevent lateral movement within zone)
+set rulebase security rules Deny-Intrazone from Corporate to Corporate
+set rulebase security rules Deny-Intrazone action deny log-end yes
+
+# Default deny all
+set rulebase security rules Deny-All from any to any
+set rulebase security rules Deny-All action deny log-end yes</code></pre>
+<h4>Step 4: Implement Inter-VLAN Routing ACLs</h4>
+<p>For additional layer 3 filtering on the router/L3 switch:</p>
+<pre><code>! ACL: Corporate can only reach specific server ports
+ip access-list extended CORP-TO-SERVERS
+ permit tcp 10.0.20.0 0.0.0.255 10.0.30.0 0.0.0.255 eq 80
+ permit tcp 10.0.20.0 0.0.0.255 10.0.30.0 0.0.0.255 eq 443
+ permit tcp 10.0.20.0 0.0.0.255 10.0.30.0 0.0.0.255 eq 25
+ permit udp 10.0.20.0 0.0.0.255 10.0.30.10 0.0.0.0 eq 53
+ deny ip 10.0.20.0 0.0.0.255 10.0.30.0 0.0.0.255 log
+
+! ACL: PCI CDE isolation
+ip access-list extended PCI-ISOLATION
+ permit tcp host 10.0.30.10 host 10.0.40.10 eq 443
+ permit tcp 10.0.10.50 0.0.0.0 10.0.40.0 0.0.0.255 eq 22
+ deny ip any 10.0.40.0 0.0.0.255 log
+
+! Apply ACLs to VLAN interfaces
+interface Vlan20
+ ip address 10.0.20.1 255.255.255.0
+ ip access-group CORP-TO-SERVERS out
+
+interface Vlan40
+ ip address 10.0.40.1 255.255.255.0
+ ip access-group PCI-ISOLATION in</code></pre>
+<h4>Step 5: Validate Segmentation</h4>
+<pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Network segmentation validation - tests connectivity between zones.&quot;&quot;&quot;
+
+import subprocess
+import sys
+import json
+from datetime import datetime
+
+
+class SegmentationValidator:
+    &quot;&quot;&quot;Test network segmentation controls between zones.&quot;&quot;&quot;
+
+    def __init__(self):
+        self.results = []
+
+    def test_connectivity(self, src_desc: str, dst_ip: str, port: int,
+                          protocol: str = &quot;tcp&quot;, expected: str = &quot;blocked&quot;):
+        &quot;&quot;&quot;Test if connectivity exists between source and destination.&quot;&quot;&quot;
+        try:
+            if protocol == &quot;tcp&quot;:
+                cmd = [&quot;nc&quot;, &quot;-z&quot;, &quot;-w&quot;, &quot;3&quot;, dst_ip, str(port)]
+            elif protocol == &quot;udp&quot;:
+                cmd = [&quot;nc&quot;, &quot;-z&quot;, &quot;-u&quot;, &quot;-w&quot;, &quot;3&quot;, dst_ip, str(port)]
+            elif protocol == &quot;icmp&quot;:
+                cmd = [&quot;ping&quot;, &quot;-c&quot;, &quot;1&quot;, &quot;-W&quot;, &quot;3&quot;, dst_ip]
+            else:
+                return
+
+            result = subprocess.run(cmd, capture_output=True, timeout=5)
+            actual = &quot;open&quot; if result.returncode == 0 else &quot;blocked&quot;
+
+        except subprocess.TimeoutExpired:
+            actual = &quot;blocked&quot;
+        except FileNotFoundError:
+            actual = &quot;error&quot;
+
+        status = &quot;PASS&quot; if actual == expected else &quot;FAIL&quot;
+
+        self.results.append({
+            &quot;source&quot;: src_desc,
+            &quot;destination&quot;: f&quot;{dst_ip}:{port}/{protocol}&quot;,
+            &quot;expected&quot;: expected,
+            &quot;actual&quot;: actual,
+            &quot;status&quot;: status,
+        })
+
+        symbol = &quot;[+]&quot; if status == &quot;PASS&quot; else &quot;[!]&quot;
+        print(f&quot;  {symbol} {src_desc} -&gt; {dst_ip}:{port}/{protocol} &quot;
+              f&quot;| Expected: {expected} | Actual: {actual} | {status}&quot;)
+
+    def run_validation(self):
+        &quot;&quot;&quot;Run segmentation validation tests.&quot;&quot;&quot;
+        print(f&quot;\n{'='*70}&quot;)
+        print(&quot;NETWORK SEGMENTATION VALIDATION&quot;)
+        print(f&quot;{'='*70}&quot;)
+        print(f&quot;Date: {datetime.now().isoformat()}\n&quot;)
+
+        # Tests that SHOULD be blocked
+        print(&quot;[*] Testing controls that should BLOCK traffic:&quot;)
+        self.test_connectivity(&quot;Corporate&quot;, &quot;10.0.40.10&quot;, 443, &quot;tcp&quot;, &quot;blocked&quot;)
+        self.test_connectivity(&quot;Corporate&quot;, &quot;10.0.40.10&quot;, 22, &quot;tcp&quot;, &quot;blocked&quot;)
+        self.test_connectivity(&quot;Guest&quot;, &quot;10.0.30.10&quot;, 80, &quot;tcp&quot;, &quot;blocked&quot;)
+        self.test_connectivity(&quot;Guest&quot;, &quot;10.0.20.1&quot;, 0, &quot;icmp&quot;, &quot;blocked&quot;)
+
+        # Tests that SHOULD be allowed
+        print(&quot;\n[*] Testing controls that should ALLOW traffic:&quot;)
+        self.test_connectivity(&quot;Corporate&quot;, &quot;10.0.30.10&quot;, 443, &quot;tcp&quot;, &quot;open&quot;)
+        self.test_connectivity(&quot;Corporate&quot;, &quot;10.0.30.10&quot;, 80, &quot;tcp&quot;, &quot;open&quot;)
+        self.test_connectivity(&quot;Management&quot;, &quot;10.0.30.10&quot;, 22, &quot;tcp&quot;, &quot;open&quot;)
+
+        # Summary
+        passed = sum(1 for r in self.results if r[&quot;status&quot;] == &quot;PASS&quot;)
+        failed = sum(1 for r in self.results if r[&quot;status&quot;] == &quot;FAIL&quot;)
+        print(f&quot;\n{'='*70}&quot;)
+        print(f&quot;Results: {passed} PASSED, {failed} FAILED out of {len(self.results)} tests&quot;)
+
+        if failed &gt; 0:
+            print(f&quot;\n[!] FAILED TESTS:&quot;)
+            for r in self.results:
+                if r[&quot;status&quot;] == &quot;FAIL&quot;:
+                    print(f&quot;  - {r['source']} -&gt; {r['destination']}: &quot;
+                          f&quot;expected {r['expected']}, got {r['actual']}&quot;)
+
+        # Save report
+        report = {
+            &quot;date&quot;: datetime.now().isoformat(),
+            &quot;total_tests&quot;: len(self.results),
+            &quot;passed&quot;: passed,
+            &quot;failed&quot;: failed,
+            &quot;results&quot;: self.results,
+        }
+        report_path = f&quot;segmentation_test_{datetime.now().strftime('%Y%m%d')}.json&quot;
+        with open(report_path, 'w') as f:
+            json.dump(report, f, indent=2)
+        print(f&quot;\nReport saved to: {report_path}&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    validator = SegmentationValidator()
+    validator.run_validation()</code></pre>
+<h3>Best Practices</h3>
+<ul>
+<li><strong>Default Deny</strong> - Start with deny-all inter-zone rules and explicitly allow required traffic</li>
+<li><strong>Document Flows</strong> - Map all legitimate traffic flows before implementing restrictions</li>
+<li><strong>Segment by Sensitivity</strong> - Group assets by data classification and compliance scope</li>
+<li><strong>Intra-Zone Control</strong> - Block lateral movement within zones, not just between zones</li>
+<li><strong>Limit Management Access</strong> - Restrict management plane to a dedicated zone with jump boxes</li>
+<li><strong>Regular Validation</strong> - Test segmentation controls quarterly with automated tools</li>
+<li><strong>Monitor Denied Traffic</strong> - Log and review denied inter-zone traffic for policy refinement</li>
+<li><strong>PCI Scope Reduction</strong> - Use segmentation to minimize PCI DSS Cardholder Data Environment scope</li>
+</ul>
+<h3>References</h3>
+<ul>
+<li>[CISA Zero Trust Microsegmentation Guidance](https://www.cisa.gov/sites/default/files/2025-07/ZT-Microsegmentation-Guidance-Part-One_508c.pdf)</li>
+<li>[NIST SP 800-125B - Secure Virtual Network Configuration](https://csrc.nist.gov/publications/detail/sp/800-125b/final)</li>
+<li>[PCI DSS v4.0 - Network Segmentation](https://www.pcisecuritystandards.org/)</li>
+<li>[Faddom Network Segmentation Best Practices 2025](https://faddom.com/10-network-segmentation-best-practices-to-know-in-2025/)</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: implementing-network-segmentation-with-firewall-zones\ndisplay_name: implementing-network-segmentation-with-firewall-zones\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# implementing-network-segmentation-with-firewall-zones - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `implementing-network-segmentation-with-firewall-zones` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nNetwork segmentation divides a flat network into isolated security zones with firewall-enforced boundaries to contain breaches, restrict lateral movement, and enforce least-privilege access between workloads. Segmentatio\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose implementing-network-segmentation-with-firewall-zones, then write the task. Fallback prompt: Use the implementing-network-segmentation-with-firewall-zones skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `implementing-network-segmentation-with-firewall-zones` |\n| Canonical name | `implementing-network-segmentation-with-firewall-zones` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nNetwork segmentation divides a flat network into isolated security zones with firewall-enforced boundaries to contain breaches, restrict lateral movement, and enforce least-privilege access between workloads. Segmentatio\n\n## Original SKILL.md\n\n---\nname: implementing-network-segmentation-with-firewall-zones\ndescription: Design and implement network segmentation using firewall security zones,\n  VLANs, ACLs, and microsegmentation policies to restrict lateral movement and enforce\n  least-privilege network access.\ndomain: cybersecurity\nsubdomain: network-security\ntags:\n- network-segmentation\n- firewall-zones\n- vlan\n- microsegmentation\n- lateral-movement\n- zero-trust\n- acl\n- east-west-traffic\n- pci-dss\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- PR.IR-01\n- DE.CM-01\n- ID.AM-03\n- PR.DS-02\nmitre_attack:\n- T1046\n- T1040\n- T1557\n- T1071\n- T1021\n---\n\n# Implementing Network Segmentation with Firewall Zones\n\n## Overview\n\nNetwork segmentation divides a flat network into isolated security zones with firewall-enforced boundaries to contain breaches, restrict lateral movement, and enforce least-privilege access between workloads. Segmentation is a foundational control required by PCI DSS, HIPAA, NIST 800-53, and zero trust architectures. Modern segmentation combines traditional VLAN-based approaches with microsegmentation at the workload level for granular east-west traffic control. This skill covers designing zone architectures, configuring inter-zone firewall policies, implementing VLAN segmentation on switches, and deploying microsegmentation for dynamic environments.\n\n\n## When to Use\n\n- When deploying or configuring implementing network segmentation with firewall zones capabilities in your environment\n- When establishing security controls aligned to compliance requirements\n- When building or improving security architecture for this domain\n- When conducting security assessments that require this implementation\n\n## Prerequisites\n\n- Network topology documentation with asset inventory\n- Firewall supporting zone-based policies (Palo Alto, Fortinet, Cisco Firepower)\n- Managed switches with VLAN support (802.1Q trunking)\n- Traffic flow documentation or NetFlow data for baseline analysis\n- Compliance requirements (PCI DSS scope, HIPAA ePHI boundaries)\n\n## Core Concepts\n\n### Zone Architecture Tiers\n\n| Zone | Trust Level | Examples | Access Policy |\n|------|-------------|----------|---------------|\n| **Internet** | None | Public internet | Default deny inbound |\n| **DMZ** | Low | Web servers, mail relays, DNS | Limited inbound, restricted outbound |\n| **Guest** | Low | Guest WiFi, visitor network | Internet only, no internal access |\n| **Corporate** | Medium | Employee workstations, printers | Controlled access to internal resources |\n| **Server/Data Center** | High | Application servers, databases | Strict ACLs, limited admin access |\n| **PCI CDE** | Critical | Payment systems, card data | PCI DSS compliant isolation |\n| **Management** | Critical | Network devices, hypervisors, IPMI | Highly restricted, jump box only |\n| **OT/SCADA** | Critical | Industrial control systems | Air-gapped or strictly firewalled |\n\n### Segmentation Approaches\n\n| Approach | Scope | Granularity | Use Case |\n|----------|-------|-------------|----------|\n| **VLAN Segmentation** | Layer 2 | Subnet-level | Department separation, guest isolation |\n| **Firewall Zones** | Layer 3-7 | Zone-to-zone | Inter-zone policy enforcement |\n| **ACLs on Routers** | Layer 3-4 | Subnet/port | Quick filtering at routing boundaries |\n| **Microsegmentation** | Layer 3-7 | Workload-level | Zero trust, container environments |\n| **SGT/TrustSec** | Layer 2-7 | Tag-based | Identity-based segmentation |\n\n## Workflow\n\n### Step 1: Map Traffic Flows and Define Zones\n\nBefore implementing segmentation, capture baseline traffic:\n\n```bash\n# Capture NetFlow data to understand existing traffic patterns\nnfdump -R /var/cache/nfdump/ -s srcip/bytes -n 50\n\n# Identify east-west traffic between subnets\nnfdump -R /var/cache/nfdump/ -s record/bytes \\\n  'src net 10.0.0.0/8 and dst net 10.0.0.0/8' -n 100\n\n# Map application dependencies\n# Document which servers need to communicate with which other servers\n```\n\n### Step 2: Configure VLANs on Switches\n\n```\n! Core switch VLAN configuration\nvlan 10\n name Management\nvlan 20\n name Corporate-Users\nvlan 30\n name Servers\nvlan 40\n name PCI-CDE\nvlan 50\n name Guest\nvlan 60\n name DMZ\nvlan 99\n name Native-Unused\n\n! Trunk port to firewall\ninterface GigabitEthernet1/0/1\n description Trunk-to-Firewall\n switchport trunk encapsulation dot1q\n switchport mode trunk\n switchport trunk allowed vlan 10,20,30,40,50,60\n switchport trunk native vlan 99\n switchport nonegotiate\n\n! Access port for corporate users\ninterface range GigabitEthernet1/0/2-24\n switchport mode access\n switchport access vlan 20\n spanning-tree portfast\n\n! Access port for servers\ninterface range GigabitEthernet1/0/25-36\n switchport mode access\n switchport access vlan 30\n\n! Prevent VLAN hopping\ninterface range GigabitEthernet1/0/37-48\n switchport mode access\n switchport access vlan 99\n shutdown\n```\n\n### Step 3: Configure Firewall Zone Policies\n\n**Palo Alto zone-based policy:**\n\n```\n# Define zones on firewall sub-interfaces\nset network interface ethernet ethernet1/1 layer3 units ethernet1/1.10 tag 10 ip 10.0.10.1/24\nset network interface ethernet ethernet1/1 layer3 units ethernet1/1.20 tag 20 ip 10.0.20.1/24\nset network interface ethernet ethernet1/1 layer3 units ethernet1/1.30 tag 30 ip 10.0.30.1/24\nset network interface ethernet ethernet1/1 layer3 units ethernet1/1.40 tag 40 ip 10.0.40.1/24\n\nset zone Management network layer3 ethernet1/1.10\nset zone Corporate network layer3 ethernet1/1.20\nset zone Servers network layer3 ethernet1/1.30\nset zone PCI-CDE network layer3 ethernet1/1.40\n\n# Inter-zone policies (deny by default, explicitly allow)\n\n# Corporate -> Servers (only specific apps)\nset rulebase security rules Corp-to-Servers from Corporate to Servers\nset rulebase security rules Corp-to-Servers application [ web-browsing ssl dns smtp ]\nset rulebase security rules Corp-to-Servers action allow\nset rulebase security rules Corp-to-Servers profile-setting group Standard-Profiles\n\n# Corporate -> PCI (DENY)\nset rulebase security rules Corp-to-PCI from Corporate to PCI-CDE\nset rulebase security rules Corp-to-PCI action deny log-end yes\n\n# Servers -> PCI (only payment processing)\nset rulebase security rules Servers-to-PCI from Servers to PCI-CDE\nset rulebase security rules Servers-to-PCI source [ 10.0.30.10 ]\nset rulebase security rules Servers-to-PCI destination [ 10.0.40.10 ]\nset rulebase security rules Servers-to-PCI application [ ssl ]\nset rulebase security rules Servers-to-PCI service service-https\nset rulebase security rules Servers-to-PCI action allow\n\n# Management -> All (admin access via jump box)\nset rulebase security rules Mgmt-Admin from Management to [ Servers PCI-CDE ]\nset rulebase security rules Mgmt-Admin source [ 10.0.10.50 ]\nset rulebase security rules Mgmt-Admin application [ ssh rdp ]\nset rulebase security rules Mgmt-Admin source-user [ admin-group ]\nset rulebase security rules Mgmt-Admin action allow\n\n# Intra-zone deny (prevent lateral movement within zone)\nset rulebase security rules Deny-Intrazone from Corporate to Corporate\nset rulebase security rules Deny-Intrazone action deny log-end yes\n\n# Default deny all\nset rulebase security rules Deny-All from any to any\nset rulebase security rules Deny-All action deny log-end yes\n```\n\n### Step 4: Implement Inter-VLAN Routing ACLs\n\nFor additional layer 3 filtering on the router/L3 switch:\n\n```\n! ACL: Corporate can only reach specific server ports\nip access-list extended CORP-TO-SERVERS\n permit tcp 10.0.20.0 0.0.0.255 10.0.30.0 0.0.0.255 eq 80\n permit tcp 10.0.20.0 0.0.0.255 10.0.30.0 0.0.0.255 eq 443\n permit tcp 10.0.20.0 0.0.0.255 10.0.30.0 0.0.0.255 eq 25\n permit udp 10.0.20.0 0.0.0.255 10.0.30.10 0.0.0.0 eq 53\n deny ip 10.0.20.0 0.0.0.255 10.0.30.0 0.0.0.255 log\n\n! ACL: PCI CDE isolation\nip access-list extended PCI-ISOLATION\n permit tcp host 10.0.30.10 host 10.0.40.10 eq 443\n permit tcp 10.0.10.50 0.0.0.0 10.0.40.0 0.0.0.255 eq 22\n deny ip any 10.0.40.0 0.0.0.255 log\n\n! Apply ACLs to VLAN interfaces\ninterface Vlan20\n ip address 10.0.20.1 255.255.255.0\n ip access-group CORP-TO-SERVERS out\n\ninterface Vlan40\n ip address 10.0.40.1 255.255.255.0\n ip access-group PCI-ISOLATION in\n```\n\n### Step 5: Validate Segmentation\n\n```python\n#!/usr/bin/env python3\n\"\"\"Network segmentation validation - tests connectivity between zones.\"\"\"\n\nimport subprocess\nimport sys\nimport json\nfrom datetime import datetime\n\n\nclass SegmentationValidator:\n    \"\"\"Test network segmentation controls between zones.\"\"\"\n\n    def __init__(self):\n        self.results = []\n\n    def test_connectivity(self, src_desc: str, dst_ip: str, port: int,\n                          protocol: str = \"tcp\", expected: str = \"blocked\"):\n        \"\"\"Test if connectivity exists between source and destination.\"\"\"\n        try:\n            if protocol == \"tcp\":\n                cmd = [\"nc\", \"-z\", \"-w\", \"3\", dst_ip, str(port)]\n            elif protocol == \"udp\":\n                cmd = [\"nc\", \"-z\", \"-u\", \"-w\", \"3\", dst_ip, str(port)]\n            elif protocol == \"icmp\":\n                cmd = [\"ping\", \"-c\", \"1\", \"-W\", \"3\", dst_ip]\n            else:\n                return\n\n            result = subprocess.run(cmd, capture_output=True, timeout=5)\n            actual = \"open\" if result.returncode == 0 else \"blocked\"\n\n        except subprocess.TimeoutExpired:\n            actual = \"blocked\"\n        except FileNotFoundError:\n            actual = \"error\"\n\n        status = \"PASS\" if actual == expected else \"FAIL\"\n\n        self.results.append({\n            \"source\": src_desc,\n            \"destination\": f\"{dst_ip}:{port}/{protocol}\",\n            \"expected\": expected,\n            \"actual\": actual,\n            \"status\": status,\n        })\n\n        symbol = \"[+]\" if status == \"PASS\" else \"[!]\"\n        print(f\"  {symbol} {src_desc} -> {dst_ip}:{port}/{protocol} \"\n              f\"| Expected: {expected} | Actual: {actual} | {status}\")\n\n    def run_validation(self):\n        \"\"\"Run segmentation validation tests.\"\"\"\n        print(f\"\\n{'='*70}\")\n        print(\"NETWORK SEGMENTATION VALIDATION\")\n        print(f\"{'='*70}\")\n        print(f\"Date: {datetime.now().isoformat()}\\n\")\n\n        # Tests that SHOULD be blocked\n        print(\"[*] Testing controls that should BLOCK traffic:\")\n        self.test_connectivity(\"Corporate\", \"10.0.40.10\", 443, \"tcp\", \"blocked\")\n        self.test_connectivity(\"Corporate\", \"10.0.40.10\", 22, \"tcp\", \"blocked\")\n        self.test_connectivity(\"Guest\", \"10.0.30.10\", 80, \"tcp\", \"blocked\")\n        self.test_connectivity(\"Guest\", \"10.0.20.1\", 0, \"icmp\", \"blocked\")\n\n        # Tests that SHOULD be allowed\n        print(\"\\n[*] Testing controls that should ALLOW traffic:\")\n        self.test_connectivity(\"Corporate\", \"10.0.30.10\", 443, \"tcp\", \"open\")\n        self.test_connectivity(\"Corporate\", \"10.0.30.10\", 80, \"tcp\", \"open\")\n        self.test_connectivity(\"Management\", \"10.0.30.10\", 22, \"tcp\", \"open\")\n\n        # Summary\n        passed = sum(1 for r in self.results if r[\"status\"] == \"PASS\")\n        failed = sum(1 for r in self.results if r[\"status\"] == \"FAIL\")\n        print(f\"\\n{'='*70}\")\n        print(f\"Results: {passed} PASSED, {failed} FAILED out of {len(self.results)} tests\")\n\n        if failed > 0:\n            print(f\"\\n[!] FAILED TESTS:\")\n            for r in self.results:\n                if r[\"status\"] == \"FAIL\":\n                    print(f\"  - {r['source']} -> {r['destination']}: \"\n                          f\"expected {r['expected']}, got {r['actual']}\")\n\n        # Save report\n        report = {\n            \"date\": datetime.now().isoformat(),\n            \"total_tests\": len(self.results),\n            \"passed\": passed,\n            \"failed\": failed,\n            \"results\": self.results,\n        }\n        report_path = f\"segmentation_test_{datetime.now().strftime('%Y%m%d')}.json\"\n        with open(report_path, 'w') as f:\n            json.dump(report, f, indent=2)\n        print(f\"\\nReport saved to: {report_path}\")\n\n\nif __name__ == \"__main__\":\n    validator = SegmentationValidator()\n    validator.run_validation()\n```\n\n## Best Practices\n\n- **Default Deny** - Start with deny-all inter-zone rules and explicitly allow required traffic\n- **Document Flows** - Map all legitimate traffic flows before implementing restrictions\n- **Segment by Sensitivity** - Group assets by data classification and compliance scope\n- **Intra-Zone Control** - Block lateral movement within zones, not just between zones\n- **Limit Management Access** - Restrict management plane to a dedicated zone with jump boxes\n- **Regular Validation** - Test segmentation controls quarterly with automated tools\n- **Monitor Denied Traffic** - Log and review denied inter-zone traffic for policy refinement\n- **PCI Scope Reduction** - Use segmentation to minimize PCI DSS Cardholder Data Environment scope\n\n## References\n\n- [CISA Zero Trust Microsegmentation Guidance](https://www.cisa.gov/sites/default/files/2025-07/ZT-Microsegmentation-Guidance-Part-One_508c.pdf)\n- [NIST SP 800-125B - Secure Virtual Network Configuration](https://csrc.nist.gov/publications/detail/sp/800-125b/final)\n- [PCI DSS v4.0 - Network Segmentation](https://www.pcisecuritystandards.org/)\n- [Faddom Network Segmentation Best Practices 2025](https://faddom.com/10-network-segmentation-best-practices-to-know-in-2025/)\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("implementing-network-segmentation-with-firewall-zones-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

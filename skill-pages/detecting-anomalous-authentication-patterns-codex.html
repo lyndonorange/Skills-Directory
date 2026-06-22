@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>detecting-anomalous-authentication-patterns - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/detecting-anomalous-authentication-patterns-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>detecting-anomalous-authentication-patterns</h1>
+      <p class="description">'Detects anomalous authentication patterns using UEBA analytics, statistical</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>detecting-anomalous-authentication-patterns</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>detecting-anomalous-authentication-patterns</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Detects anomalous authentication patterns using UEBA analytics, statistical</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose detecting-anomalous-authentication-patterns, then write the task. Fallback prompt: Use the detecting-anomalous-authentication-patterns skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Detecting Anomalous Authentication Patterns</h2>
+<h3>When to Use</h3>
+<ul>
+<li>Security operations needs to identify compromised accounts from authentication log analysis</li>
+<li>Implementing impossible travel detection to flag geographically inconsistent logins</li>
+<li>Detecting brute force, password spraying, and credential stuffing attacks in real time</li>
+<li>Building behavioral baselines for users to identify deviations indicating account compromise</li>
+<li>Correlating authentication anomalies with threat intelligence for lateral movement detection</li>
+<li>Investigating alerts from SIEM or IdP for suspicious sign-in activity</li>
+</ul>
+<p><strong>Do not use</strong> for static rule-based alerting on single failed logins; anomaly detection requires statistical baselines across time and entity dimensions to reduce false positives.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>Authentication log sources (Azure AD/Entra ID sign-in logs, Okta system logs, Active Directory event logs 4624/4625/4648/4768/4771)</li>
+<li>SIEM platform (Splunk, Microsoft Sentinel, Elastic SIEM) with at least 90 days of baseline data</li>
+<li>GeoIP database for location-based anomaly detection (MaxMind GeoLite2 or IP2Location)</li>
+<li>Python 3.9+ with pandas, scikit-learn, and scipy for custom analytics</li>
+<li>User identity context (department, role, typical work hours, location)</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Collect and Normalize Authentication Logs</h4>
+<p>Aggregate authentication events from all identity sources:</p>
+<pre><code>import pandas as pd
+import json
+from datetime import datetime, timedelta
+from collections import defaultdict
+
+# Parse authentication logs from multiple sources
+def normalize_auth_logs(log_source, raw_logs):
+    &quot;&quot;&quot;Normalize authentication events to a common schema.&quot;&quot;&quot;
+    normalized = []
+
+    for event in raw_logs:
+        if log_source == &quot;azure_ad&quot;:
+            normalized.append({
+                &quot;timestamp&quot;: event[&quot;createdDateTime&quot;],
+                &quot;user&quot;: event[&quot;userPrincipalName&quot;],
+                &quot;source_ip&quot;: event[&quot;ipAddress&quot;],
+                &quot;location&quot;: {
+                    &quot;city&quot;: event.get(&quot;location&quot;, {}).get(&quot;city&quot;),
+                    &quot;state&quot;: event.get(&quot;location&quot;, {}).get(&quot;state&quot;),
+                    &quot;country&quot;: event.get(&quot;location&quot;, {}).get(&quot;countryOrRegion&quot;),
+                    &quot;lat&quot;: event.get(&quot;location&quot;, {}).get(&quot;geoCoordinates&quot;, {}).get(&quot;latitude&quot;),
+                    &quot;lon&quot;: event.get(&quot;location&quot;, {}).get(&quot;geoCoordinates&quot;, {}).get(&quot;longitude&quot;)
+                },
+                &quot;result&quot;: &quot;success&quot; if event[&quot;status&quot;][&quot;errorCode&quot;] == 0 else &quot;failure&quot;,
+                &quot;failure_reason&quot;: event[&quot;status&quot;].get(&quot;failureReason&quot;, &quot;&quot;),
+                &quot;app&quot;: event.get(&quot;appDisplayName&quot;, &quot;Unknown&quot;),
+                &quot;device&quot;: event.get(&quot;deviceDetail&quot;, {}).get(&quot;operatingSystem&quot;, &quot;Unknown&quot;),
+                &quot;browser&quot;: event.get(&quot;deviceDetail&quot;, {}).get(&quot;browser&quot;, &quot;Unknown&quot;),
+                &quot;mfa_result&quot;: event.get(&quot;authenticationDetails&quot;, [{}])[0].get(&quot;succeeded&quot;, None),
+                &quot;risk_level&quot;: event.get(&quot;riskLevelDuringSignIn&quot;, &quot;none&quot;),
+                &quot;client_app&quot;: event.get(&quot;clientAppUsed&quot;, &quot;Unknown&quot;),
+                &quot;source&quot;: &quot;azure_ad&quot;
+            })
+        elif log_source == &quot;okta&quot;:
+            normalized.append({
+                &quot;timestamp&quot;: event[&quot;published&quot;],
+                &quot;user&quot;: event[&quot;actor&quot;][&quot;alternateId&quot;],
+                &quot;source_ip&quot;: event[&quot;client&quot;][&quot;ipAddress&quot;],
+                &quot;location&quot;: {
+                    &quot;city&quot;: event[&quot;client&quot;].get(&quot;geographicalContext&quot;, {}).get(&quot;city&quot;),
+                    &quot;state&quot;: event[&quot;client&quot;].get(&quot;geographicalContext&quot;, {}).get(&quot;state&quot;),
+                    &quot;country&quot;: event[&quot;client&quot;].get(&quot;geographicalContext&quot;, {}).get(&quot;country&quot;),
+                    &quot;lat&quot;: event[&quot;client&quot;].get(&quot;geographicalContext&quot;, {}).get(&quot;geolocation&quot;, {}).get(&quot;lat&quot;),
+                    &quot;lon&quot;: event[&quot;client&quot;].get(&quot;geographicalContext&quot;, {}).get(&quot;geolocation&quot;, {}).get(&quot;lon&quot;)
+                },
+                &quot;result&quot;: &quot;success&quot; if event[&quot;outcome&quot;][&quot;result&quot;] == &quot;SUCCESS&quot; else &quot;failure&quot;,
+                &quot;failure_reason&quot;: event[&quot;outcome&quot;].get(&quot;reason&quot;, &quot;&quot;),
+                &quot;app&quot;: event.get(&quot;target&quot;, [{}])[0].get(&quot;displayName&quot;, &quot;Unknown&quot;),
+                &quot;device&quot;: event[&quot;client&quot;].get(&quot;device&quot;, &quot;Unknown&quot;),
+                &quot;browser&quot;: event[&quot;client&quot;].get(&quot;userAgent&quot;, {}).get(&quot;browser&quot;, &quot;Unknown&quot;),
+                &quot;source&quot;: &quot;okta&quot;
+            })
+        elif log_source == &quot;windows_ad&quot;:
+            normalized.append({
+                &quot;timestamp&quot;: event[&quot;TimeCreated&quot;],
+                &quot;user&quot;: event[&quot;TargetUserName&quot;],
+                &quot;source_ip&quot;: event.get(&quot;IpAddress&quot;, &quot;&quot;),
+                &quot;location&quot;: None,  # Requires GeoIP enrichment
+                &quot;result&quot;: &quot;success&quot; if event[&quot;EventId&quot;] in [4624, 4648] else &quot;failure&quot;,
+                &quot;failure_reason&quot;: event.get(&quot;FailureReason&quot;, &quot;&quot;),
+                &quot;logon_type&quot;: event.get(&quot;LogonType&quot;, &quot;&quot;),
+                &quot;source&quot;: &quot;windows_ad&quot;
+            })
+
+    return pd.DataFrame(normalized)
+
+# Enrich with GeoIP data for Windows AD logs missing location
+import geoip2.database
+
+def enrich_geoip(df, geoip_db_path=&quot;/opt/geoip/GeoLite2-City.mmdb&quot;):
+    &quot;&quot;&quot;Add geolocation data to events missing location information.&quot;&quot;&quot;
+    reader = geoip2.database.Reader(geoip_db_path)
+
+    for idx, row in df.iterrows():
+        if row[&quot;location&quot;] is None and row[&quot;source_ip&quot;]:
+            try:
+                response = reader.city(row[&quot;source_ip&quot;])
+                df.at[idx, &quot;location&quot;] = {
+                    &quot;city&quot;: response.city.name,
+                    &quot;country&quot;: response.country.iso_code,
+                    &quot;lat&quot;: response.location.latitude,
+                    &quot;lon&quot;: response.location.longitude
+                }
+            except Exception:
+                pass
+
+    reader.close()
+    return df</code></pre>
+<h4>Step 2: Detect Impossible Travel Anomalies</h4>
+<p>Identify logins from geographically impossible locations:</p>
+<pre><code>from math import radians, sin, cos, sqrt, atan2
+from datetime import datetime
+
+def haversine_distance(lat1, lon1, lat2, lon2):
+    &quot;&quot;&quot;Calculate great-circle distance between two points in km.&quot;&quot;&quot;
+    R = 6371  # Earth's radius in kilometers
+
+    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1-a))
+
+    return R * c
+
+def detect_impossible_travel(df, max_speed_kmh=900):
+    &quot;&quot;&quot;
+    Detect impossible travel events where a user authenticates from
+    two locations faster than physically possible.
+
+    max_speed_kmh: Maximum realistic travel speed (900 km/h ~= commercial flight)
+    &quot;&quot;&quot;
+    alerts = []
+
+    # Sort by user and timestamp
+    df_sorted = df.sort_values([&quot;user&quot;, &quot;timestamp&quot;])
+
+    for user, user_events in df_sorted.groupby(&quot;user&quot;):
+        successful_events = user_events[user_events[&quot;result&quot;] == &quot;success&quot;]
+
+        for i in range(1, len(successful_events)):
+            prev = successful_events.iloc[i-1]
+            curr = successful_events.iloc[i]
+
+            # Skip if location data is missing
+            if not prev.get(&quot;location&quot;) or not curr.get(&quot;location&quot;):
+                continue
+            if not prev[&quot;location&quot;].get(&quot;lat&quot;) or not curr[&quot;location&quot;].get(&quot;lat&quot;):
+                continue
+
+            # Calculate distance and time delta
+            distance_km = haversine_distance(
+                prev[&quot;location&quot;][&quot;lat&quot;], prev[&quot;location&quot;][&quot;lon&quot;],
+                curr[&quot;location&quot;][&quot;lat&quot;], curr[&quot;location&quot;][&quot;lon&quot;]
+            )
+
+            time_diff = (pd.Timestamp(curr[&quot;timestamp&quot;]) -
+                        pd.Timestamp(prev[&quot;timestamp&quot;])).total_seconds() / 3600
+
+            if time_diff &lt;= 0:
+                continue
+
+            required_speed = distance_km / time_diff
+
+            # Flag if required speed exceeds maximum realistic travel
+            if required_speed &gt; max_speed_kmh and distance_km &gt; 100:
+                alerts.append({
+                    &quot;alert_type&quot;: &quot;IMPOSSIBLE_TRAVEL&quot;,
+                    &quot;severity&quot;: &quot;HIGH&quot;,
+                    &quot;user&quot;: user,
+                    &quot;timestamp&quot;: curr[&quot;timestamp&quot;],
+                    &quot;details&quot;: {
+                        &quot;location_1&quot;: f&quot;{prev['location']['city']}, {prev['location']['country']}&quot;,
+                        &quot;location_2&quot;: f&quot;{curr['location']['city']}, {curr['location']['country']}&quot;,
+                        &quot;time_1&quot;: prev[&quot;timestamp&quot;],
+                        &quot;time_2&quot;: curr[&quot;timestamp&quot;],
+                        &quot;distance_km&quot;: round(distance_km, 1),
+                        &quot;time_hours&quot;: round(time_diff, 2),
+                        &quot;required_speed_kmh&quot;: round(required_speed, 1),
+                        &quot;source_ip_1&quot;: prev[&quot;source_ip&quot;],
+                        &quot;source_ip_2&quot;: curr[&quot;source_ip&quot;]
+                    }
+                })
+
+    return alerts
+
+# Run impossible travel detection
+travel_alerts = detect_impossible_travel(auth_df)
+print(f&quot;Impossible travel alerts: {len(travel_alerts)}&quot;)
+for alert in travel_alerts:
+    print(f&quot;  [{alert['severity']}] {alert['user']}: &quot;
+          f&quot;{alert['details']['location_1']} -&gt; {alert['details']['location_2']} &quot;
+          f&quot;({alert['details']['distance_km']} km in {alert['details']['time_hours']}h)&quot;)</code></pre>
+<h4>Step 3: Detect Brute Force and Password Spraying</h4>
+<p>Identify credential attack patterns across authentication logs:</p>
+<pre><code>from collections import Counter
+
+def detect_brute_force(df, threshold_failures=10, window_minutes=10):
+    &quot;&quot;&quot;
+    Detect brute force attacks: many failed attempts against
+    a single account in a short time window.
+    &quot;&quot;&quot;
+    alerts = []
+    failed = df[df[&quot;result&quot;] == &quot;failure&quot;].copy()
+    failed[&quot;timestamp&quot;] = pd.to_datetime(failed[&quot;timestamp&quot;])
+
+    for user, user_fails in failed.groupby(&quot;user&quot;):
+        user_fails_sorted = user_fails.sort_values(&quot;timestamp&quot;)
+
+        # Sliding window analysis
+        for i, row in user_fails_sorted.iterrows():
+            window_start = row[&quot;timestamp&quot;]
+            window_end = window_start + timedelta(minutes=window_minutes)
+
+            window_events = user_fails_sorted[
+                (user_fails_sorted[&quot;timestamp&quot;] &gt;= window_start) &amp;
+                (user_fails_sorted[&quot;timestamp&quot;] &lt;= window_end)
+            ]
+
+            if len(window_events) &gt;= threshold_failures:
+                source_ips = window_events[&quot;source_ip&quot;].unique()
+                alerts.append({
+                    &quot;alert_type&quot;: &quot;BRUTE_FORCE&quot;,
+                    &quot;severity&quot;: &quot;HIGH&quot;,
+                    &quot;user&quot;: user,
+                    &quot;timestamp&quot;: str(window_start),
+                    &quot;details&quot;: {
+                        &quot;failed_attempts&quot;: len(window_events),
+                        &quot;window_minutes&quot;: window_minutes,
+                        &quot;source_ips&quot;: list(source_ips),
+                        &quot;distributed&quot;: len(source_ips) &gt; 1,
+                        &quot;failure_reasons&quot;: dict(Counter(window_events[&quot;failure_reason&quot;]))
+                    }
+                })
+                break  # One alert per user per detection pass
+
+    return alerts
+
+def detect_password_spray(df, threshold_users=10, window_minutes=30):
+    &quot;&quot;&quot;
+    Detect password spraying: failed logins against many different
+    accounts from the same source in a short window (1-2 attempts per user).
+    &quot;&quot;&quot;
+    alerts = []
+    failed = df[df[&quot;result&quot;] == &quot;failure&quot;].copy()
+    failed[&quot;timestamp&quot;] = pd.to_datetime(failed[&quot;timestamp&quot;])
+
+    for source_ip, ip_events in failed.groupby(&quot;source_ip&quot;):
+        ip_events_sorted = ip_events.sort_values(&quot;timestamp&quot;)
+
+        for i, row in ip_events_sorted.iterrows():
+            window_start = row[&quot;timestamp&quot;]
+            window_end = window_start + timedelta(minutes=window_minutes)
+
+            window_events = ip_events_sorted[
+                (ip_events_sorted[&quot;timestamp&quot;] &gt;= window_start) &amp;
+                (ip_events_sorted[&quot;timestamp&quot;] &lt;= window_end)
+            ]
+
+            unique_users = window_events[&quot;user&quot;].nunique()
+            attempts_per_user = len(window_events) / unique_users if unique_users &gt; 0 else 0
+
+            # Password spray: many users targeted, few attempts per user
+            if unique_users &gt;= threshold_users and attempts_per_user &lt;= 3:
+                # Check if any succeeded (compromised account)
+                success_after = df[
+                    (df[&quot;source_ip&quot;] == source_ip) &amp;
+                    (df[&quot;result&quot;] == &quot;success&quot;) &amp;
+                    (pd.to_datetime(df[&quot;timestamp&quot;]) &gt; window_start) &amp;
+                    (pd.to_datetime(df[&quot;timestamp&quot;]) &lt; window_end + timedelta(hours=1))
+                ]
+
+                alerts.append({
+                    &quot;alert_type&quot;: &quot;PASSWORD_SPRAY&quot;,
+                    &quot;severity&quot;: &quot;CRITICAL&quot; if len(success_after) &gt; 0 else &quot;HIGH&quot;,
+                    &quot;timestamp&quot;: str(window_start),
+                    &quot;details&quot;: {
+                        &quot;source_ip&quot;: source_ip,
+                        &quot;targeted_users&quot;: unique_users,
+                        &quot;total_attempts&quot;: len(window_events),
+                        &quot;avg_attempts_per_user&quot;: round(attempts_per_user, 1),
+                        &quot;window_minutes&quot;: window_minutes,
+                        &quot;successful_logins_after&quot;: len(success_after),
+                        &quot;compromised_accounts&quot;: list(success_after[&quot;user&quot;].unique()) if len(success_after) &gt; 0 else []
+                    }
+                })
+                break
+
+    return alerts
+
+# Run detections
+brute_force_alerts = detect_brute_force(auth_df)
+spray_alerts = detect_password_spray(auth_df)
+print(f&quot;Brute force alerts: {len(brute_force_alerts)}&quot;)
+print(f&quot;Password spray alerts: {len(spray_alerts)}&quot;)</code></pre>
+<h4>Step 4: Build Behavioral Baselines and Detect Deviations</h4>
+<p>Create user behavioral profiles and flag statistical anomalies:</p>
+<pre><code>import numpy as np
+from scipy import stats
+from sklearn.ensemble import IsolationForest
+
+def build_user_baseline(df, user, lookback_days=90):
+    &quot;&quot;&quot;Build behavioral baseline for a specific user.&quot;&quot;&quot;
+    user_events = df[df[&quot;user&quot;] == user].copy()
+    user_events[&quot;timestamp&quot;] = pd.to_datetime(user_events[&quot;timestamp&quot;])
+    user_events[&quot;hour&quot;] = user_events[&quot;timestamp&quot;].dt.hour
+    user_events[&quot;day_of_week&quot;] = user_events[&quot;timestamp&quot;].dt.dayofweek
+
+    baseline = {
+        &quot;user&quot;: user,
+        &quot;typical_hours&quot;: {
+            &quot;start&quot;: int(user_events[&quot;hour&quot;].quantile(0.05)),
+            &quot;end&quot;: int(user_events[&quot;hour&quot;].quantile(0.95)),
+            &quot;mean&quot;: float(user_events[&quot;hour&quot;].mean()),
+            &quot;std&quot;: float(user_events[&quot;hour&quot;].std())
+        },
+        &quot;typical_days&quot;: list(user_events[&quot;day_of_week&quot;].mode().values),
+        &quot;typical_ips&quot;: list(user_events[&quot;source_ip&quot;].value_counts().head(10).index),
+        &quot;typical_locations&quot;: list(
+            user_events[&quot;location&quot;].apply(
+                lambda x: x.get(&quot;country&quot;) if isinstance(x, dict) else None
+            ).dropna().value_counts().head(5).index
+        ),
+        &quot;typical_apps&quot;: list(user_events[&quot;app&quot;].value_counts().head(10).index),
+        &quot;typical_devices&quot;: list(user_events[&quot;device&quot;].value_counts().head(5).index),
+        &quot;avg_daily_logins&quot;: float(
+            user_events.groupby(user_events[&quot;timestamp&quot;].dt.date).size().mean()
+        ),
+        &quot;std_daily_logins&quot;: float(
+            user_events.groupby(user_events[&quot;timestamp&quot;].dt.date).size().std()
+        ),
+        &quot;failure_rate&quot;: float(
+            (user_events[&quot;result&quot;] == &quot;failure&quot;).mean()
+        )
+    }
+
+    return baseline
+
+def detect_behavioral_anomalies(event, baseline):
+    &quot;&quot;&quot;Compare a new authentication event against user baseline.&quot;&quot;&quot;
+    anomalies = []
+    event_time = pd.Timestamp(event[&quot;timestamp&quot;])
+
+    # Off-hours login detection
+    hour = event_time.hour
+    if baseline[&quot;typical_hours&quot;][&quot;std&quot;] &gt; 0:
+        z_score = abs(hour - baseline[&quot;typical_hours&quot;][&quot;mean&quot;]) / baseline[&quot;typical_hours&quot;][&quot;std&quot;]
+        if z_score &gt; 2.5:
+            anomalies.append({
+                &quot;type&quot;: &quot;OFF_HOURS_LOGIN&quot;,
+                &quot;severity&quot;: &quot;MEDIUM&quot;,
+                &quot;detail&quot;: f&quot;Login at {hour}:00 (baseline: {baseline['typical_hours']['start']}:00-{baseline['typical_hours']['end']}:00)&quot;,
+                &quot;z_score&quot;: round(z_score, 2)
+            })
+
+    # New source IP
+    if event[&quot;source_ip&quot;] not in baseline[&quot;typical_ips&quot;]:
+        anomalies.append({
+            &quot;type&quot;: &quot;NEW_SOURCE_IP&quot;,
+            &quot;severity&quot;: &quot;MEDIUM&quot;,
+            &quot;detail&quot;: f&quot;Login from unknown IP: {event['source_ip']}&quot;
+        })
+
+    # New country
+    if event.get(&quot;location&quot;) and isinstance(event[&quot;location&quot;], dict):
+        country = event[&quot;location&quot;].get(&quot;country&quot;)
+        if country and country not in baseline[&quot;typical_locations&quot;]:
+            anomalies.append({
+                &quot;type&quot;: &quot;NEW_COUNTRY&quot;,
+                &quot;severity&quot;: &quot;HIGH&quot;,
+                &quot;detail&quot;: f&quot;Login from new country: {country}&quot;
+            })
+
+    # New application
+    if event.get(&quot;app&quot;) and event[&quot;app&quot;] not in baseline[&quot;typical_apps&quot;]:
+        anomalies.append({
+            &quot;type&quot;: &quot;NEW_APPLICATION&quot;,
+            &quot;severity&quot;: &quot;LOW&quot;,
+            &quot;detail&quot;: f&quot;Access to new application: {event['app']}&quot;
+        })
+
+    # New device
+    if event.get(&quot;device&quot;) and event[&quot;device&quot;] not in baseline[&quot;typical_devices&quot;]:
+        anomalies.append({
+            &quot;type&quot;: &quot;NEW_DEVICE&quot;,
+            &quot;severity&quot;: &quot;MEDIUM&quot;,
+            &quot;detail&quot;: f&quot;Login from new device: {event['device']}&quot;
+        })
+
+    # Weekend login for weekday-only users
+    if event_time.dayofweek &gt;= 5 and 5 not in baseline[&quot;typical_days&quot;] and 6 not in baseline[&quot;typical_days&quot;]:
+        anomalies.append({
+            &quot;type&quot;: &quot;WEEKEND_LOGIN&quot;,
+            &quot;severity&quot;: &quot;LOW&quot;,
+            &quot;detail&quot;: f&quot;Weekend login detected (typical days: {baseline['typical_days']})&quot;
+        })
+
+    return anomalies
+
+def isolation_forest_anomaly_detection(df):
+    &quot;&quot;&quot;Use Isolation Forest for multivariate anomaly detection.&quot;&quot;&quot;
+    # Feature engineering
+    features_df = df.copy()
+    features_df[&quot;timestamp&quot;] = pd.to_datetime(features_df[&quot;timestamp&quot;])
+    features_df[&quot;hour&quot;] = features_df[&quot;timestamp&quot;].dt.hour
+    features_df[&quot;day_of_week&quot;] = features_df[&quot;timestamp&quot;].dt.dayofweek
+    features_df[&quot;is_failure&quot;] = (features_df[&quot;result&quot;] == &quot;failure&quot;).astype(int)
+
+    # Encode categorical features
+    features_df[&quot;ip_frequency&quot;] = features_df.groupby(&quot;source_ip&quot;)[&quot;source_ip&quot;].transform(&quot;count&quot;)
+    features_df[&quot;user_frequency&quot;] = features_df.groupby(&quot;user&quot;)[&quot;user&quot;].transform(&quot;count&quot;)
+
+    feature_columns = [&quot;hour&quot;, &quot;day_of_week&quot;, &quot;is_failure&quot;, &quot;ip_frequency&quot;, &quot;user_frequency&quot;]
+    X = features_df[feature_columns].fillna(0)
+
+    # Train Isolation Forest
+    model = IsolationForest(
+        n_estimators=200,
+        contamination=0.01,  # Expect 1% anomaly rate
+        random_state=42,
+        n_jobs=-1
+    )
+    features_df[&quot;anomaly_score&quot;] = model.fit_predict(X)
+    features_df[&quot;anomaly_probability&quot;] = model.score_samples(X)
+
+    # Extract anomalies (labeled as -1)
+    anomalies = features_df[features_df[&quot;anomaly_score&quot;] == -1]
+
+    return anomalies.sort_values(&quot;anomaly_probability&quot;)</code></pre>
+<h4>Step 5: Implement SIEM Detection Rules</h4>
+<p>Deploy detection rules for common authentication attack patterns:</p>
+<pre><code># Splunk SPL queries for authentication anomaly detection
+
+# 1. Brute Force Detection
+# name: Authentication Brute Force - Multiple Failed Logins
+# severity: high
+brute_force_spl: |
+  index=auth sourcetype IN (&quot;azure:aad:signin&quot;, &quot;okta:im:log&quot;, &quot;WinEventLog:Security&quot;)
+  (result=&quot;failure&quot; OR EventCode=4625)
+  | bin _time span=10m
+  | stats count as failed_attempts dc(src_ip) as unique_ips
+    values(src_ip) as source_ips
+    latest(_time) as last_attempt
+    by user _time
+  | where failed_attempts &gt;= 10
+  | eval alert_type=if(unique_ips &gt; 3, &quot;Distributed Brute Force&quot;, &quot;Standard Brute Force&quot;)
+
+# 2. Password Spray Detection
+# name: Password Spray Attack - Multiple Users Same Source
+# severity: critical
+password_spray_spl: |
+  index=auth sourcetype IN (&quot;azure:aad:signin&quot;, &quot;okta:im:log&quot;)
+  result=&quot;failure&quot;
+  | bin _time span=30m
+  | stats dc(user) as targeted_users count as total_attempts
+    values(user) as users_targeted
+    by src_ip _time
+  | where targeted_users &gt;= 10
+  | eval attempts_per_user = round(total_attempts / targeted_users, 1)
+  | where attempts_per_user &lt;= 3
+  | eval severity=if(targeted_users &gt; 50, &quot;CRITICAL&quot;, &quot;HIGH&quot;)
+
+# 3. Impossible Travel Detection
+# name: Impossible Travel - Geographically Inconsistent Logins
+# severity: high
+impossible_travel_spl: |
+  index=auth result=&quot;success&quot;
+  | iplocation src_ip
+  | sort user _time
+  | streamstats current=f last(lat) as prev_lat last(lon) as prev_lon
+    last(_time) as prev_time last(City) as prev_city last(Country) as prev_country
+    by user
+  | where isnotnull(prev_lat) AND isnotnull(lat)
+  | eval distance_km = 6371 * 2 * asin(sqrt(
+      pow(sin((lat - prev_lat) * pi() / 360), 2) +
+      cos(prev_lat * pi() / 180) * cos(lat * pi() / 180) *
+      pow(sin((lon - prev_lon) * pi() / 360), 2)))
+  | eval time_hours = (_time - prev_time) / 3600
+  | eval required_speed = distance_km / time_hours
+  | where required_speed &gt; 900 AND distance_km &gt; 100
+
+# 4. Credential Stuffing Detection
+# name: Credential Stuffing - High Volume Failed Logins with Some Successes
+# severity: critical
+credential_stuffing_spl: |
+  index=auth
+  | bin _time span=1h
+  | stats count(eval(result=&quot;failure&quot;)) as failures
+    count(eval(result=&quot;success&quot;)) as successes
+    dc(user) as unique_users
+    dc(src_ip) as unique_ips
+    by src_ip _time
+  | where failures &gt; 100 AND successes &gt; 0 AND unique_users &gt; 20
+  | eval success_rate = round(successes / (failures + successes) * 100, 2)
+  | where success_rate &lt; 5</code></pre>
+<h4>Step 6: Correlate and Score Authentication Anomalies</h4>
+<p>Combine multiple detection signals into risk scores:</p>
+<pre><code>def calculate_auth_risk_score(user, alerts, baseline):
+    &quot;&quot;&quot;
+    Calculate composite risk score for authentication events.
+    Combines multiple anomaly signals with weighted scoring.
+    &quot;&quot;&quot;
+    score = 0
+    risk_factors = []
+
+    weights = {
+        &quot;IMPOSSIBLE_TRAVEL&quot;: 40,
+        &quot;PASSWORD_SPRAY&quot;: 35,
+        &quot;BRUTE_FORCE&quot;: 30,
+        &quot;CREDENTIAL_STUFFING&quot;: 35,
+        &quot;NEW_COUNTRY&quot;: 25,
+        &quot;OFF_HOURS_LOGIN&quot;: 15,
+        &quot;NEW_SOURCE_IP&quot;: 10,
+        &quot;NEW_DEVICE&quot;: 10,
+        &quot;NEW_APPLICATION&quot;: 5,
+        &quot;WEEKEND_LOGIN&quot;: 5,
+        &quot;MFA_BYPASS&quot;: 45,
+        &quot;LEGACY_PROTOCOL&quot;: 20
+    }
+
+    for alert in alerts:
+        alert_type = alert.get(&quot;type&quot;) or alert.get(&quot;alert_type&quot;)
+        weight = weights.get(alert_type, 10)
+
+        # Adjust weight based on severity
+        severity_multiplier = {
+            &quot;CRITICAL&quot;: 2.0,
+            &quot;HIGH&quot;: 1.5,
+            &quot;MEDIUM&quot;: 1.0,
+            &quot;LOW&quot;: 0.5
+        }
+        severity = alert.get(&quot;severity&quot;, &quot;MEDIUM&quot;)
+        adjusted_weight = weight * severity_multiplier.get(severity, 1.0)
+
+        score += adjusted_weight
+        risk_factors.append({
+            &quot;factor&quot;: alert_type,
+            &quot;weight&quot;: adjusted_weight,
+            &quot;detail&quot;: alert.get(&quot;detail&quot;, alert.get(&quot;details&quot;, &quot;&quot;))
+        })
+
+    # Normalize score to 0-100
+    normalized_score = min(100, score)
+
+    # Determine risk level
+    if normalized_score &gt;= 80:
+        risk_level = &quot;CRITICAL&quot;
+        recommended_action = &quot;Immediate account suspension and investigation&quot;
+    elif normalized_score &gt;= 60:
+        risk_level = &quot;HIGH&quot;
+        recommended_action = &quot;Force MFA re-enrollment and notify SOC&quot;
+    elif normalized_score &gt;= 40:
+        risk_level = &quot;MEDIUM&quot;
+        recommended_action = &quot;Require step-up authentication&quot;
+    elif normalized_score &gt;= 20:
+        risk_level = &quot;LOW&quot;
+        recommended_action = &quot;Monitor and log for trend analysis&quot;
+    else:
+        risk_level = &quot;INFORMATIONAL&quot;
+        recommended_action = &quot;No action required&quot;
+
+    return {
+        &quot;user&quot;: user,
+        &quot;risk_score&quot;: normalized_score,
+        &quot;risk_level&quot;: risk_level,
+        &quot;recommended_action&quot;: recommended_action,
+        &quot;risk_factors&quot;: sorted(risk_factors, key=lambda x: x[&quot;weight&quot;], reverse=True),
+        &quot;timestamp&quot;: datetime.utcnow().isoformat()
+    }</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | <strong>Impossible Travel</strong> | Authentication anomaly where a user logs in from two geographically distant locations within a timeframe that makes physical travel impossible | | <strong>Password Spraying</strong> | Credential attack that tries a small number of commonly used passwords against many accounts to avoid lockout thresholds | | <strong>Credential Stuffing</strong> | Automated attack using stolen username/password pairs from data breaches to gain unauthorized access to accounts | | <strong>UEBA</strong> | User and Entity Behavior Analytics technology that builds behavioral baselines and detects deviations using machine learning and statistical analysis | | <strong>Behavioral Baseline</strong> | Statistical profile of a user's normal authentication patterns including typical hours, locations, devices, and applications | | <strong>Isolation Forest</strong> | Unsupervised machine learning algorithm that detects anomalies by isolating observations that differ from the majority of data points | | <strong>Risk Score</strong> | Composite numerical value aggregating multiple anomaly signals with weighted scoring to prioritize authentication threats |</p>
+<h3>Tools &amp; Systems</h3>
+<ul>
+<li><strong>Microsoft Sentinel UEBA</strong>: Cloud-native SIEM with built-in entity behavior analytics for Azure AD and multi-cloud authentication anomaly detection</li>
+<li><strong>Exabeam Advanced Analytics</strong>: UEBA platform using machine learning for user session analysis and automated threat timeline construction</li>
+<li><strong>Splunk UBA</strong>: Behavioral analytics add-on for Splunk providing pre-built authentication anomaly models and risk scoring</li>
+<li><strong>Elastic SIEM ML Jobs</strong>: Machine learning anomaly detection jobs for authentication log analysis in the Elastic Stack</li>
+</ul>
+<h3>Common Scenarios</h3>
+<h4>Scenario: Detecting Compromised Executive Account After Password Spray</h4>
+<p><strong>Context</strong>: SOC observes a spike in failed authentication attempts from a cloud VPS IP address targeting 200+ accounts. Two hours later, an executive account shows successful authentication from the same IP range followed by mailbox rule creation and data exfiltration.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Run password spray detection across the timeframe to identify all targeted accounts</li>
+<li>Cross-reference targeted accounts with subsequent successful logins from related IP ranges</li>
+<li>Build behavioral baseline for the executive account and flag all deviations</li>
+<li>Check for impossible travel between the executive's last legitimate login and the attacker's session</li>
+<li>Identify post-compromise activity: mailbox rules, file downloads, delegated access changes</li>
+<li>Calculate composite risk score combining password spray, new IP, off-hours login, and new device signals</li>
+<li>Trigger automated response: force session termination, disable account, notify manager</li>
+</ol>
+<p><strong>Pitfalls</strong>:</p>
+<ul>
+<li>Relying on single-signal detection (failed logins only) misses successful spray results</li>
+<li>Not correlating across identity providers when users have accounts in multiple IdPs</li>
+<li>Static thresholds that do not account for legitimate VPN IP changes or travel</li>
+<li>Ignoring successful authentications after the spray window closes (attackers may wait before using credentials)</li>
+</ul>
+<h3>Output Format</h3>
+<pre><code>AUTHENTICATION ANOMALY DETECTION REPORT
+=========================================
+Analysis Period:   2026-02-01 to 2026-02-24
+Total Auth Events: 2,847,392
+Users Monitored:   3,847
+Alert Sources:     Azure AD, Okta, Windows AD
+
+THREAT DETECTION SUMMARY
+Password Spray Attacks:    3
+Brute Force Attacks:       12
+Impossible Travel:         8
+Credential Stuffing:       1
+Behavioral Anomalies:      47
+
+HIGH-RISK ACCOUNTS
+[CRITICAL] j.smith@corp.com     Score: 92
+  - Impossible travel: Chicago -&gt; Moscow (7,876 km in 0.5h)
+  - Password spray target followed by successful login
+  - New device and browser fingerprint
+  - Off-hours access to SharePoint and email
+  Action: Account suspended, SOC investigation initiated
+
+[HIGH] m.johnson@corp.com       Score: 67
+  - Login from new country (Brazil)
+  - New source IP not matching VPN ranges
+  - Access to HR application outside normal pattern
+  Action: MFA re-enrollment required, manager notified
+
+[MEDIUM] a.williams@corp.com    Score: 38
+  - Weekend login at 03:00 UTC
+  - New device (Linux, typically Windows user)
+  Action: Step-up authentication applied
+
+ATTACK CAMPAIGN DETAILS
+Password Spray Campaign #1:
+  Source:            185.220.101.x/24 (Tor exit node)
+  Targeted Users:    247
+  Success Rate:      0.8% (2 accounts compromised)
+  Compromised:       j.smith@corp.com, r.davis@corp.com
+  Duration:          45 minutes
+  Pattern:           2 attempts per user, 3-second interval</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: detecting-anomalous-authentication-patterns\ndisplay_name: detecting-anomalous-authentication-patterns\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# detecting-anomalous-authentication-patterns - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `detecting-anomalous-authentication-patterns` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- Security operations needs to identify compromised accounts from authentication log analysis\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose detecting-anomalous-authentication-patterns, then write the task. Fallback prompt: Use the detecting-anomalous-authentication-patterns skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `detecting-anomalous-authentication-patterns` |\n| Canonical name | `detecting-anomalous-authentication-patterns` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n- Security operations needs to identify compromised accounts from authentication log analysis\n\n## Original SKILL.md\n\n---\nname: detecting-anomalous-authentication-patterns\ndescription: 'Detects anomalous authentication patterns using UEBA analytics, statistical\n  baselines, and machine learning models to identify impossible travel, credential\n  stuffing, brute force, password spraying, and compromised account behaviors across\n  authentication logs. Activates for requests involving authentication anomaly detection,\n  login behavior analysis, UEBA implementation, or suspicious sign-in investigation.\n\n  '\ndomain: cybersecurity\nsubdomain: identity-access-management\ntags:\n- UEBA\n- authentication-anomaly\n- impossible-travel\n- brute-force\n- credential-stuffing\n- behavioral-analytics\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\natlas_techniques:\n- AML.T0043\n- AML.T0018\nnist_ai_rmf:\n- MEASURE-2.7\n- MEASURE-2.5\n- MAP-5.1\nnist_csf:\n- PR.AA-01\n- PR.AA-02\n- PR.AA-05\n- PR.AA-06\nmitre_attack:\n- T1110\n- T1110.003\n- T1110.004\n- T1078\n- T1021\n---\n\n# Detecting Anomalous Authentication Patterns\n\n## When to Use\n\n- Security operations needs to identify compromised accounts from authentication log analysis\n- Implementing impossible travel detection to flag geographically inconsistent logins\n- Detecting brute force, password spraying, and credential stuffing attacks in real time\n- Building behavioral baselines for users to identify deviations indicating account compromise\n- Correlating authentication anomalies with threat intelligence for lateral movement detection\n- Investigating alerts from SIEM or IdP for suspicious sign-in activity\n\n**Do not use** for static rule-based alerting on single failed logins; anomaly detection requires statistical baselines across time and entity dimensions to reduce false positives.\n\n## Prerequisites\n\n- Authentication log sources (Azure AD/Entra ID sign-in logs, Okta system logs, Active Directory event logs 4624/4625/4648/4768/4771)\n- SIEM platform (Splunk, Microsoft Sentinel, Elastic SIEM) with at least 90 days of baseline data\n- GeoIP database for location-based anomaly detection (MaxMind GeoLite2 or IP2Location)\n- Python 3.9+ with pandas, scikit-learn, and scipy for custom analytics\n- User identity context (department, role, typical work hours, location)\n\n## Workflow\n\n### Step 1: Collect and Normalize Authentication Logs\n\nAggregate authentication events from all identity sources:\n\n```python\nimport pandas as pd\nimport json\nfrom datetime import datetime, timedelta\nfrom collections import defaultdict\n\n# Parse authentication logs from multiple sources\ndef normalize_auth_logs(log_source, raw_logs):\n    \"\"\"Normalize authentication events to a common schema.\"\"\"\n    normalized = []\n\n    for event in raw_logs:\n        if log_source == \"azure_ad\":\n            normalized.append({\n                \"timestamp\": event[\"createdDateTime\"],\n                \"user\": event[\"userPrincipalName\"],\n                \"source_ip\": event[\"ipAddress\"],\n                \"location\": {\n                    \"city\": event.get(\"location\", {}).get(\"city\"),\n                    \"state\": event.get(\"location\", {}).get(\"state\"),\n                    \"country\": event.get(\"location\", {}).get(\"countryOrRegion\"),\n                    \"lat\": event.get(\"location\", {}).get(\"geoCoordinates\", {}).get(\"latitude\"),\n                    \"lon\": event.get(\"location\", {}).get(\"geoCoordinates\", {}).get(\"longitude\")\n                },\n                \"result\": \"success\" if event[\"status\"][\"errorCode\"] == 0 else \"failure\",\n                \"failure_reason\": event[\"status\"].get(\"failureReason\", \"\"),\n                \"app\": event.get(\"appDisplayName\", \"Unknown\"),\n                \"device\": event.get(\"deviceDetail\", {}).get(\"operatingSystem\", \"Unknown\"),\n                \"browser\": event.get(\"deviceDetail\", {}).get(\"browser\", \"Unknown\"),\n                \"mfa_result\": event.get(\"authenticationDetails\", [{}])[0].get(\"succeeded\", None),\n                \"risk_level\": event.get(\"riskLevelDuringSignIn\", \"none\"),\n                \"client_app\": event.get(\"clientAppUsed\", \"Unknown\"),\n                \"source\": \"azure_ad\"\n            })\n        elif log_source == \"okta\":\n            normalized.append({\n                \"timestamp\": event[\"published\"],\n                \"user\": event[\"actor\"][\"alternateId\"],\n                \"source_ip\": event[\"client\"][\"ipAddress\"],\n                \"location\": {\n                    \"city\": event[\"client\"].get(\"geographicalContext\", {}).get(\"city\"),\n                    \"state\": event[\"client\"].get(\"geographicalContext\", {}).get(\"state\"),\n                    \"country\": event[\"client\"].get(\"geographicalContext\", {}).get(\"country\"),\n                    \"lat\": event[\"client\"].get(\"geographicalContext\", {}).get(\"geolocation\", {}).get(\"lat\"),\n                    \"lon\": event[\"client\"].get(\"geographicalContext\", {}).get(\"geolocation\", {}).get(\"lon\")\n                },\n                \"result\": \"success\" if event[\"outcome\"][\"result\"] == \"SUCCESS\" else \"failure\",\n                \"failure_reason\": event[\"outcome\"].get(\"reason\", \"\"),\n                \"app\": event.get(\"target\", [{}])[0].get(\"displayName\", \"Unknown\"),\n                \"device\": event[\"client\"].get(\"device\", \"Unknown\"),\n                \"browser\": event[\"client\"].get(\"userAgent\", {}).get(\"browser\", \"Unknown\"),\n                \"source\": \"okta\"\n            })\n        elif log_source == \"windows_ad\":\n            normalized.append({\n                \"timestamp\": event[\"TimeCreated\"],\n                \"user\": event[\"TargetUserName\"],\n                \"source_ip\": event.get(\"IpAddress\", \"\"),\n                \"location\": None,  # Requires GeoIP enrichment\n                \"result\": \"success\" if event[\"EventId\"] in [4624, 4648] else \"failure\",\n                \"failure_reason\": event.get(\"FailureReason\", \"\"),\n                \"logon_type\": event.get(\"LogonType\", \"\"),\n                \"source\": \"windows_ad\"\n            })\n\n    return pd.DataFrame(normalized)\n\n# Enrich with GeoIP data for Windows AD logs missing location\nimport geoip2.database\n\ndef enrich_geoip(df, geoip_db_path=\"/opt/geoip/GeoLite2-City.mmdb\"):\n    \"\"\"Add geolocation data to events missing location information.\"\"\"\n    reader = geoip2.database.Reader(geoip_db_path)\n\n    for idx, row in df.iterrows():\n        if row[\"location\"] is None and row[\"source_ip\"]:\n            try:\n                response = reader.city(row[\"source_ip\"])\n                df.at[idx, \"location\"] = {\n                    \"city\": response.city.name,\n                    \"country\": response.country.iso_code,\n                    \"lat\": response.location.latitude,\n                    \"lon\": response.location.longitude\n                }\n            except Exception:\n                pass\n\n    reader.close()\n    return df\n```\n\n### Step 2: Detect Impossible Travel Anomalies\n\nIdentify logins from geographically impossible locations:\n\n```python\nfrom math import radians, sin, cos, sqrt, atan2\nfrom datetime import datetime\n\ndef haversine_distance(lat1, lon1, lat2, lon2):\n    \"\"\"Calculate great-circle distance between two points in km.\"\"\"\n    R = 6371  # Earth's radius in kilometers\n\n    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])\n    dlat = lat2 - lat1\n    dlon = lon2 - lon1\n\n    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2\n    c = 2 * atan2(sqrt(a), sqrt(1-a))\n\n    return R * c\n\ndef detect_impossible_travel(df, max_speed_kmh=900):\n    \"\"\"\n    Detect impossible travel events where a user authenticates from\n    two locations faster than physically possible.\n\n    max_speed_kmh: Maximum realistic travel speed (900 km/h ~= commercial flight)\n    \"\"\"\n    alerts = []\n\n    # Sort by user and timestamp\n    df_sorted = df.sort_values([\"user\", \"timestamp\"])\n\n    for user, user_events in df_sorted.groupby(\"user\"):\n        successful_events = user_events[user_events[\"result\"] == \"success\"]\n\n        for i in range(1, len(successful_events)):\n            prev = successful_events.iloc[i-1]\n            curr = successful_events.iloc[i]\n\n            # Skip if location data is missing\n            if not prev.get(\"location\") or not curr.get(\"location\"):\n                continue\n            if not prev[\"location\"].get(\"lat\") or not curr[\"location\"].get(\"lat\"):\n                continue\n\n            # Calculate distance and time delta\n            distance_km = haversine_distance(\n                prev[\"location\"][\"lat\"], prev[\"location\"][\"lon\"],\n                curr[\"location\"][\"lat\"], curr[\"location\"][\"lon\"]\n            )\n\n            time_diff = (pd.Timestamp(curr[\"timestamp\"]) -\n                        pd.Timestamp(prev[\"timestamp\"])).total_seconds() / 3600\n\n            if time_diff \u003c= 0:\n                continue\n\n            required_speed = distance_km / time_diff\n\n            # Flag if required speed exceeds maximum realistic travel\n            if required_speed > max_speed_kmh and distance_km > 100:\n                alerts.append({\n                    \"alert_type\": \"IMPOSSIBLE_TRAVEL\",\n                    \"severity\": \"HIGH\",\n                    \"user\": user,\n                    \"timestamp\": curr[\"timestamp\"],\n                    \"details\": {\n                        \"location_1\": f\"{prev['location']['city']}, {prev['location']['country']}\",\n                        \"location_2\": f\"{curr['location']['city']}, {curr['location']['country']}\",\n                        \"time_1\": prev[\"timestamp\"],\n                        \"time_2\": curr[\"timestamp\"],\n                        \"distance_km\": round(distance_km, 1),\n                        \"time_hours\": round(time_diff, 2),\n                        \"required_speed_kmh\": round(required_speed, 1),\n                        \"source_ip_1\": prev[\"source_ip\"],\n                        \"source_ip_2\": curr[\"source_ip\"]\n                    }\n                })\n\n    return alerts\n\n# Run impossible travel detection\ntravel_alerts = detect_impossible_travel(auth_df)\nprint(f\"Impossible travel alerts: {len(travel_alerts)}\")\nfor alert in travel_alerts:\n    print(f\"  [{alert['severity']}] {alert['user']}: \"\n          f\"{alert['details']['location_1']} -> {alert['details']['location_2']} \"\n          f\"({alert['details']['distance_km']} km in {alert['details']['time_hours']}h)\")\n```\n\n### Step 3: Detect Brute Force and Password Spraying\n\nIdentify credential attack patterns across authentication logs:\n\n```python\nfrom collections import Counter\n\ndef detect_brute_force(df, threshold_failures=10, window_minutes=10):\n    \"\"\"\n    Detect brute force attacks: many failed attempts against\n    a single account in a short time window.\n    \"\"\"\n    alerts = []\n    failed = df[df[\"result\"] == \"failure\"].copy()\n    failed[\"timestamp\"] = pd.to_datetime(failed[\"timestamp\"])\n\n    for user, user_fails in failed.groupby(\"user\"):\n        user_fails_sorted = user_fails.sort_values(\"timestamp\")\n\n        # Sliding window analysis\n        for i, row in user_fails_sorted.iterrows():\n            window_start = row[\"timestamp\"]\n            window_end = window_start + timedelta(minutes=window_minutes)\n\n            window_events = user_fails_sorted[\n                (user_fails_sorted[\"timestamp\"] >= window_start) &\n                (user_fails_sorted[\"timestamp\"] \u003c= window_end)\n            ]\n\n            if len(window_events) >= threshold_failures:\n                source_ips = window_events[\"source_ip\"].unique()\n                alerts.append({\n                    \"alert_type\": \"BRUTE_FORCE\",\n                    \"severity\": \"HIGH\",\n                    \"user\": user,\n                    \"timestamp\": str(window_start),\n                    \"details\": {\n                        \"failed_attempts\": len(window_events),\n                        \"window_minutes\": window_minutes,\n                        \"source_ips\": list(source_ips),\n                        \"distributed\": len(source_ips) > 1,\n                        \"failure_reasons\": dict(Counter(window_events[\"failure_reason\"]))\n                    }\n                })\n                break  # One alert per user per detection pass\n\n    return alerts\n\ndef detect_password_spray(df, threshold_users=10, window_minutes=30):\n    \"\"\"\n    Detect password spraying: failed logins against many different\n    accounts from the same source in a short window (1-2 attempts per user).\n    \"\"\"\n    alerts = []\n    failed = df[df[\"result\"] == \"failure\"].copy()\n    failed[\"timestamp\"] = pd.to_datetime(failed[\"timestamp\"])\n\n    for source_ip, ip_events in failed.groupby(\"source_ip\"):\n        ip_events_sorted = ip_events.sort_values(\"timestamp\")\n\n        for i, row in ip_events_sorted.iterrows():\n            window_start = row[\"timestamp\"]\n            window_end = window_start + timedelta(minutes=window_minutes)\n\n            window_events = ip_events_sorted[\n                (ip_events_sorted[\"timestamp\"] >= window_start) &\n                (ip_events_sorted[\"timestamp\"] \u003c= window_end)\n            ]\n\n            unique_users = window_events[\"user\"].nunique()\n            attempts_per_user = len(window_events) / unique_users if unique_users > 0 else 0\n\n            # Password spray: many users targeted, few attempts per user\n            if unique_users >= threshold_users and attempts_per_user \u003c= 3:\n                # Check if any succeeded (compromised account)\n                success_after = df[\n                    (df[\"source_ip\"] == source_ip) &\n                    (df[\"result\"] == \"success\") &\n                    (pd.to_datetime(df[\"timestamp\"]) > window_start) &\n                    (pd.to_datetime(df[\"timestamp\"]) \u003c window_end + timedelta(hours=1))\n                ]\n\n                alerts.append({\n                    \"alert_type\": \"PASSWORD_SPRAY\",\n                    \"severity\": \"CRITICAL\" if len(success_after) > 0 else \"HIGH\",\n                    \"timestamp\": str(window_start),\n                    \"details\": {\n                        \"source_ip\": source_ip,\n                        \"targeted_users\": unique_users,\n                        \"total_attempts\": len(window_events),\n                        \"avg_attempts_per_user\": round(attempts_per_user, 1),\n                        \"window_minutes\": window_minutes,\n                        \"successful_logins_after\": len(success_after),\n                        \"compromised_accounts\": list(success_after[\"user\"].unique()) if len(success_after) > 0 else []\n                    }\n                })\n                break\n\n    return alerts\n\n# Run detections\nbrute_force_alerts = detect_brute_force(auth_df)\nspray_alerts = detect_password_spray(auth_df)\nprint(f\"Brute force alerts: {len(brute_force_alerts)}\")\nprint(f\"Password spray alerts: {len(spray_alerts)}\")\n```\n\n### Step 4: Build Behavioral Baselines and Detect Deviations\n\nCreate user behavioral profiles and flag statistical anomalies:\n\n```python\nimport numpy as np\nfrom scipy import stats\nfrom sklearn.ensemble import IsolationForest\n\ndef build_user_baseline(df, user, lookback_days=90):\n    \"\"\"Build behavioral baseline for a specific user.\"\"\"\n    user_events = df[df[\"user\"] == user].copy()\n    user_events[\"timestamp\"] = pd.to_datetime(user_events[\"timestamp\"])\n    user_events[\"hour\"] = user_events[\"timestamp\"].dt.hour\n    user_events[\"day_of_week\"] = user_events[\"timestamp\"].dt.dayofweek\n\n    baseline = {\n        \"user\": user,\n        \"typical_hours\": {\n            \"start\": int(user_events[\"hour\"].quantile(0.05)),\n            \"end\": int(user_events[\"hour\"].quantile(0.95)),\n            \"mean\": float(user_events[\"hour\"].mean()),\n            \"std\": float(user_events[\"hour\"].std())\n        },\n        \"typical_days\": list(user_events[\"day_of_week\"].mode().values),\n        \"typical_ips\": list(user_events[\"source_ip\"].value_counts().head(10).index),\n        \"typical_locations\": list(\n            user_events[\"location\"].apply(\n                lambda x: x.get(\"country\") if isinstance(x, dict) else None\n            ).dropna().value_counts().head(5).index\n        ),\n        \"typical_apps\": list(user_events[\"app\"].value_counts().head(10).index),\n        \"typical_devices\": list(user_events[\"device\"].value_counts().head(5).index),\n        \"avg_daily_logins\": float(\n            user_events.groupby(user_events[\"timestamp\"].dt.date).size().mean()\n        ),\n        \"std_daily_logins\": float(\n            user_events.groupby(user_events[\"timestamp\"].dt.date).size().std()\n        ),\n        \"failure_rate\": float(\n            (user_events[\"result\"] == \"failure\").mean()\n        )\n    }\n\n    return baseline\n\ndef detect_behavioral_anomalies(event, baseline):\n    \"\"\"Compare a new authentication event against user baseline.\"\"\"\n    anomalies = []\n    event_time = pd.Timestamp(event[\"timestamp\"])\n\n    # Off-hours login detection\n    hour = event_time.hour\n    if baseline[\"typical_hours\"][\"std\"] > 0:\n        z_score = abs(hour - baseline[\"typical_hours\"][\"mean\"]) / baseline[\"typical_hours\"][\"std\"]\n        if z_score > 2.5:\n            anomalies.append({\n                \"type\": \"OFF_HOURS_LOGIN\",\n                \"severity\": \"MEDIUM\",\n                \"detail\": f\"Login at {hour}:00 (baseline: {baseline['typical_hours']['start']}:00-{baseline['typical_hours']['end']}:00)\",\n                \"z_score\": round(z_score, 2)\n            })\n\n    # New source IP\n    if event[\"source_ip\"] not in baseline[\"typical_ips\"]:\n        anomalies.append({\n            \"type\": \"NEW_SOURCE_IP\",\n            \"severity\": \"MEDIUM\",\n            \"detail\": f\"Login from unknown IP: {event['source_ip']}\"\n        })\n\n    # New country\n    if event.get(\"location\") and isinstance(event[\"location\"], dict):\n        country = event[\"location\"].get(\"country\")\n        if country and country not in baseline[\"typical_locations\"]:\n            anomalies.append({\n                \"type\": \"NEW_COUNTRY\",\n                \"severity\": \"HIGH\",\n                \"detail\": f\"Login from new country: {country}\"\n            })\n\n    # New application\n    if event.get(\"app\") and event[\"app\"] not in baseline[\"typical_apps\"]:\n        anomalies.append({\n            \"type\": \"NEW_APPLICATION\",\n            \"severity\": \"LOW\",\n            \"detail\": f\"Access to new application: {event['app']}\"\n        })\n\n    # New device\n    if event.get(\"device\") and event[\"device\"] not in baseline[\"typical_devices\"]:\n        anomalies.append({\n            \"type\": \"NEW_DEVICE\",\n            \"severity\": \"MEDIUM\",\n            \"detail\": f\"Login from new device: {event['device']}\"\n        })\n\n    # Weekend login for weekday-only users\n    if event_time.dayofweek >= 5 and 5 not in baseline[\"typical_days\"] and 6 not in baseline[\"typical_days\"]:\n        anomalies.append({\n            \"type\": \"WEEKEND_LOGIN\",\n            \"severity\": \"LOW\",\n            \"detail\": f\"Weekend login detected (typical days: {baseline['typical_days']})\"\n        })\n\n    return anomalies\n\ndef isolation_forest_anomaly_detection(df):\n    \"\"\"Use Isolation Forest for multivariate anomaly detection.\"\"\"\n    # Feature engineering\n    features_df = df.copy()\n    features_df[\"timestamp\"] = pd.to_datetime(features_df[\"timestamp\"])\n    features_df[\"hour\"] = features_df[\"timestamp\"].dt.hour\n    features_df[\"day_of_week\"] = features_df[\"timestamp\"].dt.dayofweek\n    features_df[\"is_failure\"] = (features_df[\"result\"] == \"failure\").astype(int)\n\n    # Encode categorical features\n    features_df[\"ip_frequency\"] = features_df.groupby(\"source_ip\")[\"source_ip\"].transform(\"count\")\n    features_df[\"user_frequency\"] = features_df.groupby(\"user\")[\"user\"].transform(\"count\")\n\n    feature_columns = [\"hour\", \"day_of_week\", \"is_failure\", \"ip_frequency\", \"user_frequency\"]\n    X = features_df[feature_columns].fillna(0)\n\n    # Train Isolation Forest\n    model = IsolationForest(\n        n_estimators=200,\n        contamination=0.01,  # Expect 1% anomaly rate\n        random_state=42,\n        n_jobs=-1\n    )\n    features_df[\"anomaly_score\"] = model.fit_predict(X)\n    features_df[\"anomaly_probability\"] = model.score_samples(X)\n\n    # Extract anomalies (labeled as -1)\n    anomalies = features_df[features_df[\"anomaly_score\"] == -1]\n\n    return anomalies.sort_values(\"anomaly_probability\")\n```\n\n### Step 5: Implement SIEM Detection Rules\n\nDeploy detection rules for common authentication attack patterns:\n\n```yaml\n# Splunk SPL queries for authentication anomaly detection\n\n# 1. Brute Force Detection\n# name: Authentication Brute Force - Multiple Failed Logins\n# severity: high\nbrute_force_spl: |\n  index=auth sourcetype IN (\"azure:aad:signin\", \"okta:im:log\", \"WinEventLog:Security\")\n  (result=\"failure\" OR EventCode=4625)\n  | bin _time span=10m\n  | stats count as failed_attempts dc(src_ip) as unique_ips\n    values(src_ip) as source_ips\n    latest(_time) as last_attempt\n    by user _time\n  | where failed_attempts >= 10\n  | eval alert_type=if(unique_ips > 3, \"Distributed Brute Force\", \"Standard Brute Force\")\n\n# 2. Password Spray Detection\n# name: Password Spray Attack - Multiple Users Same Source\n# severity: critical\npassword_spray_spl: |\n  index=auth sourcetype IN (\"azure:aad:signin\", \"okta:im:log\")\n  result=\"failure\"\n  | bin _time span=30m\n  | stats dc(user) as targeted_users count as total_attempts\n    values(user) as users_targeted\n    by src_ip _time\n  | where targeted_users >= 10\n  | eval attempts_per_user = round(total_attempts / targeted_users, 1)\n  | where attempts_per_user \u003c= 3\n  | eval severity=if(targeted_users > 50, \"CRITICAL\", \"HIGH\")\n\n# 3. Impossible Travel Detection\n# name: Impossible Travel - Geographically Inconsistent Logins\n# severity: high\nimpossible_travel_spl: |\n  index=auth result=\"success\"\n  | iplocation src_ip\n  | sort user _time\n  | streamstats current=f last(lat) as prev_lat last(lon) as prev_lon\n    last(_time) as prev_time last(City) as prev_city last(Country) as prev_country\n    by user\n  | where isnotnull(prev_lat) AND isnotnull(lat)\n  | eval distance_km = 6371 * 2 * asin(sqrt(\n      pow(sin((lat - prev_lat) * pi() / 360), 2) +\n      cos(prev_lat * pi() / 180) * cos(lat * pi() / 180) *\n      pow(sin((lon - prev_lon) * pi() / 360), 2)))\n  | eval time_hours = (_time - prev_time) / 3600\n  | eval required_speed = distance_km / time_hours\n  | where required_speed > 900 AND distance_km > 100\n\n# 4. Credential Stuffing Detection\n# name: Credential Stuffing - High Volume Failed Logins with Some Successes\n# severity: critical\ncredential_stuffing_spl: |\n  index=auth\n  | bin _time span=1h\n  | stats count(eval(result=\"failure\")) as failures\n    count(eval(result=\"success\")) as successes\n    dc(user) as unique_users\n    dc(src_ip) as unique_ips\n    by src_ip _time\n  | where failures > 100 AND successes > 0 AND unique_users > 20\n  | eval success_rate = round(successes / (failures + successes) * 100, 2)\n  | where success_rate \u003c 5\n```\n\n### Step 6: Correlate and Score Authentication Anomalies\n\nCombine multiple detection signals into risk scores:\n\n```python\ndef calculate_auth_risk_score(user, alerts, baseline):\n    \"\"\"\n    Calculate composite risk score for authentication events.\n    Combines multiple anomaly signals with weighted scoring.\n    \"\"\"\n    score = 0\n    risk_factors = []\n\n    weights = {\n        \"IMPOSSIBLE_TRAVEL\": 40,\n        \"PASSWORD_SPRAY\": 35,\n        \"BRUTE_FORCE\": 30,\n        \"CREDENTIAL_STUFFING\": 35,\n        \"NEW_COUNTRY\": 25,\n        \"OFF_HOURS_LOGIN\": 15,\n        \"NEW_SOURCE_IP\": 10,\n        \"NEW_DEVICE\": 10,\n        \"NEW_APPLICATION\": 5,\n        \"WEEKEND_LOGIN\": 5,\n        \"MFA_BYPASS\": 45,\n        \"LEGACY_PROTOCOL\": 20\n    }\n\n    for alert in alerts:\n        alert_type = alert.get(\"type\") or alert.get(\"alert_type\")\n        weight = weights.get(alert_type, 10)\n\n        # Adjust weight based on severity\n        severity_multiplier = {\n            \"CRITICAL\": 2.0,\n            \"HIGH\": 1.5,\n            \"MEDIUM\": 1.0,\n            \"LOW\": 0.5\n        }\n        severity = alert.get(\"severity\", \"MEDIUM\")\n        adjusted_weight = weight * severity_multiplier.get(severity, 1.0)\n\n        score += adjusted_weight\n        risk_factors.append({\n            \"factor\": alert_type,\n            \"weight\": adjusted_weight,\n            \"detail\": alert.get(\"detail\", alert.get(\"details\", \"\"))\n        })\n\n    # Normalize score to 0-100\n    normalized_score = min(100, score)\n\n    # Determine risk level\n    if normalized_score >= 80:\n        risk_level = \"CRITICAL\"\n        recommended_action = \"Immediate account suspension and investigation\"\n    elif normalized_score >= 60:\n        risk_level = \"HIGH\"\n        recommended_action = \"Force MFA re-enrollment and notify SOC\"\n    elif normalized_score >= 40:\n        risk_level = \"MEDIUM\"\n        recommended_action = \"Require step-up authentication\"\n    elif normalized_score >= 20:\n        risk_level = \"LOW\"\n        recommended_action = \"Monitor and log for trend analysis\"\n    else:\n        risk_level = \"INFORMATIONAL\"\n        recommended_action = \"No action required\"\n\n    return {\n        \"user\": user,\n        \"risk_score\": normalized_score,\n        \"risk_level\": risk_level,\n        \"recommended_action\": recommended_action,\n        \"risk_factors\": sorted(risk_factors, key=lambda x: x[\"weight\"], reverse=True),\n        \"timestamp\": datetime.utcnow().isoformat()\n    }\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| **Impossible Travel** | Authentication anomaly where a user logs in from two geographically distant locations within a timeframe that makes physical travel impossible |\n| **Password Spraying** | Credential attack that tries a small number of commonly used passwords against many accounts to avoid lockout thresholds |\n| **Credential Stuffing** | Automated attack using stolen username/password pairs from data breaches to gain unauthorized access to accounts |\n| **UEBA** | User and Entity Behavior Analytics technology that builds behavioral baselines and detects deviations using machine learning and statistical analysis |\n| **Behavioral Baseline** | Statistical profile of a user's normal authentication patterns including typical hours, locations, devices, and applications |\n| **Isolation Forest** | Unsupervised machine learning algorithm that detects anomalies by isolating observations that differ from the majority of data points |\n| **Risk Score** | Composite numerical value aggregating multiple anomaly signals with weighted scoring to prioritize authentication threats |\n\n## Tools & Systems\n\n- **Microsoft Sentinel UEBA**: Cloud-native SIEM with built-in entity behavior analytics for Azure AD and multi-cloud authentication anomaly detection\n- **Exabeam Advanced Analytics**: UEBA platform using machine learning for user session analysis and automated threat timeline construction\n- **Splunk UBA**: Behavioral analytics add-on for Splunk providing pre-built authentication anomaly models and risk scoring\n- **Elastic SIEM ML Jobs**: Machine learning anomaly detection jobs for authentication log analysis in the Elastic Stack\n\n## Common Scenarios\n\n### Scenario: Detecting Compromised Executive Account After Password Spray\n\n**Context**: SOC observes a spike in failed authentication attempts from a cloud VPS IP address targeting 200+ accounts. Two hours later, an executive account shows successful authentication from the same IP range followed by mailbox rule creation and data exfiltration.\n\n**Approach**:\n1. Run password spray detection across the timeframe to identify all targeted accounts\n2. Cross-reference targeted accounts with subsequent successful logins from related IP ranges\n3. Build behavioral baseline for the executive account and flag all deviations\n4. Check for impossible travel between the executive's last legitimate login and the attacker's session\n5. Identify post-compromise activity: mailbox rules, file downloads, delegated access changes\n6. Calculate composite risk score combining password spray, new IP, off-hours login, and new device signals\n7. Trigger automated response: force session termination, disable account, notify manager\n\n**Pitfalls**:\n- Relying on single-signal detection (failed logins only) misses successful spray results\n- Not correlating across identity providers when users have accounts in multiple IdPs\n- Static thresholds that do not account for legitimate VPN IP changes or travel\n- Ignoring successful authentications after the spray window closes (attackers may wait before using credentials)\n\n## Output Format\n\n```\nAUTHENTICATION ANOMALY DETECTION REPORT\n=========================================\nAnalysis Period:   2026-02-01 to 2026-02-24\nTotal Auth Events: 2,847,392\nUsers Monitored:   3,847\nAlert Sources:     Azure AD, Okta, Windows AD\n\nTHREAT DETECTION SUMMARY\nPassword Spray Attacks:    3\nBrute Force Attacks:       12\nImpossible Travel:         8\nCredential Stuffing:       1\nBehavioral Anomalies:      47\n\nHIGH-RISK ACCOUNTS\n[CRITICAL] j.smith@corp.com     Score: 92\n  - Impossible travel: Chicago -> Moscow (7,876 km in 0.5h)\n  - Password spray target followed by successful login\n  - New device and browser fingerprint\n  - Off-hours access to SharePoint and email\n  Action: Account suspended, SOC investigation initiated\n\n[HIGH] m.johnson@corp.com       Score: 67\n  - Login from new country (Brazil)\n  - New source IP not matching VPN ranges\n  - Access to HR application outside normal pattern\n  Action: MFA re-enrollment required, manager notified\n\n[MEDIUM] a.williams@corp.com    Score: 38\n  - Weekend login at 03:00 UTC\n  - New device (Linux, typically Windows user)\n  Action: Step-up authentication applied\n\nATTACK CAMPAIGN DETAILS\nPassword Spray Campaign #1:\n  Source:            185.220.101.x/24 (Tor exit node)\n  Targeted Users:    247\n  Success Rate:      0.8% (2 accounts compromised)\n  Compromised:       j.smith@corp.com, r.davis@corp.com\n  Duration:          45 minutes\n  Pattern:           2 attempts per user, 3-second interval\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("detecting-anomalous-authentication-patterns-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

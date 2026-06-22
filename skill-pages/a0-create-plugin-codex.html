@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>a0-create-plugin - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/a0-create-plugin-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Agent platforms, tools, and automation</div>
+      <h1>a0-create-plugin</h1>
+      <p class="description">Create, extend, or modify Agent Zero plugins. Follows strict full-stack conventions (usr/plugins, plugin.yaml, Store Gating, AgentContext, plugin settings). Use for UI hooks, API handlers, lifecycle extensions, or plugin settings UI.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Agent platforms, tools, and automation</span></div>
+<div class="meta-card"><strong>display name</strong><span>a0-create-plugin</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>a0-create-plugin</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Create, extend, or modify Agent Zero plugins. Follows strict full-stack conventions (usr/plugins, plugin.yaml, Store Gating, AgentContext, plugin settings). Use for UI hooks, API handlers, lifecycle extensions, or plugin settings UI.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose a0-create-plugin, then write the task. Fallback prompt: Use the a0-create-plugin skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Agent Zero Plugin Development</h2>
+<blockquote>[!IMPORTANT]</blockquote>
+<blockquote>Always create new plugins in <code>/a0/usr/plugins/&lt;plugin_name&gt;/</code>. The <code>/a0/plugins/</code> directory is reserved for core system plugins.</blockquote>
+<p>Related skills: <code>/a0/skills/a0-review-plugin/SKILL.md</code> | <code>/a0/skills/a0-contribute-plugin/SKILL.md</code> | <code>/a0/skills/a0-manage-plugin/SKILL.md</code></p>
+<p>Primary references:</p>
+<ul>
+<li>/a0/AGENTS.md (Full-stack architecture &amp; AgentContext)</li>
+<li>/a0/plugins/AGENTS.md (Plugin contract, plugin.yaml, settings, banners, extension contracts, Plugin Index)</li>
+<li>/a0/webui/components/AGENTS.md (Component system and modal component conventions)</li>
+<li>/a0/webui/js/AGENTS.md (Modal stack, API helpers, extension loader)</li>
+<li>/a0/webui/css/AGENTS.md (Modal CSS and shared visual primitives)</li>
+<li>/a0/docs/developer/plugins.md (Developer lifecycle and publishing)</li>
+</ul>
+<hr>
+<h3>Step 0: Ask First — Local or Community Plugin?</h3>
+<p>Before starting, ask the user one question:</p>
+<blockquote>&quot;Should this plugin be <strong>local only</strong> (stays in your Agent Zero installation) or a <strong>community plugin</strong> (published to the Plugin Index so others can install it)?&quot;</blockquote>
+<ul>
+<li><strong>Local plugin</strong>: Create it in <code>/a0/usr/plugins/&lt;plugin_name&gt;/</code>. No repository needed. Skip to the manifest section below.</li>
+<li><strong>Community plugin</strong>: The plugin must live in its own GitHub repository (runtime manifest at the repo root), and then a separate index submission PR is made to https://github.com/agent0ai/a0-plugins. Guide the user through both steps.</li>
+</ul>
+<hr>
+<h3>Plugin Manifest (plugin.yaml)</h3>
+<p>Every plugin must have a <code>plugin.yaml</code> or it will not be discovered.</p>
+<pre><code>name: my_plugin              # required for community plugins; must match dir name (^[a-z0-9_]+$)
+title: My Plugin
+description: What this plugin does.
+version: 1.0.0
+settings_sections:
+  - agent
+per_project_config: false
+per_agent_config: false</code></pre>
+<p><code>name</code>: lowercase, numbers, underscores only (<code>^[a-z0-9_]+$</code>). Required by CI when submitting to the Plugin Index - must exactly match the index folder name.</p>
+<p><code>settings_sections</code> controls which Settings tabs show a subsection for this plugin. Valid values: <code>agent</code>, <code>external</code>, <code>mcp</code>, <code>developer</code>, <code>backup</code>. Use <code>[]</code> for no subsection.</p>
+<p>Activation defaults to ON when no toggle rule exists. Set <code>per_project_config</code> and/or <code>per_agent_config</code> to enable advanced per-scope switching. Core system plugins may also use <code>always_enabled: true</code> to lock the plugin permanently ON (reserved for framework use).</p>
+<hr>
+<h3>Mandatory Frontend Patterns</h3>
+<h4>1. The &quot;Store Gate&quot; Template</h4>
+<p>To avoid race conditions and undefined errors, every component must use this wrapper:</p>
+<pre><code>&lt;div x-data&gt;
+  &lt;template x-if=&quot;$store.myPluginStore&quot;&gt;
+    &lt;div x-init=&quot;$store.myPluginStore.onOpen()&quot; x-destroy=&quot;$store.myPluginStore.cleanup()&quot;&gt;
+       &lt;!-- Content goes here --&gt;
+    &lt;/div&gt;
+  &lt;/template&gt;
+&lt;/div&gt;</code></pre>
+<h4>2. Separate Store Module</h4>
+<p>Place store logic in a separate .js file. Do NOT use alpine:init listeners inside HTML.</p>
+<pre><code>// webui/my-store.js
+import { createStore } from &quot;/js/AlpineStore.js&quot;;
+export const store = createStore(&quot;myPluginStore&quot;, {
+    status: 'idle',
+    init() { ... },
+    onOpen() { ... },
+    cleanup() { ... }
+});</code></pre>
+<p>Import it in the HTML &lt;head&gt;:</p>
+<pre><code>&lt;head&gt;
+  &lt;script type=&quot;module&quot; src=&quot;/plugins/&lt;plugin_name&gt;/webui/my-store.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;</code></pre>
+<h4>3. User Feedback: A0 Notifications Only</h4>
+<p>Do <strong>not</strong> show errors or success via inline boxes (e.g. a red <code>&lt;div&gt;</code> bound to <code>store.error</code>). Use the project notification system so toasts and history stay consistent.</p>
+<ul>
+<li><strong>Errors</strong>: <code>toastFrontendError(message, &quot;My Plugin&quot;)</code> (or <code>$store.notificationStore.frontendError(...)</code>)</li>
+<li><strong>Success</strong>: <code>toastFrontendSuccess(message, &quot;My Plugin&quot;)</code></li>
+<li><strong>Warnings/Info</strong>: <code>toastFrontendWarning</code>, <code>toastFrontendInfo</code> from <code>/components/notifications/notification-store.js</code></li>
+</ul>
+<p>Import and call from your store; do not render a dedicated error/success block in the template. See [Notifications](/a0/docs/developer/notifications.md) for the full API.</p>
+<hr>
+<h3>Plugin Settings</h3>
+<p>If your plugin needs user-configurable settings, add <code>webui/config.html</code>. The system detects it automatically and shows a Settings button in the relevant tabs (per <code>settings_sections</code> in <code>plugin.yaml</code>).</p>
+<h4>Settings modal contract</h4>
+<p>The modal provides Project + Agent profile context selectors. The plugin settings wrapper instantiates a local modal context from <code>$store.pluginSettingsPrototype</code>. Inside <code>config.html</code>, bind plugin fields to <code>config.<em></code> and use <code>context.</em></code> for modal-level state and actions:</p>
+<pre><code>&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;My Plugin Settings&lt;/title&gt;
+  &lt;script type=&quot;module&quot;&gt;
+    import { store } from &quot;/components/plugins/plugin-settings-store.js&quot;;
+  &lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div x-data&gt;
+    &lt;input x-model=&quot;config.my_key&quot; /&gt;
+    &lt;input type=&quot;checkbox&quot; x-model=&quot;config.feature_enabled&quot; /&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>The modal's Save button persists <code>config</code> to <code>config.json</code> in the correct scope (project/agent/global).</p>
+<h4>Sidebar Button (sidebar entry point)</h4>
+<ul>
+<li>Extension point: <code>sidebar-quick-actions-main-start</code></li>
+<li>Class: <code>class=&quot;config-button&quot;</code></li>
+<li>Placement: <code>x-move-after=&quot;.config-button#dashboard&quot;</code></li>
+<li>Action: <code>@click=&quot;openModal('/plugins/&lt;plugin_name&gt;/webui/my-modal.html')&quot;</code></li>
+</ul>
+<hr>
+<h3>Backend API &amp; Context</h3>
+<h4>Import Paths</h4>
+<ul>
+<li>Correct: <code>from agent import AgentContext, AgentContextType</code></li>
+<li>Correct: <code>from initialize import initialize_agent</code></li>
+<li>Correct for plugin-local Python modules under <code>usr/plugins/&lt;name&gt;/</code>: <code>from usr.plugins.&lt;name&gt;.helpers.module import ...</code></li>
+<li>Avoid <code>sys.path</code> hacks for plugin-local imports</li>
+<li>Avoid symlink-dependent imports like <code>from plugins.&lt;name&gt;...</code> for user/community plugins in <code>usr/plugins/</code></li>
+</ul>
+<h4>Sending Messages Proactively</h4>
+<pre><code>from agent import AgentContext
+from helpers.messages import UserMessage
+
+context = AgentContext.use(context_id)
+task = context.communicate(UserMessage(&quot;Message text&quot;))
+response = await task.result()</code></pre>
+<h4>Reading Plugin Settings (backend)</h4>
+<pre><code>from helpers.plugins import get_plugin_config, save_plugin_config
+
+# Runtime (with running agent - resolves project/profile from context)
+settings = get_plugin_config(&quot;my-plugin&quot;, agent=agent) or {}
+
+# Explicit write target (project/profile scope)
+save_plugin_config(
+    &quot;my-plugin&quot;,
+    project_name=&quot;my-project&quot;,
+    agent_profile=&quot;default&quot;,
+    settings=settings,
+)</code></pre>
+<hr>
+<h3>Directory Layout</h3>
+<pre><code>/a0/usr/plugins/&lt;name&gt;/
+  plugin.yaml           # Required manifest
+  execute.py            # Optional user-triggered setup, post-install, or maintenance script
+  hooks.py              # Optional framework runtime hook functions
+  default_config.yaml   # Optional default settings fallback
+  README.md             # Optional locally; strongly recommended for community plugins
+  LICENSE               # Optional locally (shown in Plugin List UI when present); required at repo root for Plugin Index submission
+  agents/
+    &lt;profile&gt;/agent.yaml # Optional plugin-distributed agent profile
+  api/                  # API Handlers (ApiHandler base class)
+  tools/                # Tool subclasses
+  helpers/              # Shared Python logic
+  prompts/              # Prompt templates
+  conf/
+    model_providers.yaml # Optional: add or override model providers
+  extensions/
+    python/&lt;extension_point&gt;/  # Named Python lifecycle extensions
+    python/_functions/&lt;module&gt;/&lt;qualname&gt;/&lt;start|end&gt;/  # Implicit @extensible hooks
+    webui/&lt;point&gt;/      # HTML/JS hook extensions
+  webui/
+    config.html         # Optional: plugin settings UI
+    my-modal.html       # Full plugin pages
+    my-store.js         # Alpine stores</code></pre>
+<p>Do not create the retired flattened extensible path form <code>extensions/python/&lt;module&gt;_&lt;qualname&gt;_&lt;start|end&gt;/</code>. The current runtime only resolves the deep <code>_functions/&lt;module&gt;/&lt;qualname&gt;/&lt;start|end&gt;</code> layout for implicit <code>@extensible</code> hooks.</p>
+<h4>Import rule for plugin-local Python code</h4>
+<p>Use the fully qualified <code>usr.plugins.&lt;plugin_name&gt;...</code> path for plugin-local imports. This lets plugins keep a normal <code>helpers/</code> directory without renaming it to <code>&lt;name&gt;_helpers</code>, and it avoids both <code>sys.path</code> mutation and symlink installation steps.</p>
+<p>Good:</p>
+<pre><code>from usr.plugins.my_plugin.helpers.runtime import do_work
+import usr.plugins.my_plugin.helpers.state as state</code></pre>
+<p>Avoid:</p>
+<pre><code>sys.path.insert(0, ...)
+from helpers.runtime import do_work
+
+from plugins.my_plugin.helpers.runtime import do_work</code></pre>
+<h3>Plugin Execution Script (<code>execute.py</code>)</h3>
+<p>If your plugin needs a user-triggered script for setup, post-install work, maintenance, or other manual operations, add an <code>execute.py</code> at the plugin root.</p>
+<p>Good uses for <code>execute.py</code> include:</p>
+<ul>
+<li>installing dependencies or downloading models/assets</li>
+<li>running post-install steps after the plugin is copied into place</li>
+<li>rebuilding caches, indexes, or generated files</li>
+<li>applying migrations, repair steps, or sync jobs that the user may need to run again later</li>
+<li>performing periodic maintenance tasks that should happen only when explicitly requested by the user</li>
+</ul>
+<p>Use <code>execute.py</code> for <strong>user-initiated</strong> work. If the behavior is framework-internal or should happen automatically as part of plugin lifecycle handling, use <code>hooks.py</code> or lifecycle extensions instead.</p>
+<p>First rule of plugin side effects: do not modify the system permanently in ways that outlive the plugin. When a plugin is deleted, there should be no leftover symlinks, unmanaged services, or stray files outside plugin-owned paths unless the user explicitly requested that behavior and the plugin documents how to clean it up.</p>
+<pre><code>import subprocess
+import sys
+
+def main():
+    print(&quot;Installing plugin dependencies...&quot;)
+    result = subprocess.run(
+        [sys.executable, &quot;-m&quot;, &quot;pip&quot;, &quot;install&quot;, &quot;requests==2.31.0&quot;],
+        text=True,
+    )
+    if result.returncode != 0:
+        print(&quot;ERROR: Installation failed&quot;)
+        return result.returncode
+
+    print(&quot;Refreshing plugin resources...&quot;)
+    # Add post-install, repair, migration, or maintenance logic here.
+
+    print(&quot;Done.&quot;)
+    return 0
+
+if __name__ == &quot;__main__&quot;:
+    sys.exit(main())</code></pre>
+<p>Users trigger it from the Plugins UI. Treat it as a manual, rerunnable operation: return <code>0</code> on success, non-zero on failure, and print progress so the user can understand what happened. When possible, make it safe to run more than once; if reruns are not safe, detect the state and print a clear message.</p>
+<h3>Runtime Hooks (<code>hooks.py</code>)</h3>
+<p>If your plugin needs framework-internal hook points, add a <code>hooks.py</code> file at the plugin root. The framework can call exported functions by name via <code>helpers.plugins.call_plugin_hook(...)</code>.</p>
+<ul>
+<li><code>hooks.py</code> runs inside the <strong>Agent Zero framework runtime</strong>, not the separate agent execution environment.</li>
+<li>Use it for things like install hooks, pre-update hooks, plugin registration work, cache setup, file preparation, or other internal framework operations.</li>
+<li>Current built-in usage:</li>
+<li>the plugin installer calls <code>install()</code> in <code>hooks.py</code> after placing a plugin in <code>usr/plugins/</code></li>
+<li>the plugin updater calls <code>pre_update()</code> in <code>hooks.py</code> immediately before pulling new plugin code into place</li>
+<li>the plugin uninstaller calls <code>uninstall()</code> in <code>hooks.py</code> before deleting the plugin directory — use this to clean up any dependencies or state created by <code>install()</code></li>
+<li>Hook functions may be sync or async.</li>
+<li>Hooks should be reversible and cleanup-safe. Prefer framework-managed state and plugin-owned paths over permanent system modifications.</li>
+</ul>
+<h4>Environment targeting rules</h4>
+<ul>
+<li>If <code>hooks.py</code> runs <code>sys.executable -m pip install ...</code>, it installs into the same Python environment that is running Agent Zero.</li>
+<li>That is correct for dependencies needed by the plugin inside the framework runtime.</li>
+<li>If the dependency is meant for the separate agent runtime or for OS-level tools, do <strong>not</strong> assume the current environment is correct.</li>
+</ul>
+<p>Instead, explicitly switch targets in a subprocess:</p>
+<ul>
+<li>invoke the exact Python interpreter for the target runtime</li>
+<li>activate the target virtualenv in the subprocess before running <code>pip</code></li>
+<li>run the relevant OS package manager from a subprocess configured for the intended environment</li>
+</ul>
+<p>In Docker, this usually means <code>hooks.py</code> affects <code>/opt/venv-a0</code> unless you intentionally target <code>/opt/venv</code> or another environment.</p>
+<hr>
+<h3>Community Plugin: GitHub Repo + Plugin Index Submission</h3>
+<p>If the user chose a <strong>community plugin</strong>, follow these additional steps after building and testing the plugin locally.</p>
+<h4>1. Repository Structure</h4>
+<p>The plugin must live in its own GitHub repository with the plugin contents at the <strong>repository root</strong> (not inside a subfolder):</p>
+<pre><code>your-plugin-repo/          ← GitHub repository root
+├── plugin.yaml            ← runtime manifest (must include name field!)
+├── default_config.yaml
+├── README.md
+├── LICENSE                ← required at repo root before Plugin Index submission
+├── api/
+├── tools/
+├── extensions/
+└── webui/</code></pre>
+<p>The runtime <code>plugin.yaml</code> at the repo root <strong>must include a <code>name</code> field</strong> matching the index folder name:</p>
+<pre><code>name: my_plugin            # REQUIRED - must match index folder name exactly
+title: My Plugin
+description: What this plugin does.
+version: 1.0.0</code></pre>
+<p>Help the user create this repository and push the plugin files to it.</p>
+<h4>2. Index manifest (different from runtime manifest)</h4>
+<p>The Plugin Index (<code>https://github.com/agent0ai/a0-plugins</code>) uses a <strong>separate <code>index.yaml</code></strong> file that only describes discoverability — it is NOT the same as the runtime <code>plugin.yaml</code> and has a different schema:</p>
+<pre><code>title: My Plugin
+description: What this plugin does.
+github: https://github.com/yourname/your-plugin-repo
+tags:
+  - tools
+  - example
+screenshots:                # optional, up to 5 full image URLs
+  - https://raw.githubusercontent.com/yourname/your-plugin-repo/main/docs/screen1.png</code></pre>
+<p>Required fields: <code>title</code>, <code>description</code>, <code>github</code>. Optional: <code>tags</code> (up to 5), <code>screenshots</code> (up to 5 URLs). See the recommended tag list at https://github.com/agent0ai/a0-plugins/blob/main/TAGS.md.</p>
+<blockquote>Important: CI also checks that your remote <code>plugin.yaml</code> contains a <code>name</code> field matching the index folder name exactly.</blockquote>
+<h4>3. Submission steps</h4>
+<ol>
+<li>Fork <code>https://github.com/agent0ai/a0-plugins</code>.</li>
+<li>Create the folder <code>plugins/&lt;your_plugin_name&gt;/</code> in the fork.</li>
+</ol>
+<ul>
+<li>Folder name: lowercase letters, numbers, underscores only (<code>^[a-z0-9_]+$</code>) - no hyphens</li>
+<li>Must exactly match the <code>name</code> field in your remote <code>plugin.yaml</code></li>
+</ul>
+<ol>
+<li>Add <code>index.yaml</code> inside it (and optionally a square thumbnail ≤ 20 KB named <code>thumbnail.png</code>, <code>thumbnail.jpg</code>, or <code>thumbnail.webp</code>).</li>
+<li>Open a Pull Request. The PR must add exactly one new plugin folder.</li>
+<li>CI validates automatically. A maintainer reviews and merges.</li>
+</ol>
+<p>Submission constraints:</p>
+<ul>
+<li>Folder name: unique, stable, <code>^[a-z0-9_]+$</code></li>
+<li>Folders starting with <code>_</code> are reserved for internal use</li>
+<li><code>title</code> max 50 characters, <code>description</code> max 500 characters</li>
+<li><code>index.yaml</code> max 2000 characters total</li>
+</ul>
+<p>For a fully guided contribution flow (including git operations), read <code>/a0/skills/a0-contribute-plugin/SKILL.md</code>.</p>
+<hr>
+<h3>Plugin Index &amp; Plugin Hub</h3>
+<p>The <strong>Plugin Index</strong> is the community hub at https://github.com/agent0ai/a0-plugins.</p>
+<p>Agent Zero now exposes indexed plugins through the built-in <strong>Plugin Hub</strong>. Users can open it from the <strong>Plugins</strong> dialog either through the <strong>Browse</strong> tab or through the <strong>Install</strong> button, then inspect plugin details and install directly from the UI.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: a0-create-plugin\ndisplay_name: a0-create-plugin\nplatform: Codex\ncategory: Agent platforms, tools, and automation\n---\n\n# a0-create-plugin - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `a0-create-plugin` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n> [!IMPORTANT]\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose a0-create-plugin, then write the task. Fallback prompt: Use the a0-create-plugin skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `a0-create-plugin` |\n| Canonical name | `a0-create-plugin` |\n| Platform | `Codex` |\n| Category | Agent platforms, tools, and automation |\n\n## Description\n\n> [!IMPORTANT]\n\n## Original SKILL.md\n\n---\nname: a0-create-plugin\ndescription: Create, extend, or modify Agent Zero plugins. Follows strict full-stack conventions (usr/plugins, plugin.yaml, Store Gating, AgentContext, plugin settings). Use for UI hooks, API handlers, lifecycle extensions, or plugin settings UI.\nversion: 1.0.0\ntags: [\"plugins\", \"create\", \"build\", \"develop\", \"extend\"]\ntrigger_patterns:\n  - \"create plugin\"\n  - \"build plugin\"\n  - \"new plugin\"\n  - \"develop plugin\"\n  - \"write plugin\"\n  - \"plugin template\"\n---\n\n# Agent Zero Plugin Development\n\n> [!IMPORTANT]\n> Always create new plugins in `/a0/usr/plugins/\u003cplugin_name>/`. The `/a0/plugins/` directory is reserved for core system plugins.\n\nRelated skills: `/a0/skills/a0-review-plugin/SKILL.md` | `/a0/skills/a0-contribute-plugin/SKILL.md` | `/a0/skills/a0-manage-plugin/SKILL.md`\n\nPrimary references:\n- /a0/AGENTS.md (Full-stack architecture & AgentContext)\n- /a0/plugins/AGENTS.md (Plugin contract, plugin.yaml, settings, banners, extension contracts, Plugin Index)\n- /a0/webui/components/AGENTS.md (Component system and modal component conventions)\n- /a0/webui/js/AGENTS.md (Modal stack, API helpers, extension loader)\n- /a0/webui/css/AGENTS.md (Modal CSS and shared visual primitives)\n- /a0/docs/developer/plugins.md (Developer lifecycle and publishing)\n\n---\n\n## Step 0: Ask First — Local or Community Plugin?\n\nBefore starting, ask the user one question:\n\n> \"Should this plugin be **local only** (stays in your Agent Zero installation) or a **community plugin** (published to the Plugin Index so others can install it)?\"\n\n- **Local plugin**: Create it in `/a0/usr/plugins/\u003cplugin_name>/`. No repository needed. Skip to the manifest section below.\n- **Community plugin**: The plugin must live in its own GitHub repository (runtime manifest at the repo root), and then a separate index submission PR is made to https://github.com/agent0ai/a0-plugins. Guide the user through both steps.\n\n---\n\n## Plugin Manifest (plugin.yaml)\n\nEvery plugin must have a `plugin.yaml` or it will not be discovered.\n\n```yaml\nname: my_plugin              # required for community plugins; must match dir name (^[a-z0-9_]+$)\ntitle: My Plugin\ndescription: What this plugin does.\nversion: 1.0.0\nsettings_sections:\n  - agent\nper_project_config: false\nper_agent_config: false\n```\n\n`name`: lowercase, numbers, underscores only (`^[a-z0-9_]+$`). Required by CI when submitting to the Plugin Index - must exactly match the index folder name.\n\n`settings_sections` controls which Settings tabs show a subsection for this plugin. Valid values: `agent`, `external`, `mcp`, `developer`, `backup`. Use `[]` for no subsection.\n\nActivation defaults to ON when no toggle rule exists. Set `per_project_config` and/or `per_agent_config` to enable advanced per-scope switching. Core system plugins may also use `always_enabled: true` to lock the plugin permanently ON (reserved for framework use).\n\n---\n\n## Mandatory Frontend Patterns\n\n### 1. The \"Store Gate\" Template\nTo avoid race conditions and undefined errors, every component must use this wrapper:\n```html\n\u003cdiv x-data>\n  \u003ctemplate x-if=\"$store.myPluginStore\">\n    \u003cdiv x-init=\"$store.myPluginStore.onOpen()\" x-destroy=\"$store.myPluginStore.cleanup()\">\n       \u003c!-- Content goes here -->\n    \u003c/div>\n  \u003c/template>\n\u003c/div>\n```\n\n### 2. Separate Store Module\nPlace store logic in a separate .js file. Do NOT use alpine:init listeners inside HTML.\n```javascript\n// webui/my-store.js\nimport { createStore } from \"/js/AlpineStore.js\";\nexport const store = createStore(\"myPluginStore\", {\n    status: 'idle',\n    init() { ... },\n    onOpen() { ... },\n    cleanup() { ... }\n});\n```\nImport it in the HTML \u003chead>:\n```html\n\u003chead>\n  \u003cscript type=\"module\" src=\"/plugins/\u003cplugin_name>/webui/my-store.js\">\u003c/script>\n\u003c/head>\n```\n\n### 3. User Feedback: A0 Notifications Only\nDo **not** show errors or success via inline boxes (e.g. a red `\u003cdiv>` bound to `store.error`). Use the project notification system so toasts and history stay consistent.\n\n- **Errors**: `toastFrontendError(message, \"My Plugin\")` (or `$store.notificationStore.frontendError(...)`)\n- **Success**: `toastFrontendSuccess(message, \"My Plugin\")`\n- **Warnings/Info**: `toastFrontendWarning`, `toastFrontendInfo` from `/components/notifications/notification-store.js`\n\nImport and call from your store; do not render a dedicated error/success block in the template. See [Notifications](/a0/docs/developer/notifications.md) for the full API.\n\n---\n\n## Plugin Settings\n\nIf your plugin needs user-configurable settings, add `webui/config.html`. The system detects it automatically and shows a Settings button in the relevant tabs (per `settings_sections` in `plugin.yaml`).\n\n### Settings modal contract\n\nThe modal provides Project + Agent profile context selectors. The plugin settings wrapper instantiates a local modal context from `$store.pluginSettingsPrototype`. Inside `config.html`, bind plugin fields to `config.*` and use `context.*` for modal-level state and actions:\n\n```html\n\u003chtml>\n\u003chead>\n  \u003ctitle>My Plugin Settings\u003c/title>\n  \u003cscript type=\"module\">\n    import { store } from \"/components/plugins/plugin-settings-store.js\";\n  \u003c/script>\n\u003c/head>\n\u003cbody>\n  \u003cdiv x-data>\n    \u003cinput x-model=\"config.my_key\" />\n    \u003cinput type=\"checkbox\" x-model=\"config.feature_enabled\" />\n  \u003c/div>\n\u003c/body>\n\u003c/html>\n```\n\nThe modal's Save button persists `config` to `config.json` in the correct scope (project/agent/global).\n\n### Sidebar Button (sidebar entry point)\n- Extension point: `sidebar-quick-actions-main-start`\n- Class: `class=\"config-button\"`\n- Placement: `x-move-after=\".config-button#dashboard\"`\n- Action: `@click=\"openModal('/plugins/\u003cplugin_name>/webui/my-modal.html')\"`\n\n---\n\n## Backend API & Context\n\n### Import Paths\n- Correct: `from agent import AgentContext, AgentContextType`\n- Correct: `from initialize import initialize_agent`\n- Correct for plugin-local Python modules under `usr/plugins/\u003cname>/`: `from usr.plugins.\u003cname>.helpers.module import ...`\n- Avoid `sys.path` hacks for plugin-local imports\n- Avoid symlink-dependent imports like `from plugins.\u003cname>...` for user/community plugins in `usr/plugins/`\n\n### Sending Messages Proactively\n```python\nfrom agent import AgentContext\nfrom helpers.messages import UserMessage\n\ncontext = AgentContext.use(context_id)\ntask = context.communicate(UserMessage(\"Message text\"))\nresponse = await task.result()\n```\n\n### Reading Plugin Settings (backend)\n```python\nfrom helpers.plugins import get_plugin_config, save_plugin_config\n\n# Runtime (with running agent - resolves project/profile from context)\nsettings = get_plugin_config(\"my-plugin\", agent=agent) or {}\n\n# Explicit write target (project/profile scope)\nsave_plugin_config(\n    \"my-plugin\",\n    project_name=\"my-project\",\n    agent_profile=\"default\",\n    settings=settings,\n)\n```\n\n---\n\n## Directory Layout\n```\n/a0/usr/plugins/\u003cname>/\n  plugin.yaml           # Required manifest\n  execute.py            # Optional user-triggered setup, post-install, or maintenance script\n  hooks.py              # Optional framework runtime hook functions\n  default_config.yaml   # Optional default settings fallback\n  README.md             # Optional locally; strongly recommended for community plugins\n  LICENSE               # Optional locally (shown in Plugin List UI when present); required at repo root for Plugin Index submission\n  agents/\n    \u003cprofile>/agent.yaml # Optional plugin-distributed agent profile\n  api/                  # API Handlers (ApiHandler base class)\n  tools/                # Tool subclasses\n  helpers/              # Shared Python logic\n  prompts/              # Prompt templates\n  conf/\n    model_providers.yaml # Optional: add or override model providers\n  extensions/\n    python/\u003cextension_point>/  # Named Python lifecycle extensions\n    python/_functions/\u003cmodule>/\u003cqualname>/\u003cstart|end>/  # Implicit @extensible hooks\n    webui/\u003cpoint>/      # HTML/JS hook extensions\n  webui/\n    config.html         # Optional: plugin settings UI\n    my-modal.html       # Full plugin pages\n    my-store.js         # Alpine stores\n```\n\nDo not create the retired flattened extensible path form `extensions/python/\u003cmodule>_\u003cqualname>_\u003cstart|end>/`. The current runtime only resolves the deep `_functions/\u003cmodule>/\u003cqualname>/\u003cstart|end>` layout for implicit `@extensible` hooks.\n\n### Import rule for plugin-local Python code\n\nUse the fully qualified `usr.plugins.\u003cplugin_name>...` path for plugin-local\nimports. This lets plugins keep a normal `helpers/` directory without renaming\nit to `\u003cname>_helpers`, and it avoids both `sys.path` mutation and symlink\ninstallation steps.\n\nGood:\n\n```python\nfrom usr.plugins.my_plugin.helpers.runtime import do_work\nimport usr.plugins.my_plugin.helpers.state as state\n```\n\nAvoid:\n\n```python\nsys.path.insert(0, ...)\nfrom helpers.runtime import do_work\n\nfrom plugins.my_plugin.helpers.runtime import do_work\n```\n\n## Plugin Execution Script (`execute.py`)\nIf your plugin needs a user-triggered script for setup, post-install work, maintenance, or other manual operations, add an `execute.py` at the plugin root.\n\nGood uses for `execute.py` include:\n- installing dependencies or downloading models/assets\n- running post-install steps after the plugin is copied into place\n- rebuilding caches, indexes, or generated files\n- applying migrations, repair steps, or sync jobs that the user may need to run again later\n- performing periodic maintenance tasks that should happen only when explicitly requested by the user\n\nUse `execute.py` for **user-initiated** work. If the behavior is framework-internal or should happen automatically as part of plugin lifecycle handling, use `hooks.py` or lifecycle extensions instead.\n\nFirst rule of plugin side effects: do not modify the system permanently in ways\nthat outlive the plugin. When a plugin is deleted, there should be no leftover\nsymlinks, unmanaged services, or stray files outside plugin-owned paths unless\nthe user explicitly requested that behavior and the plugin documents how to\nclean it up.\n\n```python\nimport subprocess\nimport sys\n\ndef main():\n    print(\"Installing plugin dependencies...\")\n    result = subprocess.run(\n        [sys.executable, \"-m\", \"pip\", \"install\", \"requests==2.31.0\"],\n        text=True,\n    )\n    if result.returncode != 0:\n        print(\"ERROR: Installation failed\")\n        return result.returncode\n\n    print(\"Refreshing plugin resources...\")\n    # Add post-install, repair, migration, or maintenance logic here.\n\n    print(\"Done.\")\n    return 0\n\nif __name__ == \"__main__\":\n    sys.exit(main())\n```\n\nUsers trigger it from the Plugins UI. Treat it as a manual, rerunnable operation: return `0` on success, non-zero on failure, and print progress so the user can understand what happened. When possible, make it safe to run more than once; if reruns are not safe, detect the state and print a clear message.\n\n## Runtime Hooks (`hooks.py`)\nIf your plugin needs framework-internal hook points, add a `hooks.py` file at the plugin root. The framework can call exported functions by name via `helpers.plugins.call_plugin_hook(...)`.\n\n- `hooks.py` runs inside the **Agent Zero framework runtime**, not the separate agent execution environment.\n- Use it for things like install hooks, pre-update hooks, plugin registration work, cache setup, file preparation, or other internal framework operations.\n- Current built-in usage:\n  - the plugin installer calls `install()` in `hooks.py` after placing a plugin in `usr/plugins/`\n  - the plugin updater calls `pre_update()` in `hooks.py` immediately before pulling new plugin code into place\n  - the plugin uninstaller calls `uninstall()` in `hooks.py` before deleting the plugin directory — use this to clean up any dependencies or state created by `install()`\n- Hook functions may be sync or async.\n- Hooks should be reversible and cleanup-safe. Prefer framework-managed state and plugin-owned paths over permanent system modifications.\n\n### Environment targeting rules\n- If `hooks.py` runs `sys.executable -m pip install ...`, it installs into the same Python environment that is running Agent Zero.\n- That is correct for dependencies needed by the plugin inside the framework runtime.\n- If the dependency is meant for the separate agent runtime or for OS-level tools, do **not** assume the current environment is correct.\n\nInstead, explicitly switch targets in a subprocess:\n- invoke the exact Python interpreter for the target runtime\n- activate the target virtualenv in the subprocess before running `pip`\n- run the relevant OS package manager from a subprocess configured for the intended environment\n\nIn Docker, this usually means `hooks.py` affects `/opt/venv-a0` unless you intentionally target `/opt/venv` or another environment.\n\n---\n\n## Community Plugin: GitHub Repo + Plugin Index Submission\n\nIf the user chose a **community plugin**, follow these additional steps after building and testing the plugin locally.\n\n### 1. Repository Structure\n\nThe plugin must live in its own GitHub repository with the plugin contents at the **repository root** (not inside a subfolder):\n\n```text\nyour-plugin-repo/          ← GitHub repository root\n├── plugin.yaml            ← runtime manifest (must include name field!)\n├── default_config.yaml\n├── README.md\n├── LICENSE                ← required at repo root before Plugin Index submission\n├── api/\n├── tools/\n├── extensions/\n└── webui/\n```\n\nThe runtime `plugin.yaml` at the repo root **must include a `name` field** matching the index folder name:\n\n```yaml\nname: my_plugin            # REQUIRED - must match index folder name exactly\ntitle: My Plugin\ndescription: What this plugin does.\nversion: 1.0.0\n```\n\nHelp the user create this repository and push the plugin files to it.\n\n### 2. Index manifest (different from runtime manifest)\n\nThe Plugin Index (`https://github.com/agent0ai/a0-plugins`) uses a **separate `index.yaml`** file that only describes discoverability — it is NOT the same as the runtime `plugin.yaml` and has a different schema:\n\n```yaml\ntitle: My Plugin\ndescription: What this plugin does.\ngithub: https://github.com/yourname/your-plugin-repo\ntags:\n  - tools\n  - example\nscreenshots:                # optional, up to 5 full image URLs\n  - https://raw.githubusercontent.com/yourname/your-plugin-repo/main/docs/screen1.png\n```\n\nRequired fields: `title`, `description`, `github`. Optional: `tags` (up to 5), `screenshots` (up to 5 URLs).\nSee the recommended tag list at https://github.com/agent0ai/a0-plugins/blob/main/TAGS.md.\n\n> Important: CI also checks that your remote `plugin.yaml` contains a `name` field matching the index folder name exactly.\n\n### 3. Submission steps\n\n1. Fork `https://github.com/agent0ai/a0-plugins`.\n2. Create the folder `plugins/\u003cyour_plugin_name>/` in the fork.\n   - Folder name: lowercase letters, numbers, underscores only (`^[a-z0-9_]+$`) - no hyphens\n   - Must exactly match the `name` field in your remote `plugin.yaml`\n3. Add `index.yaml` inside it (and optionally a square thumbnail ≤ 20 KB named `thumbnail.png`, `thumbnail.jpg`, or `thumbnail.webp`).\n4. Open a Pull Request. The PR must add exactly one new plugin folder.\n5. CI validates automatically. A maintainer reviews and merges.\n\nSubmission constraints:\n- Folder name: unique, stable, `^[a-z0-9_]+$`\n- Folders starting with `_` are reserved for internal use\n- `title` max 50 characters, `description` max 500 characters\n- `index.yaml` max 2000 characters total\n\nFor a fully guided contribution flow (including git operations), read `/a0/skills/a0-contribute-plugin/SKILL.md`.\n\n---\n\n## Plugin Index & Plugin Hub\n\nThe **Plugin Index** is the community hub at https://github.com/agent0ai/a0-plugins.\n\nAgent Zero now exposes indexed plugins through the built-in **Plugin Hub**. Users can open it from the **Plugins** dialog either through the **Browse** tab or through the **Install** button, then inspect plugin details and install directly from the UI.\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("a0-create-plugin-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

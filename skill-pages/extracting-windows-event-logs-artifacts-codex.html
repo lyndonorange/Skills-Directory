@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>extracting-windows-event-logs-artifacts - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/extracting-windows-event-logs-artifacts-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>extracting-windows-event-logs-artifacts</h1>
+      <p class="description">Extract, parse, and analyze Windows Event Logs (EVTX) using Chainsaw,</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>extracting-windows-event-logs-artifacts</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>extracting-windows-event-logs-artifacts</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Extract, parse, and analyze Windows Event Logs (EVTX) using Chainsaw,</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose extracting-windows-event-logs-artifacts, then write the task. Fallback prompt: Use the extracting-windows-event-logs-artifacts skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Extracting Windows Event Logs Artifacts</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When investigating security incidents on Windows systems through event log analysis</li>
+<li>For detecting lateral movement, privilege escalation, and persistence mechanisms</li>
+<li>When performing threat hunting across Windows event log data</li>
+<li>During compliance audits requiring review of authentication and access events</li>
+<li>When building forensic timelines from Windows system activity</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Windows Event Log files (EVTX format) from forensic image or live system</li>
+<li>Chainsaw, Hayabusa, or EvtxECmd for parsing and detection</li>
+<li>Sigma rules for automated threat detection</li>
+<li>Understanding of critical Windows Event IDs</li>
+<li>Python with python-evtx or evtx library for custom parsing</li>
+<li>PowerShell for live system analysis (if applicable)</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Collect Windows Event Log Files</h4>
+<pre><code># Extract EVTX files from forensic image
+mount -o ro,loop,offset=$((2048*512)) /cases/case-2024-001/images/evidence.dd /mnt/evidence
+
+mkdir -p /cases/case-2024-001/evtx/
+cp /mnt/evidence/Windows/System32/winevt/Logs/*.evtx /cases/case-2024-001/evtx/
+
+# Key event logs to prioritize
+# Security.evtx - Authentication, authorization, audit events
+# System.evtx - System services, drivers, hardware events
+# Application.evtx - Application errors and events
+# Microsoft-Windows-Sysmon%4Operational.evtx - Detailed process/network monitoring
+# Microsoft-Windows-PowerShell%4Operational.evtx - PowerShell activity
+# Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx - RDP sessions
+# Microsoft-Windows-TaskScheduler%4Operational.evtx - Scheduled tasks
+# Microsoft-Windows-WinRM%4Operational.evtx - Windows Remote Management
+# Microsoft-Windows-Bits-Client%4Operational.evtx - BITS transfers
+# Microsoft-Windows-Windows Defender%4Operational.evtx - AV detections
+
+# List available log files and sizes
+ls -lhS /cases/case-2024-001/evtx/ | head -20
+
+# Hash for integrity
+sha256sum /cases/case-2024-001/evtx/*.evtx &gt; /cases/case-2024-001/evtx/evtx_hashes.txt</code></pre>
+<h4>Step 2: Run Chainsaw for Sigma-Based Detection</h4>
+<pre><code># Install Chainsaw
+wget https://github.com/WithSecureLabs/chainsaw/releases/latest/download/chainsaw_all_platforms+rules.zip
+unzip chainsaw_all_platforms+rules.zip -d /opt/chainsaw
+
+# Run Chainsaw with bundled Sigma rules
+/opt/chainsaw/chainsaw hunt /cases/case-2024-001/evtx/ \
+   -s /opt/chainsaw/sigma/rules/ \
+   --mapping /opt/chainsaw/mappings/sigma-event-logs-all.yml \
+   --output /cases/case-2024-001/analysis/chainsaw_results.txt
+
+# Run with CSV output for easier analysis
+/opt/chainsaw/chainsaw hunt /cases/case-2024-001/evtx/ \
+   -s /opt/chainsaw/sigma/rules/ \
+   --mapping /opt/chainsaw/mappings/sigma-event-logs-all.yml \
+   --csv \
+   --output /cases/case-2024-001/analysis/chainsaw_results/
+
+# Run with JSON output
+/opt/chainsaw/chainsaw hunt /cases/case-2024-001/evtx/ \
+   -s /opt/chainsaw/sigma/rules/ \
+   --mapping /opt/chainsaw/mappings/sigma-event-logs-all.yml \
+   --json \
+   --output /cases/case-2024-001/analysis/chainsaw_results.json
+
+# Search for specific keywords
+/opt/chainsaw/chainsaw search /cases/case-2024-001/evtx/ \
+   -s &quot;mimikatz&quot; --json
+
+# Search for specific event IDs
+/opt/chainsaw/chainsaw search /cases/case-2024-001/evtx/ \
+   -e 4688 --json | head -100</code></pre>
+<h4>Step 3: Run Hayabusa for Fast Timeline Generation</h4>
+<pre><code># Install Hayabusa
+wget https://github.com/Yamato-Security/hayabusa/releases/latest/download/hayabusa-linux-x64-musl.zip
+unzip hayabusa-linux-x64-musl.zip -d /opt/hayabusa
+
+# Generate CSV timeline with all detection rules
+/opt/hayabusa/hayabusa csv-timeline \
+   -d /cases/case-2024-001/evtx/ \
+   -o /cases/case-2024-001/analysis/hayabusa_timeline.csv \
+   -p verbose
+
+# Generate JSON timeline
+/opt/hayabusa/hayabusa json-timeline \
+   -d /cases/case-2024-001/evtx/ \
+   -o /cases/case-2024-001/analysis/hayabusa_timeline.json
+
+# Run with only critical and high severity detections
+/opt/hayabusa/hayabusa csv-timeline \
+   -d /cases/case-2024-001/evtx/ \
+   -o /cases/case-2024-001/analysis/hayabusa_critical.csv \
+   -p verbose \
+   --min-level critical
+
+# Generate detection summary (metrics)
+/opt/hayabusa/hayabusa metrics \
+   -d /cases/case-2024-001/evtx/ \
+   -o /cases/case-2024-001/analysis/hayabusa_metrics.csv
+
+# Logon summary
+/opt/hayabusa/hayabusa logon-summary \
+   -d /cases/case-2024-001/evtx/ \
+   -o /cases/case-2024-001/analysis/logon_summary.csv</code></pre>
+<h4>Step 4: Parse Specific Critical Event IDs</h4>
+<pre><code># Extract authentication events with python-evtx
+pip install evtx
+
+python3 &lt;&lt; 'PYEOF'
+import json
+from evtx import PyEvtxParser
+
+parser = PyEvtxParser(&quot;/cases/case-2024-001/evtx/Security.evtx&quot;)
+
+# Critical Event IDs mapping
+critical_events = {
+    '4624': 'Successful Logon',
+    '4625': 'Failed Logon',
+    '4634': 'Logoff',
+    '4648': 'Explicit Credential Logon',
+    '4672': 'Special Privileges Assigned',
+    '4688': 'Process Created',
+    '4689': 'Process Exited',
+    '4697': 'Service Installed',
+    '4698': 'Scheduled Task Created',
+    '4720': 'User Account Created',
+    '4724': 'Password Reset Attempted',
+    '4728': 'Member Added to Global Group',
+    '4732': 'Member Added to Local Group',
+    '4756': 'Member Added to Universal Group',
+    '1102': 'Audit Log Cleared',
+    '4688': 'New Process Created'
+}
+
+results = {eid: [] for eid in critical_events}
+
+for record in parser.records_json():
+    data = json.loads(record['data'])
+    event_id = str(data['Event']['System']['EventID'])
+
+    if event_id in critical_events:
+        event_data = data['Event'].get('EventData', {})
+        results[event_id].append({
+            'timestamp': data['Event']['System']['TimeCreated']['#attributes']['SystemTime'],
+            'event_id': event_id,
+            'description': critical_events[event_id],
+            'data': event_data
+        })
+
+# Print summary
+for eid, events in results.items():
+    if events:
+        print(f&quot;\n[{eid}] {critical_events[eid]}: {len(events)} events&quot;)
+        for e in events[:3]:
+            print(f&quot;  {e['timestamp']}: {json.dumps(e['data'], default=str)[:200]}&quot;)
+        if len(events) &gt; 3:
+            print(f&quot;  ... and {len(events)-3} more&quot;)
+
+# Save full results
+with open('/cases/case-2024-001/analysis/critical_events.json', 'w') as f:
+    json.dump(results, f, indent=2, default=str)
+PYEOF</code></pre>
+<h4>Step 5: Detect Specific Attack Patterns</h4>
+<pre><code># Detect Pass-the-Hash (Logon Type 9 with NTLM)
+python3 &lt;&lt; 'PYEOF'
+import json
+from evtx import PyEvtxParser
+
+parser = PyEvtxParser(&quot;/cases/case-2024-001/evtx/Security.evtx&quot;)
+
+print(&quot;=== PASS-THE-HASH INDICATORS ===&quot;)
+print(&quot;Looking for: Event 4624, Logon Type 9, NTLM authentication\n&quot;)
+
+for record in parser.records_json():
+    data = json.loads(record['data'])
+    event_id = str(data['Event']['System']['EventID'])
+
+    if event_id == '4624':
+        event_data = data['Event'].get('EventData', {})
+        logon_type = str(event_data.get('LogonType', ''))
+        auth_package = str(event_data.get('AuthenticationPackageName', ''))
+        logon_process = str(event_data.get('LogonProcessName', ''))
+
+        # Pass-the-Hash indicators
+        if logon_type == '9' and 'NTLM' in auth_package:
+            timestamp = data['Event']['System']['TimeCreated']['#attributes']['SystemTime']
+            target = event_data.get('TargetUserName', 'Unknown')
+            source_ip = event_data.get('IpAddress', 'N/A')
+            print(f&quot;  [{timestamp}] PtH: User={target}, IP={source_ip}, Auth={auth_package}&quot;)
+
+        # Network logon with NTLM (lateral movement)
+        if logon_type == '3' and 'NTLM' in auth_package:
+            timestamp = data['Event']['System']['TimeCreated']['#attributes']['SystemTime']
+            target = event_data.get('TargetUserName', 'Unknown')
+            source_ip = event_data.get('IpAddress', 'N/A')
+            workstation = event_data.get('WorkstationName', 'N/A')
+            print(f&quot;  [{timestamp}] Network NTLM: User={target}, IP={source_ip}, WS={workstation}&quot;)
+PYEOF
+
+# Detect log clearing / anti-forensics
+python3 &lt;&lt; 'PYEOF'
+import json
+from evtx import PyEvtxParser
+
+for log_file in ['Security.evtx', 'System.evtx']:
+    path = f&quot;/cases/case-2024-001/evtx/{log_file}&quot;
+    try:
+        parser = PyEvtxParser(path)
+        for record in parser.records_json():
+            data = json.loads(record['data'])
+            event_id = str(data['Event']['System']['EventID'])
+            if event_id in ('1102', '104'):  # Security log cleared, System log cleared
+                timestamp = data['Event']['System']['TimeCreated']['#attributes']['SystemTime']
+                print(f&quot;LOG CLEARED: [{timestamp}] EventID {event_id} in {log_file}&quot;)
+    except Exception as e:
+        print(f&quot;Error parsing {log_file}: {e}&quot;)
+PYEOF</code></pre>
+<h3>Key Concepts</h3>
+<p>| Concept | Description | |---------|-------------| | EVTX format | Binary XML-based Windows Event Log format introduced in Vista/Server 2008 | | Event ID | Numeric identifier for specific event types (e.g., 4624 = successful logon) | | Logon types | Classification of authentication methods (2=interactive, 3=network, 10=RDP) | | Sigma rules | Generic detection signatures that map to specific SIEM/log queries | | Sysmon | Microsoft system monitoring driver providing detailed process and network events | | Audit policy | GPO settings controlling which events Windows records | | Event forwarding (WEF) | Windows mechanism for centralized event log collection | | EVTX channels | Separate log files for different event categories and applications |</p>
+<h3>Tools &amp; Systems</h3>
+<p>| Tool | Purpose | |------|---------| | Chainsaw | Sigma-based EVTX analysis and threat hunting tool | | Hayabusa | Fast Windows Event Log forensic timeline generator | | EvtxECmd | Eric Zimmerman command-line EVTX parser with CSV/JSON output | | python-evtx | Python library for EVTX file parsing | | LogParser | Microsoft SQL-like query engine for Windows logs | | Event Log Explorer | GUI tool for browsing and analyzing EVTX files | | KAPE | Automated triage collection including event logs | | Velociraptor | Endpoint agent with EVTX collection and hunting artifacts |</p>
+<h3>Common Scenarios</h3>
+<p><strong>Scenario 1: Detecting Lateral Movement</strong> Filter for Event 4624 with Logon Type 3 (network) and Type 10 (RDP), identify unusual source-destination pairs, check for Event 4648 (explicit credentials) indicating pass-the-hash, correlate with process creation events (4688) on target systems.</p>
+<p><strong>Scenario 2: Privilege Escalation Detection</strong> Search for Event 4672 (special privileges assigned) for unexpected users, check for Event 4728/4732 (group membership changes) adding users to admin groups, look for Event 4697 (service installed) indicating new system-level access, correlate with 4720 (account creation).</p>
+<p><strong>Scenario 3: PowerShell Attack Detection</strong> Analyze PowerShell Operational log for Script Block Logging (Event 4104), search for encoded commands in Event 4688 (process creation with command line), detect AMSI bypass attempts, identify download cradles and invocation of known attack tools.</p>
+<p><strong>Scenario 4: Ransomware Incident Reconstruction</strong> Build timeline starting from initial access (4624 from external IP), trace privilege escalation through group membership changes, identify service installations for persistence, find process creation events for encryption executable, detect volume shadow copy deletion in System log.</p>
+<h3>Output Format</h3>
+<pre><code>Windows Event Log Analysis Summary:
+  System: DC01.corp.local (Windows Server 2019)
+  Log Files Analyzed: 15 EVTX files
+  Total Events: 2,456,789
+  Analysis Period: 2024-01-10 to 2024-01-20
+
+  Chainsaw Detections:
+    Critical:  12 (Mimikatz usage, PsExec, log clearing)
+    High:      34 (Network NTLM logons, encoded PowerShell)
+    Medium:    89 (Unusual service installations, scheduled tasks)
+    Low:       234 (Informational)
+
+  Hayabusa Timeline:
+    Total Alerts: 369
+    Unique Rules Triggered: 45
+    Top Rules:
+      - Suspicious NTLM Authentication (34 hits)
+      - PowerShell Download Cradle (12 hits)
+      - Service Installation Suspicious Path (8 hits)
+
+  Critical Findings:
+    2024-01-15 14:32 - RDP brute force (234 failed, 1 success from 203.0.113.45)
+    2024-01-15 14:45 - Admin account created (svcbackup) - Event 4720
+    2024-01-16 02:30 - PsExec service installed on DC01 - Event 4697
+    2024-01-18 03:00 - Security log cleared - Event 1102
+
+  Reports:
+    Chainsaw: /analysis/chainsaw_results/
+    Hayabusa: /analysis/hayabusa_timeline.csv
+    Critical Events: /analysis/critical_events.json</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: extracting-windows-event-logs-artifacts\ndisplay_name: extracting-windows-event-logs-artifacts\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# extracting-windows-event-logs-artifacts - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `extracting-windows-event-logs-artifacts` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When investigating security incidents on Windows systems through event log analysis\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose extracting-windows-event-logs-artifacts, then write the task. Fallback prompt: Use the extracting-windows-event-logs-artifacts skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `extracting-windows-event-logs-artifacts` |\n| Canonical name | `extracting-windows-event-logs-artifacts` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\n- When investigating security incidents on Windows systems through event log analysis\n\n## Original SKILL.md\n\n---\nname: extracting-windows-event-logs-artifacts\ndescription: Extract, parse, and analyze Windows Event Logs (EVTX) using Chainsaw,\n  Hayabusa, and EvtxECmd to detect lateral movement, persistence, and privilege escalation.\ndomain: cybersecurity\nsubdomain: digital-forensics\ntags:\n- forensics\n- windows-event-logs\n- evtx\n- chainsaw\n- hayabusa\n- sigma-rules\n- incident-response\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- RS.AN-01\n- RS.AN-03\n- DE.AE-02\n- RS.MA-01\nmitre_attack:\n- T1005\n- T1074\n- T1119\n- T1070\n- T1021\n---\n\n# Extracting Windows Event Logs Artifacts\n\n## When to Use\n- When investigating security incidents on Windows systems through event log analysis\n- For detecting lateral movement, privilege escalation, and persistence mechanisms\n- When performing threat hunting across Windows event log data\n- During compliance audits requiring review of authentication and access events\n- When building forensic timelines from Windows system activity\n\n## Prerequisites\n- Windows Event Log files (EVTX format) from forensic image or live system\n- Chainsaw, Hayabusa, or EvtxECmd for parsing and detection\n- Sigma rules for automated threat detection\n- Understanding of critical Windows Event IDs\n- Python with python-evtx or evtx library for custom parsing\n- PowerShell for live system analysis (if applicable)\n\n## Workflow\n\n### Step 1: Collect Windows Event Log Files\n\n```bash\n# Extract EVTX files from forensic image\nmount -o ro,loop,offset=$((2048*512)) /cases/case-2024-001/images/evidence.dd /mnt/evidence\n\nmkdir -p /cases/case-2024-001/evtx/\ncp /mnt/evidence/Windows/System32/winevt/Logs/*.evtx /cases/case-2024-001/evtx/\n\n# Key event logs to prioritize\n# Security.evtx - Authentication, authorization, audit events\n# System.evtx - System services, drivers, hardware events\n# Application.evtx - Application errors and events\n# Microsoft-Windows-Sysmon%4Operational.evtx - Detailed process/network monitoring\n# Microsoft-Windows-PowerShell%4Operational.evtx - PowerShell activity\n# Microsoft-Windows-TerminalServices-LocalSessionManager%4Operational.evtx - RDP sessions\n# Microsoft-Windows-TaskScheduler%4Operational.evtx - Scheduled tasks\n# Microsoft-Windows-WinRM%4Operational.evtx - Windows Remote Management\n# Microsoft-Windows-Bits-Client%4Operational.evtx - BITS transfers\n# Microsoft-Windows-Windows Defender%4Operational.evtx - AV detections\n\n# List available log files and sizes\nls -lhS /cases/case-2024-001/evtx/ | head -20\n\n# Hash for integrity\nsha256sum /cases/case-2024-001/evtx/*.evtx > /cases/case-2024-001/evtx/evtx_hashes.txt\n```\n\n### Step 2: Run Chainsaw for Sigma-Based Detection\n\n```bash\n# Install Chainsaw\nwget https://github.com/WithSecureLabs/chainsaw/releases/latest/download/chainsaw_all_platforms+rules.zip\nunzip chainsaw_all_platforms+rules.zip -d /opt/chainsaw\n\n# Run Chainsaw with bundled Sigma rules\n/opt/chainsaw/chainsaw hunt /cases/case-2024-001/evtx/ \\\n   -s /opt/chainsaw/sigma/rules/ \\\n   --mapping /opt/chainsaw/mappings/sigma-event-logs-all.yml \\\n   --output /cases/case-2024-001/analysis/chainsaw_results.txt\n\n# Run with CSV output for easier analysis\n/opt/chainsaw/chainsaw hunt /cases/case-2024-001/evtx/ \\\n   -s /opt/chainsaw/sigma/rules/ \\\n   --mapping /opt/chainsaw/mappings/sigma-event-logs-all.yml \\\n   --csv \\\n   --output /cases/case-2024-001/analysis/chainsaw_results/\n\n# Run with JSON output\n/opt/chainsaw/chainsaw hunt /cases/case-2024-001/evtx/ \\\n   -s /opt/chainsaw/sigma/rules/ \\\n   --mapping /opt/chainsaw/mappings/sigma-event-logs-all.yml \\\n   --json \\\n   --output /cases/case-2024-001/analysis/chainsaw_results.json\n\n# Search for specific keywords\n/opt/chainsaw/chainsaw search /cases/case-2024-001/evtx/ \\\n   -s \"mimikatz\" --json\n\n# Search for specific event IDs\n/opt/chainsaw/chainsaw search /cases/case-2024-001/evtx/ \\\n   -e 4688 --json | head -100\n```\n\n### Step 3: Run Hayabusa for Fast Timeline Generation\n\n```bash\n# Install Hayabusa\nwget https://github.com/Yamato-Security/hayabusa/releases/latest/download/hayabusa-linux-x64-musl.zip\nunzip hayabusa-linux-x64-musl.zip -d /opt/hayabusa\n\n# Generate CSV timeline with all detection rules\n/opt/hayabusa/hayabusa csv-timeline \\\n   -d /cases/case-2024-001/evtx/ \\\n   -o /cases/case-2024-001/analysis/hayabusa_timeline.csv \\\n   -p verbose\n\n# Generate JSON timeline\n/opt/hayabusa/hayabusa json-timeline \\\n   -d /cases/case-2024-001/evtx/ \\\n   -o /cases/case-2024-001/analysis/hayabusa_timeline.json\n\n# Run with only critical and high severity detections\n/opt/hayabusa/hayabusa csv-timeline \\\n   -d /cases/case-2024-001/evtx/ \\\n   -o /cases/case-2024-001/analysis/hayabusa_critical.csv \\\n   -p verbose \\\n   --min-level critical\n\n# Generate detection summary (metrics)\n/opt/hayabusa/hayabusa metrics \\\n   -d /cases/case-2024-001/evtx/ \\\n   -o /cases/case-2024-001/analysis/hayabusa_metrics.csv\n\n# Logon summary\n/opt/hayabusa/hayabusa logon-summary \\\n   -d /cases/case-2024-001/evtx/ \\\n   -o /cases/case-2024-001/analysis/logon_summary.csv\n```\n\n### Step 4: Parse Specific Critical Event IDs\n\n```bash\n# Extract authentication events with python-evtx\npip install evtx\n\npython3 \u003c\u003c 'PYEOF'\nimport json\nfrom evtx import PyEvtxParser\n\nparser = PyEvtxParser(\"/cases/case-2024-001/evtx/Security.evtx\")\n\n# Critical Event IDs mapping\ncritical_events = {\n    '4624': 'Successful Logon',\n    '4625': 'Failed Logon',\n    '4634': 'Logoff',\n    '4648': 'Explicit Credential Logon',\n    '4672': 'Special Privileges Assigned',\n    '4688': 'Process Created',\n    '4689': 'Process Exited',\n    '4697': 'Service Installed',\n    '4698': 'Scheduled Task Created',\n    '4720': 'User Account Created',\n    '4724': 'Password Reset Attempted',\n    '4728': 'Member Added to Global Group',\n    '4732': 'Member Added to Local Group',\n    '4756': 'Member Added to Universal Group',\n    '1102': 'Audit Log Cleared',\n    '4688': 'New Process Created'\n}\n\nresults = {eid: [] for eid in critical_events}\n\nfor record in parser.records_json():\n    data = json.loads(record['data'])\n    event_id = str(data['Event']['System']['EventID'])\n\n    if event_id in critical_events:\n        event_data = data['Event'].get('EventData', {})\n        results[event_id].append({\n            'timestamp': data['Event']['System']['TimeCreated']['#attributes']['SystemTime'],\n            'event_id': event_id,\n            'description': critical_events[event_id],\n            'data': event_data\n        })\n\n# Print summary\nfor eid, events in results.items():\n    if events:\n        print(f\"\\n[{eid}] {critical_events[eid]}: {len(events)} events\")\n        for e in events[:3]:\n            print(f\"  {e['timestamp']}: {json.dumps(e['data'], default=str)[:200]}\")\n        if len(events) > 3:\n            print(f\"  ... and {len(events)-3} more\")\n\n# Save full results\nwith open('/cases/case-2024-001/analysis/critical_events.json', 'w') as f:\n    json.dump(results, f, indent=2, default=str)\nPYEOF\n```\n\n### Step 5: Detect Specific Attack Patterns\n\n```bash\n# Detect Pass-the-Hash (Logon Type 9 with NTLM)\npython3 \u003c\u003c 'PYEOF'\nimport json\nfrom evtx import PyEvtxParser\n\nparser = PyEvtxParser(\"/cases/case-2024-001/evtx/Security.evtx\")\n\nprint(\"=== PASS-THE-HASH INDICATORS ===\")\nprint(\"Looking for: Event 4624, Logon Type 9, NTLM authentication\\n\")\n\nfor record in parser.records_json():\n    data = json.loads(record['data'])\n    event_id = str(data['Event']['System']['EventID'])\n\n    if event_id == '4624':\n        event_data = data['Event'].get('EventData', {})\n        logon_type = str(event_data.get('LogonType', ''))\n        auth_package = str(event_data.get('AuthenticationPackageName', ''))\n        logon_process = str(event_data.get('LogonProcessName', ''))\n\n        # Pass-the-Hash indicators\n        if logon_type == '9' and 'NTLM' in auth_package:\n            timestamp = data['Event']['System']['TimeCreated']['#attributes']['SystemTime']\n            target = event_data.get('TargetUserName', 'Unknown')\n            source_ip = event_data.get('IpAddress', 'N/A')\n            print(f\"  [{timestamp}] PtH: User={target}, IP={source_ip}, Auth={auth_package}\")\n\n        # Network logon with NTLM (lateral movement)\n        if logon_type == '3' and 'NTLM' in auth_package:\n            timestamp = data['Event']['System']['TimeCreated']['#attributes']['SystemTime']\n            target = event_data.get('TargetUserName', 'Unknown')\n            source_ip = event_data.get('IpAddress', 'N/A')\n            workstation = event_data.get('WorkstationName', 'N/A')\n            print(f\"  [{timestamp}] Network NTLM: User={target}, IP={source_ip}, WS={workstation}\")\nPYEOF\n\n# Detect log clearing / anti-forensics\npython3 \u003c\u003c 'PYEOF'\nimport json\nfrom evtx import PyEvtxParser\n\nfor log_file in ['Security.evtx', 'System.evtx']:\n    path = f\"/cases/case-2024-001/evtx/{log_file}\"\n    try:\n        parser = PyEvtxParser(path)\n        for record in parser.records_json():\n            data = json.loads(record['data'])\n            event_id = str(data['Event']['System']['EventID'])\n            if event_id in ('1102', '104'):  # Security log cleared, System log cleared\n                timestamp = data['Event']['System']['TimeCreated']['#attributes']['SystemTime']\n                print(f\"LOG CLEARED: [{timestamp}] EventID {event_id} in {log_file}\")\n    except Exception as e:\n        print(f\"Error parsing {log_file}: {e}\")\nPYEOF\n```\n\n## Key Concepts\n\n| Concept | Description |\n|---------|-------------|\n| EVTX format | Binary XML-based Windows Event Log format introduced in Vista/Server 2008 |\n| Event ID | Numeric identifier for specific event types (e.g., 4624 = successful logon) |\n| Logon types | Classification of authentication methods (2=interactive, 3=network, 10=RDP) |\n| Sigma rules | Generic detection signatures that map to specific SIEM/log queries |\n| Sysmon | Microsoft system monitoring driver providing detailed process and network events |\n| Audit policy | GPO settings controlling which events Windows records |\n| Event forwarding (WEF) | Windows mechanism for centralized event log collection |\n| EVTX channels | Separate log files for different event categories and applications |\n\n## Tools & Systems\n\n| Tool | Purpose |\n|------|---------|\n| Chainsaw | Sigma-based EVTX analysis and threat hunting tool |\n| Hayabusa | Fast Windows Event Log forensic timeline generator |\n| EvtxECmd | Eric Zimmerman command-line EVTX parser with CSV/JSON output |\n| python-evtx | Python library for EVTX file parsing |\n| LogParser | Microsoft SQL-like query engine for Windows logs |\n| Event Log Explorer | GUI tool for browsing and analyzing EVTX files |\n| KAPE | Automated triage collection including event logs |\n| Velociraptor | Endpoint agent with EVTX collection and hunting artifacts |\n\n## Common Scenarios\n\n**Scenario 1: Detecting Lateral Movement**\nFilter for Event 4624 with Logon Type 3 (network) and Type 10 (RDP), identify unusual source-destination pairs, check for Event 4648 (explicit credentials) indicating pass-the-hash, correlate with process creation events (4688) on target systems.\n\n**Scenario 2: Privilege Escalation Detection**\nSearch for Event 4672 (special privileges assigned) for unexpected users, check for Event 4728/4732 (group membership changes) adding users to admin groups, look for Event 4697 (service installed) indicating new system-level access, correlate with 4720 (account creation).\n\n**Scenario 3: PowerShell Attack Detection**\nAnalyze PowerShell Operational log for Script Block Logging (Event 4104), search for encoded commands in Event 4688 (process creation with command line), detect AMSI bypass attempts, identify download cradles and invocation of known attack tools.\n\n**Scenario 4: Ransomware Incident Reconstruction**\nBuild timeline starting from initial access (4624 from external IP), trace privilege escalation through group membership changes, identify service installations for persistence, find process creation events for encryption executable, detect volume shadow copy deletion in System log.\n\n## Output Format\n\n```\nWindows Event Log Analysis Summary:\n  System: DC01.corp.local (Windows Server 2019)\n  Log Files Analyzed: 15 EVTX files\n  Total Events: 2,456,789\n  Analysis Period: 2024-01-10 to 2024-01-20\n\n  Chainsaw Detections:\n    Critical:  12 (Mimikatz usage, PsExec, log clearing)\n    High:      34 (Network NTLM logons, encoded PowerShell)\n    Medium:    89 (Unusual service installations, scheduled tasks)\n    Low:       234 (Informational)\n\n  Hayabusa Timeline:\n    Total Alerts: 369\n    Unique Rules Triggered: 45\n    Top Rules:\n      - Suspicious NTLM Authentication (34 hits)\n      - PowerShell Download Cradle (12 hits)\n      - Service Installation Suspicious Path (8 hits)\n\n  Critical Findings:\n    2024-01-15 14:32 - RDP brute force (234 failed, 1 success from 203.0.113.45)\n    2024-01-15 14:45 - Admin account created (svcbackup) - Event 4720\n    2024-01-16 02:30 - PsExec service installed on DC01 - Event 4697\n    2024-01-18 03:00 - Security log cleared - Event 1102\n\n  Reports:\n    Chainsaw: /analysis/chainsaw_results/\n    Hayabusa: /analysis/hayabusa_timeline.csv\n    Critical Events: /analysis/critical_events.json\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("extracting-windows-event-logs-artifacts-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

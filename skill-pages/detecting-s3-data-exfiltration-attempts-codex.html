@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>detecting-s3-data-exfiltration-attempts - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/detecting-s3-data-exfiltration-attempts-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>detecting-s3-data-exfiltration-attempts</h1>
+      <p class="description">'Detecting data exfiltration attempts from AWS S3 buckets by analyzing</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>detecting-s3-data-exfiltration-attempts</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>detecting-s3-data-exfiltration-attempts</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Detecting data exfiltration attempts from AWS S3 buckets by analyzing</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose detecting-s3-data-exfiltration-attempts, then write the task. Fallback prompt: Use the detecting-s3-data-exfiltration-attempts skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Detecting S3 Data Exfiltration Attempts</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When GuardDuty detects anomalous S3 access patterns such as bulk downloads from unusual IPs</li>
+<li>When investigating suspected data breach involving S3-stored sensitive data</li>
+<li>When building detection rules for S3 data loss prevention monitoring</li>
+<li>When responding to Macie alerts about sensitive data being accessed or moved</li>
+<li>When compliance requires monitoring and logging of all access to classified data stores</li>
+</ul>
+<p><strong>Do not use</strong> for preventing data exfiltration (use S3 bucket policies, VPC endpoints, and SCPs), for data classification (use Amazon Macie discovery jobs), or for network-level exfiltration detection (use VPC Flow Logs with network analysis tools).</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>CloudTrail configured with S3 data event logging (<code>GetObject</code>, <code>PutObject</code>, <code>CopyObject</code>)</li>
+<li>GuardDuty enabled with S3 Protection feature activated</li>
+<li>Amazon Macie enabled for sensitive data discovery in target buckets</li>
+<li>CloudWatch Logs or Athena for querying CloudTrail logs at scale</li>
+<li>VPC endpoint policies configured for S3 access monitoring</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Enable S3 Data Event Logging in CloudTrail</h4>
+<p>Configure CloudTrail to capture all S3 object-level operations for forensic analysis.</p>
+<pre><code># Enable S3 data events on an existing trail
+aws cloudtrail put-event-selectors \
+  --trail-name management-trail \
+  --event-selectors '[{
+    &quot;ReadWriteType&quot;: &quot;All&quot;,
+    &quot;IncludeManagementEvents&quot;: true,
+    &quot;DataResources&quot;: [{
+      &quot;Type&quot;: &quot;AWS::S3::Object&quot;,
+      &quot;Values&quot;: [&quot;arn:aws:s3:::sensitive-data-bucket/&quot;, &quot;arn:aws:s3:::customer-records/&quot;]
+    }]
+  }]'
+
+# Verify data event configuration
+aws cloudtrail get-event-selectors --trail-name management-trail \
+  --query 'EventSelectors[*].DataResources' --output json
+
+# Enable GuardDuty S3 Protection
+aws guardduty update-detector \
+  --detector-id $(aws guardduty list-detectors --query 'DetectorIds[0]' --output text) \
+  --data-sources '{&quot;S3Logs&quot;:{&quot;Enable&quot;:true}}'</code></pre>
+<h4>Step 2: Query CloudTrail for Anomalous S3 Access Patterns</h4>
+<p>Analyze CloudTrail logs for bulk download activity, unusual access times, and unfamiliar source IPs.</p>
+<pre><code># Athena query: Top S3 downloaders by volume in last 24 hours
+cat &lt;&lt; 'EOF'
+SELECT
+  useridentity.arn as principal,
+  sourceipaddress,
+  COUNT(*) as request_count,
+  SUM(CAST(json_extract_scalar(requestparameters, '$.bytesTransferredOut') AS bigint)) as bytes_downloaded
+FROM cloudtrail_logs
+WHERE eventname = 'GetObject'
+  AND eventsource = 's3.amazonaws.com'
+  AND eventtime &gt; date_add('hour', -24, now())
+GROUP BY useridentity.arn, sourceipaddress
+ORDER BY request_count DESC
+LIMIT 50
+EOF
+
+# CloudWatch Logs Insights: S3 GetObject requests from unusual IPs
+aws logs start-query \
+  --log-group-name cloudtrail-logs \
+  --start-time $(date -d &quot;24 hours ago&quot; +%s) \
+  --end-time $(date +%s) \
+  --query-string '
+    fields @timestamp, userIdentity.arn, sourceIPAddress, requestParameters.bucketName, requestParameters.key
+    | filter eventName = &quot;GetObject&quot;
+    | stats count() as requestCount by sourceIPAddress, userIdentity.arn
+    | sort requestCount desc
+    | limit 25
+  '
+
+# Detect cross-account copies (potential exfiltration)
+aws logs start-query \
+  --log-group-name cloudtrail-logs \
+  --start-time $(date -d &quot;7 days ago&quot; +%s) \
+  --end-time $(date +%s) \
+  --query-string '
+    fields @timestamp, userIdentity.arn, sourceIPAddress, requestParameters.bucketName
+    | filter eventName in [&quot;CopyObject&quot;, &quot;ReplicateObject&quot;, &quot;UploadPart&quot;]
+    | filter userIdentity.accountId != &quot;OUR_ACCOUNT_ID&quot;
+    | sort @timestamp desc
+    | limit 100
+  '</code></pre>
+<h4>Step 3: Review GuardDuty S3 Findings</h4>
+<p>Check for GuardDuty S3-specific finding types that indicate exfiltration activity.</p>
+<pre><code># List active S3 exfiltration-related findings
+aws guardduty list-findings \
+  --detector-id $(aws guardduty list-detectors --query 'DetectorIds[0]' --output text) \
+  --finding-criteria '{
+    &quot;Criterion&quot;: {
+      &quot;type&quot;: {
+        &quot;Eq&quot;: [
+          &quot;Exfiltration:S3/MaliciousIPCaller&quot;,
+          &quot;Exfiltration:S3/ObjectRead.Unusual&quot;,
+          &quot;Discovery:S3/MaliciousIPCaller.Custom&quot;,
+          &quot;Discovery:S3/BucketEnumeration.Unusual&quot;,
+          &quot;UnauthorizedAccess:S3/MaliciousIPCaller.Custom&quot;,
+          &quot;UnauthorizedAccess:S3/TorIPCaller&quot;,
+          &quot;Impact:S3/AnomalousBehavior.Delete&quot;
+        ]
+      }
+    }
+  }' --output json
+
+# Get detailed finding information
+aws guardduty get-findings \
+  --detector-id $(aws guardduty list-detectors --query 'DetectorIds[0]' --output text) \
+  --finding-ids FINDING_IDS \
+  --query 'Findings[*].{Type:Type,Severity:Severity,Resource:Resource.S3BucketDetails[0].Name,Action:Service.Action}' \
+  --output table</code></pre>
+<h4>Step 4: Analyze Macie Findings for Sensitive Data Access</h4>
+<p>Review Macie findings to correlate data sensitivity with access anomalies.</p>
+<pre><code># List Macie findings for sensitive data exposure
+aws macie2 list-findings \
+  --finding-criteria '{
+    &quot;criterion&quot;: {
+      &quot;category&quot;: {&quot;eq&quot;: [&quot;CLASSIFICATION&quot;]},
+      &quot;severity.description&quot;: {&quot;eq&quot;: [&quot;High&quot;, &quot;Critical&quot;]}
+    }
+  }' \
+  --sort-criteria '{&quot;attributeName&quot;: &quot;updatedAt&quot;, &quot;orderBy&quot;: &quot;DESC&quot;}' \
+  --max-results 25
+
+# Get detailed finding with data classification
+aws macie2 get-findings \
+  --finding-ids FINDING_IDS \
+  --query 'findings[*].{Type:type,Severity:severity.description,Bucket:resourcesAffected.s3Bucket.name,SensitiveDataTypes:classificationDetails.result.sensitiveData[*].category}' \
+  --output table
+
+# Run a sensitive data discovery job on target bucket
+aws macie2 create-classification-job \
+  --job-type ONE_TIME \
+  --name &quot;exfiltration-investigation&quot; \
+  --s3-job-definition '{
+    &quot;bucketDefinitions&quot;: [{
+      &quot;accountId&quot;: &quot;ACCOUNT_ID&quot;,
+      &quot;buckets&quot;: [&quot;sensitive-data-bucket&quot;]
+    }]
+  }'</code></pre>
+<h4>Step 5: Build Automated Detection Rules</h4>
+<p>Create CloudWatch alarms and EventBridge rules for real-time exfiltration detection.</p>
+<pre><code># CloudWatch metric filter for high-volume S3 downloads
+aws logs put-metric-filter \
+  --log-group-name cloudtrail-logs \
+  --filter-name s3-bulk-download \
+  --filter-pattern '{$.eventName = &quot;GetObject&quot; &amp;&amp; $.eventSource = &quot;s3.amazonaws.com&quot;}' \
+  --metric-transformations '[{
+    &quot;metricName&quot;: &quot;S3GetObjectCount&quot;,
+    &quot;metricNamespace&quot;: &quot;SecurityMetrics&quot;,
+    &quot;metricValue&quot;: &quot;1&quot;,
+    &quot;defaultValue&quot;: 0
+  }]'
+
+# Alarm for anomalous download volume (&gt;1000 objects/hour)
+aws cloudwatch put-metric-alarm \
+  --alarm-name s3-exfiltration-alert \
+  --metric-name S3GetObjectCount \
+  --namespace SecurityMetrics \
+  --statistic Sum \
+  --period 3600 \
+  --threshold 1000 \
+  --comparison-operator GreaterThanThreshold \
+  --evaluation-periods 1 \
+  --alarm-actions arn:aws:sns:us-east-1:ACCOUNT:security-alerts
+
+# EventBridge rule for GuardDuty S3 findings
+aws events put-rule \
+  --name guardduty-s3-exfiltration \
+  --event-pattern '{
+    &quot;source&quot;: [&quot;aws.guardduty&quot;],
+    &quot;detail-type&quot;: [&quot;GuardDuty Finding&quot;],
+    &quot;detail&quot;: {
+      &quot;type&quot;: [{&quot;prefix&quot;: &quot;Exfiltration:S3/&quot;}]
+    }
+  }'</code></pre>
+<h4>Step 6: Implement Preventive Controls</h4>
+<p>Deploy bucket policies and VPC endpoint policies to restrict data movement paths.</p>
+<pre><code># VPC endpoint policy restricting S3 access to specific buckets
+aws ec2 modify-vpc-endpoint \
+  --vpc-endpoint-id vpce-ENDPOINT_ID \
+  --policy-document '{
+    &quot;Statement&quot;: [{
+      &quot;Sid&quot;: &quot;RestrictToOwnBuckets&quot;,
+      &quot;Effect&quot;: &quot;Allow&quot;,
+      &quot;Principal&quot;: &quot;*&quot;,
+      &quot;Action&quot;: [&quot;s3:GetObject&quot;, &quot;s3:PutObject&quot;],
+      &quot;Resource&quot;: [&quot;arn:aws:s3:::approved-bucket-1/*&quot;, &quot;arn:aws:s3:::approved-bucket-2/*&quot;]
+    }]
+  }'
+
+# Bucket policy denying access from outside the VPC
+aws s3api put-bucket-policy --bucket sensitive-data-bucket --policy '{
+  &quot;Version&quot;: &quot;2012-10-17&quot;,
+  &quot;Statement&quot;: [{
+    &quot;Sid&quot;: &quot;DenyNonVpcAccess&quot;,
+    &quot;Effect&quot;: &quot;Deny&quot;,
+    &quot;Principal&quot;: &quot;*&quot;,
+    &quot;Action&quot;: &quot;s3:GetObject&quot;,
+    &quot;Resource&quot;: &quot;arn:aws:s3:::sensitive-data-bucket/*&quot;,
+    &quot;Condition&quot;: {
+      &quot;StringNotEquals&quot;: {
+        &quot;aws:sourceVpce&quot;: &quot;vpce-ENDPOINT_ID&quot;
+      }
+    }
+  }]
+}'</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | S3 Data Events | CloudTrail object-level logging that captures GetObject, PutObject, DeleteObject, and CopyObject API calls with request details | | GuardDuty S3 Protection | Threat detection feature analyzing CloudTrail S3 data events to identify anomalous access patterns and exfiltration attempts | | Amazon Macie | Data security service that discovers and classifies sensitive data in S3 and generates findings for data exposure risks | | VPC Endpoint Policy | Access control policy on an S3 VPC endpoint that restricts which buckets and actions can be accessed through the endpoint | | Data Exfiltration | Unauthorized transfer of data from an organization's S3 storage to an external location controlled by an attacker | | Anomalous Behavior Detection | Machine learning-based identification of S3 access patterns that deviate from established baselines for a principal |</p>
+<h3>Tools &amp; Systems</h3>
+<ul>
+<li><strong>AWS CloudTrail</strong>: Audit logging of S3 object-level operations for forensic analysis and anomaly detection</li>
+<li><strong>Amazon GuardDuty</strong>: ML-based threat detection with S3-specific finding types for exfiltration and unauthorized access</li>
+<li><strong>Amazon Macie</strong>: Sensitive data discovery and classification for correlating access anomalies with data sensitivity</li>
+<li><strong>Amazon Athena</strong>: SQL query engine for analyzing CloudTrail logs at scale to identify bulk download patterns</li>
+<li><strong>CloudWatch Logs Insights</strong>: Real-time log analysis for building detection queries against CloudTrail data</li>
+</ul>
+<h3>Common Scenarios</h3>
+<h4>Scenario: Compromised IAM Credentials Used for Bulk S3 Data Download</h4>
+<p><strong>Context</strong>: GuardDuty reports an <code>Exfiltration:S3/ObjectRead.Unusual</code> finding indicating that a developer's access key is downloading thousands of objects from a sensitive data bucket at 3 AM from an IP address in a foreign country.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Immediately deactivate the compromised access key</li>
+<li>Query CloudTrail for all S3 actions by the compromised principal in the last 72 hours</li>
+<li>Identify which buckets and objects were accessed using Athena queries</li>
+<li>Cross-reference accessed objects with Macie classifications to assess data sensitivity</li>
+<li>Check for CopyObject calls to external accounts (cross-account exfiltration)</li>
+<li>Review how the credentials were compromised (TruffleHog scan, phishing investigation)</li>
+<li>Implement VPC endpoint policies to restrict future S3 access to approved network paths</li>
+</ol>
+<p><strong>Pitfalls</strong>: CloudTrail S3 data events can generate massive log volume. Use Athena with partitioned tables rather than CloudWatch Logs Insights for queries spanning more than 24 hours. GuardDuty baseline learning requires 7-14 days, so new accounts may generate false positives for normal access patterns.</p>
+<h3>Output Format</h3>
+<pre><code>S3 Data Exfiltration Investigation Report
+============================================
+Account: 123456789012
+Detection Source: GuardDuty Exfiltration:S3/ObjectRead.Unusual
+Investigation Date: 2026-02-23
+
+INCIDENT TIMELINE:
+  2026-02-23 02:47 UTC - First anomalous GetObject from 185.x.x.x
+  2026-02-23 02:47-04:12 UTC - 12,847 GetObject requests
+  2026-02-23 04:15 UTC - GuardDuty finding generated
+  2026-02-23 04:20 UTC - PagerDuty alert received by SOC
+  2026-02-23 04:25 UTC - Access key deactivated
+
+COMPROMISED PRINCIPAL:
+  ARN: arn:aws:iam::123456789012:user/developer-jane
+  Access Key: AKIA...WXYZ
+  Source IP: 185.x.x.x (Tor exit node)
+
+DATA IMPACT ASSESSMENT:
+  Buckets accessed: 3
+  Objects downloaded: 12,847
+  Total data volume: 4.7 GB
+  Sensitive data types: PII (SSN, email), Financial (credit card)
+  Macie severity: CRITICAL
+
+CONTAINMENT ACTIONS:
+  [x] Access key deactivated
+  [x] User password reset and MFA re-enrolled
+  [x] VPC endpoint policy applied to sensitive buckets
+  [x] Bucket policy restricting to VPC-only access
+  [x] TruffleHog scan initiated on developer repositories</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: detecting-s3-data-exfiltration-attempts\ndisplay_name: detecting-s3-data-exfiltration-attempts\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# detecting-s3-data-exfiltration-attempts - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `detecting-s3-data-exfiltration-attempts` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When GuardDuty detects anomalous S3 access patterns such as bulk downloads from unusual IPs\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose detecting-s3-data-exfiltration-attempts, then write the task. Fallback prompt: Use the detecting-s3-data-exfiltration-attempts skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `detecting-s3-data-exfiltration-attempts` |\n| Canonical name | `detecting-s3-data-exfiltration-attempts` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n- When GuardDuty detects anomalous S3 access patterns such as bulk downloads from unusual IPs\n\n## Original SKILL.md\n\n---\nname: detecting-s3-data-exfiltration-attempts\ndescription: 'Detecting data exfiltration attempts from AWS S3 buckets by analyzing\n  CloudTrail S3 data events, VPC Flow Logs, GuardDuty findings, Amazon Macie alerts,\n  and S3 access patterns to identify unauthorized bulk downloads and cross-account\n  data transfers.\n\n  '\ndomain: cybersecurity\nsubdomain: cloud-security\ntags:\n- cloud-security\n- aws\n- s3\n- data-exfiltration\n- guardduty\n- macie\n- threat-detection\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- PR.IR-01\n- ID.AM-08\n- GV.SC-06\n- DE.CM-01\nmitre_attack:\n- T1530\n- T1567.002\n- T1537\n- T1119\n---\n\n# Detecting S3 Data Exfiltration Attempts\n\n## When to Use\n\n- When GuardDuty detects anomalous S3 access patterns such as bulk downloads from unusual IPs\n- When investigating suspected data breach involving S3-stored sensitive data\n- When building detection rules for S3 data loss prevention monitoring\n- When responding to Macie alerts about sensitive data being accessed or moved\n- When compliance requires monitoring and logging of all access to classified data stores\n\n**Do not use** for preventing data exfiltration (use S3 bucket policies, VPC endpoints, and SCPs), for data classification (use Amazon Macie discovery jobs), or for network-level exfiltration detection (use VPC Flow Logs with network analysis tools).\n\n## Prerequisites\n\n- CloudTrail configured with S3 data event logging (`GetObject`, `PutObject`, `CopyObject`)\n- GuardDuty enabled with S3 Protection feature activated\n- Amazon Macie enabled for sensitive data discovery in target buckets\n- CloudWatch Logs or Athena for querying CloudTrail logs at scale\n- VPC endpoint policies configured for S3 access monitoring\n\n## Workflow\n\n### Step 1: Enable S3 Data Event Logging in CloudTrail\n\nConfigure CloudTrail to capture all S3 object-level operations for forensic analysis.\n\n```bash\n# Enable S3 data events on an existing trail\naws cloudtrail put-event-selectors \\\n  --trail-name management-trail \\\n  --event-selectors '[{\n    \"ReadWriteType\": \"All\",\n    \"IncludeManagementEvents\": true,\n    \"DataResources\": [{\n      \"Type\": \"AWS::S3::Object\",\n      \"Values\": [\"arn:aws:s3:::sensitive-data-bucket/\", \"arn:aws:s3:::customer-records/\"]\n    }]\n  }]'\n\n# Verify data event configuration\naws cloudtrail get-event-selectors --trail-name management-trail \\\n  --query 'EventSelectors[*].DataResources' --output json\n\n# Enable GuardDuty S3 Protection\naws guardduty update-detector \\\n  --detector-id $(aws guardduty list-detectors --query 'DetectorIds[0]' --output text) \\\n  --data-sources '{\"S3Logs\":{\"Enable\":true}}'\n```\n\n### Step 2: Query CloudTrail for Anomalous S3 Access Patterns\n\nAnalyze CloudTrail logs for bulk download activity, unusual access times, and unfamiliar source IPs.\n\n```bash\n# Athena query: Top S3 downloaders by volume in last 24 hours\ncat \u003c\u003c 'EOF'\nSELECT\n  useridentity.arn as principal,\n  sourceipaddress,\n  COUNT(*) as request_count,\n  SUM(CAST(json_extract_scalar(requestparameters, '$.bytesTransferredOut') AS bigint)) as bytes_downloaded\nFROM cloudtrail_logs\nWHERE eventname = 'GetObject'\n  AND eventsource = 's3.amazonaws.com'\n  AND eventtime > date_add('hour', -24, now())\nGROUP BY useridentity.arn, sourceipaddress\nORDER BY request_count DESC\nLIMIT 50\nEOF\n\n# CloudWatch Logs Insights: S3 GetObject requests from unusual IPs\naws logs start-query \\\n  --log-group-name cloudtrail-logs \\\n  --start-time $(date -d \"24 hours ago\" +%s) \\\n  --end-time $(date +%s) \\\n  --query-string '\n    fields @timestamp, userIdentity.arn, sourceIPAddress, requestParameters.bucketName, requestParameters.key\n    | filter eventName = \"GetObject\"\n    | stats count() as requestCount by sourceIPAddress, userIdentity.arn\n    | sort requestCount desc\n    | limit 25\n  '\n\n# Detect cross-account copies (potential exfiltration)\naws logs start-query \\\n  --log-group-name cloudtrail-logs \\\n  --start-time $(date -d \"7 days ago\" +%s) \\\n  --end-time $(date +%s) \\\n  --query-string '\n    fields @timestamp, userIdentity.arn, sourceIPAddress, requestParameters.bucketName\n    | filter eventName in [\"CopyObject\", \"ReplicateObject\", \"UploadPart\"]\n    | filter userIdentity.accountId != \"OUR_ACCOUNT_ID\"\n    | sort @timestamp desc\n    | limit 100\n  '\n```\n\n### Step 3: Review GuardDuty S3 Findings\n\nCheck for GuardDuty S3-specific finding types that indicate exfiltration activity.\n\n```bash\n# List active S3 exfiltration-related findings\naws guardduty list-findings \\\n  --detector-id $(aws guardduty list-detectors --query 'DetectorIds[0]' --output text) \\\n  --finding-criteria '{\n    \"Criterion\": {\n      \"type\": {\n        \"Eq\": [\n          \"Exfiltration:S3/MaliciousIPCaller\",\n          \"Exfiltration:S3/ObjectRead.Unusual\",\n          \"Discovery:S3/MaliciousIPCaller.Custom\",\n          \"Discovery:S3/BucketEnumeration.Unusual\",\n          \"UnauthorizedAccess:S3/MaliciousIPCaller.Custom\",\n          \"UnauthorizedAccess:S3/TorIPCaller\",\n          \"Impact:S3/AnomalousBehavior.Delete\"\n        ]\n      }\n    }\n  }' --output json\n\n# Get detailed finding information\naws guardduty get-findings \\\n  --detector-id $(aws guardduty list-detectors --query 'DetectorIds[0]' --output text) \\\n  --finding-ids FINDING_IDS \\\n  --query 'Findings[*].{Type:Type,Severity:Severity,Resource:Resource.S3BucketDetails[0].Name,Action:Service.Action}' \\\n  --output table\n```\n\n### Step 4: Analyze Macie Findings for Sensitive Data Access\n\nReview Macie findings to correlate data sensitivity with access anomalies.\n\n```bash\n# List Macie findings for sensitive data exposure\naws macie2 list-findings \\\n  --finding-criteria '{\n    \"criterion\": {\n      \"category\": {\"eq\": [\"CLASSIFICATION\"]},\n      \"severity.description\": {\"eq\": [\"High\", \"Critical\"]}\n    }\n  }' \\\n  --sort-criteria '{\"attributeName\": \"updatedAt\", \"orderBy\": \"DESC\"}' \\\n  --max-results 25\n\n# Get detailed finding with data classification\naws macie2 get-findings \\\n  --finding-ids FINDING_IDS \\\n  --query 'findings[*].{Type:type,Severity:severity.description,Bucket:resourcesAffected.s3Bucket.name,SensitiveDataTypes:classificationDetails.result.sensitiveData[*].category}' \\\n  --output table\n\n# Run a sensitive data discovery job on target bucket\naws macie2 create-classification-job \\\n  --job-type ONE_TIME \\\n  --name \"exfiltration-investigation\" \\\n  --s3-job-definition '{\n    \"bucketDefinitions\": [{\n      \"accountId\": \"ACCOUNT_ID\",\n      \"buckets\": [\"sensitive-data-bucket\"]\n    }]\n  }'\n```\n\n### Step 5: Build Automated Detection Rules\n\nCreate CloudWatch alarms and EventBridge rules for real-time exfiltration detection.\n\n```bash\n# CloudWatch metric filter for high-volume S3 downloads\naws logs put-metric-filter \\\n  --log-group-name cloudtrail-logs \\\n  --filter-name s3-bulk-download \\\n  --filter-pattern '{$.eventName = \"GetObject\" && $.eventSource = \"s3.amazonaws.com\"}' \\\n  --metric-transformations '[{\n    \"metricName\": \"S3GetObjectCount\",\n    \"metricNamespace\": \"SecurityMetrics\",\n    \"metricValue\": \"1\",\n    \"defaultValue\": 0\n  }]'\n\n# Alarm for anomalous download volume (>1000 objects/hour)\naws cloudwatch put-metric-alarm \\\n  --alarm-name s3-exfiltration-alert \\\n  --metric-name S3GetObjectCount \\\n  --namespace SecurityMetrics \\\n  --statistic Sum \\\n  --period 3600 \\\n  --threshold 1000 \\\n  --comparison-operator GreaterThanThreshold \\\n  --evaluation-periods 1 \\\n  --alarm-actions arn:aws:sns:us-east-1:ACCOUNT:security-alerts\n\n# EventBridge rule for GuardDuty S3 findings\naws events put-rule \\\n  --name guardduty-s3-exfiltration \\\n  --event-pattern '{\n    \"source\": [\"aws.guardduty\"],\n    \"detail-type\": [\"GuardDuty Finding\"],\n    \"detail\": {\n      \"type\": [{\"prefix\": \"Exfiltration:S3/\"}]\n    }\n  }'\n```\n\n### Step 6: Implement Preventive Controls\n\nDeploy bucket policies and VPC endpoint policies to restrict data movement paths.\n\n```bash\n# VPC endpoint policy restricting S3 access to specific buckets\naws ec2 modify-vpc-endpoint \\\n  --vpc-endpoint-id vpce-ENDPOINT_ID \\\n  --policy-document '{\n    \"Statement\": [{\n      \"Sid\": \"RestrictToOwnBuckets\",\n      \"Effect\": \"Allow\",\n      \"Principal\": \"*\",\n      \"Action\": [\"s3:GetObject\", \"s3:PutObject\"],\n      \"Resource\": [\"arn:aws:s3:::approved-bucket-1/*\", \"arn:aws:s3:::approved-bucket-2/*\"]\n    }]\n  }'\n\n# Bucket policy denying access from outside the VPC\naws s3api put-bucket-policy --bucket sensitive-data-bucket --policy '{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [{\n    \"Sid\": \"DenyNonVpcAccess\",\n    \"Effect\": \"Deny\",\n    \"Principal\": \"*\",\n    \"Action\": \"s3:GetObject\",\n    \"Resource\": \"arn:aws:s3:::sensitive-data-bucket/*\",\n    \"Condition\": {\n      \"StringNotEquals\": {\n        \"aws:sourceVpce\": \"vpce-ENDPOINT_ID\"\n      }\n    }\n  }]\n}'\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| S3 Data Events | CloudTrail object-level logging that captures GetObject, PutObject, DeleteObject, and CopyObject API calls with request details |\n| GuardDuty S3 Protection | Threat detection feature analyzing CloudTrail S3 data events to identify anomalous access patterns and exfiltration attempts |\n| Amazon Macie | Data security service that discovers and classifies sensitive data in S3 and generates findings for data exposure risks |\n| VPC Endpoint Policy | Access control policy on an S3 VPC endpoint that restricts which buckets and actions can be accessed through the endpoint |\n| Data Exfiltration | Unauthorized transfer of data from an organization's S3 storage to an external location controlled by an attacker |\n| Anomalous Behavior Detection | Machine learning-based identification of S3 access patterns that deviate from established baselines for a principal |\n\n## Tools & Systems\n\n- **AWS CloudTrail**: Audit logging of S3 object-level operations for forensic analysis and anomaly detection\n- **Amazon GuardDuty**: ML-based threat detection with S3-specific finding types for exfiltration and unauthorized access\n- **Amazon Macie**: Sensitive data discovery and classification for correlating access anomalies with data sensitivity\n- **Amazon Athena**: SQL query engine for analyzing CloudTrail logs at scale to identify bulk download patterns\n- **CloudWatch Logs Insights**: Real-time log analysis for building detection queries against CloudTrail data\n\n## Common Scenarios\n\n### Scenario: Compromised IAM Credentials Used for Bulk S3 Data Download\n\n**Context**: GuardDuty reports an `Exfiltration:S3/ObjectRead.Unusual` finding indicating that a developer's access key is downloading thousands of objects from a sensitive data bucket at 3 AM from an IP address in a foreign country.\n\n**Approach**:\n1. Immediately deactivate the compromised access key\n2. Query CloudTrail for all S3 actions by the compromised principal in the last 72 hours\n3. Identify which buckets and objects were accessed using Athena queries\n4. Cross-reference accessed objects with Macie classifications to assess data sensitivity\n5. Check for CopyObject calls to external accounts (cross-account exfiltration)\n6. Review how the credentials were compromised (TruffleHog scan, phishing investigation)\n7. Implement VPC endpoint policies to restrict future S3 access to approved network paths\n\n**Pitfalls**: CloudTrail S3 data events can generate massive log volume. Use Athena with partitioned tables rather than CloudWatch Logs Insights for queries spanning more than 24 hours. GuardDuty baseline learning requires 7-14 days, so new accounts may generate false positives for normal access patterns.\n\n## Output Format\n\n```\nS3 Data Exfiltration Investigation Report\n============================================\nAccount: 123456789012\nDetection Source: GuardDuty Exfiltration:S3/ObjectRead.Unusual\nInvestigation Date: 2026-02-23\n\nINCIDENT TIMELINE:\n  2026-02-23 02:47 UTC - First anomalous GetObject from 185.x.x.x\n  2026-02-23 02:47-04:12 UTC - 12,847 GetObject requests\n  2026-02-23 04:15 UTC - GuardDuty finding generated\n  2026-02-23 04:20 UTC - PagerDuty alert received by SOC\n  2026-02-23 04:25 UTC - Access key deactivated\n\nCOMPROMISED PRINCIPAL:\n  ARN: arn:aws:iam::123456789012:user/developer-jane\n  Access Key: AKIA...WXYZ\n  Source IP: 185.x.x.x (Tor exit node)\n\nDATA IMPACT ASSESSMENT:\n  Buckets accessed: 3\n  Objects downloaded: 12,847\n  Total data volume: 4.7 GB\n  Sensitive data types: PII (SSN, email), Financial (credit card)\n  Macie severity: CRITICAL\n\nCONTAINMENT ACTIONS:\n  [x] Access key deactivated\n  [x] User password reset and MFA re-enrolled\n  [x] VPC endpoint policy applied to sensitive buckets\n  [x] Bucket policy restricting to VPC-only access\n  [x] TruffleHog scan initiated on developer repositories\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("detecting-s3-data-exfiltration-attempts-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>zoom-meeting-sdk-web-client-view - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/zoom-meeting-sdk-web-client-view-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>zoom-meeting-sdk-web-client-view</h1>
+      <p class="description">|</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>zoom-meeting-sdk-web-client-view</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>zoom-meeting-sdk-web-client-view</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>|</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose zoom-meeting-sdk-web-client-view, then write the task. Fallback prompt: Use the zoom-meeting-sdk-web-client-view skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Zoom Meeting SDK Web - Client View</h2>
+<p>Full-page Zoom meeting experience embedded in your web application. Client View provides the familiar Zoom interface with minimal customization needed.</p>
+<h3>Overview</h3>
+<p>Client View uses the <code>ZoomMtg</code> global singleton to render a full-page meeting experience identical to the Zoom Web Client.</p>
+<p>| Aspect | Details | |--------|---------| | <strong>API Object</strong> | <code>ZoomMtg</code> (global singleton) | | <strong>API Style</strong> | Callback-based | | <strong>UI</strong> | Full-page takeover | | <strong>Password param</strong> | <code>passWord</code> (capital W) | | <strong>Events</strong> | <code>inMeetingServiceListener()</code> | | <strong>Best For</strong> | Quick integration, standard Zoom UI |</p>
+<h3>Installation</h3>
+<h4>NPM</h4>
+<pre><code>npm install @zoom/meetingsdk --save</code></pre>
+<pre><code>import { ZoomMtg } from '@zoom/meetingsdk';</code></pre>
+<h4>CDN</h4>
+<pre><code>&lt;script src=&quot;https://source.zoom.us/{VERSION}/lib/vendor/react.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://source.zoom.us/{VERSION}/lib/vendor/react-dom.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://source.zoom.us/{VERSION}/lib/vendor/redux.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://source.zoom.us/{VERSION}/lib/vendor/redux-thunk.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://source.zoom.us/{VERSION}/lib/vendor/lodash.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://source.zoom.us/zoom-meeting-{VERSION}.min.js&quot;&gt;&lt;/script&gt;</code></pre>
+<h3>Complete Initialization Flow</h3>
+<pre><code>// Step 1: Check browser compatibility
+console.log('Requirements:', ZoomMtg.checkSystemRequirements());
+
+// Step 2: Set CDN path (optional - for China or custom hosting)
+// ZoomMtg.setZoomJSLib('https://source.zoom.us/{VERSION}/lib', '/av');
+
+// Step 3: Preload WebAssembly modules
+ZoomMtg.preLoadWasm();
+ZoomMtg.prepareWebSDK();
+
+// Step 4: Load language resources
+ZoomMtg.i18n.load('en-US');
+ZoomMtg.i18n.onLoad(() =&gt; {
+  
+  // Step 5: Initialize SDK
+  ZoomMtg.init({
+    leaveUrl: '/meeting-ended',
+    patchJsMedia: true,
+    disableCORP: !window.crossOriginIsolated,
+    success: () =&gt; {
+      console.log('SDK initialized');
+      
+      // Step 6: Join meeting
+      const joinPayload = {
+        signature: signature,
+        meetingNumber: meetingNumber,
+        userName: userName,
+        passWord: passWord,
+        success: (res) =&gt; {
+          console.log('Joined meeting');
+
+          // Step 7: Post-join operations
+          ZoomMtg.getAttendeeslist({});
+          ZoomMtg.getCurrentUser({
+            success: (res) =&gt; console.log('Current user:', res.result.currentUser)
+          });
+        },
+        error: (err) =&gt; console.error('Join failed:', err)
+      };
+
+      // IMPORTANT: only include optional fields when they have real values
+      // Passing undefined for some optional fields can cause runtime join errors
+      if (userEmail) joinPayload.userEmail = userEmail;
+      if (tk) joinPayload.tk = tk;
+      if (zak) joinPayload.zak = zak;
+
+      ZoomMtg.join(joinPayload);
+    },
+    error: (err) =&gt; console.error('Init failed:', err)
+  });
+});</code></pre>
+<h3>ZoomMtg.init() - All Options</h3>
+<h4>Required</h4>
+<p>| Parameter | Type | Description | |-----------|------|-------------| | <code>leaveUrl</code> | <code>string</code> | URL to redirect after leaving meeting |</p>
+<h4>UI Customization</h4>
+<p>| Parameter | Type | Default | Description | |-----------|------|---------|-------------| | <code>showMeetingHeader</code> | <code>boolean</code> | <code>true</code> | Show meeting number and topic | | <code>disableInvite</code> | <code>boolean</code> | <code>false</code> | Hide invite button | | <code>disableCallOut</code> | <code>boolean</code> | <code>false</code> | Hide call out option | | <code>disableRecord</code> | <code>boolean</code> | <code>false</code> | Hide record button | | <code>disableJoinAudio</code> | <code>boolean</code> | <code>false</code> | Hide join audio option | | <code>disablePreview</code> | <code>boolean</code> | <code>false</code> | Skip audio/video preview | | <code>audioPanelAlwaysOpen</code> | <code>boolean</code> | <code>false</code> | Keep audio panel open | | <code>showPureSharingContent</code> | <code>boolean</code> | <code>false</code> | Prevent overlays on shared content | | <code>videoHeader</code> | <code>boolean</code> | <code>true</code> | Show video tile header | | <code>isLockBottom</code> | <code>boolean</code> | <code>true</code> | Show/hide footer | | <code>videoDrag</code> | <code>boolean</code> | <code>true</code> | Enable drag video tiles | | <code>sharingMode</code> | <code>string</code> | <code>'both'</code> | <code>'both'</code> or <code>'fit'</code> | | <code>screenShare</code> | <code>boolean</code> | <code>true</code> | Enable browser URL sharing | | <code>hideShareAudioOption</code> | <code>boolean</code> | <code>false</code> | Hide &quot;Share tab audio&quot; checkbox | | <code>disablePictureInPicture</code> | <code>boolean</code> | <code>false</code> | Disable PiP mode | | <code>disableZoomLogo</code> | <code>boolean</code> | <code>false</code> | Remove Zoom logo (deprecated) | | <code>defaultView</code> | <code>string</code> | <code>'speaker'</code> | <code>'gallery'</code>, <code>'speaker'</code>, <code>'multiSpeaker'</code> |</p>
+<h4>Feature Toggles</h4>
+<p>| Parameter | Type | Default | Description | |-----------|------|---------|-------------| | <code>isSupportAV</code> | <code>boolean</code> | <code>true</code> | Enable audio/video | | <code>isSupportChat</code> | <code>boolean</code> | <code>true</code> | Enable in-meeting chat | | <code>isSupportQA</code> | <code>boolean</code> | <code>true</code> | Enable webinar Q&amp;A | | <code>isSupportCC</code> | <code>boolean</code> | <code>true</code> | Enable closed captions | | <code>isSupportPolling</code> | <code>boolean</code> | <code>true</code> | Enable polling | | <code>isSupportBreakout</code> | <code>boolean</code> | <code>true</code> | Enable breakout rooms | | <code>isSupportNonverbal</code> | <code>boolean</code> | <code>true</code> | Enable nonverbal feedback | | <code>isSupportSimulive</code> | <code>boolean</code> | <code>false</code> | Enable Simulive | | <code>disableVoIP</code> | <code>boolean</code> | <code>false</code> | Disable VoIP | | <code>disableReport</code> | <code>boolean</code> | <code>false</code> | Disable report feature |</p>
+<h4>Video Quality</h4>
+<p>| Parameter | Type | Default | Description | |-----------|------|---------|-------------| | <code>enableHD</code> | <code>boolean</code> | <code>true</code> (≥2.8.0) | Enable 720p video | | <code>enableFullHD</code> | <code>boolean</code> | <code>false</code> | Enable 1080p for webinar attendees |</p>
+<h4>Advanced</h4>
+<p>| Parameter | Type | Default | Description | |-----------|------|---------|-------------| | <code>debug</code> | <code>boolean</code> | <code>false</code> | Enable debug logging | | <code>patchJsMedia</code> | <code>boolean</code> | <code>false</code> | Auto-apply media fixes | | <code>disableCORP</code> | <code>boolean</code> | <code>false</code> | Disable web isolation | | <code>helper</code> | <code>string</code> | <code>''</code> | Path to helper.html | | <code>externalLinkPage</code> | <code>string</code> | - | Page for external links | | <code>webEndpoint</code> | <code>string</code> | - | For ZFG environments | | <code>leaveOnPageUnload</code> | <code>boolean</code> | <code>false</code> | Auto cleanup on page close | | <code>isShowJoiningErrorDialog</code> | <code>boolean</code> | <code>true</code> | Show error dialog on join failure | | <code>meetingInfo</code> | <code>Array&lt;string&gt;</code> | <code>[...]</code> | Meeting info to display | | <code>inviteUrlFormat</code> | <code>string</code> | <code>''</code> | Custom invite URL format | | <code>loginWindow</code> | <code>object</code> | <code>{width: 400, height: 380}</code> | Login popup size |</p>
+<h4>Callbacks</h4>
+<p>| Parameter | Type | Description | |-----------|------|-------------| | <code>success</code> | <code>Function</code> | Called on successful init | | <code>error</code> | <code>Function</code> | Called on init failure |</p>
+<h3>ZoomMtg.join() - All Options</h3>
+<h4>Required</h4>
+<p>| Parameter | Type | Description | |-----------|------|-------------| | <code>signature</code> | <code>string</code> | SDK JWT from backend (v5.0+: must include appKey prefix) | | <code>meetingNumber</code> | <code>string \| number</code> | Meeting or webinar number | | <code>userName</code> | <code>string</code> | Display name | | <code>passWord</code> | <code>string</code> | Meeting password (capital W!) |</p>
+<h4>Authentication</h4>
+<p>| Parameter | Type | When Required | Description | |-----------|------|---------------|-------------| | <code>zak</code> | <code>string</code> | Starting as host | Host's Zoom Access Key | | <code>tk</code> | <code>string</code> | Registration required | Registrant token | | <code>userEmail</code> | <code>string</code> | Webinars | User email | | <code>obfToken</code> | <code>string</code> | March 2026+ | App Privilege Token |</p>
+<h4>Optional</h4>
+<p>| Parameter | Type | Description | |-----------|------|-------------| | <code>customerKey</code> | <code>string</code> | Custom ID (max 36 chars) | | <code>recordingToken</code> | <code>string</code> | Local recording permission |</p>
+<h4>Callbacks</h4>
+<p>| Parameter | Type | Description | |-----------|------|-------------| | <code>success</code> | <code>Function</code> | Called on successful join | | <code>error</code> | <code>Function</code> | Called on join failure |</p>
+<h3>Event Listeners</h3>
+<h4>User Events</h4>
+<pre><code>ZoomMtg.inMeetingServiceListener('onUserJoin', (data) =&gt; {
+  console.log('User joined:', data);
+  // { userId, userName, ... }
+});
+
+ZoomMtg.inMeetingServiceListener('onUserLeave', (data) =&gt; {
+  console.log('User left:', data);
+  // Reason codes:
+  // 0: OTHER
+  // 1: HOST_ENDED_MEETING
+  // 2: SELF_LEAVE_FROM_IN_MEETING
+  // 3: SELF_LEAVE_FROM_WAITING_ROOM
+  // 4: SELF_LEAVE_FROM_WAITING_FOR_HOST_START
+  // 5: MEETING_TRANSFER
+  // 6: KICK_OUT_FROM_MEETING
+  // 7: KICK_OUT_FROM_WAITING_ROOM
+  // 8: LEAVE_FROM_DISCLAIMER
+});
+
+ZoomMtg.inMeetingServiceListener('onUserUpdate', (data) =&gt; {
+  console.log('User updated:', data);
+});
+
+ZoomMtg.inMeetingServiceListener('onUserIsInWaitingRoom', (data) =&gt; {
+  console.log('User in waiting room:', data);
+});</code></pre>
+<h4>Meeting Status</h4>
+<pre><code>ZoomMtg.inMeetingServiceListener('onMeetingStatus', (data) =&gt; {
+  // status: 1=connecting, 2=connected, 3=disconnected, 4=reconnecting
+  console.log('Status:', data.status);
+});</code></pre>
+<h4>Audio/Video Events</h4>
+<pre><code>ZoomMtg.inMeetingServiceListener('onActiveSpeaker', (data) =&gt; {
+  // [{userId, userName}]
+  console.log('Active speaker:', data);
+});
+
+ZoomMtg.inMeetingServiceListener('onNetworkQualityChange', (data) =&gt; {
+  // {level: 0-5, userId, type: 'uplink'}
+  // 0-1=bad, 2=normal, 3-5=good
+  console.log('Network quality:', data);
+});
+
+ZoomMtg.inMeetingServiceListener('onAudioQos', (data) =&gt; {
+  console.log('Audio QoS:', data);
+});
+
+ZoomMtg.inMeetingServiceListener('onVideoQos', (data) =&gt; {
+  console.log('Video QoS:', data);
+});</code></pre>
+<h4>Chat &amp; Communication</h4>
+<pre><code>ZoomMtg.inMeetingServiceListener('onReceiveChatMsg', (data) =&gt; {
+  console.log('Chat message:', data);
+});
+
+ZoomMtg.inMeetingServiceListener('onReceiveTranscriptionMsg', (data) =&gt; {
+  console.log('Transcription:', data);
+});
+
+ZoomMtg.inMeetingServiceListener('onReceiveTranslateMsg', (data) =&gt; {
+  console.log('Translation:', data);
+});</code></pre>
+<h4>Recording &amp; Sharing</h4>
+<pre><code>ZoomMtg.inMeetingServiceListener('onRecordingChange', (data) =&gt; {
+  console.log('Recording status:', data);
+});
+
+ZoomMtg.inMeetingServiceListener('onShareContentChange', (data) =&gt; {
+  console.log('Share content:', data);
+});
+
+ZoomMtg.inMeetingServiceListener('receiveSharingChannelReady', (data) =&gt; {
+  console.log('Sharing channel ready:', data);
+});</code></pre>
+<h4>Breakout Rooms</h4>
+<pre><code>ZoomMtg.inMeetingServiceListener('onRoomStatusChange', (data) =&gt; {
+  // status: 2=InProgress, 3=Closing, 4=Closed
+  console.log('Breakout room status:', data);
+});</code></pre>
+<h4>Other Events</h4>
+<pre><code>ZoomMtg.inMeetingServiceListener('onJoinSpeed', (data) =&gt; {
+  console.log('Join metrics:', data);
+});
+
+ZoomMtg.inMeetingServiceListener('onVbStatusChange', (data) =&gt; {
+  console.log('Virtual background status:', data);
+});
+
+ZoomMtg.inMeetingServiceListener('onFocusModeStatusChange', (data) =&gt; {
+  console.log('Focus mode:', data);
+});
+
+ZoomMtg.inMeetingServiceListener('onPictureInPicture', (data) =&gt; {
+  console.log('PiP status:', data);
+});
+
+ZoomMtg.inMeetingServiceListener('onClaimStatus', (data) =&gt; {
+  console.log('Host claim status:', data);
+});</code></pre>
+<h3>Common Methods</h3>
+<h4>Meeting Info</h4>
+<pre><code>// Get current user
+ZoomMtg.getCurrentUser({
+  success: (res) =&gt; console.log(res.result.currentUser)
+});
+
+// Get all attendees
+ZoomMtg.getAttendeeslist({});
+
+// Get meeting info
+ZoomMtg.getCurrentMeetingInfo({
+  success: (res) =&gt; console.log(res)
+});
+
+// Get SDK version
+ZoomMtg.getWebSDKVersion({
+  success: (version) =&gt; console.log(version)
+});</code></pre>
+<h4>Audio/Video Control</h4>
+<pre><code>// Mute/unmute specific user
+ZoomMtg.mute({ userId, mute: true });
+
+// Mute/unmute all
+ZoomMtg.muteAll({ muteAll: true });
+
+// Stop incoming audio
+ZoomMtg.stopIncomingAudio({ stop: true });
+
+// Mirror video
+ZoomMtg.mirrorVideo({ mirror: true });</code></pre>
+<h4>Chat</h4>
+<pre><code>// Send chat message
+ZoomMtg.sendChat({
+  message: 'Hello!',
+  userId: 0  // 0 = everyone
+});</code></pre>
+<h4>Meeting Control</h4>
+<pre><code>// Leave meeting
+ZoomMtg.leaveMeeting({});
+
+// End meeting (host only)
+ZoomMtg.endMeeting({});
+
+// Lock meeting
+ZoomMtg.lockMeeting({ lock: true });</code></pre>
+<h4>Host Controls</h4>
+<pre><code>// Make host
+ZoomMtg.makeHost({ userId });
+
+// Make co-host
+ZoomMtg.makeCoHost({ userId });
+
+// Remove co-host
+ZoomMtg.withdrawCoHost({ userId });
+
+// Remove participant
+ZoomMtg.expel({ userId });
+
+// Put on hold
+ZoomMtg.putOnHold({ userId, bHold: true });
+
+// Claim host with host key
+ZoomMtg.claimHostWithHostKey({ hostKey: '123456' });
+
+// Reclaim host
+ZoomMtg.reclaimHost({});
+
+// Admit all from waiting room
+ZoomMtg.admitAll({});</code></pre>
+<h4>Raise Hand</h4>
+<pre><code>// Raise hand
+ZoomMtg.raiseHand({ userId });
+
+// Lower hand
+ZoomMtg.lowerHand({ oderId });
+
+// Lower all hands
+ZoomMtg.lowerAllHands({});</code></pre>
+<h4>Spotlight &amp; Pin</h4>
+<pre><code>// Spotlight video
+ZoomMtg.operateSpotlight({ oderId, action: 'add' }); // or 'remove'
+
+// Pin video
+ZoomMtg.operatePin({ oderId, action: 'add' }); // or 'remove'
+
+// Allow multi-pin
+ZoomMtg.allowMultiPin({ allow: true });</code></pre>
+<h4>Screen Share</h4>
+<pre><code>// Start screen share
+ZoomMtg.startScreenShare({});
+
+// Share specific source (Electron)
+ZoomMtg.shareSource({ source });</code></pre>
+<h4>Recording</h4>
+<pre><code>// Start/stop recording
+ZoomMtg.record({ record: true }); // or false
+
+// Show/hide record button
+ZoomMtg.showRecordFunction({ show: true });</code></pre>
+<h4>Breakout Rooms</h4>
+<pre><code>// Create breakout room
+ZoomMtg.createBreakoutRoom({
+  rooms: [{ name: 'Room 1' }, { name: 'Room 2' }]
+});
+
+// Open breakout rooms
+ZoomMtg.openBreakoutRooms({});
+
+// Close breakout rooms
+ZoomMtg.closeBreakoutRooms({});
+
+// Join breakout room
+ZoomMtg.joinBreakoutRoom({ roomId });
+
+// Leave breakout room
+ZoomMtg.leaveBreakoutRoom({});
+
+// Move user to breakout room
+ZoomMtg.moveUserToBreakoutRoom({ oderId, roomId });
+
+// Get breakout room status
+ZoomMtg.getBreakoutRoomStatus({
+  success: (res) =&gt; console.log(res)
+});</code></pre>
+<h4>Virtual Background</h4>
+<pre><code>// Check support
+ZoomMtg.isSupportVirtualBackground({
+  success: (data) =&gt; console.log(data.result.isSupport)
+});
+
+// Set virtual background
+ZoomMtg.setVirtualBackground({ imageUrl: '...' });
+
+// Get VB status
+ZoomMtg.getVirtualBackgroundStatus({
+  success: (data) =&gt; console.log(data)
+});
+
+// Lock virtual background (host)
+ZoomMtg.lockVirtualBackground({ lock: true });</code></pre>
+<h4>UI Control</h4>
+<pre><code>// Show/hide meeting header
+ZoomMtg.showMeetingHeader({ show: true });
+
+// Show/hide invite button
+ZoomMtg.showInviteFunction({ show: true });
+
+// Show/hide join audio button
+ZoomMtg.showJoinAudioFunction({ show: true });
+
+// Show/hide callout button
+ZoomMtg.showCalloutFunction({ show: true });
+
+// Re-render with new options
+ZoomMtg.reRender({ lang: 'de-DE' });</code></pre>
+<h4>Language</h4>
+<pre><code>// Load language
+ZoomMtg.i18n.load('de-DE');
+
+// Reload language
+ZoomMtg.i18n.reload('de-DE');
+
+// Get current language
+ZoomMtg.i18n.getCurrentLang();
+
+// Get all translations
+ZoomMtg.i18n.getAll();</code></pre>
+<h3>Rate Limits</h3>
+<p>| Method | Limit | |--------|-------| | <code>join()</code> | 10 seconds | | <code>callOut()</code> | 10 seconds | | <code>mute()</code> | 1 second | | <code>muteAll()</code> | 5 seconds |</p>
+<h3>DOM Elements</h3>
+<p>The SDK automatically adds these elements:</p>
+<ul>
+<li><code>#zmmtg-root</code> - Main meeting container</li>
+<li><code>#aria-notify-area</code> - Accessibility announcements</li>
+</ul>
+<p>Do NOT manually create or remove these.</p>
+<h4>SPA (React/Next) Overlay Gotcha</h4>
+<p>If you &quot;join&quot; but see a blank/black area or your app shell instead of the meeting UI, the Zoom UI can be rendering <strong>behind</strong> your app layout. Ensure <code>#zmmtg-root</code> occupies the viewport and is above other fixed elements:</p>
+<pre><code>#zmmtg-root {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+}</code></pre>
+<h4>Join Payload Sanitization Gotcha</h4>
+<p>If <code>ZoomMtg.join()</code> succeeds partially but the screen turns black and console shows errors like <code>Cannot read properties of undefined (reading 'toString')</code>, sanitize optional fields before calling join.</p>
+<p>Do not pass optional keys with <code>undefined</code> values (<code>userEmail</code>, <code>tk</code>, <code>zak</code>, etc.). Build a payload and only attach those keys when they are non-empty strings.</p>
+<p>Also prefer <code>defaultView: 'speaker'</code> during <code>ZoomMtg.init()</code> unless you have SharedArrayBuffer/gallery-view prerequisites fully configured.</p>
+<h3>Resources</h3>
+<ul>
+<li>[Main Web SDK Skill](../SKILL.md)</li>
+<li>[Reference Index](references/README.md)</li>
+<li>[Error Codes](../troubleshooting/error-codes.md)</li>
+<li>[Common Issues](../troubleshooting/common-issues.md)</li>
+<li>[SharedArrayBuffer Setup](../concepts/sharedarraybuffer.md)</li>
+<li>[Official API Reference](https://marketplacefront.zoom.us/sdk/meeting/web/index.html)</li>
+</ul>
+<h3>Operations</h3>
+<ul>
+<li>[RUNBOOK.md](RUNBOOK.md) - 5-minute preflight and debugging checklist.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: zoom-meeting-sdk-web-client-view\ndisplay_name: zoom-meeting-sdk-web-client-view\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# zoom-meeting-sdk-web-client-view - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `zoom-meeting-sdk-web-client-view` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nFull-page Zoom meeting experience embedded in your web application. Client View provides the familiar Zoom interface with minimal customization needed.\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose zoom-meeting-sdk-web-client-view, then write the task. Fallback prompt: Use the zoom-meeting-sdk-web-client-view skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `zoom-meeting-sdk-web-client-view` |\n| Canonical name | `zoom-meeting-sdk-web-client-view` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nFull-page Zoom meeting experience embedded in your web application. Client View provides the familiar Zoom interface with minimal customization needed.\n\n## Original SKILL.md\n\n---\nname: zoom-meeting-sdk-web-client-view\ndescription: |\n  Zoom Meeting SDK Web - Client View. Full-page Zoom meeting experience with the familiar Zoom interface.\n  Uses ZoomMtg global singleton with callback-based API. Ideal for quick integration with minimal\n  customization. Provides the same UI as Zoom Web Client.\nuser-invocable: false\ntriggers:\n  - \"meeting sdk client view\"\n  - \"zoommtg\"\n  - \"full page zoom ui\"\n  - \"password\"\n  - \"preparewebsdk\"\n---\n\n# Zoom Meeting SDK Web - Client View\n\nFull-page Zoom meeting experience embedded in your web application. Client View provides the familiar Zoom interface with minimal customization needed.\n\n## Overview\n\nClient View uses the `ZoomMtg` global singleton to render a full-page meeting experience identical to the Zoom Web Client.\n\n| Aspect | Details |\n|--------|---------|\n| **API Object** | `ZoomMtg` (global singleton) |\n| **API Style** | Callback-based |\n| **UI** | Full-page takeover |\n| **Password param** | `passWord` (capital W) |\n| **Events** | `inMeetingServiceListener()` |\n| **Best For** | Quick integration, standard Zoom UI |\n\n## Installation\n\n### NPM\n\n```bash\nnpm install @zoom/meetingsdk --save\n```\n\n```javascript\nimport { ZoomMtg } from '@zoom/meetingsdk';\n```\n\n### CDN\n\n```html\n\u003cscript src=\"https://source.zoom.us/{VERSION}/lib/vendor/react.min.js\">\u003c/script>\n\u003cscript src=\"https://source.zoom.us/{VERSION}/lib/vendor/react-dom.min.js\">\u003c/script>\n\u003cscript src=\"https://source.zoom.us/{VERSION}/lib/vendor/redux.min.js\">\u003c/script>\n\u003cscript src=\"https://source.zoom.us/{VERSION}/lib/vendor/redux-thunk.min.js\">\u003c/script>\n\u003cscript src=\"https://source.zoom.us/{VERSION}/lib/vendor/lodash.min.js\">\u003c/script>\n\u003cscript src=\"https://source.zoom.us/zoom-meeting-{VERSION}.min.js\">\u003c/script>\n```\n\n## Complete Initialization Flow\n\n```javascript\n// Step 1: Check browser compatibility\nconsole.log('Requirements:', ZoomMtg.checkSystemRequirements());\n\n// Step 2: Set CDN path (optional - for China or custom hosting)\n// ZoomMtg.setZoomJSLib('https://source.zoom.us/{VERSION}/lib', '/av');\n\n// Step 3: Preload WebAssembly modules\nZoomMtg.preLoadWasm();\nZoomMtg.prepareWebSDK();\n\n// Step 4: Load language resources\nZoomMtg.i18n.load('en-US');\nZoomMtg.i18n.onLoad(() => {\n  \n  // Step 5: Initialize SDK\n  ZoomMtg.init({\n    leaveUrl: '/meeting-ended',\n    patchJsMedia: true,\n    disableCORP: !window.crossOriginIsolated,\n    success: () => {\n      console.log('SDK initialized');\n      \n      // Step 6: Join meeting\n      const joinPayload = {\n        signature: signature,\n        meetingNumber: meetingNumber,\n        userName: userName,\n        passWord: passWord,\n        success: (res) => {\n          console.log('Joined meeting');\n\n          // Step 7: Post-join operations\n          ZoomMtg.getAttendeeslist({});\n          ZoomMtg.getCurrentUser({\n            success: (res) => console.log('Current user:', res.result.currentUser)\n          });\n        },\n        error: (err) => console.error('Join failed:', err)\n      };\n\n      // IMPORTANT: only include optional fields when they have real values\n      // Passing undefined for some optional fields can cause runtime join errors\n      if (userEmail) joinPayload.userEmail = userEmail;\n      if (tk) joinPayload.tk = tk;\n      if (zak) joinPayload.zak = zak;\n\n      ZoomMtg.join(joinPayload);\n    },\n    error: (err) => console.error('Init failed:', err)\n  });\n});\n```\n\n## ZoomMtg.init() - All Options\n\n### Required\n\n| Parameter | Type | Description |\n|-----------|------|-------------|\n| `leaveUrl` | `string` | URL to redirect after leaving meeting |\n\n### UI Customization\n\n| Parameter | Type | Default | Description |\n|-----------|------|---------|-------------|\n| `showMeetingHeader` | `boolean` | `true` | Show meeting number and topic |\n| `disableInvite` | `boolean` | `false` | Hide invite button |\n| `disableCallOut` | `boolean` | `false` | Hide call out option |\n| `disableRecord` | `boolean` | `false` | Hide record button |\n| `disableJoinAudio` | `boolean` | `false` | Hide join audio option |\n| `disablePreview` | `boolean` | `false` | Skip audio/video preview |\n| `audioPanelAlwaysOpen` | `boolean` | `false` | Keep audio panel open |\n| `showPureSharingContent` | `boolean` | `false` | Prevent overlays on shared content |\n| `videoHeader` | `boolean` | `true` | Show video tile header |\n| `isLockBottom` | `boolean` | `true` | Show/hide footer |\n| `videoDrag` | `boolean` | `true` | Enable drag video tiles |\n| `sharingMode` | `string` | `'both'` | `'both'` or `'fit'` |\n| `screenShare` | `boolean` | `true` | Enable browser URL sharing |\n| `hideShareAudioOption` | `boolean` | `false` | Hide \"Share tab audio\" checkbox |\n| `disablePictureInPicture` | `boolean` | `false` | Disable PiP mode |\n| `disableZoomLogo` | `boolean` | `false` | Remove Zoom logo (deprecated) |\n| `defaultView` | `string` | `'speaker'` | `'gallery'`, `'speaker'`, `'multiSpeaker'` |\n\n### Feature Toggles\n\n| Parameter | Type | Default | Description |\n|-----------|------|---------|-------------|\n| `isSupportAV` | `boolean` | `true` | Enable audio/video |\n| `isSupportChat` | `boolean` | `true` | Enable in-meeting chat |\n| `isSupportQA` | `boolean` | `true` | Enable webinar Q&A |\n| `isSupportCC` | `boolean` | `true` | Enable closed captions |\n| `isSupportPolling` | `boolean` | `true` | Enable polling |\n| `isSupportBreakout` | `boolean` | `true` | Enable breakout rooms |\n| `isSupportNonverbal` | `boolean` | `true` | Enable nonverbal feedback |\n| `isSupportSimulive` | `boolean` | `false` | Enable Simulive |\n| `disableVoIP` | `boolean` | `false` | Disable VoIP |\n| `disableReport` | `boolean` | `false` | Disable report feature |\n\n### Video Quality\n\n| Parameter | Type | Default | Description |\n|-----------|------|---------|-------------|\n| `enableHD` | `boolean` | `true` (≥2.8.0) | Enable 720p video |\n| `enableFullHD` | `boolean` | `false` | Enable 1080p for webinar attendees |\n\n### Advanced\n\n| Parameter | Type | Default | Description |\n|-----------|------|---------|-------------|\n| `debug` | `boolean` | `false` | Enable debug logging |\n| `patchJsMedia` | `boolean` | `false` | Auto-apply media fixes |\n| `disableCORP` | `boolean` | `false` | Disable web isolation |\n| `helper` | `string` | `''` | Path to helper.html |\n| `externalLinkPage` | `string` | - | Page for external links |\n| `webEndpoint` | `string` | - | For ZFG environments |\n| `leaveOnPageUnload` | `boolean` | `false` | Auto cleanup on page close |\n| `isShowJoiningErrorDialog` | `boolean` | `true` | Show error dialog on join failure |\n| `meetingInfo` | `Array\u003cstring>` | `[...]` | Meeting info to display |\n| `inviteUrlFormat` | `string` | `''` | Custom invite URL format |\n| `loginWindow` | `object` | `{width: 400, height: 380}` | Login popup size |\n\n### Callbacks\n\n| Parameter | Type | Description |\n|-----------|------|-------------|\n| `success` | `Function` | Called on successful init |\n| `error` | `Function` | Called on init failure |\n\n## ZoomMtg.join() - All Options\n\n### Required\n\n| Parameter | Type | Description |\n|-----------|------|-------------|\n| `signature` | `string` | SDK JWT from backend (v5.0+: must include appKey prefix) |\n| `meetingNumber` | `string \\| number` | Meeting or webinar number |\n| `userName` | `string` | Display name |\n| `passWord` | `string` | Meeting password (capital W!) |\n\n### Authentication\n\n| Parameter | Type | When Required | Description |\n|-----------|------|---------------|-------------|\n| `zak` | `string` | Starting as host | Host's Zoom Access Key |\n| `tk` | `string` | Registration required | Registrant token |\n| `userEmail` | `string` | Webinars | User email |\n| `obfToken` | `string` | March 2026+ | App Privilege Token |\n\n### Optional\n\n| Parameter | Type | Description |\n|-----------|------|-------------|\n| `customerKey` | `string` | Custom ID (max 36 chars) |\n| `recordingToken` | `string` | Local recording permission |\n\n### Callbacks\n\n| Parameter | Type | Description |\n|-----------|------|-------------|\n| `success` | `Function` | Called on successful join |\n| `error` | `Function` | Called on join failure |\n\n## Event Listeners\n\n### User Events\n\n```javascript\nZoomMtg.inMeetingServiceListener('onUserJoin', (data) => {\n  console.log('User joined:', data);\n  // { userId, userName, ... }\n});\n\nZoomMtg.inMeetingServiceListener('onUserLeave', (data) => {\n  console.log('User left:', data);\n  // Reason codes:\n  // 0: OTHER\n  // 1: HOST_ENDED_MEETING\n  // 2: SELF_LEAVE_FROM_IN_MEETING\n  // 3: SELF_LEAVE_FROM_WAITING_ROOM\n  // 4: SELF_LEAVE_FROM_WAITING_FOR_HOST_START\n  // 5: MEETING_TRANSFER\n  // 6: KICK_OUT_FROM_MEETING\n  // 7: KICK_OUT_FROM_WAITING_ROOM\n  // 8: LEAVE_FROM_DISCLAIMER\n});\n\nZoomMtg.inMeetingServiceListener('onUserUpdate', (data) => {\n  console.log('User updated:', data);\n});\n\nZoomMtg.inMeetingServiceListener('onUserIsInWaitingRoom', (data) => {\n  console.log('User in waiting room:', data);\n});\n```\n\n### Meeting Status\n\n```javascript\nZoomMtg.inMeetingServiceListener('onMeetingStatus', (data) => {\n  // status: 1=connecting, 2=connected, 3=disconnected, 4=reconnecting\n  console.log('Status:', data.status);\n});\n```\n\n### Audio/Video Events\n\n```javascript\nZoomMtg.inMeetingServiceListener('onActiveSpeaker', (data) => {\n  // [{userId, userName}]\n  console.log('Active speaker:', data);\n});\n\nZoomMtg.inMeetingServiceListener('onNetworkQualityChange', (data) => {\n  // {level: 0-5, userId, type: 'uplink'}\n  // 0-1=bad, 2=normal, 3-5=good\n  console.log('Network quality:', data);\n});\n\nZoomMtg.inMeetingServiceListener('onAudioQos', (data) => {\n  console.log('Audio QoS:', data);\n});\n\nZoomMtg.inMeetingServiceListener('onVideoQos', (data) => {\n  console.log('Video QoS:', data);\n});\n```\n\n### Chat & Communication\n\n```javascript\nZoomMtg.inMeetingServiceListener('onReceiveChatMsg', (data) => {\n  console.log('Chat message:', data);\n});\n\nZoomMtg.inMeetingServiceListener('onReceiveTranscriptionMsg', (data) => {\n  console.log('Transcription:', data);\n});\n\nZoomMtg.inMeetingServiceListener('onReceiveTranslateMsg', (data) => {\n  console.log('Translation:', data);\n});\n```\n\n### Recording & Sharing\n\n```javascript\nZoomMtg.inMeetingServiceListener('onRecordingChange', (data) => {\n  console.log('Recording status:', data);\n});\n\nZoomMtg.inMeetingServiceListener('onShareContentChange', (data) => {\n  console.log('Share content:', data);\n});\n\nZoomMtg.inMeetingServiceListener('receiveSharingChannelReady', (data) => {\n  console.log('Sharing channel ready:', data);\n});\n```\n\n### Breakout Rooms\n\n```javascript\nZoomMtg.inMeetingServiceListener('onRoomStatusChange', (data) => {\n  // status: 2=InProgress, 3=Closing, 4=Closed\n  console.log('Breakout room status:', data);\n});\n```\n\n### Other Events\n\n```javascript\nZoomMtg.inMeetingServiceListener('onJoinSpeed', (data) => {\n  console.log('Join metrics:', data);\n});\n\nZoomMtg.inMeetingServiceListener('onVbStatusChange', (data) => {\n  console.log('Virtual background status:', data);\n});\n\nZoomMtg.inMeetingServiceListener('onFocusModeStatusChange', (data) => {\n  console.log('Focus mode:', data);\n});\n\nZoomMtg.inMeetingServiceListener('onPictureInPicture', (data) => {\n  console.log('PiP status:', data);\n});\n\nZoomMtg.inMeetingServiceListener('onClaimStatus', (data) => {\n  console.log('Host claim status:', data);\n});\n```\n\n## Common Methods\n\n### Meeting Info\n\n```javascript\n// Get current user\nZoomMtg.getCurrentUser({\n  success: (res) => console.log(res.result.currentUser)\n});\n\n// Get all attendees\nZoomMtg.getAttendeeslist({});\n\n// Get meeting info\nZoomMtg.getCurrentMeetingInfo({\n  success: (res) => console.log(res)\n});\n\n// Get SDK version\nZoomMtg.getWebSDKVersion({\n  success: (version) => console.log(version)\n});\n```\n\n### Audio/Video Control\n\n```javascript\n// Mute/unmute specific user\nZoomMtg.mute({ userId, mute: true });\n\n// Mute/unmute all\nZoomMtg.muteAll({ muteAll: true });\n\n// Stop incoming audio\nZoomMtg.stopIncomingAudio({ stop: true });\n\n// Mirror video\nZoomMtg.mirrorVideo({ mirror: true });\n```\n\n### Chat\n\n```javascript\n// Send chat message\nZoomMtg.sendChat({\n  message: 'Hello!',\n  userId: 0  // 0 = everyone\n});\n```\n\n### Meeting Control\n\n```javascript\n// Leave meeting\nZoomMtg.leaveMeeting({});\n\n// End meeting (host only)\nZoomMtg.endMeeting({});\n\n// Lock meeting\nZoomMtg.lockMeeting({ lock: true });\n```\n\n### Host Controls\n\n```javascript\n// Make host\nZoomMtg.makeHost({ userId });\n\n// Make co-host\nZoomMtg.makeCoHost({ userId });\n\n// Remove co-host\nZoomMtg.withdrawCoHost({ userId });\n\n// Remove participant\nZoomMtg.expel({ userId });\n\n// Put on hold\nZoomMtg.putOnHold({ userId, bHold: true });\n\n// Claim host with host key\nZoomMtg.claimHostWithHostKey({ hostKey: '123456' });\n\n// Reclaim host\nZoomMtg.reclaimHost({});\n\n// Admit all from waiting room\nZoomMtg.admitAll({});\n```\n\n### Raise Hand\n\n```javascript\n// Raise hand\nZoomMtg.raiseHand({ userId });\n\n// Lower hand\nZoomMtg.lowerHand({ oderId });\n\n// Lower all hands\nZoomMtg.lowerAllHands({});\n```\n\n### Spotlight & Pin\n\n```javascript\n// Spotlight video\nZoomMtg.operateSpotlight({ oderId, action: 'add' }); // or 'remove'\n\n// Pin video\nZoomMtg.operatePin({ oderId, action: 'add' }); // or 'remove'\n\n// Allow multi-pin\nZoomMtg.allowMultiPin({ allow: true });\n```\n\n### Screen Share\n\n```javascript\n// Start screen share\nZoomMtg.startScreenShare({});\n\n// Share specific source (Electron)\nZoomMtg.shareSource({ source });\n```\n\n### Recording\n\n```javascript\n// Start/stop recording\nZoomMtg.record({ record: true }); // or false\n\n// Show/hide record button\nZoomMtg.showRecordFunction({ show: true });\n```\n\n### Breakout Rooms\n\n```javascript\n// Create breakout room\nZoomMtg.createBreakoutRoom({\n  rooms: [{ name: 'Room 1' }, { name: 'Room 2' }]\n});\n\n// Open breakout rooms\nZoomMtg.openBreakoutRooms({});\n\n// Close breakout rooms\nZoomMtg.closeBreakoutRooms({});\n\n// Join breakout room\nZoomMtg.joinBreakoutRoom({ roomId });\n\n// Leave breakout room\nZoomMtg.leaveBreakoutRoom({});\n\n// Move user to breakout room\nZoomMtg.moveUserToBreakoutRoom({ oderId, roomId });\n\n// Get breakout room status\nZoomMtg.getBreakoutRoomStatus({\n  success: (res) => console.log(res)\n});\n```\n\n### Virtual Background\n\n```javascript\n// Check support\nZoomMtg.isSupportVirtualBackground({\n  success: (data) => console.log(data.result.isSupport)\n});\n\n// Set virtual background\nZoomMtg.setVirtualBackground({ imageUrl: '...' });\n\n// Get VB status\nZoomMtg.getVirtualBackgroundStatus({\n  success: (data) => console.log(data)\n});\n\n// Lock virtual background (host)\nZoomMtg.lockVirtualBackground({ lock: true });\n```\n\n### UI Control\n\n```javascript\n// Show/hide meeting header\nZoomMtg.showMeetingHeader({ show: true });\n\n// Show/hide invite button\nZoomMtg.showInviteFunction({ show: true });\n\n// Show/hide join audio button\nZoomMtg.showJoinAudioFunction({ show: true });\n\n// Show/hide callout button\nZoomMtg.showCalloutFunction({ show: true });\n\n// Re-render with new options\nZoomMtg.reRender({ lang: 'de-DE' });\n```\n\n### Language\n\n```javascript\n// Load language\nZoomMtg.i18n.load('de-DE');\n\n// Reload language\nZoomMtg.i18n.reload('de-DE');\n\n// Get current language\nZoomMtg.i18n.getCurrentLang();\n\n// Get all translations\nZoomMtg.i18n.getAll();\n```\n\n## Rate Limits\n\n| Method | Limit |\n|--------|-------|\n| `join()` | 10 seconds |\n| `callOut()` | 10 seconds |\n| `mute()` | 1 second |\n| `muteAll()` | 5 seconds |\n\n## DOM Elements\n\nThe SDK automatically adds these elements:\n- `#zmmtg-root` - Main meeting container\n- `#aria-notify-area` - Accessibility announcements\n\nDo NOT manually create or remove these.\n\n### SPA (React/Next) Overlay Gotcha\n\nIf you \"join\" but see a blank/black area or your app shell instead of the meeting UI, the Zoom UI can be rendering **behind** your app layout. Ensure `#zmmtg-root` occupies the viewport and is above other fixed elements:\n\n```css\n#zmmtg-root {\n  position: fixed !important;\n  inset: 0 !important;\n  z-index: 9999 !important;\n}\n```\n\n### Join Payload Sanitization Gotcha\n\nIf `ZoomMtg.join()` succeeds partially but the screen turns black and console shows errors like `Cannot read properties of undefined (reading 'toString')`, sanitize optional fields before calling join.\n\nDo not pass optional keys with `undefined` values (`userEmail`, `tk`, `zak`, etc.). Build a payload and only attach those keys when they are non-empty strings.\n\nAlso prefer `defaultView: 'speaker'` during `ZoomMtg.init()` unless you have SharedArrayBuffer/gallery-view prerequisites fully configured.\n\n## Resources\n\n- [Main Web SDK Skill](../SKILL.md)\n- [Reference Index](references/README.md)\n- [Error Codes](../troubleshooting/error-codes.md)\n- [Common Issues](../troubleshooting/common-issues.md)\n- [SharedArrayBuffer Setup](../concepts/sharedarraybuffer.md)\n- [Official API Reference](https://marketplacefront.zoom.us/sdk/meeting/web/index.html)\n\n## Operations\n\n- [RUNBOOK.md](RUNBOOK.md) - 5-minute preflight and debugging checklist.\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("zoom-meeting-sdk-web-client-view-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

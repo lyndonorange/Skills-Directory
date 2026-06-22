@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>analyzing-windows-lnk-files-for-artifacts - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/analyzing-windows-lnk-files-for-artifacts-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>analyzing-windows-lnk-files-for-artifacts</h1>
+      <p class="description">Parse Windows LNK shortcut files to extract target paths, timestamps,</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>analyzing-windows-lnk-files-for-artifacts</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>analyzing-windows-lnk-files-for-artifacts</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Parse Windows LNK shortcut files to extract target paths, timestamps,</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose analyzing-windows-lnk-files-for-artifacts, then write the task. Fallback prompt: Use the analyzing-windows-lnk-files-for-artifacts skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Analyzing Windows LNK Files for Artifacts</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When reconstructing user file access history from Windows shortcut files</li>
+<li>For tracking accessed files, network shares, and removable media</li>
+<li>During investigations to prove a user opened specific documents</li>
+<li>When correlating file access with other timeline artifacts</li>
+<li>For identifying accessed paths on remote systems or USB devices</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Access to LNK files from forensic image (Recent, Desktop, Quick Launch)</li>
+<li>LECmd (Eric Zimmerman), python-lnk, or LnkParser for analysis</li>
+<li>Understanding of LNK file structure (Shell Link Binary format)</li>
+<li>Knowledge of LNK file locations on Windows systems</li>
+<li>Forensic workstation with analysis tools installed</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Collect LNK Files from Forensic Image</h4>
+<pre><code># Mount forensic image
+mount -o ro,loop,offset=$((2048*512)) /cases/case-2024-001/images/evidence.dd /mnt/evidence
+
+mkdir -p /cases/case-2024-001/lnk/{recent,desktop,startup,custom}
+
+# Copy Recent items LNK files (primary source)
+cp /mnt/evidence/Users/*/AppData/Roaming/Microsoft/Windows/Recent/*.lnk \
+   /cases/case-2024-001/lnk/recent/ 2&gt;/dev/null
+
+# Copy automatic destinations (Jump Lists)
+cp /mnt/evidence/Users/*/AppData/Roaming/Microsoft/Windows/Recent/AutomaticDestinations/*.automaticDestinations-ms \
+   /cases/case-2024-001/lnk/recent/ 2&gt;/dev/null
+
+# Copy custom destinations (pinned Jump List items)
+cp /mnt/evidence/Users/*/AppData/Roaming/Microsoft/Windows/Recent/CustomDestinations/*.customDestinations-ms \
+   /cases/case-2024-001/lnk/custom/ 2&gt;/dev/null
+
+# Copy Desktop shortcuts
+cp /mnt/evidence/Users/*/Desktop/*.lnk /cases/case-2024-001/lnk/desktop/ 2&gt;/dev/null
+
+# Copy Startup folder shortcuts (persistence)
+cp /mnt/evidence/Users/*/AppData/Roaming/Microsoft/Windows/Start\ Menu/Programs/Startup/*.lnk \
+   /cases/case-2024-001/lnk/startup/ 2&gt;/dev/null
+cp &quot;/mnt/evidence/ProgramData/Microsoft/Windows/Start Menu/Programs/Startup&quot;/*.lnk \
+   /cases/case-2024-001/lnk/startup/ 2&gt;/dev/null
+
+# Find all LNK files on the system
+find /mnt/evidence/ -name &quot;*.lnk&quot; -type f 2&gt;/dev/null &gt; /cases/case-2024-001/lnk/all_lnk_locations.txt
+
+# Count and hash
+ls /cases/case-2024-001/lnk/recent/ | wc -l
+sha256sum /cases/case-2024-001/lnk/recent/*.lnk &gt; /cases/case-2024-001/lnk/lnk_hashes.txt 2&gt;/dev/null</code></pre>
+<h4>Step 2: Parse LNK Files with LECmd</h4>
+<pre><code># Using Eric Zimmerman's LECmd (Windows or via Mono)
+# Process all LNK files in a directory
+LECmd.exe -d &quot;C:\cases\lnk\recent\&quot; --csv &quot;C:\cases\analysis\&quot; --csvf lnk_analysis.csv
+
+# Process a single LNK file with verbose output
+LECmd.exe -f &quot;C:\cases\lnk\recent\document.pdf.lnk&quot;
+
+# Process Jump List files
+JLECmd.exe -d &quot;C:\cases\lnk\recent\&quot; --csv &quot;C:\cases\analysis\&quot; --csvf jumplist_analysis.csv
+
+# Output includes:
+# - Source file path
+# - Target path (file that was accessed)
+# - Target creation, modification, access timestamps
+# - LNK creation and modification timestamps
+# - Working directory
+# - Command line arguments
+# - Volume serial number and label
+# - Drive type (Fixed, Removable, Network)
+# - Machine ID (NetBIOS name)
+# - MAC address (from tracker database)
+# - File size of target</code></pre>
+<h4>Step 3: Parse LNK Files with Python</h4>
+<pre><code>pip install LnkParse3
+
+python3 &lt;&lt; 'PYEOF'
+import LnkParse3
+import os, json, csv
+from datetime import datetime
+
+lnk_dir = '/cases/case-2024-001/lnk/recent/'
+results = []
+
+for filename in sorted(os.listdir(lnk_dir)):
+    if not filename.lower().endswith('.lnk'):
+        continue
+
+    filepath = os.path.join(lnk_dir, filename)
+    try:
+        with open(filepath, 'rb') as f:
+            lnk = LnkParse3.lnk_file(f)
+            info = lnk.get_json()
+
+            parsed = {
+                'lnk_file': filename,
+                'target_path': '',
+                'working_dir': '',
+                'arguments': '',
+                'target_created': '',
+                'target_modified': '',
+                'target_accessed': '',
+                'file_size': '',
+                'drive_type': '',
+                'volume_serial': '',
+                'volume_label': '',
+                'machine_id': '',
+                'mac_address': '',
+            }
+
+            # Extract header timestamps
+            header = info.get('header', {})
+            parsed['target_created'] = str(header.get('creation_time', ''))
+            parsed['target_modified'] = str(header.get('modified_time', ''))
+            parsed['target_accessed'] = str(header.get('accessed_time', ''))
+            parsed['file_size'] = str(header.get('file_size', ''))
+
+            # Extract link info
+            link_info = info.get('link_info', {})
+            if link_info:
+                local_path = link_info.get('local_base_path', '')
+                network_path = link_info.get('common_network_relative_link', {}).get('net_name', '')
+                parsed['target_path'] = local_path or network_path
+
+                vol_info = link_info.get('volume_id', {})
+                if vol_info:
+                    parsed['drive_type'] = str(vol_info.get('drive_type', ''))
+                    parsed['volume_serial'] = str(vol_info.get('drive_serial_number', ''))
+                    parsed['volume_label'] = str(vol_info.get('volume_label', ''))
+
+            # Extract string data
+            string_data = info.get('string_data', {})
+            parsed['working_dir'] = str(string_data.get('working_dir', ''))
+            parsed['arguments'] = str(string_data.get('command_line_arguments', ''))
+
+            # Extract tracker data (machine ID and MAC)
+            extra = info.get('extra', {})
+            tracker = extra.get('DISTRIBUTED_LINK_TRACKER_BLOCK', {})
+            if tracker:
+                parsed['machine_id'] = str(tracker.get('machine_id', ''))
+                parsed['mac_address'] = str(tracker.get('mac_address', ''))
+
+            results.append(parsed)
+
+            # Print summary
+            print(f&quot;\n{filename}&quot;)
+            print(f&quot;  Target: {parsed['target_path']}&quot;)
+            print(f&quot;  Modified: {parsed['target_modified']}&quot;)
+            print(f&quot;  Drive: {parsed['drive_type']} (Serial: {parsed['volume_serial']})&quot;)
+            if parsed['machine_id']:
+                print(f&quot;  Machine: {parsed['machine_id']}&quot;)
+
+    except Exception as e:
+        print(f&quot;  Error parsing {filename}: {e}&quot;)
+
+# Write results to CSV
+with open('/cases/case-2024-001/analysis/lnk_analysis.csv', 'w', newline='') as f:
+    writer = csv.DictWriter(f, fieldnames=results[0].keys() if results else [])
+    writer.writeheader()
+    writer.writerows(results)
+
+print(f&quot;\n\nTotal LNK files parsed: {len(results)}&quot;)
+PYEOF</code></pre>
+<h4>Step 4: Analyze for Investigative Value</h4>
+<pre><code># Identify files accessed from removable media
+python3 &lt;&lt; 'PYEOF'
+import csv
+
+with open('/cases/case-2024-001/analysis/lnk_analysis.csv') as f:
+    reader = csv.DictReader(f)
+
+    print(&quot;=== FILES ACCESSED FROM REMOVABLE MEDIA ===\n&quot;)
+    removable = []
+    network = []
+
+    for row in reader:
+        if 'DRIVE_REMOVABLE' in row.get('drive_type', '').upper() or \
+           'removable' in row.get('drive_type', '').lower():
+            removable.append(row)
+            print(f&quot;  {row['target_modified']} | {row['target_path']} | Vol: {row['volume_serial']}&quot;)
+
+        if 'network' in row.get('drive_type', '').lower() or \
+           row.get('target_path', '').startswith('\\\\'):
+            network.append(row)
+
+    print(f&quot;\n=== FILES ACCESSED FROM NETWORK SHARES ===\n&quot;)
+    for row in network:
+        print(f&quot;  {row['target_modified']} | {row['target_path']}&quot;)
+
+    print(f&quot;\nRemovable media files: {len(removable)}&quot;)
+    print(f&quot;Network share files: {len(network)}&quot;)
+
+    # Check for unique machines (tracker data)
+    machines = set()
+    for row in [*removable, *network]:
+        if row.get('machine_id'):
+            machines.add(row['machine_id'])
+    if machines:
+        print(f&quot;\nMachine IDs found: {machines}&quot;)
+PYEOF
+
+# Check Startup folder LNK files for persistence
+echo &quot;=== STARTUP FOLDER SHORTCUTS (PERSISTENCE) ===&quot; &gt; /cases/case-2024-001/analysis/startup_persistence.txt
+for lnk in /cases/case-2024-001/lnk/startup/*.lnk; do
+    python3 -c &quot;
+import LnkParse3
+with open('$lnk', 'rb') as f:
+    lnk = LnkParse3.lnk_file(f)
+    info = lnk.get_json()
+    target = info.get('link_info', {}).get('local_base_path', 'Unknown')
+    args = info.get('string_data', {}).get('command_line_arguments', '')
+    print(f'  $(basename $lnk): {target} {args}')
+&quot; &gt;&gt; /cases/case-2024-001/analysis/startup_persistence.txt 2&gt;/dev/null
+done</code></pre>
+<h3>Key Concepts</h3>
+<p>| Concept | Description | |---------|-------------| | Shell Link (.lnk) | Windows shortcut file format containing target path, timestamps, and metadata | | Target timestamps | Creation, modification, and access times of the file the shortcut points to | | Volume serial number | Unique identifier of the drive volume where the target file resides | | Machine ID | NetBIOS name embedded by the Distributed Link Tracking service | | MAC address | Network adapter MAC from the machine that created the LNK file | | Jump Lists | Recent and pinned file lists per application (contain embedded LNK data) | | Automatic Destinations | System-managed Jump List entries for recently opened files | | Custom Destinations | User-pinned Jump List items that persist until manually removed |</p>
+<h3>Tools &amp; Systems</h3>
+<p>| Tool | Purpose | |------|---------| | LECmd | Eric Zimmerman command-line LNK file parser with CSV/JSON output | | JLECmd | Eric Zimmerman Jump List parser | | LnkParse3 | Python library for programmatic LNK file analysis | | lnk_parser | Alternative Python LNK parsing tool | | Autopsy | Forensic platform with LNK file analysis module | | KAPE | Automated LNK and Jump List artifact collection | | Plaso | Timeline tool with LNK file parser for super-timeline creation | | LNK Explorer | GUI tool for interactive LNK file examination |</p>
+<h3>Common Scenarios</h3>
+<p><strong>Scenario 1: Data Exfiltration via USB Drive</strong> Analyze Recent folder LNK files for targets on removable drives, correlate volume serial numbers with USBSTOR registry entries, build a list of files accessed from USB devices, establish which documents were opened from the removable drive, correlate with file copy timestamps.</p>
+<p><strong>Scenario 2: Malware Persistence via Startup Shortcuts</strong> Examine Startup folder LNK files for malicious targets, check target path and arguments for encoded commands or suspicious executables, verify target file exists and examine it, correlate creation timestamp with initial compromise time.</p>
+<p><strong>Scenario 3: Network Share Access Investigation</strong> Filter LNK files with network paths (UNC targets), identify which network shares were accessed and when, correlate machine IDs with known corporate systems, check if sensitive file servers were accessed outside of normal duties, build access timeline for compliance investigation.</p>
+<p><strong>Scenario 4: Document Access Timeline for Legal Proceedings</strong> Extract all Recent folder LNK files, build chronological list of documents accessed by the user, identify specific files relevant to the case, present target timestamps showing when files were opened, correlate with email and communication timelines.</p>
+<h3>Output Format</h3>
+<pre><code>LNK File Analysis Summary:
+  User Profile: suspect_user
+  Total LNK Files: 234 (Recent: 198, Desktop: 23, Startup: 5, Other: 8)
+
+  File Access Statistics:
+    Local drive (C:):    156 files
+    Removable media:     23 files (3 unique volume serials)
+    Network shares:      15 files (\\server01, \\fileserver)
+    Other drives:        4 files
+
+  Machine IDs Found: DESKTOP-ABC123, LAPTOP-XYZ789
+  MAC Addresses: AA:BB:CC:DD:EE:FF, 11:22:33:44:55:66
+
+  Removable Media Access:
+    Volume Serial 1234-ABCD:
+      2024-01-15 14:32 - E:\Confidential\financial_report.xlsx
+      2024-01-15 14:45 - E:\Confidential\customer_database.csv
+      2024-01-15 15:00 - E:\Projects\source_code.zip
+
+  Startup Persistence:
+    updater.lnk -&gt; C:\ProgramData\svc\updater.exe (SUSPICIOUS)
+    OneDrive.lnk -&gt; C:\Users\...\OneDrive.exe (Legitimate)
+
+  Timeline: /cases/case-2024-001/analysis/lnk_analysis.csv</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: analyzing-windows-lnk-files-for-artifacts\ndisplay_name: analyzing-windows-lnk-files-for-artifacts\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# analyzing-windows-lnk-files-for-artifacts - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `analyzing-windows-lnk-files-for-artifacts` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When reconstructing user file access history from Windows shortcut files\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose analyzing-windows-lnk-files-for-artifacts, then write the task. Fallback prompt: Use the analyzing-windows-lnk-files-for-artifacts skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `analyzing-windows-lnk-files-for-artifacts` |\n| Canonical name | `analyzing-windows-lnk-files-for-artifacts` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n- When reconstructing user file access history from Windows shortcut files\n\n## Original SKILL.md\n\n---\nname: analyzing-windows-lnk-files-for-artifacts\ndescription: Parse Windows LNK shortcut files to extract target paths, timestamps,\n  volume information, and machine identifiers for forensic timeline reconstruction.\ndomain: cybersecurity\nsubdomain: digital-forensics\ntags:\n- forensics\n- lnk-files\n- windows-artifacts\n- shortcut-analysis\n- timeline-reconstruction\n- evidence-collection\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- RS.AN-01\n- RS.AN-03\n- DE.AE-02\n- RS.MA-01\nmitre_attack:\n- T1547.001\n- T1204.002\n- T1005\n- T1025\n- T1074.001\n---\n\n# Analyzing Windows LNK Files for Artifacts\n\n## When to Use\n- When reconstructing user file access history from Windows shortcut files\n- For tracking accessed files, network shares, and removable media\n- During investigations to prove a user opened specific documents\n- When correlating file access with other timeline artifacts\n- For identifying accessed paths on remote systems or USB devices\n\n## Prerequisites\n- Access to LNK files from forensic image (Recent, Desktop, Quick Launch)\n- LECmd (Eric Zimmerman), python-lnk, or LnkParser for analysis\n- Understanding of LNK file structure (Shell Link Binary format)\n- Knowledge of LNK file locations on Windows systems\n- Forensic workstation with analysis tools installed\n\n## Workflow\n\n### Step 1: Collect LNK Files from Forensic Image\n\n```bash\n# Mount forensic image\nmount -o ro,loop,offset=$((2048*512)) /cases/case-2024-001/images/evidence.dd /mnt/evidence\n\nmkdir -p /cases/case-2024-001/lnk/{recent,desktop,startup,custom}\n\n# Copy Recent items LNK files (primary source)\ncp /mnt/evidence/Users/*/AppData/Roaming/Microsoft/Windows/Recent/*.lnk \\\n   /cases/case-2024-001/lnk/recent/ 2>/dev/null\n\n# Copy automatic destinations (Jump Lists)\ncp /mnt/evidence/Users/*/AppData/Roaming/Microsoft/Windows/Recent/AutomaticDestinations/*.automaticDestinations-ms \\\n   /cases/case-2024-001/lnk/recent/ 2>/dev/null\n\n# Copy custom destinations (pinned Jump List items)\ncp /mnt/evidence/Users/*/AppData/Roaming/Microsoft/Windows/Recent/CustomDestinations/*.customDestinations-ms \\\n   /cases/case-2024-001/lnk/custom/ 2>/dev/null\n\n# Copy Desktop shortcuts\ncp /mnt/evidence/Users/*/Desktop/*.lnk /cases/case-2024-001/lnk/desktop/ 2>/dev/null\n\n# Copy Startup folder shortcuts (persistence)\ncp /mnt/evidence/Users/*/AppData/Roaming/Microsoft/Windows/Start\\ Menu/Programs/Startup/*.lnk \\\n   /cases/case-2024-001/lnk/startup/ 2>/dev/null\ncp \"/mnt/evidence/ProgramData/Microsoft/Windows/Start Menu/Programs/Startup\"/*.lnk \\\n   /cases/case-2024-001/lnk/startup/ 2>/dev/null\n\n# Find all LNK files on the system\nfind /mnt/evidence/ -name \"*.lnk\" -type f 2>/dev/null > /cases/case-2024-001/lnk/all_lnk_locations.txt\n\n# Count and hash\nls /cases/case-2024-001/lnk/recent/ | wc -l\nsha256sum /cases/case-2024-001/lnk/recent/*.lnk > /cases/case-2024-001/lnk/lnk_hashes.txt 2>/dev/null\n```\n\n### Step 2: Parse LNK Files with LECmd\n\n```bash\n# Using Eric Zimmerman's LECmd (Windows or via Mono)\n# Process all LNK files in a directory\nLECmd.exe -d \"C:\\cases\\lnk\\recent\\\" --csv \"C:\\cases\\analysis\\\" --csvf lnk_analysis.csv\n\n# Process a single LNK file with verbose output\nLECmd.exe -f \"C:\\cases\\lnk\\recent\\document.pdf.lnk\"\n\n# Process Jump List files\nJLECmd.exe -d \"C:\\cases\\lnk\\recent\\\" --csv \"C:\\cases\\analysis\\\" --csvf jumplist_analysis.csv\n\n# Output includes:\n# - Source file path\n# - Target path (file that was accessed)\n# - Target creation, modification, access timestamps\n# - LNK creation and modification timestamps\n# - Working directory\n# - Command line arguments\n# - Volume serial number and label\n# - Drive type (Fixed, Removable, Network)\n# - Machine ID (NetBIOS name)\n# - MAC address (from tracker database)\n# - File size of target\n```\n\n### Step 3: Parse LNK Files with Python\n\n```bash\npip install LnkParse3\n\npython3 \u003c\u003c 'PYEOF'\nimport LnkParse3\nimport os, json, csv\nfrom datetime import datetime\n\nlnk_dir = '/cases/case-2024-001/lnk/recent/'\nresults = []\n\nfor filename in sorted(os.listdir(lnk_dir)):\n    if not filename.lower().endswith('.lnk'):\n        continue\n\n    filepath = os.path.join(lnk_dir, filename)\n    try:\n        with open(filepath, 'rb') as f:\n            lnk = LnkParse3.lnk_file(f)\n            info = lnk.get_json()\n\n            parsed = {\n                'lnk_file': filename,\n                'target_path': '',\n                'working_dir': '',\n                'arguments': '',\n                'target_created': '',\n                'target_modified': '',\n                'target_accessed': '',\n                'file_size': '',\n                'drive_type': '',\n                'volume_serial': '',\n                'volume_label': '',\n                'machine_id': '',\n                'mac_address': '',\n            }\n\n            # Extract header timestamps\n            header = info.get('header', {})\n            parsed['target_created'] = str(header.get('creation_time', ''))\n            parsed['target_modified'] = str(header.get('modified_time', ''))\n            parsed['target_accessed'] = str(header.get('accessed_time', ''))\n            parsed['file_size'] = str(header.get('file_size', ''))\n\n            # Extract link info\n            link_info = info.get('link_info', {})\n            if link_info:\n                local_path = link_info.get('local_base_path', '')\n                network_path = link_info.get('common_network_relative_link', {}).get('net_name', '')\n                parsed['target_path'] = local_path or network_path\n\n                vol_info = link_info.get('volume_id', {})\n                if vol_info:\n                    parsed['drive_type'] = str(vol_info.get('drive_type', ''))\n                    parsed['volume_serial'] = str(vol_info.get('drive_serial_number', ''))\n                    parsed['volume_label'] = str(vol_info.get('volume_label', ''))\n\n            # Extract string data\n            string_data = info.get('string_data', {})\n            parsed['working_dir'] = str(string_data.get('working_dir', ''))\n            parsed['arguments'] = str(string_data.get('command_line_arguments', ''))\n\n            # Extract tracker data (machine ID and MAC)\n            extra = info.get('extra', {})\n            tracker = extra.get('DISTRIBUTED_LINK_TRACKER_BLOCK', {})\n            if tracker:\n                parsed['machine_id'] = str(tracker.get('machine_id', ''))\n                parsed['mac_address'] = str(tracker.get('mac_address', ''))\n\n            results.append(parsed)\n\n            # Print summary\n            print(f\"\\n{filename}\")\n            print(f\"  Target: {parsed['target_path']}\")\n            print(f\"  Modified: {parsed['target_modified']}\")\n            print(f\"  Drive: {parsed['drive_type']} (Serial: {parsed['volume_serial']})\")\n            if parsed['machine_id']:\n                print(f\"  Machine: {parsed['machine_id']}\")\n\n    except Exception as e:\n        print(f\"  Error parsing {filename}: {e}\")\n\n# Write results to CSV\nwith open('/cases/case-2024-001/analysis/lnk_analysis.csv', 'w', newline='') as f:\n    writer = csv.DictWriter(f, fieldnames=results[0].keys() if results else [])\n    writer.writeheader()\n    writer.writerows(results)\n\nprint(f\"\\n\\nTotal LNK files parsed: {len(results)}\")\nPYEOF\n```\n\n### Step 4: Analyze for Investigative Value\n\n```bash\n# Identify files accessed from removable media\npython3 \u003c\u003c 'PYEOF'\nimport csv\n\nwith open('/cases/case-2024-001/analysis/lnk_analysis.csv') as f:\n    reader = csv.DictReader(f)\n\n    print(\"=== FILES ACCESSED FROM REMOVABLE MEDIA ===\\n\")\n    removable = []\n    network = []\n\n    for row in reader:\n        if 'DRIVE_REMOVABLE' in row.get('drive_type', '').upper() or \\\n           'removable' in row.get('drive_type', '').lower():\n            removable.append(row)\n            print(f\"  {row['target_modified']} | {row['target_path']} | Vol: {row['volume_serial']}\")\n\n        if 'network' in row.get('drive_type', '').lower() or \\\n           row.get('target_path', '').startswith('\\\\\\\\'):\n            network.append(row)\n\n    print(f\"\\n=== FILES ACCESSED FROM NETWORK SHARES ===\\n\")\n    for row in network:\n        print(f\"  {row['target_modified']} | {row['target_path']}\")\n\n    print(f\"\\nRemovable media files: {len(removable)}\")\n    print(f\"Network share files: {len(network)}\")\n\n    # Check for unique machines (tracker data)\n    machines = set()\n    for row in [*removable, *network]:\n        if row.get('machine_id'):\n            machines.add(row['machine_id'])\n    if machines:\n        print(f\"\\nMachine IDs found: {machines}\")\nPYEOF\n\n# Check Startup folder LNK files for persistence\necho \"=== STARTUP FOLDER SHORTCUTS (PERSISTENCE) ===\" > /cases/case-2024-001/analysis/startup_persistence.txt\nfor lnk in /cases/case-2024-001/lnk/startup/*.lnk; do\n    python3 -c \"\nimport LnkParse3\nwith open('$lnk', 'rb') as f:\n    lnk = LnkParse3.lnk_file(f)\n    info = lnk.get_json()\n    target = info.get('link_info', {}).get('local_base_path', 'Unknown')\n    args = info.get('string_data', {}).get('command_line_arguments', '')\n    print(f'  $(basename $lnk): {target} {args}')\n\" >> /cases/case-2024-001/analysis/startup_persistence.txt 2>/dev/null\ndone\n```\n\n## Key Concepts\n\n| Concept | Description |\n|---------|-------------|\n| Shell Link (.lnk) | Windows shortcut file format containing target path, timestamps, and metadata |\n| Target timestamps | Creation, modification, and access times of the file the shortcut points to |\n| Volume serial number | Unique identifier of the drive volume where the target file resides |\n| Machine ID | NetBIOS name embedded by the Distributed Link Tracking service |\n| MAC address | Network adapter MAC from the machine that created the LNK file |\n| Jump Lists | Recent and pinned file lists per application (contain embedded LNK data) |\n| Automatic Destinations | System-managed Jump List entries for recently opened files |\n| Custom Destinations | User-pinned Jump List items that persist until manually removed |\n\n## Tools & Systems\n\n| Tool | Purpose |\n|------|---------|\n| LECmd | Eric Zimmerman command-line LNK file parser with CSV/JSON output |\n| JLECmd | Eric Zimmerman Jump List parser |\n| LnkParse3 | Python library for programmatic LNK file analysis |\n| lnk_parser | Alternative Python LNK parsing tool |\n| Autopsy | Forensic platform with LNK file analysis module |\n| KAPE | Automated LNK and Jump List artifact collection |\n| Plaso | Timeline tool with LNK file parser for super-timeline creation |\n| LNK Explorer | GUI tool for interactive LNK file examination |\n\n## Common Scenarios\n\n**Scenario 1: Data Exfiltration via USB Drive**\nAnalyze Recent folder LNK files for targets on removable drives, correlate volume serial numbers with USBSTOR registry entries, build a list of files accessed from USB devices, establish which documents were opened from the removable drive, correlate with file copy timestamps.\n\n**Scenario 2: Malware Persistence via Startup Shortcuts**\nExamine Startup folder LNK files for malicious targets, check target path and arguments for encoded commands or suspicious executables, verify target file exists and examine it, correlate creation timestamp with initial compromise time.\n\n**Scenario 3: Network Share Access Investigation**\nFilter LNK files with network paths (UNC targets), identify which network shares were accessed and when, correlate machine IDs with known corporate systems, check if sensitive file servers were accessed outside of normal duties, build access timeline for compliance investigation.\n\n**Scenario 4: Document Access Timeline for Legal Proceedings**\nExtract all Recent folder LNK files, build chronological list of documents accessed by the user, identify specific files relevant to the case, present target timestamps showing when files were opened, correlate with email and communication timelines.\n\n## Output Format\n\n```\nLNK File Analysis Summary:\n  User Profile: suspect_user\n  Total LNK Files: 234 (Recent: 198, Desktop: 23, Startup: 5, Other: 8)\n\n  File Access Statistics:\n    Local drive (C:):    156 files\n    Removable media:     23 files (3 unique volume serials)\n    Network shares:      15 files (\\\\server01, \\\\fileserver)\n    Other drives:        4 files\n\n  Machine IDs Found: DESKTOP-ABC123, LAPTOP-XYZ789\n  MAC Addresses: AA:BB:CC:DD:EE:FF, 11:22:33:44:55:66\n\n  Removable Media Access:\n    Volume Serial 1234-ABCD:\n      2024-01-15 14:32 - E:\\Confidential\\financial_report.xlsx\n      2024-01-15 14:45 - E:\\Confidential\\customer_database.csv\n      2024-01-15 15:00 - E:\\Projects\\source_code.zip\n\n  Startup Persistence:\n    updater.lnk -> C:\\ProgramData\\svc\\updater.exe (SUSPICIOUS)\n    OneDrive.lnk -> C:\\Users\\...\\OneDrive.exe (Legitimate)\n\n  Timeline: /cases/case-2024-001/analysis/lnk_analysis.csv\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("analyzing-windows-lnk-files-for-artifacts-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

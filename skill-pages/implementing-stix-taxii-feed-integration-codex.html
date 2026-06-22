@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>implementing-stix-taxii-feed-integration - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/implementing-stix-taxii-feed-integration-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>implementing-stix-taxii-feed-integration</h1>
+      <p class="description">STIX (Structured Threat Information eXpression) and TAXII (Trusted Automated</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>implementing-stix-taxii-feed-integration</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>implementing-stix-taxii-feed-integration</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>STIX (Structured Threat Information eXpression) and TAXII (Trusted Automated</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose implementing-stix-taxii-feed-integration, then write the task. Fallback prompt: Use the implementing-stix-taxii-feed-integration skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Implementing STIX/TAXII Feed Integration</h2>
+<h3>Overview</h3>
+<p>STIX (Structured Threat Information eXpression) and TAXII (Trusted Automated eXchange of Intelligence Information) are OASIS open standards for representing and transporting cyber threat intelligence. This skill covers implementing a STIX/TAXII 2.1 feed consumer and producer using Python, configuring TAXII server discovery, collection management, polling for new intelligence, parsing STIX 2.1 objects, and integrating feeds into SIEM and TIP platforms.</p>
+<h3>When to Use</h3>
+<ul>
+<li>When deploying or configuring implementing stix taxii feed integration capabilities in your environment</li>
+<li>When establishing security controls aligned to compliance requirements</li>
+<li>When building or improving security architecture for this domain</li>
+<li>When conducting security assessments that require this implementation</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Python 3.9+ with <code>taxii2-client</code>, <code>stix2</code>, <code>cti-taxii-client</code> libraries</li>
+<li>Understanding of STIX 2.1 data model (SDOs, SCOs, SROs)</li>
+<li>Understanding of TAXII 2.1 protocol (discovery, API roots, collections)</li>
+<li>Network access to TAXII servers (MITRE ATT&amp;CK TAXII, Anomali STAXX)</li>
+<li>Optional: medallion for running a local TAXII 2.1 server</li>
+</ul>
+<h3>Key Concepts</h3>
+<h4>TAXII 2.1 Architecture</h4>
+<p>TAXII defines a RESTful API with three service types:</p>
+<ul>
+<li><strong>Discovery</strong>: Returns information about available API roots</li>
+<li><strong>API Root</strong>: Contains collections and serves as the main interaction point</li>
+<li><strong>Collection</strong>: A logical grouping of STIX objects accessible via GET/POST</li>
+</ul>
+<h4>STIX 2.1 Object Model</h4>
+<p>STIX objects are categorized as:</p>
+<ul>
+<li><strong>SDOs (STIX Domain Objects)</strong>: Indicator, Malware, Threat Actor, Campaign, Attack Pattern, Tool, Infrastructure, Vulnerability, Identity, Location, Note, Opinion, Report, Grouping</li>
+<li><strong>SCOs (STIX Cyber Observables)</strong>: IPv4-Addr, Domain-Name, URL, File, Email-Addr, Process, Network-Traffic, Artifact</li>
+<li><strong>SROs (STIX Relationship Objects)</strong>: Relationship, Sighting</li>
+<li><strong>Meta Objects</strong>: Marking Definition (TLP), Language Content, Extension Definition</li>
+</ul>
+<h4>STIX Bundle</h4>
+<p>A Bundle is a collection of STIX objects transmitted together. Bundles have a unique ID and contain an array of objects. TAXII collections serve bundles in response to GET requests.</p>
+<h3>Workflow</h3>
+<h4>Step 1: TAXII Server Discovery</h4>
+<pre><code>from taxii2client.v21 import Server, Collection, as_pages
+
+# Connect to MITRE ATT&amp;CK TAXII server
+server = Server(&quot;https://cti-taxii.mitre.org/taxii2/&quot;, user=&quot;&quot;, password=&quot;&quot;)
+
+print(f&quot;Title: {server.title}&quot;)
+print(f&quot;Description: {server.description}&quot;)
+
+# List API roots
+for api_root in server.api_roots:
+    print(f&quot;\nAPI Root: {api_root.title}&quot;)
+    print(f&quot;  URL: {api_root.url}&quot;)
+
+    # List collections
+    for collection in api_root.collections:
+        print(f&quot;  Collection: {collection.title} (ID: {collection.id})&quot;)
+        print(f&quot;    Can Read: {collection.can_read}&quot;)
+        print(f&quot;    Can Write: {collection.can_write}&quot;)</code></pre>
+<h4>Step 2: Fetch STIX Objects from Collection</h4>
+<pre><code>from taxii2client.v21 import Collection, as_pages
+import json
+
+# Connect to Enterprise ATT&amp;CK collection
+ENTERPRISE_ATTACK_ID = &quot;95ecc380-afe9-11e4-9b6c-751b66dd541e&quot;
+collection = Collection(
+    f&quot;https://cti-taxii.mitre.org/stix/collections/{ENTERPRISE_ATTACK_ID}/&quot;,
+    user=&quot;&quot;,
+    password=&quot;&quot;,
+)
+
+print(f&quot;Collection: {collection.title}&quot;)
+
+# Fetch all objects (paginated)
+all_objects = []
+for envelope in as_pages(collection.get_objects, per_request=50):
+    objects = envelope.get(&quot;objects&quot;, [])
+    all_objects.extend(objects)
+    print(f&quot;  Fetched {len(objects)} objects (total: {len(all_objects)})&quot;)
+
+print(f&quot;\nTotal objects retrieved: {len(all_objects)}&quot;)
+
+# Categorize by type
+type_counts = {}
+for obj in all_objects:
+    obj_type = obj.get(&quot;type&quot;, &quot;unknown&quot;)
+    type_counts[obj_type] = type_counts.get(obj_type, 0) + 1
+
+for obj_type, count in sorted(type_counts.items()):
+    print(f&quot;  {obj_type}: {count}&quot;)</code></pre>
+<h4>Step 3: Parse STIX 2.1 Objects with stix2 Library</h4>
+<pre><code>from stix2 import parse, Filter, MemoryStore
+
+# Load objects into a MemoryStore for querying
+store = MemoryStore(stix_data=all_objects)
+
+# Query for all indicators
+indicators = store.query([Filter(&quot;type&quot;, &quot;=&quot;, &quot;indicator&quot;)])
+print(f&quot;Indicators: {len(indicators)}&quot;)
+
+for ind in indicators[:5]:
+    print(f&quot;  {ind.name}: {ind.pattern}&quot;)
+
+# Query for malware
+malware_list = store.query([Filter(&quot;type&quot;, &quot;=&quot;, &quot;malware&quot;)])
+print(f&quot;\nMalware families: {len(malware_list)}&quot;)
+
+# Query for threat actors
+actors = store.query([Filter(&quot;type&quot;, &quot;=&quot;, &quot;intrusion-set&quot;)])
+print(f&quot;Threat actors: {len(actors)}&quot;)
+
+# Find relationships for a specific object
+def get_related(store, source_id):
+    relationships = store.query([
+        Filter(&quot;type&quot;, &quot;=&quot;, &quot;relationship&quot;),
+        Filter(&quot;source_ref&quot;, &quot;=&quot;, source_id),
+    ])
+    return relationships
+
+# Example: Get all techniques used by APT28
+apt28 = store.query([
+    Filter(&quot;type&quot;, &quot;=&quot;, &quot;intrusion-set&quot;),
+    Filter(&quot;name&quot;, &quot;=&quot;, &quot;APT28&quot;),
+])
+if apt28:
+    rels = get_related(store, apt28[0].id)
+    for rel in rels:
+        target = store.get(rel.target_ref)
+        if target:
+            print(f&quot;  {rel.relationship_type} -&gt; {target.name} ({target.type})&quot;)</code></pre>
+<h4>Step 4: Implement Custom TAXII Consumer</h4>
+<pre><code>from taxii2client.v21 import Collection, as_pages
+from stix2 import parse, Bundle
+from datetime import datetime, timedelta
+import json
+
+class TAXIIConsumer:
+    &quot;&quot;&quot;Consume STIX/TAXII 2.1 feeds and extract IOCs.&quot;&quot;&quot;
+
+    def __init__(self, collection_url, user=&quot;&quot;, password=&quot;&quot;):
+        self.collection = Collection(collection_url, user=user, password=password)
+        self.last_poll = None
+
+    def poll_new_objects(self, added_after=None):
+        &quot;&quot;&quot;Poll for objects added after a specific timestamp.&quot;&quot;&quot;
+        if added_after is None:
+            added_after = (
+                self.last_poll or
+                (datetime.utcnow() - timedelta(days=1)).strftime(
+                    &quot;%Y-%m-%dT%H:%M:%S.000Z&quot;
+                )
+            )
+
+        all_objects = []
+        kwargs = {&quot;added_after&quot;: added_after}
+
+        for envelope in as_pages(
+            self.collection.get_objects, per_request=100, **kwargs
+        ):
+            objects = envelope.get(&quot;objects&quot;, [])
+            all_objects.extend(objects)
+
+        self.last_poll = datetime.utcnow().strftime(&quot;%Y-%m-%dT%H:%M:%S.000Z&quot;)
+        return all_objects
+
+    def extract_indicators(self, objects):
+        &quot;&quot;&quot;Extract actionable indicators from STIX objects.&quot;&quot;&quot;
+        indicators = []
+        for obj in objects:
+            if obj.get(&quot;type&quot;) == &quot;indicator&quot;:
+                indicators.append({
+                    &quot;id&quot;: obj.get(&quot;id&quot;),
+                    &quot;name&quot;: obj.get(&quot;name&quot;, &quot;&quot;),
+                    &quot;pattern&quot;: obj.get(&quot;pattern&quot;, &quot;&quot;),
+                    &quot;pattern_type&quot;: obj.get(&quot;pattern_type&quot;, &quot;&quot;),
+                    &quot;valid_from&quot;: obj.get(&quot;valid_from&quot;, &quot;&quot;),
+                    &quot;valid_until&quot;: obj.get(&quot;valid_until&quot;, &quot;&quot;),
+                    &quot;indicator_types&quot;: obj.get(&quot;indicator_types&quot;, []),
+                    &quot;confidence&quot;: obj.get(&quot;confidence&quot;, 0),
+                    &quot;labels&quot;: obj.get(&quot;labels&quot;, []),
+                })
+        return indicators
+
+    def extract_observables(self, objects):
+        &quot;&quot;&quot;Extract STIX Cyber Observables.&quot;&quot;&quot;
+        observables = []
+        observable_types = {
+            &quot;ipv4-addr&quot;, &quot;ipv6-addr&quot;, &quot;domain-name&quot;, &quot;url&quot;,
+            &quot;file&quot;, &quot;email-addr&quot;, &quot;network-traffic&quot;,
+        }
+        for obj in objects:
+            if obj.get(&quot;type&quot;) in observable_types:
+                observables.append({
+                    &quot;type&quot;: obj[&quot;type&quot;],
+                    &quot;value&quot;: obj.get(&quot;value&quot;, &quot;&quot;),
+                    &quot;id&quot;: obj.get(&quot;id&quot;),
+                })
+        return observables
+
+
+# Usage
+consumer = TAXIIConsumer(
+    f&quot;https://cti-taxii.mitre.org/stix/collections/{ENTERPRISE_ATTACK_ID}/&quot;
+)
+new_objects = consumer.poll_new_objects()
+indicators = consumer.extract_indicators(new_objects)
+print(f&quot;New indicators: {len(indicators)}&quot;)</code></pre>
+<h4>Step 5: Set Up Local TAXII Server with Medallion</h4>
+<pre><code># medallion configuration (medallion.conf)
+TAXII_CONFIG = {
+    &quot;backend&quot;: {
+        &quot;module_class&quot;: &quot;MemoryBackend&quot;,
+    },
+    &quot;users&quot;: {
+        &quot;admin&quot;: &quot;admin_password&quot;,
+        &quot;readonly&quot;: &quot;readonly_password&quot;,
+    },
+    &quot;taxii&quot;: {
+        &quot;max_content_length&quot;: 10485760,
+    },
+}
+
+# Run medallion server:
+# pip install medallion
+# python -m medallion --config medallion.conf --port 5000
+
+# Add objects to local TAXII server
+import requests
+
+def push_to_taxii(server_url, collection_id, stix_bundle, user, password):
+    &quot;&quot;&quot;Push STIX bundle to a TAXII 2.1 collection.&quot;&quot;&quot;
+    url = f&quot;{server_url}/collections/{collection_id}/objects/&quot;
+    headers = {
+        &quot;Content-Type&quot;: &quot;application/stix+json;version=2.1&quot;,
+        &quot;Accept&quot;: &quot;application/taxii+json;version=2.1&quot;,
+    }
+    response = requests.post(
+        url,
+        json=stix_bundle,
+        headers=headers,
+        auth=(user, password),
+        timeout=30,
+    )
+    return response.json()</code></pre>
+<h3>Validation Criteria</h3>
+<ul>
+<li>TAXII server discovery returns valid API roots and collections</li>
+<li>STIX objects fetched and parsed correctly from TAXII collections</li>
+<li>Indicators extracted with valid STIX patterns</li>
+<li>Pagination handled correctly for large collections</li>
+<li>Consumer tracks polling state for incremental updates</li>
+<li>Local TAXII server accepts and serves STIX bundles</li>
+</ul>
+<h3>References</h3>
+<ul>
+<li>[STIX 2.1 Specification](https://docs.oasis-open.org/cti/stix/v2.1/stix-v2.1.html)</li>
+<li>[TAXII 2.1 Specification](https://docs.oasis-open.org/cti/taxii/v2.1/taxii-v2.1.html)</li>
+<li>[taxii2-client PyPI](https://pypi.org/project/taxii2-client/)</li>
+<li>[stix2 Python Library](https://stix2.readthedocs.io/)</li>
+<li>[MITRE ATT&amp;CK TAXII Server](https://cti-taxii.mitre.org/taxii2/)</li>
+<li>[Medallion TAXII Server](https://github.com/oasis-open/cti-taxii-server)</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: implementing-stix-taxii-feed-integration\ndisplay_name: implementing-stix-taxii-feed-integration\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# implementing-stix-taxii-feed-integration - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `implementing-stix-taxii-feed-integration` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nSTIX (Structured Threat Information eXpression) and TAXII (Trusted Automated eXchange of Intelligence Information) are OASIS open standards for representing and transporting cyber threat intelligence. This skill covers i\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose implementing-stix-taxii-feed-integration, then write the task. Fallback prompt: Use the implementing-stix-taxii-feed-integration skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `implementing-stix-taxii-feed-integration` |\n| Canonical name | `implementing-stix-taxii-feed-integration` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nSTIX (Structured Threat Information eXpression) and TAXII (Trusted Automated eXchange of Intelligence Information) are OASIS open standards for representing and transporting cyber threat intelligence. This skill covers i\n\n## Original SKILL.md\n\n---\nname: implementing-stix-taxii-feed-integration\ndescription: STIX (Structured Threat Information eXpression) and TAXII (Trusted Automated\n  eXchange of Intelligence Information) are OASIS open standards for representing\n  and transporting cyber threat intelligence.\ndomain: cybersecurity\nsubdomain: threat-intelligence\ntags:\n- threat-intelligence\n- cti\n- ioc\n- mitre-attack\n- stix\n- taxii\n- feed-integration\n- oasis\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- ID.RA-01\n- ID.RA-05\n- DE.CM-01\n- DE.AE-02\nmitre_attack:\n- T1591\n- T1592\n- T1593\n- T1589\n---\n# Implementing STIX/TAXII Feed Integration\n\n## Overview\n\nSTIX (Structured Threat Information eXpression) and TAXII (Trusted Automated eXchange of Intelligence Information) are OASIS open standards for representing and transporting cyber threat intelligence. This skill covers implementing a STIX/TAXII 2.1 feed consumer and producer using Python, configuring TAXII server discovery, collection management, polling for new intelligence, parsing STIX 2.1 objects, and integrating feeds into SIEM and TIP platforms.\n\n\n## When to Use\n\n- When deploying or configuring implementing stix taxii feed integration capabilities in your environment\n- When establishing security controls aligned to compliance requirements\n- When building or improving security architecture for this domain\n- When conducting security assessments that require this implementation\n\n## Prerequisites\n\n- Python 3.9+ with `taxii2-client`, `stix2`, `cti-taxii-client` libraries\n- Understanding of STIX 2.1 data model (SDOs, SCOs, SROs)\n- Understanding of TAXII 2.1 protocol (discovery, API roots, collections)\n- Network access to TAXII servers (MITRE ATT&CK TAXII, Anomali STAXX)\n- Optional: medallion for running a local TAXII 2.1 server\n\n## Key Concepts\n\n### TAXII 2.1 Architecture\n\nTAXII defines a RESTful API with three service types:\n- **Discovery**: Returns information about available API roots\n- **API Root**: Contains collections and serves as the main interaction point\n- **Collection**: A logical grouping of STIX objects accessible via GET/POST\n\n### STIX 2.1 Object Model\n\nSTIX objects are categorized as:\n- **SDOs (STIX Domain Objects)**: Indicator, Malware, Threat Actor, Campaign, Attack Pattern, Tool, Infrastructure, Vulnerability, Identity, Location, Note, Opinion, Report, Grouping\n- **SCOs (STIX Cyber Observables)**: IPv4-Addr, Domain-Name, URL, File, Email-Addr, Process, Network-Traffic, Artifact\n- **SROs (STIX Relationship Objects)**: Relationship, Sighting\n- **Meta Objects**: Marking Definition (TLP), Language Content, Extension Definition\n\n### STIX Bundle\n\nA Bundle is a collection of STIX objects transmitted together. Bundles have a unique ID and contain an array of objects. TAXII collections serve bundles in response to GET requests.\n\n## Workflow\n\n### Step 1: TAXII Server Discovery\n\n```python\nfrom taxii2client.v21 import Server, Collection, as_pages\n\n# Connect to MITRE ATT&CK TAXII server\nserver = Server(\"https://cti-taxii.mitre.org/taxii2/\", user=\"\", password=\"\")\n\nprint(f\"Title: {server.title}\")\nprint(f\"Description: {server.description}\")\n\n# List API roots\nfor api_root in server.api_roots:\n    print(f\"\\nAPI Root: {api_root.title}\")\n    print(f\"  URL: {api_root.url}\")\n\n    # List collections\n    for collection in api_root.collections:\n        print(f\"  Collection: {collection.title} (ID: {collection.id})\")\n        print(f\"    Can Read: {collection.can_read}\")\n        print(f\"    Can Write: {collection.can_write}\")\n```\n\n### Step 2: Fetch STIX Objects from Collection\n\n```python\nfrom taxii2client.v21 import Collection, as_pages\nimport json\n\n# Connect to Enterprise ATT&CK collection\nENTERPRISE_ATTACK_ID = \"95ecc380-afe9-11e4-9b6c-751b66dd541e\"\ncollection = Collection(\n    f\"https://cti-taxii.mitre.org/stix/collections/{ENTERPRISE_ATTACK_ID}/\",\n    user=\"\",\n    password=\"\",\n)\n\nprint(f\"Collection: {collection.title}\")\n\n# Fetch all objects (paginated)\nall_objects = []\nfor envelope in as_pages(collection.get_objects, per_request=50):\n    objects = envelope.get(\"objects\", [])\n    all_objects.extend(objects)\n    print(f\"  Fetched {len(objects)} objects (total: {len(all_objects)})\")\n\nprint(f\"\\nTotal objects retrieved: {len(all_objects)}\")\n\n# Categorize by type\ntype_counts = {}\nfor obj in all_objects:\n    obj_type = obj.get(\"type\", \"unknown\")\n    type_counts[obj_type] = type_counts.get(obj_type, 0) + 1\n\nfor obj_type, count in sorted(type_counts.items()):\n    print(f\"  {obj_type}: {count}\")\n```\n\n### Step 3: Parse STIX 2.1 Objects with stix2 Library\n\n```python\nfrom stix2 import parse, Filter, MemoryStore\n\n# Load objects into a MemoryStore for querying\nstore = MemoryStore(stix_data=all_objects)\n\n# Query for all indicators\nindicators = store.query([Filter(\"type\", \"=\", \"indicator\")])\nprint(f\"Indicators: {len(indicators)}\")\n\nfor ind in indicators[:5]:\n    print(f\"  {ind.name}: {ind.pattern}\")\n\n# Query for malware\nmalware_list = store.query([Filter(\"type\", \"=\", \"malware\")])\nprint(f\"\\nMalware families: {len(malware_list)}\")\n\n# Query for threat actors\nactors = store.query([Filter(\"type\", \"=\", \"intrusion-set\")])\nprint(f\"Threat actors: {len(actors)}\")\n\n# Find relationships for a specific object\ndef get_related(store, source_id):\n    relationships = store.query([\n        Filter(\"type\", \"=\", \"relationship\"),\n        Filter(\"source_ref\", \"=\", source_id),\n    ])\n    return relationships\n\n# Example: Get all techniques used by APT28\napt28 = store.query([\n    Filter(\"type\", \"=\", \"intrusion-set\"),\n    Filter(\"name\", \"=\", \"APT28\"),\n])\nif apt28:\n    rels = get_related(store, apt28[0].id)\n    for rel in rels:\n        target = store.get(rel.target_ref)\n        if target:\n            print(f\"  {rel.relationship_type} -> {target.name} ({target.type})\")\n```\n\n### Step 4: Implement Custom TAXII Consumer\n\n```python\nfrom taxii2client.v21 import Collection, as_pages\nfrom stix2 import parse, Bundle\nfrom datetime import datetime, timedelta\nimport json\n\nclass TAXIIConsumer:\n    \"\"\"Consume STIX/TAXII 2.1 feeds and extract IOCs.\"\"\"\n\n    def __init__(self, collection_url, user=\"\", password=\"\"):\n        self.collection = Collection(collection_url, user=user, password=password)\n        self.last_poll = None\n\n    def poll_new_objects(self, added_after=None):\n        \"\"\"Poll for objects added after a specific timestamp.\"\"\"\n        if added_after is None:\n            added_after = (\n                self.last_poll or\n                (datetime.utcnow() - timedelta(days=1)).strftime(\n                    \"%Y-%m-%dT%H:%M:%S.000Z\"\n                )\n            )\n\n        all_objects = []\n        kwargs = {\"added_after\": added_after}\n\n        for envelope in as_pages(\n            self.collection.get_objects, per_request=100, **kwargs\n        ):\n            objects = envelope.get(\"objects\", [])\n            all_objects.extend(objects)\n\n        self.last_poll = datetime.utcnow().strftime(\"%Y-%m-%dT%H:%M:%S.000Z\")\n        return all_objects\n\n    def extract_indicators(self, objects):\n        \"\"\"Extract actionable indicators from STIX objects.\"\"\"\n        indicators = []\n        for obj in objects:\n            if obj.get(\"type\") == \"indicator\":\n                indicators.append({\n                    \"id\": obj.get(\"id\"),\n                    \"name\": obj.get(\"name\", \"\"),\n                    \"pattern\": obj.get(\"pattern\", \"\"),\n                    \"pattern_type\": obj.get(\"pattern_type\", \"\"),\n                    \"valid_from\": obj.get(\"valid_from\", \"\"),\n                    \"valid_until\": obj.get(\"valid_until\", \"\"),\n                    \"indicator_types\": obj.get(\"indicator_types\", []),\n                    \"confidence\": obj.get(\"confidence\", 0),\n                    \"labels\": obj.get(\"labels\", []),\n                })\n        return indicators\n\n    def extract_observables(self, objects):\n        \"\"\"Extract STIX Cyber Observables.\"\"\"\n        observables = []\n        observable_types = {\n            \"ipv4-addr\", \"ipv6-addr\", \"domain-name\", \"url\",\n            \"file\", \"email-addr\", \"network-traffic\",\n        }\n        for obj in objects:\n            if obj.get(\"type\") in observable_types:\n                observables.append({\n                    \"type\": obj[\"type\"],\n                    \"value\": obj.get(\"value\", \"\"),\n                    \"id\": obj.get(\"id\"),\n                })\n        return observables\n\n\n# Usage\nconsumer = TAXIIConsumer(\n    f\"https://cti-taxii.mitre.org/stix/collections/{ENTERPRISE_ATTACK_ID}/\"\n)\nnew_objects = consumer.poll_new_objects()\nindicators = consumer.extract_indicators(new_objects)\nprint(f\"New indicators: {len(indicators)}\")\n```\n\n### Step 5: Set Up Local TAXII Server with Medallion\n\n```python\n# medallion configuration (medallion.conf)\nTAXII_CONFIG = {\n    \"backend\": {\n        \"module_class\": \"MemoryBackend\",\n    },\n    \"users\": {\n        \"admin\": \"admin_password\",\n        \"readonly\": \"readonly_password\",\n    },\n    \"taxii\": {\n        \"max_content_length\": 10485760,\n    },\n}\n\n# Run medallion server:\n# pip install medallion\n# python -m medallion --config medallion.conf --port 5000\n\n# Add objects to local TAXII server\nimport requests\n\ndef push_to_taxii(server_url, collection_id, stix_bundle, user, password):\n    \"\"\"Push STIX bundle to a TAXII 2.1 collection.\"\"\"\n    url = f\"{server_url}/collections/{collection_id}/objects/\"\n    headers = {\n        \"Content-Type\": \"application/stix+json;version=2.1\",\n        \"Accept\": \"application/taxii+json;version=2.1\",\n    }\n    response = requests.post(\n        url,\n        json=stix_bundle,\n        headers=headers,\n        auth=(user, password),\n        timeout=30,\n    )\n    return response.json()\n```\n\n## Validation Criteria\n\n- TAXII server discovery returns valid API roots and collections\n- STIX objects fetched and parsed correctly from TAXII collections\n- Indicators extracted with valid STIX patterns\n- Pagination handled correctly for large collections\n- Consumer tracks polling state for incremental updates\n- Local TAXII server accepts and serves STIX bundles\n\n## References\n\n- [STIX 2.1 Specification](https://docs.oasis-open.org/cti/stix/v2.1/stix-v2.1.html)\n- [TAXII 2.1 Specification](https://docs.oasis-open.org/cti/taxii/v2.1/taxii-v2.1.html)\n- [taxii2-client PyPI](https://pypi.org/project/taxii2-client/)\n- [stix2 Python Library](https://stix2.readthedocs.io/)\n- [MITRE ATT&CK TAXII Server](https://cti-taxii.mitre.org/taxii2/)\n- [Medallion TAXII Server](https://github.com/oasis-open/cti-taxii-server)\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("implementing-stix-taxii-feed-integration-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

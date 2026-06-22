@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>hunting-for-command-and-control-beaconing - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/hunting-for-command-and-control-beaconing-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>hunting-for-command-and-control-beaconing</h1>
+      <p class="description">Detect C2 beaconing patterns in network traffic using frequency analysis,</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>hunting-for-command-and-control-beaconing</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>hunting-for-command-and-control-beaconing</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Detect C2 beaconing patterns in network traffic using frequency analysis,</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose hunting-for-command-and-control-beaconing, then write the task. Fallback prompt: Use the hunting-for-command-and-control-beaconing skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Hunting for Command and Control Beaconing</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When proactively hunting for compromised systems in the network</li>
+<li>After threat intel indicates C2 frameworks targeting your industry</li>
+<li>When investigating periodic outbound connections to suspicious domains</li>
+<li>During incident response to identify active C2 channels</li>
+<li>When DNS query logs show unusual patterns to specific domains</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Network proxy/firewall logs with full URL and timing data</li>
+<li>DNS query logs (passive DNS, DNS server logs, or Sysmon Event ID 22)</li>
+<li>Zeek/Bro network connection logs or NetFlow data</li>
+<li>SIEM with statistical analysis capabilities (Splunk, Elastic)</li>
+<li>Threat intelligence feeds for domain/IP reputation</li>
+</ul>
+<h3>Workflow</h3>
+<ol>
+<li><strong>Identify Beaconing Characteristics</strong>: Define what constitutes beaconing (regular intervals, small payload sizes, consistent destinations, jitter patterns).</li>
+<li><strong>Collect Network Telemetry</strong>: Aggregate proxy logs, DNS queries, and connection metadata for analysis.</li>
+<li><strong>Apply Frequency Analysis</strong>: Identify connections with regular intervals using statistical methods (standard deviation, coefficient of variation).</li>
+<li><strong>Filter Known-Good Traffic</strong>: Exclude legitimate periodic traffic (Windows Update, AV updates, heartbeat services, NTP).</li>
+<li><strong>Analyze Domain/IP Reputation</strong>: Check identified beaconing destinations against threat intel, WHOIS data, and certificate transparency logs.</li>
+<li><strong>Investigate Endpoint Context</strong>: Correlate beaconing activity with process creation, user context, and file system changes on source endpoints.</li>
+<li><strong>Confirm and Respond</strong>: Validate C2 activity, block communication, and initiate incident response.</li>
+</ol>
+<h3>Key Concepts</h3>
+<p>| Concept | Description | |---------|-------------| | T1071 | Application Layer Protocol (HTTP/HTTPS/DNS C2) | | T1071.001 | Web Protocols (HTTP/S beaconing) | | T1071.004 | DNS (DNS tunneling C2) | | T1573 | Encrypted Channel | | T1572 | Protocol Tunneling | | T1568 | Dynamic Resolution (DGA, fast-flux) | | T1132 | Data Encoding in C2 | | T1095 | Non-Application Layer Protocol | | Beacon Interval | Time between C2 check-ins | | Jitter | Random variation in beacon interval | | DGA | Domain Generation Algorithm | | Fast-Flux | Rapidly changing DNS resolution |</p>
+<h3>Tools &amp; Systems</h3>
+<p>| Tool | Purpose | |------|---------| | RITA (Real Intelligence Threat Analytics) | Automated beacon detection in Zeek logs | | Splunk | Statistical beacon analysis with SPL | | Elastic Security | ML-based anomaly detection for beaconing | | Zeek/Bro | Network connection metadata collection | | Suricata | Network IDS with JA3/JA4 fingerprinting | | VirusTotal | Domain and IP reputation checking | | PassiveDNS | Historical DNS resolution data | | Flare | C2 profile detection |</p>
+<h3>Common Scenarios</h3>
+<ol>
+<li><strong>Cobalt Strike Beacon</strong>: HTTP/HTTPS beaconing with configurable sleep time and jitter to malleable C2 profiles.</li>
+<li><strong>DNS Tunneling C2</strong>: Data exfiltration and command receipt via encoded DNS TXT/CNAME queries to attacker-controlled domains.</li>
+<li><strong>Sliver C2 over HTTPS</strong>: Modern C2 framework using HTTPS with configurable beacon intervals and domain fronting.</li>
+<li><strong>DGA-based C2</strong>: Malware generating random domains daily, with adversary registering upcoming domains for C2.</li>
+<li><strong>Legitimate Service Abuse</strong>: C2 over legitimate cloud services (Azure, AWS, Slack, Discord, Telegram).</li>
+</ol>
+<h3>Output Format</h3>
+<pre><code>Hunt ID: TH-C2-[DATE]-[SEQ]
+Source IP: [Internal IP]
+Source Host: [Hostname]
+Destination: [Domain/IP]
+Protocol: [HTTP/HTTPS/DNS/Custom]
+Beacon Interval: [Average seconds]
+Jitter: [Percentage]
+Connection Count: [Total connections]
+Data Volume: [Bytes sent/received]
+First Seen: [Timestamp]
+Last Seen: [Timestamp]
+Domain Age: [Days]
+TI Match: [Yes/No - source]
+Risk Level: [Critical/High/Medium/Low]</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: hunting-for-command-and-control-beaconing\ndisplay_name: hunting-for-command-and-control-beaconing\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# hunting-for-command-and-control-beaconing - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `hunting-for-command-and-control-beaconing` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When proactively hunting for compromised systems in the network\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose hunting-for-command-and-control-beaconing, then write the task. Fallback prompt: Use the hunting-for-command-and-control-beaconing skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `hunting-for-command-and-control-beaconing` |\n| Canonical name | `hunting-for-command-and-control-beaconing` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n- When proactively hunting for compromised systems in the network\n\n## Original SKILL.md\n\n---\nname: hunting-for-command-and-control-beaconing\ndescription: Detect C2 beaconing patterns in network traffic using frequency analysis,\n  jitter detection, and domain reputation to identify compromised endpoints communicating\n  with adversary infrastructure.\ndomain: cybersecurity\nsubdomain: threat-hunting\ntags:\n- threat-hunting\n- mitre-attack\n- c2\n- beaconing\n- network-analysis\n- proactive-detection\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nd3fend_techniques:\n- File Metadata Consistency Validation\n- Certificate Analysis\n- Application Protocol Command Analysis\n- Content Format Conversion\n- File Content Analysis\nnist_csf:\n- DE.CM-01\n- DE.AE-02\n- DE.AE-07\n- ID.RA-05\nmitre_attack:\n- T1046\n- T1057\n- T1082\n- T1083\n- T1071\n---\n\n# Hunting for Command and Control Beaconing\n\n## When to Use\n\n- When proactively hunting for compromised systems in the network\n- After threat intel indicates C2 frameworks targeting your industry\n- When investigating periodic outbound connections to suspicious domains\n- During incident response to identify active C2 channels\n- When DNS query logs show unusual patterns to specific domains\n\n## Prerequisites\n\n- Network proxy/firewall logs with full URL and timing data\n- DNS query logs (passive DNS, DNS server logs, or Sysmon Event ID 22)\n- Zeek/Bro network connection logs or NetFlow data\n- SIEM with statistical analysis capabilities (Splunk, Elastic)\n- Threat intelligence feeds for domain/IP reputation\n\n## Workflow\n\n1. **Identify Beaconing Characteristics**: Define what constitutes beaconing (regular intervals, small payload sizes, consistent destinations, jitter patterns).\n2. **Collect Network Telemetry**: Aggregate proxy logs, DNS queries, and connection metadata for analysis.\n3. **Apply Frequency Analysis**: Identify connections with regular intervals using statistical methods (standard deviation, coefficient of variation).\n4. **Filter Known-Good Traffic**: Exclude legitimate periodic traffic (Windows Update, AV updates, heartbeat services, NTP).\n5. **Analyze Domain/IP Reputation**: Check identified beaconing destinations against threat intel, WHOIS data, and certificate transparency logs.\n6. **Investigate Endpoint Context**: Correlate beaconing activity with process creation, user context, and file system changes on source endpoints.\n7. **Confirm and Respond**: Validate C2 activity, block communication, and initiate incident response.\n\n## Key Concepts\n\n| Concept | Description |\n|---------|-------------|\n| T1071 | Application Layer Protocol (HTTP/HTTPS/DNS C2) |\n| T1071.001 | Web Protocols (HTTP/S beaconing) |\n| T1071.004 | DNS (DNS tunneling C2) |\n| T1573 | Encrypted Channel |\n| T1572 | Protocol Tunneling |\n| T1568 | Dynamic Resolution (DGA, fast-flux) |\n| T1132 | Data Encoding in C2 |\n| T1095 | Non-Application Layer Protocol |\n| Beacon Interval | Time between C2 check-ins |\n| Jitter | Random variation in beacon interval |\n| DGA | Domain Generation Algorithm |\n| Fast-Flux | Rapidly changing DNS resolution |\n\n## Tools & Systems\n\n| Tool | Purpose |\n|------|---------|\n| RITA (Real Intelligence Threat Analytics) | Automated beacon detection in Zeek logs |\n| Splunk | Statistical beacon analysis with SPL |\n| Elastic Security | ML-based anomaly detection for beaconing |\n| Zeek/Bro | Network connection metadata collection |\n| Suricata | Network IDS with JA3/JA4 fingerprinting |\n| VirusTotal | Domain and IP reputation checking |\n| PassiveDNS | Historical DNS resolution data |\n| Flare | C2 profile detection |\n\n## Common Scenarios\n\n1. **Cobalt Strike Beacon**: HTTP/HTTPS beaconing with configurable sleep time and jitter to malleable C2 profiles.\n2. **DNS Tunneling C2**: Data exfiltration and command receipt via encoded DNS TXT/CNAME queries to attacker-controlled domains.\n3. **Sliver C2 over HTTPS**: Modern C2 framework using HTTPS with configurable beacon intervals and domain fronting.\n4. **DGA-based C2**: Malware generating random domains daily, with adversary registering upcoming domains for C2.\n5. **Legitimate Service Abuse**: C2 over legitimate cloud services (Azure, AWS, Slack, Discord, Telegram).\n\n## Output Format\n\n```\nHunt ID: TH-C2-[DATE]-[SEQ]\nSource IP: [Internal IP]\nSource Host: [Hostname]\nDestination: [Domain/IP]\nProtocol: [HTTP/HTTPS/DNS/Custom]\nBeacon Interval: [Average seconds]\nJitter: [Percentage]\nConnection Count: [Total connections]\nData Volume: [Bytes sent/received]\nFirst Seen: [Timestamp]\nLast Seen: [Timestamp]\nDomain Age: [Days]\nTI Match: [Yes/No - source]\nRisk Level: [Critical/High/Medium/Low]\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("hunting-for-command-and-control-beaconing-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

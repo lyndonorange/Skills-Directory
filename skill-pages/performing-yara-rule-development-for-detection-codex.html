@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>performing-yara-rule-development-for-detection - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/performing-yara-rule-development-for-detection-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>performing-yara-rule-development-for-detection</h1>
+      <p class="description">Develop precise YARA rules for malware detection by identifying unique</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>performing-yara-rule-development-for-detection</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>performing-yara-rule-development-for-detection</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Develop precise YARA rules for malware detection by identifying unique</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose performing-yara-rule-development-for-detection, then write the task. Fallback prompt: Use the performing-yara-rule-development-for-detection skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Performing YARA Rule Development for Detection</h2>
+<h3>Overview</h3>
+<p>YARA is the pattern matching swiss knife for malware researchers, enabling identification and classification of malware based on textual or binary patterns. Effective YARA rules combine unique string patterns, byte sequences, PE header characteristics, import table analysis, and conditional logic to detect malware families while avoiding false positives. Modern YARA-X (rewritten in Rust, stable since June 2025) brings improved performance and new modules. Rules should target unpacked malware artifacts like hardcoded stack strings, C2 URLs, mutex names, encryption constants, and unique code sequences rather than packer signatures.</p>
+<h3>When to Use</h3>
+<ul>
+<li>When conducting security assessments that involve performing yara rule development for detection</li>
+<li>When following incident response procedures for related security events</li>
+<li>When performing scheduled security testing or auditing activities</li>
+<li>When validating security controls through hands-on testing</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Python 3.9+ with <code>yara-python</code> library</li>
+<li>YARA 4.5+ or YARA-X 0.10+</li>
+<li>PE analysis tools (<code>pefile</code>, <code>pestudio</code>)</li>
+<li>Hex editor for identifying unique byte patterns</li>
+<li>Access to malware samples (VirusTotal, MalwareBazaar)</li>
+<li>Understanding of PE file format, strings, and import tables</li>
+</ul>
+<h3>Key Concepts</h3>
+<h4>Rule Structure</h4>
+<p>Every YARA rule consists of three sections: <code>meta</code> (optional descriptive metadata), <code>strings</code> (pattern definitions), and <code>condition</code> (matching logic). String types include text strings (ASCII/wide/nocase), hex patterns with wildcards and jumps, and regular expressions. Conditions combine string matches with file properties using boolean operators.</p>
+<h4>String Selection Strategy</h4>
+<p>Effective rules target patterns that are unique to the malware family and survive recompilation. Hardcoded stack strings are excellent choices because compilers embed them consistently. C2 domain patterns, custom encryption routines, unique error messages, and specific API call sequences provide stable detection anchors. Avoid compiler-generated boilerplate and common library strings.</p>
+<h4>Performance Optimization</h4>
+<p>YARA evaluates conditions short-circuit style. Place the most discriminating and cheapest-to-evaluate conditions first. Use <code>filesize</code> limits to skip irrelevant files quickly. Minimize regex usage in favor of hex patterns. Use <code>private</code> rules as building blocks for complex detection logic without generating standalone matches.</p>
+<h3>Workflow</h3>
+<h4>Step 1: Analyze Sample for Unique Patterns</h4>
+<pre><code>#!/usr/bin/env python3
+&quot;&quot;&quot;Extract candidate strings and byte patterns for YARA rule creation.&quot;&quot;&quot;
+import pefile
+import re
+import sys
+from collections import Counter
+
+
+def extract_strings(filepath, min_length=6):
+    &quot;&quot;&quot;Extract ASCII and wide strings from binary.&quot;&quot;&quot;
+    with open(filepath, 'rb') as f:
+        data = f.read()
+
+    # ASCII strings
+    ascii_strings = re.findall(
+        rb'[\x20-\x7e]{' + str(min_length).encode() + rb',}', data
+    )
+
+    # Wide (UTF-16LE) strings
+    wide_strings = re.findall(
+        rb'(?:[\x20-\x7e]\x00){' + str(min_length).encode() + rb',}', data
+    )
+
+    return {
+        'ascii': [s.decode('ascii') for s in ascii_strings],
+        'wide': [s.decode('utf-16-le') for s in wide_strings],
+    }
+
+
+def analyze_pe_imports(filepath):
+    &quot;&quot;&quot;Extract import table for API-based detection.&quot;&quot;&quot;
+    try:
+        pe = pefile.PE(filepath)
+    except pefile.PEFormatError:
+        return []
+
+    imports = []
+    if hasattr(pe, 'DIRECTORY_ENTRY_IMPORT'):
+        for entry in pe.DIRECTORY_ENTRY_IMPORT:
+            dll_name = entry.dll.decode('utf-8', errors='replace')
+            for imp in entry.imports:
+                if imp.name:
+                    func_name = imp.name.decode('utf-8', errors='replace')
+                    imports.append(f&quot;{dll_name}!{func_name}&quot;)
+    return imports
+
+
+def find_unique_byte_patterns(filepath, pattern_length=16):
+    &quot;&quot;&quot;Find unique byte sequences suitable for YARA hex patterns.&quot;&quot;&quot;
+    with open(filepath, 'rb') as f:
+        data = f.read()
+
+    try:
+        pe = pefile.PE(filepath)
+        # Focus on code section
+        for section in pe.sections:
+            if section.Characteristics &amp; 0x20000000:  # IMAGE_SCN_MEM_EXECUTE
+                code_start = section.PointerToRawData
+                code_end = code_start + section.SizeOfRawData
+                code_data = data[code_start:code_end]
+                break
+        else:
+            code_data = data
+    except Exception:
+        code_data = data
+
+    # Find byte patterns that appear exactly once
+    patterns = []
+    for i in range(0, len(code_data) - pattern_length, 4):
+        pattern = code_data[i:i+pattern_length]
+        if pattern.count(b'\x00') &lt; pattern_length // 3:  # Skip null-heavy
+            hex_pattern = ' '.join(f'{b:02X}' for b in pattern)
+            patterns.append(hex_pattern)
+
+    # Count frequency and return unique ones
+    freq = Counter(patterns)
+    unique = [p for p, count in freq.items() if count == 1]
+
+    return unique[:20]  # Top 20 candidates
+
+
+def suggest_rule_strings(filepath):
+    &quot;&quot;&quot;Suggest strings and patterns for YARA rule.&quot;&quot;&quot;
+    print(f&quot;[+] Analyzing: {filepath}&quot;)
+
+    # Extract strings
+    strings = extract_strings(filepath)
+
+    # Filter for suspicious/unique strings
+    suspicious_keywords = [
+        'http', 'https', 'cmd', 'powershell', 'mutex', 'pipe',
+        'password', 'credential', 'inject', 'hook', 'debug',
+        'sandbox', 'virtual', 'vmware', 'vbox',
+    ]
+
+    print(&quot;\n[+] Suspicious ASCII strings:&quot;)
+    for s in strings['ascii']:
+        if any(kw in s.lower() for kw in suspicious_keywords):
+            print(f&quot;  $ = \&quot;{s}\&quot; ascii&quot;)
+
+    print(&quot;\n[+] Suspicious wide strings:&quot;)
+    for s in strings['wide']:
+        if any(kw in s.lower() for kw in suspicious_keywords):
+            print(f&quot;  $ = \&quot;{s}\&quot; wide&quot;)
+
+    # Import analysis
+    imports = analyze_pe_imports(filepath)
+    suspicious_apis = [
+        'VirtualAlloc', 'VirtualProtect', 'WriteProcessMemory',
+        'CreateRemoteThread', 'NtUnmapViewOfSection', 'RtlMoveMemory',
+        'OpenProcess', 'CreateToolhelp32Snapshot',
+        'InternetOpenA', 'HttpSendRequestA',
+        'CryptEncrypt', 'CryptDecrypt',
+    ]
+
+    print(&quot;\n[+] Suspicious imports:&quot;)
+    for imp in imports:
+        func = imp.split('!')[-1]
+        if func in suspicious_apis:
+            print(f&quot;  {imp}&quot;)
+
+    # Byte patterns
+    print(&quot;\n[+] Candidate hex patterns:&quot;)
+    patterns = find_unique_byte_patterns(filepath)
+    for p in patterns[:5]:
+        print(f&quot;  $hex = {{ {p} }}&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    if len(sys.argv) &lt; 2:
+        print(f&quot;Usage: {sys.argv[0]} &lt;sample_path&gt;&quot;)
+        sys.exit(1)
+    suggest_rule_strings(sys.argv[1])</code></pre>
+<h4>Step 2: Write and Test YARA Rules</h4>
+<pre><code>import yara
+import os
+
+def create_yara_rule(rule_name, meta, strings, condition):
+    &quot;&quot;&quot;Generate a YARA rule from components.&quot;&quot;&quot;
+    meta_str = &quot;\n&quot;.join(f'        {k} = &quot;{v}&quot;' for k, v in meta.items())
+    strings_str = &quot;\n&quot;.join(f&quot;        {s}&quot; for s in strings)
+
+    rule = f&quot;&quot;&quot;rule {rule_name} {{
+    meta:
+{meta_str}
+
+    strings:
+{strings_str}
+
+    condition:
+        {condition}
+}}&quot;&quot;&quot;
+    return rule
+
+
+def test_yara_rule(rule_text, test_dir):
+    &quot;&quot;&quot;Compile and test YARA rule against sample directory.&quot;&quot;&quot;
+    try:
+        rules = yara.compile(source=rule_text)
+    except yara.SyntaxError as e:
+        print(f&quot;[-] YARA syntax error: {e}&quot;)
+        return None
+
+    results = {&quot;matches&quot;: [], &quot;no_match&quot;: []}
+
+    for filename in os.listdir(test_dir):
+        filepath = os.path.join(test_dir, filename)
+        if not os.path.isfile(filepath):
+            continue
+
+        matches = rules.match(filepath)
+        if matches:
+            results[&quot;matches&quot;].append({
+                &quot;file&quot;: filename,
+                &quot;rules&quot;: [m.rule for m in matches],
+            })
+        else:
+            results[&quot;no_match&quot;].append(filename)
+
+    print(f&quot;[+] Matches: {len(results['matches'])}&quot;)
+    print(f&quot;[-] No match: {len(results['no_match'])}&quot;)
+    return results
+
+
+# Example: Create a rule for a hypothetical malware family
+example_rule = create_yara_rule(
+    rule_name=&quot;MalwareFamily_Variant_A&quot;,
+    meta={
+        &quot;description&quot;: &quot;Detects MalwareFamily Variant A&quot;,
+        &quot;author&quot;: &quot;Malware Analysis Team&quot;,
+        &quot;date&quot;: &quot;2025-01-01&quot;,
+        &quot;hash&quot;: &quot;abc123...&quot;,
+        &quot;tlp&quot;: &quot;WHITE&quot;,
+    },
+    strings=[
+        '$mutex = &quot;Global\\\\UniqueM4lwareMutex&quot; ascii wide',
+        '$c2_pattern = /https?:\\/\\/[a-z]{5,10}\\.(xyz|top|buzz)\\/gate\\.php/',
+        '$api1 = &quot;VirtualAllocEx&quot; ascii',
+        '$api2 = &quot;WriteProcessMemory&quot; ascii',
+        '$api3 = &quot;CreateRemoteThread&quot; ascii',
+        '$hex_decrypt = { 8B 45 ?? 33 C1 89 45 ?? 83 C1 04 }',
+        '$pdb = &quot;C:\\\\Users\\\\&quot; ascii',
+    ],
+    condition=(
+        'uint16(0) == 0x5A4D and filesize &lt; 2MB and '
+        '($mutex or $c2_pattern) and '
+        '2 of ($api*) and '
+        '$hex_decrypt'
+    ),
+)
+
+print(example_rule)</code></pre>
+<h4>Step 3: Performance Testing and Optimization</h4>
+<pre><code>import time
+
+def benchmark_rule(rule_text, scan_directory, iterations=3):
+    &quot;&quot;&quot;Benchmark YARA rule scan performance.&quot;&quot;&quot;
+    rules = yara.compile(source=rule_text)
+
+    files = []
+    for root, _, filenames in os.walk(scan_directory):
+        for f in filenames:
+            files.append(os.path.join(root, f))
+
+    print(f&quot;[+] Benchmarking against {len(files)} files &quot;
+          f&quot;({iterations} iterations)&quot;)
+
+    times = []
+    for i in range(iterations):
+        start = time.perf_counter()
+        matches = 0
+        for filepath in files:
+            try:
+                result = rules.match(filepath)
+                if result:
+                    matches += 1
+            except Exception:
+                pass
+        elapsed = time.perf_counter() - start
+        times.append(elapsed)
+        print(f&quot;  Iteration {i+1}: {elapsed:.3f}s ({matches} matches)&quot;)
+
+    avg_time = sum(times) / len(times)
+    files_per_sec = len(files) / avg_time
+    print(f&quot;\n[+] Average: {avg_time:.3f}s ({files_per_sec:.0f} files/sec)&quot;)
+    return avg_time</code></pre>
+<h3>Validation Criteria</h3>
+<ul>
+<li>YARA rules compile without syntax errors</li>
+<li>Rules detect target malware family samples with zero false negatives</li>
+<li>False positive rate below 0.1% when scanned against clean file corpus</li>
+<li>Rule performance allows scanning 1000+ files per second</li>
+<li>Rules survive minor malware modifications (recompilation, string changes)</li>
+<li>Metadata includes hash, author, date, description, and TLP marking</li>
+</ul>
+<h3>References</h3>
+<ul>
+<li>[YARA Official Documentation](https://virustotal.github.io/yara/)</li>
+<li>[YARA-X Rewrite in Rust](https://github.com/VirusTotal/yara-x)</li>
+<li>[Yara-Rules Community Repository](https://github.com/Yara-Rules/rules)</li>
+<li>[ReversingLabs - Writing Detailed YARA Rules](https://www.reversinglabs.com/blog/writing-detailed-yara-rules-for-malware-detection)</li>
+<li>[YARA Rule Crafting Deep Dive](https://cyberthreatintelligencenetwork.com/index.php/2024/09/11/yara-rule-crafting-a-deep-dive-into-signature-based-threat-hunting-strategies/)</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: performing-yara-rule-development-for-detection\ndisplay_name: performing-yara-rule-development-for-detection\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# performing-yara-rule-development-for-detection - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `performing-yara-rule-development-for-detection` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nYARA is the pattern matching swiss knife for malware researchers, enabling identification and classification of malware based on textual or binary patterns. Effective YARA rules combine unique string patterns, byte seque\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose performing-yara-rule-development-for-detection, then write the task. Fallback prompt: Use the performing-yara-rule-development-for-detection skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `performing-yara-rule-development-for-detection` |\n| Canonical name | `performing-yara-rule-development-for-detection` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\nYARA is the pattern matching swiss knife for malware researchers, enabling identification and classification of malware based on textual or binary patterns. Effective YARA rules combine unique string patterns, byte seque\n\n## Original SKILL.md\n\n---\nname: performing-yara-rule-development-for-detection\ndescription: Develop precise YARA rules for malware detection by identifying unique\n  byte patterns, strings, and behavioral indicators in executable files while minimizing\n  false positives.\ndomain: cybersecurity\nsubdomain: malware-analysis\ntags:\n- yara\n- malware-detection\n- signature-development\n- threat-hunting\n- pattern-matching\n- yara-x\n- indicator-development\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- DE.AE-02\n- RS.AN-03\n- ID.RA-01\n- DE.CM-01\nmitre_attack:\n- T1027\n- T1055\n- T1140\n- T1497\n---\n# Performing YARA Rule Development for Detection\n\n## Overview\n\nYARA is the pattern matching swiss knife for malware researchers, enabling identification and classification of malware based on textual or binary patterns. Effective YARA rules combine unique string patterns, byte sequences, PE header characteristics, import table analysis, and conditional logic to detect malware families while avoiding false positives. Modern YARA-X (rewritten in Rust, stable since June 2025) brings improved performance and new modules. Rules should target unpacked malware artifacts like hardcoded stack strings, C2 URLs, mutex names, encryption constants, and unique code sequences rather than packer signatures.\n\n\n## When to Use\n\n- When conducting security assessments that involve performing yara rule development for detection\n- When following incident response procedures for related security events\n- When performing scheduled security testing or auditing activities\n- When validating security controls through hands-on testing\n\n## Prerequisites\n\n- Python 3.9+ with `yara-python` library\n- YARA 4.5+ or YARA-X 0.10+\n- PE analysis tools (`pefile`, `pestudio`)\n- Hex editor for identifying unique byte patterns\n- Access to malware samples (VirusTotal, MalwareBazaar)\n- Understanding of PE file format, strings, and import tables\n\n## Key Concepts\n\n### Rule Structure\n\nEvery YARA rule consists of three sections: `meta` (optional descriptive metadata), `strings` (pattern definitions), and `condition` (matching logic). String types include text strings (ASCII/wide/nocase), hex patterns with wildcards and jumps, and regular expressions. Conditions combine string matches with file properties using boolean operators.\n\n### String Selection Strategy\n\nEffective rules target patterns that are unique to the malware family and survive recompilation. Hardcoded stack strings are excellent choices because compilers embed them consistently. C2 domain patterns, custom encryption routines, unique error messages, and specific API call sequences provide stable detection anchors. Avoid compiler-generated boilerplate and common library strings.\n\n### Performance Optimization\n\nYARA evaluates conditions short-circuit style. Place the most discriminating and cheapest-to-evaluate conditions first. Use `filesize` limits to skip irrelevant files quickly. Minimize regex usage in favor of hex patterns. Use `private` rules as building blocks for complex detection logic without generating standalone matches.\n\n## Workflow\n\n### Step 1: Analyze Sample for Unique Patterns\n\n```python\n#!/usr/bin/env python3\n\"\"\"Extract candidate strings and byte patterns for YARA rule creation.\"\"\"\nimport pefile\nimport re\nimport sys\nfrom collections import Counter\n\n\ndef extract_strings(filepath, min_length=6):\n    \"\"\"Extract ASCII and wide strings from binary.\"\"\"\n    with open(filepath, 'rb') as f:\n        data = f.read()\n\n    # ASCII strings\n    ascii_strings = re.findall(\n        rb'[\\x20-\\x7e]{' + str(min_length).encode() + rb',}', data\n    )\n\n    # Wide (UTF-16LE) strings\n    wide_strings = re.findall(\n        rb'(?:[\\x20-\\x7e]\\x00){' + str(min_length).encode() + rb',}', data\n    )\n\n    return {\n        'ascii': [s.decode('ascii') for s in ascii_strings],\n        'wide': [s.decode('utf-16-le') for s in wide_strings],\n    }\n\n\ndef analyze_pe_imports(filepath):\n    \"\"\"Extract import table for API-based detection.\"\"\"\n    try:\n        pe = pefile.PE(filepath)\n    except pefile.PEFormatError:\n        return []\n\n    imports = []\n    if hasattr(pe, 'DIRECTORY_ENTRY_IMPORT'):\n        for entry in pe.DIRECTORY_ENTRY_IMPORT:\n            dll_name = entry.dll.decode('utf-8', errors='replace')\n            for imp in entry.imports:\n                if imp.name:\n                    func_name = imp.name.decode('utf-8', errors='replace')\n                    imports.append(f\"{dll_name}!{func_name}\")\n    return imports\n\n\ndef find_unique_byte_patterns(filepath, pattern_length=16):\n    \"\"\"Find unique byte sequences suitable for YARA hex patterns.\"\"\"\n    with open(filepath, 'rb') as f:\n        data = f.read()\n\n    try:\n        pe = pefile.PE(filepath)\n        # Focus on code section\n        for section in pe.sections:\n            if section.Characteristics & 0x20000000:  # IMAGE_SCN_MEM_EXECUTE\n                code_start = section.PointerToRawData\n                code_end = code_start + section.SizeOfRawData\n                code_data = data[code_start:code_end]\n                break\n        else:\n            code_data = data\n    except Exception:\n        code_data = data\n\n    # Find byte patterns that appear exactly once\n    patterns = []\n    for i in range(0, len(code_data) - pattern_length, 4):\n        pattern = code_data[i:i+pattern_length]\n        if pattern.count(b'\\x00') \u003c pattern_length // 3:  # Skip null-heavy\n            hex_pattern = ' '.join(f'{b:02X}' for b in pattern)\n            patterns.append(hex_pattern)\n\n    # Count frequency and return unique ones\n    freq = Counter(patterns)\n    unique = [p for p, count in freq.items() if count == 1]\n\n    return unique[:20]  # Top 20 candidates\n\n\ndef suggest_rule_strings(filepath):\n    \"\"\"Suggest strings and patterns for YARA rule.\"\"\"\n    print(f\"[+] Analyzing: {filepath}\")\n\n    # Extract strings\n    strings = extract_strings(filepath)\n\n    # Filter for suspicious/unique strings\n    suspicious_keywords = [\n        'http', 'https', 'cmd', 'powershell', 'mutex', 'pipe',\n        'password', 'credential', 'inject', 'hook', 'debug',\n        'sandbox', 'virtual', 'vmware', 'vbox',\n    ]\n\n    print(\"\\n[+] Suspicious ASCII strings:\")\n    for s in strings['ascii']:\n        if any(kw in s.lower() for kw in suspicious_keywords):\n            print(f\"  $ = \\\"{s}\\\" ascii\")\n\n    print(\"\\n[+] Suspicious wide strings:\")\n    for s in strings['wide']:\n        if any(kw in s.lower() for kw in suspicious_keywords):\n            print(f\"  $ = \\\"{s}\\\" wide\")\n\n    # Import analysis\n    imports = analyze_pe_imports(filepath)\n    suspicious_apis = [\n        'VirtualAlloc', 'VirtualProtect', 'WriteProcessMemory',\n        'CreateRemoteThread', 'NtUnmapViewOfSection', 'RtlMoveMemory',\n        'OpenProcess', 'CreateToolhelp32Snapshot',\n        'InternetOpenA', 'HttpSendRequestA',\n        'CryptEncrypt', 'CryptDecrypt',\n    ]\n\n    print(\"\\n[+] Suspicious imports:\")\n    for imp in imports:\n        func = imp.split('!')[-1]\n        if func in suspicious_apis:\n            print(f\"  {imp}\")\n\n    # Byte patterns\n    print(\"\\n[+] Candidate hex patterns:\")\n    patterns = find_unique_byte_patterns(filepath)\n    for p in patterns[:5]:\n        print(f\"  $hex = {{ {p} }}\")\n\n\nif __name__ == \"__main__\":\n    if len(sys.argv) \u003c 2:\n        print(f\"Usage: {sys.argv[0]} \u003csample_path>\")\n        sys.exit(1)\n    suggest_rule_strings(sys.argv[1])\n```\n\n### Step 2: Write and Test YARA Rules\n\n```python\nimport yara\nimport os\n\ndef create_yara_rule(rule_name, meta, strings, condition):\n    \"\"\"Generate a YARA rule from components.\"\"\"\n    meta_str = \"\\n\".join(f'        {k} = \"{v}\"' for k, v in meta.items())\n    strings_str = \"\\n\".join(f\"        {s}\" for s in strings)\n\n    rule = f\"\"\"rule {rule_name} {{\n    meta:\n{meta_str}\n\n    strings:\n{strings_str}\n\n    condition:\n        {condition}\n}}\"\"\"\n    return rule\n\n\ndef test_yara_rule(rule_text, test_dir):\n    \"\"\"Compile and test YARA rule against sample directory.\"\"\"\n    try:\n        rules = yara.compile(source=rule_text)\n    except yara.SyntaxError as e:\n        print(f\"[-] YARA syntax error: {e}\")\n        return None\n\n    results = {\"matches\": [], \"no_match\": []}\n\n    for filename in os.listdir(test_dir):\n        filepath = os.path.join(test_dir, filename)\n        if not os.path.isfile(filepath):\n            continue\n\n        matches = rules.match(filepath)\n        if matches:\n            results[\"matches\"].append({\n                \"file\": filename,\n                \"rules\": [m.rule for m in matches],\n            })\n        else:\n            results[\"no_match\"].append(filename)\n\n    print(f\"[+] Matches: {len(results['matches'])}\")\n    print(f\"[-] No match: {len(results['no_match'])}\")\n    return results\n\n\n# Example: Create a rule for a hypothetical malware family\nexample_rule = create_yara_rule(\n    rule_name=\"MalwareFamily_Variant_A\",\n    meta={\n        \"description\": \"Detects MalwareFamily Variant A\",\n        \"author\": \"Malware Analysis Team\",\n        \"date\": \"2025-01-01\",\n        \"hash\": \"abc123...\",\n        \"tlp\": \"WHITE\",\n    },\n    strings=[\n        '$mutex = \"Global\\\\\\\\UniqueM4lwareMutex\" ascii wide',\n        '$c2_pattern = /https?:\\\\/\\\\/[a-z]{5,10}\\\\.(xyz|top|buzz)\\\\/gate\\\\.php/',\n        '$api1 = \"VirtualAllocEx\" ascii',\n        '$api2 = \"WriteProcessMemory\" ascii',\n        '$api3 = \"CreateRemoteThread\" ascii',\n        '$hex_decrypt = { 8B 45 ?? 33 C1 89 45 ?? 83 C1 04 }',\n        '$pdb = \"C:\\\\\\\\Users\\\\\\\\\" ascii',\n    ],\n    condition=(\n        'uint16(0) == 0x5A4D and filesize \u003c 2MB and '\n        '($mutex or $c2_pattern) and '\n        '2 of ($api*) and '\n        '$hex_decrypt'\n    ),\n)\n\nprint(example_rule)\n```\n\n### Step 3: Performance Testing and Optimization\n\n```python\nimport time\n\ndef benchmark_rule(rule_text, scan_directory, iterations=3):\n    \"\"\"Benchmark YARA rule scan performance.\"\"\"\n    rules = yara.compile(source=rule_text)\n\n    files = []\n    for root, _, filenames in os.walk(scan_directory):\n        for f in filenames:\n            files.append(os.path.join(root, f))\n\n    print(f\"[+] Benchmarking against {len(files)} files \"\n          f\"({iterations} iterations)\")\n\n    times = []\n    for i in range(iterations):\n        start = time.perf_counter()\n        matches = 0\n        for filepath in files:\n            try:\n                result = rules.match(filepath)\n                if result:\n                    matches += 1\n            except Exception:\n                pass\n        elapsed = time.perf_counter() - start\n        times.append(elapsed)\n        print(f\"  Iteration {i+1}: {elapsed:.3f}s ({matches} matches)\")\n\n    avg_time = sum(times) / len(times)\n    files_per_sec = len(files) / avg_time\n    print(f\"\\n[+] Average: {avg_time:.3f}s ({files_per_sec:.0f} files/sec)\")\n    return avg_time\n```\n\n## Validation Criteria\n\n- YARA rules compile without syntax errors\n- Rules detect target malware family samples with zero false negatives\n- False positive rate below 0.1% when scanned against clean file corpus\n- Rule performance allows scanning 1000+ files per second\n- Rules survive minor malware modifications (recompilation, string changes)\n- Metadata includes hash, author, date, description, and TLP marking\n\n## References\n\n- [YARA Official Documentation](https://virustotal.github.io/yara/)\n- [YARA-X Rewrite in Rust](https://github.com/VirusTotal/yara-x)\n- [Yara-Rules Community Repository](https://github.com/Yara-Rules/rules)\n- [ReversingLabs - Writing Detailed YARA Rules](https://www.reversinglabs.com/blog/writing-detailed-yara-rules-for-malware-detection)\n- [YARA Rule Crafting Deep Dive](https://cyberthreatintelligencenetwork.com/index.php/2024/09/11/yara-rule-crafting-a-deep-dive-into-signature-based-threat-hunting-strategies/)\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("performing-yara-rule-development-for-detection-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>performing-timeline-reconstruction-with-plaso - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/performing-timeline-reconstruction-with-plaso-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>performing-timeline-reconstruction-with-plaso</h1>
+      <p class="description">Build comprehensive forensic super-timelines using Plaso (log2timeline)</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>performing-timeline-reconstruction-with-plaso</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>performing-timeline-reconstruction-with-plaso</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Build comprehensive forensic super-timelines using Plaso (log2timeline)</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose performing-timeline-reconstruction-with-plaso, then write the task. Fallback prompt: Use the performing-timeline-reconstruction-with-plaso skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Performing Timeline Reconstruction with Plaso</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When building a comprehensive forensic timeline from multiple evidence sources</li>
+<li>For correlating events across file system metadata, event logs, browser history, and registry</li>
+<li>During complex investigations requiring chronological reconstruction of activities</li>
+<li>When standard log analysis is insufficient to establish the sequence of events</li>
+<li>For presenting investigation findings in a visual, chronological format</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Plaso (log2timeline/psort) installed on forensic workstation</li>
+<li>Forensic disk image(s) in raw (dd), E01, or VMDK format</li>
+<li>Sufficient storage for Plaso output (can be 10x+ the image size)</li>
+<li>Minimum 8GB RAM (16GB+ recommended for large images)</li>
+<li>Timeline Explorer (Eric Zimmerman) or Timesketch for visualization</li>
+<li>Understanding of timestamp types (MACB: Modified, Accessed, Changed, Born)</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Install Plaso and Prepare the Environment</h4>
+<pre><code># Install Plaso on Ubuntu/Debian
+sudo add-apt-repository ppa:gift/stable
+sudo apt-get update
+sudo apt-get install plaso-tools
+
+# Or install via pip
+pip install plaso
+
+# Or use Docker (recommended for dependency isolation)
+docker pull log2timeline/plaso
+
+# Verify installation
+log2timeline.py --version
+psort.py --version
+
+# Create output directory
+mkdir -p /cases/case-2024-001/timeline/
+
+# Verify the forensic image
+img_stat /cases/case-2024-001/images/evidence.dd</code></pre>
+<h4>Step 2: Generate the Plaso Storage File with log2timeline</h4>
+<pre><code># Basic processing of a disk image (all parsers)
+log2timeline.py \
+   --storage-file /cases/case-2024-001/timeline/evidence.plaso \
+   /cases/case-2024-001/images/evidence.dd
+
+# Process with specific parsers for faster targeted analysis
+log2timeline.py \
+   --parsers &quot;winevtx,prefetch,mft,usnjrnl,lnk,recycle_bin,chrome_history,firefox_history,winreg&quot; \
+   --storage-file /cases/case-2024-001/timeline/evidence.plaso \
+   /cases/case-2024-001/images/evidence.dd
+
+# Process with a filter file to focus on specific paths
+cat &lt;&lt; 'EOF' &gt; /cases/case-2024-001/timeline/filter.txt
+/Windows/System32/winevt/Logs
+/Windows/Prefetch
+/Users/*/NTUSER.DAT
+/Users/*/AppData/Local/Google/Chrome
+/Users/*/AppData/Roaming/Mozilla/Firefox
+/$MFT
+/$UsnJrnl:$J
+/Windows/System32/config
+EOF
+
+log2timeline.py \
+   --filter-file /cases/case-2024-001/timeline/filter.txt \
+   --storage-file /cases/case-2024-001/timeline/evidence.plaso \
+   /cases/case-2024-001/images/evidence.dd
+
+# Using Docker
+docker run --rm -v /cases:/cases log2timeline/plaso log2timeline \
+   --storage-file /cases/case-2024-001/timeline/evidence.plaso \
+   /cases/case-2024-001/images/evidence.dd
+
+# Process multiple evidence sources into one timeline
+log2timeline.py \
+   --storage-file /cases/case-2024-001/timeline/combined.plaso \
+   /cases/case-2024-001/images/workstation.dd
+
+log2timeline.py \
+   --storage-file /cases/case-2024-001/timeline/combined.plaso \
+   /cases/case-2024-001/images/server.dd</code></pre>
+<h4>Step 3: Filter and Export Timeline with psort</h4>
+<pre><code># Export full timeline to CSV (super-timeline format)
+psort.py \
+   -o l2tcsv \
+   -w /cases/case-2024-001/timeline/full_timeline.csv \
+   /cases/case-2024-001/timeline/evidence.plaso
+
+# Export with date range filter (focus on incident window)
+psort.py \
+   -o l2tcsv \
+   -w /cases/case-2024-001/timeline/incident_window.csv \
+   /cases/case-2024-001/timeline/evidence.plaso \
+   &quot;date &gt; '2024-01-15 00:00:00' AND date &lt; '2024-01-20 23:59:59'&quot;
+
+# Export in JSON Lines format (for ingestion into SIEM/Timesketch)
+psort.py \
+   -o json_line \
+   -w /cases/case-2024-001/timeline/timeline.jsonl \
+   /cases/case-2024-001/timeline/evidence.plaso
+
+# Export with specific source type filters
+psort.py \
+   -o l2tcsv \
+   -w /cases/case-2024-001/timeline/registry_events.csv \
+   /cases/case-2024-001/timeline/evidence.plaso \
+   &quot;source_short == 'REG'&quot;
+
+psort.py \
+   -o l2tcsv \
+   -w /cases/case-2024-001/timeline/evtx_events.csv \
+   /cases/case-2024-001/timeline/evidence.plaso \
+   &quot;source_short == 'EVT'&quot;
+
+# Export for Timeline Explorer (dynamic CSV)
+psort.py \
+   -o dynamic \
+   -w /cases/case-2024-001/timeline/timeline_explorer.csv \
+   /cases/case-2024-001/timeline/evidence.plaso</code></pre>
+<h4>Step 4: Analyze Timeline with Timesketch</h4>
+<pre><code># Install Timesketch (Docker deployment)
+git clone https://github.com/google/timesketch.git
+cd timesketch
+docker compose up -d
+
+# Import Plaso file into Timesketch via CLI
+timesketch_importer \
+   --host http://localhost:5000 \
+   --username analyst \
+   --password password \
+   --sketch_id 1 \
+   --timeline_name &quot;Case 2024-001 Workstation&quot; \
+   /cases/case-2024-001/timeline/evidence.plaso
+
+# Alternatively, import JSONL
+timesketch_importer \
+   --host http://localhost:5000 \
+   --username analyst \
+   --sketch_id 1 \
+   --timeline_name &quot;Case 2024-001&quot; \
+   /cases/case-2024-001/timeline/timeline.jsonl
+
+# In Timesketch web UI:
+# 1. Search for events: &quot;data_type:windows:evtx:record AND event_identifier:4624&quot;
+# 2. Apply Sigma analyzers for automated detection
+# 3. Star/tag important events
+# 4. Create stories documenting the investigation narrative
+# 5. Share with team members</code></pre>
+<h4>Step 5: Perform Targeted Timeline Analysis</h4>
+<pre><code># Analyze specific time periods around known events
+python3 &lt;&lt; 'PYEOF'
+import csv
+from collections import defaultdict
+from datetime import datetime
+
+# Load incident window timeline
+events_by_hour = defaultdict(list)
+source_counts = defaultdict(int)
+
+with open('/cases/case-2024-001/timeline/incident_window.csv', 'r', errors='ignore') as f:
+    reader = csv.DictReader(f)
+    total = 0
+    for row in reader:
+        total += 1
+        timestamp = row.get('datetime', row.get('date', ''))
+        source = row.get('source_short', row.get('source', 'Unknown'))
+        description = row.get('message', row.get('desc', ''))
+
+        source_counts[source] += 1
+
+        # Group by hour for activity patterns
+        try:
+            dt = datetime.strptime(timestamp[:19], '%Y-%m-%dT%H:%M:%S')
+            hour_key = dt.strftime('%Y-%m-%d %H:00')
+            events_by_hour[hour_key].append({
+                'time': timestamp,
+                'source': source,
+                'description': description[:200]
+            })
+        except (ValueError, TypeError):
+            pass
+
+print(f&quot;Total events in incident window: {total}\n&quot;)
+
+print(&quot;=== EVENTS BY SOURCE TYPE ===&quot;)
+for source, count in sorted(source_counts.items(), key=lambda x: x[1], reverse=True):
+    print(f&quot;  {source}: {count}&quot;)
+
+print(&quot;\n=== ACTIVITY BY HOUR ===&quot;)
+for hour in sorted(events_by_hour.keys()):
+    count = len(events_by_hour[hour])
+    bar = '#' * min(count // 10, 50)
+    print(f&quot;  {hour}: {count:&gt;6} events {bar}&quot;)
+
+# Find hours with unusual activity spikes
+avg = total / max(len(events_by_hour), 1)
+print(f&quot;\n=== ANOMALOUS HOURS (&gt;{avg*3:.0f} events) ===&quot;)
+for hour in sorted(events_by_hour.keys()):
+    if len(events_by_hour[hour]) &gt; avg * 3:
+        print(f&quot;  {hour}: {len(events_by_hour[hour])} events (SPIKE)&quot;)
+PYEOF</code></pre>
+<h3>Key Concepts</h3>
+<p>| Concept | Description | |---------|-------------| | Super-timeline | Unified chronological view combining all artifact timestamps from multiple sources | | MACB timestamps | Modified, Accessed, Changed (metadata), Born (created) - four key file timestamp types | | Plaso storage file | SQLite-based intermediate format storing parsed events before export | | L2T CSV | Log2timeline CSV format with standardized columns for timeline events | | Parser | Plaso module extracting timestamps from a specific artifact type (e.g., winevtx, prefetch) | | Psort | Plaso sorting and filtering tool for post-processing storage files | | Timesketch | Google open-source collaborative timeline analysis platform | | Pivot points | Known timestamps (e.g., malware execution) used to focus investigation scope |</p>
+<h3>Tools &amp; Systems</h3>
+<p>| Tool | Purpose | |------|---------| | log2timeline (Plaso) | Primary timeline generation engine parsing 100+ artifact types | | psort | Plaso output filtering, sorting, and export utility | | Timesketch | Web-based collaborative forensic timeline analysis platform | | Timeline Explorer | Eric Zimmerman's Windows GUI for CSV timeline analysis | | KAPE | Automated triage collection feeding into Plaso processing | | mactime (TSK) | Simpler timeline generation from Sleuth Kit bodyfiles | | Excel/Sheets | Manual timeline review for small filtered datasets | | Elastic/Kibana | Alternative visualization platform for JSONL timeline data |</p>
+<h3>Common Scenarios</h3>
+<p><strong>Scenario 1: Ransomware Attack Reconstruction</strong> Process the full disk image with Plaso, filter to the week before encryption was discovered, identify the initial access vector from browser history and event logs, trace privilege escalation through registry and Prefetch, map lateral movement from network logon events, pinpoint encryption start from MFT timestamps showing mass file modifications.</p>
+<p><strong>Scenario 2: Data Theft Investigation</strong> Create super-timeline from suspect's workstation, filter for USB device connection events, file access timestamps, and cloud storage browser activity, build a narrative showing data staging, compression, and exfiltration, present timeline to legal team with tagged evidence points.</p>
+<p><strong>Scenario 3: Multi-System Breach Analysis</strong> Process disk images from all affected systems into a single Plaso storage file, import into Timesketch for collaborative analysis, search for lateral movement patterns across system timelines, identify the patient-zero system and initial compromise vector, map the full attack chain across the environment.</p>
+<p><strong>Scenario 4: Insider Threat After-Hours Activity</strong> Filter timeline to non-business hours only, identify file access patterns outside normal working times, correlate with authentication events (badge access, VPN logon), search for data access to sensitive directories during these periods, build evidence package for HR/legal.</p>
+<h3>Output Format</h3>
+<pre><code>Timeline Reconstruction Summary:
+  Evidence Sources:
+    Disk Image: evidence.dd (500 GB, NTFS)
+    Plaso Storage: evidence.plaso (2.3 GB)
+
+  Processing Statistics:
+    Total events extracted: 4,567,890
+    Parsers used: 45 (winevtx, prefetch, mft, usnjrnl, lnk, chrome, firefox, winreg, ...)
+    Processing time: 3h 45m
+
+  Incident Window (2024-01-15 to 2024-01-20):
+    Events in window: 234,567
+    Event Sources:
+      MFT:          89,234
+      Event Logs:   45,678
+      USN Journal:  56,789
+      Registry:     23,456
+      Prefetch:     1,234
+      Browser:      5,678
+      LNK Files:    2,345
+      Other:        10,153
+
+  Key Timeline Events:
+    2024-01-15 14:32 - Phishing email opened (browser)
+    2024-01-15 14:33 - Malicious document downloaded
+    2024-01-15 14:35 - PowerShell executed (Prefetch + Event Log)
+    2024-01-15 14:36 - C2 connection established (Registry + Event Log)
+    2024-01-16 02:30 - Mimikatz execution (Prefetch)
+    2024-01-16 02:45 - Lateral movement to DC (Event Log)
+    2024-01-17 03:00 - Data exfiltration (MFT + USN Journal)
+    2024-01-18 03:00 - Log clearing (Event Log)
+
+  Exported Files:
+    Full Timeline:     /timeline/full_timeline.csv (4.5M rows)
+    Incident Window:   /timeline/incident_window.csv (234K rows)
+    Timesketch Import: /timeline/timeline.jsonl</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: performing-timeline-reconstruction-with-plaso\ndisplay_name: performing-timeline-reconstruction-with-plaso\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# performing-timeline-reconstruction-with-plaso - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `performing-timeline-reconstruction-with-plaso` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When building a comprehensive forensic timeline from multiple evidence sources\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose performing-timeline-reconstruction-with-plaso, then write the task. Fallback prompt: Use the performing-timeline-reconstruction-with-plaso skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `performing-timeline-reconstruction-with-plaso` |\n| Canonical name | `performing-timeline-reconstruction-with-plaso` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n- When building a comprehensive forensic timeline from multiple evidence sources\n\n## Original SKILL.md\n\n---\nname: performing-timeline-reconstruction-with-plaso\ndescription: Build comprehensive forensic super-timelines using Plaso (log2timeline)\n  to correlate events across file systems, logs, and artifacts into a unified chronological\n  view.\ndomain: cybersecurity\nsubdomain: digital-forensics\ntags:\n- forensics\n- timeline-analysis\n- plaso\n- log2timeline\n- super-timeline\n- event-correlation\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- RS.AN-01\n- RS.AN-03\n- DE.AE-02\n- RS.MA-01\nmitre_attack:\n- T1005\n- T1074\n- T1119\n- T1070\n- T1059\n---\n\n# Performing Timeline Reconstruction with Plaso\n\n## When to Use\n- When building a comprehensive forensic timeline from multiple evidence sources\n- For correlating events across file system metadata, event logs, browser history, and registry\n- During complex investigations requiring chronological reconstruction of activities\n- When standard log analysis is insufficient to establish the sequence of events\n- For presenting investigation findings in a visual, chronological format\n\n## Prerequisites\n- Plaso (log2timeline/psort) installed on forensic workstation\n- Forensic disk image(s) in raw (dd), E01, or VMDK format\n- Sufficient storage for Plaso output (can be 10x+ the image size)\n- Minimum 8GB RAM (16GB+ recommended for large images)\n- Timeline Explorer (Eric Zimmerman) or Timesketch for visualization\n- Understanding of timestamp types (MACB: Modified, Accessed, Changed, Born)\n\n## Workflow\n\n### Step 1: Install Plaso and Prepare the Environment\n\n```bash\n# Install Plaso on Ubuntu/Debian\nsudo add-apt-repository ppa:gift/stable\nsudo apt-get update\nsudo apt-get install plaso-tools\n\n# Or install via pip\npip install plaso\n\n# Or use Docker (recommended for dependency isolation)\ndocker pull log2timeline/plaso\n\n# Verify installation\nlog2timeline.py --version\npsort.py --version\n\n# Create output directory\nmkdir -p /cases/case-2024-001/timeline/\n\n# Verify the forensic image\nimg_stat /cases/case-2024-001/images/evidence.dd\n```\n\n### Step 2: Generate the Plaso Storage File with log2timeline\n\n```bash\n# Basic processing of a disk image (all parsers)\nlog2timeline.py \\\n   --storage-file /cases/case-2024-001/timeline/evidence.plaso \\\n   /cases/case-2024-001/images/evidence.dd\n\n# Process with specific parsers for faster targeted analysis\nlog2timeline.py \\\n   --parsers \"winevtx,prefetch,mft,usnjrnl,lnk,recycle_bin,chrome_history,firefox_history,winreg\" \\\n   --storage-file /cases/case-2024-001/timeline/evidence.plaso \\\n   /cases/case-2024-001/images/evidence.dd\n\n# Process with a filter file to focus on specific paths\ncat \u003c\u003c 'EOF' > /cases/case-2024-001/timeline/filter.txt\n/Windows/System32/winevt/Logs\n/Windows/Prefetch\n/Users/*/NTUSER.DAT\n/Users/*/AppData/Local/Google/Chrome\n/Users/*/AppData/Roaming/Mozilla/Firefox\n/$MFT\n/$UsnJrnl:$J\n/Windows/System32/config\nEOF\n\nlog2timeline.py \\\n   --filter-file /cases/case-2024-001/timeline/filter.txt \\\n   --storage-file /cases/case-2024-001/timeline/evidence.plaso \\\n   /cases/case-2024-001/images/evidence.dd\n\n# Using Docker\ndocker run --rm -v /cases:/cases log2timeline/plaso log2timeline \\\n   --storage-file /cases/case-2024-001/timeline/evidence.plaso \\\n   /cases/case-2024-001/images/evidence.dd\n\n# Process multiple evidence sources into one timeline\nlog2timeline.py \\\n   --storage-file /cases/case-2024-001/timeline/combined.plaso \\\n   /cases/case-2024-001/images/workstation.dd\n\nlog2timeline.py \\\n   --storage-file /cases/case-2024-001/timeline/combined.plaso \\\n   /cases/case-2024-001/images/server.dd\n```\n\n### Step 3: Filter and Export Timeline with psort\n\n```bash\n# Export full timeline to CSV (super-timeline format)\npsort.py \\\n   -o l2tcsv \\\n   -w /cases/case-2024-001/timeline/full_timeline.csv \\\n   /cases/case-2024-001/timeline/evidence.plaso\n\n# Export with date range filter (focus on incident window)\npsort.py \\\n   -o l2tcsv \\\n   -w /cases/case-2024-001/timeline/incident_window.csv \\\n   /cases/case-2024-001/timeline/evidence.plaso \\\n   \"date > '2024-01-15 00:00:00' AND date \u003c '2024-01-20 23:59:59'\"\n\n# Export in JSON Lines format (for ingestion into SIEM/Timesketch)\npsort.py \\\n   -o json_line \\\n   -w /cases/case-2024-001/timeline/timeline.jsonl \\\n   /cases/case-2024-001/timeline/evidence.plaso\n\n# Export with specific source type filters\npsort.py \\\n   -o l2tcsv \\\n   -w /cases/case-2024-001/timeline/registry_events.csv \\\n   /cases/case-2024-001/timeline/evidence.plaso \\\n   \"source_short == 'REG'\"\n\npsort.py \\\n   -o l2tcsv \\\n   -w /cases/case-2024-001/timeline/evtx_events.csv \\\n   /cases/case-2024-001/timeline/evidence.plaso \\\n   \"source_short == 'EVT'\"\n\n# Export for Timeline Explorer (dynamic CSV)\npsort.py \\\n   -o dynamic \\\n   -w /cases/case-2024-001/timeline/timeline_explorer.csv \\\n   /cases/case-2024-001/timeline/evidence.plaso\n```\n\n### Step 4: Analyze Timeline with Timesketch\n\n```bash\n# Install Timesketch (Docker deployment)\ngit clone https://github.com/google/timesketch.git\ncd timesketch\ndocker compose up -d\n\n# Import Plaso file into Timesketch via CLI\ntimesketch_importer \\\n   --host http://localhost:5000 \\\n   --username analyst \\\n   --password password \\\n   --sketch_id 1 \\\n   --timeline_name \"Case 2024-001 Workstation\" \\\n   /cases/case-2024-001/timeline/evidence.plaso\n\n# Alternatively, import JSONL\ntimesketch_importer \\\n   --host http://localhost:5000 \\\n   --username analyst \\\n   --sketch_id 1 \\\n   --timeline_name \"Case 2024-001\" \\\n   /cases/case-2024-001/timeline/timeline.jsonl\n\n# In Timesketch web UI:\n# 1. Search for events: \"data_type:windows:evtx:record AND event_identifier:4624\"\n# 2. Apply Sigma analyzers for automated detection\n# 3. Star/tag important events\n# 4. Create stories documenting the investigation narrative\n# 5. Share with team members\n```\n\n### Step 5: Perform Targeted Timeline Analysis\n\n```bash\n# Analyze specific time periods around known events\npython3 \u003c\u003c 'PYEOF'\nimport csv\nfrom collections import defaultdict\nfrom datetime import datetime\n\n# Load incident window timeline\nevents_by_hour = defaultdict(list)\nsource_counts = defaultdict(int)\n\nwith open('/cases/case-2024-001/timeline/incident_window.csv', 'r', errors='ignore') as f:\n    reader = csv.DictReader(f)\n    total = 0\n    for row in reader:\n        total += 1\n        timestamp = row.get('datetime', row.get('date', ''))\n        source = row.get('source_short', row.get('source', 'Unknown'))\n        description = row.get('message', row.get('desc', ''))\n\n        source_counts[source] += 1\n\n        # Group by hour for activity patterns\n        try:\n            dt = datetime.strptime(timestamp[:19], '%Y-%m-%dT%H:%M:%S')\n            hour_key = dt.strftime('%Y-%m-%d %H:00')\n            events_by_hour[hour_key].append({\n                'time': timestamp,\n                'source': source,\n                'description': description[:200]\n            })\n        except (ValueError, TypeError):\n            pass\n\nprint(f\"Total events in incident window: {total}\\n\")\n\nprint(\"=== EVENTS BY SOURCE TYPE ===\")\nfor source, count in sorted(source_counts.items(), key=lambda x: x[1], reverse=True):\n    print(f\"  {source}: {count}\")\n\nprint(\"\\n=== ACTIVITY BY HOUR ===\")\nfor hour in sorted(events_by_hour.keys()):\n    count = len(events_by_hour[hour])\n    bar = '#' * min(count // 10, 50)\n    print(f\"  {hour}: {count:>6} events {bar}\")\n\n# Find hours with unusual activity spikes\navg = total / max(len(events_by_hour), 1)\nprint(f\"\\n=== ANOMALOUS HOURS (>{avg*3:.0f} events) ===\")\nfor hour in sorted(events_by_hour.keys()):\n    if len(events_by_hour[hour]) > avg * 3:\n        print(f\"  {hour}: {len(events_by_hour[hour])} events (SPIKE)\")\nPYEOF\n```\n\n## Key Concepts\n\n| Concept | Description |\n|---------|-------------|\n| Super-timeline | Unified chronological view combining all artifact timestamps from multiple sources |\n| MACB timestamps | Modified, Accessed, Changed (metadata), Born (created) - four key file timestamp types |\n| Plaso storage file | SQLite-based intermediate format storing parsed events before export |\n| L2T CSV | Log2timeline CSV format with standardized columns for timeline events |\n| Parser | Plaso module extracting timestamps from a specific artifact type (e.g., winevtx, prefetch) |\n| Psort | Plaso sorting and filtering tool for post-processing storage files |\n| Timesketch | Google open-source collaborative timeline analysis platform |\n| Pivot points | Known timestamps (e.g., malware execution) used to focus investigation scope |\n\n## Tools & Systems\n\n| Tool | Purpose |\n|------|---------|\n| log2timeline (Plaso) | Primary timeline generation engine parsing 100+ artifact types |\n| psort | Plaso output filtering, sorting, and export utility |\n| Timesketch | Web-based collaborative forensic timeline analysis platform |\n| Timeline Explorer | Eric Zimmerman's Windows GUI for CSV timeline analysis |\n| KAPE | Automated triage collection feeding into Plaso processing |\n| mactime (TSK) | Simpler timeline generation from Sleuth Kit bodyfiles |\n| Excel/Sheets | Manual timeline review for small filtered datasets |\n| Elastic/Kibana | Alternative visualization platform for JSONL timeline data |\n\n## Common Scenarios\n\n**Scenario 1: Ransomware Attack Reconstruction**\nProcess the full disk image with Plaso, filter to the week before encryption was discovered, identify the initial access vector from browser history and event logs, trace privilege escalation through registry and Prefetch, map lateral movement from network logon events, pinpoint encryption start from MFT timestamps showing mass file modifications.\n\n**Scenario 2: Data Theft Investigation**\nCreate super-timeline from suspect's workstation, filter for USB device connection events, file access timestamps, and cloud storage browser activity, build a narrative showing data staging, compression, and exfiltration, present timeline to legal team with tagged evidence points.\n\n**Scenario 3: Multi-System Breach Analysis**\nProcess disk images from all affected systems into a single Plaso storage file, import into Timesketch for collaborative analysis, search for lateral movement patterns across system timelines, identify the patient-zero system and initial compromise vector, map the full attack chain across the environment.\n\n**Scenario 4: Insider Threat After-Hours Activity**\nFilter timeline to non-business hours only, identify file access patterns outside normal working times, correlate with authentication events (badge access, VPN logon), search for data access to sensitive directories during these periods, build evidence package for HR/legal.\n\n## Output Format\n\n```\nTimeline Reconstruction Summary:\n  Evidence Sources:\n    Disk Image: evidence.dd (500 GB, NTFS)\n    Plaso Storage: evidence.plaso (2.3 GB)\n\n  Processing Statistics:\n    Total events extracted: 4,567,890\n    Parsers used: 45 (winevtx, prefetch, mft, usnjrnl, lnk, chrome, firefox, winreg, ...)\n    Processing time: 3h 45m\n\n  Incident Window (2024-01-15 to 2024-01-20):\n    Events in window: 234,567\n    Event Sources:\n      MFT:          89,234\n      Event Logs:   45,678\n      USN Journal:  56,789\n      Registry:     23,456\n      Prefetch:     1,234\n      Browser:      5,678\n      LNK Files:    2,345\n      Other:        10,153\n\n  Key Timeline Events:\n    2024-01-15 14:32 - Phishing email opened (browser)\n    2024-01-15 14:33 - Malicious document downloaded\n    2024-01-15 14:35 - PowerShell executed (Prefetch + Event Log)\n    2024-01-15 14:36 - C2 connection established (Registry + Event Log)\n    2024-01-16 02:30 - Mimikatz execution (Prefetch)\n    2024-01-16 02:45 - Lateral movement to DC (Event Log)\n    2024-01-17 03:00 - Data exfiltration (MFT + USN Journal)\n    2024-01-18 03:00 - Log clearing (Event Log)\n\n  Exported Files:\n    Full Timeline:     /timeline/full_timeline.csv (4.5M rows)\n    Incident Window:   /timeline/incident_window.csv (234K rows)\n    Timesketch Import: /timeline/timeline.jsonl\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("performing-timeline-reconstruction-with-plaso-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

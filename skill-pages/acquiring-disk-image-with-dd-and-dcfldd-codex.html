@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>acquiring-disk-image-with-dd-and-dcfldd - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/acquiring-disk-image-with-dd-and-dcfldd-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>acquiring-disk-image-with-dd-and-dcfldd</h1>
+      <p class="description">Create forensically sound bit-for-bit disk images using dd and dcfldd</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>acquiring-disk-image-with-dd-and-dcfldd</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>acquiring-disk-image-with-dd-and-dcfldd</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Create forensically sound bit-for-bit disk images using dd and dcfldd</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose acquiring-disk-image-with-dd-and-dcfldd, then write the task. Fallback prompt: Use the acquiring-disk-image-with-dd-and-dcfldd skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Acquiring Disk Image with dd and dcfldd</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When you need to create a forensic copy of a suspect drive for investigation</li>
+<li>During incident response when preserving volatile disk evidence before analysis</li>
+<li>When law enforcement or legal proceedings require a verified bit-for-bit copy</li>
+<li>Before performing any destructive analysis on a storage device</li>
+<li>When acquiring images from physical drives, USB devices, or memory cards</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Linux-based forensic workstation (SIFT, Kali, or any Linux distro)</li>
+<li><code>dd</code> (pre-installed on all Linux systems) or <code>dcfldd</code> (enhanced forensic version)</li>
+<li>Write-blocker hardware or software write-blocking configured</li>
+<li>Destination drive with sufficient storage (larger than source)</li>
+<li>Root/sudo privileges on the forensic workstation</li>
+<li>SHA-256 or MD5 hashing utilities (<code>sha256sum</code>, <code>md5sum</code>)</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Identify the Target Device and Enable Write Protection</h4>
+<pre><code># List all connected block devices to identify the target
+lsblk -o NAME,SIZE,TYPE,MOUNTPOINT,MODEL
+
+# Verify the device details
+fdisk -l /dev/sdb
+
+# Enable software write-blocking (if no hardware blocker)
+blockdev --setro /dev/sdb
+
+# Verify read-only status
+blockdev --getro /dev/sdb
+# Output: 1 (means read-only is enabled)
+
+# Alternatively, use udev rules for persistent write-blocking
+echo 'SUBSYSTEM==&quot;block&quot;, ATTRS{serial}==&quot;WD-WCAV5H861234&quot;, ATTR{ro}=&quot;1&quot;' &gt; /etc/udev/rules.d/99-writeblock.rules
+udevadm control --reload-rules</code></pre>
+<h4>Step 2: Prepare the Destination and Document the Source</h4>
+<pre><code># Create case directory structure
+mkdir -p /cases/case-2024-001/{images,hashes,logs,notes}
+
+# Document source drive information
+hdparm -I /dev/sdb &gt; /cases/case-2024-001/notes/source_drive_info.txt
+
+# Record the serial number and model
+smartctl -i /dev/sdb &gt;&gt; /cases/case-2024-001/notes/source_drive_info.txt
+
+# Pre-hash the source device
+sha256sum /dev/sdb | tee /cases/case-2024-001/hashes/source_hash_before.txt</code></pre>
+<h4>Step 3: Acquire the Image Using dd</h4>
+<pre><code># Basic dd acquisition with progress and error handling
+dd if=/dev/sdb of=/cases/case-2024-001/images/evidence.dd \
+   bs=4096 \
+   conv=noerror,sync \
+   status=progress 2&gt;&amp;1 | tee /cases/case-2024-001/logs/dd_acquisition.log
+
+# For compressed images to save space
+dd if=/dev/sdb bs=4096 conv=noerror,sync status=progress | \
+   gzip -c &gt; /cases/case-2024-001/images/evidence.dd.gz
+
+# Using dd with a specific count for partial acquisition
+dd if=/dev/sdb of=/cases/case-2024-001/images/first_1gb.dd \
+   bs=1M count=1024 status=progress</code></pre>
+<h4>Step 4: Acquire Using dcfldd (Preferred Forensic Method)</h4>
+<pre><code># Install dcfldd if not present
+apt-get install dcfldd
+
+# Acquire image with built-in hashing and split output
+dcfldd if=/dev/sdb \
+   of=/cases/case-2024-001/images/evidence.dd \
+   hash=sha256,md5 \
+   hashwindow=1G \
+   hashlog=/cases/case-2024-001/hashes/acquisition_hashes.txt \
+   bs=4096 \
+   conv=noerror,sync \
+   errlog=/cases/case-2024-001/logs/dcfldd_errors.log
+
+# Split large images into manageable segments
+dcfldd if=/dev/sdb \
+   of=/cases/case-2024-001/images/evidence.dd \
+   hash=sha256 \
+   hashlog=/cases/case-2024-001/hashes/split_hashes.txt \
+   bs=4096 \
+   split=2G \
+   splitformat=aa
+
+# Acquire with verification pass
+dcfldd if=/dev/sdb \
+   of=/cases/case-2024-001/images/evidence.dd \
+   hash=sha256 \
+   hashlog=/cases/case-2024-001/hashes/verification.txt \
+   vf=/cases/case-2024-001/images/evidence.dd \
+   verifylog=/cases/case-2024-001/logs/verify.log</code></pre>
+<h4>Step 5: Verify Image Integrity</h4>
+<pre><code># Hash the acquired image
+sha256sum /cases/case-2024-001/images/evidence.dd | \
+   tee /cases/case-2024-001/hashes/image_hash.txt
+
+# Compare source and image hashes
+diff &lt;(sha256sum /dev/sdb | awk '{print $1}') \
+     &lt;(sha256sum /cases/case-2024-001/images/evidence.dd | awk '{print $1}')
+
+# If using split images, verify each segment
+sha256sum /cases/case-2024-001/images/evidence.dd.* | \
+   tee /cases/case-2024-001/hashes/split_image_hashes.txt
+
+# Re-hash source to confirm no changes occurred
+sha256sum /dev/sdb | tee /cases/case-2024-001/hashes/source_hash_after.txt
+diff /cases/case-2024-001/hashes/source_hash_before.txt \
+     /cases/case-2024-001/hashes/source_hash_after.txt</code></pre>
+<h4>Step 6: Document the Acquisition Process</h4>
+<pre><code># Generate acquisition report
+cat &lt;&lt; 'EOF' &gt; /cases/case-2024-001/notes/acquisition_report.txt
+DISK IMAGE ACQUISITION REPORT
+==============================
+Case Number: 2024-001
+Date/Time: $(date -u +&quot;%Y-%m-%d %H:%M:%S UTC&quot;)
+Examiner: [Name]
+
+Source Device: /dev/sdb
+Model: [from hdparm output]
+Serial: [from hdparm output]
+Size: [from fdisk output]
+
+Acquisition Tool: dcfldd v1.9.1
+Block Size: 4096
+Write Blocker: [Hardware/Software model]
+
+Image File: evidence.dd
+Image Hash (SHA-256): [from hash file]
+Source Hash (SHA-256): [from hash file]
+Hash Match: YES/NO
+
+Errors During Acquisition: [from error log]
+EOF
+
+# Compress logs for archival
+tar -czf /cases/case-2024-001/acquisition_package.tar.gz \
+   /cases/case-2024-001/hashes/ \
+   /cases/case-2024-001/logs/ \
+   /cases/case-2024-001/notes/</code></pre>
+<h3>Key Concepts</h3>
+<p>| Concept | Description | |---------|-------------| | Bit-for-bit copy | Exact replica of source including unallocated space and slack space | | Write blocker | Hardware or software mechanism preventing writes to evidence media | | Hash verification | Cryptographic hash comparing source and image to prove integrity | | Block size (bs) | Transfer chunk size affecting speed; 4096 or 64K typical for forensics | | conv=noerror,sync | Continue on read errors and pad with zeros to maintain offset alignment | | Chain of custody | Documented trail proving evidence has not been tampered with | | Split imaging | Breaking large images into smaller files for storage and transport | | Raw/dd format | Bit-for-bit image format without metadata container overhead |</p>
+<h3>Tools &amp; Systems</h3>
+<p>| Tool | Purpose | |------|---------| | dd | Standard Unix disk duplication utility for raw imaging | | dcfldd | DoD Computer Forensics Laboratory enhanced version of dd with hashing | | dc3dd | Another forensic dd variant from the DoD Cyber Crime Center | | sha256sum | SHA-256 hash calculation for integrity verification | | blockdev | Linux command to set block device read-only mode | | hdparm | Drive identification and parameter reporting | | smartctl | S.M.A.R.T. data retrieval for drive health and identification | | lsblk | Block device enumeration and identification |</p>
+<h3>Common Scenarios</h3>
+<p><strong>Scenario 1: Acquiring a Suspect Laptop Hard Drive</strong> Connect the drive via a Tableau T35u hardware write-blocker, identify as <code>/dev/sdb</code>, use dcfldd with SHA-256 hashing, split into 4GB segments for DVD archival, verify hashes match, document in case notes.</p>
+<p><strong>Scenario 2: Imaging a USB Flash Drive from a Compromised Workstation</strong> Use software write-blocking with <code>blockdev --setro</code>, acquire with dcfldd including MD5 and SHA-256 dual hashing, image is small enough for single file, verify and store on encrypted case drive.</p>
+<p><strong>Scenario 3: Remote Acquisition Over Network</strong> Use dd piped through netcat or ssh for remote acquisition: <code>ssh root@remote &quot;dd if=/dev/sda bs=4096&quot; | dd of=remote_image.dd bs=4096</code>, hash both ends independently to verify transfer integrity.</p>
+<p><strong>Scenario 4: Acquiring from a Failing Drive</strong> Use <code>ddrescue</code> first to recover readable sectors, then use dd with <code>conv=noerror,sync</code> to fill gaps with zeros, document which sectors were unreadable in the error log.</p>
+<h3>Output Format</h3>
+<pre><code>Acquisition Summary:
+  Source:       /dev/sdb (500GB Western Digital WD5000AAKX)
+  Destination:  /cases/case-2024-001/images/evidence.dd
+  Tool:         dcfldd 1.9.1
+  Block Size:   4096 bytes
+  Duration:     2h 15m 32s
+  Bytes Copied: 500,107,862,016
+  Errors:       0 bad sectors
+  Source SHA-256:  a3f2b8c9d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1
+  Image SHA-256:   a3f2b8c9d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1
+  Verification:    PASSED - Hashes match</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: acquiring-di[redacted-token]\ndisplay_name: acquiring-di[redacted-token]\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# acquiring-di[redacted-token] - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `acquiring-di[redacted-token]` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When you need to create a forensic copy of a suspect drive for investigation\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose acquiring-di[redacted-token], then write the task. Fallback prompt: Use the acquiring-di[redacted-token] skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `acquiring-di[redacted-token]` |\n| Canonical name | `acquiring-di[redacted-token]` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n- When you need to create a forensic copy of a suspect drive for investigation\n\n## Original SKILL.md\n\n---\nname: acquiring-di[redacted-token]\ndescription: Create forensically sound bit-for-bit disk images using dd and dcfldd\n  while preserving evidence integrity through hash verification.\ndomain: cybersecurity\nsubdomain: digital-forensics\ntags:\n- forensics\n- disk-imaging\n- evidence-acquisition\n- dd\n- dcfldd\n- hash-verification\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- RS.AN-01\n- RS.AN-03\n- DE.AE-02\n- RS.MA-01\nmitre_attack:\n- T1006\n- T1005\n- T1025\n- T1074.001\n---\n\n# Acquiring Disk Image with dd and dcfldd\n\n## When to Use\n- When you need to create a forensic copy of a suspect drive for investigation\n- During incident response when preserving volatile disk evidence before analysis\n- When law enforcement or legal proceedings require a verified bit-for-bit copy\n- Before performing any destructive analysis on a storage device\n- When acquiring images from physical drives, USB devices, or memory cards\n\n## Prerequisites\n- Linux-based forensic workstation (SIFT, Kali, or any Linux distro)\n- `dd` (pre-installed on all Linux systems) or `dcfldd` (enhanced forensic version)\n- Write-blocker hardware or software write-blocking configured\n- Destination drive with sufficient storage (larger than source)\n- Root/sudo privileges on the forensic workstation\n- SHA-256 or MD5 hashing utilities (`sha256sum`, `md5sum`)\n\n## Workflow\n\n### Step 1: Identify the Target Device and Enable Write Protection\n\n```bash\n# List all connected block devices to identify the target\nlsblk -o NAME,SIZE,TYPE,MOUNTPOINT,MODEL\n\n# Verify the device details\nfdisk -l /dev/sdb\n\n# Enable software write-blocking (if no hardware blocker)\nblockdev --setro /dev/sdb\n\n# Verify read-only status\nblockdev --getro /dev/sdb\n# Output: 1 (means read-only is enabled)\n\n# Alternatively, use udev rules for persistent write-blocking\necho 'SUBSYSTEM==\"block\", ATTRS{serial}==\"WD-WCAV5H861234\", ATTR{ro}=\"1\"' > /etc/udev/rules.d/99-writeblock.rules\nudevadm control --reload-rules\n```\n\n### Step 2: Prepare the Destination and Document the Source\n\n```bash\n# Create case directory structure\nmkdir -p /cases/case-2024-001/{images,hashes,logs,notes}\n\n# Document source drive information\nhdparm -I /dev/sdb > /cases/case-2024-001/notes/source_drive_info.txt\n\n# Record the serial number and model\nsmartctl -i /dev/sdb >> /cases/case-2024-001/notes/source_drive_info.txt\n\n# Pre-hash the source device\nsha256sum /dev/sdb | tee /cases/case-2024-001/hashes/source_hash_before.txt\n```\n\n### Step 3: Acquire the Image Using dd\n\n```bash\n# Basic dd acquisition with progress and error handling\ndd if=/dev/sdb of=/cases/case-2024-001/images/evidence.dd \\\n   bs=4096 \\\n   conv=noerror,sync \\\n   status=progress 2>&1 | tee /cases/case-2024-001/logs/dd_acquisition.log\n\n# For compressed images to save space\ndd if=/dev/sdb bs=4096 conv=noerror,sync status=progress | \\\n   gzip -c > /cases/case-2024-001/images/evidence.dd.gz\n\n# Using dd with a specific count for partial acquisition\ndd if=/dev/sdb of=/cases/case-2024-001/images/first_1gb.dd \\\n   bs=1M count=1024 status=progress\n```\n\n### Step 4: Acquire Using dcfldd (Preferred Forensic Method)\n\n```bash\n# Install dcfldd if not present\napt-get install dcfldd\n\n# Acquire image with built-in hashing and split output\ndcfldd if=/dev/sdb \\\n   of=/cases/case-2024-001/images/evidence.dd \\\n   hash=sha256,md5 \\\n   hashwindow=1G \\\n   hashlog=/cases/case-2024-001/hashes/acquisition_hashes.txt \\\n   bs=4096 \\\n   conv=noerror,sync \\\n   errlog=/cases/case-2024-001/logs/dcfldd_errors.log\n\n# Split large images into manageable segments\ndcfldd if=/dev/sdb \\\n   of=/cases/case-2024-001/images/evidence.dd \\\n   hash=sha256 \\\n   hashlog=/cases/case-2024-001/hashes/split_hashes.txt \\\n   bs=4096 \\\n   split=2G \\\n   splitformat=aa\n\n# Acquire with verification pass\ndcfldd if=/dev/sdb \\\n   of=/cases/case-2024-001/images/evidence.dd \\\n   hash=sha256 \\\n   hashlog=/cases/case-2024-001/hashes/verification.txt \\\n   vf=/cases/case-2024-001/images/evidence.dd \\\n   verifylog=/cases/case-2024-001/logs/verify.log\n```\n\n### Step 5: Verify Image Integrity\n\n```bash\n# Hash the acquired image\nsha256sum /cases/case-2024-001/images/evidence.dd | \\\n   tee /cases/case-2024-001/hashes/image_hash.txt\n\n# Compare source and image hashes\ndiff \u003c(sha256sum /dev/sdb | awk '{print $1}') \\\n     \u003c(sha256sum /cases/case-2024-001/images/evidence.dd | awk '{print $1}')\n\n# If using split images, verify each segment\nsha256sum /cases/case-2024-001/images/evidence.dd.* | \\\n   tee /cases/case-2024-001/hashes/split_image_hashes.txt\n\n# Re-hash source to confirm no changes occurred\nsha256sum /dev/sdb | tee /cases/case-2024-001/hashes/source_hash_after.txt\ndiff /cases/case-2024-001/hashes/source_hash_before.txt \\\n     /cases/case-2024-001/hashes/source_hash_after.txt\n```\n\n### Step 6: Document the Acquisition Process\n\n```bash\n# Generate acquisition report\ncat \u003c\u003c 'EOF' > /cases/case-2024-001/notes/acquisition_report.txt\nDISK IMAGE ACQUISITION REPORT\n==============================\nCase Number: 2024-001\nDate/Time: $(date -u +\"%Y-%m-%d %H:%M:%S UTC\")\nExaminer: [Name]\n\nSource Device: /dev/sdb\nModel: [from hdparm output]\nSerial: [from hdparm output]\nSize: [from fdisk output]\n\nAcquisition Tool: dcfldd v1.9.1\nBlock Size: 4096\nWrite Blocker: [Hardware/Software model]\n\nImage File: evidence.dd\nImage Hash (SHA-256): [from hash file]\nSource Hash (SHA-256): [from hash file]\nHash Match: YES/NO\n\nErrors During Acquisition: [from error log]\nEOF\n\n# Compress logs for archival\ntar -czf /cases/case-2024-001/acquisition_package.tar.gz \\\n   /cases/case-2024-001/hashes/ \\\n   /cases/case-2024-001/logs/ \\\n   /cases/case-2024-001/notes/\n```\n\n## Key Concepts\n\n| Concept | Description |\n|---------|-------------|\n| Bit-for-bit copy | Exact replica of source including unallocated space and slack space |\n| Write blocker | Hardware or software mechanism preventing writes to evidence media |\n| Hash verification | Cryptographic hash comparing source and image to prove integrity |\n| Block size (bs) | Transfer chunk size affecting speed; 4096 or 64K typical for forensics |\n| conv=noerror,sync | Continue on read errors and pad with zeros to maintain offset alignment |\n| Chain of custody | Documented trail proving evidence has not been tampered with |\n| Split imaging | Breaking large images into smaller files for storage and transport |\n| Raw/dd format | Bit-for-bit image format without metadata container overhead |\n\n## Tools & Systems\n\n| Tool | Purpose |\n|------|---------|\n| dd | Standard Unix disk duplication utility for raw imaging |\n| dcfldd | DoD Computer Forensics Laboratory enhanced version of dd with hashing |\n| dc3dd | Another forensic dd variant from the DoD Cyber Crime Center |\n| sha256sum | SHA-256 hash calculation for integrity verification |\n| blockdev | Linux command to set block device read-only mode |\n| hdparm | Drive identification and parameter reporting |\n| smartctl | S.M.A.R.T. data retrieval for drive health and identification |\n| lsblk | Block device enumeration and identification |\n\n## Common Scenarios\n\n**Scenario 1: Acquiring a Suspect Laptop Hard Drive**\nConnect the drive via a Tableau T35u hardware write-blocker, identify as `/dev/sdb`, use dcfldd with SHA-256 hashing, split into 4GB segments for DVD archival, verify hashes match, document in case notes.\n\n**Scenario 2: Imaging a USB Flash Drive from a Compromised Workstation**\nUse software write-blocking with `blockdev --setro`, acquire with dcfldd including MD5 and SHA-256 dual hashing, image is small enough for single file, verify and store on encrypted case drive.\n\n**Scenario 3: Remote Acquisition Over Network**\nUse dd piped through netcat or ssh for remote acquisition: `ssh root@remote \"dd if=/dev/sda bs=4096\" | dd of=remote_image.dd bs=4096`, hash both ends independently to verify transfer integrity.\n\n**Scenario 4: Acquiring from a Failing Drive**\nUse `ddrescue` first to recover readable sectors, then use dd with `conv=noerror,sync` to fill gaps with zeros, document which sectors were unreadable in the error log.\n\n## Output Format\n\n```\nAcquisition Summary:\n  Source:       /dev/sdb (500GB Western Digital WD5000AAKX)\n  Destination:  /cases/case-2024-001/images/evidence.dd\n  Tool:         dcfldd 1.9.1\n  Block Size:   4096 bytes\n  Duration:     2h 15m 32s\n  Bytes Copied: 500,107,862,016\n  Errors:       0 bad sectors\n  Source SHA-256:  a3f2b8c9d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1\n  Image SHA-256:   a3f2b8c9d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1\n  Verification:    PASSED - Hashes match\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("acquiring-disk-image-with-dd-and-dcfldd-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

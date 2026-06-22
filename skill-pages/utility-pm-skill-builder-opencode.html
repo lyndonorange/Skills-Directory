@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Utility Pm Skill Builder - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/utility-pm-skill-builder-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / PM operations, communication, and utilities</div>
+      <h1>Utility Pm Skill Builder</h1>
+      <p class="description">Guides contributors from a PM skill idea to a complete Skill Implementation Packet aligned with pm-skills conventions. Runs gap analysis, validates through a Why Gate, classifies by type and phase, generates draft files, and writes to a staging area for review before promotion.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>PM operations, communication, and utilities</span></div>
+<div class="meta-card"><strong>display name</strong><span>utility-pm-skill-builder</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>pm-skills-utility-pm-skill-builder</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Guides contributors from a PM skill idea to a complete Skill Implementation Packet aligned with pm-skills conventions. Runs gap analysis, validates through a Why Gate, classifies by type and phase, generates draft files, and writes to a staging area for review before promotion.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the utility-pm-skill-builder skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <p>&lt;!-- PM-Skills | https://github.com/product-on-purpose/pm-skills | Apache 2.0 --&gt;</p>
+<h2>PM Skill Builder</h2>
+<p>This skill creates new PM skills for the pm-skills library. It produces a Skill Implementation Packet . a complete design document with draft files . in a staging area for review before promotion to canonical locations.</p>
+<h3>When to Use</h3>
+<ul>
+<li>When you have an idea for a new PM skill</li>
+<li>When you want to add a domain skill (phase-specific), foundation skill</li>
+</ul>
+<p>(cross-cutting), or utility skill (meta/tooling) to the pm-skills library</p>
+<ul>
+<li>When a contributor needs guided skill creation that follows repo conventions</li>
+</ul>
+<h3>When NOT to Use</h3>
+<ul>
+<li>To modify an existing skill → use a future validation/iteration utility (planned)</li>
+<li>To create a skill for a non-pm-skills context → use a general agent skill builder (planned)</li>
+<li>To create a workflow → workflows are authored directly, not via this builder</li>
+</ul>
+<h3>Instructions</h3>
+<p>When asked to create a new PM skill, follow these steps:</p>
+<h4>Step 1: Understand the Idea</h4>
+<p>Accept the idea in either form:</p>
+<ul>
+<li><strong>Problem-first</strong>: &quot;What PM problem does this skill solve? Who runs into</li>
+</ul>
+<p>this problem, and what do they currently produce (or fail to produce)?&quot;</p>
+<ul>
+<li><strong>Skill-first</strong>: &quot;Describe the skill you want to create. What artifact</li>
+</ul>
+<p>does it produce? What PM activity does it support?&quot;</p>
+<p>Both entry points produce the same downstream flow. If the user provides one form, do not ask for the other . extract what you need and proceed.</p>
+<p>If the idea is vague, ask ONE follow-up question to clarify the artifact type and target audience before proceeding.</p>
+<h4>Step 2: Gap Analysis</h4>
+<p>Check ALL existing skills for overlap. Use the Current Library Reference table below AND scan the <code>skills/</code> directory for the latest inventory.</p>
+<p>Present findings with specificity:</p>
+<ul>
+<li>Name each overlapping skill and explain what it covers</li>
+<li>Identify the specific gap this new skill would fill</li>
+<li>If overlap is high, trigger the Why Gate (see below)</li>
+</ul>
+<p><strong>Why Gate</strong> (triggers when overlap is found): Ask the user: &quot;Name 2-3 specific prompts or scenarios where the existing skills fail to produce what you need.&quot;</p>
+<p><strong>Kill Gate</strong>: If the user cannot articulate convincing gaps, recommend an alternative:</p>
+<ul>
+<li>&quot;Revise [existing skill] to cover this case&quot;</li>
+<li>&quot;Create a workflow combining [skill A] + [skill B]&quot;</li>
+<li>&quot;Add a command variant, not a new skill&quot;</li>
+<li>&quot;This is a documentation improvement, not a new skill&quot;</li>
+</ul>
+<p>Do not proceed past the kill gate without either convincing evidence of a gap or explicit user override.</p>
+<h4>Step 3: Scope Check</h4>
+<p>Evaluate whether the idea should be ONE skill or MULTIPLE skills.</p>
+<p><strong>Splitting signals:</strong></p>
+<ul>
+<li>The idea produces multiple distinct artifact types</li>
+<li>The idea crosses Triple Diamond phases (e.g., Discover + Deliver)</li>
+<li>The description naturally contains &quot;and&quot; connecting two activities</li>
+</ul>
+<p>If splitting is warranted, present the recommendation: &quot;This seems to cover two distinct PM activities:</p>
+<ol>
+<li>[Activity A] → produces [Artifact A]</li>
+<li>[Activity B] → produces [Artifact B]</li>
+</ol>
+<p>These work better as separate skills that can be chained via a workflow. Want to proceed with just [Activity A] for now?&quot;</p>
+<h4>Step 4: Classification + Repo-Fit</h4>
+<p>Determine the skill's classification and naming:</p>
+<p><strong>Domain skills</strong> (phase-specific PM activities):</p>
+<ul>
+<li>Phase: discover | define | develop | deliver | measure | iterate</li>
+<li>Directory: <code>{phase}-{skill-name}</code></li>
+<li>Frontmatter: <code>phase: {phase}</code> (required), no <code>classification</code> field</li>
+</ul>
+<p><strong>Foundation skills</strong> (cross-cutting, used across phases):</p>
+<ul>
+<li>No phase</li>
+<li>Directory: <code>foundation-{skill-name}</code></li>
+<li>Frontmatter: <code>classification: foundation</code> (required), no <code>phase</code> field</li>
+<li>Use when: the skill applies to multiple phases equally</li>
+</ul>
+<p><strong>Utility skills</strong> (meta-skills, repo tooling):</p>
+<ul>
+<li>No phase</li>
+<li>Directory: <code>utility-{skill-name}</code></li>
+<li>Frontmatter: <code>classification: utility</code> (required), no <code>phase</code> field</li>
+<li>Use when: the skill operates on the repo, workflow, or other skills</li>
+</ul>
+<p><strong>Exemplar selection:</strong> Identify 1-2 existing skills that are the closest structural match:</p>
+<ul>
+<li>Same phase &gt; same category &gt; similar artifact type</li>
+<li>Read their SKILL.md to understand section structure, instruction style,</li>
+</ul>
+<p>output contract format, and quality checklist pattern</p>
+<ul>
+<li>Name the exemplars explicitly: &quot;Modeled after [skill] . same phase,</li>
+</ul>
+<p>[category] category&quot;</p>
+<p>Present the classification and exemplar selection for user confirmation.</p>
+<h4>Step 5: Generate Skill Implementation Packet</h4>
+<p>Produce the complete packet using <code>references/TEMPLATE.md</code> as the format. The packet includes:</p>
+<ol>
+<li><strong>Decision</strong> . recommendation + Why Gate evidence (if applicable)</li>
+<li><strong>Classification</strong> . type, phase (if domain), category, directory name</li>
+<li><strong>Overlap Analysis</strong> . what was found, why this skill is still needed</li>
+<li><strong>Exemplar Skills</strong> . which existing skills modeled, why</li>
+<li><strong>Draft Frontmatter</strong> . complete, valid YAML block. The frontmatter MUST begin with <code>---</code> at byte 0 of the file (no preceding content of any kind, including HTML comments, BOM, or whitespace). Place any attribution comment AFTER the closing <code>---</code> fence, never before. Reference: <code>library/skill-output-samples/SAMPLE_CREATION.md</code> Section 5.</li>
+<li><strong>Draft SKILL.md</strong> . full content (not an outline), mirroring exemplar structure</li>
+<li><strong>Draft TEMPLATE.md</strong> . section headers with guidance comments</li>
+<li><strong>Draft EXAMPLE.md</strong> . complete, realistic example (150-300 lines) with a</li>
+</ol>
+<p>specific PM scenario, every section filled, optional sections demonstrated both filled and skipped</p>
+<ol>
+<li><strong>Draft Command</strong> . command frontmatter</li>
+<li><strong>AGENTS.md Entry</strong> . exact text to add</li>
+<li><strong>Validation Checklist</strong> . all CI rules checked against the draft</li>
+<li><strong>Next Steps</strong> . local CI, testing, contribution workflow</li>
+</ol>
+<h4>Step 6: Write to Staging Area</h4>
+<p>Write all generated files to the staging area:</p>
+<pre><code>_staging/pm-skill-builder/{skill-name}/
+├── SKILL.md               ← draft skill file
+├── references/
+│   ├── TEMPLATE.md        ← draft template
+│   └── EXAMPLE.md         ← draft example
+└── command.md             ← draft command</code></pre>
+<blockquote><strong>Note</strong>: <code>_staging/</code> is gitignored . draft artifacts never ship in releases.</blockquote>
+<blockquote>The staging folder is discarded after promotion.</blockquote>
+<p>Report what was written and where.</p>
+<h4>Step 7: Promote (on confirmation)</h4>
+<p>Ask: &quot;Review the packet above. When ready, I'll promote the files to their canonical locations. Proceed? [yes/no]&quot;</p>
+<p>If yes, promote by copying each file from staging to its canonical path:</p>
+<p>| Staging file | Canonical location | |--------------|--------------------| | <code>_staging/pm-skill-builder/{skill-name}/SKILL.md</code> | <code>skills/{dir-name}/SKILL.md</code> | | <code>_staging/pm-skill-builder/{skill-name}/references/TEMPLATE.md</code> | <code>skills/{dir-name}/references/TEMPLATE.md</code> | | <code>_staging/pm-skill-builder/{skill-name}/references/EXAMPLE.md</code> | <code>skills/{dir-name}/references/EXAMPLE.md</code> | | <code>_staging/pm-skill-builder/{skill-name}/command.md</code> | <code>commands/{command-name}.md</code> |</p>
+<p>Where <code>{dir-name}</code> is the classification-prefixed directory (e.g., <code>deliver-change-communication</code>).</p>
+<p>Then:</p>
+<ol>
+<li>Create the target directory: <code>skills/{dir-name}/references/</code></li>
+<li>Copy each file to its canonical location</li>
+<li>Append the AGENTS.md entry from the packet</li>
+<li>Run CI validation: <code>bash scripts/lint-skills-frontmatter.sh &amp;&amp; bash scripts/validate-agents-md.sh &amp;&amp; bash scripts/validate-commands.sh</code></li>
+<li>If validation passes, delete the staging folder: <code>_staging/pm-skill-builder/{skill-name}/</code></li>
+<li>If validation fails, report the error and keep staging intact for fixes</li>
+</ol>
+<p>Design rationale lives in the GitHub issue, PR, or effort brief . not in a permanent packet file.</p>
+<p>Provide post-promotion guidance:</p>
+<ul>
+<li>&quot;Run CI locally: <code>bash scripts/lint-skills-frontmatter.sh</code>&quot;</li>
+<li>&quot;Test the skill: try <code>/{command-name}</code> with a realistic scenario&quot;</li>
+<li>&quot;If contributing: create a GitHub issue with the skill-proposal template,</li>
+</ul>
+<p>then open a PR&quot;</p>
+<h3>Current Library Reference</h3>
+<p>Use this table for gap analysis . it reflects the current skill inventory. Also scan the <code>skills/</code> directory for the latest authoritative count.</p>
+<h4>Domain Skills (26)</h4>
+<p>| Phase | Skill | Category | Description | |-------|-------|----------|-------------| | discover | competitive-analysis | research | Structured competitive landscape analysis | | discover | interview-synthesis | research | User research interview synthesis | | discover | stakeholder-summary | research | Stakeholder needs and influence mapping | | define | hypothesis | ideation | Testable hypothesis with success metrics | | define | jtbd-canvas | problem-framing | Jobs to Be Done canvas | | define | opportunity-tree | problem-framing | Opportunity solution tree | | define | problem-statement | problem-framing | Clear problem statement with success criteria | | develop | adr | specification | Architecture Decision Record | | develop | design-rationale | specification | Design decision reasoning | | develop | solution-brief | ideation | One-page solution overview | | develop | spike-summary | coordination | Technical/design spike results | | deliver | acceptance-criteria | specification | Given/When/Then acceptance criteria | | deliver | edge-cases | specification | Edge cases and error states | | deliver | launch-checklist | coordination | Pre-launch checklist | | deliver | prd | specification | Product Requirements Document | | deliver | release-notes | coordination | User-facing release notes | | deliver | user-stories | specification | User stories with acceptance criteria | | measure | dashboard-requirements | validation | Analytics dashboard spec | | measure | experiment-design | validation | A/B test or experiment design | | measure | experiment-results | reflection | Experiment results and learnings | | measure | instrumentation-spec | validation | Event tracking specification | | measure | okr-grader | reflection | OKR cycle-close scoring at the KR level | | iterate | lessons-log | reflection | Structured lessons learned | | iterate | pivot-decision | reflection | Pivot or persevere decision | | iterate | refinement-notes | coordination | Backlog refinement outcomes | | iterate | retrospective | reflection | Team retrospective |</p>
+<h4>Foundation Skills (8)</h4>
+<p>| Skill | Category | Description | |-------|----------|-------------| | lean-canvas | problem-framing | One-page lean canvas across nine interlocking blocks | | meeting-agenda | meeting | Attendee-facing pre-meeting agenda | | meeting-brief | meeting | Private pre-meeting strategic preparation | | meeting-recap | meeting | Post-meeting summary with decisions and actions | | meeting-synthesize | meeting | Cross-meeting pattern synthesis from multiple recaps | | okr-writer | coordination | Outcome-based OKR set authoring with coaching | | persona | research | Evidence-calibrated product or marketing persona | | stakeholder-update | meeting | Async stakeholder communication for non-attendees |</p>
+<h4>Utility Skills (6)</h4>
+<p>| Skill | Category | Description | |-------|----------|-------------| | mermaid-diagrams | documentation | Mermaid diagram authoring with syntax validation | | pm-skill-builder | coordination | This skill | | pm-skill-iterate | coordination | Targeted improvements to an existing skill | | pm-skill-validate | coordination | Audit a skill against structural conventions and quality criteria | | slideshow-creator | communication | JSON-spec presentation generation across 18 slide types | | update-pm-skills | coordination | Check for and apply pm-skills releases locally |</p>
+<h3>Output Contract</h3>
+<p>The builder MUST produce draft files for the new skill:</p>
+<ul>
+<li><code>SKILL.md</code> . full skill instructions</li>
+<li><code>references/TEMPLATE.md</code> . output template with guidance comments</li>
+<li><code>references/EXAMPLE.md</code> . complete worked example (150-300 lines)</li>
+<li><code>command.md</code> . slash command file</li>
+</ul>
+<p>All drafts are written to <code>_staging/pm-skill-builder/{skill-name}/</code> (gitignored).</p>
+<p>On promotion, files are copied to canonical locations, AGENTS.md is updated, and the staging folder is discarded.</p>
+<h3>Quality Checklist</h3>
+<p>Before finalizing the packet, verify all items in both tiers:</p>
+<h4>CI Validation (must pass)</h4>
+<ul>
+<li>[ ] <code>name</code> matches directory name</li>
+<li>[ ] Description is 20-100 words (single-line, no multiline YAML)</li>
+<li>[ ] <code>version</code>, <code>updated</code>, <code>license</code> all present</li>
+<li>[ ] Classification correct (domain → <code>phase:</code>, foundation/utility → <code>classification:</code>)</li>
+<li>[ ] Directory name follows convention: <code>{phase/classification}-{skill-name}</code></li>
+<li>[ ] TEMPLATE.md has ≥3 <code>##</code> sections</li>
+<li>[ ] Command file references correct skill path</li>
+<li>[ ] AGENTS.md entry uses <code>####</code> + <code><strong>Path:</strong></code> format</li>
+</ul>
+<h4>Quality Checks (should pass)</h4>
+<ul>
+<li>[ ] Gap analysis checked all existing skills (not just same-phase)</li>
+<li>[ ] Why Gate evidence is specific (names prompts/scenarios, not vague)</li>
+<li>[ ] EXAMPLE.md is a complete artifact (150-300 lines), not an outline</li>
+<li>[ ] Output contract is present in draft SKILL.md</li>
+<li>[ ] Quality checklist is present in draft SKILL.md</li>
+</ul>
+<h3>Examples</h3>
+<p>See <code>references/EXAMPLE.md</code> for a completed Skill Implementation Packet demonstrating a realistic domain skill creation.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: pm-skills-utility-pm-skill-builder\ndisplay_name: utility-pm-skill-builder\nplatform: OpenCode\ncategory: PM operations, communication, and utilities\n---\n\n# utility-pm-skill-builder - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `utility-pm-skill-builder` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nThis skill creates new PM skills for the pm-skills library. It produces a\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the utility-pm-skill-builder skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `utility-pm-skill-builder` |\n| Canonical name | `pm-skills-utility-pm-skill-builder` |\n| Platform | `OpenCode` |\n| Category | PM operations, communication, and utilities |\n\n## Description\n\nThis skill creates new PM skills for the pm-skills library. It produces a\n\n## Original SKILL.md\n\n---\nname: pm-skills-utility-pm-skill-builder\ndescription: Guides contributors from a PM skill idea to a complete Skill Implementation Packet aligned with pm-skills conventions. Runs gap analysis, validates through a Why Gate, classifies by type and phase, generates draft files, and writes to a staging area for review before promotion.\nlicense: Apache-2.0\nmetadata:\n  classification: utility\n  version: \"1.0.0\"\n  updated: 2026-03-22\n  category: coordination\n  frameworks: [triple-diamond]\n  author: product-on-purpose\n---\n\u003c!-- PM-Skills | https://github.com/product-on-purpose/pm-skills | Apache 2.0 -->\n# PM Skill Builder\n\nThis skill creates new PM skills for the pm-skills library. It produces a\nSkill Implementation Packet . a complete design document with draft files .\nin a staging area for review before promotion to canonical locations.\n\n## When to Use\n\n- When you have an idea for a new PM skill\n- When you want to add a domain skill (phase-specific), foundation skill\n  (cross-cutting), or utility skill (meta/tooling) to the pm-skills library\n- When a contributor needs guided skill creation that follows repo conventions\n\n## When NOT to Use\n\n- To modify an existing skill → use a future validation/iteration utility (planned)\n- To create a skill for a non-pm-skills context → use a general agent skill builder (planned)\n- To create a workflow → workflows are authored directly, not via this builder\n\n## Instructions\n\nWhen asked to create a new PM skill, follow these steps:\n\n### Step 1: Understand the Idea\n\nAccept the idea in either form:\n- **Problem-first**: \"What PM problem does this skill solve? Who runs into\n  this problem, and what do they currently produce (or fail to produce)?\"\n- **Skill-first**: \"Describe the skill you want to create. What artifact\n  does it produce? What PM activity does it support?\"\n\nBoth entry points produce the same downstream flow. If the user provides\none form, do not ask for the other . extract what you need and proceed.\n\nIf the idea is vague, ask ONE follow-up question to clarify the artifact\ntype and target audience before proceeding.\n\n### Step 2: Gap Analysis\n\nCheck ALL existing skills for overlap. Use the Current Library Reference\ntable below AND scan the `skills/` directory for the latest inventory.\n\nPresent findings with specificity:\n- Name each overlapping skill and explain what it covers\n- Identify the specific gap this new skill would fill\n- If overlap is high, trigger the Why Gate (see below)\n\n**Why Gate** (triggers when overlap is found):\nAsk the user: \"Name 2-3 specific prompts or scenarios where the existing\nskills fail to produce what you need.\"\n\n**Kill Gate**: If the user cannot articulate convincing gaps, recommend\nan alternative:\n- \"Revise [existing skill] to cover this case\"\n- \"Create a workflow combining [skill A] + [skill B]\"\n- \"Add a command variant, not a new skill\"\n- \"This is a documentation improvement, not a new skill\"\n\nDo not proceed past the kill gate without either convincing evidence of\na gap or explicit user override.\n\n### Step 3: Scope Check\n\nEvaluate whether the idea should be ONE skill or MULTIPLE skills.\n\n**Splitting signals:**\n- The idea produces multiple distinct artifact types\n- The idea crosses Triple Diamond phases (e.g., Discover + Deliver)\n- The description naturally contains \"and\" connecting two activities\n\nIf splitting is warranted, present the recommendation:\n\"This seems to cover two distinct PM activities:\n  1. [Activity A] → produces [Artifact A]\n  2. [Activity B] → produces [Artifact B]\nThese work better as separate skills that can be chained via a workflow.\nWant to proceed with just [Activity A] for now?\"\n\n### Step 4: Classification + Repo-Fit\n\nDetermine the skill's classification and naming:\n\n**Domain skills** (phase-specific PM activities):\n- Phase: discover | define | develop | deliver | measure | iterate\n- Directory: `{phase}-{skill-name}`\n- Frontmatter: `phase: {phase}` (required), no `classification` field\n\n**Foundation skills** (cross-cutting, used across phases):\n- No phase\n- Directory: `foundation-{skill-name}`\n- Frontmatter: `classification: foundation` (required), no `phase` field\n- Use when: the skill applies to multiple phases equally\n\n**Utility skills** (meta-skills, repo tooling):\n- No phase\n- Directory: `utility-{skill-name}`\n- Frontmatter: `classification: utility` (required), no `phase` field\n- Use when: the skill operates on the repo, workflow, or other skills\n\n**Exemplar selection:**\nIdentify 1-2 existing skills that are the closest structural match:\n- Same phase > same category > similar artifact type\n- Read their SKILL.md to understand section structure, instruction style,\n  output contract format, and quality checklist pattern\n- Name the exemplars explicitly: \"Modeled after [skill] . same phase,\n  [category] category\"\n\nPresent the classification and exemplar selection for user confirmation.\n\n### Step 5: Generate Skill Implementation Packet\n\nProduce the complete packet using `references/TEMPLATE.md` as the format.\nThe packet includes:\n\n1. **Decision** . recommendation + Why Gate evidence (if applicable)\n2. **Classification** . type, phase (if domain), category, directory name\n3. **Overlap Analysis** . what was found, why this skill is still needed\n4. **Exemplar Skills** . which existing skills modeled, why\n5. **Draft Frontmatter** . complete, valid YAML block. The frontmatter MUST begin with `---` at byte 0 of the file (no preceding content of any kind, including HTML comments, BOM, or whitespace). Place any attribution comment AFTER the closing `---` fence, never before. Reference: `library/skill-output-samples/SAMPLE_CREATION.md` Section 5.\n6. **Draft SKILL.md** . full content (not an outline), mirroring exemplar structure\n7. **Draft TEMPLATE.md** . section headers with guidance comments\n8. **Draft EXAMPLE.md** . complete, realistic example (150-300 lines) with a\n   specific PM scenario, every section filled, optional sections demonstrated\n   both filled and skipped\n9. **Draft Command** . command frontmatter\n10. **AGENTS.md Entry** . exact text to add\n11. **Validation Checklist** . all CI rules checked against the draft\n12. **Next Steps** . local CI, testing, contribution workflow\n\n### Step 6: Write to Staging Area\n\nWrite all generated files to the staging area:\n\n```\n_staging/pm-skill-builder/{skill-name}/\n├── SKILL.md               ← draft skill file\n├── references/\n│   ├── TEMPLATE.md        ← draft template\n│   └── EXAMPLE.md         ← draft example\n└── command.md             ← draft command\n```\n\n> **Note**: `_staging/` is gitignored . draft artifacts never ship in releases.\n> The staging folder is discarded after promotion.\n\nReport what was written and where.\n\n### Step 7: Promote (on confirmation)\n\nAsk: \"Review the packet above. When ready, I'll promote the files to\ntheir canonical locations. Proceed? [yes/no]\"\n\nIf yes, promote by copying each file from staging to its canonical path:\n\n| Staging file | Canonical location |\n|--------------|--------------------|\n| `_staging/pm-skill-builder/{skill-name}/SKILL.md` | `skills/{dir-name}/SKILL.md` |\n| `_staging/pm-skill-builder/{skill-name}/references/TEMPLATE.md` | `skills/{dir-name}/references/TEMPLATE.md` |\n| `_staging/pm-skill-builder/{skill-name}/references/EXAMPLE.md` | `skills/{dir-name}/references/EXAMPLE.md` |\n| `_staging/pm-skill-builder/{skill-name}/command.md` | `commands/{command-name}.md` |\n\nWhere `{dir-name}` is the classification-prefixed directory (e.g., `deliver-change-communication`).\n\nThen:\n1. Create the target directory: `skills/{dir-name}/references/`\n2. Copy each file to its canonical location\n3. Append the AGENTS.md entry from the packet\n4. Run CI validation: `bash scripts/lint-skills-frontmatter.sh && bash scripts/validate-agents-md.sh && bash scripts/validate-commands.sh`\n5. If validation passes, delete the staging folder: `_staging/pm-skill-builder/{skill-name}/`\n6. If validation fails, report the error and keep staging intact for fixes\n\nDesign rationale lives in the GitHub issue, PR, or effort brief . not\nin a permanent packet file.\n\nProvide post-promotion guidance:\n- \"Run CI locally: `bash scripts/lint-skills-frontmatter.sh`\"\n- \"Test the skill: try `/{command-name}` with a realistic scenario\"\n- \"If contributing: create a GitHub issue with the skill-proposal template,\n  then open a PR\"\n\n## Current Library Reference\n\nUse this table for gap analysis . it reflects the current skill inventory.\nAlso scan the `skills/` directory for the latest authoritative count.\n\n### Domain Skills (26)\n\n| Phase | Skill | Category | Description |\n|-------|-------|----------|-------------|\n| discover | competitive-analysis | research | Structured competitive landscape analysis |\n| discover | interview-synthesis | research | User research interview synthesis |\n| discover | stakeholder-summary | research | Stakeholder needs and influence mapping |\n| define | hypothesis | ideation | Testable hypothesis with success metrics |\n| define | jtbd-canvas | problem-framing | Jobs to Be Done canvas |\n| define | opportunity-tree | problem-framing | Opportunity solution tree |\n| define | problem-statement | problem-framing | Clear problem statement with success criteria |\n| develop | adr | specification | Architecture Decision Record |\n| develop | design-rationale | specification | Design decision reasoning |\n| develop | solution-brief | ideation | One-page solution overview |\n| develop | spike-summary | coordination | Technical/design spike results |\n| deliver | acceptance-criteria | specification | Given/When/Then acceptance criteria |\n| deliver | edge-cases | specification | Edge cases and error states |\n| deliver | launch-checklist | coordination | Pre-launch checklist |\n| deliver | prd | specification | Product Requirements Document |\n| deliver | release-notes | coordination | User-facing release notes |\n| deliver | user-stories | specification | User stories with acceptance criteria |\n| measure | dashboard-requirements | validation | Analytics dashboard spec |\n| measure | experiment-design | validation | A/B test or experiment design |\n| measure | experiment-results | reflection | Experiment results and learnings |\n| measure | instrumentation-spec | validation | Event tracking specification |\n| measure | okr-grader | reflection | OKR cycle-close scoring at the KR level |\n| iterate | lessons-log | reflection | Structured lessons learned |\n| iterate | pivot-decision | reflection | Pivot or persevere decision |\n| iterate | refinement-notes | coordination | Backlog refinement outcomes |\n| iterate | retrospective | reflection | Team retrospective |\n\n### Foundation Skills (8)\n\n| Skill | Category | Description |\n|-------|----------|-------------|\n| lean-canvas | problem-framing | One-page lean canvas across nine interlocking blocks |\n| meeting-agenda | meeting | Attendee-facing pre-meeting agenda |\n| meeting-brief | meeting | Private pre-meeting strategic preparation |\n| meeting-recap | meeting | Post-meeting summary with decisions and actions |\n| meeting-synthesize | meeting | Cross-meeting pattern synthesis from multiple recaps |\n| okr-writer | coordination | Outcome-based OKR set authoring with coaching |\n| persona | research | Evidence-calibrated product or marketing persona |\n| stakeholder-update | meeting | Async stakeholder communication for non-attendees |\n\n### Utility Skills (6)\n\n| Skill | Category | Description |\n|-------|----------|-------------|\n| mermaid-diagrams | documentation | Mermaid diagram authoring with syntax validation |\n| pm-skill-builder | coordination | This skill |\n| pm-skill-iterate | coordination | Targeted improvements to an existing skill |\n| pm-skill-validate | coordination | Audit a skill against structural conventions and quality criteria |\n| slideshow-creator | communication | JSON-spec presentation generation across 18 slide types |\n| update-pm-skills | coordination | Check for and apply pm-skills releases locally |\n\n## Output Contract\n\nThe builder MUST produce draft files for the new skill:\n- `SKILL.md` . full skill instructions\n- `references/TEMPLATE.md` . output template with guidance comments\n- `references/EXAMPLE.md` . complete worked example (150-300 lines)\n- `command.md` . slash command file\n\nAll drafts are written to `_staging/pm-skill-builder/{skill-name}/` (gitignored).\n\nOn promotion, files are copied to canonical locations, AGENTS.md is\nupdated, and the staging folder is discarded.\n\n## Quality Checklist\n\nBefore finalizing the packet, verify all items in both tiers:\n\n### CI Validation (must pass)\n- [ ] `name` matches directory name\n- [ ] Description is 20-100 words (single-line, no multiline YAML)\n- [ ] `version`, `updated`, `license` all present\n- [ ] Classification correct (domain → `phase:`, foundation/utility → `classification:`)\n- [ ] Directory name follows convention: `{phase/classification}-{skill-name}`\n- [ ] TEMPLATE.md has ≥3 `##` sections\n- [ ] Command file references correct skill path\n- [ ] AGENTS.md entry uses `####` + `**Path:**` format\n\n### Quality Checks (should pass)\n- [ ] Gap analysis checked all existing skills (not just same-phase)\n- [ ] Why Gate evidence is specific (names prompts/scenarios, not vague)\n- [ ] EXAMPLE.md is a complete artifact (150-300 lines), not an outline\n- [ ] Output contract is present in draft SKILL.md\n- [ ] Quality checklist is present in draft SKILL.md\n\n## Examples\n\nSee `references/EXAMPLE.md` for a completed Skill Implementation Packet\ndemonstrating a realistic domain skill creation.\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("utility-pm-skill-builder-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

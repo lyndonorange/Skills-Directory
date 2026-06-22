@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>performance-optimization - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/performance-optimization-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>performance-optimization</h1>
+      <p class="description">Optimizes application performance. Use when performance requirements exist, when you suspect performance regressions, or when Core Web Vitals or load times need improvement. Use when profiling reveals bottlenecks that need fixing.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>performance-optimization</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>performance-optimization</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Optimizes application performance. Use when performance requirements exist, when you suspect performance regressions, or when Core Web Vitals or load times need improvement. Use when profiling reveals bottlenecks that need fixing.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose performance-optimization, then write the task. Fallback prompt: Use the performance-optimization skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Performance Optimization</h2>
+<h3>Overview</h3>
+<p>Measure before optimizing. Performance work without measurement is guessing — and guessing leads to premature optimization that adds complexity without improving what matters. Profile first, identify the actual bottleneck, fix it, measure again. Optimize only what measurements prove matters.</p>
+<h3>When to Use</h3>
+<ul>
+<li>Performance requirements exist in the spec (load time budgets, response time SLAs)</li>
+<li>Users or monitoring report slow behavior</li>
+<li>Core Web Vitals scores are below thresholds</li>
+<li>You suspect a change introduced a regression</li>
+<li>Building features that handle large datasets or high traffic</li>
+</ul>
+<p><strong>When NOT to use:</strong> Don't optimize before you have evidence of a problem. Premature optimization adds complexity that costs more than the performance it gains.</p>
+<h3>Core Web Vitals Targets</h3>
+<p>| Metric | Good | Needs Improvement | Poor | |--------|------|-------------------|------| | <strong>LCP</strong> (Largest Contentful Paint) | ≤ 2.5s | ≤ 4.0s | &gt; 4.0s | | <strong>INP</strong> (Interaction to Next Paint) | ≤ 200ms | ≤ 500ms | &gt; 500ms | | <strong>CLS</strong> (Cumulative Layout Shift) | ≤ 0.1 | ≤ 0.25 | &gt; 0.25 |</p>
+<h3>The Optimization Workflow</h3>
+<pre><code>1. MEASURE  → Establish baseline with real data
+2. IDENTIFY → Find the actual bottleneck (not assumed)
+3. FIX      → Address the specific bottleneck
+4. VERIFY   → Measure again, confirm improvement
+5. GUARD    → Add monitoring or tests to prevent regression</code></pre>
+<h4>Step 1: Measure</h4>
+<p>Two complementary approaches — use both:</p>
+<ul>
+<li><strong>Synthetic (Lighthouse, DevTools Performance tab):</strong> Controlled conditions, reproducible. Best for CI regression detection and isolating specific issues.</li>
+<li><strong>RUM (web-vitals library, CrUX):</strong> Real user data in real conditions. Required to validate that a fix actually improved user experience.</li>
+</ul>
+<p><strong>Frontend:</strong></p>
+<pre><code># Synthetic: Lighthouse in Chrome DevTools (or CI)
+# Chrome DevTools → Performance tab → Record
+# Chrome DevTools MCP → Performance trace
+
+# RUM: Web Vitals library in code
+import { onLCP, onINP, onCLS } from 'web-vitals';
+
+onLCP(console.log);
+onINP(console.log);
+onCLS(console.log);</code></pre>
+<p><strong>Backend:</strong></p>
+<pre><code># Response time logging
+# Application Performance Monitoring (APM)
+# Database query logging with timing
+
+# Simple timing
+console.time('db-query');
+const result = await db.query(...);
+console.timeEnd('db-query');</code></pre>
+<h4>Where to Start Measuring</h4>
+<p>Use the symptom to decide what to measure first:</p>
+<pre><code>What is slow?
+├── First page load
+│   ├── Large bundle? --&gt; Measure bundle size, check code splitting
+│   ├── Slow server response? --&gt; Measure TTFB in DevTools Network waterfall
+│   │   ├── DNS long? --&gt; Add dns-prefetch / preconnect for known origins
+│   │   ├── TCP/TLS long? --&gt; Enable HTTP/2, check edge deployment, keep-alive
+│   │   └── Waiting (server) long? --&gt; Profile backend, check queries and caching
+│   └── Render-blocking resources? --&gt; Check network waterfall for CSS/JS blocking
+├── Interaction feels sluggish
+│   ├── UI freezes on click? --&gt; Profile main thread, look for long tasks (&gt;50ms)
+│   ├── Form input lag? --&gt; Check re-renders, controlled component overhead
+│   └── Animation jank? --&gt; Check layout thrashing, forced reflows
+├── Page after navigation
+│   ├── Data loading? --&gt; Measure API response times, check for waterfalls
+│   └── Client rendering? --&gt; Profile component render time, check for N+1 fetches
+└── Backend / API
+    ├── Single endpoint slow? --&gt; Profile database queries, check indexes
+    ├── All endpoints slow? --&gt; Check connection pool, memory, CPU
+    └── Intermittent slowness? --&gt; Check for lock contention, GC pauses, external deps</code></pre>
+<h4>Step 2: Identify the Bottleneck</h4>
+<p>Common bottlenecks by category:</p>
+<p><strong>Frontend:</strong></p>
+<p>| Symptom | Likely Cause | Investigation | |---------|-------------|---------------| | Slow LCP | Large images, render-blocking resources, slow server | Check network waterfall, image sizes | | High CLS | Images without dimensions, late-loading content, font shifts | Check layout shift attribution | | Poor INP | Heavy JavaScript on main thread, large DOM updates | Check long tasks in Performance trace | | Slow initial load | Large bundle, many network requests | Check bundle size, code splitting |</p>
+<p><strong>Backend:</strong></p>
+<p>| Symptom | Likely Cause | Investigation | |---------|-------------|---------------| | Slow API responses | N+1 queries, missing indexes, unoptimized queries | Check database query log | | Memory growth | Leaked references, unbounded caches, large payloads | Heap snapshot analysis | | CPU spikes | Synchronous heavy computation, regex backtracking | CPU profiling | | High latency | Missing caching, redundant computation, network hops | Trace requests through the stack |</p>
+<h4>Step 3: Fix Common Anti-Patterns</h4>
+<h5>N+1 Queries (Backend)</h5>
+<pre><code>// BAD: N+1 — one query per task for the owner
+const tasks = await db.tasks.findMany();
+for (const task of tasks) {
+  task.owner = await db.users.findUnique({ where: { id: task.ownerId } });
+}
+
+// GOOD: Single query with join/include
+const tasks = await db.tasks.findMany({
+  include: { owner: true },
+});</code></pre>
+<h5>Unbounded Data Fetching</h5>
+<pre><code>// BAD: Fetching all records
+const allTasks = await db.tasks.findMany();
+
+// GOOD: Paginated with limits
+const tasks = await db.tasks.findMany({
+  take: 20,
+  skip: (page - 1) * 20,
+  orderBy: { createdAt: 'desc' },
+});</code></pre>
+<h5>Missing Image Optimization (Frontend)</h5>
+<pre><code>&lt;!-- BAD: No dimensions, no format optimization --&gt;
+&lt;img src=&quot;/hero.jpg&quot; /&gt;
+
+&lt;!-- GOOD: Hero / LCP image — art direction + resolution switching, high priority --&gt;
+&lt;!--
+  Two techniques combined:
+  - Art direction (media): different crop/composition per breakpoint
+  - Resolution switching (srcset + sizes): right file size per screen density
+--&gt;
+&lt;picture&gt;
+  &lt;!-- Mobile: portrait crop (8:10) --&gt;
+  &lt;source
+    media=&quot;(max-width: 767px)&quot;
+    srcset=&quot;/hero-mobile-400.avif 400w, /hero-mobile-800.avif 800w&quot;
+    sizes=&quot;100vw&quot;
+    width=&quot;800&quot;
+    height=&quot;1000&quot;
+    type=&quot;image/avif&quot;
+  /&gt;
+  &lt;source
+    media=&quot;(max-width: 767px)&quot;
+    srcset=&quot;/hero-mobile-400.webp 400w, /hero-mobile-800.webp 800w&quot;
+    sizes=&quot;100vw&quot;
+    width=&quot;800&quot;
+    height=&quot;1000&quot;
+    type=&quot;image/webp&quot;
+  /&gt;
+  &lt;!-- Desktop: landscape crop (2:1) --&gt;
+  &lt;source
+    srcset=&quot;/hero-800.avif 800w, /hero-1200.avif 1200w, /hero-1600.avif 1600w&quot;
+    sizes=&quot;(max-width: 1200px) 100vw, 1200px&quot;
+    width=&quot;1200&quot;
+    height=&quot;600&quot;
+    type=&quot;image/avif&quot;
+  /&gt;
+  &lt;source
+    srcset=&quot;/hero-800.webp 800w, /hero-1200.webp 1200w, /hero-1600.webp 1600w&quot;
+    sizes=&quot;(max-width: 1200px) 100vw, 1200px&quot;
+    width=&quot;1200&quot;
+    height=&quot;600&quot;
+    type=&quot;image/webp&quot;
+  /&gt;
+  &lt;img
+    src=&quot;/hero-desktop.jpg&quot;
+    width=&quot;1200&quot;
+    height=&quot;600&quot;
+    fetchpriority=&quot;high&quot;
+    alt=&quot;Hero image description&quot;
+  /&gt;
+&lt;/picture&gt;
+
+&lt;!-- GOOD: Below-the-fold image — lazy loaded + async decoding --&gt;
+&lt;img
+  src=&quot;/content.webp&quot;
+  width=&quot;800&quot;
+  height=&quot;400&quot;
+  loading=&quot;lazy&quot;
+  decoding=&quot;async&quot;
+  alt=&quot;Content image description&quot;
+/&gt;</code></pre>
+<h5>Unnecessary Re-renders (React)</h5>
+<pre><code>// BAD: Creates new object on every render, causing children to re-render
+function TaskList() {
+  return &lt;TaskFilters options={{ sortBy: 'date', order: 'desc' }} /&gt;;
+}
+
+// GOOD: Stable reference
+const DEFAULT_OPTIONS = { sortBy: 'date', order: 'desc' } as const;
+function TaskList() {
+  return &lt;TaskFilters options={DEFAULT_OPTIONS} /&gt;;
+}
+
+// Use React.memo for expensive components
+const TaskItem = React.memo(function TaskItem({ task }: Props) {
+  return &lt;div&gt;{/* expensive render */}&lt;/div&gt;;
+});
+
+// Use useMemo for expensive computations
+function TaskStats({ tasks }: Props) {
+  const stats = useMemo(() =&gt; calculateStats(tasks), [tasks]);
+  return &lt;div&gt;{stats.completed} / {stats.total}&lt;/div&gt;;
+}</code></pre>
+<h5>Large Bundle Size</h5>
+<pre><code>// Modern bundlers (Vite, webpack 5+) handle named imports with tree-shaking automatically,
+// provided the dependency ships ESM and is marked `sideEffects: false` in package.json.
+// Profile before changing import styles — the real gains come from splitting and lazy loading.
+
+// GOOD: Dynamic import for heavy, rarely-used features
+const ChartLibrary = lazy(() =&gt; import('./ChartLibrary'));
+
+// GOOD: Route-level code splitting wrapped in Suspense
+const SettingsPage = lazy(() =&gt; import('./pages/Settings'));
+
+function App() {
+  return (
+    &lt;Suspense fallback={&lt;Spinner /&gt;}&gt;
+      &lt;SettingsPage /&gt;
+    &lt;/Suspense&gt;
+  );
+}</code></pre>
+<h5>Missing Caching (Backend)</h5>
+<pre><code>// Cache frequently-read, rarely-changed data
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+let cachedConfig: AppConfig | null = null;
+let cacheExpiry = 0;
+
+async function getAppConfig(): Promise&lt;AppConfig&gt; {
+  if (cachedConfig &amp;&amp; Date.now() &lt; cacheExpiry) {
+    return cachedConfig;
+  }
+  cachedConfig = await db.config.findFirst();
+  cacheExpiry = Date.now() + CACHE_TTL;
+  return cachedConfig;
+}
+
+// HTTP caching headers for static assets
+app.use('/static', express.static('public', {
+  maxAge: '1y',           // Cache for 1 year
+  immutable: true,        // Never revalidate (use content hashing in filenames)
+}));
+
+// Cache-Control for API responses
+res.set('Cache-Control', 'public, max-age=300'); // 5 minutes</code></pre>
+<h3>Performance Budget</h3>
+<p>Set budgets and enforce them:</p>
+<pre><code>JavaScript bundle: &lt; 200KB gzipped (initial load)
+CSS: &lt; 50KB gzipped
+Images: &lt; 200KB per image (above the fold)
+Fonts: &lt; 100KB total
+API response time: &lt; 200ms (p95)
+Time to Interactive: &lt; 3.5s on 4G
+Lighthouse Performance score: ≥ 90</code></pre>
+<p><strong>Enforce in CI:</strong></p>
+<pre><code># Bundle size check
+npx bundlesize --config bundlesize.config.json
+
+# Lighthouse CI
+npx lhci autorun</code></pre>
+<h3>See Also</h3>
+<p>For detailed performance checklists, optimization commands, and anti-pattern reference, see <code>references/performance-checklist.md</code>.</p>
+<h3>Common Rationalizations</h3>
+<p>| Rationalization | Reality | |---|---| | &quot;We'll optimize later&quot; | Performance debt compounds. Fix obvious anti-patterns now, defer micro-optimizations. | | &quot;It's fast on my machine&quot; | Your machine isn't the user's. Profile on representative hardware and networks. | | &quot;This optimization is obvious&quot; | If you didn't measure, you don't know. Profile first. | | &quot;Users won't notice 100ms&quot; | Research shows 100ms delays impact conversion rates. Users notice more than you think. | | &quot;The framework handles performance&quot; | Frameworks prevent some issues but can't fix N+1 queries or oversized bundles. |</p>
+<h3>Red Flags</h3>
+<ul>
+<li>Optimization without profiling data to justify it</li>
+<li>N+1 query patterns in data fetching</li>
+<li>List endpoints without pagination</li>
+<li>Images without dimensions, lazy loading, or responsive sizes</li>
+<li>Bundle size growing without review</li>
+<li>No performance monitoring in production</li>
+<li><code>React.memo</code> and <code>useMemo</code> everywhere (overusing is as bad as underusing)</li>
+</ul>
+<h3>Verification</h3>
+<p>After any performance-related change:</p>
+<ul>
+<li>[ ] Before and after measurements exist (specific numbers)</li>
+<li>[ ] The specific bottleneck is identified and addressed</li>
+<li>[ ] Core Web Vitals are within &quot;Good&quot; thresholds</li>
+<li>[ ] Bundle size hasn't increased significantly</li>
+<li>[ ] No N+1 queries in new data fetching code</li>
+<li>[ ] Performance budget passes in CI (if configured)</li>
+<li>[ ] Existing tests still pass (optimization didn't break behavior)</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: performance-optimization\ndisplay_name: performance-optimization\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# performance-optimization - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `performance-optimization` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nMeasure before optimizing. Performance work without measurement is guessing — and guessing leads to premature optimization that adds complexity without improving what matters. Profile first, identify the actual bottlenec\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose performance-optimization, then write the task. Fallback prompt: Use the performance-optimization skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `performance-optimization` |\n| Canonical name | `performance-optimization` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nMeasure before optimizing. Performance work without measurement is guessing — and guessing leads to premature optimization that adds complexity without improving what matters. Profile first, identify the actual bottlenec\n\n## Original SKILL.md\n\n---\nname: performance-optimization\ndescription: Optimizes application performance. Use when performance requirements exist, when you suspect performance regressions, or when Core Web Vitals or load times need improvement. Use when profiling reveals bottlenecks that need fixing.\n---\n\n# Performance Optimization\n\n## Overview\n\nMeasure before optimizing. Performance work without measurement is guessing — and guessing leads to premature optimization that adds complexity without improving what matters. Profile first, identify the actual bottleneck, fix it, measure again. Optimize only what measurements prove matters.\n\n## When to Use\n\n- Performance requirements exist in the spec (load time budgets, response time SLAs)\n- Users or monitoring report slow behavior\n- Core Web Vitals scores are below thresholds\n- You suspect a change introduced a regression\n- Building features that handle large datasets or high traffic\n\n**When NOT to use:** Don't optimize before you have evidence of a problem. Premature optimization adds complexity that costs more than the performance it gains.\n\n## Core Web Vitals Targets\n\n| Metric | Good | Needs Improvement | Poor |\n|--------|------|-------------------|------|\n| **LCP** (Largest Contentful Paint) | ≤ 2.5s | ≤ 4.0s | > 4.0s |\n| **INP** (Interaction to Next Paint) | ≤ 200ms | ≤ 500ms | > 500ms |\n| **CLS** (Cumulative Layout Shift) | ≤ 0.1 | ≤ 0.25 | > 0.25 |\n\n## The Optimization Workflow\n\n```\n1. MEASURE  → Establish baseline with real data\n2. IDENTIFY → Find the actual bottleneck (not assumed)\n3. FIX      → Address the specific bottleneck\n4. VERIFY   → Measure again, confirm improvement\n5. GUARD    → Add monitoring or tests to prevent regression\n```\n\n### Step 1: Measure\n\nTwo complementary approaches — use both:\n\n- **Synthetic (Lighthouse, DevTools Performance tab):** Controlled conditions, reproducible. Best for CI regression detection and isolating specific issues.\n- **RUM (web-vitals library, CrUX):** Real user data in real conditions. Required to validate that a fix actually improved user experience.\n\n**Frontend:**\n```bash\n# Synthetic: Lighthouse in Chrome DevTools (or CI)\n# Chrome DevTools → Performance tab → Record\n# Chrome DevTools MCP → Performance trace\n\n# RUM: Web Vitals library in code\nimport { onLCP, onINP, onCLS } from 'web-vitals';\n\nonLCP(console.log);\nonINP(console.log);\nonCLS(console.log);\n```\n\n**Backend:**\n```bash\n# Response time logging\n# Application Performance Monitoring (APM)\n# Database query logging with timing\n\n# Simple timing\nconsole.time('db-query');\nconst result = await db.query(...);\nconsole.timeEnd('db-query');\n```\n\n### Where to Start Measuring\n\nUse the symptom to decide what to measure first:\n\n```\nWhat is slow?\n├── First page load\n│   ├── Large bundle? --> Measure bundle size, check code splitting\n│   ├── Slow server response? --> Measure TTFB in DevTools Network waterfall\n│   │   ├── DNS long? --> Add dns-prefetch / preconnect for known origins\n│   │   ├── TCP/TLS long? --> Enable HTTP/2, check edge deployment, keep-alive\n│   │   └── Waiting (server) long? --> Profile backend, check queries and caching\n│   └── Render-blocking resources? --> Check network waterfall for CSS/JS blocking\n├── Interaction feels sluggish\n│   ├── UI freezes on click? --> Profile main thread, look for long tasks (>50ms)\n│   ├── Form input lag? --> Check re-renders, controlled component overhead\n│   └── Animation jank? --> Check layout thrashing, forced reflows\n├── Page after navigation\n│   ├── Data loading? --> Measure API response times, check for waterfalls\n│   └── Client rendering? --> Profile component render time, check for N+1 fetches\n└── Backend / API\n    ├── Single endpoint slow? --> Profile database queries, check indexes\n    ├── All endpoints slow? --> Check connection pool, memory, CPU\n    └── Intermittent slowness? --> Check for lock contention, GC pauses, external deps\n```\n\n### Step 2: Identify the Bottleneck\n\nCommon bottlenecks by category:\n\n**Frontend:**\n\n| Symptom | Likely Cause | Investigation |\n|---------|-------------|---------------|\n| Slow LCP | Large images, render-blocking resources, slow server | Check network waterfall, image sizes |\n| High CLS | Images without dimensions, late-loading content, font shifts | Check layout shift attribution |\n| Poor INP | Heavy JavaScript on main thread, large DOM updates | Check long tasks in Performance trace |\n| Slow initial load | Large bundle, many network requests | Check bundle size, code splitting |\n\n**Backend:**\n\n| Symptom | Likely Cause | Investigation |\n|---------|-------------|---------------|\n| Slow API responses | N+1 queries, missing indexes, unoptimized queries | Check database query log |\n| Memory growth | Leaked references, unbounded caches, large payloads | Heap snapshot analysis |\n| CPU spikes | Synchronous heavy computation, regex backtracking | CPU profiling |\n| High latency | Missing caching, redundant computation, network hops | Trace requests through the stack |\n\n### Step 3: Fix Common Anti-Patterns\n\n#### N+1 Queries (Backend)\n\n```typescript\n// BAD: N+1 — one query per task for the owner\nconst tasks = await db.tasks.findMany();\nfor (const task of tasks) {\n  task.owner = await db.users.findUnique({ where: { id: task.ownerId } });\n}\n\n// GOOD: Single query with join/include\nconst tasks = await db.tasks.findMany({\n  include: { owner: true },\n});\n```\n\n#### Unbounded Data Fetching\n\n```typescript\n// BAD: Fetching all records\nconst allTasks = await db.tasks.findMany();\n\n// GOOD: Paginated with limits\nconst tasks = await db.tasks.findMany({\n  take: 20,\n  skip: (page - 1) * 20,\n  orderBy: { createdAt: 'desc' },\n});\n```\n\n#### Missing Image Optimization (Frontend)\n\n```html\n\u003c!-- BAD: No dimensions, no format optimization -->\n\u003cimg src=\"/hero.jpg\" />\n\n\u003c!-- GOOD: Hero / LCP image — art direction + resolution switching, high priority -->\n\u003c!--\n  Two techniques combined:\n  - Art direction (media): different crop/composition per breakpoint\n  - Resolution switching (srcset + sizes): right file size per screen density\n-->\n\u003cpicture>\n  \u003c!-- Mobile: portrait crop (8:10) -->\n  \u003csource\n    media=\"(max-width: 767px)\"\n    srcset=\"/hero-mobile-400.avif 400w, /hero-mobile-800.avif 800w\"\n    sizes=\"100vw\"\n    width=\"800\"\n    height=\"1000\"\n    type=\"image/avif\"\n  />\n  \u003csource\n    media=\"(max-width: 767px)\"\n    srcset=\"/hero-mobile-400.webp 400w, /hero-mobile-800.webp 800w\"\n    sizes=\"100vw\"\n    width=\"800\"\n    height=\"1000\"\n    type=\"image/webp\"\n  />\n  \u003c!-- Desktop: landscape crop (2:1) -->\n  \u003csource\n    srcset=\"/hero-800.avif 800w, /hero-1200.avif 1200w, /hero-1600.avif 1600w\"\n    sizes=\"(max-width: 1200px) 100vw, 1200px\"\n    width=\"1200\"\n    height=\"600\"\n    type=\"image/avif\"\n  />\n  \u003csource\n    srcset=\"/hero-800.webp 800w, /hero-1200.webp 1200w, /hero-1600.webp 1600w\"\n    sizes=\"(max-width: 1200px) 100vw, 1200px\"\n    width=\"1200\"\n    height=\"600\"\n    type=\"image/webp\"\n  />\n  \u003cimg\n    src=\"/hero-desktop.jpg\"\n    width=\"1200\"\n    height=\"600\"\n    fetchpriority=\"high\"\n    alt=\"Hero image description\"\n  />\n\u003c/picture>\n\n\u003c!-- GOOD: Below-the-fold image — lazy loaded + async decoding -->\n\u003cimg\n  src=\"/content.webp\"\n  width=\"800\"\n  height=\"400\"\n  loading=\"lazy\"\n  decoding=\"async\"\n  alt=\"Content image description\"\n/>\n```\n\n#### Unnecessary Re-renders (React)\n\n```tsx\n// BAD: Creates new object on every render, causing children to re-render\nfunction TaskList() {\n  return \u003cTaskFilters options={{ sortBy: 'date', order: 'desc' }} />;\n}\n\n// GOOD: Stable reference\nconst DEFAULT_OPTIONS = { sortBy: 'date', order: 'desc' } as const;\nfunction TaskList() {\n  return \u003cTaskFilters options={DEFAULT_OPTIONS} />;\n}\n\n// Use React.memo for expensive components\nconst TaskItem = React.memo(function TaskItem({ task }: Props) {\n  return \u003cdiv>{/* expensive render */}\u003c/div>;\n});\n\n// Use useMemo for expensive computations\nfunction TaskStats({ tasks }: Props) {\n  const stats = useMemo(() => calculateStats(tasks), [tasks]);\n  return \u003cdiv>{stats.completed} / {stats.total}\u003c/div>;\n}\n```\n\n#### Large Bundle Size\n\n```typescript\n// Modern bundlers (Vite, webpack 5+) handle named imports with tree-shaking automatically,\n// provided the dependency ships ESM and is marked `sideEffects: false` in package.json.\n// Profile before changing import styles — the real gains come from splitting and lazy loading.\n\n// GOOD: Dynamic import for heavy, rarely-used features\nconst ChartLibrary = lazy(() => import('./ChartLibrary'));\n\n// GOOD: Route-level code splitting wrapped in Suspense\nconst SettingsPage = lazy(() => import('./pages/Settings'));\n\nfunction App() {\n  return (\n    \u003cSuspense fallback={\u003cSpinner />}>\n      \u003cSettingsPage />\n    \u003c/Suspense>\n  );\n}\n```\n\n#### Missing Caching (Backend)\n\n```typescript\n// Cache frequently-read, rarely-changed data\nconst CACHE_TTL = 5 * 60 * 1000; // 5 minutes\nlet cachedConfig: AppConfig | null = null;\nlet cacheExpiry = 0;\n\nasync function getAppConfig(): Promise\u003cAppConfig> {\n  if (cachedConfig && Date.now() \u003c cacheExpiry) {\n    return cachedConfig;\n  }\n  cachedConfig = await db.config.findFirst();\n  cacheExpiry = Date.now() + CACHE_TTL;\n  return cachedConfig;\n}\n\n// HTTP caching headers for static assets\napp.use('/static', express.static('public', {\n  maxAge: '1y',           // Cache for 1 year\n  immutable: true,        // Never revalidate (use content hashing in filenames)\n}));\n\n// Cache-Control for API responses\nres.set('Cache-Control', 'public, max-age=300'); // 5 minutes\n```\n\n## Performance Budget\n\nSet budgets and enforce them:\n\n```\nJavaScript bundle: \u003c 200KB gzipped (initial load)\nCSS: \u003c 50KB gzipped\nImages: \u003c 200KB per image (above the fold)\nFonts: \u003c 100KB total\nAPI response time: \u003c 200ms (p95)\nTime to Interactive: \u003c 3.5s on 4G\nLighthouse Performance score: ≥ 90\n```\n\n**Enforce in CI:**\n```bash\n# Bundle size check\nnpx bundlesize --config bundlesize.config.json\n\n# Lighthouse CI\nnpx lhci autorun\n```\n\n## See Also\n\nFor detailed performance checklists, optimization commands, and anti-pattern reference, see `references/performance-checklist.md`.\n\n\n## Common Rationalizations\n\n| Rationalization | Reality |\n|---|---|\n| \"We'll optimize later\" | Performance debt compounds. Fix obvious anti-patterns now, defer micro-optimizations. |\n| \"It's fast on my machine\" | Your machine isn't the user's. Profile on representative hardware and networks. |\n| \"This optimization is obvious\" | If you didn't measure, you don't know. Profile first. |\n| \"Users won't notice 100ms\" | Research shows 100ms delays impact conversion rates. Users notice more than you think. |\n| \"The framework handles performance\" | Frameworks prevent some issues but can't fix N+1 queries or oversized bundles. |\n\n## Red Flags\n\n- Optimization without profiling data to justify it\n- N+1 query patterns in data fetching\n- List endpoints without pagination\n- Images without dimensions, lazy loading, or responsive sizes\n- Bundle size growing without review\n- No performance monitoring in production\n- `React.memo` and `useMemo` everywhere (overusing is as bad as underusing)\n\n## Verification\n\nAfter any performance-related change:\n\n- [ ] Before and after measurements exist (specific numbers)\n- [ ] The specific bottleneck is identified and addressed\n- [ ] Core Web Vitals are within \"Good\" thresholds\n- [ ] Bundle size hasn't increased significantly\n- [ ] No N+1 queries in new data fetching code\n- [ ] Performance budget passes in CI (if configured)\n- [ ] Existing tests still pass (optimization didn't break behavior)\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("performance-optimization-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

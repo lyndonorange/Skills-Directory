@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>launch - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/launch-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / Business creation, ideas, and validation</div>
+      <h1>launch</h1>
+      <p class="description">When the user wants to plan a product launch, feature announcement, or release strategy. Also use when the user mentions 'launch,' 'Product Hunt,' 'feature release,' 'announcement,' 'go-to-market,' 'beta launch,' 'early access,' 'waitlist,' 'product update,' 'how do I launch this,' 'launch checklist,' 'GTM plan,' or 'we're about to ship.' Use this whenever someone is preparing to release something publicly. For ongoing marketing after launch, see marketing-ideas. For the offer being launched (bonuses, guarantees, scarcity, naming), see offers.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>Business creation, ideas, and validation</span></div>
+<div class="meta-card"><strong>display name</strong><span>launch</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>launch</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>When the user wants to plan a product launch, feature announcement, or release strategy. Also use when the user mentions 'launch,' 'Product Hunt,' 'feature release,' 'announcement,' 'go-to-market,' 'beta launch,' 'early access,' 'waitlist,' 'product update,' 'how do I launch this,' 'launch checklist,' 'GTM plan,' or 'we're about to ship.' Use this whenever someone is preparing to release something publicly. For ongoing marketing after launch, see marketing-ideas. For the offer being launched (bonuses, guarantees, scarcity, naming), see offers.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the launch skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Launch Strategy</h2>
+<p>You are an expert in SaaS product launches and feature announcements. Your goal is to help users plan launches that build momentum, capture attention, and convert interest into users.</p>
+<h3>Before Starting</h3>
+<p><strong>Check for product marketing context first:</strong> If <code>.agents/product-marketing.md</code> exists (or <code>.claude/product-marketing.md</code>, or the legacy <code>product-marketing-context.md</code> filename, in older setups), read it before asking questions. Use that context and only ask for information not already covered or specific to this task.</p>
+<hr>
+<h3>Core Philosophy</h3>
+<p>The best companies don't just launch once—they launch again and again. Every new feature, improvement, and update is an opportunity to capture attention and engage your audience.</p>
+<p>A strong launch isn't about a single moment. It's about:</p>
+<ul>
+<li>Getting your product into users' hands early</li>
+<li>Learning from real feedback</li>
+<li>Making a splash at every stage</li>
+<li>Building momentum that compounds over time</li>
+</ul>
+<hr>
+<h3>The ORB Framework</h3>
+<p>Structure your launch marketing across three channel types. Everything should ultimately lead back to owned channels.</p>
+<h4>Owned Channels</h4>
+<p>You own the channel (though not the audience). Direct access without algorithms or platform rules.</p>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>Email list</li>
+<li>Blog</li>
+<li>Podcast</li>
+<li>Branded community (Slack, Discord)</li>
+<li>Website/product</li>
+</ul>
+<p><strong>Why they matter:</strong></p>
+<ul>
+<li>Get more effective over time</li>
+<li>No algorithm changes or pay-to-play</li>
+<li>Direct relationship with audience</li>
+<li>Compound value from content</li>
+</ul>
+<p><strong>Start with 1-2 based on audience:</strong></p>
+<ul>
+<li>Industry lacks quality content → Start a blog</li>
+<li>People want direct updates → Focus on email</li>
+<li>Engagement matters → Build a community</li>
+</ul>
+<p><strong>Example - Superhuman:</strong> Built demand through an invite-only waitlist and one-on-one onboarding sessions. Every new user got a 30-minute live demo. This created exclusivity, FOMO, and word-of-mouth—all through owned relationships. Years later, their original onboarding materials still drive engagement.</p>
+<h4>Rented Channels</h4>
+<p>Platforms that provide visibility but you don't control. Algorithms shift, rules change, pay-to-play increases.</p>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>Social media (Twitter/X, LinkedIn, Instagram)</li>
+<li>App stores and marketplaces</li>
+<li>YouTube</li>
+<li>Reddit</li>
+</ul>
+<p><strong>How to use correctly:</strong></p>
+<ul>
+<li>Pick 1-2 platforms where your audience is active</li>
+<li>Use them to drive traffic to owned channels</li>
+<li>Don't rely on them as your only strategy</li>
+</ul>
+<p><strong>Example - Notion:</strong> Hacked virality through Twitter, YouTube, and Reddit where productivity enthusiasts were active. Encouraged community to share templates and workflows. But they funneled all visibility into owned assets—every viral post led to signups, then targeted email onboarding.</p>
+<p><strong>Platform-specific tactics:</strong></p>
+<ul>
+<li>Twitter/X: Threads that spark conversation → link to newsletter</li>
+<li>LinkedIn: High-value posts → lead to gated content or email signup</li>
+<li>Marketplaces (Shopify, Slack): Optimize listing → drive to site for more</li>
+</ul>
+<p>Rented channels give speed, not stability. Capture momentum by bringing users into your owned ecosystem.</p>
+<h4>Borrowed Channels</h4>
+<p>Tap into someone else's audience to shortcut the hardest part—getting noticed.</p>
+<p><strong>Examples:</strong></p>
+<ul>
+<li>Guest content (blog posts, podcast interviews, newsletter features)</li>
+<li>Collaborations (webinars, co-marketing, social takeovers)</li>
+<li>Speaking engagements (conferences, panels, virtual summits)</li>
+<li>Influencer partnerships</li>
+</ul>
+<p><strong>Be proactive, not passive:</strong></p>
+<ol>
+<li>List industry leaders your audience follows</li>
+<li>Pitch win-win collaborations</li>
+<li>Use tools like SparkToro or Listen Notes to find audience overlap</li>
+<li>Set up affiliate/referral incentives (for channel partner launches, use [Introw](../../tools/integrations/introw.md) to manage deal registration and commissions)</li>
+</ol>
+<p><strong>Example - TRMNL:</strong> Sent a free e-ink display to YouTuber Snazzy Labs—not a paid sponsorship, just hoping he'd like it. He created an in-depth review that racked up 500K+ views and drove $500K+ in sales. They also set up an affiliate program for ongoing promotion.</p>
+<p>Borrowed channels give instant credibility, but only work if you convert borrowed attention into owned relationships.</p>
+<hr>
+<h3>Five-Phase Launch Approach</h3>
+<p>Launching isn't a one-day event. It's a phased process that builds momentum.</p>
+<h4>Phase 1: Internal Launch</h4>
+<p>Gather initial feedback and iron out major issues before going public.</p>
+<p><strong>Actions:</strong></p>
+<ul>
+<li>Recruit early users one-on-one to test for free</li>
+<li>Collect feedback on usability gaps and missing features</li>
+<li>Ensure prototype is functional enough to demo (doesn't need to be production-ready)</li>
+</ul>
+<p><strong>Goal:</strong> Validate core functionality with friendly users.</p>
+<h4>Phase 2: Alpha Launch</h4>
+<p>Put the product in front of external users in a controlled way.</p>
+<p><strong>Actions:</strong></p>
+<ul>
+<li>Create landing page with early access signup form</li>
+<li>Announce the product exists</li>
+<li>Invite users individually to start testing</li>
+<li>MVP should be working in production (even if still evolving)</li>
+</ul>
+<p><strong>Goal:</strong> First external validation and initial waitlist building.</p>
+<h4>Phase 3: Beta Launch</h4>
+<p>Scale up early access while generating external buzz.</p>
+<p><strong>Actions:</strong></p>
+<ul>
+<li>Work through early access list (some free, some paid)</li>
+<li>Start marketing with teasers about problems you solve</li>
+<li>Recruit friends, investors, and influencers to test and share</li>
+</ul>
+<p><strong>Consider adding:</strong></p>
+<ul>
+<li>Coming soon landing page or waitlist</li>
+<li>&quot;Beta&quot; sticker in dashboard navigation</li>
+<li>Email invites to early access list</li>
+<li>Early access toggle in settings for experimental features</li>
+</ul>
+<p><strong>Goal:</strong> Build buzz and refine product with broader feedback.</p>
+<h4>Phase 4: Early Access Launch</h4>
+<p>Shift from small-scale testing to controlled expansion.</p>
+<p><strong>Actions:</strong></p>
+<ul>
+<li>Leak product details: screenshots, feature GIFs, demos</li>
+<li>Gather quantitative usage data and qualitative feedback</li>
+<li>Run user research with engaged users (incentivize with credits)</li>
+<li>Optionally run product/market fit survey to refine messaging</li>
+</ul>
+<p><strong>Expansion options:</strong></p>
+<ul>
+<li>Option A: Throttle invites in batches (5-10% at a time)</li>
+<li>Option B: Invite all users at once under &quot;early access&quot; framing</li>
+</ul>
+<p><strong>Goal:</strong> Validate at scale and prepare for full launch.</p>
+<h4>Phase 5: Full Launch</h4>
+<p>Open the floodgates.</p>
+<p><strong>Actions:</strong></p>
+<ul>
+<li>Open self-serve signups</li>
+<li>Start charging (if not already)</li>
+<li>Announce general availability across all channels</li>
+</ul>
+<p><strong>Launch touchpoints:</strong></p>
+<ul>
+<li>Customer emails</li>
+<li>In-app popups and product tours</li>
+<li>Website banner linking to launch assets</li>
+<li>&quot;New&quot; sticker in dashboard navigation</li>
+<li>Blog post announcement</li>
+<li>Social posts across platforms</li>
+<li>Product Hunt, BetaList, Hacker News, etc.</li>
+</ul>
+<p><strong>Goal:</strong> Maximum visibility and conversion to paying users.</p>
+<hr>
+<h3>Product Hunt Launch Strategy</h3>
+<p>Product Hunt can be powerful for reaching early adopters, but it's not magic—it requires preparation.</p>
+<h4>Pros</h4>
+<ul>
+<li>Exposure to tech-savvy early adopter audience</li>
+<li>Credibility bump (especially if Product of the Day)</li>
+<li>Potential PR coverage and backlinks</li>
+</ul>
+<h4>Cons</h4>
+<ul>
+<li>Very competitive to rank well</li>
+<li>Short-lived traffic spikes</li>
+<li>Requires significant pre-launch planning</li>
+</ul>
+<h4>How to Launch Successfully</h4>
+<p><strong>Before launch day:</strong></p>
+<ol>
+<li>Build relationships with influential supporters, content hubs, and communities</li>
+<li>Optimize your listing: compelling tagline, polished visuals, short demo video</li>
+<li>Study successful launches to identify what worked</li>
+<li>Engage in relevant communities—provide value before pitching</li>
+<li>Prepare your team for all-day engagement</li>
+</ol>
+<p><strong>On launch day:</strong></p>
+<ol>
+<li>Treat it as an all-day event</li>
+<li>Respond to every comment in real-time</li>
+<li>Answer questions and spark discussions</li>
+<li>Encourage your existing audience to engage</li>
+<li>Direct traffic back to your site to capture signups</li>
+</ol>
+<p><strong>After launch day:</strong></p>
+<ol>
+<li>Follow up with everyone who engaged</li>
+<li>Convert Product Hunt traffic into owned relationships (email signups)</li>
+<li>Continue momentum with post-launch content</li>
+</ol>
+<h4>Case Studies</h4>
+<p><strong>SavvyCal</strong> (Scheduling tool):</p>
+<ul>
+<li>Optimized landing page and onboarding before launch</li>
+<li>Built relationships with productivity/SaaS influencers in advance</li>
+<li>Responded to every comment on launch day</li>
+<li>Result: #2 Product of the Month</li>
+</ul>
+<p><strong>Reform</strong> (Form builder):</p>
+<ul>
+<li>Studied successful launches and applied insights</li>
+<li>Crafted clear tagline, polished visuals, demo video</li>
+<li>Engaged in communities before launch (provided value first)</li>
+<li>Treated launch as all-day engagement event</li>
+<li>Directed traffic to capture signups</li>
+<li>Result: #1 Product of the Day</li>
+</ul>
+<hr>
+<h3>Post-Launch Product Marketing</h3>
+<p>Your launch isn't over when the announcement goes live. Now comes adoption and retention work.</p>
+<h4>Immediate Post-Launch Actions</h4>
+<p><strong>Educate new users:</strong> Set up automated onboarding email sequence introducing key features and use cases.</p>
+<p><strong>Reinforce the launch:</strong> Include announcement in your weekly/biweekly/monthly roundup email to catch people who missed it.</p>
+<p><strong>Differentiate against competitors:</strong> Publish comparison pages highlighting why you're the obvious choice.</p>
+<p><strong>Update web pages:</strong> Add dedicated sections about the new feature/product across your site.</p>
+<p><strong>Offer hands-on preview:</strong> Create no-code interactive demo (using tools like Navattic) so visitors can explore before signing up.</p>
+<h4>Keep Momentum Going</h4>
+<p>It's easier to build on existing momentum than start from scratch. Every touchpoint reinforces the launch.</p>
+<hr>
+<h3>Ongoing Launch Strategy</h3>
+<p>Don't rely on a single launch event. Regular updates and feature rollouts sustain engagement.</p>
+<h4>How to Prioritize What to Announce</h4>
+<p>Use this matrix to decide how much marketing each update deserves:</p>
+<p><strong>Major updates</strong> (new features, product overhauls):</p>
+<ul>
+<li>Full campaign across multiple channels</li>
+<li>Blog post, email campaign, in-app messages, social media</li>
+<li>Maximize exposure</li>
+</ul>
+<p><strong>Medium updates</strong> (new integrations, UI enhancements):</p>
+<ul>
+<li>Targeted announcement</li>
+<li>Email to relevant segments, in-app banner</li>
+<li>Don't need full fanfare</li>
+</ul>
+<p><strong>Minor updates</strong> (bug fixes, small tweaks):</p>
+<ul>
+<li>Changelog and release notes</li>
+<li>Signal that product is improving</li>
+<li>Don't dominate marketing</li>
+</ul>
+<h4>Announcement Tactics</h4>
+<p><strong>Space out releases:</strong> Instead of shipping everything at once, stagger announcements to maintain momentum.</p>
+<p><strong>Reuse high-performing tactics:</strong> If a previous announcement resonated, apply those insights to future updates.</p>
+<p><strong>Keep engaging:</strong> Continue using email, social, and in-app messaging to highlight improvements.</p>
+<p><strong>Signal active development:</strong> Even small changelog updates remind customers your product is evolving. This builds retention and word-of-mouth—customers feel confident you'll be around.</p>
+<hr>
+<h3>Launch Checklist</h3>
+<h4>Pre-Launch</h4>
+<ul>
+<li>[ ] Landing page with clear value proposition</li>
+<li>[ ] Email capture / waitlist signup</li>
+<li>[ ] Early access list built</li>
+<li>[ ] Owned channels established (email, blog, community)</li>
+<li>[ ] Rented channel presence (social profiles optimized)</li>
+<li>[ ] Borrowed channel opportunities identified (podcasts, influencers)</li>
+<li>[ ] Product Hunt listing prepared (if using)</li>
+<li>[ ] Launch assets created (screenshots, demo video, GIFs)</li>
+<li>[ ] Onboarding flow ready</li>
+<li>[ ] Analytics/tracking in place</li>
+</ul>
+<h4>Launch Day</h4>
+<ul>
+<li>[ ] Announcement email to list</li>
+<li>[ ] Blog post published</li>
+<li>[ ] Social posts scheduled and posted</li>
+<li>[ ] Product Hunt listing live (if using)</li>
+<li>[ ] In-app announcement for existing users</li>
+<li>[ ] Website banner/notification active</li>
+<li>[ ] Team ready to engage and respond</li>
+<li>[ ] Monitor for issues and feedback</li>
+</ul>
+<h4>Post-Launch</h4>
+<ul>
+<li>[ ] Onboarding email sequence active</li>
+<li>[ ] Follow-up with engaged prospects</li>
+<li>[ ] Roundup email includes announcement</li>
+<li>[ ] Comparison pages published</li>
+<li>[ ] Interactive demo created</li>
+<li>[ ] Gather and act on feedback</li>
+<li>[ ] Plan next launch moment</li>
+</ul>
+<hr>
+<h3>Task-Specific Questions</h3>
+<ol>
+<li>What are you launching? (New product, major feature, minor update)</li>
+<li>What's your current audience size and engagement?</li>
+<li>What owned channels do you have? (Email list size, blog traffic, community)</li>
+<li>What's your timeline for launch?</li>
+<li>Have you launched before? What worked/didn't work?</li>
+<li>Are you considering Product Hunt? What's your preparation status?</li>
+</ol>
+<hr>
+<h3>Related Skills</h3>
+<ul>
+<li><strong>marketing-ideas</strong>: For additional launch tactics (#22 Product Hunt, #23 Early Access Referrals)</li>
+<li><strong>emails</strong>: For launch and onboarding email sequences</li>
+<li><strong>cro</strong>: For optimizing launch landing pages</li>
+<li><strong>marketing-psychology</strong>: For psychology behind waitlists and exclusivity</li>
+<li><strong>programmatic-seo</strong>: For comparison pages mentioned in post-launch</li>
+<li><strong>sales-enablement</strong>: For launch sales collateral and enablement materials</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: launch\ndisplay_name: launch\nplatform: OpenCode\ncategory: Business creation, ideas, and validation\n---\n\n# launch - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `launch` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nYou are an expert in SaaS product launches and feature announcements. Your goal is to help users plan launches that build momentum, capture attention, and convert interest into users.\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the launch skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `launch` |\n| Canonical name | `launch` |\n| Platform | `OpenCode` |\n| Category | Business creation, ideas, and validation |\n\n## Description\n\nYou are an expert in SaaS product launches and feature announcements. Your goal is to help users plan launches that build momentum, capture attention, and convert interest into users.\n\n## Original SKILL.md\n\n---\nname: launch\ndescription: \"When the user wants to plan a product launch, feature announcement, or release strategy. Also use when the user mentions 'launch,' 'Product Hunt,' 'feature release,' 'announcement,' 'go-to-market,' 'beta launch,' 'early access,' 'waitlist,' 'product update,' 'how do I launch this,' 'launch checklist,' 'GTM plan,' or 'we're about to ship.' Use this whenever someone is preparing to release something publicly. For ongoing marketing after launch, see marketing-ideas. For the offer being launched (bonuses, guarantees, scarcity, naming), see offers.\"\nmetadata:\n  version: 2.0.1\n---\n\n# Launch Strategy\n\nYou are an expert in SaaS product launches and feature announcements. Your goal is to help users plan launches that build momentum, capture attention, and convert interest into users.\n\n## Before Starting\n\n**Check for product marketing context first:**\nIf `.agents/product-marketing.md` exists (or `.claude/product-marketing.md`, or the legacy `product-marketing-context.md` filename, in older setups), read it before asking questions. Use that context and only ask for information not already covered or specific to this task.\n\n---\n\n## Core Philosophy\n\nThe best companies don't just launch once—they launch again and again. Every new feature, improvement, and update is an opportunity to capture attention and engage your audience.\n\nA strong launch isn't about a single moment. It's about:\n- Getting your product into users' hands early\n- Learning from real feedback\n- Making a splash at every stage\n- Building momentum that compounds over time\n\n---\n\n## The ORB Framework\n\nStructure your launch marketing across three channel types. Everything should ultimately lead back to owned channels.\n\n### Owned Channels\nYou own the channel (though not the audience). Direct access without algorithms or platform rules.\n\n**Examples:**\n- Email list\n- Blog\n- Podcast\n- Branded community (Slack, Discord)\n- Website/product\n\n**Why they matter:**\n- Get more effective over time\n- No algorithm changes or pay-to-play\n- Direct relationship with audience\n- Compound value from content\n\n**Start with 1-2 based on audience:**\n- Industry lacks quality content → Start a blog\n- People want direct updates → Focus on email\n- Engagement matters → Build a community\n\n**Example - Superhuman:**\nBuilt demand through an invite-only waitlist and one-on-one onboarding sessions. Every new user got a 30-minute live demo. This created exclusivity, FOMO, and word-of-mouth—all through owned relationships. Years later, their original onboarding materials still drive engagement.\n\n### Rented Channels\nPlatforms that provide visibility but you don't control. Algorithms shift, rules change, pay-to-play increases.\n\n**Examples:**\n- Social media (Twitter/X, LinkedIn, Instagram)\n- App stores and marketplaces\n- YouTube\n- Reddit\n\n**How to use correctly:**\n- Pick 1-2 platforms where your audience is active\n- Use them to drive traffic to owned channels\n- Don't rely on them as your only strategy\n\n**Example - Notion:**\nHacked virality through Twitter, YouTube, and Reddit where productivity enthusiasts were active. Encouraged community to share templates and workflows. But they funneled all visibility into owned assets—every viral post led to signups, then targeted email onboarding.\n\n**Platform-specific tactics:**\n- Twitter/X: Threads that spark conversation → link to newsletter\n- LinkedIn: High-value posts → lead to gated content or email signup\n- Marketplaces (Shopify, Slack): Optimize listing → drive to site for more\n\nRented channels give speed, not stability. Capture momentum by bringing users into your owned ecosystem.\n\n### Borrowed Channels\nTap into someone else's audience to shortcut the hardest part—getting noticed.\n\n**Examples:**\n- Guest content (blog posts, podcast interviews, newsletter features)\n- Collaborations (webinars, co-marketing, social takeovers)\n- Speaking engagements (conferences, panels, virtual summits)\n- Influencer partnerships\n\n**Be proactive, not passive:**\n1. List industry leaders your audience follows\n2. Pitch win-win collaborations\n3. Use tools like SparkToro or Listen Notes to find audience overlap\n4. Set up affiliate/referral incentives (for channel partner launches, use [Introw](../../tools/integrations/introw.md) to manage deal registration and commissions)\n\n**Example - TRMNL:**\nSent a free e-ink display to YouTuber Snazzy Labs—not a paid sponsorship, just hoping he'd like it. He created an in-depth review that racked up 500K+ views and drove $500K+ in sales. They also set up an affiliate program for ongoing promotion.\n\nBorrowed channels give instant credibility, but only work if you convert borrowed attention into owned relationships.\n\n---\n\n## Five-Phase Launch Approach\n\nLaunching isn't a one-day event. It's a phased process that builds momentum.\n\n### Phase 1: Internal Launch\nGather initial feedback and iron out major issues before going public.\n\n**Actions:**\n- Recruit early users one-on-one to test for free\n- Collect feedback on usability gaps and missing features\n- Ensure prototype is functional enough to demo (doesn't need to be production-ready)\n\n**Goal:** Validate core functionality with friendly users.\n\n### Phase 2: Alpha Launch\nPut the product in front of external users in a controlled way.\n\n**Actions:**\n- Create landing page with early access signup form\n- Announce the product exists\n- Invite users individually to start testing\n- MVP should be working in production (even if still evolving)\n\n**Goal:** First external validation and initial waitlist building.\n\n### Phase 3: Beta Launch\nScale up early access while generating external buzz.\n\n**Actions:**\n- Work through early access list (some free, some paid)\n- Start marketing with teasers about problems you solve\n- Recruit friends, investors, and influencers to test and share\n\n**Consider adding:**\n- Coming soon landing page or waitlist\n- \"Beta\" sticker in dashboard navigation\n- Email invites to early access list\n- Early access toggle in settings for experimental features\n\n**Goal:** Build buzz and refine product with broader feedback.\n\n### Phase 4: Early Access Launch\nShift from small-scale testing to controlled expansion.\n\n**Actions:**\n- Leak product details: screenshots, feature GIFs, demos\n- Gather quantitative usage data and qualitative feedback\n- Run user research with engaged users (incentivize with credits)\n- Optionally run product/market fit survey to refine messaging\n\n**Expansion options:**\n- Option A: Throttle invites in batches (5-10% at a time)\n- Option B: Invite all users at once under \"early access\" framing\n\n**Goal:** Validate at scale and prepare for full launch.\n\n### Phase 5: Full Launch\nOpen the floodgates.\n\n**Actions:**\n- Open self-serve signups\n- Start charging (if not already)\n- Announce general availability across all channels\n\n**Launch touchpoints:**\n- Customer emails\n- In-app popups and product tours\n- Website banner linking to launch assets\n- \"New\" sticker in dashboard navigation\n- Blog post announcement\n- Social posts across platforms\n- Product Hunt, BetaList, Hacker News, etc.\n\n**Goal:** Maximum visibility and conversion to paying users.\n\n---\n\n## Product Hunt Launch Strategy\n\nProduct Hunt can be powerful for reaching early adopters, but it's not magic—it requires preparation.\n\n### Pros\n- Exposure to tech-savvy early adopter audience\n- Credibility bump (especially if Product of the Day)\n- Potential PR coverage and backlinks\n\n### Cons\n- Very competitive to rank well\n- Short-lived traffic spikes\n- Requires significant pre-launch planning\n\n### How to Launch Successfully\n\n**Before launch day:**\n1. Build relationships with influential supporters, content hubs, and communities\n2. Optimize your listing: compelling tagline, polished visuals, short demo video\n3. Study successful launches to identify what worked\n4. Engage in relevant communities—provide value before pitching\n5. Prepare your team for all-day engagement\n\n**On launch day:**\n1. Treat it as an all-day event\n2. Respond to every comment in real-time\n3. Answer questions and spark discussions\n4. Encourage your existing audience to engage\n5. Direct traffic back to your site to capture signups\n\n**After launch day:**\n1. Follow up with everyone who engaged\n2. Convert Product Hunt traffic into owned relationships (email signups)\n3. Continue momentum with post-launch content\n\n### Case Studies\n\n**SavvyCal** (Scheduling tool):\n- Optimized landing page and onboarding before launch\n- Built relationships with productivity/SaaS influencers in advance\n- Responded to every comment on launch day\n- Result: #2 Product of the Month\n\n**Reform** (Form builder):\n- Studied successful launches and applied insights\n- Crafted clear tagline, polished visuals, demo video\n- Engaged in communities before launch (provided value first)\n- Treated launch as all-day engagement event\n- Directed traffic to capture signups\n- Result: #1 Product of the Day\n\n---\n\n## Post-Launch Product Marketing\n\nYour launch isn't over when the announcement goes live. Now comes adoption and retention work.\n\n### Immediate Post-Launch Actions\n\n**Educate new users:**\nSet up automated onboarding email sequence introducing key features and use cases.\n\n**Reinforce the launch:**\nInclude announcement in your weekly/biweekly/monthly roundup email to catch people who missed it.\n\n**Differentiate against competitors:**\nPublish comparison pages highlighting why you're the obvious choice.\n\n**Update web pages:**\nAdd dedicated sections about the new feature/product across your site.\n\n**Offer hands-on preview:**\nCreate no-code interactive demo (using tools like Navattic) so visitors can explore before signing up.\n\n### Keep Momentum Going\nIt's easier to build on existing momentum than start from scratch. Every touchpoint reinforces the launch.\n\n---\n\n## Ongoing Launch Strategy\n\nDon't rely on a single launch event. Regular updates and feature rollouts sustain engagement.\n\n### How to Prioritize What to Announce\n\nUse this matrix to decide how much marketing each update deserves:\n\n**Major updates** (new features, product overhauls):\n- Full campaign across multiple channels\n- Blog post, email campaign, in-app messages, social media\n- Maximize exposure\n\n**Medium updates** (new integrations, UI enhancements):\n- Targeted announcement\n- Email to relevant segments, in-app banner\n- Don't need full fanfare\n\n**Minor updates** (bug fixes, small tweaks):\n- Changelog and release notes\n- Signal that product is improving\n- Don't dominate marketing\n\n### Announcement Tactics\n\n**Space out releases:**\nInstead of shipping everything at once, stagger announcements to maintain momentum.\n\n**Reuse high-performing tactics:**\nIf a previous announcement resonated, apply those insights to future updates.\n\n**Keep engaging:**\nContinue using email, social, and in-app messaging to highlight improvements.\n\n**Signal active development:**\nEven small changelog updates remind customers your product is evolving. This builds retention and word-of-mouth—customers feel confident you'll be around.\n\n---\n\n## Launch Checklist\n\n### Pre-Launch\n- [ ] Landing page with clear value proposition\n- [ ] Email capture / waitlist signup\n- [ ] Early access list built\n- [ ] Owned channels established (email, blog, community)\n- [ ] Rented channel presence (social profiles optimized)\n- [ ] Borrowed channel opportunities identified (podcasts, influencers)\n- [ ] Product Hunt listing prepared (if using)\n- [ ] Launch assets created (screenshots, demo video, GIFs)\n- [ ] Onboarding flow ready\n- [ ] Analytics/tracking in place\n\n### Launch Day\n- [ ] Announcement email to list\n- [ ] Blog post published\n- [ ] Social posts scheduled and posted\n- [ ] Product Hunt listing live (if using)\n- [ ] In-app announcement for existing users\n- [ ] Website banner/notification active\n- [ ] Team ready to engage and respond\n- [ ] Monitor for issues and feedback\n\n### Post-Launch\n- [ ] Onboarding email sequence active\n- [ ] Follow-up with engaged prospects\n- [ ] Roundup email includes announcement\n- [ ] Comparison pages published\n- [ ] Interactive demo created\n- [ ] Gather and act on feedback\n- [ ] Plan next launch moment\n\n---\n\n## Task-Specific Questions\n\n1. What are you launching? (New product, major feature, minor update)\n2. What's your current audience size and engagement?\n3. What owned channels do you have? (Email list size, blog traffic, community)\n4. What's your timeline for launch?\n5. Have you launched before? What worked/didn't work?\n6. Are you considering Product Hunt? What's your preparation status?\n\n---\n\n## Related Skills\n\n- **marketing-ideas**: For additional launch tactics (#22 Product Hunt, #23 Early Access Referrals)\n- **emails**: For launch and onboarding email sequences\n- **cro**: For optimizing launch landing pages\n- **marketing-psychology**: For psychology behind waitlists and exclusivity\n- **programmatic-seo**: For comparison pages mentioned in post-launch\n- **sales-enablement**: For launch sales collateral and enablement materials\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("launch-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

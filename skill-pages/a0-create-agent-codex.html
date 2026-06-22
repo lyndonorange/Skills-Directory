@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>a0-create-agent - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/a0-create-agent-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Agent platforms, tools, and automation</div>
+      <h1>a0-create-agent</h1>
+      <p class="description">Create a new Agent Zero agent profile (subordinate). Covers where profiles live (user / plugin-distributed / project-scoped), the agent.yaml schema, the prompt inheritance &amp; override model, and optional profile-specific tools and extensions. Use for any &quot;create/add/new agent profile&quot; request.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Agent platforms, tools, and automation</span></div>
+<div class="meta-card"><strong>display name</strong><span>a0-create-agent</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>a0-create-agent</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Create a new Agent Zero agent profile (subordinate). Covers where profiles live (user / plugin-distributed / project-scoped), the agent.yaml schema, the prompt inheritance &amp; override model, and optional profile-specific tools and extensions. Use for any &quot;create/add/new agent profile&quot; request.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose a0-create-agent, then write the task. Fallback prompt: Use the a0-create-agent skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Create an Agent Zero Agent Profile</h2>
+<blockquote>[!IMPORTANT]</blockquote>
+<blockquote>Do <strong>not</strong> create new profiles in <code>/a0/agents/</code> — that directory is reserved for core framework profiles (<code>default</code>, <code>agent0</code>, <code>developer</code>, <code>hacker</code>, <code>researcher</code>, <code>_example</code>). User profiles belong in <code>/a0/usr/agents/&lt;profile_name&gt;/</code>.</blockquote>
+<p>Related skills: <code>/a0/skills/a0-development/SKILL.md</code> (broader framework guide) | <code>/a0/skills/a0-create-plugin/SKILL.md</code> (bundle a profile inside a plugin).</p>
+<p>Primary references:</p>
+<ul>
+<li><code>/a0/agents/_example/</code> — the canonical reference profile (tool + extension + prompt overrides)</li>
+<li><code>/a0/agents/default/</code> — the base profile every other profile inherits from</li>
+<li><code>/a0/plugins/AGENTS.md</code> — plugin-distributed profiles + per-profile config</li>
+</ul>
+<hr>
+<h3>Existing Profile Pattern</h3>
+<p>The built-in profiles are intentionally split into two layers:</p>
+<ol>
+<li><code>agent.yaml</code> is tiny metadata for discovery and delegation:</li>
+</ol>
+<ul>
+<li><code>title</code></li>
+<li><code>description</code></li>
+<li><code>context</code></li>
+</ul>
+<ol>
+<li>The actual profile behavior usually lives in <code>prompts/agent.system.main.specifics.md</code>.</li>
+</ol>
+<p>Use the shipped profiles as calibration:</p>
+<p>| Profile | Pattern to copy | |---|---| | <code>agent0</code> | Minimal top-level assistant identity | | <code>developer</code> | Rich capabilities, methodology, output requirements | | <code>researcher</code> | Rich capabilities, methodology, evidence standards | | <code>hacker</code> | Short, direct operational identity plus optional environment override | | <code>_example</code> | Minimal demo of prompt/tool/extension override surfaces |</p>
+<p>For most new profiles, create <code>agent.yaml</code> plus one strong <code>agent.system.main.specifics.md</code>. Add other prompt overrides, tools, or extensions only when the blueprint explicitly needs them.</p>
+<hr>
+<h3>Step 0: Progressive Intake</h3>
+<p>Do not ask the user a long form. New users are easily overwhelmed. Guide them with lossy compression: ask only the next highest-value question, one or two questions per turn maximum.</p>
+<p>Default assumptions unless the user says otherwise:</p>
+<ul>
+<li>Scope: user profile in <code>/a0/usr/agents/&lt;name&gt;</code>.</li>
+<li>Models: inherit global/project <code>_model_config</code>.</li>
+<li>Response contract: keep the standard Agent Zero JSON tool-call contract.</li>
+<li>Extras: no custom tools or lifecycle extensions.</li>
+<li>Prompt strategy: <code>agent.yaml</code> plus <code>prompts/agent.system.main.specifics.md</code>.</li>
+</ul>
+<p>Recommended interview flow:</p>
+<ol>
+<li>First ask only:</li>
+</ol>
+<ul>
+<li>&quot;What should this agent be excellent at?&quot;</li>
+<li>Optionally: &quot;Do you already have a name/title in mind?&quot;</li>
+</ul>
+<ol>
+<li>After the purpose is clear, propose a short summary with inferred <code>name</code>, <code>title</code>, <code>description</code>, and <code>context</code>, then ask for confirmation or corrections.</li>
+<li>Ask about behavior only if needed:</li>
+</ol>
+<ul>
+<li>&quot;Should it work more like a concise specialist, a rigorous researcher, a code-heavy implementer, or something else?&quot;</li>
+</ul>
+<ol>
+<li>Ask about advanced options only when the user's request implies them:</li>
+</ol>
+<ul>
+<li>custom output format</li>
+<li>profile-specific Main/Utility models</li>
+<li>custom tools</li>
+<li>lifecycle extensions</li>
+<li>plugin/project scope</li>
+</ul>
+<ol>
+<li>Before writing files, show the compact blueprint summary and ask for confirmation.</li>
+<li>Only after confirmation, produce the full AgentProfileBlueprint JSON in Step 1 and write files from it.</li>
+</ol>
+<p>Never open with all blueprint fields. Do not mention obscure paths until they matter. Hide defaults, but use them.</p>
+<p>If the user gives a broad idea, infer sensible defaults and mark uncertainties in <code>validation.open_questions</code> instead of stalling.</p>
+<hr>
+<h3>Step 1: Create an AgentProfileBlueprint JSON</h3>
+<p>Before writing files, produce exactly one valid JSON object in a fenced <code>json</code> block using this schema. This blueprint is the source of truth. Do not require a utility model or prose post-processing to extract fields.</p>
+<pre><code>{
+  &quot;schema&quot;: &quot;agent_zero.agent_profile_blueprint.v1&quot;,
+  &quot;status&quot;: &quot;draft&quot;,
+  &quot;profile&quot;: {
+    &quot;scope&quot;: &quot;user&quot;,
+    &quot;root&quot;: &quot;/a0/usr/agents&quot;,
+    &quot;name&quot;: &quot;data-analyst&quot;,
+    &quot;title&quot;: &quot;Data Analyst&quot;,
+    &quot;description&quot;: &quot;Agent specialized in data analysis, visualization, and statistical modeling.&quot;,
+    &quot;context&quot;: &quot;Use this agent for data analysis tasks, creating visualizations, statistical analysis, and working with datasets in Python.&quot;
+  },
+  &quot;behavior&quot;: {
+    &quot;role&quot;: &quot;You are a specialized data analysis agent.&quot;,
+    &quot;primary_capabilities&quot;: [
+      &quot;Python data analysis with pandas, numpy, and scipy&quot;,
+      &quot;Data visualization with matplotlib, seaborn, and plotly&quot;,
+      &quot;Statistical modeling and hypothesis testing&quot;
+    ],
+    &quot;operating_principles&quot;: [
+      &quot;Inspect data before drawing conclusions&quot;,
+      &quot;Prefer reproducible code and explicit assumptions&quot;,
+      &quot;Explain uncertainty and limitations&quot;
+    ],
+    &quot;workflow&quot;: [
+      &quot;Clarify the question and available data&quot;,
+      &quot;Profile and clean the dataset&quot;,
+      &quot;Run analysis with appropriate methods&quot;,
+      &quot;Visualize and interpret results&quot;
+    ],
+    &quot;output_preferences&quot;: [
+      &quot;Concise findings first&quot;,
+      &quot;Tables or charts when useful&quot;,
+      &quot;Reproducible code when analysis is performed&quot;
+    ]
+  },
+  &quot;prompt_strategy&quot;: {
+    &quot;base_pattern&quot;: &quot;specifics_only&quot;,
+    &quot;override_rationale&quot;: [
+      &quot;Use agent.system.main.specifics.md for role, expertise, and process.&quot;,
+      &quot;Keep the inherited communication contract unchanged.&quot;
+    ],
+    &quot;root_prompt_overrides&quot;: [
+      {
+        &quot;file&quot;: &quot;agent.system.main.communication.md&quot;,
+        &quot;reason&quot;: &quot;Only include if the profile needs a different response JSON schema or output format.&quot;
+      }
+    ]
+  },
+  &quot;llm_config&quot;: {
+    &quot;enabled&quot;: false,
+    &quot;path&quot;: &quot;/a0/usr/agents/data-analyst/plugins/_model_config/config.json&quot;,
+    &quot;source&quot;: &quot;inherit_global&quot;,
+    &quot;chat_model&quot;: null,
+    &quot;utility_model&quot;: null,
+    &quot;embedding_model&quot;: null,
+    &quot;notes&quot;: [
+      &quot;Do not put model settings in agent.yaml.&quot;,
+      &quot;Only create this config file if the user wants profile-specific Main or Utility models.&quot;,
+      &quot;Scoped _model_config config is not deep-merged; include a complete config with chat_model, utility_model, and embedding_model.&quot;
+    ]
+  },
+  &quot;files&quot;: [
+    {
+      &quot;path&quot;: &quot;/a0/usr/agents/data-analyst/agent.yaml&quot;,
+      &quot;kind&quot;: &quot;yaml&quot;,
+      &quot;content&quot;: &quot;title: Data Analyst\ndescription: Agent specialized in data analysis, visualization, and statistical modeling.\ncontext: Use this agent for data analysis tasks, creating visualizations, statistical analysis, and working with datasets in Python.\n&quot;
+    },
+    {
+      &quot;path&quot;: &quot;/a0/usr/agents/data-analyst/prompts/agent.system.main.specifics.md&quot;,
+      &quot;kind&quot;: &quot;markdown&quot;,
+      &quot;content&quot;: &quot;## Your role\n\nYou are a specialized data analysis agent.\n\n## Expertise\n- Python data analysis with pandas, numpy, and scipy\n- Data visualization with matplotlib, seaborn, and plotly\n- Statistical modeling and hypothesis testing\n\n## Process\n1. Clarify the question and available data\n2. Profile and clean the dataset\n3. Run analysis with appropriate methods\n4. Visualize and interpret results\n&quot;
+    }
+  ],
+  &quot;optional_components&quot;: {
+    &quot;extra_prompt_overrides&quot;: [],
+    &quot;tools&quot;: [],
+    &quot;extensions&quot;: []
+  },
+  &quot;validation&quot;: {
+    &quot;needs_user_confirmation&quot;: true,
+    &quot;unique_name_checked&quot;: false,
+    &quot;yaml_valid&quot;: false,
+    &quot;open_questions&quot;: []
+  }
+}</code></pre>
+<p>Rules for the blueprint:</p>
+<ul>
+<li>Output strict JSON: no comments, no trailing commas, no markdown inside string values except the intended file content.</li>
+<li><code>profile.name</code> must be lowercase letters, numbers, hyphens, or underscores only.</li>
+<li><code>prompt_strategy.root_prompt_overrides</code> must list any inherited root <code>/prompts</code> files being considered or replaced and why.</li>
+<li>If a root prompt override is only a possibility, list it in <code>prompt_strategy</code> but do not add it to <code>files</code> until confirmed.</li>
+<li><code>llm_config.enabled</code> controls whether a profile-scoped <code>_model_config/config.json</code> file is created. Keep it <code>false</code> when models should inherit from global/project settings.</li>
+<li><code>files[*].content</code> must be the exact file content to write.</li>
+<li>Include only files that should actually be created.</li>
+<li>Set <code>status</code> to <code>draft</code> until all required choices are known; set it to <code>ready</code> only after resolving open questions.</li>
+<li>Ask the user to confirm or edit the blueprint before writing files unless they explicitly authorized immediate creation.</li>
+</ul>
+<hr>
+<h3>Step 2: Required Fields</h3>
+<p>The blueprint must contain these required profile inputs:</p>
+<p>| Input | Rule | Example | |---|---|---| | <strong>name</strong> (directory name) | lowercase letters, numbers, hyphens or underscores; must be unique across profile search paths | <code>data-analyst</code> | | <strong>title</strong> | human-readable display name shown in the UI | <code>Data Analyst</code> | | <strong>description</strong> | one-line specialization summary | <code>Agent specialized in data analysis, visualization, and statistical modeling.</code> | | <strong>context</strong> | instructions telling the <em>superior</em> agent when to delegate to this profile | <code>Use this agent for data analysis tasks, creating visualizations, statistical analysis, and working with datasets in Python.</code> |</p>
+<blockquote>[!NOTE]</blockquote>
+<blockquote><code>agent.yaml</code> has <strong>only</strong> these three content fields (<code>title</code>, <code>description</code>, <code>context</code>). Do not add model, temperature, or <code>allowed_tools</code> fields to <code>agent.yaml</code>. Profile-specific model settings live in a companion <code>_model_config</code> plugin config file, and tool availability is controlled by plugin activation.</blockquote>
+<hr>
+<h3>Step 3: Write Files from the Blueprint</h3>
+<p>After the user confirms the blueprint, create exactly the paths listed in <code>files</code>.</p>
+<pre><code>&lt;PROFILE_ROOT&gt;/&lt;name&gt;/
+├── agent.yaml                # Required
+├── prompts/                  # Optional — prompt overrides
+├── tools/                    # Optional — profile-specific tools
+└── extensions/               # Optional — profile-specific extensions</code></pre>
+<p><code>agent.yaml</code>:</p>
+<pre><code>title: Data Analyst
+description: Agent specialized in data analysis, visualization, and statistical modeling.
+context: Use this agent for data analysis tasks, creating visualizations, statistical
+  analysis, and working with datasets in Python.</code></pre>
+<p>A profile with only <code>agent.yaml</code> is valid — it inherits everything from <code>default/</code>. Add the sections below only when you need to change something.</p>
+<hr>
+<h3>Step 4: Optional profile-specific LLM config</h3>
+<p>Agent Zero does <strong>not</strong> read Main/Utility model settings from <code>agent.yaml</code>. The <code>_model_config</code> plugin is always enabled and supports per-agent-profile config. If the user wants this profile to use specific LLMs, create a companion config file:</p>
+<p>| Profile scope | Model config path | |---|---| | User profile | <code>/a0/usr/agents/&lt;profile&gt;/plugins/_model_config/config.json</code> | | Plugin-distributed profile | <code>/a0/usr/plugins/&lt;plugin&gt;/agents/&lt;profile&gt;/plugins/_model_config/config.json</code> | | Project-scoped profile | <code>&lt;project&gt;/.a0proj/agents/&lt;profile&gt;/plugins/_model_config/config.json</code> |</p>
+<p>Scoped <code>_model_config/config.json</code> files are selected as a whole; they are <strong>not</strong> deep-merged with broader global/project config. Therefore, if you create this file, include a complete effective model config. When the user only wants to customize Main or Utility, copy the other sections from the current effective config.</p>
+<p>Minimal complete profile-scoped config:</p>
+<pre><code>{
+  &quot;allow_chat_override&quot;: true,
+  &quot;chat_model&quot;: {
+    &quot;provider&quot;: &quot;openrouter&quot;,
+    &quot;name&quot;: &quot;anthropic/claude-sonnet-4.6&quot;,
+    &quot;api_base&quot;: &quot;&quot;,
+    &quot;ctx_length&quot;: 200000,
+    &quot;ctx_history&quot;: 0.7,
+    &quot;vision&quot;: true,
+    &quot;rl_requests&quot;: 0,
+    &quot;rl_input&quot;: 0,
+    &quot;rl_output&quot;: 0,
+    &quot;kwargs&quot;: {}
+  },
+  &quot;utility_model&quot;: {
+    &quot;provider&quot;: &quot;openrouter&quot;,
+    &quot;name&quot;: &quot;openai/gpt-5.4-mini&quot;,
+    &quot;api_base&quot;: &quot;&quot;,
+    &quot;ctx_length&quot;: 128000,
+    &quot;ctx_input&quot;: 0.7,
+    &quot;rl_requests&quot;: 0,
+    &quot;rl_input&quot;: 0,
+    &quot;rl_output&quot;: 0,
+    &quot;kwargs&quot;: {}
+  },
+  &quot;embedding_model&quot;: {
+    &quot;provider&quot;: &quot;huggingface&quot;,
+    &quot;name&quot;: &quot;sentence-transformers/all-MiniLM-L6-v2&quot;,
+    &quot;api_base&quot;: &quot;&quot;,
+    &quot;rl_requests&quot;: 0,
+    &quot;rl_input&quot;: 0,
+    &quot;kwargs&quot;: {}
+  }
+}</code></pre>
+<p>Rules:</p>
+<ul>
+<li>Ask the user whether Main/Utility should inherit defaults or be profile-specific.</li>
+<li>Do not store API keys in this file; API keys are managed globally through settings/secrets.</li>
+<li>Include <code>chat_model</code>, <code>utility_model</code>, and <code>embedding_model</code> in the generated file if any profile-scoped model config is created.</li>
+<li>If only Main or Utility is customized, copy the non-customized model sections from the current effective <code>_model_config</code> config.</li>
+<li>Use provider IDs and model names exactly as <code>_model_config</code> expects.</li>
+<li>Add this file to <code>files</code> only when <code>llm_config.enabled</code> is <code>true</code>.</li>
+</ul>
+<hr>
+<h3>Step 5: Override prompts (the most common customization)</h3>
+<p>Profiles inherit all prompts from <code>/a0/prompts/</code> and from <code>/a0/agents/default/</code>. To change behavior, drop a file with the <strong>same filename</strong> into <code>&lt;PROFILE_ROOT&gt;/&lt;name&gt;/prompts/</code>. The loader searches profile-specific prompts first and falls back to the defaults.</p>
+<h4>The canonical override: <code>agent.system.main.specifics.md</code></h4>
+<p>This is the designated extension slot for profile-specific role, identity, and behavior instructions. The file ships <strong>empty</strong> in both <code>/a0/prompts/agent.system.main.specifics.md</code> and <code>/a0/agents/default/agent.system.main.specifics.md</code> precisely so profiles can fill it in without fighting the base prompt. It is included from <code>agent.system.main.md</code> right after <code>agent.system.main.role.md</code>, so whatever you put here layers on top of the inherited role.</p>
+<p><strong>Every shipped profile in <code>/a0/agents/</code> overrides this file</strong> — a good sanity check that this is the right place for your specialization. Look at the existing profiles for concrete shape:</p>
+<p>| Profile | What its <code>agent.system.main.specifics.md</code> does | |---|---| | <code>/a0/agents/agent0/prompts/agent.system.main.specifics.md</code> | Establishes the top-level user-facing agent's behavior | | <code>/a0/agents/developer/prompts/agent.system.main.specifics.md</code> | Full &quot;Master Developer&quot; role + process spec (most elaborate example) | | <code>/a0/agents/hacker/prompts/agent.system.main.specifics.md</code> | Concise red/blue team pentester identity | | <code>/a0/agents/researcher/prompts/agent.system.main.specifics.md</code> | Research methodology and deliverable expectations | | <code>/a0/agents/_example/prompts/agent.system.main.specifics.md</code> | Minimal demo override (fictional &quot;Agent Zero&quot; persona) |</p>
+<p>Start by copying whichever existing profile's <code>specifics.md</code> is closest to your target, then rewrite.</p>
+<p>Example <code>agent.system.main.specifics.md</code> for a data analyst:</p>
+<pre><code>## Your role
+
+You are a specialized data analysis agent.
+Your expertise includes:
+- Python data analysis (pandas, numpy, scipy)
+- Data visualization (matplotlib, seaborn, plotly)
+- Statistical modeling and hypothesis testing
+- SQL queries and database analysis
+- Data cleaning and preprocessing
+
+## Process
+1. Understand the data and the question
+2. Choose appropriate tools and methods
+3. Execute analysis with `code_execution_tool`
+4. Visualize results when applicable
+5. Provide clear interpretation of findings</code></pre>
+<h4>High-value inherited prompt levers</h4>
+<p>The root <code>/a0/prompts</code> directory contains powerful defaults. A profile can override any of these by placing a file with the same name in <code>&lt;PROFILE_ROOT&gt;/&lt;name&gt;/prompts/</code>. Use this when the requested profile needs a different protocol, not just a different specialty.</p>
+<p>| File | Override when the user wants... | |---|---| | <code>agent.system.main.communication.md</code> | A different response contract, such as no <code>thoughts</code> array, a different JSON schema, plain Markdown answers, or a domain-specific output envelope. This is the main lever for output format changes. | | <code>agent.system.main.solving.md</code> | A different problem-solving loop, delegation policy, verification standard, or autonomy level. | | <code>agent.system.main.tips.md</code> | Different file-handling, skill-use, memory, or operational best-practice defaults. | | <code>agent.system.main.environment.md</code> | A different runtime/environment description than the default Kali/Docker Agent Zero environment. | | <code>agent.system.main.role.md</code> | A fundamentally different base identity. Rare; prefer <code>specifics.md</code> unless replacing the base role is intentional. | | <code>agent.system.tool.response.md</code> | Different final-response tool instructions, such as stricter final formatting or use of includes for long output. | | <code>fw.user_message.md</code> / <code>fw.ai_response.md</code> | Different framework message wrapping. Advanced and fragile; override only with a clear reason. |</p>
+<p>When a blueprint includes any of these, add an entry to <code>prompt_strategy.root_prompt_overrides</code> and include the exact override file in <code>files</code>.</p>
+<h4>Secondary overrides (use only when needed)</h4>
+<p>| File | When to override | Shipped example | |---|---|---| | <code>agent.system.main.role.md</code> | Replace the base role framing wholesale (rare — most profiles layer via <code>specifics.md</code> instead) | <code>/a0/agents/agent0/prompts/agent.system.main.role.md</code> | | <code>agent.system.main.communication.md</code> | Change reply format / communication style | <code>/a0/agents/developer/prompts/agent.system.main.communication.md</code>, <code>/a0/agents/researcher/prompts/...</code> | | <code>agent.system.main.environment.md</code> | Describe a non-default runtime environment | <code>/a0/agents/hacker/prompts/agent.system.main.environment.md</code> (Kali/Docker) | | <code>agent.system.tool.&lt;name&gt;.md</code> | Document a profile-specific tool (see Step 6) | <code>/a0/agents/_example/prompts/agent.system.tool.example_tool.md</code> |</p>
+<blockquote>[!TIP]</blockquote>
+<blockquote>Only override what you actually need to change. Copying unchanged prompt files creates silent drift when the framework updates the originals — <code>specifics.md</code> is safe to own because its default is empty by design.</blockquote>
+<hr>
+<h3>Step 6 (optional): Profile-specific tools</h3>
+<p>Drop a Python tool class in <code>&lt;PROFILE_ROOT&gt;/&lt;name&gt;/tools/&lt;tool_name&gt;.py</code>:</p>
+<pre><code>from helpers.tool import Tool, Response
+
+class ExampleTool(Tool):
+    async def execute(self, **kwargs):
+        test_input = kwargs.get(&quot;test_input&quot;, &quot;&quot;)
+        return Response(
+            message=f&quot;Example tool executed with test_input: {test_input}&quot;,
+            break_loop=False,
+        )</code></pre>
+<p>Two important rules:</p>
+<ol>
+<li>To make the tool visible in the system prompt, add <code>prompts/agent.system.tool.&lt;tool_name&gt;.md</code> describing its usage and JSON call schema. The prompt loader auto-includes every file matching <code>agent.system.tool.*.md</code>.</li>
+<li>Placing a file with the same name as a core tool (e.g. <code>tools/response.py</code>) <strong>replaces</strong> the core tool for this profile only. See <code>/a0/agents/_example/tools/response.py</code> for a redefinition example.</li>
+</ol>
+<hr>
+<h3>Step 7 (optional): Profile-specific extensions</h3>
+<p>Lifecycle hooks go in <code>&lt;PROFILE_ROOT&gt;/&lt;name&gt;/extensions/&lt;hook_point&gt;/_NN_&lt;name&gt;.py</code>. The <code>_NN_</code> prefix controls execution order.</p>
+<p>Example — rename the agent at init (<code>/a0/agents/_example/extensions/agent_init/_10_example_extension.py</code>):</p>
+<pre><code>from helpers.extension import Extension
+
+class ExampleExtension(Extension):
+    async def execute(self, **kwargs):
+        self.agent.agent_name = &quot;SuperAgent&quot; + str(self.agent.number)</code></pre>
+<p>Available hook points mirror the framework's own <code>/a0/extensions/python/&lt;point&gt;/</code> directories — see <code>a0-development/SKILL.md</code> for the full list.</p>
+<hr>
+<h3>Step 8: Test the new profile</h3>
+<ol>
+<li>The profile is picked up on next agent initialization — no restart of individual conversations needed, but a fresh agent/subordinate spawn is required.</li>
+<li>From the superior agent, delegate to it via <code>call_subordinate</code> using the profile's <strong>directory name</strong> (not the title).</li>
+<li>Verify:</li>
+</ol>
+<ul>
+<li>Title appears correctly in the UI agent selector.</li>
+<li>Role override (if any) takes effect in the new agent's system prompt.</li>
+<li>Profile-specific tools are callable and their prompt files are included.</li>
+</ul>
+<p>If the profile does not appear, check:</p>
+<ul>
+<li>Directory name matches the <code>^[a-z0-9_-]+$</code> pattern and is unique.</li>
+<li><code>agent.yaml</code> parses as valid YAML.</li>
+<li>It is placed in one of the recognized search paths (see Step 0).</li>
+</ul>
+<hr>
+<h3>Reference: Complete <code>_example</code> profile layout</h3>
+<pre><code>/a0/agents/_example/
+├── agent.yaml
+├── prompts/
+│   ├── agent.system.main.specifics.md     # role override
+│   └── agent.system.tool.example_tool.md  # tool usage prompt
+├── tools/
+│   ├── example_tool.py                    # new tool
+│   └── response.py                        # redefines core response tool
+└── extensions/
+    └── agent_init/
+        └── _10_example_extension.py       # init-time hook</code></pre>
+<p>Copy this shape when in doubt — it demonstrates every customization surface a profile supports.</p>
+<hr>
+<h3>Quick checklist</h3>
+<ul>
+<li>[ ] Confirmed profile scope (user / plugin / project)</li>
+<li>[ ] Produced and confirmed <code>agent_zero.agent_profile_blueprint.v1</code> JSON</li>
+<li>[ ] Confirmed whether Main/Utility models inherit defaults or need <code>_model_config/config.json</code></li>
+<li>[ ] Directory name is unique and matches allowed characters</li>
+<li>[ ] <code>agent.yaml</code> contains exactly <code>title</code>, <code>description</code>, <code>context</code></li>
+<li>[ ] Prompt overrides only include files that actually change behavior</li>
+<li>[ ] Any new tool has a matching <code>agent.system.tool.&lt;name&gt;.md</code></li>
+<li>[ ] Profile tested via <code>call_subordinate</code> in a fresh conversation</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: a0-create-agent\ndisplay_name: a0-create-agent\nplatform: Codex\ncategory: Agent platforms, tools, and automation\n---\n\n# a0-create-agent - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `a0-create-agent` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n> [!IMPORTANT]\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose a0-create-agent, then write the task. Fallback prompt: Use the a0-create-agent skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `a0-create-agent` |\n| Canonical name | `a0-create-agent` |\n| Platform | `Codex` |\n| Category | Agent platforms, tools, and automation |\n\n## Description\n\n> [!IMPORTANT]\n\n## Original SKILL.md\n\n---\nname: a0-create-agent\ndescription: Create a new Agent Zero agent profile (subordinate). Covers where profiles live (user / plugin-distributed / project-scoped), the agent.yaml schema, the prompt inheritance & override model, and optional profile-specific tools and extensions. Use for any \"create/add/new agent profile\" request.\nversion: 1.0.0\ntags: [\"agents\", \"profile\", \"create\", \"new\", \"subordinate\"]\ntrigger_patterns:\n  - \"create agent\"\n  - \"new agent profile\"\n  - \"add agent profile\"\n  - \"make agent profile\"\n  - \"agent profile template\"\n  - \"build agent profile\"\n---\n\n# Create an Agent Zero Agent Profile\n\n> [!IMPORTANT]\n> Do **not** create new profiles in `/a0/agents/` — that directory is reserved for core framework profiles (`default`, `agent0`, `developer`, `hacker`, `researcher`, `_example`). User profiles belong in `/a0/usr/agents/\u003cprofile_name>/`.\n\nRelated skills: `/a0/skills/a0-development/SKILL.md` (broader framework guide) | `/a0/skills/a0-create-plugin/SKILL.md` (bundle a profile inside a plugin).\n\nPrimary references:\n- `/a0/agents/_example/` — the canonical reference profile (tool + extension + prompt overrides)\n- `/a0/agents/default/` — the base profile every other profile inherits from\n- `/a0/plugins/AGENTS.md` — plugin-distributed profiles + per-profile config\n\n---\n\n## Existing Profile Pattern\n\nThe built-in profiles are intentionally split into two layers:\n\n1. `agent.yaml` is tiny metadata for discovery and delegation:\n   - `title`\n   - `description`\n   - `context`\n2. The actual profile behavior usually lives in `prompts/agent.system.main.specifics.md`.\n\nUse the shipped profiles as calibration:\n\n| Profile | Pattern to copy |\n|---|---|\n| `agent0` | Minimal top-level assistant identity |\n| `developer` | Rich capabilities, methodology, output requirements |\n| `researcher` | Rich capabilities, methodology, evidence standards |\n| `hacker` | Short, direct operational identity plus optional environment override |\n| `_example` | Minimal demo of prompt/tool/extension override surfaces |\n\nFor most new profiles, create `agent.yaml` plus one strong `agent.system.main.specifics.md`. Add other prompt overrides, tools, or extensions only when the blueprint explicitly needs them.\n\n---\n\n## Step 0: Progressive Intake\n\nDo not ask the user a long form. New users are easily overwhelmed. Guide them with lossy compression: ask only the next highest-value question, one or two questions per turn maximum.\n\nDefault assumptions unless the user says otherwise:\n\n- Scope: user profile in `/a0/usr/agents/\u003cname>`.\n- Models: inherit global/project `_model_config`.\n- Response contract: keep the standard Agent Zero JSON tool-call contract.\n- Extras: no custom tools or lifecycle extensions.\n- Prompt strategy: `agent.yaml` plus `prompts/agent.system.main.specifics.md`.\n\nRecommended interview flow:\n\n1. First ask only:\n   - \"What should this agent be excellent at?\"\n   - Optionally: \"Do you already have a name/title in mind?\"\n2. After the purpose is clear, propose a short summary with inferred `name`, `title`, `description`, and `context`, then ask for confirmation or corrections.\n3. Ask about behavior only if needed:\n   - \"Should it work more like a concise specialist, a rigorous researcher, a code-heavy implementer, or something else?\"\n4. Ask about advanced options only when the user's request implies them:\n   - custom output format\n   - profile-specific Main/Utility models\n   - custom tools\n   - lifecycle extensions\n   - plugin/project scope\n5. Before writing files, show the compact blueprint summary and ask for confirmation.\n6. Only after confirmation, produce the full AgentProfileBlueprint JSON in Step 1 and write files from it.\n\nNever open with all blueprint fields. Do not mention obscure paths until they matter. Hide defaults, but use them.\n\nIf the user gives a broad idea, infer sensible defaults and mark uncertainties in `validation.open_questions` instead of stalling.\n\n---\n\n## Step 1: Create an AgentProfileBlueprint JSON\n\nBefore writing files, produce exactly one valid JSON object in a fenced `json` block using this schema. This blueprint is the source of truth. Do not require a utility model or prose post-processing to extract fields.\n\n```json\n{\n  \"schema\": \"agent_zero.agent_profile_blueprint.v1\",\n  \"status\": \"draft\",\n  \"profile\": {\n    \"scope\": \"user\",\n    \"root\": \"/a0/usr/agents\",\n    \"name\": \"data-analyst\",\n    \"title\": \"Data Analyst\",\n    \"description\": \"Agent specialized in data analysis, visualization, and statistical modeling.\",\n    \"context\": \"Use this agent for data analysis tasks, creating visualizations, statistical analysis, and working with datasets in Python.\"\n  },\n  \"behavior\": {\n    \"role\": \"You are a specialized data analysis agent.\",\n    \"primary_capabilities\": [\n      \"Python data analysis with pandas, numpy, and scipy\",\n      \"Data visualization with matplotlib, seaborn, and plotly\",\n      \"Statistical modeling and hypothesis testing\"\n    ],\n    \"operating_principles\": [\n      \"Inspect data before drawing conclusions\",\n      \"Prefer reproducible code and explicit assumptions\",\n      \"Explain uncertainty and limitations\"\n    ],\n    \"workflow\": [\n      \"Clarify the question and available data\",\n      \"Profile and clean the dataset\",\n      \"Run analysis with appropriate methods\",\n      \"Visualize and interpret results\"\n    ],\n    \"output_preferences\": [\n      \"Concise findings first\",\n      \"Tables or charts when useful\",\n      \"Reproducible code when analysis is performed\"\n    ]\n  },\n  \"prompt_strategy\": {\n    \"base_pattern\": \"specifics_only\",\n    \"override_rationale\": [\n      \"Use agent.system.main.specifics.md for role, expertise, and process.\",\n      \"Keep the inherited communication contract unchanged.\"\n    ],\n    \"root_prompt_overrides\": [\n      {\n        \"file\": \"agent.system.main.communication.md\",\n        \"reason\": \"Only include if the profile needs a different response JSON schema or output format.\"\n      }\n    ]\n  },\n  \"llm_config\": {\n    \"enabled\": false,\n    \"path\": \"/a0/usr/agents/data-analyst/plugins/_model_config/config.json\",\n    \"source\": \"inherit_global\",\n    \"chat_model\": null,\n    \"utility_model\": null,\n    \"embedding_model\": null,\n    \"notes\": [\n      \"Do not put model settings in agent.yaml.\",\n      \"Only create this config file if the user wants profile-specific Main or Utility models.\",\n      \"Scoped _model_config config is not deep-merged; include a complete config with chat_model, utility_model, and embedding_model.\"\n    ]\n  },\n  \"files\": [\n    {\n      \"path\": \"/a0/usr/agents/data-analyst/agent.yaml\",\n      \"kind\": \"yaml\",\n      \"content\": \"title: Data Analyst\\ndescription: Agent specialized in data analysis, visualization, and statistical modeling.\\ncontext: Use this agent for data analysis tasks, creating visualizations, statistical analysis, and working with datasets in Python.\\n\"\n    },\n    {\n      \"path\": \"/a0/usr/agents/data-analyst/prompts/agent.system.main.specifics.md\",\n      \"kind\": \"markdown\",\n      \"content\": \"## Your role\\n\\nYou are a specialized data analysis agent.\\n\\n## Expertise\\n- Python data analysis with pandas, numpy, and scipy\\n- Data visualization with matplotlib, seaborn, and plotly\\n- Statistical modeling and hypothesis testing\\n\\n## Process\\n1. Clarify the question and available data\\n2. Profile and clean the dataset\\n3. Run analysis with appropriate methods\\n4. Visualize and interpret results\\n\"\n    }\n  ],\n  \"optional_components\": {\n    \"extra_prompt_overrides\": [],\n    \"tools\": [],\n    \"extensions\": []\n  },\n  \"validation\": {\n    \"needs_user_confirmation\": true,\n    \"unique_name_checked\": false,\n    \"yaml_valid\": false,\n    \"open_questions\": []\n  }\n}\n```\n\nRules for the blueprint:\n\n- Output strict JSON: no comments, no trailing commas, no markdown inside string values except the intended file content.\n- `profile.name` must be lowercase letters, numbers, hyphens, or underscores only.\n- `prompt_strategy.root_prompt_overrides` must list any inherited root `/prompts` files being considered or replaced and why.\n- If a root prompt override is only a possibility, list it in `prompt_strategy` but do not add it to `files` until confirmed.\n- `llm_config.enabled` controls whether a profile-scoped `_model_config/config.json` file is created. Keep it `false` when models should inherit from global/project settings.\n- `files[*].content` must be the exact file content to write.\n- Include only files that should actually be created.\n- Set `status` to `draft` until all required choices are known; set it to `ready` only after resolving open questions.\n- Ask the user to confirm or edit the blueprint before writing files unless they explicitly authorized immediate creation.\n\n---\n\n## Step 2: Required Fields\n\nThe blueprint must contain these required profile inputs:\n\n| Input | Rule | Example |\n|---|---|---|\n| **name** (directory name) | lowercase letters, numbers, hyphens or underscores; must be unique across profile search paths | `data-analyst` |\n| **title** | human-readable display name shown in the UI | `Data Analyst` |\n| **description** | one-line specialization summary | `Agent specialized in data analysis, visualization, and statistical modeling.` |\n| **context** | instructions telling the *superior* agent when to delegate to this profile | `Use this agent for data analysis tasks, creating visualizations, statistical analysis, and working with datasets in Python.` |\n\n> [!NOTE]\n> `agent.yaml` has **only** these three content fields (`title`, `description`, `context`). Do not add model, temperature, or `allowed_tools` fields to `agent.yaml`. Profile-specific model settings live in a companion `_model_config` plugin config file, and tool availability is controlled by plugin activation.\n\n---\n\n## Step 3: Write Files from the Blueprint\n\nAfter the user confirms the blueprint, create exactly the paths listed in `files`.\n\n```\n\u003cPROFILE_ROOT>/\u003cname>/\n├── agent.yaml                # Required\n├── prompts/                  # Optional — prompt overrides\n├── tools/                    # Optional — profile-specific tools\n└── extensions/               # Optional — profile-specific extensions\n```\n\n`agent.yaml`:\n\n```yaml\ntitle: Data Analyst\ndescription: Agent specialized in data analysis, visualization, and statistical modeling.\ncontext: Use this agent for data analysis tasks, creating visualizations, statistical\n  analysis, and working with datasets in Python.\n```\n\nA profile with only `agent.yaml` is valid — it inherits everything from `default/`. Add the sections below only when you need to change something.\n\n---\n\n## Step 4: Optional profile-specific LLM config\n\nAgent Zero does **not** read Main/Utility model settings from `agent.yaml`. The `_model_config` plugin is always enabled and supports per-agent-profile config. If the user wants this profile to use specific LLMs, create a companion config file:\n\n| Profile scope | Model config path |\n|---|---|\n| User profile | `/a0/usr/agents/\u003cprofile>/plugins/_model_config/config.json` |\n| Plugin-distributed profile | `/a0/usr/plugins/\u003cplugin>/agents/\u003cprofile>/plugins/_model_config/config.json` |\n| Project-scoped profile | `\u003cproject>/.a0proj/agents/\u003cprofile>/plugins/_model_config/config.json` |\n\nScoped `_model_config/config.json` files are selected as a whole; they are **not** deep-merged with broader global/project config. Therefore, if you create this file, include a complete effective model config. When the user only wants to customize Main or Utility, copy the other sections from the current effective config.\n\nMinimal complete profile-scoped config:\n\n```json\n{\n  \"allow_chat_override\": true,\n  \"chat_model\": {\n    \"provider\": \"openrouter\",\n    \"name\": \"anthropic/claude-sonnet-4.6\",\n    \"api_base\": \"\",\n    \"ctx_length\": 200000,\n    \"ctx_history\": 0.7,\n    \"vision\": true,\n    \"rl_requests\": 0,\n    \"rl_input\": 0,\n    \"rl_output\": 0,\n    \"kwargs\": {}\n  },\n  \"utility_model\": {\n    \"provider\": \"openrouter\",\n    \"name\": \"openai/gpt-5.4-mini\",\n    \"api_base\": \"\",\n    \"ctx_length\": 128000,\n    \"ctx_input\": 0.7,\n    \"rl_requests\": 0,\n    \"rl_input\": 0,\n    \"rl_output\": 0,\n    \"kwargs\": {}\n  },\n  \"embedding_model\": {\n    \"provider\": \"huggingface\",\n    \"name\": \"sentence-transformers/all-MiniLM-L6-v2\",\n    \"api_base\": \"\",\n    \"rl_requests\": 0,\n    \"rl_input\": 0,\n    \"kwargs\": {}\n  }\n}\n```\n\nRules:\n\n- Ask the user whether Main/Utility should inherit defaults or be profile-specific.\n- Do not store API keys in this file; API keys are managed globally through settings/secrets.\n- Include `chat_model`, `utility_model`, and `embedding_model` in the generated file if any profile-scoped model config is created.\n- If only Main or Utility is customized, copy the non-customized model sections from the current effective `_model_config` config.\n- Use provider IDs and model names exactly as `_model_config` expects.\n- Add this file to `files` only when `llm_config.enabled` is `true`.\n\n---\n\n## Step 5: Override prompts (the most common customization)\n\nProfiles inherit all prompts from `/a0/prompts/` and from `/a0/agents/default/`. To change behavior, drop a file with the **same filename** into `\u003cPROFILE_ROOT>/\u003cname>/prompts/`. The loader searches profile-specific prompts first and falls back to the defaults.\n\n### The canonical override: `agent.system.main.specifics.md`\n\nThis is the designated extension slot for profile-specific role, identity, and behavior instructions. The file ships **empty** in both `/a0/prompts/agent.system.main.specifics.md` and `/a0/agents/default/agent.system.main.specifics.md` precisely so profiles can fill it in without fighting the base prompt. It is included from `agent.system.main.md` right after `agent.system.main.role.md`, so whatever you put here layers on top of the inherited role.\n\n**Every shipped profile in `/a0/agents/` overrides this file** — a good sanity check that this is the right place for your specialization. Look at the existing profiles for concrete shape:\n\n| Profile | What its `agent.system.main.specifics.md` does |\n|---|---|\n| `/a0/agents/agent0/prompts/agent.system.main.specifics.md` | Establishes the top-level user-facing agent's behavior |\n| `/a0/agents/developer/prompts/agent.system.main.specifics.md` | Full \"Master Developer\" role + process spec (most elaborate example) |\n| `/a0/agents/hacker/prompts/agent.system.main.specifics.md` | Concise red/blue team pentester identity |\n| `/a0/agents/researcher/prompts/agent.system.main.specifics.md` | Research methodology and deliverable expectations |\n| `/a0/agents/_example/prompts/agent.system.main.specifics.md` | Minimal demo override (fictional \"Agent Zero\" persona) |\n\nStart by copying whichever existing profile's `specifics.md` is closest to your target, then rewrite.\n\nExample `agent.system.main.specifics.md` for a data analyst:\n\n```markdown\n## Your role\n\nYou are a specialized data analysis agent.\nYour expertise includes:\n- Python data analysis (pandas, numpy, scipy)\n- Data visualization (matplotlib, seaborn, plotly)\n- Statistical modeling and hypothesis testing\n- SQL queries and database analysis\n- Data cleaning and preprocessing\n\n## Process\n1. Understand the data and the question\n2. Choose appropriate tools and methods\n3. Execute analysis with `code_execution_tool`\n4. Visualize results when applicable\n5. Provide clear interpretation of findings\n```\n\n### High-value inherited prompt levers\n\nThe root `/a0/prompts` directory contains powerful defaults. A profile can override any of these by placing a file with the same name in `\u003cPROFILE_ROOT>/\u003cname>/prompts/`. Use this when the requested profile needs a different protocol, not just a different specialty.\n\n| File | Override when the user wants... |\n|---|---|\n| `agent.system.main.communication.md` | A different response contract, such as no `thoughts` array, a different JSON schema, plain Markdown answers, or a domain-specific output envelope. This is the main lever for output format changes. |\n| `agent.system.main.solving.md` | A different problem-solving loop, delegation policy, verification standard, or autonomy level. |\n| `agent.system.main.tips.md` | Different file-handling, skill-use, memory, or operational best-practice defaults. |\n| `agent.system.main.environment.md` | A different runtime/environment description than the default Kali/Docker Agent Zero environment. |\n| `agent.system.main.role.md` | A fundamentally different base identity. Rare; prefer `specifics.md` unless replacing the base role is intentional. |\n| `agent.system.tool.response.md` | Different final-response tool instructions, such as stricter final formatting or use of includes for long output. |\n| `fw.user_message.md` / `fw.ai_response.md` | Different framework message wrapping. Advanced and fragile; override only with a clear reason. |\n\nWhen a blueprint includes any of these, add an entry to `prompt_strategy.root_prompt_overrides` and include the exact override file in `files`.\n\n### Secondary overrides (use only when needed)\n\n| File | When to override | Shipped example |\n|---|---|---|\n| `agent.system.main.role.md` | Replace the base role framing wholesale (rare — most profiles layer via `specifics.md` instead) | `/a0/agents/agent0/prompts/agent.system.main.role.md` |\n| `agent.system.main.communication.md` | Change reply format / communication style | `/a0/agents/developer/prompts/agent.system.main.communication.md`, `/a0/agents/researcher/prompts/...` |\n| `agent.system.main.environment.md` | Describe a non-default runtime environment | `/a0/agents/hacker/prompts/agent.system.main.environment.md` (Kali/Docker) |\n| `agent.system.tool.\u003cname>.md` | Document a profile-specific tool (see Step 6) | `/a0/agents/_example/prompts/agent.system.tool.example_tool.md` |\n\n> [!TIP]\n> Only override what you actually need to change. Copying unchanged prompt files creates silent drift when the framework updates the originals — `specifics.md` is safe to own because its default is empty by design.\n\n---\n\n## Step 6 (optional): Profile-specific tools\n\nDrop a Python tool class in `\u003cPROFILE_ROOT>/\u003cname>/tools/\u003ctool_name>.py`:\n\n```python\nfrom helpers.tool import Tool, Response\n\nclass ExampleTool(Tool):\n    async def execute(self, **kwargs):\n        test_input = kwargs.get(\"test_input\", \"\")\n        return Response(\n            message=f\"Example tool executed with test_input: {test_input}\",\n            break_loop=False,\n        )\n```\n\nTwo important rules:\n\n1. To make the tool visible in the system prompt, add `prompts/agent.system.tool.\u003ctool_name>.md` describing its usage and JSON call schema. The prompt loader auto-includes every file matching `agent.system.tool.*.md`.\n2. Placing a file with the same name as a core tool (e.g. `tools/response.py`) **replaces** the core tool for this profile only. See `/a0/agents/_example/tools/response.py` for a redefinition example.\n\n---\n\n## Step 7 (optional): Profile-specific extensions\n\nLifecycle hooks go in `\u003cPROFILE_ROOT>/\u003cname>/extensions/\u003chook_point>/_NN_\u003cname>.py`. The `_NN_` prefix controls execution order.\n\nExample — rename the agent at init (`/a0/agents/_example/extensions/agent_init/_10_example_extension.py`):\n\n```python\nfrom helpers.extension import Extension\n\nclass ExampleExtension(Extension):\n    async def execute(self, **kwargs):\n        self.agent.agent_name = \"SuperAgent\" + str(self.agent.number)\n```\n\nAvailable hook points mirror the framework's own `/a0/extensions/python/\u003cpoint>/` directories — see `a0-development/SKILL.md` for the full list.\n\n---\n\n## Step 8: Test the new profile\n\n1. The profile is picked up on next agent initialization — no restart of individual conversations needed, but a fresh agent/subordinate spawn is required.\n2. From the superior agent, delegate to it via `call_subordinate` using the profile's **directory name** (not the title).\n3. Verify:\n   - Title appears correctly in the UI agent selector.\n   - Role override (if any) takes effect in the new agent's system prompt.\n   - Profile-specific tools are callable and their prompt files are included.\n\nIf the profile does not appear, check:\n- Directory name matches the `^[a-z0-9_-]+$` pattern and is unique.\n- `agent.yaml` parses as valid YAML.\n- It is placed in one of the recognized search paths (see Step 0).\n\n---\n\n## Reference: Complete `_example` profile layout\n\n```\n/a0/agents/_example/\n├── agent.yaml\n├── prompts/\n│   ├── agent.system.main.specifics.md     # role override\n│   └── agent.system.tool.example_tool.md  # tool usage prompt\n├── tools/\n│   ├── example_tool.py                    # new tool\n│   └── response.py                        # redefines core response tool\n└── extensions/\n    └── agent_init/\n        └── _10_example_extension.py       # init-time hook\n```\n\nCopy this shape when in doubt — it demonstrates every customization surface a profile supports.\n\n---\n\n## Quick checklist\n\n- [ ] Confirmed profile scope (user / plugin / project)\n- [ ] Produced and confirmed `agent_zero.agent_profile_blueprint.v1` JSON\n- [ ] Confirmed whether Main/Utility models inherit defaults or need `_model_config/config.json`\n- [ ] Directory name is unique and matches allowed characters\n- [ ] `agent.yaml` contains exactly `title`, `description`, `context`\n- [ ] Prompt overrides only include files that actually change behavior\n- [ ] Any new tool has a matching `agent.system.tool.\u003cname>.md`\n- [ ] Profile tested via `call_subordinate` in a fresh conversation\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("a0-create-agent-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

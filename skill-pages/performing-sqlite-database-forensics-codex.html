@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>performing-sqlite-database-forensics - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/performing-sqlite-database-forensics-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>performing-sqlite-database-forensics</h1>
+      <p class="description">Perform forensic analysis of SQLite databases to recover deleted records</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>performing-sqlite-database-forensics</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>performing-sqlite-database-forensics</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Perform forensic analysis of SQLite databases to recover deleted records</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose performing-sqlite-database-forensics, then write the task. Fallback prompt: Use the performing-sqlite-database-forensics skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Performing SQLite Database Forensics</h2>
+<h3>Overview</h3>
+<p>SQLite is the most widely deployed database engine in the world, used by virtually every mobile application, web browser, and many desktop applications to store user data. In digital forensics, SQLite databases are critical evidence sources containing browser history, messaging records, call logs, GPS locations, application preferences, and cached content. Forensic analysis goes beyond simple SQL queries to examine the internal B-tree page structures, freelist pages containing deleted records, Write-Ahead Log (WAL) files preserving transaction history, and unallocated space within database pages where recoverable data may persist after deletion.</p>
+<h3>When to Use</h3>
+<ul>
+<li>When conducting security assessments that involve performing sqlite database forensics</li>
+<li>When following incident response procedures for related security events</li>
+<li>When performing scheduled security testing or auditing activities</li>
+<li>When validating security controls through hands-on testing</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>DB Browser for SQLite (sqlitebrowser)</li>
+<li>SQLite command-line tools (sqlite3)</li>
+<li>Python 3.8+ with sqlite3 module</li>
+<li>Belkasoft Evidence Center or Axiom (commercial)</li>
+<li>Hex editor (HxD, 010 Editor) for manual page inspection</li>
+<li>Understanding of B-tree data structures</li>
+</ul>
+<h3>SQLite Internal Structure</h3>
+<h4>Database Header (First 100 Bytes)</h4>
+<p>| Offset | Size | Description | |--------|------|-------------| | 0 | 16 | Magic string: &quot;SQLite format 3\000&quot; | | 16 | 2 | Page size (512-65536 bytes) | | 18 | 1 | File format write version | | 19 | 1 | File format read version | | 24 | 4 | File change counter | | 28 | 4 | Database size in pages | | 32 | 4 | First freelist trunk page number | | 36 | 4 | Total freelist pages | | 52 | 4 | Text encoding (1=UTF-8, 2=UTF-16le, 3=UTF-16be) | | 96 | 4 | Version-valid-for number |</p>
+<h4>Page Types</h4>
+<p>| Type | ID | Description | |------|----|-------------| | B-tree Interior | 0x05 | Internal table node | | B-tree Leaf | 0x0D | Table leaf page containing actual records | | Index Interior | 0x02 | Internal index node | | Index Leaf | 0x0A | Index leaf page | | Freelist Trunk | - | Tracks freed pages | | Freelist Leaf | - | Freed page with recoverable data | | Overflow | - | Continuation of large records |</p>
+<h3>Deleted Record Recovery</h3>
+<h4>Method 1: Freelist Page Analysis</h4>
+<p>When records are deleted, SQLite may place their pages on the freelist rather than overwriting them immediately.</p>
+<pre><code>import struct
+import sqlite3
+import os
+
+
+def analyze_freelist(db_path: str) -&gt; dict:
+    &quot;&quot;&quot;Analyze SQLite freelist to identify pages containing deleted data.&quot;&quot;&quot;
+    with open(db_path, &quot;rb&quot;) as f:
+        # Read header
+        header = f.read(100)
+        page_size = struct.unpack(&quot;&gt;H&quot;, header[16:18])[0]
+        if page_size == 1:
+            page_size = 65536
+        first_freelist_page = struct.unpack(&quot;&gt;I&quot;, header[32:36])[0]
+        total_freelist_pages = struct.unpack(&quot;&gt;I&quot;, header[36:40])[0]
+
+        freelist_info = {
+            &quot;page_size&quot;: page_size,
+            &quot;first_freelist_page&quot;: first_freelist_page,
+            &quot;total_freelist_pages&quot;: total_freelist_pages,
+            &quot;trunk_pages&quot;: [],
+            &quot;leaf_pages&quot;: []
+        }
+
+        if first_freelist_page == 0:
+            return freelist_info
+
+        # Walk the freelist trunk chain
+        trunk_page = first_freelist_page
+        while trunk_page != 0:
+            offset = (trunk_page - 1) * page_size
+            f.seek(offset)
+            page_data = f.read(page_size)
+
+            next_trunk = struct.unpack(&quot;&gt;I&quot;, page_data[0:4])[0]
+            leaf_count = struct.unpack(&quot;&gt;I&quot;, page_data[4:8])[0]
+
+            leaves = []
+            for i in range(leaf_count):
+                leaf_page = struct.unpack(&quot;&gt;I&quot;, page_data[8 + i * 4:12 + i * 4])[0]
+                leaves.append(leaf_page)
+
+            freelist_info[&quot;trunk_pages&quot;].append({
+                &quot;page_number&quot;: trunk_page,
+                &quot;next_trunk&quot;: next_trunk,
+                &quot;leaf_count&quot;: leaf_count,
+                &quot;leaf_pages&quot;: leaves
+            })
+            freelist_info[&quot;leaf_pages&quot;].extend(leaves)
+            trunk_page = next_trunk
+
+    return freelist_info
+
+
+def extract_freelist_content(db_path: str, output_dir: str):
+    &quot;&quot;&quot;Extract raw content from freelist pages for analysis.&quot;&quot;&quot;
+    info = analyze_freelist(db_path)
+    os.makedirs(output_dir, exist_ok=True)
+
+    with open(db_path, &quot;rb&quot;) as f:
+        page_size = info[&quot;page_size&quot;]
+        for page_num in info[&quot;leaf_pages&quot;]:
+            offset = (page_num - 1) * page_size
+            f.seek(offset)
+            page_data = f.read(page_size)
+            output_file = os.path.join(output_dir, f&quot;freelist_page_{page_num}.bin&quot;)
+            with open(output_file, &quot;wb&quot;) as out:
+                out.write(page_data)
+
+    return len(info[&quot;leaf_pages&quot;])</code></pre>
+<h4>Method 2: WAL (Write-Ahead Log) Analysis</h4>
+<p>The WAL file contains pending transactions that have not yet been checkpointed back to the main database.</p>
+<pre><code>def parse_wal_header(wal_path: str) -&gt; dict:
+    &quot;&quot;&quot;Parse SQLite WAL file header and frame inventory.&quot;&quot;&quot;
+    with open(wal_path, &quot;rb&quot;) as f:
+        header = f.read(32)
+        magic = struct.unpack(&quot;&gt;I&quot;, header[0:4])[0]
+        file_format = struct.unpack(&quot;&gt;I&quot;, header[4:8])[0]
+        page_size = struct.unpack(&quot;&gt;I&quot;, header[8:12])[0]
+        checkpoint_seq = struct.unpack(&quot;&gt;I&quot;, header[12:16])[0]
+        salt1 = struct.unpack(&quot;&gt;I&quot;, header[16:20])[0]
+        salt2 = struct.unpack(&quot;&gt;I&quot;, header[20:24])[0]
+
+        wal_info = {
+            &quot;magic&quot;: hex(magic),
+            &quot;format&quot;: file_format,
+            &quot;page_size&quot;: page_size,
+            &quot;checkpoint_sequence&quot;: checkpoint_seq,
+            &quot;frames&quot;: []
+        }
+
+        # Parse frames (24-byte header + page_size data each)
+        frame_offset = 32
+        frame_num = 0
+        file_size = os.path.getsize(wal_path)
+
+        while frame_offset + 24 + page_size &lt;= file_size:
+            f.seek(frame_offset)
+            frame_header = f.read(24)
+            page_number = struct.unpack(&quot;&gt;I&quot;, frame_header[0:4])[0]
+            db_size_after = struct.unpack(&quot;&gt;I&quot;, frame_header[4:8])[0]
+
+            wal_info[&quot;frames&quot;].append({
+                &quot;frame_number&quot;: frame_num,
+                &quot;page_number&quot;: page_number,
+                &quot;db_size_pages&quot;: db_size_after,
+                &quot;offset&quot;: frame_offset
+            })
+            frame_offset += 24 + page_size
+            frame_num += 1
+
+    return wal_info</code></pre>
+<h4>Method 3: Unallocated Space Within Pages</h4>
+<p>Deleted cells within active B-tree pages leave data in the unallocated region between the cell pointer array and the cell content area.</p>
+<pre><code>def analyze_unallocated_space(db_path: str, page_number: int) -&gt; dict:
+    &quot;&quot;&quot;Analyze unallocated space within a specific B-tree page.&quot;&quot;&quot;
+    with open(db_path, &quot;rb&quot;) as f:
+        header = f.read(100)
+        page_size = struct.unpack(&quot;&gt;H&quot;, header[16:18])[0]
+        if page_size == 1:
+            page_size = 65536
+
+        offset = (page_number - 1) * page_size
+        f.seek(offset)
+        page_data = f.read(page_size)
+
+        # Parse page header (8 or 12 bytes depending on type)
+        page_type = page_data[0]
+        first_freeblock = struct.unpack(&quot;&gt;H&quot;, page_data[1:3])[0]
+        cell_count = struct.unpack(&quot;&gt;H&quot;, page_data[3:5])[0]
+        cell_content_offset = struct.unpack(&quot;&gt;H&quot;, page_data[5:7])[0]
+        if cell_content_offset == 0:
+            cell_content_offset = 65536
+
+        header_size = 12 if page_type in (0x02, 0x05) else 8
+        cell_pointer_end = header_size + cell_count * 2
+
+        unallocated_start = cell_pointer_end
+        unallocated_end = cell_content_offset
+        unallocated_size = unallocated_end - unallocated_start
+
+        return {
+            &quot;page_number&quot;: page_number,
+            &quot;page_type&quot;: hex(page_type),
+            &quot;cell_count&quot;: cell_count,
+            &quot;unallocated_start&quot;: unallocated_start,
+            &quot;unallocated_end&quot;: unallocated_end,
+            &quot;unallocated_size&quot;: unallocated_size,
+            &quot;unallocated_data&quot;: page_data[unallocated_start:unallocated_end].hex()
+        }</code></pre>
+<h3>Common Forensic Databases</h3>
+<p>| Application | Database File | Key Tables | |------------|--------------|------------| | Chrome | History | urls, visits, downloads, keyword_search_terms | | Firefox | places.sqlite | moz_places, moz_historyvisits | | Safari | History.db | history_items, history_visits | | WhatsApp | msgstore.db | messages, chat_list | | Signal | signal.sqlite | sms, mms | | iMessage | sms.db | message, handle, chat | | Android SMS | mmssms.db | sms, mms, threads | | Skype | main.db | Messages, Conversations |</p>
+<h3>Timestamp Decoding</h3>
+<pre><code>from datetime import datetime, timedelta
+
+def decode_chrome_timestamp(chrome_ts: int) -&gt; datetime:
+    &quot;&quot;&quot;Convert Chrome/WebKit timestamp to datetime (microseconds since 1601-01-01).&quot;&quot;&quot;
+    epoch_delta = 11644473600
+    return datetime.utcfromtimestamp((chrome_ts / 1000000) - epoch_delta)
+
+def decode_unix_timestamp(unix_ts: int) -&gt; datetime:
+    &quot;&quot;&quot;Convert Unix timestamp to datetime.&quot;&quot;&quot;
+    return datetime.utcfromtimestamp(unix_ts)
+
+def decode_mac_absolute_time(mac_ts: float) -&gt; datetime:
+    &quot;&quot;&quot;Convert Mac Absolute Time (seconds since 2001-01-01).&quot;&quot;&quot;
+    mac_epoch = datetime(2001, 1, 1)
+    return mac_epoch + timedelta(seconds=mac_ts)
+
+def decode_mozilla_timestamp(moz_ts: int) -&gt; datetime:
+    &quot;&quot;&quot;Convert Mozilla PRTime (microseconds since Unix epoch).&quot;&quot;&quot;
+    return datetime.utcfromtimestamp(moz_ts / 1000000)</code></pre>
+<h3>References</h3>
+<ul>
+<li>SQLite File Format: https://www.sqlite.org/fileformat2.html</li>
+<li>Belkasoft SQLite Analysis: https://belkasoft.com/sqlite-analysis</li>
+<li>Spyder Forensics SQLite Training: https://www.spyderforensics.com/sqlite-forensic-fundamentals-2025/</li>
+<li>Forensic Analysis of Damaged SQLite Databases: https://www.forensicfocus.com/articles/forensic-analysis-of-damaged-sqlite-databases/</li>
+</ul>
+<h3>Example Output</h3>
+<pre><code>$ python3 sqlite_forensics.py --db /evidence/chrome/Default/History \
+    --wal /evidence/chrome/Default/History-wal \
+    --journal /evidence/chrome/Default/History-journal \
+    --output /analysis/sqlite_report
+
+SQLite Database Forensic Analyzer v2.0
+========================================
+Database:    /evidence/chrome/Default/History
+Size:        48.2 MB
+SQLite Ver:  3.39.5
+Page Size:   4096 bytes
+Total Pages: 12,345
+Encoding:    UTF-8
+
+[+] Analyzing WAL (Write-Ahead Log)...
+    WAL file:       History-wal (2.1 MB)
+    WAL frames:     512
+    Checkpointed:   No (contains uncommitted data)
+    Recoverable rows from WAL: 234
+
+[+] Analyzing journal file...
+    Journal file:   History-journal (0 bytes - rolled back)
+
+[+] Scanning for deleted records (freelist pages)...
+    Freelist pages:     456
+    Deleted records recovered: 1,892
+
+[+] Analyzing table: urls
+    Active rows:     12,456
+    Deleted rows:    1,234 (recovered from freelist)
+    WAL-only rows:   89
+
+--- Recovered Deleted URLs (Last 10) ---
+Row ID | URL                                              | Title                    | Visit Count | Last Visit (UTC)
+-------|--------------------------------------------------|--------------------------|-------------|---------------------
+89234  | https://mega.nz/folder/xYz123#key=AbCdEf        | MEGA                     | 5           | 2024-01-16 03:20:00
+89235  | https://transfer.sh/abc123/data.7z               | transfer.sh              | 1           | 2024-01-16 03:25:00
+89240  | https://temp-mail.org/en/                        | Temp Mail                | 3           | 2024-01-15 13:00:00
+89241  | https://browserleaks.com/ip                      | IP Leak Test             | 1           | 2024-01-15 12:55:00
+89245  | https://www.virustotal.com/gui/file/a1b2c3...    | VirusTotal               | 2           | 2024-01-15 14:30:00
+89250  | https://github.com/gentilkiwi/mimikatz/releases  | Mimikatz Releases        | 1           | 2024-01-15 16:00:00
+89260  | https://raw.githubusercontent.com/.../payload.ps1| GitHub Raw               | 1           | 2024-01-15 14:34:00
+89270  | https://pastebin.com/edit/kL9mN2pQ               | Pastebin - Edit          | 2           | 2024-01-15 14:42:00
+89280  | https://duckduckgo.com/?q=clear+browser+history  | DuckDuckGo               | 1           | 2024-01-17 22:00:00
+89285  | https://duckduckgo.com/?q=anti+forensics+tools   | DuckDuckGo               | 1           | 2024-01-17 22:05:00
+
+[+] Analyzing table: downloads
+    Active rows:     234
+    Deleted rows:    12 (recovered)
+
+--- Recovered Deleted Downloads ---
+Row ID | Filename               | URL                                    | Size      | Start Time (UTC)
+-------|------------------------|----------------------------------------|-----------|---------------------
+5012   | payload.ps1            | https://raw.githubusercontent.com/...  | 4,096     | 2024-01-15 14:34:00
+5015   | mimikatz_trunk.zip     | https://github.com/.../releases/...    | 1,892,352 | 2024-01-15 16:00:00
+5018   | netscan_portable.zip   | https://www.softperfect.com/...        | 5,242,880 | 2024-01-15 15:05:00
+
+[+] Slack space analysis...
+    Pages with slack space data: 234
+    Partial strings recovered:   67 fragments
+
+Summary:
+  Total records analyzed:  14,578 (active) + 3,126 (deleted/WAL)
+  Evidence-relevant URLs:  23 (flagged)
+  Deleted downloads:       12 (3 tool-related)
+  Anti-forensics evidence: Browser history deletion detected
+  Report: /analysis/sqlite_report/sqlite_forensics.json
+  Recovered DB: /analysis/sqlite_report/History_recovered.db</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: performing-sqlite-database-forensics\ndisplay_name: performing-sqlite-database-forensics\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# performing-sqlite-database-forensics - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `performing-sqlite-database-forensics` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nSQLite is the most widely deployed database engine in the world, used by virtually every mobile application, web browser, and many desktop applications to store user data. In digital forensics, SQLite databases are criti\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose performing-sqlite-database-forensics, then write the task. Fallback prompt: Use the performing-sqlite-database-forensics skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `performing-sqlite-database-forensics` |\n| Canonical name | `performing-sqlite-database-forensics` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\nSQLite is the most widely deployed database engine in the world, used by virtually every mobile application, web browser, and many desktop applications to store user data. In digital forensics, SQLite databases are criti\n\n## Original SKILL.md\n\n---\nname: performing-sqlite-database-forensics\ndescription: Perform forensic analysis of SQLite databases to recover deleted records\n  from freelists and WAL files, decode encoded timestamps, and extract evidence from\n  browser history, messaging apps, and mobile device databases.\ndomain: cybersecurity\nsubdomain: digital-forensics\ntags:\n- sqlite\n- database-forensics\n- freelist\n- wal\n- write-ahead-log\n- browser-history\n- mobile-forensics\n- deleted-records\n- b-tree\n- unallocated-space\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- RS.AN-01\n- RS.AN-03\n- DE.AE-02\n- RS.MA-01\nmitre_attack:\n- T1005\n- T1074\n- T1119\n- T1070\n- T1059\n---\n\n# Performing SQLite Database Forensics\n\n## Overview\n\nSQLite is the most widely deployed database engine in the world, used by virtually every mobile application, web browser, and many desktop applications to store user data. In digital forensics, SQLite databases are critical evidence sources containing browser history, messaging records, call logs, GPS locations, application preferences, and cached content. Forensic analysis goes beyond simple SQL queries to examine the internal B-tree page structures, freelist pages containing deleted records, Write-Ahead Log (WAL) files preserving transaction history, and unallocated space within database pages where recoverable data may persist after deletion.\n\n\n## When to Use\n\n- When conducting security assessments that involve performing sqlite database forensics\n- When following incident response procedures for related security events\n- When performing scheduled security testing or auditing activities\n- When validating security controls through hands-on testing\n\n## Prerequisites\n\n- DB Browser for SQLite (sqlitebrowser)\n- SQLite command-line tools (sqlite3)\n- Python 3.8+ with sqlite3 module\n- Belkasoft Evidence Center or Axiom (commercial)\n- Hex editor (HxD, 010 Editor) for manual page inspection\n- Understanding of B-tree data structures\n\n## SQLite Internal Structure\n\n### Database Header (First 100 Bytes)\n\n| Offset | Size | Description |\n|--------|------|-------------|\n| 0 | 16 | Magic string: \"SQLite format 3\\000\" |\n| 16 | 2 | Page size (512-65536 bytes) |\n| 18 | 1 | File format write version |\n| 19 | 1 | File format read version |\n| 24 | 4 | File change counter |\n| 28 | 4 | Database size in pages |\n| 32 | 4 | First freelist trunk page number |\n| 36 | 4 | Total freelist pages |\n| 52 | 4 | Text encoding (1=UTF-8, 2=UTF-16le, 3=UTF-16be) |\n| 96 | 4 | Version-valid-for number |\n\n### Page Types\n\n| Type | ID | Description |\n|------|----|-------------|\n| B-tree Interior | 0x05 | Internal table node |\n| B-tree Leaf | 0x0D | Table leaf page containing actual records |\n| Index Interior | 0x02 | Internal index node |\n| Index Leaf | 0x0A | Index leaf page |\n| Freelist Trunk | - | Tracks freed pages |\n| Freelist Leaf | - | Freed page with recoverable data |\n| Overflow | - | Continuation of large records |\n\n## Deleted Record Recovery\n\n### Method 1: Freelist Page Analysis\n\nWhen records are deleted, SQLite may place their pages on the freelist rather than overwriting them immediately.\n\n```python\nimport struct\nimport sqlite3\nimport os\n\n\ndef analyze_freelist(db_path: str) -> dict:\n    \"\"\"Analyze SQLite freelist to identify pages containing deleted data.\"\"\"\n    with open(db_path, \"rb\") as f:\n        # Read header\n        header = f.read(100)\n        page_size = struct.unpack(\">H\", header[16:18])[0]\n        if page_size == 1:\n            page_size = 65536\n        first_freelist_page = struct.unpack(\">I\", header[32:36])[0]\n        total_freelist_pages = struct.unpack(\">I\", header[36:40])[0]\n\n        freelist_info = {\n            \"page_size\": page_size,\n            \"first_freelist_page\": first_freelist_page,\n            \"total_freelist_pages\": total_freelist_pages,\n            \"trunk_pages\": [],\n            \"leaf_pages\": []\n        }\n\n        if first_freelist_page == 0:\n            return freelist_info\n\n        # Walk the freelist trunk chain\n        trunk_page = first_freelist_page\n        while trunk_page != 0:\n            offset = (trunk_page - 1) * page_size\n            f.seek(offset)\n            page_data = f.read(page_size)\n\n            next_trunk = struct.unpack(\">I\", page_data[0:4])[0]\n            leaf_count = struct.unpack(\">I\", page_data[4:8])[0]\n\n            leaves = []\n            for i in range(leaf_count):\n                leaf_page = struct.unpack(\">I\", page_data[8 + i * 4:12 + i * 4])[0]\n                leaves.append(leaf_page)\n\n            freelist_info[\"trunk_pages\"].append({\n                \"page_number\": trunk_page,\n                \"next_trunk\": next_trunk,\n                \"leaf_count\": leaf_count,\n                \"leaf_pages\": leaves\n            })\n            freelist_info[\"leaf_pages\"].extend(leaves)\n            trunk_page = next_trunk\n\n    return freelist_info\n\n\ndef extract_freelist_content(db_path: str, output_dir: str):\n    \"\"\"Extract raw content from freelist pages for analysis.\"\"\"\n    info = analyze_freelist(db_path)\n    os.makedirs(output_dir, exist_ok=True)\n\n    with open(db_path, \"rb\") as f:\n        page_size = info[\"page_size\"]\n        for page_num in info[\"leaf_pages\"]:\n            offset = (page_num - 1) * page_size\n            f.seek(offset)\n            page_data = f.read(page_size)\n            output_file = os.path.join(output_dir, f\"freelist_page_{page_num}.bin\")\n            with open(output_file, \"wb\") as out:\n                out.write(page_data)\n\n    return len(info[\"leaf_pages\"])\n```\n\n### Method 2: WAL (Write-Ahead Log) Analysis\n\nThe WAL file contains pending transactions that have not yet been checkpointed back to the main database.\n\n```python\ndef parse_wal_header(wal_path: str) -> dict:\n    \"\"\"Parse SQLite WAL file header and frame inventory.\"\"\"\n    with open(wal_path, \"rb\") as f:\n        header = f.read(32)\n        magic = struct.unpack(\">I\", header[0:4])[0]\n        file_format = struct.unpack(\">I\", header[4:8])[0]\n        page_size = struct.unpack(\">I\", header[8:12])[0]\n        checkpoint_seq = struct.unpack(\">I\", header[12:16])[0]\n        salt1 = struct.unpack(\">I\", header[16:20])[0]\n        salt2 = struct.unpack(\">I\", header[20:24])[0]\n\n        wal_info = {\n            \"magic\": hex(magic),\n            \"format\": file_format,\n            \"page_size\": page_size,\n            \"checkpoint_sequence\": checkpoint_seq,\n            \"frames\": []\n        }\n\n        # Parse frames (24-byte header + page_size data each)\n        frame_offset = 32\n        frame_num = 0\n        file_size = os.path.getsize(wal_path)\n\n        while frame_offset + 24 + page_size \u003c= file_size:\n            f.seek(frame_offset)\n            frame_header = f.read(24)\n            page_number = struct.unpack(\">I\", frame_header[0:4])[0]\n            db_size_after = struct.unpack(\">I\", frame_header[4:8])[0]\n\n            wal_info[\"frames\"].append({\n                \"frame_number\": frame_num,\n                \"page_number\": page_number,\n                \"db_size_pages\": db_size_after,\n                \"offset\": frame_offset\n            })\n            frame_offset += 24 + page_size\n            frame_num += 1\n\n    return wal_info\n```\n\n### Method 3: Unallocated Space Within Pages\n\nDeleted cells within active B-tree pages leave data in the unallocated region between the cell pointer array and the cell content area.\n\n```python\ndef analyze_unallocated_space(db_path: str, page_number: int) -> dict:\n    \"\"\"Analyze unallocated space within a specific B-tree page.\"\"\"\n    with open(db_path, \"rb\") as f:\n        header = f.read(100)\n        page_size = struct.unpack(\">H\", header[16:18])[0]\n        if page_size == 1:\n            page_size = 65536\n\n        offset = (page_number - 1) * page_size\n        f.seek(offset)\n        page_data = f.read(page_size)\n\n        # Parse page header (8 or 12 bytes depending on type)\n        page_type = page_data[0]\n        first_freeblock = struct.unpack(\">H\", page_data[1:3])[0]\n        cell_count = struct.unpack(\">H\", page_data[3:5])[0]\n        cell_content_offset = struct.unpack(\">H\", page_data[5:7])[0]\n        if cell_content_offset == 0:\n            cell_content_offset = 65536\n\n        header_size = 12 if page_type in (0x02, 0x05) else 8\n        cell_pointer_end = header_size + cell_count * 2\n\n        unallocated_start = cell_pointer_end\n        unallocated_end = cell_content_offset\n        unallocated_size = unallocated_end - unallocated_start\n\n        return {\n            \"page_number\": page_number,\n            \"page_type\": hex(page_type),\n            \"cell_count\": cell_count,\n            \"unallocated_start\": unallocated_start,\n            \"unallocated_end\": unallocated_end,\n            \"unallocated_size\": unallocated_size,\n            \"unallocated_data\": page_data[unallocated_start:unallocated_end].hex()\n        }\n```\n\n## Common Forensic Databases\n\n| Application | Database File | Key Tables |\n|------------|--------------|------------|\n| Chrome | History | urls, visits, downloads, keyword_search_terms |\n| Firefox | places.sqlite | moz_places, moz_historyvisits |\n| Safari | History.db | history_items, history_visits |\n| WhatsApp | msgstore.db | messages, chat_list |\n| Signal | signal.sqlite | sms, mms |\n| iMessage | sms.db | message, handle, chat |\n| Android SMS | mmssms.db | sms, mms, threads |\n| Skype | main.db | Messages, Conversations |\n\n## Timestamp Decoding\n\n```python\nfrom datetime import datetime, timedelta\n\ndef decode_chrome_timestamp(chrome_ts: int) -> datetime:\n    \"\"\"Convert Chrome/WebKit timestamp to datetime (microseconds since 1601-01-01).\"\"\"\n    epoch_delta = 11644473600\n    return datetime.utcfromtimestamp((chrome_ts / 1000000) - epoch_delta)\n\ndef decode_unix_timestamp(unix_ts: int) -> datetime:\n    \"\"\"Convert Unix timestamp to datetime.\"\"\"\n    return datetime.utcfromtimestamp(unix_ts)\n\ndef decode_mac_absolute_time(mac_ts: float) -> datetime:\n    \"\"\"Convert Mac Absolute Time (seconds since 2001-01-01).\"\"\"\n    mac_epoch = datetime(2001, 1, 1)\n    return mac_epoch + timedelta(seconds=mac_ts)\n\ndef decode_mozilla_timestamp(moz_ts: int) -> datetime:\n    \"\"\"Convert Mozilla PRTime (microseconds since Unix epoch).\"\"\"\n    return datetime.utcfromtimestamp(moz_ts / 1000000)\n```\n\n## References\n\n- SQLite File Format: https://www.sqlite.org/fileformat2.html\n- Belkasoft SQLite Analysis: https://belkasoft.com/sqlite-analysis\n- Spyder Forensics SQLite Training: https://www.spyderforensics.com/sqlite-forensic-fundamentals-2025/\n- Forensic Analysis of Damaged SQLite Databases: https://www.forensicfocus.com/articles/forensic-analysis-of-damaged-sqlite-databases/\n\n## Example Output\n\n```text\n$ python3 sqlite_forensics.py --db /evidence/chrome/Default/History \\\n    --wal /evidence/chrome/Default/History-wal \\\n    --journal /evidence/chrome/Default/History-journal \\\n    --output /analysis/sqlite_report\n\nSQLite Database Forensic Analyzer v2.0\n========================================\nDatabase:    /evidence/chrome/Default/History\nSize:        48.2 MB\nSQLite Ver:  3.39.5\nPage Size:   4096 bytes\nTotal Pages: 12,345\nEncoding:    UTF-8\n\n[+] Analyzing WAL (Write-Ahead Log)...\n    WAL file:       History-wal (2.1 MB)\n    WAL frames:     512\n    Checkpointed:   No (contains uncommitted data)\n    Recoverable rows from WAL: 234\n\n[+] Analyzing journal file...\n    Journal file:   History-journal (0 bytes - rolled back)\n\n[+] Scanning for deleted records (freelist pages)...\n    Freelist pages:     456\n    Deleted records recovered: 1,892\n\n[+] Analyzing table: urls\n    Active rows:     12,456\n    Deleted rows:    1,234 (recovered from freelist)\n    WAL-only rows:   89\n\n--- Recovered Deleted URLs (Last 10) ---\nRow ID | URL                                              | Title                    | Visit Count | Last Visit (UTC)\n-------|--------------------------------------------------|--------------------------|-------------|---------------------\n89234  | https://mega.nz/folder/xYz123#key=AbCdEf        | MEGA                     | 5           | 2024-01-16 03:20:00\n89235  | https://transfer.sh/abc123/data.7z               | transfer.sh              | 1           | 2024-01-16 03:25:00\n89240  | https://temp-mail.org/en/                        | Temp Mail                | 3           | 2024-01-15 13:00:00\n89241  | https://browserleaks.com/ip                      | IP Leak Test             | 1           | 2024-01-15 12:55:00\n89245  | https://www.virustotal.com/gui/file/a1b2c3...    | VirusTotal               | 2           | 2024-01-15 14:30:00\n89250  | https://github.com/gentilkiwi/mimikatz/releases  | Mimikatz Releases        | 1           | 2024-01-15 16:00:00\n89260  | https://raw.githubusercontent.com/.../payload.ps1| GitHub Raw               | 1           | 2024-01-15 14:34:00\n89270  | https://pastebin.com/edit/kL9mN2pQ               | Pastebin - Edit          | 2           | 2024-01-15 14:42:00\n89280  | https://duckduckgo.com/?q=clear+browser+history  | DuckDuckGo               | 1           | 2024-01-17 22:00:00\n89285  | https://duckduckgo.com/?q=anti+forensics+tools   | DuckDuckGo               | 1           | 2024-01-17 22:05:00\n\n[+] Analyzing table: downloads\n    Active rows:     234\n    Deleted rows:    12 (recovered)\n\n--- Recovered Deleted Downloads ---\nRow ID | Filename               | URL                                    | Size      | Start Time (UTC)\n-------|------------------------|----------------------------------------|-----------|---------------------\n5012   | payload.ps1            | https://raw.githubusercontent.com/...  | 4,096     | 2024-01-15 14:34:00\n5015   | mimikatz_trunk.zip     | https://github.com/.../releases/...    | 1,892,352 | 2024-01-15 16:00:00\n5018   | netscan_portable.zip   | https://www.softperfect.com/...        | 5,242,880 | 2024-01-15 15:05:00\n\n[+] Slack space analysis...\n    Pages with slack space data: 234\n    Partial strings recovered:   67 fragments\n\nSummary:\n  Total records analyzed:  14,578 (active) + 3,126 (deleted/WAL)\n  Evidence-relevant URLs:  23 (flagged)\n  Deleted downloads:       12 (3 tool-related)\n  Anti-forensics evidence: Browser history deletion detected\n  Report: /analysis/sqlite_report/sqlite_forensics.json\n  Recovered DB: /analysis/sqlite_report/History_recovered.db\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("performing-sqlite-database-forensics-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

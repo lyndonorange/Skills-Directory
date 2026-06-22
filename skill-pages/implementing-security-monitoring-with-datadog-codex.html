@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>implementing-security-monitoring-with-datadog - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/implementing-security-monitoring-with-datadog-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>implementing-security-monitoring-with-datadog</h1>
+      <p class="description">'Implements security monitoring using Datadog Cloud SIEM, Cloud Security</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>implementing-security-monitoring-with-datadog</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>implementing-security-monitoring-with-datadog</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Implements security monitoring using Datadog Cloud SIEM, Cloud Security</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose implementing-security-monitoring-with-datadog, then write the task. Fallback prompt: Use the implementing-security-monitoring-with-datadog skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Implementing Security Monitoring with Datadog</h2>
+<h3>When to Use</h3>
+<ul>
+<li>Deploying Cloud SIEM to detect real-time threats across cloud infrastructure (AWS, Azure, GCP)</li>
+<li>Creating custom detection rules for attacker techniques, credential abuse, or anomalous behavior</li>
+<li>Enabling Workload Protection (CSM Threats) to monitor file, process, and network activity on hosts and containers</li>
+<li>Meeting compliance requirements (PCI-DSS, SOC 2, HIPAA) that mandate centralized log monitoring and alerting</li>
+<li>Building security dashboards to provide SOC visibility into threat signals, investigation context, and response metrics</li>
+</ul>
+<p><strong>Do not use</strong> for endpoint-only monitoring without cloud infrastructure; use a dedicated EDR solution for purely on-premises endpoint detection.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>Datadog account with Security Monitoring (Cloud SIEM) and/or Cloud Security Management enabled</li>
+<li>Datadog API Key and Application Key from Organization Settings &gt; API Keys</li>
+<li>Datadog Agent v7+ installed on hosts/containers that generate security-relevant logs</li>
+<li>Log sources configured for ingestion: AWS CloudTrail, VPC Flow Logs, GuardDuty, Azure Activity Logs, GCP Audit Logs, or on-host logs (auth.log, syslog, Windows Security Events)</li>
+<li>Python 3.9+ with <code>datadog-api-client</code> library for programmatic rule management</li>
+<li>Network access from monitored hosts to Datadog intake endpoints (port 443)</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Deploy and Configure the Datadog Agent for Security</h4>
+<p>Install the Datadog Agent and enable security-related features in <code>datadog.yaml</code>:</p>
+<pre><code># /etc/datadog-agent/datadog.yaml
+
+api_key: &lt;YOUR_DATADOG_API_KEY&gt;
+site: datadoghq.com   # or datadoghq.eu, us3.datadoghq.com, etc.
+
+# Enable log collection for Cloud SIEM
+logs_enabled: true
+
+# Enable security features
+runtime_security_config:
+  enabled: true          # Workload Protection (CSM Threats)
+  activity_dump:
+    enabled: true        # Record process activity for investigation
+
+compliance_config:
+  enabled: true          # CIS benchmark checks (CSM Misconfigurations)
+  host_benchmarks:
+    enabled: true</code></pre>
+<p>Configure log sources for security-relevant files on Linux:</p>
+<pre><code># /etc/datadog-agent/conf.d/auth.d/conf.yaml
+logs:
+  - type: file
+    path: /var/log/auth.log
+    source: auth
+    service: linux-auth
+    tags:
+      - env:production
+      - security:authentication
+
+  - type: file
+    path: /var/log/syslog
+    source: syslog
+    service: linux-syslog</code></pre>
+<p>For Windows Security Event Logs:</p>
+<pre><code># /etc/datadog-agent/conf.d/win32_event_log.d/conf.yaml
+logs:
+  - type: windows_event
+    channel_path: Security
+    source: windows.events
+    service: windows-security
+    filters:
+      - id: [4624, 4625, 4648, 4672, 4688, 4720, 4726, 4740, 4767]</code></pre>
+<p>Enable the system-probe for Workload Protection (CSM Threats):</p>
+<pre><code># /etc/datadog-agent/system-probe.yaml
+runtime_security_config:
+  enabled: true
+  fim_enabled: true        # File Integrity Monitoring
+  network_enabled: true    # Network activity monitoring</code></pre>
+<p>Restart the Agent after configuration changes:</p>
+<pre><code>sudo systemctl restart datadog-agent
+sudo datadog-agent status | grep -A5 &quot;Security Agent&quot;</code></pre>
+<h4>Step 2: Configure Cloud Log Sources for SIEM</h4>
+<p>Set up AWS CloudTrail, VPC Flow Logs, and GuardDuty ingestion for Cloud SIEM:</p>
+<pre><code>Datadog App &gt; Security &gt; Cloud SIEM &gt; Configuration &gt; Content Packs
+
+AWS Content Pack:
+  1. Enable the AWS integration in Datadog (Integrations &gt; Amazon Web Services)
+  2. Configure CloudTrail log forwarding via the Datadog Forwarder Lambda
+  3. Enable VPC Flow Logs forwarding to Datadog
+  4. Enable GuardDuty findings forwarding
+
+Required IAM permissions for the Datadog role:
+  - cloudtrail:LookupEvents
+  - logs:FilterLogEvents
+  - guardduty:ListDetectors, guardduty:GetFindings
+  - s3:GetObject (for CloudTrail S3 bucket)
+
+Azure Content Pack:
+  1. Configure Azure Activity Logs via Event Hub to Datadog
+  2. Forward Azure AD Sign-in Logs and Audit Logs
+  3. Enable Microsoft Defender for Cloud alerts forwarding
+
+GCP Content Pack:
+  1. Configure GCP Audit Logs export via Pub/Sub to Datadog
+  2. Forward Cloud Audit Logs (Admin Activity, Data Access)</code></pre>
+<p>Verify log ingestion is working:</p>
+<pre><code>Datadog App &gt; Logs &gt; Search
+  Filter: source:(cloudtrail OR aws.guardduty OR azure.activitylogs)
+  Verify: Logs appearing with correct source tags and parsed attributes</code></pre>
+<h4>Step 3: Enable and Customize Detection Rules</h4>
+<p>Datadog provides out-of-the-box detection rules that are automatically imported. Review and customize them:</p>
+<pre><code>Datadog App &gt; Security &gt; Detection Rules
+
+Out-of-the-box rule categories:
+  - AWS: IAM policy changes, root account usage, S3 public access
+  - Azure: Suspicious sign-ins, resource group deletions
+  - GCP: IAM policy modifications, firewall rule changes
+  - Authentication: Brute force, impossible travel, credential stuffing
+  - Network: Port scanning, DNS tunneling, C2 beaconing
+  - Application: SQL injection attempts, XSS, SSRF patterns</code></pre>
+<p>Create a custom detection rule for brute force login detection:</p>
+<pre><code>Datadog App &gt; Security &gt; Detection Rules &gt; New Rule
+
+Rule Name: &quot;Brute Force Login Detection - Custom&quot;
+Rule Type: Log Detection (Real-time)
+
+Define Search Query:
+  source:auth status:error @evt.name:authentication @evt.outcome:failure
+  Group By: @usr.id
+
+Set Rule Cases:
+  Case 1: When count &gt; 10 in 5 minutes
+    Name: &quot;High volume failed logins&quot;
+    Severity: HIGH
+    Notification: @slack-security-alerts @pagerduty-soc
+
+  Case 2: When count &gt; 50 in 5 minutes
+    Name: &quot;Extreme brute force attempt&quot;
+    Severity: CRITICAL
+    Notification: @slack-security-alerts @pagerduty-soc-critical
+
+Signal Settings:
+  Keep signal alive for: 10 minutes
+  Maximum signal duration: 24 hours
+  Evaluation window: 5 minutes</code></pre>
+<p>Create a detection rule for AWS root account usage:</p>
+<pre><code>Rule Name: &quot;AWS Root Account Console Login&quot;
+Rule Type: Log Detection
+
+Query:
+  source:cloudtrail @evt.name:ConsoleLogin @userIdentity.type:Root
+
+Severity: CRITICAL
+Notification Message:
+  &quot;AWS Root account console login detected from IP {{@network.client.ip}}.
+   Account: {{@usr.account_id}}
+   Region: {{@cloud.region}}
+   MFA Used: {{@additionalEventData.MFAUsed}}&quot;
+
+Tags: attack:initial-access, mitre:T1078</code></pre>
+<h4>Step 4: Configure Workload Protection (CSM Threats)</h4>
+<p>Set up runtime threat detection for hosts and containers:</p>
+<pre><code>Datadog App &gt; Security &gt; Cloud Security Management &gt; Setup
+
+Enable Workload Protection:
+  1. Verify Agent has runtime_security_config.enabled: true
+  2. Review default Agent rules (file integrity, process execution)
+  3. Customize rules for your environment
+
+Default detection categories:
+  - Process Execution: Detect reverse shells, crypto miners, exploitation tools
+  - File Integrity: Monitor changes to /etc/passwd, /etc/shadow, SSH keys
+  - Network Activity: Detect unexpected outbound connections, DNS tunneling
+  - Container Escape: Detect privileged container breakout attempts
+  - Kernel Module: Detect rootkit or unauthorized kernel module loading</code></pre>
+<p>Create a custom CSM Threats Agent rule to detect unauthorized SSH key modifications:</p>
+<pre><code>Datadog App &gt; Security &gt; CSM &gt; Agent Rules &gt; New Agent Rule
+
+Rule Expression:
+  open.file.path == &quot;/root/.ssh/authorized_keys&quot; &amp;&amp;
+  open.flags &amp; (O_WRONLY | O_RDWR | O_CREAT) &gt; 0 &amp;&amp;
+  process.file.name != &quot;sshd&quot;
+
+Rule Name: ssh_key_modification
+Description: Detect non-sshd processes modifying root authorized_keys
+Tags: attack:persistence, mitre:T1098.004</code></pre>
+<h4>Step 5: Build Security Dashboards</h4>
+<p>Create a Cloud SIEM overview dashboard:</p>
+<pre><code>Datadog App &gt; Dashboards &gt; New Dashboard &gt; &quot;Security Operations Overview&quot;
+
+Widgets:
+  1. Signal Count Over Time (timeseries)
+     Query: count:security_signal by {signal.rule.name}
+     Display: Line chart, last 24 hours
+
+  2. Top Triggered Rules (top list)
+     Query: count:security_signal by {signal.rule.name}.as_count()
+     Display: Top 10
+
+  3. Critical Signals (query value)
+     Query: count:security_signal{severity:critical}
+     Conditional format: Red if &gt; 0
+
+  4. Signals by Source (pie chart)
+     Query: count:security_signal by {source}
+
+  5. Geographic Threat Map (geomap)
+     Query: count:security_signal by {network.client.geoip.country.name}
+
+  6. Top Targeted Users (top list)
+     Query: count:security_signal by {usr.id}
+
+  7. Mean Time to Triage (query value)
+     Query: avg:security_signal.triage_time
+
+  8. Open Signals by Severity (table)
+     Query: count:security_signal{status:open} by {severity}</code></pre>
+<h4>Step 6: Configure Notification Workflows</h4>
+<p>Set up automated notification and response workflows:</p>
+<pre><code>Datadog App &gt; Security &gt; Notification Rules
+
+Rule 1: Critical Signal Escalation
+  Condition: severity:critical
+  Recipients: @pagerduty-soc-critical @slack-security-incidents
+  Message: &quot;CRITICAL security signal: {{signal.rule.name}}
+            Source: {{signal.attributes.network.client.ip}}
+            Target: {{signal.attributes.usr.id}}
+            Details: {{signal.message}}&quot;
+
+Rule 2: High Signal SOC Alert
+  Condition: severity:high
+  Recipients: @slack-security-alerts
+  Suppress: After first notification, suppress for 15 minutes
+
+Rule 3: Compliance Violation
+  Condition: rule_type:compliance
+  Recipients: @slack-compliance-team @jira-compliance-board
+
+Workflow Automation (Datadog Workflows):
+  Trigger: Security signal with severity:critical
+  Steps:
+    1. Enrich signal with threat intelligence lookup
+    2. Create Jira incident ticket
+    3. Send Slack notification with investigation context
+    4. If source is AWS: Trigger Lambda to isolate resource</code></pre>
+<h4>Step 7: Validate and Tune Detection Coverage</h4>
+<p>Test detection rules and tune false positives:</p>
+<pre><code># Generate a test security event (failed SSH login)
+ssh -o StrictHostKeyChecking=no invalid_user@localhost 2&gt;/dev/null
+
+# Verify the event appears in Datadog Logs
+# Datadog App &gt; Logs &gt; source:auth status:error
+
+# Check that a security signal was generated
+# Datadog App &gt; Security &gt; Signals &gt; Filter by rule name
+
+# Tune noisy rules by adding suppression queries:
+# Datadog App &gt; Security &gt; Detection Rules &gt; [Rule] &gt; Edit
+# Add suppression: Suppress signal when @usr.id:service-account-*</code></pre>
+<p>Use the Security Signals API to validate programmatically:</p>
+<pre><code>from datadog_api_client import Configuration, ApiClient
+from datadog_api_client.v2.api.security_monitoring_api import SecurityMonitoringApi
+
+configuration = Configuration()
+# Reads DD_API_KEY and DD_APP_KEY from environment
+
+with ApiClient(configuration) as api_client:
+    api = SecurityMonitoringApi(api_client)
+    signals = api.search_security_monitoring_signals(
+        body={
+            &quot;filter&quot;: {
+                &quot;query&quot;: &quot;status:open severity:critical&quot;,
+                &quot;from&quot;: &quot;now-24h&quot;,
+                &quot;to&quot;: &quot;now&quot;,
+            },
+            &quot;sort&quot;: {&quot;field&quot;: &quot;timestamp&quot;, &quot;order&quot;: &quot;desc&quot;},
+            &quot;page&quot;: {&quot;limit&quot;: 25},
+        }
+    )
+    for signal in signals.data:
+        attrs = signal.attributes
+        print(f&quot;[{attrs.severity}] {attrs.title}&quot;)
+        print(f&quot;  Rule: {attrs.custom.get('rule', {}).get('name', 'N/A')}&quot;)
+        print(f&quot;  Time: {attrs.timestamp}&quot;)</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | <strong>Cloud SIEM</strong> | Datadog's security information and event management service that analyzes ingested logs in real-time to detect threats using detection rules | | <strong>Security Signal</strong> | An alert generated when a detection rule matches incoming log data; signals have severity, status (open/triage/closed), and investigation context | | <strong>Detection Rule</strong> | A query-based rule that evaluates logs or events against conditions (threshold, anomaly, new value, impossible travel) to generate security signals | | <strong>CSM (Cloud Security Management)</strong> | Datadog platform for infrastructure security including Misconfigurations (compliance benchmarks), Threats (runtime detection), and Vulnerabilities | | <strong>Workload Protection</strong> | CSM Threats component that monitors file, process, and network activity on hosts and containers using eBPF-based Agent rules | | <strong>Content Pack</strong> | Pre-built collection of detection rules, dashboards, and log parsers for a specific integration (AWS, Azure, GCP, Okta, etc.) | | <strong>Agent Rule</strong> | A kernel-level rule evaluated by the Datadog Agent on the host to collect security-relevant events before sending to Datadog for threat detection | | <strong>Suppression Query</strong> | A filter applied to a detection rule to prevent signals from being generated for known-good activity (reduces false positives) |</p>
+<h3>Verification</h3>
+<ul>
+<li>[ ] Datadog Agent is installed and reporting on all target hosts (<code>datadog-agent status</code> shows security agent running)</li>
+<li>[ ] Security-relevant log sources are ingesting into Datadog (CloudTrail, auth.log, Windows Security Events visible in Log Explorer)</li>
+<li>[ ] Cloud SIEM Content Packs are enabled for all cloud providers in use (AWS, Azure, GCP)</li>
+<li>[ ] Out-of-the-box detection rules are active and generating signals for test events</li>
+<li>[ ] Custom detection rules trigger correctly (test with a simulated failed login burst)</li>
+<li>[ ] Workload Protection (CSM Threats) is enabled and Agent rules are evaluating on hosts</li>
+<li>[ ] Security dashboard displays signal counts, top rules, severity breakdown, and geographic data</li>
+<li>[ ] Notification workflows deliver alerts to Slack, PagerDuty, or Jira for critical and high signals</li>
+<li>[ ] Suppression queries are configured to reduce false positives on noisy rules</li>
+<li>[ ] Security Signals API returns results programmatically for automation integration</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: implementing-security-monitoring-with-datadog\ndisplay_name: implementing-security-monitoring-with-datadog\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# implementing-security-monitoring-with-datadog - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `implementing-security-monitoring-with-datadog` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- Deploying Cloud SIEM to detect real-time threats across cloud infrastructure (AWS, Azure, GCP)\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose implementing-security-monitoring-with-datadog, then write the task. Fallback prompt: Use the implementing-security-monitoring-with-datadog skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `implementing-security-monitoring-with-datadog` |\n| Canonical name | `implementing-security-monitoring-with-datadog` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\n- Deploying Cloud SIEM to detect real-time threats across cloud infrastructure (AWS, Azure, GCP)\n\n## Original SKILL.md\n\n---\nname: implementing-security-monitoring-with-datadog\ndescription: 'Implements security monitoring using Datadog Cloud SIEM, Cloud Security\n  Management (CSM), and Workload Protection to detect threats, enforce compliance,\n  and respond to security events across cloud and hybrid infrastructure. Covers Agent\n  deployment, log source ingestion, detection rule creation, security dashboards,\n  and automated notification workflows. Activates for requests involving Datadog security\n  setup, Cloud SIEM configuration, CSM threat detection, or security monitoring dashboards.\n\n  '\ndomain: cybersecurity\nsubdomain: security-operations\ntags:\n- siem\n- security-monitoring\n- datadog\n- cloud-security\n- log-analysis\n- detection-rules\n- CSM\n- workload-protection\nversion: 1.0.0\nauthor: mahipal\nlicense: Apache-2.0\nnist_ai_rmf:\n- GOVERN-1.1\n- MEASURE-2.7\n- MANAGE-3.1\n- GOVERN-4.2\n- MAP-2.3\nd3fend_techniques:\n- Restore Access\n- Password Authentication\n- Biometric Authentication\n- Strong Password Policy\n- Restore User Account Access\nnist_csf:\n- DE.CM-01\n- RS.MA-01\n- GV.OV-01\n- DE.AE-02\nmitre_attack:\n- T1078\n- T1190\n- T1059\n- T1685.002\n- T1685.005\n---\n\n# Implementing Security Monitoring with Datadog\n\n## When to Use\n\n- Deploying Cloud SIEM to detect real-time threats across cloud infrastructure (AWS, Azure, GCP)\n- Creating custom detection rules for attacker techniques, credential abuse, or anomalous behavior\n- Enabling Workload Protection (CSM Threats) to monitor file, process, and network activity on hosts and containers\n- Meeting compliance requirements (PCI-DSS, SOC 2, HIPAA) that mandate centralized log monitoring and alerting\n- Building security dashboards to provide SOC visibility into threat signals, investigation context, and response metrics\n\n**Do not use** for endpoint-only monitoring without cloud infrastructure; use a dedicated EDR solution for purely on-premises endpoint detection.\n\n## Prerequisites\n\n- Datadog account with Security Monitoring (Cloud SIEM) and/or Cloud Security Management enabled\n- Datadog API Key and Application Key from Organization Settings > API Keys\n- Datadog Agent v7+ installed on hosts/containers that generate security-relevant logs\n- Log sources configured for ingestion: AWS CloudTrail, VPC Flow Logs, GuardDuty, Azure Activity Logs, GCP Audit Logs, or on-host logs (auth.log, syslog, Windows Security Events)\n- Python 3.9+ with `datadog-api-client` library for programmatic rule management\n- Network access from monitored hosts to Datadog intake endpoints (port 443)\n\n## Workflow\n\n### Step 1: Deploy and Configure the Datadog Agent for Security\n\nInstall the Datadog Agent and enable security-related features in `datadog.yaml`:\n\n```yaml\n# /etc/datadog-agent/datadog.yaml\n\napi_key: \u003cYOUR_DATADOG_API_KEY>\nsite: datadoghq.com   # or datadoghq.eu, us3.datadoghq.com, etc.\n\n# Enable log collection for Cloud SIEM\nlogs_enabled: true\n\n# Enable security features\nruntime_security_config:\n  enabled: true          # Workload Protection (CSM Threats)\n  activity_dump:\n    enabled: true        # Record process activity for investigation\n\ncompliance_config:\n  enabled: true          # CIS benchmark checks (CSM Misconfigurations)\n  host_benchmarks:\n    enabled: true\n```\n\nConfigure log sources for security-relevant files on Linux:\n\n```yaml\n# /etc/datadog-agent/conf.d/auth.d/conf.yaml\nlogs:\n  - type: file\n    path: /var/log/auth.log\n    source: auth\n    service: linux-auth\n    tags:\n      - env:production\n      - security:authentication\n\n  - type: file\n    path: /var/log/syslog\n    source: syslog\n    service: linux-syslog\n```\n\nFor Windows Security Event Logs:\n\n```yaml\n# /etc/datadog-agent/conf.d/win32_event_log.d/conf.yaml\nlogs:\n  - type: windows_event\n    channel_path: Security\n    source: windows.events\n    service: windows-security\n    filters:\n      - id: [4624, 4625, 4648, 4672, 4688, 4720, 4726, 4740, 4767]\n```\n\nEnable the system-probe for Workload Protection (CSM Threats):\n\n```yaml\n# /etc/datadog-agent/system-probe.yaml\nruntime_security_config:\n  enabled: true\n  fim_enabled: true        # File Integrity Monitoring\n  network_enabled: true    # Network activity monitoring\n```\n\nRestart the Agent after configuration changes:\n\n```bash\nsudo systemctl restart datadog-agent\nsudo datadog-agent status | grep -A5 \"Security Agent\"\n```\n\n### Step 2: Configure Cloud Log Sources for SIEM\n\nSet up AWS CloudTrail, VPC Flow Logs, and GuardDuty ingestion for Cloud SIEM:\n\n```\nDatadog App > Security > Cloud SIEM > Configuration > Content Packs\n\nAWS Content Pack:\n  1. Enable the AWS integration in Datadog (Integrations > Amazon Web Services)\n  2. Configure CloudTrail log forwarding via the Datadog Forwarder Lambda\n  3. Enable VPC Flow Logs forwarding to Datadog\n  4. Enable GuardDuty findings forwarding\n\nRequired IAM permissions for the Datadog role:\n  - cloudtrail:LookupEvents\n  - logs:FilterLogEvents\n  - guardduty:ListDetectors, guardduty:GetFindings\n  - s3:GetObject (for CloudTrail S3 bucket)\n\nAzure Content Pack:\n  1. Configure Azure Activity Logs via Event Hub to Datadog\n  2. Forward Azure AD Sign-in Logs and Audit Logs\n  3. Enable Microsoft Defender for Cloud alerts forwarding\n\nGCP Content Pack:\n  1. Configure GCP Audit Logs export via Pub/Sub to Datadog\n  2. Forward Cloud Audit Logs (Admin Activity, Data Access)\n```\n\nVerify log ingestion is working:\n\n```\nDatadog App > Logs > Search\n  Filter: source:(cloudtrail OR aws.guardduty OR azure.activitylogs)\n  Verify: Logs appearing with correct source tags and parsed attributes\n```\n\n### Step 3: Enable and Customize Detection Rules\n\nDatadog provides out-of-the-box detection rules that are automatically imported. Review and customize them:\n\n```\nDatadog App > Security > Detection Rules\n\nOut-of-the-box rule categories:\n  - AWS: IAM policy changes, root account usage, S3 public access\n  - Azure: Suspicious sign-ins, resource group deletions\n  - GCP: IAM policy modifications, firewall rule changes\n  - Authentication: Brute force, impossible travel, credential stuffing\n  - Network: Port scanning, DNS tunneling, C2 beaconing\n  - Application: SQL injection attempts, XSS, SSRF patterns\n```\n\nCreate a custom detection rule for brute force login detection:\n\n```\nDatadog App > Security > Detection Rules > New Rule\n\nRule Name: \"Brute Force Login Detection - Custom\"\nRule Type: Log Detection (Real-time)\n\nDefine Search Query:\n  source:auth status:error @evt.name:authentication @evt.outcome:failure\n  Group By: @usr.id\n\nSet Rule Cases:\n  Case 1: When count > 10 in 5 minutes\n    Name: \"High volume failed logins\"\n    Severity: HIGH\n    Notification: @slack-security-alerts @pagerduty-soc\n\n  Case 2: When count > 50 in 5 minutes\n    Name: \"Extreme brute force attempt\"\n    Severity: CRITICAL\n    Notification: @slack-security-alerts @pagerduty-soc-critical\n\nSignal Settings:\n  Keep signal alive for: 10 minutes\n  Maximum signal duration: 24 hours\n  Evaluation window: 5 minutes\n```\n\nCreate a detection rule for AWS root account usage:\n\n```\nRule Name: \"AWS Root Account Console Login\"\nRule Type: Log Detection\n\nQuery:\n  source:cloudtrail @evt.name:ConsoleLogin @userIdentity.type:Root\n\nSeverity: CRITICAL\nNotification Message:\n  \"AWS Root account console login detected from IP {{@network.client.ip}}.\n   Account: {{@usr.account_id}}\n   Region: {{@cloud.region}}\n   MFA Used: {{@additionalEventData.MFAUsed}}\"\n\nTags: attack:initial-access, mitre:T1078\n```\n\n### Step 4: Configure Workload Protection (CSM Threats)\n\nSet up runtime threat detection for hosts and containers:\n\n```\nDatadog App > Security > Cloud Security Management > Setup\n\nEnable Workload Protection:\n  1. Verify Agent has runtime_security_config.enabled: true\n  2. Review default Agent rules (file integrity, process execution)\n  3. Customize rules for your environment\n\nDefault detection categories:\n  - Process Execution: Detect reverse shells, crypto miners, exploitation tools\n  - File Integrity: Monitor changes to /etc/passwd, /etc/shadow, SSH keys\n  - Network Activity: Detect unexpected outbound connections, DNS tunneling\n  - Container Escape: Detect privileged container breakout attempts\n  - Kernel Module: Detect rootkit or unauthorized kernel module loading\n```\n\nCreate a custom CSM Threats Agent rule to detect unauthorized SSH key modifications:\n\n```\nDatadog App > Security > CSM > Agent Rules > New Agent Rule\n\nRule Expression:\n  open.file.path == \"/root/.ssh/authorized_keys\" &&\n  open.flags & (O_WRONLY | O_RDWR | O_CREAT) > 0 &&\n  process.file.name != \"sshd\"\n\nRule Name: ssh_key_modification\nDescription: Detect non-sshd processes modifying root authorized_keys\nTags: attack:persistence, mitre:T1098.004\n```\n\n### Step 5: Build Security Dashboards\n\nCreate a Cloud SIEM overview dashboard:\n\n```\nDatadog App > Dashboards > New Dashboard > \"Security Operations Overview\"\n\nWidgets:\n  1. Signal Count Over Time (timeseries)\n     Query: count:security_signal by {signal.rule.name}\n     Display: Line chart, last 24 hours\n\n  2. Top Triggered Rules (top list)\n     Query: count:security_signal by {signal.rule.name}.as_count()\n     Display: Top 10\n\n  3. Critical Signals (query value)\n     Query: count:security_signal{severity:critical}\n     Conditional format: Red if > 0\n\n  4. Signals by Source (pie chart)\n     Query: count:security_signal by {source}\n\n  5. Geographic Threat Map (geomap)\n     Query: count:security_signal by {network.client.geoip.country.name}\n\n  6. Top Targeted Users (top list)\n     Query: count:security_signal by {usr.id}\n\n  7. Mean Time to Triage (query value)\n     Query: avg:security_signal.triage_time\n\n  8. Open Signals by Severity (table)\n     Query: count:security_signal{status:open} by {severity}\n```\n\n### Step 6: Configure Notification Workflows\n\nSet up automated notification and response workflows:\n\n```\nDatadog App > Security > Notification Rules\n\nRule 1: Critical Signal Escalation\n  Condition: severity:critical\n  Recipients: @pagerduty-soc-critical @slack-security-incidents\n  Message: \"CRITICAL security signal: {{signal.rule.name}}\n            Source: {{signal.attributes.network.client.ip}}\n            Target: {{signal.attributes.usr.id}}\n            Details: {{signal.message}}\"\n\nRule 2: High Signal SOC Alert\n  Condition: severity:high\n  Recipients: @slack-security-alerts\n  Suppress: After first notification, suppress for 15 minutes\n\nRule 3: Compliance Violation\n  Condition: rule_type:compliance\n  Recipients: @slack-compliance-team @jira-compliance-board\n\nWorkflow Automation (Datadog Workflows):\n  Trigger: Security signal with severity:critical\n  Steps:\n    1. Enrich signal with threat intelligence lookup\n    2. Create Jira incident ticket\n    3. Send Slack notification with investigation context\n    4. If source is AWS: Trigger Lambda to isolate resource\n```\n\n### Step 7: Validate and Tune Detection Coverage\n\nTest detection rules and tune false positives:\n\n```bash\n# Generate a test security event (failed SSH login)\nssh -o StrictHostKeyChecking=no invalid_user@localhost 2>/dev/null\n\n# Verify the event appears in Datadog Logs\n# Datadog App > Logs > source:auth status:error\n\n# Check that a security signal was generated\n# Datadog App > Security > Signals > Filter by rule name\n\n# Tune noisy rules by adding suppression queries:\n# Datadog App > Security > Detection Rules > [Rule] > Edit\n# Add suppression: Suppress signal when @usr.id:service-account-*\n```\n\nUse the Security Signals API to validate programmatically:\n\n```python\nfrom datadog_api_client import Configuration, ApiClient\nfrom datadog_api_client.v2.api.security_monitoring_api import SecurityMonitoringApi\n\nconfiguration = Configuration()\n# Reads DD_API_KEY and DD_APP_KEY from environment\n\nwith ApiClient(configuration) as api_client:\n    api = SecurityMonitoringApi(api_client)\n    signals = api.search_security_monitoring_signals(\n        body={\n            \"filter\": {\n                \"query\": \"status:open severity:critical\",\n                \"from\": \"now-24h\",\n                \"to\": \"now\",\n            },\n            \"sort\": {\"field\": \"timestamp\", \"order\": \"desc\"},\n            \"page\": {\"limit\": 25},\n        }\n    )\n    for signal in signals.data:\n        attrs = signal.attributes\n        print(f\"[{attrs.severity}] {attrs.title}\")\n        print(f\"  Rule: {attrs.custom.get('rule', {}).get('name', 'N/A')}\")\n        print(f\"  Time: {attrs.timestamp}\")\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| **Cloud SIEM** | Datadog's security information and event management service that analyzes ingested logs in real-time to detect threats using detection rules |\n| **Security Signal** | An alert generated when a detection rule matches incoming log data; signals have severity, status (open/triage/closed), and investigation context |\n| **Detection Rule** | A query-based rule that evaluates logs or events against conditions (threshold, anomaly, new value, impossible travel) to generate security signals |\n| **CSM (Cloud Security Management)** | Datadog platform for infrastructure security including Misconfigurations (compliance benchmarks), Threats (runtime detection), and Vulnerabilities |\n| **Workload Protection** | CSM Threats component that monitors file, process, and network activity on hosts and containers using eBPF-based Agent rules |\n| **Content Pack** | Pre-built collection of detection rules, dashboards, and log parsers for a specific integration (AWS, Azure, GCP, Okta, etc.) |\n| **Agent Rule** | A kernel-level rule evaluated by the Datadog Agent on the host to collect security-relevant events before sending to Datadog for threat detection |\n| **Suppression Query** | A filter applied to a detection rule to prevent signals from being generated for known-good activity (reduces false positives) |\n\n## Verification\n\n- [ ] Datadog Agent is installed and reporting on all target hosts (`datadog-agent status` shows security agent running)\n- [ ] Security-relevant log sources are ingesting into Datadog (CloudTrail, auth.log, Windows Security Events visible in Log Explorer)\n- [ ] Cloud SIEM Content Packs are enabled for all cloud providers in use (AWS, Azure, GCP)\n- [ ] Out-of-the-box detection rules are active and generating signals for test events\n- [ ] Custom detection rules trigger correctly (test with a simulated failed login burst)\n- [ ] Workload Protection (CSM Threats) is enabled and Agent rules are evaluating on hosts\n- [ ] Security dashboard displays signal counts, top rules, severity breakdown, and geographic data\n- [ ] Notification workflows deliver alerts to Slack, PagerDuty, or Jira for critical and high signals\n- [ ] Suppression queries are configured to reduce false positives on noisy rules\n- [ ] Security Signals API returns results programmatically for automation integration\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("implementing-security-monitoring-with-datadog-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

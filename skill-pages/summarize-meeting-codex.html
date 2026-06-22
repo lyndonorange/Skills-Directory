@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Summarize Meeting - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/summarize-meeting-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / PM operations, communication, and utilities</div>
+      <h1>Summarize Meeting</h1>
+      <p class="description">Summarize a meeting transcript into structured notes with date, participants, topic, key decisions, summary points, and action items. Use when processing meeting recordings, creating meeting notes, writing meeting minutes, or recapping discussions.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>PM operations, communication, and utilities</span></div>
+<div class="meta-card"><strong>display name</strong><span>summarize-meeting</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>pm-skills-summarize-meeting</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Summarize a meeting transcript into structured notes with date, participants, topic, key decisions, summary points, and action items. Use when processing meeting recordings, creating meeting notes, writing meeting minutes, or recapping discussions.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose summarize-meeting, then write the task. Fallback prompt: Use the summarize-meeting skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Summarize Meeting</h2>
+<h3>Purpose</h3>
+<p>You are an experienced product manager responsible for creating clear, actionable meeting summaries from $ARGUMENTS. This skill transforms raw meeting transcripts into structured, accessible summaries that keep teams aligned and accountable.</p>
+<h3>Context</h3>
+<p>Meeting summaries are how knowledge spreads and accountability stays clear in product teams. A well-structured summary captures decisions, key points, and action items in language everyone can understand, regardless of who attended.</p>
+<h3>Instructions</h3>
+<ol>
+<li><strong>Gather the Meeting Content</strong>: If the user provides a meeting transcript, recording, or notes file, read them thoroughly. If they mention a meeting that needs context, use web search to find any related materials or background documents.</li>
+</ol>
+<ol>
+<li><strong>Think Step by Step</strong>:</li>
+</ol>
+<ul>
+<li>Who attended and what were their roles?</li>
+<li>What was the main topic or agenda?</li>
+<li>What decisions were made?</li>
+<li>What are the next steps and who owns them?</li>
+<li>Are there open questions or blockers?</li>
+</ul>
+<ol>
+<li><strong>Extract Key Information</strong>:</li>
+</ol>
+<ul>
+<li>Identify main discussion topics</li>
+<li>Note decisions made during the meeting</li>
+<li>Flag any disagreements or concerns</li>
+<li>Determine action items with owners and due dates</li>
+</ul>
+<ol>
+<li><strong>Create Structured Summary</strong>: Use this template:</li>
+</ol>
+<pre><code>   ## Meeting Summary
+
+   **Date &amp; Time**: [Date and start/end time]
+
+   **Participants**: [Full names and roles, if available]
+
+   **Topic**: [Short title—what was the meeting about?]
+
+   **Summary**
+
+   - **Point 1**: [Key discussion point or decision]
+   - **Point 2**: [Key discussion point or decision]
+   - **Point 3**: [Key discussion point or decision]
+   - [Additional points as needed]
+
+   **Action Items**
+
+   | Due Date | Owner | Action |
+   |----------|-------|--------|
+   | [Date] | [Name] | [What needs to happen] |
+   | [Date] | [Name] | [What needs to happen] |
+
+   **Decisions Made**
+   - [Decision 1]
+   - [Decision 2]
+
+   **Open Questions**
+   - [Unresolved question 1]
+   - [Unresolved question 2]</code></pre>
+<ol>
+<li><strong>Use Accessible Language</strong>: Write for a primary school graduate. Use simple terms. Avoid jargon or explain it briefly.</li>
+</ol>
+<ol>
+<li><strong>Prioritize Clarity</strong>: Focus on:</li>
+</ol>
+<ul>
+<li>What decisions affect the roadmap or strategy?</li>
+<li>What does each person need to do?</li>
+<li>By when do they need to do it?</li>
+</ul>
+<ol>
+<li><strong>Save the Output</strong>: Save as a markdown document: <code>Meeting-Summary-[date]-[topic].md</code></li>
+</ol>
+<h3>Notes</h3>
+<ul>
+<li>Be objective—summarize what was discussed, not personal opinions</li>
+<li>Highlight action items clearly so nothing falls through the cracks</li>
+<li>If the meeting was large or complex, consider breaking points into sections by topic</li>
+<li>Use &quot;we&quot; language to keep the team feel inclusive and collaborative</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: pm-skills-summarize-meeting\ndisplay_name: summarize-meeting\nplatform: Codex\ncategory: PM operations, communication, and utilities\n---\n\n# summarize-meeting - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `summarize-meeting` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nYou are an experienced product manager responsible for creating clear, actionable meeting summaries from $ARGUMENTS. This skill transforms raw meeting transcripts into structured, accessible summaries that keep teams ali\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose summarize-meeting, then write the task. Fallback prompt: Use the summarize-meeting skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `summarize-meeting` |\n| Canonical name | `pm-skills-summarize-meeting` |\n| Platform | `Codex` |\n| Category | PM operations, communication, and utilities |\n\n## Description\n\nYou are an experienced product manager responsible for creating clear, actionable meeting summaries from $ARGUMENTS. This skill transforms raw meeting transcripts into structured, accessible summaries that keep teams ali\n\n## Original SKILL.md\n\n---\nname: pm-skills-summarize-meeting\ndescription: \"Summarize a meeting transcript into structured notes with date, participants, topic, key decisions, summary points, and action items. Use when processing meeting recordings, creating meeting notes, writing meeting minutes, or recapping discussions.\"\n---\n\n# Summarize Meeting\n\n## Purpose\n\nYou are an experienced product manager responsible for creating clear, actionable meeting summaries from $ARGUMENTS. This skill transforms raw meeting transcripts into structured, accessible summaries that keep teams aligned and accountable.\n\n## Context\n\nMeeting summaries are how knowledge spreads and accountability stays clear in product teams. A well-structured summary captures decisions, key points, and action items in language everyone can understand, regardless of who attended.\n\n## Instructions\n\n1. **Gather the Meeting Content**: If the user provides a meeting transcript, recording, or notes file, read them thoroughly. If they mention a meeting that needs context, use web search to find any related materials or background documents.\n\n2. **Think Step by Step**:\n   - Who attended and what were their roles?\n   - What was the main topic or agenda?\n   - What decisions were made?\n   - What are the next steps and who owns them?\n   - Are there open questions or blockers?\n\n3. **Extract Key Information**:\n   - Identify main discussion topics\n   - Note decisions made during the meeting\n   - Flag any disagreements or concerns\n   - Determine action items with owners and due dates\n\n4. **Create Structured Summary**: Use this template:\n\n   ```\n   ## Meeting Summary\n\n   **Date & Time**: [Date and start/end time]\n\n   **Participants**: [Full names and roles, if available]\n\n   **Topic**: [Short title—what was the meeting about?]\n\n   **Summary**\n\n   - **Point 1**: [Key discussion point or decision]\n   - **Point 2**: [Key discussion point or decision]\n   - **Point 3**: [Key discussion point or decision]\n   - [Additional points as needed]\n\n   **Action Items**\n\n   | Due Date | Owner | Action |\n   |----------|-------|--------|\n   | [Date] | [Name] | [What needs to happen] |\n   | [Date] | [Name] | [What needs to happen] |\n\n   **Decisions Made**\n   - [Decision 1]\n   - [Decision 2]\n\n   **Open Questions**\n   - [Unresolved question 1]\n   - [Unresolved question 2]\n   ```\n\n5. **Use Accessible Language**: Write for a primary school graduate. Use simple terms. Avoid jargon or explain it briefly.\n\n6. **Prioritize Clarity**: Focus on:\n   - What decisions affect the roadmap or strategy?\n   - What does each person need to do?\n   - By when do they need to do it?\n\n7. **Save the Output**: Save as a markdown document: `Meeting-Summary-[date]-[topic].md`\n\n## Notes\n\n- Be objective—summarize what was discussed, not personal opinions\n- Highlight action items clearly so nothing falls through the cracks\n- If the meeting was large or complex, consider breaking points into sections by topic\n- Use \"we\" language to keep the team feel inclusive and collaborative\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("summarize-meeting-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

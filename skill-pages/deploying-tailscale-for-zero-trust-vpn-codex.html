@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>deploying-tailscale-for-zero-trust-vpn - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/deploying-tailscale-for-zero-trust-vpn-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>deploying-tailscale-for-zero-trust-vpn</h1>
+      <p class="description">Deploy and configure Tailscale as a WireGuard-based zero trust mesh VPN</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>deploying-tailscale-for-zero-trust-vpn</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>deploying-tailscale-for-zero-trust-vpn</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Deploy and configure Tailscale as a WireGuard-based zero trust mesh VPN</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose deploying-tailscale-for-zero-trust-vpn, then write the task. Fallback prompt: Use the deploying-tailscale-for-zero-trust-vpn skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Deploying Tailscale for Zero Trust VPN</h2>
+<h3>Overview</h3>
+<p>Tailscale is a zero trust mesh VPN built on WireGuard that creates encrypted peer-to-peer connections between devices without requiring traditional VPN servers or complex network configuration. Every connection in a Tailscale network (tailnet) is end-to-end encrypted using WireGuard's Noise protocol framework with Curve25519 key exchange. Tailscale implements zero trust networking by authenticating every connection request through identity providers, enforcing granular Access Control Lists (ACLs), and supporting features like exit nodes, subnet routers, MagicDNS, and Tailscale SSH. For organizations preferring self-hosted infrastructure, Headscale provides an open-source implementation of the Tailscale control server.</p>
+<h3>When to Use</h3>
+<ul>
+<li>When deploying or configuring deploying tailscale for zero trust vpn capabilities in your environment</li>
+<li>When establishing security controls aligned to compliance requirements</li>
+<li>When building or improving security architecture for this domain</li>
+<li>When conducting security assessments that require this implementation</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Identity provider (Okta, Azure AD, Google Workspace, GitHub, or OIDC-compatible)</li>
+<li>Devices running supported OS (Linux, Windows, macOS, iOS, Android, FreeBSD)</li>
+<li>Administrative access to configure DNS and firewall rules</li>
+<li>Understanding of WireGuard protocol fundamentals</li>
+<li>Network planning documentation for subnet routing requirements</li>
+</ul>
+<h3>Architecture</h3>
+<pre><code>                    Tailscale Coordination Server
+                    (or self-hosted Headscale)
+                           |
+                    Key Distribution
+                    &amp; NAT Traversal
+                           |
+         +-----------------+-----------------+
+         |                 |                 |
+    +----+----+      +----+----+      +----+----+
+    | Node A  |&lt;----&gt;| Node B  |&lt;----&gt;| Node C  |
+    | (Linux) |      | (macOS) |      |(Windows)|
+    +---------+      +---------+      +---------+
+    WireGuard         WireGuard        WireGuard
+    Encrypted         Encrypted        Encrypted
+    P2P Tunnel        P2P Tunnel       P2P Tunnel
+
+    Each node connects directly to every other node.
+    DERP relay servers used only when direct P2P fails.</code></pre>
+<h3>Installation and Setup</h3>
+<h4>Linux Installation</h4>
+<pre><code># Add Tailscale repository and install
+curl -fsSL https://tailscale.com/install.sh | sh
+
+# Start Tailscale and authenticate
+sudo tailscale up
+
+# Check connection status
+tailscale status
+
+# View assigned IP address
+tailscale ip -4
+tailscale ip -6</code></pre>
+<h4>Windows / macOS Installation</h4>
+<pre><code># Windows: Download from https://tailscale.com/download/windows
+# macOS: Install via Homebrew
+brew install --cask tailscale
+
+# Or download from https://tailscale.com/download/mac</code></pre>
+<h4>Docker Deployment</h4>
+<pre><code># docker-compose.yml for Tailscale sidecar
+version: '3.8'
+services:
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: tailscale
+    hostname: my-service
+    environment:
+      - TS_AUTHKEY=tskey-auth-xxxxx  # Pre-auth key
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_EXTRA_ARGS=--advertise-tags=tag:container
+    volumes:
+      - tailscale-state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - net_admin
+      - sys_module
+    restart: unless-stopped
+
+volumes:
+  tailscale-state:</code></pre>
+<h4>Kubernetes Deployment</h4>
+<pre><code># Tailscale operator for Kubernetes
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tailscale-auth
+  namespace: tailscale
+type: Opaque
+stringData:
+  TS_AUTHKEY: &quot;tskey-auth-xxxxx&quot;
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: tailscale
+  namespace: tailscale
+spec:
+  selector:
+    matchLabels:
+      app: tailscale
+  template:
+    metadata:
+      labels:
+        app: tailscale
+    spec:
+      containers:
+      - name: tailscale
+        image: tailscale/tailscale:latest
+        env:
+        - name: TS_AUTHKEY
+          valueFrom:
+            secretKeyRef:
+              name: tailscale-auth
+              key: TS_AUTHKEY
+        - name: TS_KUBE_SECRET
+          value: tailscale-state
+        - name: TS_USERSPACE
+          value: &quot;true&quot;
+        securityContext:
+          capabilities:
+            add: [&quot;NET_ADMIN&quot;]</code></pre>
+<h3>Access Control Lists (ACLs)</h3>
+<p>Tailscale ACLs define who can access what within your tailnet using a declarative JSON format. The default policy is deny-all, making it zero trust by design.</p>
+<pre><code>{
+  &quot;acls&quot;: [
+    // Engineering team can access development servers
+    {
+      &quot;action&quot;: &quot;accept&quot;,
+      &quot;src&quot;: [&quot;group:engineering&quot;],
+      &quot;dst&quot;: [&quot;tag:dev-server:*&quot;]
+    },
+    // SRE team can access production infrastructure
+    {
+      &quot;action&quot;: &quot;accept&quot;,
+      &quot;src&quot;: [&quot;group:sre&quot;],
+      &quot;dst&quot;: [&quot;tag:production:22,443,8080&quot;]
+    },
+    // Database access restricted to backend services
+    {
+      &quot;action&quot;: &quot;accept&quot;,
+      &quot;src&quot;: [&quot;tag:backend&quot;],
+      &quot;dst&quot;: [&quot;tag:database:5432,3306,27017&quot;]
+    },
+    // All employees can access internal tools
+    {
+      &quot;action&quot;: &quot;accept&quot;,
+      &quot;src&quot;: [&quot;group:employees&quot;],
+      &quot;dst&quot;: [&quot;tag:internal-tools:443&quot;]
+    }
+  ],
+
+  &quot;groups&quot;: {
+    &quot;group:engineering&quot;: [&quot;user@company.com&quot;, &quot;dev@company.com&quot;],
+    &quot;group:sre&quot;: [&quot;sre@company.com&quot;, &quot;oncall@company.com&quot;],
+    &quot;group:employees&quot;: [&quot;autogroup:members&quot;]
+  },
+
+  &quot;tagOwners&quot;: {
+    &quot;tag:dev-server&quot;: [&quot;group:engineering&quot;],
+    &quot;tag:production&quot;: [&quot;group:sre&quot;],
+    &quot;tag:backend&quot;: [&quot;group:sre&quot;],
+    &quot;tag:database&quot;: [&quot;group:sre&quot;],
+    &quot;tag:internal-tools&quot;: [&quot;group:sre&quot;],
+    &quot;tag:container&quot;: [&quot;group:sre&quot;]
+  },
+
+  &quot;ssh&quot;: [
+    {
+      &quot;action&quot;: &quot;check&quot;,
+      &quot;src&quot;: [&quot;group:sre&quot;],
+      &quot;dst&quot;: [&quot;tag:production&quot;],
+      &quot;users&quot;: [&quot;root&quot;, &quot;admin&quot;]
+    },
+    {
+      &quot;action&quot;: &quot;accept&quot;,
+      &quot;src&quot;: [&quot;group:engineering&quot;],
+      &quot;dst&quot;: [&quot;tag:dev-server&quot;],
+      &quot;users&quot;: [&quot;autogroup:nonroot&quot;]
+    }
+  ],
+
+  &quot;nodeAttrs&quot;: [
+    {
+      &quot;target&quot;: [&quot;autogroup:members&quot;],
+      &quot;attr&quot;: [&quot;funnel:deny&quot;]
+    }
+  ]
+}</code></pre>
+<h3>Exit Nodes and Subnet Routing</h3>
+<h4>Configure Exit Node</h4>
+<pre><code># On the exit node machine
+sudo tailscale up --advertise-exit-node
+
+# On the client machine, use the exit node
+sudo tailscale up --exit-node=&lt;exit-node-ip&gt;
+
+# Verify exit node routing
+curl ifconfig.me  # Should show exit node's public IP</code></pre>
+<h4>Subnet Router Configuration</h4>
+<pre><code># Advertise local subnets through Tailscale
+sudo tailscale up --advertise-routes=10.0.0.0/24,192.168.1.0/24
+
+# Enable IP forwarding on Linux
+echo 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.conf
+echo 'net.ipv6.conf.all.forwarding = 1' | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
+# Accept routes on client
+sudo tailscale up --accept-routes</code></pre>
+<h3>Tailscale SSH (Zero Trust SSH)</h3>
+<p>Tailscale SSH replaces traditional SSH key management with identity-based access.</p>
+<pre><code># Enable Tailscale SSH on a server
+sudo tailscale up --ssh
+
+# Connect using Tailscale SSH (no SSH keys needed)
+ssh user@hostname  # Authenticates via Tailscale identity
+
+# Session recording (audit logging)
+# Configure in ACL policy:
+# &quot;ssh&quot;: [{&quot;action&quot;: &quot;check&quot;, &quot;src&quot;: [...], &quot;dst&quot;: [...], &quot;users&quot;: [...]}]
+# &quot;check&quot; action requires re-authentication and records sessions</code></pre>
+<h3>MagicDNS Configuration</h3>
+<pre><code># MagicDNS is enabled by default in new tailnets
+# Access devices by hostname instead of IP
+ping my-server  # Resolves via MagicDNS
+
+# Custom DNS configuration via admin console
+# Split DNS: route specific domains to internal DNS servers
+# Global nameservers: override default DNS resolution</code></pre>
+<h3>Self-Hosted with Headscale</h3>
+<pre><code># Install Headscale (open-source Tailscale control server)
+wget https://github.com/juanfont/headscale/releases/latest/download/headscale_linux_amd64
+chmod +x headscale_linux_amd64
+sudo mv headscale_linux_amd64 /usr/local/bin/headscale
+
+# Create configuration
+sudo mkdir -p /etc/headscale
+sudo headscale generate config &gt; /etc/headscale/config.yaml
+
+# Edit config for your environment
+# Key settings:
+#   server_url: https://headscale.example.com
+#   listen_addr: 0.0.0.0:8080
+#   private_key_path: /etc/headscale/private.key
+#   db_type: sqlite3
+#   db_path: /var/lib/headscale/db.sqlite
+
+# Start Headscale
+sudo headscale serve
+
+# Create user and pre-auth key
+headscale users create myorg
+headscale preauthkeys create --user myorg --reusable --expiration 24h
+
+# Connect Tailscale client to Headscale
+tailscale up --login-server https://headscale.example.com</code></pre>
+<h3>Security Hardening</h3>
+<h4>Key Expiry and Rotation</h4>
+<pre><code># Set key expiry in admin console (default: 180 days)
+# Force re-authentication periodically
+
+# Disable key expiry for servers (use auth keys instead)
+sudo tailscale up --authkey=tskey-auth-xxxxx
+
+# Pre-auth keys for automated deployment
+# Create ephemeral, single-use keys for CI/CD</code></pre>
+<h4>Device Authorization</h4>
+<pre><code>{
+  &quot;nodeAttrs&quot;: [
+    {
+      &quot;target&quot;: [&quot;autogroup:members&quot;],
+      &quot;attr&quot;: [
+        &quot;mullvad:deny&quot;,
+        &quot;funnel:deny&quot;
+      ]
+    }
+  ],
+  &quot;autoApprovers&quot;: {
+    &quot;routes&quot;: {
+      &quot;10.0.0.0/24&quot;: [&quot;group:sre&quot;],
+      &quot;192.168.0.0/16&quot;: [&quot;group:sre&quot;]
+    },
+    &quot;exitNode&quot;: [&quot;group:sre&quot;]
+  }
+}</code></pre>
+<h4>Network Lock (Tailnet Lock)</h4>
+<pre><code># Initialize network lock with signing keys
+tailscale lock init
+
+# Add trusted signing keys
+tailscale lock add nodekey:xxxxx
+
+# All new nodes require signing before joining
+# Prevents unauthorized nodes from joining the tailnet</code></pre>
+<h3>Monitoring and Observability</h3>
+<pre><code># View network status
+tailscale status --json | jq '.Peer | to_entries[] | {name: .value.HostName, online: .value.Online, os: .value.OS}'
+
+# Check connection quality
+tailscale ping &lt;peer-ip&gt;
+
+# View network map
+tailscale netcheck
+
+# Audit logs available in Tailscale admin console
+# Integration with SIEM via webhook or API</code></pre>
+<h3>Integration Patterns</h3>
+<h4>Service Mesh Integration</h4>
+<pre><code># Tailscale as sidecar for service-to-service communication
+# Each service gets a Tailscale identity
+# ACLs enforce service-to-service access policies
+
+# Example: API service can only reach database service
+# ACL: tag:api -&gt; tag:database:5432</code></pre>
+<h4>CI/CD Pipeline Integration</h4>
+<pre><code># Use ephemeral auth keys in CI/CD
+export TS_AUTHKEY=tskey-auth-xxxxx-ephemeral
+tailscale up --authkey=$TS_AUTHKEY --hostname=ci-runner-$CI_JOB_ID
+
+# Access internal resources during build/deploy
+# Node automatically removed when container stops</code></pre>
+<h3>References</h3>
+<ul>
+<li>[Tailscale Documentation](https://tailscale.com/kb/)</li>
+<li>[How Tailscale Works](https://tailscale.com/blog/how-tailscale-works)</li>
+<li>[Tailscale ACL Documentation](https://tailscale.com/kb/1018/acls/)</li>
+<li>[Headscale - Open Source Control Server](https://github.com/juanfont/headscale)</li>
+<li>[WireGuard Protocol](https://www.wireguard.com/protocol/)</li>
+<li>[Tailscale SSH](https://tailscale.com/kb/1193/tailscale-ssh/)</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: deploying-tailscale-for-zero-trust-vpn\ndisplay_name: deploying-tailscale-for-zero-trust-vpn\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# deploying-tailscale-for-zero-trust-vpn - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `deploying-tailscale-for-zero-trust-vpn` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nTailscale is a zero trust mesh VPN built on WireGuard that creates encrypted peer-to-peer connections between devices without requiring traditional VPN servers or complex network configuration. Every connection in a Tail\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose deploying-tailscale-for-zero-trust-vpn, then write the task. Fallback prompt: Use the deploying-tailscale-for-zero-trust-vpn skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `deploying-tailscale-for-zero-trust-vpn` |\n| Canonical name | `deploying-tailscale-for-zero-trust-vpn` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nTailscale is a zero trust mesh VPN built on WireGuard that creates encrypted peer-to-peer connections between devices without requiring traditional VPN servers or complex network configuration. Every connection in a Tail\n\n## Original SKILL.md\n\n---\nname: deploying-tailscale-for-zero-trust-vpn\ndescription: Deploy and configure Tailscale as a WireGuard-based zero trust mesh VPN\n  with identity-aware access controls, ACLs, and exit nodes for secure peer-to-peer\n  connectivity.\ndomain: cybersecurity\nsubdomain: zero-trust-architecture\ntags:\n- zero-trust\n- tailscale\n- wireguard\n- mesh-vpn\n- ztna\n- peer-to-peer\n- acl\n- identity-aware\n- headscale\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- PR.AA-01\n- PR.AA-05\n- PR.IR-01\n- GV.PO-01\nmitre_attack:\n- T1133\n- T1078\n- T1021\n- T1572\n---\n\n# Deploying Tailscale for Zero Trust VPN\n\n## Overview\n\nTailscale is a zero trust mesh VPN built on WireGuard that creates encrypted peer-to-peer connections between devices without requiring traditional VPN servers or complex network configuration. Every connection in a Tailscale network (tailnet) is end-to-end encrypted using WireGuard's Noise protocol framework with Curve25519 key exchange. Tailscale implements zero trust networking by authenticating every connection request through identity providers, enforcing granular Access Control Lists (ACLs), and supporting features like exit nodes, subnet routers, MagicDNS, and Tailscale SSH. For organizations preferring self-hosted infrastructure, Headscale provides an open-source implementation of the Tailscale control server.\n\n\n## When to Use\n\n- When deploying or configuring deploying tailscale for zero trust vpn capabilities in your environment\n- When establishing security controls aligned to compliance requirements\n- When building or improving security architecture for this domain\n- When conducting security assessments that require this implementation\n\n## Prerequisites\n\n- Identity provider (Okta, Azure AD, Google Workspace, GitHub, or OIDC-compatible)\n- Devices running supported OS (Linux, Windows, macOS, iOS, Android, FreeBSD)\n- Administrative access to configure DNS and firewall rules\n- Understanding of WireGuard protocol fundamentals\n- Network planning documentation for subnet routing requirements\n\n## Architecture\n\n```\n                    Tailscale Coordination Server\n                    (or self-hosted Headscale)\n                           |\n                    Key Distribution\n                    & NAT Traversal\n                           |\n         +-----------------+-----------------+\n         |                 |                 |\n    +----+----+      +----+----+      +----+----+\n    | Node A  |\u003c---->| Node B  |\u003c---->| Node C  |\n    | (Linux) |      | (macOS) |      |(Windows)|\n    +---------+      +---------+      +---------+\n    WireGuard         WireGuard        WireGuard\n    Encrypted         Encrypted        Encrypted\n    P2P Tunnel        P2P Tunnel       P2P Tunnel\n\n    Each node connects directly to every other node.\n    DERP relay servers used only when direct P2P fails.\n```\n\n## Installation and Setup\n\n### Linux Installation\n\n```bash\n# Add Tailscale repository and install\ncurl -fsSL https://tailscale.com/install.sh | sh\n\n# Start Tailscale and authenticate\nsudo tailscale up\n\n# Check connection status\ntailscale status\n\n# View assigned IP address\ntailscale ip -4\ntailscale ip -6\n```\n\n### Windows / macOS Installation\n\n```bash\n# Windows: Download from https://tailscale.com/download/windows\n# macOS: Install via Homebrew\nbrew install --cask tailscale\n\n# Or download from https://tailscale.com/download/mac\n```\n\n### Docker Deployment\n\n```yaml\n# docker-compose.yml for Tailscale sidecar\nversion: '3.8'\nservices:\n  tailscale:\n    image: tailscale/tailscale:latest\n    container_name: tailscale\n    hostname: my-service\n    environment:\n      - TS_AUTHKEY=tskey-auth-xxxxx  # Pre-auth key\n      - TS_STATE_DIR=/var/lib/tailscale\n      - TS_EXTRA_ARGS=--advertise-tags=tag:container\n    volumes:\n      - tailscale-state:/var/lib/tailscale\n      - /dev/net/tun:/dev/net/tun\n    cap_add:\n      - net_admin\n      - sys_module\n    restart: unless-stopped\n\nvolumes:\n  tailscale-state:\n```\n\n### Kubernetes Deployment\n\n```yaml\n# Tailscale operator for Kubernetes\napiVersion: v1\nkind: Secret\nmetadata:\n  name: tailscale-auth\n  namespace: tailscale\ntype: Opaque\nstringData:\n  TS_AUTHKEY: \"tskey-auth-xxxxx\"\n---\napiVersion: apps/v1\nkind: DaemonSet\nmetadata:\n  name: tailscale\n  namespace: tailscale\nspec:\n  selector:\n    matchLabels:\n      app: tailscale\n  template:\n    metadata:\n      labels:\n        app: tailscale\n    spec:\n      containers:\n      - name: tailscale\n        image: tailscale/tailscale:latest\n        env:\n        - name: TS_AUTHKEY\n          valueFrom:\n            secretKeyRef:\n              name: tailscale-auth\n              key: TS_AUTHKEY\n        - name: TS_KUBE_SECRET\n          value: tailscale-state\n        - name: TS_USERSPACE\n          value: \"true\"\n        securityContext:\n          capabilities:\n            add: [\"NET_ADMIN\"]\n```\n\n## Access Control Lists (ACLs)\n\nTailscale ACLs define who can access what within your tailnet using a declarative JSON format. The default policy is deny-all, making it zero trust by design.\n\n```json\n{\n  \"acls\": [\n    // Engineering team can access development servers\n    {\n      \"action\": \"accept\",\n      \"src\": [\"group:engineering\"],\n      \"dst\": [\"tag:dev-server:*\"]\n    },\n    // SRE team can access production infrastructure\n    {\n      \"action\": \"accept\",\n      \"src\": [\"group:sre\"],\n      \"dst\": [\"tag:production:22,443,8080\"]\n    },\n    // Database access restricted to backend services\n    {\n      \"action\": \"accept\",\n      \"src\": [\"tag:backend\"],\n      \"dst\": [\"tag:database:5432,3306,27017\"]\n    },\n    // All employees can access internal tools\n    {\n      \"action\": \"accept\",\n      \"src\": [\"group:employees\"],\n      \"dst\": [\"tag:internal-tools:443\"]\n    }\n  ],\n\n  \"groups\": {\n    \"group:engineering\": [\"user@company.com\", \"dev@company.com\"],\n    \"group:sre\": [\"sre@company.com\", \"oncall@company.com\"],\n    \"group:employees\": [\"autogroup:members\"]\n  },\n\n  \"tagOwners\": {\n    \"tag:dev-server\": [\"group:engineering\"],\n    \"tag:production\": [\"group:sre\"],\n    \"tag:backend\": [\"group:sre\"],\n    \"tag:database\": [\"group:sre\"],\n    \"tag:internal-tools\": [\"group:sre\"],\n    \"tag:container\": [\"group:sre\"]\n  },\n\n  \"ssh\": [\n    {\n      \"action\": \"check\",\n      \"src\": [\"group:sre\"],\n      \"dst\": [\"tag:production\"],\n      \"users\": [\"root\", \"admin\"]\n    },\n    {\n      \"action\": \"accept\",\n      \"src\": [\"group:engineering\"],\n      \"dst\": [\"tag:dev-server\"],\n      \"users\": [\"autogroup:nonroot\"]\n    }\n  ],\n\n  \"nodeAttrs\": [\n    {\n      \"target\": [\"autogroup:members\"],\n      \"attr\": [\"funnel:deny\"]\n    }\n  ]\n}\n```\n\n## Exit Nodes and Subnet Routing\n\n### Configure Exit Node\n\n```bash\n# On the exit node machine\nsudo tailscale up --advertise-exit-node\n\n# On the client machine, use the exit node\nsudo tailscale up --exit-node=\u003cexit-node-ip>\n\n# Verify exit node routing\ncurl ifconfig.me  # Should show exit node's public IP\n```\n\n### Subnet Router Configuration\n\n```bash\n# Advertise local subnets through Tailscale\nsudo tailscale up --advertise-routes=10.0.0.0/24,192.168.1.0/24\n\n# Enable IP forwarding on Linux\necho 'net.ipv4.ip_forward = 1' | sudo tee -a /etc/sysctl.conf\necho 'net.ipv6.conf.all.forwarding = 1' | sudo tee -a /etc/sysctl.conf\nsudo sysctl -p\n\n# Accept routes on client\nsudo tailscale up --accept-routes\n```\n\n## Tailscale SSH (Zero Trust SSH)\n\nTailscale SSH replaces traditional SSH key management with identity-based access.\n\n```bash\n# Enable Tailscale SSH on a server\nsudo tailscale up --ssh\n\n# Connect using Tailscale SSH (no SSH keys needed)\nssh user@hostname  # Authenticates via Tailscale identity\n\n# Session recording (audit logging)\n# Configure in ACL policy:\n# \"ssh\": [{\"action\": \"check\", \"src\": [...], \"dst\": [...], \"users\": [...]}]\n# \"check\" action requires re-authentication and records sessions\n```\n\n## MagicDNS Configuration\n\n```bash\n# MagicDNS is enabled by default in new tailnets\n# Access devices by hostname instead of IP\nping my-server  # Resolves via MagicDNS\n\n# Custom DNS configuration via admin console\n# Split DNS: route specific domains to internal DNS servers\n# Global nameservers: override default DNS resolution\n```\n\n## Self-Hosted with Headscale\n\n```bash\n# Install Headscale (open-source Tailscale control server)\nwget https://github.com/juanfont/headscale/releases/latest/download/headscale_linux_amd64\nchmod +x headscale_linux_amd64\nsudo mv headscale_linux_amd64 /usr/local/bin/headscale\n\n# Create configuration\nsudo mkdir -p /etc/headscale\nsudo headscale generate config > /etc/headscale/config.yaml\n\n# Edit config for your environment\n# Key settings:\n#   server_url: https://headscale.example.com\n#   listen_addr: 0.0.0.0:8080\n#   private_key_path: /etc/headscale/private.key\n#   db_type: sqlite3\n#   db_path: /var/lib/headscale/db.sqlite\n\n# Start Headscale\nsudo headscale serve\n\n# Create user and pre-auth key\nheadscale users create myorg\nheadscale preauthkeys create --user myorg --reusable --expiration 24h\n\n# Connect Tailscale client to Headscale\ntailscale up --login-server https://headscale.example.com\n```\n\n## Security Hardening\n\n### Key Expiry and Rotation\n\n```bash\n# Set key expiry in admin console (default: 180 days)\n# Force re-authentication periodically\n\n# Disable key expiry for servers (use auth keys instead)\nsudo tailscale up --authkey=tskey-auth-xxxxx\n\n# Pre-auth keys for automated deployment\n# Create ephemeral, single-use keys for CI/CD\n```\n\n### Device Authorization\n\n```json\n{\n  \"nodeAttrs\": [\n    {\n      \"target\": [\"autogroup:members\"],\n      \"attr\": [\n        \"mullvad:deny\",\n        \"funnel:deny\"\n      ]\n    }\n  ],\n  \"autoApprovers\": {\n    \"routes\": {\n      \"10.0.0.0/24\": [\"group:sre\"],\n      \"192.168.0.0/16\": [\"group:sre\"]\n    },\n    \"exitNode\": [\"group:sre\"]\n  }\n}\n```\n\n### Network Lock (Tailnet Lock)\n\n```bash\n# Initialize network lock with signing keys\ntailscale lock init\n\n# Add trusted signing keys\ntailscale lock add nodekey:xxxxx\n\n# All new nodes require signing before joining\n# Prevents unauthorized nodes from joining the tailnet\n```\n\n## Monitoring and Observability\n\n```bash\n# View network status\ntailscale status --json | jq '.Peer | to_entries[] | {name: .value.HostName, online: .value.Online, os: .value.OS}'\n\n# Check connection quality\ntailscale ping \u003cpeer-ip>\n\n# View network map\ntailscale netcheck\n\n# Audit logs available in Tailscale admin console\n# Integration with SIEM via webhook or API\n```\n\n## Integration Patterns\n\n### Service Mesh Integration\n\n```bash\n# Tailscale as sidecar for service-to-service communication\n# Each service gets a Tailscale identity\n# ACLs enforce service-to-service access policies\n\n# Example: API service can only reach database service\n# ACL: tag:api -> tag:database:5432\n```\n\n### CI/CD Pipeline Integration\n\n```bash\n# Use ephemeral auth keys in CI/CD\nexport TS_AUTHKEY=tskey-auth-xxxxx-ephemeral\ntailscale up --authkey=$TS_AUTHKEY --hostname=ci-runner-$CI_JOB_ID\n\n# Access internal resources during build/deploy\n# Node automatically removed when container stops\n```\n\n## References\n\n- [Tailscale Documentation](https://tailscale.com/kb/)\n- [How Tailscale Works](https://tailscale.com/blog/how-tailscale-works)\n- [Tailscale ACL Documentation](https://tailscale.com/kb/1018/acls/)\n- [Headscale - Open Source Control Server](https://github.com/juanfont/headscale)\n- [WireGuard Protocol](https://www.wireguard.com/protocol/)\n- [Tailscale SSH](https://tailscale.com/kb/1193/tailscale-ssh/)\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("deploying-tailscale-for-zero-trust-vpn-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

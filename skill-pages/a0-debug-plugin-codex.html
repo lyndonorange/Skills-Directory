@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>a0-debug-plugin - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/a0-debug-plugin-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Agent platforms, tools, and automation</div>
+      <h1>a0-debug-plugin</h1>
+      <p class="description">Diagnose and fix Agent Zero plugin problems. Covers plugin not appearing, won't enable, API endpoints not responding, frontend store errors, extension point injection, settings resolution, hooks.py issues, and log inspection. Use when a plugin is not working, not loading, crashing, missing from the list, or behaving unexpectedly.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Agent platforms, tools, and automation</span></div>
+<div class="meta-card"><strong>display name</strong><span>a0-debug-plugin</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>a0-debug-plugin</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Diagnose and fix Agent Zero plugin problems. Covers plugin not appearing, won't enable, API endpoints not responding, frontend store errors, extension point injection, settings resolution, hooks.py issues, and log inspection. Use when a plugin is not working, not loading, crashing, missing from the list, or behaving unexpectedly.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose a0-debug-plugin, then write the task. Fallback prompt: Use the a0-debug-plugin skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Agent Zero Plugin Debugger</h2>
+<p>Work through these checks in order. Stop at the first failure and fix it before continuing.</p>
+<hr>
+<h3>1. Plugin not appearing in the Plugins list</h3>
+<pre><code># Check plugin.yaml exists
+ls /a0/usr/plugins/&lt;name&gt;/plugin.yaml
+
+# Validate YAML
+python3 -c &quot;import yaml; yaml.safe_load(open('/a0/usr/plugins/&lt;name&gt;/plugin.yaml'))&quot;
+
+# Check directory name doesn't start with '.'
+ls /a0/usr/plugins/</code></pre>
+<p>Common causes:</p>
+<ul>
+<li>Missing <code>plugin.yaml</code> - plugin not discovered</li>
+<li>Invalid YAML syntax - plugin skipped silently</li>
+<li>Directory name starts with <code>.</code> - skipped by discovery</li>
+</ul>
+<hr>
+<h3>2. Plugin appears but won't enable</h3>
+<pre><code># Check toggle state
+ls -la /a0/usr/plugins/&lt;name&gt;/.toggle-*
+
+# Check for conflicting scoped toggles
+ls -la project/.a0proj/plugins/&lt;name&gt;/.toggle-* 2&gt;/dev/null
+ls -la /a0/usr/agents/default/plugins/&lt;name&gt;/.toggle-* 2&gt;/dev/null</code></pre>
+<hr>
+<h3>3. API endpoint not responding</h3>
+<ul>
+<li>Verify the handler file is in <code>api/</code> and subclasses <code>ApiHandler</code></li>
+<li>Route format: <code>POST /api/plugins/&lt;plugin_name&gt;/&lt;handler_filename_without_.py&gt;</code></li>
+<li>Check for Python import errors on startup (check Agent Zero logs)</li>
+<li>Verify correct import paths: <code>from agent import AgentContext</code> not <code>from helpers.context import AgentContext</code></li>
+</ul>
+<pre><code># Check for syntax errors in handler
+python3 -m py_compile /a0/usr/plugins/&lt;name&gt;/api/my_handler.py</code></pre>
+<hr>
+<h3>4. Frontend component not rendering / store errors</h3>
+<ul>
+<li>Check browser console for Alpine.js errors</li>
+<li>Verify the store file is imported in HTML <code>&lt;head&gt;</code> via <code>&lt;script type=&quot;module&quot;&gt;</code></li>
+<li>Confirm Store Gate pattern is used (missing gate = undefined error if store not yet loaded)</li>
+<li>Verify store name in <code>createStore(...)</code> matches <code>$store.&lt;name&gt;</code> in templates</li>
+</ul>
+<hr>
+<h3>5. Extension point not injecting</h3>
+<ul>
+<li>Check the HTML file is in <code>extensions/webui/&lt;correct_breakpoint_name&gt;/</code></li>
+<li>Verify the breakpoint name exists in core UI (check <code>webui/index.html</code> or component files for <code>&lt;x-extension id=&quot;...&quot;&gt;</code>)</li>
+<li>Common breakpoints: <code>sidebar-quick-actions-main-start</code>, <code>plugins-list-header-buttons</code>, <code>chat-input-bottom-actions-end</code></li>
+<li>Confirm the HTML file has a root element with <code>x-data</code> and an <code>x-move-*</code> directive</li>
+</ul>
+<p>For backend extension hooks:</p>
+<ul>
+<li>Named lifecycle hooks must live under <code>extensions/python/&lt;point&gt;/</code></li>
+<li>Implicit <code>@extensible</code> hooks must live under <code>extensions/python/_functions/&lt;module&gt;/&lt;qualname&gt;/&lt;start|end&gt;/</code></li>
+<li>The retired flattened form <code>extensions/python/&lt;module&gt;_&lt;qualname&gt;_&lt;start|end&gt;/</code> no longer loads</li>
+</ul>
+<hr>
+<h3>6. Settings not saving / loading wrong values</h3>
+<p>Config resolution order (highest priority first):</p>
+<ol>
+<li><code>project/.a0proj/agents/&lt;profile&gt;/plugins/&lt;name&gt;/config.json</code></li>
+<li><code>project/.a0proj/plugins/&lt;name&gt;/config.json</code></li>
+<li><code>usr/agents/&lt;profile&gt;/plugins/&lt;name&gt;/config.json</code></li>
+<li><code>usr/plugins/&lt;name&gt;/config.json</code></li>
+<li><code>plugins/&lt;name&gt;/default_config.yaml</code></li>
+</ol>
+<pre><code># Find which config file is actually being loaded
+find /a0 -path &quot;*/plugins/&lt;name&gt;/config.json&quot; 2&gt;/dev/null</code></pre>
+<hr>
+<h3>7. hooks.py install hook not running</h3>
+<p>The <code>install()</code> hook is called automatically by the plugin installer after placement. If it didn't run:</p>
+<ul>
+<li>Check the function is named exactly <code>install</code> (not <code>on_install</code> or similar)</li>
+<li>Check for exceptions in the function (add try/except with print for debugging)</li>
+<li>Manually trigger in the <strong>framework runtime</strong> (not via <code>code_execution_tool</code> python - that uses <code>/opt/venv</code>, not <code>/opt/venv-a0</code>):</li>
+</ul>
+<pre><code>cd /a0 &amp;&amp; /opt/venv-a0/bin/python -c &quot;
+import asyncio
+from helpers.plugins import call_plugin_hook
+asyncio.run(call_plugin_hook('&lt;plugin_name&gt;', 'install'))
+print('Done')
+&quot;</code></pre>
+<p>If the <code>pre_update()</code> hook is not running before plugin updates:</p>
+<ul>
+<li>Check the function is named exactly <code>pre_update</code></li>
+<li>Check for exceptions in the function</li>
+<li>Manually trigger it in the <strong>framework runtime</strong> the same way:</li>
+</ul>
+<pre><code>cd /a0 &amp;&amp; /opt/venv-a0/bin/python -c &quot;
+import asyncio
+from helpers.plugins import call_plugin_hook
+asyncio.run(call_plugin_hook('&lt;plugin_name&gt;', 'pre_update'))
+print('Done')
+&quot;</code></pre>
+<p>If the <code>uninstall()</code> hook is not running when the plugin is removed:</p>
+<ul>
+<li>Check the function is named exactly <code>uninstall</code> (not <code>on_uninstall</code> or similar)</li>
+<li>Check for exceptions in the function</li>
+<li>The <code>uninstall()</code> hook is called by <code>uninstall_plugin()</code> in <code>helpers/plugins.py</code> before the plugin directory is deleted. If the user removed the plugin manually (<code>rm -rf</code>), the hook was bypassed — always use the API or UI to uninstall.</li>
+<li>Manually trigger it in the <strong>framework runtime</strong> the same way:</li>
+</ul>
+<pre><code>cd /a0 &amp;&amp; /opt/venv-a0/bin/python -c &quot;
+import asyncio
+from helpers.plugins import call_plugin_hook
+asyncio.run(call_plugin_hook('&lt;plugin_name&gt;', 'uninstall'))
+print('Done')
+&quot;</code></pre>
+<hr>
+<h3>8. Check Agent Zero logs</h3>
+<pre><code># Find recent log files
+ls -lt /a0/logs/*.html | head -5</code></pre>
+<p>Plugin-related errors appear as Python tracebacks mentioning the plugin path.</p>
+<hr>
+<h3>How Plugin Discovery Works</h3>
+<ol>
+<li>Agent Zero walks <code>usr/plugins/</code> then <code>plugins/</code> at startup</li>
+<li>Any directory containing <code>plugin.yaml</code> is treated as a plugin</li>
+<li><code>usr/plugins/&lt;name&gt;</code> takes priority over <code>plugins/&lt;name&gt;</code> when both exist (user overrides core)</li>
+<li>Toggle state is evaluated: <code>.toggle-0</code> disables, <code>.toggle-1</code> enables, no file = enabled by default</li>
+<li>Enabled plugins have their <code>extensions/</code>, <code>api/</code>, <code>tools/</code>, etc. registered into the runtime, including both named extension points and implicit <code>_functions/...</code> extensible hooks</li>
+</ol>
+<p>Plugins are re-scanned when:</p>
+<ul>
+<li>Agent Zero restarts</li>
+<li>A plugin is installed/removed via the installer</li>
+<li>The &quot;Refresh&quot; action is triggered in the Plugins UI</li>
+</ul>
+<hr>
+<h3>References</h3>
+<ul>
+<li>Plugin architecture: <code>/a0/plugins/AGENTS.md</code></li>
+<li>Manage (install/update/uninstall): read <code>/a0/skills/a0-manage-plugin/SKILL.md</code></li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: a0-debug-plugin\ndisplay_name: a0-debug-plugin\nplatform: Codex\ncategory: Agent platforms, tools, and automation\n---\n\n# a0-debug-plugin - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `a0-debug-plugin` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nWork through these checks in order. Stop at the first failure and fix it before continuing.\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose a0-debug-plugin, then write the task. Fallback prompt: Use the a0-debug-plugin skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `a0-debug-plugin` |\n| Canonical name | `a0-debug-plugin` |\n| Platform | `Codex` |\n| Category | Agent platforms, tools, and automation |\n\n## Description\n\nWork through these checks in order. Stop at the first failure and fix it before continuing.\n\n## Original SKILL.md\n\n---\nname: a0-debug-plugin\ndescription: Diagnose and fix Agent Zero plugin problems. Covers plugin not appearing, won't enable, API endpoints not responding, frontend store errors, extension point injection, settings resolution, hooks.py issues, and log inspection. Use when a plugin is not working, not loading, crashing, missing from the list, or behaving unexpectedly.\nversion: 1.0.0\ntags: [\"plugins\", \"debug\", \"troubleshoot\", \"fix\", \"diagnose\", \"error\", \"broken\"]\ntrigger_patterns:\n  - \"plugin not working\"\n  - \"plugin not loading\"\n  - \"plugin not showing\"\n  - \"plugin broken\"\n  - \"plugin error\"\n  - \"plugin missing\"\n  - \"plugin crash\"\n  - \"debug plugin\"\n  - \"troubleshoot plugin\"\n  - \"fix plugin\"\n---\n\n# Agent Zero Plugin Debugger\n\nWork through these checks in order. Stop at the first failure and fix it before continuing.\n\n---\n\n## 1. Plugin not appearing in the Plugins list\n\n```bash\n# Check plugin.yaml exists\nls /a0/usr/plugins/\u003cname>/plugin.yaml\n\n# Validate YAML\npython3 -c \"import yaml; yaml.safe_load(open('/a0/usr/plugins/\u003cname>/plugin.yaml'))\"\n\n# Check directory name doesn't start with '.'\nls /a0/usr/plugins/\n```\n\nCommon causes:\n- Missing `plugin.yaml` - plugin not discovered\n- Invalid YAML syntax - plugin skipped silently\n- Directory name starts with `.` - skipped by discovery\n\n---\n\n## 2. Plugin appears but won't enable\n\n```bash\n# Check toggle state\nls -la /a0/usr/plugins/\u003cname>/.toggle-*\n\n# Check for conflicting scoped toggles\nls -la project/.a0proj/plugins/\u003cname>/.toggle-* 2>/dev/null\nls -la /a0/usr/agents/default/plugins/\u003cname>/.toggle-* 2>/dev/null\n```\n\n---\n\n## 3. API endpoint not responding\n\n- Verify the handler file is in `api/` and subclasses `ApiHandler`\n- Route format: `POST /api/plugins/\u003cplugin_name>/\u003chandler_filename_without_.py>`\n- Check for Python import errors on startup (check Agent Zero logs)\n- Verify correct import paths: `from agent import AgentContext` not `from helpers.context import AgentContext`\n\n```bash\n# Check for syntax errors in handler\npython3 -m py_compile /a0/usr/plugins/\u003cname>/api/my_handler.py\n```\n\n---\n\n## 4. Frontend component not rendering / store errors\n\n- Check browser console for Alpine.js errors\n- Verify the store file is imported in HTML `\u003chead>` via `\u003cscript type=\"module\">`\n- Confirm Store Gate pattern is used (missing gate = undefined error if store not yet loaded)\n- Verify store name in `createStore(...)` matches `$store.\u003cname>` in templates\n\n---\n\n## 5. Extension point not injecting\n\n- Check the HTML file is in `extensions/webui/\u003ccorrect_breakpoint_name>/`\n- Verify the breakpoint name exists in core UI (check `webui/index.html` or component files for `\u003cx-extension id=\"...\">`)\n- Common breakpoints: `sidebar-quick-actions-main-start`, `plugins-list-header-buttons`, `chat-input-bottom-actions-end`\n- Confirm the HTML file has a root element with `x-data` and an `x-move-*` directive\n\nFor backend extension hooks:\n- Named lifecycle hooks must live under `extensions/python/\u003cpoint>/`\n- Implicit `@extensible` hooks must live under `extensions/python/_functions/\u003cmodule>/\u003cqualname>/\u003cstart|end>/`\n- The retired flattened form `extensions/python/\u003cmodule>_\u003cqualname>_\u003cstart|end>/` no longer loads\n\n---\n\n## 6. Settings not saving / loading wrong values\n\nConfig resolution order (highest priority first):\n1. `project/.a0proj/agents/\u003cprofile>/plugins/\u003cname>/config.json`\n2. `project/.a0proj/plugins/\u003cname>/config.json`\n3. `usr/agents/\u003cprofile>/plugins/\u003cname>/config.json`\n4. `usr/plugins/\u003cname>/config.json`\n5. `plugins/\u003cname>/default_config.yaml`\n\n```bash\n# Find which config file is actually being loaded\nfind /a0 -path \"*/plugins/\u003cname>/config.json\" 2>/dev/null\n```\n\n---\n\n## 7. hooks.py install hook not running\n\nThe `install()` hook is called automatically by the plugin installer after placement. If it didn't run:\n- Check the function is named exactly `install` (not `on_install` or similar)\n- Check for exceptions in the function (add try/except with print for debugging)\n- Manually trigger in the **framework runtime** (not via `code_execution_tool` python - that uses `/opt/venv`, not `/opt/venv-a0`):\n\n```bash\ncd /a0 && /opt/venv-a0/bin/python -c \"\nimport asyncio\nfrom helpers.plugins import call_plugin_hook\nasyncio.run(call_plugin_hook('\u003cplugin_name>', 'install'))\nprint('Done')\n\"\n```\n\nIf the `pre_update()` hook is not running before plugin updates:\n- Check the function is named exactly `pre_update`\n- Check for exceptions in the function\n- Manually trigger it in the **framework runtime** the same way:\n\n```bash\ncd /a0 && /opt/venv-a0/bin/python -c \"\nimport asyncio\nfrom helpers.plugins import call_plugin_hook\nasyncio.run(call_plugin_hook('\u003cplugin_name>', 'pre_update'))\nprint('Done')\n\"\n```\n\nIf the `uninstall()` hook is not running when the plugin is removed:\n- Check the function is named exactly `uninstall` (not `on_uninstall` or similar)\n- Check for exceptions in the function\n- The `uninstall()` hook is called by `uninstall_plugin()` in `helpers/plugins.py` before the plugin directory is deleted. If the user removed the plugin manually (`rm -rf`), the hook was bypassed — always use the API or UI to uninstall.\n- Manually trigger it in the **framework runtime** the same way:\n\n```bash\ncd /a0 && /opt/venv-a0/bin/python -c \"\nimport asyncio\nfrom helpers.plugins import call_plugin_hook\nasyncio.run(call_plugin_hook('\u003cplugin_name>', 'uninstall'))\nprint('Done')\n\"\n```\n\n---\n\n## 8. Check Agent Zero logs\n\n```bash\n# Find recent log files\nls -lt /a0/logs/*.html | head -5\n```\n\nPlugin-related errors appear as Python tracebacks mentioning the plugin path.\n\n---\n\n## How Plugin Discovery Works\n\n1. Agent Zero walks `usr/plugins/` then `plugins/` at startup\n2. Any directory containing `plugin.yaml` is treated as a plugin\n3. `usr/plugins/\u003cname>` takes priority over `plugins/\u003cname>` when both exist (user overrides core)\n4. Toggle state is evaluated: `.toggle-0` disables, `.toggle-1` enables, no file = enabled by default\n5. Enabled plugins have their `extensions/`, `api/`, `tools/`, etc. registered into the runtime, including both named extension points and implicit `_functions/...` extensible hooks\n\nPlugins are re-scanned when:\n- Agent Zero restarts\n- A plugin is installed/removed via the installer\n- The \"Refresh\" action is triggered in the Plugins UI\n\n---\n\n## References\n\n- Plugin architecture: `/a0/plugins/AGENTS.md`\n- Manage (install/update/uninstall): read `/a0/skills/a0-manage-plugin/SKILL.md`\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("a0-debug-plugin-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

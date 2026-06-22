@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>configuring-snort-ids-for-intrusion-detection - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/configuring-snort-ids-for-intrusion-detection-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>configuring-snort-ids-for-intrusion-detection</h1>
+      <p class="description">'Installs, configures, and tunes Snort 3 intrusion detection system to</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>configuring-snort-ids-for-intrusion-detection</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>configuring-snort-ids-for-intrusion-detection</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Installs, configures, and tunes Snort 3 intrusion detection system to</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose configuring-snort-ids-for-intrusion-detection, then write the task. Fallback prompt: Use the configuring-snort-ids-for-intrusion-detection skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Configuring Snort IDS for Intrusion Detection</h2>
+<h3>When to Use</h3>
+<ul>
+<li>Deploying a network-based intrusion detection system to monitor traffic at key network boundaries</li>
+<li>Writing custom Snort rules to detect organization-specific threats, attack patterns, or policy violations</li>
+<li>Tuning existing rulesets to reduce false positives while maintaining detection coverage</li>
+<li>Integrating Snort alerts with SIEM platforms for centralized security monitoring</li>
+<li>Validating network security controls by generating test traffic and confirming detection</li>
+</ul>
+<p><strong>Do not use</strong> as a replacement for endpoint detection, for monitoring encrypted traffic without TLS inspection, or as the sole security control without complementary defenses.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>Snort 3.x installed from source or package manager (<code>snort --version</code> to verify)</li>
+<li>Network interface configured for promiscuous mode on a span port or network tap</li>
+<li>DAQ (Data Acquisition Library) installed for packet capture integration</li>
+<li>Registered Snort account for downloading Snort Subscriber (paid) or Community rulesets from snort.org</li>
+<li>PulledPork 3 or similar rule management tool for automated ruleset updates</li>
+<li>Sufficient CPU and memory for inline traffic inspection at line rate</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Install and Verify Snort 3</h4>
+<pre><code># Install dependencies (Ubuntu/Debian)
+sudo apt install -y build-essential libpcap-dev libpcre3-dev libnet1-dev \
+  zlib1g-dev luajit hwloc libdumbnet-dev bison flex libcmocka-dev \
+  libnetfilter-queue-dev libmnl-dev autotools-dev libluajit-5.1-dev \
+  pkg-config cmake libhwloc-dev liblzma-dev openssl libssl-dev cpputest \
+  libsqlite3-dev uuid-dev
+
+# Install DAQ from source
+git clone https://github.com/snort3/libdaq.git
+cd libdaq &amp;&amp; ./bootstrap &amp;&amp; ./configure &amp;&amp; make &amp;&amp; sudo make install
+
+# Install Snort 3
+git clone https://github.com/snort3/snort3.git
+cd snort3 &amp;&amp; ./configure_cmake.sh --prefix=/usr/local
+cd build &amp;&amp; make -j$(nproc) &amp;&amp; sudo make install
+sudo ldconfig
+
+# Verify installation
+snort -V</code></pre>
+<h4>Step 2: Configure Network Interfaces</h4>
+<pre><code># Disable offloading features that interfere with packet inspection
+sudo ethtool -K eth1 gro off lro off tso off gso off rx off tx off
+
+# Enable promiscuous mode
+sudo ip link set eth1 promisc on
+
+# Create systemd service for persistent interface configuration
+sudo tee /etc/systemd/system/snort-iface.service &lt;&lt; 'EOF'
+[Unit]
+Description=Configure Snort capture interface
+Before=snort.service
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/ethtool -K eth1 gro off lro off tso off gso off rx off tx off
+ExecStart=/sbin/ip link set eth1 promisc on
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl enable snort-iface.service</code></pre>
+<h4>Step 3: Configure Snort 3 with Lua Configuration</h4>
+<pre><code># Create Snort directory structure
+sudo mkdir -p /usr/local/etc/snort/{rules,builtin_rules,lists,appid}
+sudo mkdir -p /var/log/snort
+
+# Edit the main Snort configuration
+sudo tee /usr/local/etc/snort/snort.lua &lt;&lt; 'LUAEOF'
+-- Snort 3 Configuration
+
+-- Network variables
+HOME_NET = '10.10.0.0/16'
+EXTERNAL_NET = '!$HOME_NET'
+
+-- Path variables
+RULE_PATH = '/usr/local/etc/snort/rules'
+BUILTIN_RULE_PATH = '/usr/local/etc/snort/builtin_rules'
+
+-- Configure DAQ
+daq = {
+    module_dirs = { '/usr/local/lib/daq' },
+    modules = { { name = 'afpacket', variables = { 'buffer_size_mb=256' } } }
+}
+
+-- Decoder configuration
+normalizer = { tcp = { ips = true } }
+
+-- Stream inspection
+stream = { }
+stream_tcp = { policy = 'linux', session_timeout = 180 }
+stream_udp = { session_timeout = 30 }
+stream_icmp = { }
+
+-- HTTP inspection
+http_inspect = { }
+
+-- DNS inspection
+dns = { }
+
+-- SSL/TLS inspection
+ssl = { }
+
+-- SMB inspection
+dce_smb = { }
+
+-- File identification and processing
+file_id = { rules_file = '/usr/local/etc/snort/file_magic.rules' }
+
+-- Port scan detection
+port_scan = {
+    protos = 'all',
+    scan_types = 'all',
+    memcap = 10000000
+}
+
+-- Reputation-based filtering
+-- reputation = {
+--     blacklist = RULE_PATH .. '/blocklist.rules'
+-- }
+
+-- IPS rules
+ips = {
+    enable_builtin_rules = true,
+    include = RULE_PATH .. '/snort3-community.rules',
+    variables = {
+        nets = { HOME_NET = HOME_NET, EXTERNAL_NET = EXTERNAL_NET },
+        ports = {
+            HTTP_PORTS = '80 8080 8443',
+            SSH_PORTS = '22',
+            DNS_PORTS = '53'
+        }
+    }
+}
+
+-- Alert output
+alert_fast = {
+    file = true,
+    packet = false,
+    limit = 100
+}
+
+-- Unified2 output for Barnyard2/SIEM integration
+-- alert_unified2 = { limit = 128 }
+
+-- JSON alert output
+alert_json = {
+    file = true,
+    limit = 100,
+    fields = 'timestamp pkt_num proto pkt_gen pkt_len dir src_addr src_port dst_addr dst_port service rule action'
+}
+
+-- Syslog output
+-- alert_syslog = { level = 'info', facility = 'local1' }
+
+LUAEOF</code></pre>
+<h4>Step 4: Download and Configure Rulesets</h4>
+<pre><code># Download Snort 3 Community Rules
+wget https://www.snort.org/downloads/community/snort3-community-rules.tar.gz
+tar xzf snort3-community-rules.tar.gz
+sudo cp snort3-community-rules/snort3-community.rules /usr/local/etc/snort/rules/
+
+# Install PulledPork 3 for automated rule management
+git clone https://github.com/shirkdog/pulledpork3.git
+cd pulledpork3
+sudo python3 setup.py install
+
+# Configure PulledPork
+sudo tee /usr/local/etc/pulledpork3/pulledpork.conf &lt;&lt; 'EOF'
+registered_ruleset = true
+oinkcode = &lt;YOUR_OINK_CODE&gt;
+snort_path = /usr/local/bin/snort
+local_rules = /usr/local/etc/snort/rules/local.rules
+sorule_path = /usr/local/etc/snort/so_rules/
+snort_version = 3.0.0.0
+blocklist_path = /usr/local/etc/snort/lists/
+pid_path = /var/run/snort.pid
+ips_policy = balanced
+EOF
+
+# Run PulledPork to fetch and process rules
+sudo pulledpork3 -c /usr/local/etc/pulledpork3/pulledpork.conf</code></pre>
+<h4>Step 5: Write Custom Detection Rules</h4>
+<pre><code># Create local rules file
+sudo tee /usr/local/etc/snort/rules/local.rules &lt;&lt; 'EOF'
+# Detect reverse shell on common ports
+alert tcp $HOME_NET any -&gt; $EXTERNAL_NET 4444 (
+    msg:&quot;LOCAL Possible Reverse Shell on port 4444&quot;;
+    flow:established,to_server;
+    content:&quot;/bin/sh&quot;; nocase;
+    sid:1000001; rev:1;
+    classtype:trojan-activity;
+    priority:1;
+)
+
+# Detect Mimikatz execution indicators over SMB
+alert tcp any any -&gt; $HOME_NET 445 (
+    msg:&quot;LOCAL Mimikatz Lateral Movement via SMB&quot;;
+    flow:established,to_server;
+    content:&quot;|FF|SMB&quot;;
+    content:&quot;mimikatz&quot;; nocase; distance:0;
+    sid:1000002; rev:1;
+    classtype:trojan-activity;
+    priority:1;
+)
+
+# Detect DNS tunneling (high-entropy long subdomain queries)
+alert udp $HOME_NET any -&gt; any 53 (
+    msg:&quot;LOCAL Possible DNS Tunneling - Long Query Name&quot;;
+    content:&quot;|01 00|&quot;; offset:2; depth:2;
+    byte_test:1,&gt;,50,12;
+    sid:1000003; rev:1;
+    classtype:policy-violation;
+    priority:2;
+)
+
+# Detect cleartext password transmission via FTP
+alert tcp $HOME_NET any -&gt; any 21 (
+    msg:&quot;LOCAL FTP Cleartext Password Detected&quot;;
+    flow:established,to_server;
+    content:&quot;PASS &quot;; depth:5;
+    sid:1000004; rev:1;
+    classtype:policy-violation;
+    priority:2;
+)
+
+# Detect potential port scan (SYN flood pattern)
+alert tcp $EXTERNAL_NET any -&gt; $HOME_NET any (
+    msg:&quot;LOCAL Possible Port Scan SYN Flood&quot;;
+    flow:stateless;
+    flags:S,12;
+    threshold:type both, track by_src, count 100, seconds 10;
+    sid:1000005; rev:1;
+    classtype:attempted-recon;
+    priority:2;
+)
+EOF</code></pre>
+<h4>Step 6: Validate Configuration and Run</h4>
+<pre><code># Validate configuration
+snort -c /usr/local/etc/snort/snort.lua --daq-dir /usr/local/lib/daq -T
+
+# Run Snort in IDS mode on the capture interface
+sudo snort -c /usr/local/etc/snort/snort.lua --daq-dir /usr/local/lib/daq \
+  -i eth1 -l /var/log/snort -D
+
+# Test rules against a PCAP file
+snort -c /usr/local/etc/snort/snort.lua --daq-dir /usr/local/lib/daq \
+  -r test_traffic.pcap -l /var/log/snort/test/ -A fast
+
+# Create systemd service for production deployment
+sudo tee /etc/systemd/system/snort.service &lt;&lt; 'EOF'
+[Unit]
+Description=Snort 3 IDS
+After=network.target snort-iface.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/snort -c /usr/local/etc/snort/snort.lua --daq-dir /usr/local/lib/daq -i eth1 -l /var/log/snort -D
+ExecReload=/bin/kill -SIGHUP $MAINPID
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl enable --now snort.service</code></pre>
+<h4>Step 7: Monitor Alerts and Tune Rules</h4>
+<pre><code># View real-time alerts
+tail -f /var/log/snort/alert_fast.txt
+
+# Parse JSON alerts for analysis
+cat /var/log/snort/alert_json.txt | python3 -m json.tool
+
+# Identify top triggered rules for tuning
+grep -oP 'sid:\d+' /var/log/snort/alert_fast.txt | sort | uniq -c | sort -rn | head -20
+
+# Suppress noisy false-positive rules
+sudo tee -a /usr/local/etc/snort/rules/suppress.rules &lt;&lt; 'EOF'
+suppress gen_id 1, sig_id 2100498, track by_src, ip 10.10.1.100
+suppress gen_id 1, sig_id 2100366, track by_dst, ip 10.10.5.0/24
+EOF
+
+# Verify rule count and performance
+snort -c /usr/local/etc/snort/snort.lua --daq-dir /usr/local/lib/daq -T 2&gt;&amp;1 | grep -i &quot;rules loaded&quot;</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | <strong>IDS vs IPS</strong> | IDS passively monitors traffic and generates alerts; IPS sits inline and can actively block or drop malicious packets in real time | | <strong>Snort Rule</strong> | Detection signature with header (action, protocol, src/dst, ports) and options (content matches, flow direction, metadata) that triggers on matching traffic | | <strong>Preprocessor</strong> | Snort component that normalizes and reassembles protocol-specific traffic before rule inspection, handling fragmentation, stream reassembly, and protocol anomalies | | <strong>DAQ (Data Acquisition)</strong> | Abstraction layer in Snort 3 that interfaces with packet capture mechanisms (AF_PACKET, PCAP, NFQ) for receiving network data | | <strong>Oink Code</strong> | Personal registration code from snort.org required to download Snort Subscriber or Registered rulesets | | <strong>Threshold/Suppression</strong> | Tuning mechanisms that control alert frequency (threshold) or completely silence alerts from specific sources/destinations (suppress) |</p>
+<h3>Tools &amp; Systems</h3>
+<ul>
+<li><strong>Snort 3</strong>: Open-source network intrusion detection and prevention system with Lua-based configuration and multithreaded architecture</li>
+<li><strong>PulledPork 3</strong>: Automated Snort rule management tool that downloads, processes, and deploys rulesets with policy-based filtering</li>
+<li><strong>Barnyard2</strong>: Dedicated spooler that reads Snort's unified2 binary output and writes to databases (MySQL, PostgreSQL) for SIEM integration</li>
+<li><strong>Snorby</strong>: Web-based Snort alert management console providing dashboards, event classification, and reporting</li>
+<li><strong>tcpreplay</strong>: Tool for replaying PCAP files through Snort to validate rules and test detection capabilities</li>
+</ul>
+<h3>Common Scenarios</h3>
+<h4>Scenario: Deploying Snort IDS at a Network Perimeter for Compliance</h4>
+<p><strong>Context</strong>: A healthcare organization needs to deploy network IDS to meet HIPAA technical safeguard requirements. The IDS must monitor traffic between the DMZ and internal network, detect common attack patterns, and forward alerts to the existing Splunk SIEM. The network carries approximately 500 Mbps of traffic during peak hours.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Install Snort 3 on a dedicated sensor with dual NICs -- one for monitoring (span port from core switch) and one for management</li>
+<li>Configure AF_PACKET DAQ with a 512 MB ring buffer to handle peak throughput without drops</li>
+<li>Deploy Snort Community rules plus Emerging Threats Open ruleset as baseline detection</li>
+<li>Write custom rules for organization-specific threats: detection of PHI data patterns (SSN, MRN formats) leaving the network, unauthorized access to DICOM/HL7 ports, and connections to known bad IP lists</li>
+<li>Configure JSON alert output and forward to Splunk via syslog using rsyslog</li>
+<li>Run Snort against 24 hours of captured baseline traffic to identify false positives, then create suppression rules for legitimate traffic patterns</li>
+<li>Enable Snort as a systemd service with automatic restart and log rotation</li>
+</ol>
+<p><strong>Pitfalls</strong>:</p>
+<ul>
+<li>Deploying all available rules without tuning, overwhelming the sensor and SOC with thousands of daily false positives</li>
+<li>Forgetting to disable NIC offloading, causing Snort to miss packets due to checksum errors or jumbo frames</li>
+<li>Not sizing the sensor hardware for peak traffic, leading to packet drops during high-volume periods</li>
+<li>Relying solely on community rules without custom rules for organization-specific threats and compliance requirements</li>
+</ul>
+<h3>Output Format</h3>
+<pre><code>## Snort IDS Deployment Report
+
+**Sensor**: snort-sensor-01 (10.10.1.250)
+**Interface**: eth1 (span port from Core-SW1 gi0/24)
+**Configuration**: /usr/local/etc/snort/snort.lua
+**Ruleset**: Snort Community 3.0 + Local Rules (1,247 active rules)
+**HOME_NET**: 10.10.0.0/16
+
+### Detection Summary (24-hour baseline)
+
+| Category | Alert Count | Top Rule SID |
+|----------|-------------|--------------|
+| Attempted Recon | 342 | 1:2100498 (ICMP ping) |
+| Trojan Activity | 12 | 1:1000001 (Reverse shell) |
+| Policy Violation | 87 | 1:1000004 (FTP cleartext) |
+| Web Application Attack | 23 | 1:2100654 (SQL injection) |
+
+### Tuning Actions Taken
+- Suppressed SID 2100498 for 10.10.1.100 (monitoring server legitimate ICMP)
+- Thresholded SID 1000004 to 5 alerts per source per hour
+- Added 3 custom rules for PHI exfiltration detection</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: configuring-snort-ids-for-intrusion-detection\ndisplay_name: configuring-snort-ids-for-intrusion-detection\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# configuring-snort-ids-for-intrusion-detection - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `configuring-snort-ids-for-intrusion-detection` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- Deploying a network-based intrusion detection system to monitor traffic at key network boundaries\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose configuring-snort-ids-for-intrusion-detection, then write the task. Fallback prompt: Use the configuring-snort-ids-for-intrusion-detection skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `configuring-snort-ids-for-intrusion-detection` |\n| Canonical name | `configuring-snort-ids-for-intrusion-detection` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\n- Deploying a network-based intrusion detection system to monitor traffic at key network boundaries\n\n## Original SKILL.md\n\n---\nname: configuring-snort-ids-for-intrusion-detection\ndescription: 'Installs, configures, and tunes Snort 3 intrusion detection system to\n  monitor network traffic for malicious activity using custom and community rulesets,\n  preprocessors, and alert output plugins on authorized network segments.\n\n  '\ndomain: cybersecurity\nsubdomain: network-security\ntags:\n- network-security\n- snort\n- ids\n- intrusion-detection\n- rule-writing\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- PR.IR-01\n- DE.CM-01\n- ID.AM-03\n- PR.DS-02\nmitre_attack:\n- T1046\n- T1071.001\n- T1572\n- T1210\n- T1048\n---\n# Configuring Snort IDS for Intrusion Detection\n\n## When to Use\n\n- Deploying a network-based intrusion detection system to monitor traffic at key network boundaries\n- Writing custom Snort rules to detect organization-specific threats, attack patterns, or policy violations\n- Tuning existing rulesets to reduce false positives while maintaining detection coverage\n- Integrating Snort alerts with SIEM platforms for centralized security monitoring\n- Validating network security controls by generating test traffic and confirming detection\n\n**Do not use** as a replacement for endpoint detection, for monitoring encrypted traffic without TLS inspection, or as the sole security control without complementary defenses.\n\n## Prerequisites\n\n- Snort 3.x installed from source or package manager (`snort --version` to verify)\n- Network interface configured for promiscuous mode on a span port or network tap\n- DAQ (Data Acquisition Library) installed for packet capture integration\n- Registered Snort account for downloading Snort Subscriber (paid) or Community rulesets from snort.org\n- PulledPork 3 or similar rule management tool for automated ruleset updates\n- Sufficient CPU and memory for inline traffic inspection at line rate\n\n## Workflow\n\n### Step 1: Install and Verify Snort 3\n\n```bash\n# Install dependencies (Ubuntu/Debian)\nsudo apt install -y build-essential libpcap-dev libpcre3-dev libnet1-dev \\\n  zlib1g-dev luajit hwloc libdumbnet-dev bison flex libcmocka-dev \\\n  libnetfilter-queue-dev libmnl-dev autotools-dev libluajit-5.1-dev \\\n  pkg-config cmake libhwloc-dev liblzma-dev openssl libssl-dev cpputest \\\n  libsqlite3-dev uuid-dev\n\n# Install DAQ from source\ngit clone https://github.com/snort3/libdaq.git\ncd libdaq && ./bootstrap && ./configure && make && sudo make install\n\n# Install Snort 3\ngit clone https://github.com/snort3/snort3.git\ncd snort3 && ./configure_cmake.sh --prefix=/usr/local\ncd build && make -j$(nproc) && sudo make install\nsudo ldconfig\n\n# Verify installation\nsnort -V\n```\n\n### Step 2: Configure Network Interfaces\n\n```bash\n# Disable offloading features that interfere with packet inspection\nsudo ethtool -K eth1 gro off lro off tso off gso off rx off tx off\n\n# Enable promiscuous mode\nsudo ip link set eth1 promisc on\n\n# Create systemd service for persistent interface configuration\nsudo tee /etc/systemd/system/snort-iface.service \u003c\u003c 'EOF'\n[Unit]\nDescription=Configure Snort capture interface\nBefore=snort.service\n\n[Service]\nType=oneshot\nExecStart=/sbin/ethtool -K eth1 gro off lro off tso off gso off rx off tx off\nExecStart=/sbin/ip link set eth1 promisc on\nRemainAfterExit=yes\n\n[Install]\nWantedBy=multi-user.target\nEOF\n\nsudo systemctl enable snort-iface.service\n```\n\n### Step 3: Configure Snort 3 with Lua Configuration\n\n```bash\n# Create Snort directory structure\nsudo mkdir -p /usr/local/etc/snort/{rules,builtin_rules,lists,appid}\nsudo mkdir -p /var/log/snort\n\n# Edit the main Snort configuration\nsudo tee /usr/local/etc/snort/snort.lua \u003c\u003c 'LUAEOF'\n-- Snort 3 Configuration\n\n-- Network variables\nHOME_NET = '10.10.0.0/16'\nEXTERNAL_NET = '!$HOME_NET'\n\n-- Path variables\nRULE_PATH = '/usr/local/etc/snort/rules'\nBUILTIN_RULE_PATH = '/usr/local/etc/snort/builtin_rules'\n\n-- Configure DAQ\ndaq = {\n    module_dirs = { '/usr/local/lib/daq' },\n    modules = { { name = 'afpacket', variables = { 'buffer_size_mb=256' } } }\n}\n\n-- Decoder configuration\nnormalizer = { tcp = { ips = true } }\n\n-- Stream inspection\nstream = { }\nstream_tcp = { policy = 'linux', session_timeout = 180 }\nstream_udp = { session_timeout = 30 }\nstream_icmp = { }\n\n-- HTTP inspection\nhttp_inspect = { }\n\n-- DNS inspection\ndns = { }\n\n-- SSL/TLS inspection\nssl = { }\n\n-- SMB inspection\ndce_smb = { }\n\n-- File identification and processing\nfile_id = { rules_file = '/usr/local/etc/snort/file_magic.rules' }\n\n-- Port scan detection\nport_scan = {\n    protos = 'all',\n    scan_types = 'all',\n    memcap = 10000000\n}\n\n-- Reputation-based filtering\n-- reputation = {\n--     blacklist = RULE_PATH .. '/blocklist.rules'\n-- }\n\n-- IPS rules\nips = {\n    enable_builtin_rules = true,\n    include = RULE_PATH .. '/snort3-community.rules',\n    variables = {\n        nets = { HOME_NET = HOME_NET, EXTERNAL_NET = EXTERNAL_NET },\n        ports = {\n            HTTP_PORTS = '80 8080 8443',\n            SSH_PORTS = '22',\n            DNS_PORTS = '53'\n        }\n    }\n}\n\n-- Alert output\nalert_fast = {\n    file = true,\n    packet = false,\n    limit = 100\n}\n\n-- Unified2 output for Barnyard2/SIEM integration\n-- alert_unified2 = { limit = 128 }\n\n-- JSON alert output\nalert_json = {\n    file = true,\n    limit = 100,\n    fields = 'timestamp pkt_num proto pkt_gen pkt_len dir src_addr src_port dst_addr dst_port service rule action'\n}\n\n-- Syslog output\n-- alert_syslog = { level = 'info', facility = 'local1' }\n\nLUAEOF\n```\n\n### Step 4: Download and Configure Rulesets\n\n```bash\n# Download Snort 3 Community Rules\nwget https://www.snort.org/downloads/community/snort3-community-rules.tar.gz\ntar xzf snort3-community-rules.tar.gz\nsudo cp snort3-community-rules/snort3-community.rules /usr/local/etc/snort/rules/\n\n# Install PulledPork 3 for automated rule management\ngit clone https://github.com/shirkdog/pulledpork3.git\ncd pulledpork3\nsudo python3 setup.py install\n\n# Configure PulledPork\nsudo tee /usr/local/etc/pulledpork3/pulledpork.conf \u003c\u003c 'EOF'\nregistered_ruleset = true\noinkcode = \u003cYOUR_OINK_CODE>\nsnort_path = /usr/local/bin/snort\nlocal_rules = /usr/local/etc/snort/rules/local.rules\nsorule_path = /usr/local/etc/snort/so_rules/\nsnort_version = 3.0.0.0\nblocklist_path = /usr/local/etc/snort/lists/\npid_path = /var/run/snort.pid\nips_policy = balanced\nEOF\n\n# Run PulledPork to fetch and process rules\nsudo pulledpork3 -c /usr/local/etc/pulledpork3/pulledpork.conf\n```\n\n### Step 5: Write Custom Detection Rules\n\n```bash\n# Create local rules file\nsudo tee /usr/local/etc/snort/rules/local.rules \u003c\u003c 'EOF'\n# Detect reverse shell on common ports\nalert tcp $HOME_NET any -> $EXTERNAL_NET 4444 (\n    msg:\"LOCAL Possible Reverse Shell on port 4444\";\n    flow:established,to_server;\n    content:\"/bin/sh\"; nocase;\n    sid:1000001; rev:1;\n    classtype:trojan-activity;\n    priority:1;\n)\n\n# Detect Mimikatz execution indicators over SMB\nalert tcp any any -> $HOME_NET 445 (\n    msg:\"LOCAL Mimikatz Lateral Movement via SMB\";\n    flow:established,to_server;\n    content:\"|FF|SMB\";\n    content:\"mimikatz\"; nocase; distance:0;\n    sid:1000002; rev:1;\n    classtype:trojan-activity;\n    priority:1;\n)\n\n# Detect DNS tunneling (high-entropy long subdomain queries)\nalert udp $HOME_NET any -> any 53 (\n    msg:\"LOCAL Possible DNS Tunneling - Long Query Name\";\n    content:\"|01 00|\"; offset:2; depth:2;\n    byte_test:1,>,50,12;\n    sid:1000003; rev:1;\n    classtype:policy-violation;\n    priority:2;\n)\n\n# Detect cleartext password transmission via FTP\nalert tcp $HOME_NET any -> any 21 (\n    msg:\"LOCAL FTP Cleartext Password Detected\";\n    flow:established,to_server;\n    content:\"PASS \"; depth:5;\n    sid:1000004; rev:1;\n    classtype:policy-violation;\n    priority:2;\n)\n\n# Detect potential port scan (SYN flood pattern)\nalert tcp $EXTERNAL_NET any -> $HOME_NET any (\n    msg:\"LOCAL Possible Port Scan SYN Flood\";\n    flow:stateless;\n    flags:S,12;\n    threshold:type both, track by_src, count 100, seconds 10;\n    sid:1000005; rev:1;\n    classtype:attempted-recon;\n    priority:2;\n)\nEOF\n```\n\n### Step 6: Validate Configuration and Run\n\n```bash\n# Validate configuration\nsnort -c /usr/local/etc/snort/snort.lua --daq-dir /usr/local/lib/daq -T\n\n# Run Snort in IDS mode on the capture interface\nsudo snort -c /usr/local/etc/snort/snort.lua --daq-dir /usr/local/lib/daq \\\n  -i eth1 -l /var/log/snort -D\n\n# Test rules against a PCAP file\nsnort -c /usr/local/etc/snort/snort.lua --daq-dir /usr/local/lib/daq \\\n  -r test_traffic.pcap -l /var/log/snort/test/ -A fast\n\n# Create systemd service for production deployment\nsudo tee /etc/systemd/system/snort.service \u003c\u003c 'EOF'\n[Unit]\nDescription=Snort 3 IDS\nAfter=network.target snort-iface.service\n\n[Service]\nType=simple\nExecStart=/usr/local/bin/snort -c /usr/local/etc/snort/snort.lua --daq-dir /usr/local/lib/daq -i eth1 -l /var/log/snort -D\nExecReload=/bin/kill -SIGHUP $MAINPID\nRestart=on-failure\n\n[Install]\nWantedBy=multi-user.target\nEOF\n\nsudo systemctl enable --now snort.service\n```\n\n### Step 7: Monitor Alerts and Tune Rules\n\n```bash\n# View real-time alerts\ntail -f /var/log/snort/alert_fast.txt\n\n# Parse JSON alerts for analysis\ncat /var/log/snort/alert_json.txt | python3 -m json.tool\n\n# Identify top triggered rules for tuning\ngrep -oP 'sid:\\d+' /var/log/snort/alert_fast.txt | sort | uniq -c | sort -rn | head -20\n\n# Suppress noisy false-positive rules\nsudo tee -a /usr/local/etc/snort/rules/suppress.rules \u003c\u003c 'EOF'\nsuppress gen_id 1, sig_id 2100498, track by_src, ip 10.10.1.100\nsuppress gen_id 1, sig_id 2100366, track by_dst, ip 10.10.5.0/24\nEOF\n\n# Verify rule count and performance\nsnort -c /usr/local/etc/snort/snort.lua --daq-dir /usr/local/lib/daq -T 2>&1 | grep -i \"rules loaded\"\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| **IDS vs IPS** | IDS passively monitors traffic and generates alerts; IPS sits inline and can actively block or drop malicious packets in real time |\n| **Snort Rule** | Detection signature with header (action, protocol, src/dst, ports) and options (content matches, flow direction, metadata) that triggers on matching traffic |\n| **Preprocessor** | Snort component that normalizes and reassembles protocol-specific traffic before rule inspection, handling fragmentation, stream reassembly, and protocol anomalies |\n| **DAQ (Data Acquisition)** | Abstraction layer in Snort 3 that interfaces with packet capture mechanisms (AF_PACKET, PCAP, NFQ) for receiving network data |\n| **Oink Code** | Personal registration code from snort.org required to download Snort Subscriber or Registered rulesets |\n| **Threshold/Suppression** | Tuning mechanisms that control alert frequency (threshold) or completely silence alerts from specific sources/destinations (suppress) |\n\n## Tools & Systems\n\n- **Snort 3**: Open-source network intrusion detection and prevention system with Lua-based configuration and multithreaded architecture\n- **PulledPork 3**: Automated Snort rule management tool that downloads, processes, and deploys rulesets with policy-based filtering\n- **Barnyard2**: Dedicated spooler that reads Snort's unified2 binary output and writes to databases (MySQL, PostgreSQL) for SIEM integration\n- **Snorby**: Web-based Snort alert management console providing dashboards, event classification, and reporting\n- **tcpreplay**: Tool for replaying PCAP files through Snort to validate rules and test detection capabilities\n\n## Common Scenarios\n\n### Scenario: Deploying Snort IDS at a Network Perimeter for Compliance\n\n**Context**: A healthcare organization needs to deploy network IDS to meet HIPAA technical safeguard requirements. The IDS must monitor traffic between the DMZ and internal network, detect common attack patterns, and forward alerts to the existing Splunk SIEM. The network carries approximately 500 Mbps of traffic during peak hours.\n\n**Approach**:\n1. Install Snort 3 on a dedicated sensor with dual NICs -- one for monitoring (span port from core switch) and one for management\n2. Configure AF_PACKET DAQ with a 512 MB ring buffer to handle peak throughput without drops\n3. Deploy Snort Community rules plus Emerging Threats Open ruleset as baseline detection\n4. Write custom rules for organization-specific threats: detection of PHI data patterns (SSN, MRN formats) leaving the network, unauthorized access to DICOM/HL7 ports, and connections to known bad IP lists\n5. Configure JSON alert output and forward to Splunk via syslog using rsyslog\n6. Run Snort against 24 hours of captured baseline traffic to identify false positives, then create suppression rules for legitimate traffic patterns\n7. Enable Snort as a systemd service with automatic restart and log rotation\n\n**Pitfalls**:\n- Deploying all available rules without tuning, overwhelming the sensor and SOC with thousands of daily false positives\n- Forgetting to disable NIC offloading, causing Snort to miss packets due to checksum errors or jumbo frames\n- Not sizing the sensor hardware for peak traffic, leading to packet drops during high-volume periods\n- Relying solely on community rules without custom rules for organization-specific threats and compliance requirements\n\n## Output Format\n\n```\n## Snort IDS Deployment Report\n\n**Sensor**: snort-sensor-01 (10.10.1.250)\n**Interface**: eth1 (span port from Core-SW1 gi0/24)\n**Configuration**: /usr/local/etc/snort/snort.lua\n**Ruleset**: Snort Community 3.0 + Local Rules (1,247 active rules)\n**HOME_NET**: 10.10.0.0/16\n\n### Detection Summary (24-hour baseline)\n\n| Category | Alert Count | Top Rule SID |\n|----------|-------------|--------------|\n| Attempted Recon | 342 | 1:2100498 (ICMP ping) |\n| Trojan Activity | 12 | 1:1000001 (Reverse shell) |\n| Policy Violation | 87 | 1:1000004 (FTP cleartext) |\n| Web Application Attack | 23 | 1:2100654 (SQL injection) |\n\n### Tuning Actions Taken\n- Suppressed SID 2100498 for 10.10.1.100 (monitoring server legitimate ICMP)\n- Thresholded SID 1000004 to 5 alerts per source per hour\n- Added 3 custom rules for PHI exfiltration detection\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("configuring-snort-ids-for-intrusion-detection-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

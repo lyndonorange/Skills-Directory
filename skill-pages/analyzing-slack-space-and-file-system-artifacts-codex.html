@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>analyzing-slack-space-and-file-system-artifacts - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/analyzing-slack-space-and-file-system-artifacts-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>analyzing-slack-space-and-file-system-artifacts</h1>
+      <p class="description">Examine file system slack space, MFT entries, USN journal, and alternate</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>analyzing-slack-space-and-file-system-artifacts</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>analyzing-slack-space-and-file-system-artifacts</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Examine file system slack space, MFT entries, USN journal, and alternate</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose analyzing-slack-space-and-file-system-artifacts, then write the task. Fallback prompt: Use the analyzing-slack-space-and-file-system-artifacts skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Analyzing Slack Space and File System Artifacts</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When searching for hidden or residual data in file system slack space</li>
+<li>For analyzing NTFS Master File Table (MFT) entries for deleted file metadata</li>
+<li>When reconstructing file operations from the USN Change Journal</li>
+<li>For detecting Alternate Data Streams (ADS) used to hide data or malware</li>
+<li>During deep forensic analysis requiring examination beyond standard file recovery</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Forensic disk image with NTFS file system</li>
+<li>The Sleuth Kit (TSK) tools: istat, icat, fls, blkls, blkstat</li>
+<li>MFTECmd (Eric Zimmerman) for MFT parsing</li>
+<li>MFTExplorer for interactive MFT analysis</li>
+<li>Understanding of NTFS structures (MFT, $UsnJrnl, $LogFile, ADS)</li>
+<li>Python with analyzeMFT or mft library for automated parsing</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Identify and Extract NTFS File System Artifacts</h4>
+<pre><code># Determine partition layout
+mmls /cases/case-2024-001/images/evidence.dd
+
+# Extract key NTFS system files
+# $MFT - Master File Table
+icat -o 2048 /cases/case-2024-001/images/evidence.dd 0 &gt; /cases/case-2024-001/ntfs/MFT
+
+# $UsnJrnl:$J - USN Change Journal
+icat -o 2048 /cases/case-2024-001/images/evidence.dd 62-128 &gt; /cases/case-2024-001/ntfs/UsnJrnl_J
+
+# $LogFile - Transaction log
+icat -o 2048 /cases/case-2024-001/images/evidence.dd 2 &gt; /cases/case-2024-001/ntfs/LogFile
+
+# Extract all slack space from the volume
+blkls -s -o 2048 /cases/case-2024-001/images/evidence.dd &gt; /cases/case-2024-001/ntfs/slack_space.raw
+
+# Get file system information
+fsstat -o 2048 /cases/case-2024-001/images/evidence.dd | tee /cases/case-2024-001/ntfs/fs_info.txt</code></pre>
+<h4>Step 2: Analyze the Master File Table (MFT)</h4>
+<pre><code># Parse MFT with MFTECmd (Eric Zimmerman)
+MFTECmd.exe -f &quot;C:\cases\ntfs\MFT&quot; --csv &quot;C:\cases\analysis\&quot; --csvf mft_analysis.csv
+
+# Parse with analyzeMFT (Python)
+pip install analyzeMFT
+
+analyzeMFT.py -f /cases/case-2024-001/ntfs/MFT \
+   -o /cases/case-2024-001/analysis/mft_analysis.csv \
+   -c
+
+# Custom MFT analysis with Python
+python3 &lt;&lt; 'PYEOF'
+from mft import PyMft
+import csv
+
+mft = PyMft(open('/cases/case-2024-001/ntfs/MFT', 'rb').read())
+
+deleted_files = []
+suspicious_files = []
+
+for entry in mft.entries():
+    if entry is None:
+        continue
+
+    filename = entry.get_filename()
+    if filename is None:
+        continue
+
+    is_deleted = not entry.is_active()
+    is_directory = entry.is_directory()
+    created = entry.get_created_timestamp()
+    modified = entry.get_modified_timestamp()
+    mft_modified = entry.get_mft_modified_timestamp()
+    size = entry.get_file_size()
+
+    # Flag deleted files for recovery
+    if is_deleted and not is_directory and size &gt; 0:
+        deleted_files.append({
+            'filename': filename,
+            'size': size,
+            'created': str(created),
+            'modified': str(modified),
+            'entry_number': entry.entry_number
+        })
+
+    # Detect timestomping (MFT modified time != $SI modified time)
+    si_modified = entry.get_si_modified_timestamp()
+    fn_modified = entry.get_fn_modified_timestamp()
+    if si_modified and fn_modified:
+        if abs((si_modified - fn_modified).total_seconds()) &gt; 86400:  # &gt;1 day difference
+            suspicious_files.append({
+                'filename': filename,
+                'si_modified': str(si_modified),
+                'fn_modified': str(fn_modified),
+                'delta': str(si_modified - fn_modified)
+            })
+
+print(f&quot;=== DELETED FILES (recoverable metadata) ===&quot;)
+print(f&quot;Total: {len(deleted_files)}&quot;)
+for f in deleted_files[:20]:
+    print(f&quot;  [{f['modified']}] {f['filename']} ({f['size']} bytes)&quot;)
+
+print(f&quot;\n=== POTENTIAL TIMESTOMPING ===&quot;)
+print(f&quot;Total suspicious: {len(suspicious_files)}&quot;)
+for f in suspicious_files[:10]:
+    print(f&quot;  {f['filename']}: $SI={f['si_modified']}, $FN={f['fn_modified']} (delta: {f['delta']})&quot;)
+PYEOF</code></pre>
+<h4>Step 3: Analyze Slack Space for Hidden Data</h4>
+<pre><code># Search slack space for strings
+strings -a /cases/case-2024-001/ntfs/slack_space.raw &gt; /cases/case-2024-001/analysis/slack_strings.txt
+
+# Search for specific patterns in slack space
+grep -iab &quot;password\|secret\|confidential\|credit.card\|ssn&quot; \
+   /cases/case-2024-001/ntfs/slack_space.raw &gt; /cases/case-2024-001/analysis/slack_keywords.txt
+
+# Analyze individual file slack
+python3 &lt;&lt; 'PYEOF'
+import struct
+
+# File slack consists of:
+# 1. RAM slack: bytes between file end and next sector boundary (filled with RAM content or zeros)
+# 2. Drive slack: remaining sectors in the cluster after the last file sector
+
+# Analyze slack for specific MFT entries
+# Using Sleuth Kit to get file slack for a specific file
+import subprocess
+
+# Get file details
+result = subprocess.run(
+    ['istat', '-o', '2048', '/cases/case-2024-001/images/evidence.dd', '14523'],
+    capture_output=True, text=True
+)
+print(result.stdout)
+
+# The output shows data runs - the last cluster may contain slack data
+# Calculate slack size: (allocated_size - file_size) bytes
+PYEOF
+
+# Search for file signatures in slack space (embedded files)
+foremost -t jpg,pdf,zip -i /cases/case-2024-001/ntfs/slack_space.raw \
+   -o /cases/case-2024-001/carved/slack_carved/
+
+# Use bulk_extractor to find structured data in slack
+bulk_extractor -o /cases/case-2024-001/analysis/bulk_extract/ \
+   /cases/case-2024-001/ntfs/slack_space.raw</code></pre>
+<h4>Step 4: Parse the USN Change Journal</h4>
+<pre><code># Parse USN Journal with MFTECmd
+MFTECmd.exe -f &quot;C:\cases\ntfs\UsnJrnl_J&quot; --csv &quot;C:\cases\analysis\&quot; --csvf usn_journal.csv
+
+# Python USN Journal parsing
+pip install pyusn
+
+python3 &lt;&lt; 'PYEOF'
+import struct
+import csv
+from datetime import datetime, timedelta
+
+def parse_usn_record(data, offset):
+    &quot;&quot;&quot;Parse a single USN_RECORD_V2.&quot;&quot;&quot;
+    if offset + 8 &gt; len(data):
+        return None, offset
+
+    record_len = struct.unpack_from('&lt;I', data, offset)[0]
+    if record_len &lt; 56 or record_len &gt; 65536 or offset + record_len &gt; len(data):
+        return None, offset + 8
+
+    major_ver = struct.unpack_from('&lt;H', data, offset + 4)[0]
+    if major_ver != 2:
+        return None, offset + record_len
+
+    mft_ref = struct.unpack_from('&lt;Q', data, offset + 8)[0] &amp; 0xFFFFFFFFFFFF
+    parent_ref = struct.unpack_from('&lt;Q', data, offset + 16)[0] &amp; 0xFFFFFFFFFFFF
+    usn = struct.unpack_from('&lt;Q', data, offset + 24)[0]
+    timestamp = struct.unpack_from('&lt;Q', data, offset + 32)[0]
+    reason = struct.unpack_from('&lt;I', data, offset + 40)[0]
+    source_info = struct.unpack_from('&lt;I', data, offset + 44)[0]
+    security_id = struct.unpack_from('&lt;I', data, offset + 48)[0]
+    file_attrs = struct.unpack_from('&lt;I', data, offset + 52)[0]
+    filename_len = struct.unpack_from('&lt;H', data, offset + 56)[0]
+    filename_off = struct.unpack_from('&lt;H', data, offset + 58)[0]
+
+    name = data[offset + filename_off:offset + filename_off + filename_len].decode('utf-16-le', errors='ignore')
+
+    # Convert Windows FILETIME to datetime
+    ts = datetime(1601, 1, 1) + timedelta(microseconds=timestamp // 10)
+
+    # Decode reason flags
+    reasons = []
+    reason_flags = {
+        0x01: 'DATA_OVERWRITE', 0x02: 'DATA_EXTEND', 0x04: 'DATA_TRUNCATION',
+        0x10: 'NAMED_DATA_OVERWRITE', 0x20: 'NAMED_DATA_EXTEND',
+        0x100: 'FILE_CREATE', 0x200: 'FILE_DELETE', 0x400: 'EA_CHANGE',
+        0x800: 'SECURITY_CHANGE', 0x1000: 'RENAME_OLD_NAME', 0x2000: 'RENAME_NEW_NAME',
+        0x4000: 'INDEXABLE_CHANGE', 0x8000: 'BASIC_INFO_CHANGE',
+        0x10000: 'HARD_LINK_CHANGE', 0x20000: 'COMPRESSION_CHANGE',
+        0x40000: 'ENCRYPTION_CHANGE', 0x80000: 'OBJECT_ID_CHANGE',
+        0x100000: 'REPARSE_POINT_CHANGE', 0x200000: 'STREAM_CHANGE',
+        0x80000000: 'CLOSE'
+    }
+    for flag, desc in reason_flags.items():
+        if reason &amp; flag:
+            reasons.append(desc)
+
+    record = {
+        'timestamp': ts.strftime('%Y-%m-%d %H:%M:%S'),
+        'filename': name,
+        'mft_entry': mft_ref,
+        'parent_entry': parent_ref,
+        'reasons': '|'.join(reasons),
+        'usn': usn
+    }
+
+    return record, offset + record_len
+
+# Parse the journal
+with open('/cases/case-2024-001/ntfs/UsnJrnl_J', 'rb') as f:
+    data = f.read()
+
+records = []
+offset = 0
+while offset &lt; len(data) - 8:
+    record, offset = parse_usn_record(data, offset)
+    if record:
+        records.append(record)
+    else:
+        offset += 8  # Skip zeros
+
+# Filter for deletion events
+deletions = [r for r in records if 'FILE_DELETE' in r['reasons']]
+creations = [r for r in records if 'FILE_CREATE' in r['reasons']]
+renames = [r for r in records if 'RENAME_NEW_NAME' in r['reasons']]
+
+print(f&quot;Total USN records: {len(records)}&quot;)
+print(f&quot;File creations: {len(creations)}&quot;)
+print(f&quot;File deletions: {len(deletions)}&quot;)
+print(f&quot;File renames: {len(renames)}&quot;)
+
+print(&quot;\n=== RECENT DELETIONS ===&quot;)
+for r in deletions[-20:]:
+    print(f&quot;  [{r['timestamp']}] DELETED: {r['filename']} (MFT#{r['mft_entry']})&quot;)
+
+# Write full journal to CSV
+with open('/cases/case-2024-001/analysis/usn_journal.csv', 'w', newline='') as f:
+    writer = csv.DictWriter(f, fieldnames=['timestamp', 'filename', 'mft_entry', 'parent_entry', 'reasons', 'usn'])
+    writer.writeheader()
+    writer.writerows(records)
+PYEOF</code></pre>
+<h4>Step 5: Detect and Analyze Alternate Data Streams</h4>
+<pre><code># List all Alternate Data Streams in the image
+find /mnt/evidence -exec getfattr -d {} \; 2&gt;/dev/null | grep -i &quot;ads\|zone\|stream&quot;
+
+# Using Sleuth Kit to find ADS
+fls -r -o 2048 /cases/case-2024-001/images/evidence.dd | grep &quot;:&quot; | \
+   tee /cases/case-2024-001/analysis/ads_list.txt
+
+# Extract specific ADS content
+# Format: icat image inode:ads_name
+icat -o 2048 /cases/case-2024-001/images/evidence.dd 14523:hidden_stream \
+   &gt; /cases/case-2024-001/analysis/extracted_ads.bin
+
+# Check Zone.Identifier streams (download origin tracking)
+fls -r -o 2048 /cases/case-2024-001/images/evidence.dd | grep &quot;Zone.Identifier&quot; | \
+   while read line; do
+       inode=$(echo &quot;$line&quot; | awk '{print $2}' | tr -d ':')
+       echo &quot;=== $line ===&quot;
+       icat -o 2048 /cases/case-2024-001/images/evidence.dd &quot;${inode}:Zone.Identifier&quot; 2&gt;/dev/null
+       echo &quot;&quot;
+   done &gt; /cases/case-2024-001/analysis/zone_identifiers.txt
+
+# Zone.Identifier content reveals:
+# [ZoneTransfer]
+# ZoneId=3          (3 = Internet, indicating file was downloaded)
+# ReferrerUrl=https://malicious-site.com/payload.exe
+# HostUrl=https://cdn.malicious-site.com/payload.exe</code></pre>
+<h3>Key Concepts</h3>
+<p>| Concept | Description | |---------|-------------| | File slack | Unused space between file end and cluster boundary containing residual data | | RAM slack | Portion of slack from file end to sector boundary (historically filled with RAM) | | MFT ($MFT) | Master File Table - NTFS metadata database with entries for every file | | USN Journal ($UsnJrnl) | Change journal recording all file/directory modifications on NTFS | | Alternate Data Streams | NTFS feature allowing multiple data streams per file (hidden storage) | | $STANDARD_INFORMATION | MFT attribute with timestamps modifiable by user-mode applications | | $FILE_NAME | MFT attribute with timestamps only modifiable by the kernel | | Timestomping | Anti-forensic technique modifying file timestamps to avoid detection |</p>
+<h3>Tools &amp; Systems</h3>
+<p>| Tool | Purpose | |------|---------| | MFTECmd | Eric Zimmerman MFT and USN Journal parser with CSV output | | MFTExplorer | Interactive GUI tool for MFT analysis | | analyzeMFT | Python MFT parser with CSV/JSON output | | The Sleuth Kit | File system forensics toolkit (fls, icat, blkls, istat) | | bulk_extractor | Feature extraction from raw data including slack space | | NTFS Log Tracker | Tool for parsing $LogFile transaction records | | streams.exe | Sysinternals tool for listing NTFS Alternate Data Streams | | Plaso | Super-timeline tool parsing MFT and USN Journal |</p>
+<h3>Common Scenarios</h3>
+<p><strong>Scenario 1: Anti-Forensics Detection via Timestomping</strong> Compare $STANDARD_INFORMATION timestamps with $FILE_NAME timestamps in MFT entries, flag files where $SI timestamps predate $FN timestamps (impossible in normal operation), identify timestomped files as evidence of deliberate manipulation, correlate with other timeline evidence.</p>
+<p><strong>Scenario 2: Hidden Data in Alternate Data Streams</strong> Scan for ADS attached to files beyond the standard Zone.Identifier, extract ADS content for analysis, check for hidden executables or documents stored in ADS, correlate ADS creation with user activity timeline, document findings for evidence.</p>
+<p><strong>Scenario 3: Deleted File Reconstruction from MFT</strong> Parse MFT for inactive (deleted) entries, extract filenames, sizes, and timestamps of deleted files, recover file content using icat if data clusters are not overwritten, build list of deleted evidence files, correlate with USN Journal delete events.</p>
+<p><strong>Scenario 4: File Activity Reconstruction from USN Journal</strong> Parse the USN Change Journal for the investigation period, identify file creation, modification, rename, and deletion events, reconstruct the sequence of file operations, detect evidence of data staging (create, copy, compress, delete pattern), identify anti-forensic file wiping.</p>
+<h3>Output Format</h3>
+<pre><code>File System Artifact Analysis:
+  Volume: NTFS (Partition 2, 465 GB)
+  Cluster Size: 4096 bytes
+
+  MFT Analysis:
+    Total Entries: 456,789
+    Active Files: 234,567
+    Deleted Entries: 12,345 (8,901 with recoverable metadata)
+    Timestomped Files: 23 (SI/FN mismatch detected)
+
+  USN Journal:
+    Records Parsed: 2,345,678
+    Date Range: 2024-01-01 to 2024-01-20
+    File Creations: 45,678
+    File Deletions: 23,456
+    File Renames: 12,345
+
+  Alternate Data Streams:
+    Total ADS Found: 1,234
+    Zone.Identifier: 890 (downloaded files)
+    Custom/Suspicious ADS: 5 (hidden data detected)
+
+  Slack Space:
+    Total Slack: 12.3 GB
+    Keyword Hits: 45 (passwords, credit cards)
+    Carved Files: 23 from slack space
+
+  Suspicious Findings:
+    - 23 files with timestomped timestamps
+    - 5 files with hidden ADS containing data
+    - USN shows mass deletion on 2024-01-18 (anti-forensics)
+    - Slack space contains residual email fragments
+
+  Reports: /cases/case-2024-001/analysis/</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: analyzing-slack-space-and-file-system-artifacts\ndisplay_name: analyzing-slack-space-and-file-system-artifacts\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# analyzing-slack-space-and-file-system-artifacts - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `analyzing-slack-space-and-file-system-artifacts` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When searching for hidden or residual data in file system slack space\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose analyzing-slack-space-and-file-system-artifacts, then write the task. Fallback prompt: Use the analyzing-slack-space-and-file-system-artifacts skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `analyzing-slack-space-and-file-system-artifacts` |\n| Canonical name | `analyzing-slack-space-and-file-system-artifacts` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n- When searching for hidden or residual data in file system slack space\n\n## Original SKILL.md\n\n---\nname: analyzing-slack-space-and-file-system-artifacts\ndescription: Examine file system slack space, MFT entries, USN journal, and alternate\n  data streams to recover hidden data and reconstruct file activity on NTFS volumes.\ndomain: cybersecurity\nsubdomain: digital-forensics\ntags:\n- forensics\n- slack-space\n- ntfs\n- mft\n- usn-journal\n- alternate-data-streams\n- file-system-analysis\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- RS.AN-01\n- RS.AN-03\n- DE.AE-02\n- RS.MA-01\nmitre_attack:\n- T1070.006\n- T1564.004\n- T1070.004\n- T1005\n- T1006\n---\n\n# Analyzing Slack Space and File System Artifacts\n\n## When to Use\n- When searching for hidden or residual data in file system slack space\n- For analyzing NTFS Master File Table (MFT) entries for deleted file metadata\n- When reconstructing file operations from the USN Change Journal\n- For detecting Alternate Data Streams (ADS) used to hide data or malware\n- During deep forensic analysis requiring examination beyond standard file recovery\n\n## Prerequisites\n- Forensic disk image with NTFS file system\n- The Sleuth Kit (TSK) tools: istat, icat, fls, blkls, blkstat\n- MFTECmd (Eric Zimmerman) for MFT parsing\n- MFTExplorer for interactive MFT analysis\n- Understanding of NTFS structures (MFT, $UsnJrnl, $LogFile, ADS)\n- Python with analyzeMFT or mft library for automated parsing\n\n## Workflow\n\n### Step 1: Identify and Extract NTFS File System Artifacts\n\n```bash\n# Determine partition layout\nmmls /cases/case-2024-001/images/evidence.dd\n\n# Extract key NTFS system files\n# $MFT - Master File Table\nicat -o 2048 /cases/case-2024-001/images/evidence.dd 0 > /cases/case-2024-001/ntfs/MFT\n\n# $UsnJrnl:$J - USN Change Journal\nicat -o 2048 /cases/case-2024-001/images/evidence.dd 62-128 > /cases/case-2024-001/ntfs/UsnJrnl_J\n\n# $LogFile - Transaction log\nicat -o 2048 /cases/case-2024-001/images/evidence.dd 2 > /cases/case-2024-001/ntfs/LogFile\n\n# Extract all slack space from the volume\nblkls -s -o 2048 /cases/case-2024-001/images/evidence.dd > /cases/case-2024-001/ntfs/slack_space.raw\n\n# Get file system information\nfsstat -o 2048 /cases/case-2024-001/images/evidence.dd | tee /cases/case-2024-001/ntfs/fs_info.txt\n```\n\n### Step 2: Analyze the Master File Table (MFT)\n\n```bash\n# Parse MFT with MFTECmd (Eric Zimmerman)\nMFTECmd.exe -f \"C:\\cases\\ntfs\\MFT\" --csv \"C:\\cases\\analysis\\\" --csvf mft_analysis.csv\n\n# Parse with analyzeMFT (Python)\npip install analyzeMFT\n\nanalyzeMFT.py -f /cases/case-2024-001/ntfs/MFT \\\n   -o /cases/case-2024-001/analysis/mft_analysis.csv \\\n   -c\n\n# Custom MFT analysis with Python\npython3 \u003c\u003c 'PYEOF'\nfrom mft import PyMft\nimport csv\n\nmft = PyMft(open('/cases/case-2024-001/ntfs/MFT', 'rb').read())\n\ndeleted_files = []\nsuspicious_files = []\n\nfor entry in mft.entries():\n    if entry is None:\n        continue\n\n    filename = entry.get_filename()\n    if filename is None:\n        continue\n\n    is_deleted = not entry.is_active()\n    is_directory = entry.is_directory()\n    created = entry.get_created_timestamp()\n    modified = entry.get_modified_timestamp()\n    mft_modified = entry.get_mft_modified_timestamp()\n    size = entry.get_file_size()\n\n    # Flag deleted files for recovery\n    if is_deleted and not is_directory and size > 0:\n        deleted_files.append({\n            'filename': filename,\n            'size': size,\n            'created': str(created),\n            'modified': str(modified),\n            'entry_number': entry.entry_number\n        })\n\n    # Detect timestomping (MFT modified time != $SI modified time)\n    si_modified = entry.get_si_modified_timestamp()\n    fn_modified = entry.get_fn_modified_timestamp()\n    if si_modified and fn_modified:\n        if abs((si_modified - fn_modified).total_seconds()) > 86400:  # >1 day difference\n            suspicious_files.append({\n                'filename': filename,\n                'si_modified': str(si_modified),\n                'fn_modified': str(fn_modified),\n                'delta': str(si_modified - fn_modified)\n            })\n\nprint(f\"=== DELETED FILES (recoverable metadata) ===\")\nprint(f\"Total: {len(deleted_files)}\")\nfor f in deleted_files[:20]:\n    print(f\"  [{f['modified']}] {f['filename']} ({f['size']} bytes)\")\n\nprint(f\"\\n=== POTENTIAL TIMESTOMPING ===\")\nprint(f\"Total suspicious: {len(suspicious_files)}\")\nfor f in suspicious_files[:10]:\n    print(f\"  {f['filename']}: $SI={f['si_modified']}, $FN={f['fn_modified']} (delta: {f['delta']})\")\nPYEOF\n```\n\n### Step 3: Analyze Slack Space for Hidden Data\n\n```bash\n# Search slack space for strings\nstrings -a /cases/case-2024-001/ntfs/slack_space.raw > /cases/case-2024-001/analysis/slack_strings.txt\n\n# Search for specific patterns in slack space\ngrep -iab \"password\\|secret\\|confidential\\|credit.card\\|ssn\" \\\n   /cases/case-2024-001/ntfs/slack_space.raw > /cases/case-2024-001/analysis/slack_keywords.txt\n\n# Analyze individual file slack\npython3 \u003c\u003c 'PYEOF'\nimport struct\n\n# File slack consists of:\n# 1. RAM slack: bytes between file end and next sector boundary (filled with RAM content or zeros)\n# 2. Drive slack: remaining sectors in the cluster after the last file sector\n\n# Analyze slack for specific MFT entries\n# Using Sleuth Kit to get file slack for a specific file\nimport subprocess\n\n# Get file details\nresult = subprocess.run(\n    ['istat', '-o', '2048', '/cases/case-2024-001/images/evidence.dd', '14523'],\n    capture_output=True, text=True\n)\nprint(result.stdout)\n\n# The output shows data runs - the last cluster may contain slack data\n# Calculate slack size: (allocated_size - file_size) bytes\nPYEOF\n\n# Search for file signatures in slack space (embedded files)\nforemost -t jpg,pdf,zip -i /cases/case-2024-001/ntfs/slack_space.raw \\\n   -o /cases/case-2024-001/carved/slack_carved/\n\n# Use bulk_extractor to find structured data in slack\nbulk_extractor -o /cases/case-2024-001/analysis/bulk_extract/ \\\n   /cases/case-2024-001/ntfs/slack_space.raw\n```\n\n### Step 4: Parse the USN Change Journal\n\n```bash\n# Parse USN Journal with MFTECmd\nMFTECmd.exe -f \"C:\\cases\\ntfs\\UsnJrnl_J\" --csv \"C:\\cases\\analysis\\\" --csvf usn_journal.csv\n\n# Python USN Journal parsing\npip install pyusn\n\npython3 \u003c\u003c 'PYEOF'\nimport struct\nimport csv\nfrom datetime import datetime, timedelta\n\ndef parse_usn_record(data, offset):\n    \"\"\"Parse a single USN_RECORD_V2.\"\"\"\n    if offset + 8 > len(data):\n        return None, offset\n\n    record_len = struct.unpack_from('\u003cI', data, offset)[0]\n    if record_len \u003c 56 or record_len > 65536 or offset + record_len > len(data):\n        return None, offset + 8\n\n    major_ver = struct.unpack_from('\u003cH', data, offset + 4)[0]\n    if major_ver != 2:\n        return None, offset + record_len\n\n    mft_ref = struct.unpack_from('\u003cQ', data, offset + 8)[0] & 0xFFFFFFFFFFFF\n    parent_ref = struct.unpack_from('\u003cQ', data, offset + 16)[0] & 0xFFFFFFFFFFFF\n    usn = struct.unpack_from('\u003cQ', data, offset + 24)[0]\n    timestamp = struct.unpack_from('\u003cQ', data, offset + 32)[0]\n    reason = struct.unpack_from('\u003cI', data, offset + 40)[0]\n    source_info = struct.unpack_from('\u003cI', data, offset + 44)[0]\n    security_id = struct.unpack_from('\u003cI', data, offset + 48)[0]\n    file_attrs = struct.unpack_from('\u003cI', data, offset + 52)[0]\n    filename_len = struct.unpack_from('\u003cH', data, offset + 56)[0]\n    filename_off = struct.unpack_from('\u003cH', data, offset + 58)[0]\n\n    name = data[offset + filename_off:offset + filename_off + filename_len].decode('utf-16-le', errors='ignore')\n\n    # Convert Windows FILETIME to datetime\n    ts = datetime(1601, 1, 1) + timedelta(microseconds=timestamp // 10)\n\n    # Decode reason flags\n    reasons = []\n    reason_flags = {\n        0x01: 'DATA_OVERWRITE', 0x02: 'DATA_EXTEND', 0x04: 'DATA_TRUNCATION',\n        0x10: 'NAMED_DATA_OVERWRITE', 0x20: 'NAMED_DATA_EXTEND',\n        0x100: 'FILE_CREATE', 0x200: 'FILE_DELETE', 0x400: 'EA_CHANGE',\n        0x800: 'SECURITY_CHANGE', 0x1000: 'RENAME_OLD_NAME', 0x2000: 'RENAME_NEW_NAME',\n        0x4000: 'INDEXABLE_CHANGE', 0x8000: 'BASIC_INFO_CHANGE',\n        0x10000: 'HARD_LINK_CHANGE', 0x20000: 'COMPRESSION_CHANGE',\n        0x40000: 'ENCRYPTION_CHANGE', 0x80000: 'OBJECT_ID_CHANGE',\n        0x100000: 'REPARSE_POINT_CHANGE', 0x200000: 'STREAM_CHANGE',\n        0x80000000: 'CLOSE'\n    }\n    for flag, desc in reason_flags.items():\n        if reason & flag:\n            reasons.append(desc)\n\n    record = {\n        'timestamp': ts.strftime('%Y-%m-%d %H:%M:%S'),\n        'filename': name,\n        'mft_entry': mft_ref,\n        'parent_entry': parent_ref,\n        'reasons': '|'.join(reasons),\n        'usn': usn\n    }\n\n    return record, offset + record_len\n\n# Parse the journal\nwith open('/cases/case-2024-001/ntfs/UsnJrnl_J', 'rb') as f:\n    data = f.read()\n\nrecords = []\noffset = 0\nwhile offset \u003c len(data) - 8:\n    record, offset = parse_usn_record(data, offset)\n    if record:\n        records.append(record)\n    else:\n        offset += 8  # Skip zeros\n\n# Filter for deletion events\ndeletions = [r for r in records if 'FILE_DELETE' in r['reasons']]\ncreations = [r for r in records if 'FILE_CREATE' in r['reasons']]\nrenames = [r for r in records if 'RENAME_NEW_NAME' in r['reasons']]\n\nprint(f\"Total USN records: {len(records)}\")\nprint(f\"File creations: {len(creations)}\")\nprint(f\"File deletions: {len(deletions)}\")\nprint(f\"File renames: {len(renames)}\")\n\nprint(\"\\n=== RECENT DELETIONS ===\")\nfor r in deletions[-20:]:\n    print(f\"  [{r['timestamp']}] DELETED: {r['filename']} (MFT#{r['mft_entry']})\")\n\n# Write full journal to CSV\nwith open('/cases/case-2024-001/analysis/usn_journal.csv', 'w', newline='') as f:\n    writer = csv.DictWriter(f, fieldnames=['timestamp', 'filename', 'mft_entry', 'parent_entry', 'reasons', 'usn'])\n    writer.writeheader()\n    writer.writerows(records)\nPYEOF\n```\n\n### Step 5: Detect and Analyze Alternate Data Streams\n\n```bash\n# List all Alternate Data Streams in the image\nfind /mnt/evidence -exec getfattr -d {} \\; 2>/dev/null | grep -i \"ads\\|zone\\|stream\"\n\n# Using Sleuth Kit to find ADS\nfls -r -o 2048 /cases/case-2024-001/images/evidence.dd | grep \":\" | \\\n   tee /cases/case-2024-001/analysis/ads_list.txt\n\n# Extract specific ADS content\n# Format: icat image inode:ads_name\nicat -o 2048 /cases/case-2024-001/images/evidence.dd 14523:hidden_stream \\\n   > /cases/case-2024-001/analysis/extracted_ads.bin\n\n# Check Zone.Identifier streams (download origin tracking)\nfls -r -o 2048 /cases/case-2024-001/images/evidence.dd | grep \"Zone.Identifier\" | \\\n   while read line; do\n       inode=$(echo \"$line\" | awk '{print $2}' | tr -d ':')\n       echo \"=== $line ===\"\n       icat -o 2048 /cases/case-2024-001/images/evidence.dd \"${inode}:Zone.Identifier\" 2>/dev/null\n       echo \"\"\n   done > /cases/case-2024-001/analysis/zone_identifiers.txt\n\n# Zone.Identifier content reveals:\n# [ZoneTransfer]\n# ZoneId=3          (3 = Internet, indicating file was downloaded)\n# ReferrerUrl=https://malicious-site.com/payload.exe\n# HostUrl=https://cdn.malicious-site.com/payload.exe\n```\n\n## Key Concepts\n\n| Concept | Description |\n|---------|-------------|\n| File slack | Unused space between file end and cluster boundary containing residual data |\n| RAM slack | Portion of slack from file end to sector boundary (historically filled with RAM) |\n| MFT ($MFT) | Master File Table - NTFS metadata database with entries for every file |\n| USN Journal ($UsnJrnl) | Change journal recording all file/directory modifications on NTFS |\n| Alternate Data Streams | NTFS feature allowing multiple data streams per file (hidden storage) |\n| $STANDARD_INFORMATION | MFT attribute with timestamps modifiable by user-mode applications |\n| $FILE_NAME | MFT attribute with timestamps only modifiable by the kernel |\n| Timestomping | Anti-forensic technique modifying file timestamps to avoid detection |\n\n## Tools & Systems\n\n| Tool | Purpose |\n|------|---------|\n| MFTECmd | Eric Zimmerman MFT and USN Journal parser with CSV output |\n| MFTExplorer | Interactive GUI tool for MFT analysis |\n| analyzeMFT | Python MFT parser with CSV/JSON output |\n| The Sleuth Kit | File system forensics toolkit (fls, icat, blkls, istat) |\n| bulk_extractor | Feature extraction from raw data including slack space |\n| NTFS Log Tracker | Tool for parsing $LogFile transaction records |\n| streams.exe | Sysinternals tool for listing NTFS Alternate Data Streams |\n| Plaso | Super-timeline tool parsing MFT and USN Journal |\n\n## Common Scenarios\n\n**Scenario 1: Anti-Forensics Detection via Timestomping**\nCompare $STANDARD_INFORMATION timestamps with $FILE_NAME timestamps in MFT entries, flag files where $SI timestamps predate $FN timestamps (impossible in normal operation), identify timestomped files as evidence of deliberate manipulation, correlate with other timeline evidence.\n\n**Scenario 2: Hidden Data in Alternate Data Streams**\nScan for ADS attached to files beyond the standard Zone.Identifier, extract ADS content for analysis, check for hidden executables or documents stored in ADS, correlate ADS creation with user activity timeline, document findings for evidence.\n\n**Scenario 3: Deleted File Reconstruction from MFT**\nParse MFT for inactive (deleted) entries, extract filenames, sizes, and timestamps of deleted files, recover file content using icat if data clusters are not overwritten, build list of deleted evidence files, correlate with USN Journal delete events.\n\n**Scenario 4: File Activity Reconstruction from USN Journal**\nParse the USN Change Journal for the investigation period, identify file creation, modification, rename, and deletion events, reconstruct the sequence of file operations, detect evidence of data staging (create, copy, compress, delete pattern), identify anti-forensic file wiping.\n\n## Output Format\n\n```\nFile System Artifact Analysis:\n  Volume: NTFS (Partition 2, 465 GB)\n  Cluster Size: 4096 bytes\n\n  MFT Analysis:\n    Total Entries: 456,789\n    Active Files: 234,567\n    Deleted Entries: 12,345 (8,901 with recoverable metadata)\n    Timestomped Files: 23 (SI/FN mismatch detected)\n\n  USN Journal:\n    Records Parsed: 2,345,678\n    Date Range: 2024-01-01 to 2024-01-20\n    File Creations: 45,678\n    File Deletions: 23,456\n    File Renames: 12,345\n\n  Alternate Data Streams:\n    Total ADS Found: 1,234\n    Zone.Identifier: 890 (downloaded files)\n    Custom/Suspicious ADS: 5 (hidden data detected)\n\n  Slack Space:\n    Total Slack: 12.3 GB\n    Keyword Hits: 45 (passwords, credit cards)\n    Carved Files: 23 from slack space\n\n  Suspicious Findings:\n    - 23 files with timestomped timestamps\n    - 5 files with hidden ADS containing data\n    - USN shows mass deletion on 2024-01-18 (anti-forensics)\n    - Slack space contains residual email fragments\n\n  Reports: /cases/case-2024-001/analysis/\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("analyzing-slack-space-and-file-system-artifacts-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

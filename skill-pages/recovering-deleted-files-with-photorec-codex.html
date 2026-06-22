@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>recovering-deleted-files-with-photorec - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/recovering-deleted-files-with-photorec-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>recovering-deleted-files-with-photorec</h1>
+      <p class="description">Recover deleted files from disk images and storage media using PhotoRec's</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>recovering-deleted-files-with-photorec</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>recovering-deleted-files-with-photorec</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Recover deleted files from disk images and storage media using PhotoRec's</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose recovering-deleted-files-with-photorec, then write the task. Fallback prompt: Use the recovering-deleted-files-with-photorec skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Recovering Deleted Files with PhotoRec</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When recovering deleted files from a forensic disk image or storage device</li>
+<li>When the file system is corrupted, formatted, or overwritten</li>
+<li>During investigations requiring recovery of documents, images, videos, or databases</li>
+<li>When file system metadata is unavailable but raw data sectors remain intact</li>
+<li>For recovering files from memory cards, USB drives, and hard drives</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>PhotoRec installed (part of TestDisk suite)</li>
+<li>Forensic disk image or direct device access (read-only)</li>
+<li>Sufficient output storage space (potentially larger than source)</li>
+<li>Write-blocker if working with original media</li>
+<li>Root/sudo privileges for device access</li>
+<li>Knowledge of target file types for focused recovery</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Install PhotoRec and Prepare the Environment</h4>
+<pre><code># Install TestDisk (includes PhotoRec) on Debian/Ubuntu
+sudo apt-get install testdisk
+
+# On RHEL/CentOS
+sudo yum install testdisk
+
+# On macOS
+brew install testdisk
+
+# Verify installation
+photorec --version
+
+# Create output directory structure
+mkdir -p /cases/case-2024-001/recovered/{all,documents,images,databases}
+
+# Verify the forensic image
+file /cases/case-2024-001/images/evidence.dd
+ls -lh /cases/case-2024-001/images/evidence.dd</code></pre>
+<h4>Step 2: Run PhotoRec in Interactive Mode</h4>
+<pre><code># Launch PhotoRec against a forensic image
+photorec /cases/case-2024-001/images/evidence.dd
+
+# Interactive menu steps:
+# 1. Select the disk image: evidence.dd
+# 2. Select partition table type: [Intel] for MBR, [EFI GPT] for GPT
+# 3. Select partition to scan (or &quot;No partition&quot; for whole disk)
+# 4. Select filesystem type: [ext2/ext3/ext4] or [Other] for NTFS/FAT
+# 5. Choose scan scope: [Free] (unallocated only) or [Whole] (entire partition)
+# 6. Select output directory: /cases/case-2024-001/recovered/all/
+# 7. Press C to confirm and begin recovery
+
+# For direct device scanning (with write-blocker)
+sudo photorec /dev/sdb</code></pre>
+<h4>Step 3: Run PhotoRec with Command-Line Options for Targeted Recovery</h4>
+<pre><code># Non-interactive mode with specific file types
+photorec /d /cases/case-2024-001/recovered/documents/ \
+   /cmd /cases/case-2024-001/images/evidence.dd \
+   partition_table,options,mode,fileopt,search
+
+# Recover only specific file types using photorec command mode
+photorec /d /cases/case-2024-001/recovered/documents/ \
+   /cmd /cases/case-2024-001/images/evidence.dd \
+   options,keep_corrupted_file,enable \
+   fileopt,everything,disable \
+   fileopt,doc,enable \
+   fileopt,docx,enable \
+   fileopt,pdf,enable \
+   fileopt,xlsx,enable \
+   search
+
+# Recover only image files
+photorec /d /cases/case-2024-001/recovered/images/ \
+   /cmd /cases/case-2024-001/images/evidence.dd \
+   fileopt,everything,disable \
+   fileopt,jpg,enable \
+   fileopt,png,enable \
+   fileopt,gif,enable \
+   fileopt,bmp,enable \
+   fileopt,tif,enable \
+   search
+
+# Recover database files
+photorec /d /cases/case-2024-001/recovered/databases/ \
+   /cmd /cases/case-2024-001/images/evidence.dd \
+   fileopt,everything,disable \
+   fileopt,sqlite,enable \
+   fileopt,dbf,enable \
+   search</code></pre>
+<h4>Step 4: Organize and Catalog Recovered Files</h4>
+<pre><code># PhotoRec outputs files into recup_dir.1, recup_dir.2, etc.
+ls /cases/case-2024-001/recovered/all/
+
+# Count recovered files by type
+find /cases/case-2024-001/recovered/all/ -type f | \
+   sed 's/.*\.//' | sort | uniq -c | sort -rn &gt; /cases/case-2024-001/recovered/file_type_summary.txt
+
+# Sort recovered files into directories by extension
+cd /cases/case-2024-001/recovered/all/
+for ext in jpg png pdf docx xlsx pptx zip sqlite; do
+   mkdir -p /cases/case-2024-001/recovered/sorted/$ext
+   find . -name &quot;*.$ext&quot; -exec cp {} /cases/case-2024-001/recovered/sorted/$ext/ \;
+done
+
+# Generate SHA-256 hashes for all recovered files
+find /cases/case-2024-001/recovered/all/ -type f -exec sha256sum {} \; \
+   &gt; /cases/case-2024-001/recovered/recovered_hashes.txt
+
+# Generate file listing with metadata
+find /cases/case-2024-001/recovered/all/ -type f \
+   -printf &quot;%f\t%s\t%T+\t%p\n&quot; | sort &gt; /cases/case-2024-001/recovered/file_listing.txt</code></pre>
+<h4>Step 5: Validate and Filter Recovered Files</h4>
+<pre><code># Verify file integrity using file signatures
+find /cases/case-2024-001/recovered/all/ -type f -exec file {} \; \
+   &gt; /cases/case-2024-001/recovered/file_signatures.txt
+
+# Find files with mismatched extension/signature
+while IFS= read -r line; do
+   filepath=$(echo &quot;$line&quot; | cut -d: -f1)
+   filetype=$(echo &quot;$line&quot; | cut -d: -f2-)
+   ext=&quot;${filepath##*.}&quot;
+   if [[ &quot;$ext&quot; == &quot;jpg&quot; ]] &amp;&amp; ! echo &quot;$filetype&quot; | grep -qi &quot;JPEG&quot;; then
+      echo &quot;MISMATCH: $filepath -&gt; $filetype&quot;
+   fi
+done &lt; /cases/case-2024-001/recovered/file_signatures.txt &gt; /cases/case-2024-001/recovered/mismatches.txt
+
+# Filter out known-good files using NSRL hash comparison
+hashdeep -r -c sha256 /cases/case-2024-001/recovered/all/ | \
+   grep -vFf /opt/nsrl/nsrl_sha256.txt &gt; /cases/case-2024-001/recovered/unknown_files.txt
+
+# Remove zero-byte and corrupted files
+find /cases/case-2024-001/recovered/all/ -type f -empty -delete
+find /cases/case-2024-001/recovered/all/ -name &quot;*.jpg&quot; -exec jpeginfo -c {} \; 2&gt;&amp;1 | \
+   grep &quot;ERROR&quot; &gt; /cases/case-2024-001/recovered/corrupted_images.txt</code></pre>
+<h3>Key Concepts</h3>
+<p>| Concept | Description | |---------|-------------| | File carving | Recovering files from raw data using file header/footer signatures | | File signatures | Magic bytes at the start of files identifying their type (e.g., FF D8 FF for JPEG) | | Unallocated space | Disk sectors not assigned to any active file; may contain deleted data | | Fragmented files | Files stored in non-contiguous sectors; harder to carve completely | | Cluster/Block size | Minimum allocation unit on a file system; affects carving granularity | | File footer | Byte sequence marking the end of a file (not all formats have footers) | | Data remanence | Residual data remaining after deletion until sectors are overwritten | | False positives | Carved artifacts that match signatures but contain corrupted or partial data |</p>
+<h3>Tools &amp; Systems</h3>
+<p>| Tool | Purpose | |------|---------| | PhotoRec | Open-source file carving tool supporting 300+ file formats | | TestDisk | Companion tool for partition recovery and repair | | Foremost | Alternative file carver originally developed by US Air Force OSI | | Scalpel | High-performance file carver based on Foremost | | hashdeep | Recursive hash computation and audit tool | | jpeginfo | JPEG file integrity verification | | file | Unix utility identifying file types by magic bytes | | exiftool | Extract metadata from recovered image and document files |</p>
+<h3>Common Scenarios</h3>
+<p><strong>Scenario 1: Recovering Deleted Evidence from a Suspect's USB Drive</strong> Image the USB drive with dcfldd, run PhotoRec targeting document and image formats, organize by file type, hash all recovered files, compare against known-bad hash sets, extract metadata from images for GPS and timestamp information.</p>
+<p><strong>Scenario 2: Formatted Hard Drive Recovery</strong> Run PhotoRec in &quot;Whole&quot; mode against the entire formatted partition, recover all file types, expect higher false positive rate due to file fragmentation, validate recovered files with signature checking, catalog and hash for evidence chain.</p>
+<p><strong>Scenario 3: Memory Card from a Surveillance Camera</strong> Recover deleted video files (AVI, MP4, MOV) from the memory card image, use targeted file type selection to speed recovery, verify video files are playable, extract frame timestamps, document recovery in case notes.</p>
+<p><strong>Scenario 4: Corrupted File System on Evidence Drive</strong> When file system metadata is destroyed, PhotoRec bypasses the file system entirely and carves from raw sectors, recover maximum possible data, accept that file names and directory structure will be lost, rename files based on content during review.</p>
+<h3>Output Format</h3>
+<pre><code>PhotoRec Recovery Summary:
+  Source Image:     evidence.dd (500 GB)
+  Partition:        NTFS (Partition 2)
+  Scan Mode:        Free space only
+
+  Files Recovered:  4,523
+    Documents:      234 (doc: 45, docx: 89, pdf: 67, xlsx: 33)
+    Images:         2,145 (jpg: 1,890, png: 198, gif: 57)
+    Videos:         34 (mp4: 22, avi: 12)
+    Archives:       67 (zip: 45, rar: 22)
+    Databases:      12 (sqlite: 8, dbf: 4)
+    Other:          2,031
+
+  Data Recovered:   12.4 GB
+  Corrupted Files:  312 (flagged for review)
+  Output Directory: /cases/case-2024-001/recovered/all/
+  Hash Manifest:    /cases/case-2024-001/recovered/recovered_hashes.txt</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: recovering-deleted-files-with-photorec\ndisplay_name: recovering-deleted-files-with-photorec\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# recovering-deleted-files-with-photorec - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `recovering-deleted-files-with-photorec` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When recovering deleted files from a forensic disk image or storage device\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose recovering-deleted-files-with-photorec, then write the task. Fallback prompt: Use the recovering-deleted-files-with-photorec skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `recovering-deleted-files-with-photorec` |\n| Canonical name | `recovering-deleted-files-with-photorec` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\n- When recovering deleted files from a forensic disk image or storage device\n\n## Original SKILL.md\n\n---\nname: recovering-deleted-files-with-photorec\ndescription: Recover deleted files from disk images and storage media using PhotoRec's\n  file signature-based carving engine regardless of file system damage.\ndomain: cybersecurity\nsubdomain: digital-forensics\ntags:\n- forensics\n- file-recovery\n- photorec\n- file-carving\n- data-recovery\n- evidence-recovery\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_ai_rmf:\n- MEASURE-2.7\n- MAP-5.1\n- MANAGE-2.4\natlas_techniques:\n- AML.T0070\n- AML.T0066\n- AML.T0082\nnist_csf:\n- RS.AN-01\n- RS.AN-03\n- DE.AE-02\n- RS.MA-01\nmitre_attack:\n- T1005\n- T1074\n- T1119\n- T1070\n- T1059\n---\n\n# Recovering Deleted Files with PhotoRec\n\n## When to Use\n- When recovering deleted files from a forensic disk image or storage device\n- When the file system is corrupted, formatted, or overwritten\n- During investigations requiring recovery of documents, images, videos, or databases\n- When file system metadata is unavailable but raw data sectors remain intact\n- For recovering files from memory cards, USB drives, and hard drives\n\n## Prerequisites\n- PhotoRec installed (part of TestDisk suite)\n- Forensic disk image or direct device access (read-only)\n- Sufficient output storage space (potentially larger than source)\n- Write-blocker if working with original media\n- Root/sudo privileges for device access\n- Knowledge of target file types for focused recovery\n\n## Workflow\n\n### Step 1: Install PhotoRec and Prepare the Environment\n\n```bash\n# Install TestDisk (includes PhotoRec) on Debian/Ubuntu\nsudo apt-get install testdisk\n\n# On RHEL/CentOS\nsudo yum install testdisk\n\n# On macOS\nbrew install testdisk\n\n# Verify installation\nphotorec --version\n\n# Create output directory structure\nmkdir -p /cases/case-2024-001/recovered/{all,documents,images,databases}\n\n# Verify the forensic image\nfile /cases/case-2024-001/images/evidence.dd\nls -lh /cases/case-2024-001/images/evidence.dd\n```\n\n### Step 2: Run PhotoRec in Interactive Mode\n\n```bash\n# Launch PhotoRec against a forensic image\nphotorec /cases/case-2024-001/images/evidence.dd\n\n# Interactive menu steps:\n# 1. Select the disk image: evidence.dd\n# 2. Select partition table type: [Intel] for MBR, [EFI GPT] for GPT\n# 3. Select partition to scan (or \"No partition\" for whole disk)\n# 4. Select filesystem type: [ext2/ext3/ext4] or [Other] for NTFS/FAT\n# 5. Choose scan scope: [Free] (unallocated only) or [Whole] (entire partition)\n# 6. Select output directory: /cases/case-2024-001/recovered/all/\n# 7. Press C to confirm and begin recovery\n\n# For direct device scanning (with write-blocker)\nsudo photorec /dev/sdb\n```\n\n### Step 3: Run PhotoRec with Command-Line Options for Targeted Recovery\n\n```bash\n# Non-interactive mode with specific file types\nphotorec /d /cases/case-2024-001/recovered/documents/ \\\n   /cmd /cases/case-2024-001/images/evidence.dd \\\n   partition_table,options,mode,fileopt,search\n\n# Recover only specific file types using photorec command mode\nphotorec /d /cases/case-2024-001/recovered/documents/ \\\n   /cmd /cases/case-2024-001/images/evidence.dd \\\n   options,keep_corrupted_file,enable \\\n   fileopt,everything,disable \\\n   fileopt,doc,enable \\\n   fileopt,docx,enable \\\n   fileopt,pdf,enable \\\n   fileopt,xlsx,enable \\\n   search\n\n# Recover only image files\nphotorec /d /cases/case-2024-001/recovered/images/ \\\n   /cmd /cases/case-2024-001/images/evidence.dd \\\n   fileopt,everything,disable \\\n   fileopt,jpg,enable \\\n   fileopt,png,enable \\\n   fileopt,gif,enable \\\n   fileopt,bmp,enable \\\n   fileopt,tif,enable \\\n   search\n\n# Recover database files\nphotorec /d /cases/case-2024-001/recovered/databases/ \\\n   /cmd /cases/case-2024-001/images/evidence.dd \\\n   fileopt,everything,disable \\\n   fileopt,sqlite,enable \\\n   fileopt,dbf,enable \\\n   search\n```\n\n### Step 4: Organize and Catalog Recovered Files\n\n```bash\n# PhotoRec outputs files into recup_dir.1, recup_dir.2, etc.\nls /cases/case-2024-001/recovered/all/\n\n# Count recovered files by type\nfind /cases/case-2024-001/recovered/all/ -type f | \\\n   sed 's/.*\\.//' | sort | uniq -c | sort -rn > /cases/case-2024-001/recovered/file_type_summary.txt\n\n# Sort recovered files into directories by extension\ncd /cases/case-2024-001/recovered/all/\nfor ext in jpg png pdf docx xlsx pptx zip sqlite; do\n   mkdir -p /cases/case-2024-001/recovered/sorted/$ext\n   find . -name \"*.$ext\" -exec cp {} /cases/case-2024-001/recovered/sorted/$ext/ \\;\ndone\n\n# Generate SHA-256 hashes for all recovered files\nfind /cases/case-2024-001/recovered/all/ -type f -exec sha256sum {} \\; \\\n   > /cases/case-2024-001/recovered/recovered_hashes.txt\n\n# Generate file listing with metadata\nfind /cases/case-2024-001/recovered/all/ -type f \\\n   -printf \"%f\\t%s\\t%T+\\t%p\\n\" | sort > /cases/case-2024-001/recovered/file_listing.txt\n```\n\n### Step 5: Validate and Filter Recovered Files\n\n```bash\n# Verify file integrity using file signatures\nfind /cases/case-2024-001/recovered/all/ -type f -exec file {} \\; \\\n   > /cases/case-2024-001/recovered/file_signatures.txt\n\n# Find files with mismatched extension/signature\nwhile IFS= read -r line; do\n   filepath=$(echo \"$line\" | cut -d: -f1)\n   filetype=$(echo \"$line\" | cut -d: -f2-)\n   ext=\"${filepath##*.}\"\n   if [[ \"$ext\" == \"jpg\" ]] && ! echo \"$filetype\" | grep -qi \"JPEG\"; then\n      echo \"MISMATCH: $filepath -> $filetype\"\n   fi\ndone \u003c /cases/case-2024-001/recovered/file_signatures.txt > /cases/case-2024-001/recovered/mismatches.txt\n\n# Filter out known-good files using NSRL hash comparison\nhashdeep -r -c sha256 /cases/case-2024-001/recovered/all/ | \\\n   grep -vFf /opt/nsrl/nsrl_sha256.txt > /cases/case-2024-001/recovered/unknown_files.txt\n\n# Remove zero-byte and corrupted files\nfind /cases/case-2024-001/recovered/all/ -type f -empty -delete\nfind /cases/case-2024-001/recovered/all/ -name \"*.jpg\" -exec jpeginfo -c {} \\; 2>&1 | \\\n   grep \"ERROR\" > /cases/case-2024-001/recovered/corrupted_images.txt\n```\n\n## Key Concepts\n\n| Concept | Description |\n|---------|-------------|\n| File carving | Recovering files from raw data using file header/footer signatures |\n| File signatures | Magic bytes at the start of files identifying their type (e.g., FF D8 FF for JPEG) |\n| Unallocated space | Disk sectors not assigned to any active file; may contain deleted data |\n| Fragmented files | Files stored in non-contiguous sectors; harder to carve completely |\n| Cluster/Block size | Minimum allocation unit on a file system; affects carving granularity |\n| File footer | Byte sequence marking the end of a file (not all formats have footers) |\n| Data remanence | Residual data remaining after deletion until sectors are overwritten |\n| False positives | Carved artifacts that match signatures but contain corrupted or partial data |\n\n## Tools & Systems\n\n| Tool | Purpose |\n|------|---------|\n| PhotoRec | Open-source file carving tool supporting 300+ file formats |\n| TestDisk | Companion tool for partition recovery and repair |\n| Foremost | Alternative file carver originally developed by US Air Force OSI |\n| Scalpel | High-performance file carver based on Foremost |\n| hashdeep | Recursive hash computation and audit tool |\n| jpeginfo | JPEG file integrity verification |\n| file | Unix utility identifying file types by magic bytes |\n| exiftool | Extract metadata from recovered image and document files |\n\n## Common Scenarios\n\n**Scenario 1: Recovering Deleted Evidence from a Suspect's USB Drive**\nImage the USB drive with dcfldd, run PhotoRec targeting document and image formats, organize by file type, hash all recovered files, compare against known-bad hash sets, extract metadata from images for GPS and timestamp information.\n\n**Scenario 2: Formatted Hard Drive Recovery**\nRun PhotoRec in \"Whole\" mode against the entire formatted partition, recover all file types, expect higher false positive rate due to file fragmentation, validate recovered files with signature checking, catalog and hash for evidence chain.\n\n**Scenario 3: Memory Card from a Surveillance Camera**\nRecover deleted video files (AVI, MP4, MOV) from the memory card image, use targeted file type selection to speed recovery, verify video files are playable, extract frame timestamps, document recovery in case notes.\n\n**Scenario 4: Corrupted File System on Evidence Drive**\nWhen file system metadata is destroyed, PhotoRec bypasses the file system entirely and carves from raw sectors, recover maximum possible data, accept that file names and directory structure will be lost, rename files based on content during review.\n\n## Output Format\n\n```\nPhotoRec Recovery Summary:\n  Source Image:     evidence.dd (500 GB)\n  Partition:        NTFS (Partition 2)\n  Scan Mode:        Free space only\n\n  Files Recovered:  4,523\n    Documents:      234 (doc: 45, docx: 89, pdf: 67, xlsx: 33)\n    Images:         2,145 (jpg: 1,890, png: 198, gif: 57)\n    Videos:         34 (mp4: 22, avi: 12)\n    Archives:       67 (zip: 45, rar: 22)\n    Databases:      12 (sqlite: 8, dbf: 4)\n    Other:          2,031\n\n  Data Recovered:   12.4 GB\n  Corrupted Files:  312 (flagged for review)\n  Output Directory: /cases/case-2024-001/recovered/all/\n  Hash Manifest:    /cases/case-2024-001/recovered/recovered_hashes.txt\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("recovering-deleted-files-with-photorec-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

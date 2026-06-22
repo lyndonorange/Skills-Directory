@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>implementing-zero-trust-dns-with-nextdns - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/implementing-zero-trust-dns-with-nextdns-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>implementing-zero-trust-dns-with-nextdns</h1>
+      <p class="description">Implement NextDNS as a zero trust DNS filtering layer with encrypted</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>implementing-zero-trust-dns-with-nextdns</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>implementing-zero-trust-dns-with-nextdns</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Implement NextDNS as a zero trust DNS filtering layer with encrypted</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose implementing-zero-trust-dns-with-nextdns, then write the task. Fallback prompt: Use the implementing-zero-trust-dns-with-nextdns skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Implementing Zero Trust DNS with NextDNS</h2>
+<h3>Overview</h3>
+<p>NextDNS is a cloud-based DNS resolver that provides encrypted DNS resolution (DNS-over-HTTPS and DNS-over-TLS), real-time threat intelligence blocking, ad and tracker filtering, and granular DNS policy enforcement. In a zero trust architecture, DNS is a critical control point -- every network connection begins with a DNS query, making DNS filtering an effective layer for blocking malicious domains, preventing data exfiltration via DNS tunneling, enforcing acceptable use policies, and gaining visibility into all network communications. NextDNS processes queries using threat intelligence feeds containing millions of malicious domains updated in real-time, blocks cryptojacking and phishing domains, detects DNS rebinding attacks, and supports CNAME cloaking protection. For enterprise environments, Microsoft's Zero Trust DNS (ZTDNS) feature on Windows 11 extends this concept by enforcing that endpoints can only resolve domains through approved protected DNS servers.</p>
+<h3>When to Use</h3>
+<ul>
+<li>When deploying or configuring implementing zero trust dns with nextdns capabilities in your environment</li>
+<li>When establishing security controls aligned to compliance requirements</li>
+<li>When building or improving security architecture for this domain</li>
+<li>When conducting security assessments that require this implementation</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>NextDNS account (free tier: 300,000 queries/month; Pro: unlimited)</li>
+<li>Network devices supporting DoH or DoT configuration</li>
+<li>Administrative access to endpoint DNS settings</li>
+<li>Understanding of DNS protocol and resolution chain</li>
+<li>Familiarity with organizational acceptable use policies</li>
+</ul>
+<h3>Architecture</h3>
+<pre><code>    Endpoint Device
+         |
+    DNS Query (Encrypted)
+         |
+    +----+----+
+    |  DoH/DoT |  (DNS-over-HTTPS or DNS-over-TLS)
+    |  Tunnel  |
+    +----+----+
+         |
+    +----+----+
+    | NextDNS  |
+    | Resolver |
+    +----+----+
+         |
+    +----+----+------+--------+
+    |         |       |        |
+  Threat   Ad/Tracker Privacy  Parental
+  Intel    Blocklists Controls Controls
+  Check    Check      Check    Check
+    |         |       |        |
+    +----+----+------+--------+
+         |
+    ALLOW or BLOCK
+         |
+    Response to Endpoint</code></pre>
+<h3>Configuration Setup</h3>
+<h4>NextDNS Profile Configuration</h4>
+<pre><code>Dashboard: https://my.nextdns.io
+
+Configuration ID: abc123 (unique per profile)
+
+Endpoints:
+  DNS-over-HTTPS: https://dns.nextdns.io/abc123
+  DNS-over-TLS:   abc123.dns.nextdns.io
+  DNS-over-QUIC:  quic://abc123.dns.nextdns.io
+  IPv4:           45.90.28.x, 45.90.30.x (linked to config)
+  IPv6:           2a07:a8c0::xx, 2a07:a8c1::xx</code></pre>
+<h4>Security Settings</h4>
+<pre><code>Security Tab Configuration:
+  [x] Threat Intelligence Feeds - Block domains from curated threat feeds
+  [x] AI-Driven Threat Detection - Machine learning-based detection
+  [x] Google Safe Browsing - Cross-reference with Google's threat database
+  [x] Cryptojacking Protection - Block crypto mining domains
+  [x] DNS Rebinding Protection - Prevent DNS rebinding attacks
+  [x] IDN Homograph Attacks - Block internationalized domain name attacks
+  [x] Typosquatting Protection - Block common typosquatting domains
+  [x] DGA Protection - Block domain generation algorithm domains
+  [x] NRD (Newly Registered Domains) - Block domains &lt; 30 days old
+  [x] DDNS (Dynamic DNS) - Block dynamic DNS services
+  [x] Parked Domains - Block parked/unused domains
+  [x] CSAM - Block child sexual abuse material domains</code></pre>
+<h4>Privacy Settings</h4>
+<pre><code>Privacy Tab Configuration:
+  Blocklists:
+    [x] NextDNS Ads &amp; Trackers Blocklist
+    [x] OISD (Full)
+    [x] EasyPrivacy
+    [x] AdGuard DNS Filter
+
+  Native Tracking Protection:
+    [x] Block Windows telemetry
+    [x] Block Apple telemetry
+    [x] Block Samsung telemetry
+    [x] Block Xiaomi telemetry
+    [x] Block Huawei telemetry
+    [x] Block Roku telemetry
+    [x] Block Sonos telemetry
+
+  [x] Block Disguised Third-Party Trackers (CNAME cloaking)
+  [x] Allow Affiliate &amp; Tracking Links (optional, for business)</code></pre>
+<h4>Allowlist and Denylist</h4>
+<pre><code>Allowlist (domains that bypass all blocking):
+  - login.microsoftonline.com
+  - graph.microsoft.com
+  - *.company.com
+
+Denylist (always blocked regardless of other settings):
+  - known-malicious-domain.com
+  - unauthorized-cloud-storage.com
+  - personal-email-provider.com  (if policy requires)</code></pre>
+<h3>Endpoint Deployment</h3>
+<h4>Linux (systemd-resolved)</h4>
+<pre><code># Configure DNS-over-TLS with systemd-resolved
+sudo tee /etc/systemd/resolved.conf &lt;&lt; 'EOF'
+[Resolve]
+DNS=45.90.28.x#abc123.dns.nextdns.io
+DNS=45.90.30.x#abc123.dns.nextdns.io
+DNS=2a07:a8c0::xx#abc123.dns.nextdns.io
+DNS=2a07:a8c1::xx#abc123.dns.nextdns.io
+DNSOverTLS=yes
+Domains=~.
+EOF
+
+sudo systemctl restart systemd-resolved
+
+# Verify
+resolvectl status
+resolvectl query example.com</code></pre>
+<h4>Linux (NextDNS CLI)</h4>
+<pre><code># Install NextDNS CLI
+sh -c 'sh -e $(curl -sL https://nextdns.io/install)'
+
+# Configure with your profile
+sudo nextdns install \
+  -config abc123 \
+  -report-client-info \
+  -auto-activate
+
+# Verify
+nextdns status
+nextdns log</code></pre>
+<h4>macOS</h4>
+<pre><code># Install via Homebrew
+brew install nextdns/tap/nextdns
+
+# Configure
+sudo nextdns install \
+  -config abc123 \
+  -report-client-info
+
+# Or configure via System Settings &gt; Network &gt; DNS
+# Add DNS-over-HTTPS: https://dns.nextdns.io/abc123</code></pre>
+<h4>Windows</h4>
+<pre><code># Install NextDNS CLI for Windows
+# Download from: https://nextdns.io/download/windows
+
+# Or configure DoH natively (Windows 11)
+# Settings &gt; Network &amp; Internet &gt; Ethernet/Wi-Fi &gt; DNS
+# Preferred DNS: 45.90.28.x
+# DNS over HTTPS: On (Manual template)
+# DoH Template: https://dns.nextdns.io/abc123
+
+# PowerShell: Configure DoH
+Set-DnsClientDohServerAddress -ServerAddress &quot;45.90.28.x&quot; `
+  -DohTemplate &quot;https://dns.nextdns.io/abc123&quot; `
+  -AllowFallbackToUdp $false `
+  -AutoUpgrade $true</code></pre>
+<h4>Router-Level Configuration</h4>
+<pre><code># Most routers support custom DNS servers
+# For DoH/DoT-capable routers (pfSense, OPNsense, OpenWrt):
+
+# pfSense DNS Resolver (Unbound):
+# Services &gt; DNS Resolver &gt; Custom Options:
+server:
+  forward-zone:
+    name: &quot;.&quot;
+    forward-tls-upstream: yes
+    forward-addr: 45.90.28.x@853#abc123.dns.nextdns.io
+    forward-addr: 45.90.30.x@853#abc123.dns.nextdns.io
+
+# OpenWrt (using https-dns-proxy):
+opkg update &amp;&amp; opkg install https-dns-proxy
+uci set https-dns-proxy.default.resolver_url='https://dns.nextdns.io/abc123'
+uci commit https-dns-proxy
+/etc/init.d/https-dns-proxy restart</code></pre>
+<h4>Mobile Devices</h4>
+<pre><code>iOS:
+  Install NextDNS app from App Store
+  Or: Settings &gt; General &gt; VPN &amp; Device Management
+  Install NextDNS configuration profile
+
+Android:
+  Settings &gt; Network &gt; Private DNS
+  DNS Provider: abc123.dns.nextdns.io
+
+  Or: Install NextDNS app from Play Store</code></pre>
+<h3>Microsoft Zero Trust DNS (Windows 11)</h3>
+<p>For enterprise Windows environments, Microsoft's ZTDNS enforces that endpoints can only communicate with domains resolved through approved DNS servers.</p>
+<pre><code># Enable ZTDNS (Windows 11 23H2+)
+# Requires Windows Defender Firewall in enforcing mode
+
+# Configure Protected DNS Servers via Group Policy:
+# Computer Configuration &gt; Administrative Templates &gt; Network &gt; DNS Client
+# &gt; Configure DNS over HTTPS (DoH) name resolution
+# &gt; Protected DNS servers: https://dns.nextdns.io/abc123
+
+# Windows Firewall blocks all traffic to domains not resolved
+# through the protected DNS server</code></pre>
+<h3>Monitoring and Analytics</h3>
+<h4>Log Analysis</h4>
+<pre><code>NextDNS Analytics Dashboard provides:
+  - Total queries over time
+  - Blocked queries by category
+  - Top domains (allowed and blocked)
+  - Top blocked reasons (threat, ad, tracker)
+  - Device-level breakdown
+  - Geographic query distribution
+
+Log Settings:
+  Retention: 1 hour / 6 hours / 1 day / 1 week / 1 month / 3 months / 1 year / 2 years
+  Storage Location: US / EU / UK / Switzerland
+  Logging: [ ] Enable / [ ] Disable</code></pre>
+<h4>API Integration</h4>
+<pre><code># NextDNS API for automated monitoring
+# Get analytics data
+curl -H &quot;X-Api-Key: your-api-key&quot; \
+  &quot;https://api.nextdns.io/profiles/abc123/analytics/domains?from=-24h&quot;
+
+# Get blocked domains
+curl -H &quot;X-Api-Key: your-api-key&quot; \
+  &quot;https://api.nextdns.io/profiles/abc123/analytics/domains?from=-24h&amp;status=blocked&quot;
+
+# Export logs for SIEM integration
+curl -H &quot;X-Api-Key: your-api-key&quot; \
+  &quot;https://api.nextdns.io/profiles/abc123/logs?from=-1h&quot; \
+  | jq '.data[] | select(.status == &quot;blocked&quot;)'</code></pre>
+<h3>Zero Trust DNS Policy Framework</h3>
+<h4>Policy Tiers</h4>
+<pre><code>Tier 1 - Security (Mandatory for all):
+  - Threat intelligence blocking
+  - Cryptojacking protection
+  - DNS rebinding protection
+  - DGA detection
+  - NRD blocking (&lt; 30 days)
+
+Tier 2 - Privacy (Recommended):
+  - Tracker blocking
+  - Native telemetry blocking
+  - CNAME cloaking protection
+
+Tier 3 - Compliance (Organization-specific):
+  - Category-based blocking
+  - Custom allowlists/denylists
+  - Time-based access policies
+  - Log retention per regulatory requirements</code></pre>
+<h3>Security Best Practices</h3>
+<ol>
+<li><strong>Enforce encrypted DNS</strong>: Block plaintext DNS (port 53 UDP/TCP) at the firewall</li>
+<li><strong>Use NextDNS CLI on endpoints</strong>: Ensures per-device identification and logging</li>
+<li><strong>Enable NRD blocking</strong>: Newly registered domains are overwhelmingly malicious</li>
+<li><strong>Block DNS-over-HTTPS bypass</strong>: Ensure browsers use system DNS, not built-in DoH</li>
+<li><strong>Review blocklists quarterly</strong>: Remove false positives, add organizational blocks</li>
+<li><strong>Enable CNAME cloaking protection</strong>: Prevents tracker evasion via CNAME records</li>
+<li><strong>Set appropriate log retention</strong>: Balance privacy with forensic needs (90 days recommended)</li>
+<li><strong>Monitor for DNS tunneling</strong>: Watch for unusual query patterns and high entropy domains</li>
+<li><strong>Deploy at router level</strong>: Catches all devices including IoT and unmanaged endpoints</li>
+<li><strong>Combine with endpoint DNS</strong>: Defense in depth with both router and per-device filtering</li>
+</ol>
+<h3>References</h3>
+<ul>
+<li>[NextDNS Documentation](https://nextdns.io/)</li>
+<li>[NextDNS Configuration Guide (GitHub)](https://github.com/yokoffing/NextDNS-Config)</li>
+<li>[Microsoft Zero Trust DNS](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/zero-trust-dns/)</li>
+<li>[NIST SP 800-81-2: Secure DNS Deployment Guide](https://csrc.nist.gov/publications/detail/sp/800-81/2/final)</li>
+<li>[RFC 8484: DNS Queries over HTTPS (DoH)](https://tools.ietf.org/html/rfc8484)</li>
+<li>[RFC 7858: DNS over TLS (DoT)](https://tools.ietf.org/html/rfc7858)</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: implementing-zero-trust-dns-with-nextdns\ndisplay_name: implementing-zero-trust-dns-with-nextdns\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# implementing-zero-trust-dns-with-nextdns - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `implementing-zero-trust-dns-with-nextdns` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nNextDNS is a cloud-based DNS resolver that provides encrypted DNS resolution (DNS-over-HTTPS and DNS-over-TLS), real-time threat intelligence blocking, ad and tracker filtering, and granular DNS policy enforcement. In a \n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose implementing-zero-trust-dns-with-nextdns, then write the task. Fallback prompt: Use the implementing-zero-trust-dns-with-nextdns skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `implementing-zero-trust-dns-with-nextdns` |\n| Canonical name | `implementing-zero-trust-dns-with-nextdns` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nNextDNS is a cloud-based DNS resolver that provides encrypted DNS resolution (DNS-over-HTTPS and DNS-over-TLS), real-time threat intelligence blocking, ad and tracker filtering, and granular DNS policy enforcement. In a \n\n## Original SKILL.md\n\n---\nname: implementing-zero-trust-dns-with-nextdns\ndescription: Implement NextDNS as a zero trust DNS filtering layer with encrypted\n  resolution, threat intelligence blocking, privacy protection, and organizational\n  policy enforcement across all endpoints.\ndomain: cybersecurity\nsubdomain: zero-trust-architecture\ntags:\n- zero-trust\n- dns\n- nextdns\n- dns-over-https\n- dns-over-tls\n- threat-blocking\n- dns-filtering\n- privacy\n- encrypted-dns\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- PR.AA-01\n- PR.AA-05\n- PR.IR-01\n- GV.PO-01\nmitre_attack:\n- T1078\n- T1190\n- T1059\n- T1573\n- T1486\n---\n\n# Implementing Zero Trust DNS with NextDNS\n\n## Overview\n\nNextDNS is a cloud-based DNS resolver that provides encrypted DNS resolution (DNS-over-HTTPS and DNS-over-TLS), real-time threat intelligence blocking, ad and tracker filtering, and granular DNS policy enforcement. In a zero trust architecture, DNS is a critical control point -- every network connection begins with a DNS query, making DNS filtering an effective layer for blocking malicious domains, preventing data exfiltration via DNS tunneling, enforcing acceptable use policies, and gaining visibility into all network communications. NextDNS processes queries using threat intelligence feeds containing millions of malicious domains updated in real-time, blocks cryptojacking and phishing domains, detects DNS rebinding attacks, and supports CNAME cloaking protection. For enterprise environments, Microsoft's Zero Trust DNS (ZTDNS) feature on Windows 11 extends this concept by enforcing that endpoints can only resolve domains through approved protected DNS servers.\n\n\n## When to Use\n\n- When deploying or configuring implementing zero trust dns with nextdns capabilities in your environment\n- When establishing security controls aligned to compliance requirements\n- When building or improving security architecture for this domain\n- When conducting security assessments that require this implementation\n\n## Prerequisites\n\n- NextDNS account (free tier: 300,000 queries/month; Pro: unlimited)\n- Network devices supporting DoH or DoT configuration\n- Administrative access to endpoint DNS settings\n- Understanding of DNS protocol and resolution chain\n- Familiarity with organizational acceptable use policies\n\n## Architecture\n\n```\n    Endpoint Device\n         |\n    DNS Query (Encrypted)\n         |\n    +----+----+\n    |  DoH/DoT |  (DNS-over-HTTPS or DNS-over-TLS)\n    |  Tunnel  |\n    +----+----+\n         |\n    +----+----+\n    | NextDNS  |\n    | Resolver |\n    +----+----+\n         |\n    +----+----+------+--------+\n    |         |       |        |\n  Threat   Ad/Tracker Privacy  Parental\n  Intel    Blocklists Controls Controls\n  Check    Check      Check    Check\n    |         |       |        |\n    +----+----+------+--------+\n         |\n    ALLOW or BLOCK\n         |\n    Response to Endpoint\n```\n\n## Configuration Setup\n\n### NextDNS Profile Configuration\n\n```\nDashboard: https://my.nextdns.io\n\nConfiguration ID: abc123 (unique per profile)\n\nEndpoints:\n  DNS-over-HTTPS: https://dns.nextdns.io/abc123\n  DNS-over-TLS:   abc123.dns.nextdns.io\n  DNS-over-QUIC:  quic://abc123.dns.nextdns.io\n  IPv4:           45.90.28.x, 45.90.30.x (linked to config)\n  IPv6:           2a07:a8c0::xx, 2a07:a8c1::xx\n```\n\n### Security Settings\n\n```\nSecurity Tab Configuration:\n  [x] Threat Intelligence Feeds - Block domains from curated threat feeds\n  [x] AI-Driven Threat Detection - Machine learning-based detection\n  [x] Google Safe Browsing - Cross-reference with Google's threat database\n  [x] Cryptojacking Protection - Block crypto mining domains\n  [x] DNS Rebinding Protection - Prevent DNS rebinding attacks\n  [x] IDN Homograph Attacks - Block internationalized domain name attacks\n  [x] Typosquatting Protection - Block common typosquatting domains\n  [x] DGA Protection - Block domain generation algorithm domains\n  [x] NRD (Newly Registered Domains) - Block domains \u003c 30 days old\n  [x] DDNS (Dynamic DNS) - Block dynamic DNS services\n  [x] Parked Domains - Block parked/unused domains\n  [x] CSAM - Block child sexual abuse material domains\n```\n\n### Privacy Settings\n\n```\nPrivacy Tab Configuration:\n  Blocklists:\n    [x] NextDNS Ads & Trackers Blocklist\n    [x] OISD (Full)\n    [x] EasyPrivacy\n    [x] AdGuard DNS Filter\n\n  Native Tracking Protection:\n    [x] Block Windows telemetry\n    [x] Block Apple telemetry\n    [x] Block Samsung telemetry\n    [x] Block Xiaomi telemetry\n    [x] Block Huawei telemetry\n    [x] Block Roku telemetry\n    [x] Block Sonos telemetry\n\n  [x] Block Disguised Third-Party Trackers (CNAME cloaking)\n  [x] Allow Affiliate & Tracking Links (optional, for business)\n```\n\n### Allowlist and Denylist\n\n```\nAllowlist (domains that bypass all blocking):\n  - login.microsoftonline.com\n  - graph.microsoft.com\n  - *.company.com\n\nDenylist (always blocked regardless of other settings):\n  - known-malicious-domain.com\n  - unauthorized-cloud-storage.com\n  - personal-email-provider.com  (if policy requires)\n```\n\n## Endpoint Deployment\n\n### Linux (systemd-resolved)\n\n```bash\n# Configure DNS-over-TLS with systemd-resolved\nsudo tee /etc/systemd/resolved.conf \u003c\u003c 'EOF'\n[Resolve]\nDNS=45.90.28.x#abc123.dns.nextdns.io\nDNS=45.90.30.x#abc123.dns.nextdns.io\nDNS=2a07:a8c0::xx#abc123.dns.nextdns.io\nDNS=2a07:a8c1::xx#abc123.dns.nextdns.io\nDNSOverTLS=yes\nDomains=~.\nEOF\n\nsudo systemctl restart systemd-resolved\n\n# Verify\nresolvectl status\nresolvectl query example.com\n```\n\n### Linux (NextDNS CLI)\n\n```bash\n# Install NextDNS CLI\nsh -c 'sh -e $(curl -sL https://nextdns.io/install)'\n\n# Configure with your profile\nsudo nextdns install \\\n  -config abc123 \\\n  -report-client-info \\\n  -auto-activate\n\n# Verify\nnextdns status\nnextdns log\n```\n\n### macOS\n\n```bash\n# Install via Homebrew\nbrew install nextdns/tap/nextdns\n\n# Configure\nsudo nextdns install \\\n  -config abc123 \\\n  -report-client-info\n\n# Or configure via System Settings > Network > DNS\n# Add DNS-over-HTTPS: https://dns.nextdns.io/abc123\n```\n\n### Windows\n\n```powershell\n# Install NextDNS CLI for Windows\n# Download from: https://nextdns.io/download/windows\n\n# Or configure DoH natively (Windows 11)\n# Settings > Network & Internet > Ethernet/Wi-Fi > DNS\n# Preferred DNS: 45.90.28.x\n# DNS over HTTPS: On (Manual template)\n# DoH Template: https://dns.nextdns.io/abc123\n\n# PowerShell: Configure DoH\nSet-DnsClientDohServerAddress -ServerAddress \"45.90.28.x\" `\n  -DohTemplate \"https://dns.nextdns.io/abc123\" `\n  -AllowFallbackToUdp $false `\n  -AutoUpgrade $true\n```\n\n### Router-Level Configuration\n\n```\n# Most routers support custom DNS servers\n# For DoH/DoT-capable routers (pfSense, OPNsense, OpenWrt):\n\n# pfSense DNS Resolver (Unbound):\n# Services > DNS Resolver > Custom Options:\nserver:\n  forward-zone:\n    name: \".\"\n    forward-tls-upstream: yes\n    forward-addr: 45.90.28.x@853#abc123.dns.nextdns.io\n    forward-addr: 45.90.30.x@853#abc123.dns.nextdns.io\n\n# OpenWrt (using https-dns-proxy):\nopkg update && opkg install https-dns-proxy\nuci set https-dns-proxy.default.resolver_url='https://dns.nextdns.io/abc123'\nuci commit https-dns-proxy\n/etc/init.d/https-dns-proxy restart\n```\n\n### Mobile Devices\n\n```\niOS:\n  Install NextDNS app from App Store\n  Or: Settings > General > VPN & Device Management\n  Install NextDNS configuration profile\n\nAndroid:\n  Settings > Network > Private DNS\n  DNS Provider: abc123.dns.nextdns.io\n\n  Or: Install NextDNS app from Play Store\n```\n\n## Microsoft Zero Trust DNS (Windows 11)\n\nFor enterprise Windows environments, Microsoft's ZTDNS enforces that endpoints can only communicate with domains resolved through approved DNS servers.\n\n```powershell\n# Enable ZTDNS (Windows 11 23H2+)\n# Requires Windows Defender Firewall in enforcing mode\n\n# Configure Protected DNS Servers via Group Policy:\n# Computer Configuration > Administrative Templates > Network > DNS Client\n# > Configure DNS over HTTPS (DoH) name resolution\n# > Protected DNS servers: https://dns.nextdns.io/abc123\n\n# Windows Firewall blocks all traffic to domains not resolved\n# through the protected DNS server\n```\n\n## Monitoring and Analytics\n\n### Log Analysis\n\n```\nNextDNS Analytics Dashboard provides:\n  - Total queries over time\n  - Blocked queries by category\n  - Top domains (allowed and blocked)\n  - Top blocked reasons (threat, ad, tracker)\n  - Device-level breakdown\n  - Geographic query distribution\n\nLog Settings:\n  Retention: 1 hour / 6 hours / 1 day / 1 week / 1 month / 3 months / 1 year / 2 years\n  Storage Location: US / EU / UK / Switzerland\n  Logging: [ ] Enable / [ ] Disable\n```\n\n### API Integration\n\n```bash\n# NextDNS API for automated monitoring\n# Get analytics data\ncurl -H \"X-Api-Key: your-api-key\" \\\n  \"https://api.nextdns.io/profiles/abc123/analytics/domains?from=-24h\"\n\n# Get blocked domains\ncurl -H \"X-Api-Key: your-api-key\" \\\n  \"https://api.nextdns.io/profiles/abc123/analytics/domains?from=-24h&status=blocked\"\n\n# Export logs for SIEM integration\ncurl -H \"X-Api-Key: your-api-key\" \\\n  \"https://api.nextdns.io/profiles/abc123/logs?from=-1h\" \\\n  | jq '.data[] | select(.status == \"blocked\")'\n```\n\n## Zero Trust DNS Policy Framework\n\n### Policy Tiers\n\n```\nTier 1 - Security (Mandatory for all):\n  - Threat intelligence blocking\n  - Cryptojacking protection\n  - DNS rebinding protection\n  - DGA detection\n  - NRD blocking (\u003c 30 days)\n\nTier 2 - Privacy (Recommended):\n  - Tracker blocking\n  - Native telemetry blocking\n  - CNAME cloaking protection\n\nTier 3 - Compliance (Organization-specific):\n  - Category-based blocking\n  - Custom allowlists/denylists\n  - Time-based access policies\n  - Log retention per regulatory requirements\n```\n\n## Security Best Practices\n\n1. **Enforce encrypted DNS**: Block plaintext DNS (port 53 UDP/TCP) at the firewall\n2. **Use NextDNS CLI on endpoints**: Ensures per-device identification and logging\n3. **Enable NRD blocking**: Newly registered domains are overwhelmingly malicious\n4. **Block DNS-over-HTTPS bypass**: Ensure browsers use system DNS, not built-in DoH\n5. **Review blocklists quarterly**: Remove false positives, add organizational blocks\n6. **Enable CNAME cloaking protection**: Prevents tracker evasion via CNAME records\n7. **Set appropriate log retention**: Balance privacy with forensic needs (90 days recommended)\n8. **Monitor for DNS tunneling**: Watch for unusual query patterns and high entropy domains\n9. **Deploy at router level**: Catches all devices including IoT and unmanaged endpoints\n10. **Combine with endpoint DNS**: Defense in depth with both router and per-device filtering\n\n## References\n\n- [NextDNS Documentation](https://nextdns.io/)\n- [NextDNS Configuration Guide (GitHub)](https://github.com/yokoffing/NextDNS-Config)\n- [Microsoft Zero Trust DNS](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/zero-trust-dns/)\n- [NIST SP 800-81-2: Secure DNS Deployment Guide](https://csrc.nist.gov/publications/detail/sp/800-81/2/final)\n- [RFC 8484: DNS Queries over HTTPS (DoH)](https://tools.ietf.org/html/rfc8484)\n- [RFC 7858: DNS over TLS (DoT)](https://tools.ietf.org/html/rfc7858)\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("implementing-zero-trust-dns-with-nextdns-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

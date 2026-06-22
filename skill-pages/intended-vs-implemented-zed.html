@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Intended Vs Implemented - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Zed</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/intended-vs-implemented-zed.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Zed / Product delivery, planning, and execution</div>
+      <h1>Intended Vs Implemented</h1>
+      <p class="description">The method for finding the gap between what a system is supposed to do and what the code actually does — the class of bug generic scanners miss because they have no model of intent. Defines what counts as documented intent, what counts as implementation evidence, which mismatches matter, and how to avoid hand-wavy findings. Use when auditing AI-built code, reviewing access control against documented permissions, or checking whether a codebase matches its own documentation.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Zed</span></div>
+<div class="meta-card"><strong>category</strong><span>Product delivery, planning, and execution</span></div>
+<div class="meta-card"><strong>display name</strong><span>intended-vs-implemented</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>pm-skills-intended-vs-implemented</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>The method for finding the gap between what a system is supposed to do and what the code actually does — the class of bug generic scanners miss because they have no model of intent. Defines what counts as documented intent, what counts as implementation evidence, which mismatches matter, and how to avoid hand-wavy findings. Use when auditing AI-built code, reviewing access control against documented permissions, or checking whether a codebase matches its own documentation.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Zed</strong><p>In Zed, open the Agent panel and type: Use the intended-vs-implemented skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Intended vs. Implemented: Auditing the Gap</h2>
+<h3>Purpose</h3>
+<p>A linter scans code in a vacuum. It can tell you the code is <em>internally</em> consistent; it cannot tell you the code does what you <em>meant</em>, because it has no model of your intent. The highest-value security and correctness bugs live in that gap — a permission documented but never enforced, a &quot;cron-only&quot; endpoint anyone can call, a field marked public-only that leaks private data.</p>
+<p>This skill is the method for finding that gap. It is the differentiator: it only works when intent has been written down first (see the <strong>shipping-artifacts</strong> skill), and that's exactly why commodity tools can't replicate it.</p>
+<h3>Context</h3>
+<p>Use this when documented intent exists — <code>permissions.md</code>, <code>architecture.md</code>, <code>variables.md</code>, etc. If those docs are absent or stale, that absence is itself the first finding: you cannot audit intent you never recorded. Recommend documenting first, then auditing.</p>
+<h3>Method</h3>
+<ol>
+<li><strong>Establish intent.</strong> Read the <code>/documentation/<em>.md</code> set as the source of truth for what </em>should* be true: who may access what, which boundaries are trusted, which data is public. Treat the docs as claims to verify, not as proof.</li>
+</ol>
+<ol>
+<li><strong>Gather implementation evidence.</strong> Read the code that enforces (or fails to enforce) each claim. Evidence is a cited file and line — the actual authorization check, the actual query filter, the actual sanitizer. &quot;It's probably handled upstream&quot; is not evidence; the code path is.</li>
+</ol>
+<ol>
+<li><strong>Compare claim to code, one boundary at a time.</strong> For each documented rule, ask: does an enforcement point actually implement it, on the server, on every path? Distrust comments like &quot;internal only,&quot; &quot;admin only,&quot; or &quot;validated elsewhere&quot; — verify them in code.</li>
+</ol>
+<ol>
+<li><strong>Classify each mismatch by whether it matters.</strong> A mismatch matters when crossing it lets a real actor reach data, money, infrastructure, or another tenant they shouldn't. It does not matter when the only person affected is the actor themselves on their own data. Drop cosmetic drift; keep boundary-crossing drift.</li>
+</ol>
+<ol>
+<li><strong>Avoid hand-wavy findings.</strong> Every finding names: the <strong>documented intent</strong> (quote the doc), the <strong>implemented reality</strong> (cite the code), the <strong>attacker and victim</strong>, and the <strong>concrete fix</strong>. If you cannot cite both sides of the gap, it is a question to investigate, not a finding to report.</li>
+</ol>
+<h3>What counts</h3>
+<ul>
+<li><strong>Intent:</strong> a documented rule, boundary, scope, or public/private classification.</li>
+<li><strong>Implementation evidence:</strong> a cited enforcement point (or its provable absence) in the code.</li>
+<li><strong>A mismatch that matters:</strong> doc says one thing, code does another, and the difference crosses a trust, cost, data, or tenant boundary.</li>
+</ul>
+<h3>Notes</h3>
+<ul>
+<li>Documented-but-unenforced is a finding on its own — rank it by what crossing the gap exposes.</li>
+<li>Undocumented-but-enforced is usually fine, but flag it: the docs are now stale, which weakens the next audit.</li>
+<li>This method feeds the security and performance audits; it does not replace their sink-level analysis — it adds the intent axis they lack.</li>
+<li>Never fabricate intent to manufacture a gap. If the docs are silent, say the docs are silent.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: pm-skills-intended-vs-implemented\ndisplay_name: intended-vs-implemented\nplatform: Zed\ncategory: Product delivery, planning, and execution\n---\n\n# intended-vs-implemented - Zed Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `intended-vs-implemented` for Zed. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nA linter scans code in a vacuum. It can tell you the code is *internally* consistent; it cannot tell you the code does what you *meant*, because it has no model of your intent. The highest-value security and correctness \n\n## How To Use It In Zed\n\nIn Zed, open the Agent panel and type: Use the intended-vs-implemented skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `intended-vs-implemented` |\n| Canonical name | `pm-skills-intended-vs-implemented` |\n| Platform | `Zed` |\n| Category | Product delivery, planning, and execution |\n\n## Description\n\nA linter scans code in a vacuum. It can tell you the code is *internally* consistent; it cannot tell you the code does what you *meant*, because it has no model of your intent. The highest-value security and correctness \n\n## Original SKILL.md\n\n---\nname: pm-skills-intended-vs-implemented\ndescription: \"The method for finding the gap between what a system is supposed to do and what the code actually does — the class of bug generic scanners miss because they have no model of intent. Defines what counts as documented intent, what counts as implementation evidence, which mismatches matter, and how to avoid hand-wavy findings. Use when auditing AI-built code, reviewing access control against documented permissions, or checking whether a codebase matches its own documentation.\"\n---\n\n# Intended vs. Implemented: Auditing the Gap\n\n## Purpose\n\nA linter scans code in a vacuum. It can tell you the code is *internally* consistent; it cannot tell you the code does what you *meant*, because it has no model of your intent. The highest-value security and correctness bugs live in that gap — a permission documented but never enforced, a \"cron-only\" endpoint anyone can call, a field marked public-only that leaks private data.\n\nThis skill is the method for finding that gap. It is the differentiator: it only works when intent has been written down first (see the **shipping-artifacts** skill), and that's exactly why commodity tools can't replicate it.\n\n## Context\n\nUse this when documented intent exists — `permissions.md`, `architecture.md`, `variables.md`, etc. If those docs are absent or stale, that absence is itself the first finding: you cannot audit intent you never recorded. Recommend documenting first, then auditing.\n\n## Method\n\n1. **Establish intent.** Read the `/documentation/*.md` set as the source of truth for what *should* be true: who may access what, which boundaries are trusted, which data is public. Treat the docs as claims to verify, not as proof.\n\n2. **Gather implementation evidence.** Read the code that enforces (or fails to enforce) each claim. Evidence is a cited file and line — the actual authorization check, the actual query filter, the actual sanitizer. \"It's probably handled upstream\" is not evidence; the code path is.\n\n3. **Compare claim to code, one boundary at a time.** For each documented rule, ask: does an enforcement point actually implement it, on the server, on every path? Distrust comments like \"internal only,\" \"admin only,\" or \"validated elsewhere\" — verify them in code.\n\n4. **Classify each mismatch by whether it matters.** A mismatch matters when crossing it lets a real actor reach data, money, infrastructure, or another tenant they shouldn't. It does not matter when the only person affected is the actor themselves on their own data. Drop cosmetic drift; keep boundary-crossing drift.\n\n5. **Avoid hand-wavy findings.** Every finding names: the **documented intent** (quote the doc), the **implemented reality** (cite the code), the **attacker and victim**, and the **concrete fix**. If you cannot cite both sides of the gap, it is a question to investigate, not a finding to report.\n\n## What counts\n\n- **Intent:** a documented rule, boundary, scope, or public/private classification.\n- **Implementation evidence:** a cited enforcement point (or its provable absence) in the code.\n- **A mismatch that matters:** doc says one thing, code does another, and the difference crosses a trust, cost, data, or tenant boundary.\n\n## Notes\n\n- Documented-but-unenforced is a finding on its own — rank it by what crossing the gap exposes.\n- Undocumented-but-enforced is usually fine, but flag it: the docs are now stale, which weakens the next audit.\n- This method feeds the security and performance audits; it does not replace their sink-level analysis — it adds the intent axis they lack.\n- Never fabricate intent to manufacture a gap. If the docs are silent, say the docs are silent.\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("intended-vs-implemented-zed-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

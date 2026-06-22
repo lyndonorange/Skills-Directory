@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>securing-aws-lambda-execution-roles - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/securing-aws-lambda-execution-roles-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>securing-aws-lambda-execution-roles</h1>
+      <p class="description">'Securing AWS Lambda execution roles by implementing least-privilege</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>securing-aws-lambda-execution-roles</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>securing-aws-lambda-execution-roles</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Securing AWS Lambda execution roles by implementing least-privilege</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose securing-aws-lambda-execution-roles, then write the task. Fallback prompt: Use the securing-aws-lambda-execution-roles skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Securing AWS Lambda Execution Roles</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When deploying new Lambda functions and defining their IAM execution roles</li>
+<li>When remediating overly permissive Lambda roles discovered during security audits</li>
+<li>When implementing least-privilege access patterns for serverless architectures</li>
+<li>When building reusable IAM templates for Lambda functions across teams</li>
+<li>When Security Hub or Prowler reports Lambda functions with excessive permissions</li>
+</ul>
+<p><strong>Do not use</strong> for securing Lambda function invocation (use resource-based policies and API Gateway authorizers), for Lambda code security (use SAST tools), or for Lambda network security (use VPC configuration and security groups).</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>IAM permissions for policy creation, role modification, and Access Analyzer operations</li>
+<li>AWS IAM Access Analyzer enabled in the account</li>
+<li>CloudTrail data events enabled for Lambda to capture actual API usage</li>
+<li>Existing Lambda functions to audit and scope permissions for</li>
+<li>Understanding of each function's required AWS service interactions</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Audit Current Lambda Execution Role Permissions</h4>
+<p>Enumerate all Lambda functions and their associated IAM roles to identify over-privileged functions.</p>
+<pre><code># List all Lambda functions with their execution roles
+aws lambda list-functions \
+  --query 'Functions[*].[FunctionName,Role]' --output table
+
+# For each function, analyze attached policies
+for func in $(aws lambda list-functions --query 'Functions[*].FunctionName' --output text); do
+  role_arn=$(aws lambda get-function-configuration --function-name &quot;$func&quot; --query 'Role' --output text)
+  role_name=$(echo &quot;$role_arn&quot; | awk -F'/' '{print $NF}')
+  echo &quot;=== $func -&gt; $role_name ===&quot;
+
+  # Check for AWS managed policies (often too broad)
+  aws iam list-attached-role-policies --role-name &quot;$role_name&quot; \
+    --query 'AttachedPolicies[*].[PolicyName,PolicyArn]' --output table
+
+  # Check inline policies
+  for policy in $(aws iam list-role-policies --role-name &quot;$role_name&quot; --query 'PolicyNames' --output text); do
+    echo &quot;  Inline: $policy&quot;
+    aws iam get-role-policy --role-name &quot;$role_name&quot; --policy-name &quot;$policy&quot; \
+      --query 'PolicyDocument' --output json
+  done
+done</code></pre>
+<h4>Step 2: Analyze Actual API Usage with CloudTrail</h4>
+<p>Use CloudTrail and IAM Access Analyzer to determine which API actions the function actually uses.</p>
+<pre><code># Query CloudTrail for actual API calls made by a Lambda execution role
+aws cloudtrail lookup-events \
+  --lookup-attributes AttributeKey=Username,AttributeValue=LAMBDA_ROLE_NAME \
+  --start-time 2026-01-23T00:00:00Z \
+  --end-time 2026-02-23T00:00:00Z \
+  --query 'Events[*].[EventTime,EventName,EventSource]' \
+  --output table | sort -k2 | uniq -f1
+
+# Use IAM Access Analyzer policy generation (based on CloudTrail activity)
+aws accessanalyzer start-policy-generation \
+  --policy-generation-details '{
+    &quot;principalArn&quot;: &quot;arn:aws:iam::ACCOUNT:role/lambda-execution-role&quot;,
+    &quot;cloudTrailDetails&quot;: {
+      &quot;trailArn&quot;: &quot;arn:aws:cloudtrail:us-east-1:ACCOUNT:trail/management-trail&quot;,
+      &quot;startTime&quot;: &quot;2026-01-23T00:00:00Z&quot;,
+      &quot;endTime&quot;: &quot;2026-02-23T00:00:00Z&quot;
+    }
+  }'
+
+# Check the generated policy
+aws accessanalyzer get-generated-policy \
+  --job-id JOB_ID \
+  --query 'generatedPolicyResult.generatedPolicies[*].policy'</code></pre>
+<h4>Step 3: Create Least-Privilege Execution Policies</h4>
+<p>Build scoped IAM policies that grant only the specific actions and resources each function needs.</p>
+<pre><code># Example: Scoped policy for a function that reads from S3 and writes to DynamoDB
+cat &gt; lambda-scoped-policy.json &lt;&lt; 'EOF'
+{
+  &quot;Version&quot;: &quot;2012-10-17&quot;,
+  &quot;Statement&quot;: [
+    {
+      &quot;Sid&quot;: &quot;ReadInputBucket&quot;,
+      &quot;Effect&quot;: &quot;Allow&quot;,
+      &quot;Action&quot;: [
+        &quot;s3:GetObject&quot;,
+        &quot;s3:ListBucket&quot;
+      ],
+      &quot;Resource&quot;: [
+        &quot;arn:aws:s3:::input-data-bucket&quot;,
+        &quot;arn:aws:s3:::input-data-bucket/*&quot;
+      ]
+    },
+    {
+      &quot;Sid&quot;: &quot;WriteDynamoDB&quot;,
+      &quot;Effect&quot;: &quot;Allow&quot;,
+      &quot;Action&quot;: [
+        &quot;dynamodb:PutItem&quot;,
+        &quot;dynamodb:UpdateItem&quot;,
+        &quot;dynamodb:BatchWriteItem&quot;
+      ],
+      &quot;Resource&quot;: &quot;arn:aws:dynamodb:us-east-1:ACCOUNT:table/results-table&quot;
+    },
+    {
+      &quot;Sid&quot;: &quot;CloudWatchLogs&quot;,
+      &quot;Effect&quot;: &quot;Allow&quot;,
+      &quot;Action&quot;: [
+        &quot;logs:CreateLogGroup&quot;,
+        &quot;logs:CreateLogStream&quot;,
+        &quot;logs:PutLogEvents&quot;
+      ],
+      &quot;Resource&quot;: &quot;arn:aws:logs:us-east-1:ACCOUNT:log-group:/aws/lambda/my-function:*&quot;
+    }
+  ]
+}
+EOF
+
+# Create the policy
+aws iam create-policy \
+  --policy-name lambda-my-function-policy \
+  --policy-document [file URL removed]lambda-scoped-policy.json
+
+# Create execution role with scoped trust policy
+cat &gt; lambda-trust-policy.json &lt;&lt; 'EOF'
+{
+  &quot;Version&quot;: &quot;2012-10-17&quot;,
+  &quot;Statement&quot;: [{
+    &quot;Effect&quot;: &quot;Allow&quot;,
+    &quot;Principal&quot;: {&quot;Service&quot;: &quot;lambda.amazonaws.com&quot;},
+    &quot;Action&quot;: &quot;sts:AssumeRole&quot;,
+    &quot;Condition&quot;: {
+      &quot;StringEquals&quot;: {
+        &quot;aws:SourceAccount&quot;: &quot;ACCOUNT_ID&quot;
+      }
+    }
+  }]
+}
+EOF
+
+aws iam create-role \
+  --role-name lambda-my-function-role \
+  --assume-role-policy-document [file URL removed]lambda-trust-policy.json
+
+aws iam attach-role-policy \
+  --role-name lambda-my-function-role \
+  --policy-arn arn:aws:iam::ACCOUNT:policy/lambda-my-function-policy</code></pre>
+<h4>Step 4: Apply Permission Boundaries</h4>
+<p>Implement permission boundaries to set maximum permissions for Lambda execution roles.</p>
+<pre><code># Create a permission boundary that caps Lambda role capabilities
+cat &gt; lambda-permission-boundary.json &lt;&lt; 'EOF'
+{
+  &quot;Version&quot;: &quot;2012-10-17&quot;,
+  &quot;Statement&quot;: [
+    {
+      &quot;Sid&quot;: &quot;AllowedServices&quot;,
+      &quot;Effect&quot;: &quot;Allow&quot;,
+      &quot;Action&quot;: [
+        &quot;s3:GetObject&quot;, &quot;s3:PutObject&quot;, &quot;s3:ListBucket&quot;,
+        &quot;dynamodb:GetItem&quot;, &quot;dynamodb:PutItem&quot;, &quot;dynamodb:Query&quot;, &quot;dynamodb:UpdateItem&quot;,
+        &quot;sqs:SendMessage&quot;, &quot;sqs:ReceiveMessage&quot;, &quot;sqs:DeleteMessage&quot;,
+        &quot;sns:Publish&quot;,
+        &quot;secretsmanager:GetSecretValue&quot;,
+        &quot;kms:Decrypt&quot;, &quot;kms:GenerateDataKey&quot;,
+        &quot;logs:CreateLogGroup&quot;, &quot;logs:CreateLogStream&quot;, &quot;logs:PutLogEvents&quot;,
+        &quot;xray:PutTraceSegments&quot;, &quot;xray:PutTelemetryRecords&quot;
+      ],
+      &quot;Resource&quot;: &quot;*&quot;
+    },
+    {
+      &quot;Sid&quot;: &quot;DenyPrivilegeEscalation&quot;,
+      &quot;Effect&quot;: &quot;Deny&quot;,
+      &quot;Action&quot;: [
+        &quot;iam:CreateUser&quot;, &quot;iam:CreateRole&quot;, &quot;iam:CreatePolicy&quot;,
+        &quot;iam:AttachRolePolicy&quot;, &quot;iam:AttachUserPolicy&quot;,
+        &quot;iam:PutRolePolicy&quot;, &quot;iam:PutUserPolicy&quot;,
+        &quot;iam:CreateAccessKey&quot;, &quot;iam:PassRole&quot;,
+        &quot;lambda:CreateFunction&quot;, &quot;lambda:UpdateFunctionConfiguration&quot;,
+        &quot;sts:AssumeRole&quot;
+      ],
+      &quot;Resource&quot;: &quot;*&quot;
+    }
+  ]
+}
+EOF
+
+# Create and apply the boundary
+aws iam create-policy \
+  --policy-name lambda-permission-boundary \
+  --policy-document [file URL removed]lambda-permission-boundary.json
+
+aws iam put-role-permissions-boundary \
+  --role-name lambda-my-function-role \
+  --permissions-boundary arn:aws:iam::ACCOUNT:policy/lambda-permission-boundary</code></pre>
+<h4>Step 5: Validate Policies with IAM Access Analyzer</h4>
+<p>Use Access Analyzer to validate policies for security best practices.</p>
+<pre><code># Validate the scoped policy
+aws accessanalyzer validate-policy \
+  --policy-document [file URL removed]lambda-scoped-policy.json \
+  --policy-type IDENTITY_POLICY \
+  --query 'findings[*].[findingType,issueCode,learnMoreLink]' --output table
+
+# Check for unused access
+aws accessanalyzer check-no-new-access \
+  --new-policy-document [file URL removed]lambda-scoped-policy.json \
+  --existing-policy-document [file URL removed]old-broad-policy.json \
+  --policy-type IDENTITY_POLICY
+
+# Verify the permission boundary effectiveness
+aws iam simulate-principal-policy \
+  --policy-source-arn arn:aws:iam::ACCOUNT:role/lambda-my-function-role \
+  --action-names iam:CreateUser iam:PassRole s3:GetObject dynamodb:PutItem \
+  --query 'EvaluationResults[*].[EvalActionName,EvalDecision]' --output table</code></pre>
+<h4>Step 6: Enforce Role Standards with SCPs</h4>
+<p>Apply Service Control Policies to prevent Lambda functions from using overly broad roles.</p>
+<pre><code># SCP to deny Lambda functions using AdministratorAccess
+cat &gt; scp-deny-lambda-admin.json &lt;&lt; 'EOF'
+{
+  &quot;Version&quot;: &quot;2012-10-17&quot;,
+  &quot;Statement&quot;: [{
+    &quot;Sid&quot;: &quot;DenyLambdaAdminRole&quot;,
+    &quot;Effect&quot;: &quot;Deny&quot;,
+    &quot;Action&quot;: &quot;lambda:CreateFunction&quot;,
+    &quot;Resource&quot;: &quot;*&quot;,
+    &quot;Condition&quot;: {
+      &quot;ForAnyValue:StringLike&quot;: {
+        &quot;lambda:FunctionArn&quot;: &quot;*&quot;
+      },
+      &quot;ArnLike&quot;: {
+        &quot;iam:PassedToService&quot;: &quot;lambda.amazonaws.com&quot;
+      }
+    }
+  },
+  {
+    &quot;Sid&quot;: &quot;RequirePermissionBoundary&quot;,
+    &quot;Effect&quot;: &quot;Deny&quot;,
+    &quot;Action&quot;: [
+      &quot;iam:CreateRole&quot;,
+      &quot;iam:AttachRolePolicy&quot;,
+      &quot;iam:PutRolePolicy&quot;
+    ],
+    &quot;Resource&quot;: &quot;arn:aws:iam::*:role/lambda-*&quot;,
+    &quot;Condition&quot;: {
+      &quot;StringNotEquals&quot;: {
+        &quot;iam:PermissionsBoundary&quot;: &quot;arn:aws:iam::*:policy/lambda-permission-boundary&quot;
+      }
+    }
+  }]
+}
+EOF
+
+aws organizations create-policy \
+  --name &quot;lambda-role-guardrails&quot; \
+  --type SERVICE_CONTROL_POLICY \
+  --content [file URL removed]scp-deny-lambda-admin.json</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | Execution Role | IAM role assumed by Lambda during function execution that defines all AWS API actions the function can perform | | Least Privilege | Security principle of granting only the minimum permissions required for a function to perform its intended operations | | Permission Boundary | IAM policy that sets the maximum permissions an execution role can have, even if identity policies grant broader access | | IAM Access Analyzer | AWS service that generates least-privilege policies based on actual CloudTrail usage and validates policies for security issues | | Resource-Scoped Policy | IAM policy that specifies exact resource ARNs rather than wildcards, limiting access to only the specific resources needed | | Confused Deputy Prevention | Adding <code>aws:SourceAccount</code> or <code>aws:SourceArn</code> conditions to trust policies to prevent cross-account role assumption attacks |</p>
+<h3>Tools &amp; Systems</h3>
+<ul>
+<li><strong>IAM Access Analyzer</strong>: Generates least-privilege policies from CloudTrail data and validates policy security</li>
+<li><strong>IAM Policy Simulator</strong>: Tests effective permissions for a role against specific API actions before deployment</li>
+<li><strong>CloudTrail</strong>: Audit log of all API calls used to determine actual function permission usage</li>
+<li><strong>Prowler</strong>: Security tool with Lambda-specific checks for role permissions and configuration</li>
+<li><strong>Checkov</strong>: Infrastructure-as-code scanner that validates Lambda IAM policies in CloudFormation/Terraform</li>
+</ul>
+<h3>Common Scenarios</h3>
+<h4>Scenario: Reducing a Lambda Function from AdministratorAccess to Least Privilege</h4>
+<p><strong>Context</strong>: A security audit finds 12 Lambda functions using a shared execution role with <code>AdministratorAccess</code>. The team needs to scope each function to minimum required permissions without breaking production.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Enable CloudTrail data events for Lambda to capture actual API usage per function</li>
+<li>Wait 30 days to collect a representative sample of API calls</li>
+<li>Use IAM Access Analyzer policy generation for each function's role usage</li>
+<li>Create individual scoped policies for each function based on actual API usage</li>
+<li>Apply permission boundaries to cap maximum permissions</li>
+<li>Deploy scoped roles to staging and run integration tests</li>
+<li>Roll out to production with canary deployment and rollback plan</li>
+<li>Validate with IAM Policy Simulator before removing the old broad role</li>
+</ol>
+<p><strong>Pitfalls</strong>: Some Lambda functions may have infrequent code paths that only trigger monthly (batch jobs, error handlers). A 30-day observation window may miss rare API calls. Review the function code alongside CloudTrail data to identify all potential API calls. Use Access Analyzer's policy validation rather than relying solely on generated policies.</p>
+<h3>Output Format</h3>
+<pre><code>Lambda Execution Role Security Report
+========================================
+Account: 123456789012
+Review Date: 2026-02-23
+Functions Audited: 34
+
+ROLE PERMISSION SUMMARY:
+  Functions with AdministratorAccess:    3 (CRITICAL)
+  Functions with PowerUserAccess:        5 (HIGH)
+  Functions with wildcard actions:      12 (MEDIUM)
+  Functions with scoped policies:       14 (OK)
+
+REMEDIATION PROGRESS:
+  [x] payment-processor: Scoped to DynamoDB + S3 + KMS (3 actions)
+  [x] order-notification: Scoped to SNS + SES (2 actions)
+  [ ] data-pipeline: Generating policy from 30-day CloudTrail data
+  [ ] image-resizer: Awaiting staging validation
+
+PERMISSION BOUNDARY STATUS:
+  Functions with boundary applied:  14 / 34
+  Functions without boundary:       20 / 34
+
+POLICY VALIDATION RESULTS:
+  Policies with security warnings:   4
+  Policies with errors:              0
+  Policies with suggestions:        12</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: securing-aws-lambda-execution-roles\ndisplay_name: securing-aws-lambda-execution-roles\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# securing-aws-lambda-execution-roles - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `securing-aws-lambda-execution-roles` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When deploying new Lambda functions and defining their IAM execution roles\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose securing-aws-lambda-execution-roles, then write the task. Fallback prompt: Use the securing-aws-lambda-execution-roles skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `securing-aws-lambda-execution-roles` |\n| Canonical name | `securing-aws-lambda-execution-roles` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\n- When deploying new Lambda functions and defining their IAM execution roles\n\n## Original SKILL.md\n\n---\nname: securing-aws-lambda-execution-roles\ndescription: 'Securing AWS Lambda execution roles by implementing least-privilege\n  IAM policies, applying permission boundaries, restricting resource-based policies,\n  using IAM Access Analyzer to validate permissions, and enforcing role scoping through\n  SCPs.\n\n  '\ndomain: cybersecurity\nsubdomain: cloud-security\ntags:\n- cloud-security\n- aws\n- lambda\n- iam\n- least-privilege\n- execution-roles\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- PR.IR-01\n- ID.AM-08\n- GV.SC-06\n- DE.CM-01\nmitre_attack:\n- T1078.004\n- T1530\n- T1537\n- T1580\n---\n\n# Securing AWS Lambda Execution Roles\n\n## When to Use\n\n- When deploying new Lambda functions and defining their IAM execution roles\n- When remediating overly permissive Lambda roles discovered during security audits\n- When implementing least-privilege access patterns for serverless architectures\n- When building reusable IAM templates for Lambda functions across teams\n- When Security Hub or Prowler reports Lambda functions with excessive permissions\n\n**Do not use** for securing Lambda function invocation (use resource-based policies and API Gateway authorizers), for Lambda code security (use SAST tools), or for Lambda network security (use VPC configuration and security groups).\n\n## Prerequisites\n\n- IAM permissions for policy creation, role modification, and Access Analyzer operations\n- AWS IAM Access Analyzer enabled in the account\n- CloudTrail data events enabled for Lambda to capture actual API usage\n- Existing Lambda functions to audit and scope permissions for\n- Understanding of each function's required AWS service interactions\n\n## Workflow\n\n### Step 1: Audit Current Lambda Execution Role Permissions\n\nEnumerate all Lambda functions and their associated IAM roles to identify over-privileged functions.\n\n```bash\n# List all Lambda functions with their execution roles\naws lambda list-functions \\\n  --query 'Functions[*].[FunctionName,Role]' --output table\n\n# For each function, analyze attached policies\nfor func in $(aws lambda list-functions --query 'Functions[*].FunctionName' --output text); do\n  role_arn=$(aws lambda get-function-configuration --function-name \"$func\" --query 'Role' --output text)\n  role_name=$(echo \"$role_arn\" | awk -F'/' '{print $NF}')\n  echo \"=== $func -> $role_name ===\"\n\n  # Check for AWS managed policies (often too broad)\n  aws iam list-attached-role-policies --role-name \"$role_name\" \\\n    --query 'AttachedPolicies[*].[PolicyName,PolicyArn]' --output table\n\n  # Check inline policies\n  for policy in $(aws iam list-role-policies --role-name \"$role_name\" --query 'PolicyNames' --output text); do\n    echo \"  Inline: $policy\"\n    aws iam get-role-policy --role-name \"$role_name\" --policy-name \"$policy\" \\\n      --query 'PolicyDocument' --output json\n  done\ndone\n```\n\n### Step 2: Analyze Actual API Usage with CloudTrail\n\nUse CloudTrail and IAM Access Analyzer to determine which API actions the function actually uses.\n\n```bash\n# Query CloudTrail for actual API calls made by a Lambda execution role\naws cloudtrail lookup-events \\\n  --lookup-attributes AttributeKey=Username,AttributeValue=LAMBDA_ROLE_NAME \\\n  --start-time 2026-01-23T00:00:00Z \\\n  --end-time 2026-02-23T00:00:00Z \\\n  --query 'Events[*].[EventTime,EventName,EventSource]' \\\n  --output table | sort -k2 | uniq -f1\n\n# Use IAM Access Analyzer policy generation (based on CloudTrail activity)\naws accessanalyzer start-policy-generation \\\n  --policy-generation-details '{\n    \"principalArn\": \"arn:aws:iam::ACCOUNT:role/lambda-execution-role\",\n    \"cloudTrailDetails\": {\n      \"trailArn\": \"arn:aws:cloudtrail:us-east-1:ACCOUNT:trail/management-trail\",\n      \"startTime\": \"2026-01-23T00:00:00Z\",\n      \"endTime\": \"2026-02-23T00:00:00Z\"\n    }\n  }'\n\n# Check the generated policy\naws accessanalyzer get-generated-policy \\\n  --job-id JOB_ID \\\n  --query 'generatedPolicyResult.generatedPolicies[*].policy'\n```\n\n### Step 3: Create Least-Privilege Execution Policies\n\nBuild scoped IAM policies that grant only the specific actions and resources each function needs.\n\n```bash\n# Example: Scoped policy for a function that reads from S3 and writes to DynamoDB\ncat > lambda-scoped-policy.json \u003c\u003c 'EOF'\n{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Sid\": \"ReadInputBucket\",\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"s3:GetObject\",\n        \"s3:ListBucket\"\n      ],\n      \"Resource\": [\n        \"arn:aws:s3:::input-data-bucket\",\n        \"arn:aws:s3:::input-data-bucket/*\"\n      ]\n    },\n    {\n      \"Sid\": \"WriteDynamoDB\",\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"dynamodb:PutItem\",\n        \"dynamodb:UpdateItem\",\n        \"dynamodb:BatchWriteItem\"\n      ],\n      \"Resource\": \"arn:aws:dynamodb:us-east-1:ACCOUNT:table/results-table\"\n    },\n    {\n      \"Sid\": \"CloudWatchLogs\",\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"logs:CreateLogGroup\",\n        \"logs:CreateLogStream\",\n        \"logs:PutLogEvents\"\n      ],\n      \"Resource\": \"arn:aws:logs:us-east-1:ACCOUNT:log-group:/aws/lambda/my-function:*\"\n    }\n  ]\n}\nEOF\n\n# Create the policy\naws iam create-policy \\\n  --policy-name lambda-my-function-policy \\\n  --policy-document [file URL removed]lambda-scoped-policy.json\n\n# Create execution role with scoped trust policy\ncat > lambda-trust-policy.json \u003c\u003c 'EOF'\n{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [{\n    \"Effect\": \"Allow\",\n    \"Principal\": {\"Service\": \"lambda.amazonaws.com\"},\n    \"Action\": \"sts:AssumeRole\",\n    \"Condition\": {\n      \"StringEquals\": {\n        \"aws:SourceAccount\": \"ACCOUNT_ID\"\n      }\n    }\n  }]\n}\nEOF\n\naws iam create-role \\\n  --role-name lambda-my-function-role \\\n  --assume-role-policy-document [file URL removed]lambda-trust-policy.json\n\naws iam attach-role-policy \\\n  --role-name lambda-my-function-role \\\n  --policy-arn arn:aws:iam::ACCOUNT:policy/lambda-my-function-policy\n```\n\n### Step 4: Apply Permission Boundaries\n\nImplement permission boundaries to set maximum permissions for Lambda execution roles.\n\n```bash\n# Create a permission boundary that caps Lambda role capabilities\ncat > lambda-permission-boundary.json \u003c\u003c 'EOF'\n{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Sid\": \"AllowedServices\",\n      \"Effect\": \"Allow\",\n      \"Action\": [\n        \"s3:GetObject\", \"s3:PutObject\", \"s3:ListBucket\",\n        \"dynamodb:GetItem\", \"dynamodb:PutItem\", \"dynamodb:Query\", \"dynamodb:UpdateItem\",\n        \"sqs:SendMessage\", \"sqs:ReceiveMessage\", \"sqs:DeleteMessage\",\n        \"sns:Publish\",\n        \"secretsmanager:GetSecretValue\",\n        \"kms:Decrypt\", \"kms:GenerateDataKey\",\n        \"logs:CreateLogGroup\", \"logs:CreateLogStream\", \"logs:PutLogEvents\",\n        \"xray:PutTraceSegments\", \"xray:PutTelemetryRecords\"\n      ],\n      \"Resource\": \"*\"\n    },\n    {\n      \"Sid\": \"DenyPrivilegeEscalation\",\n      \"Effect\": \"Deny\",\n      \"Action\": [\n        \"iam:CreateUser\", \"iam:CreateRole\", \"iam:CreatePolicy\",\n        \"iam:AttachRolePolicy\", \"iam:AttachUserPolicy\",\n        \"iam:PutRolePolicy\", \"iam:PutUserPolicy\",\n        \"iam:CreateAccessKey\", \"iam:PassRole\",\n        \"lambda:CreateFunction\", \"lambda:UpdateFunctionConfiguration\",\n        \"sts:AssumeRole\"\n      ],\n      \"Resource\": \"*\"\n    }\n  ]\n}\nEOF\n\n# Create and apply the boundary\naws iam create-policy \\\n  --policy-name lambda-permission-boundary \\\n  --policy-document [file URL removed]lambda-permission-boundary.json\n\naws iam put-role-permissions-boundary \\\n  --role-name lambda-my-function-role \\\n  --permissions-boundary arn:aws:iam::ACCOUNT:policy/lambda-permission-boundary\n```\n\n### Step 5: Validate Policies with IAM Access Analyzer\n\nUse Access Analyzer to validate policies for security best practices.\n\n```bash\n# Validate the scoped policy\naws accessanalyzer validate-policy \\\n  --policy-document [file URL removed]lambda-scoped-policy.json \\\n  --policy-type IDENTITY_POLICY \\\n  --query 'findings[*].[findingType,issueCode,learnMoreLink]' --output table\n\n# Check for unused access\naws accessanalyzer check-no-new-access \\\n  --new-policy-document [file URL removed]lambda-scoped-policy.json \\\n  --existing-policy-document [file URL removed]old-broad-policy.json \\\n  --policy-type IDENTITY_POLICY\n\n# Verify the permission boundary effectiveness\naws iam simulate-principal-policy \\\n  --policy-source-arn arn:aws:iam::ACCOUNT:role/lambda-my-function-role \\\n  --action-names iam:CreateUser iam:PassRole s3:GetObject dynamodb:PutItem \\\n  --query 'EvaluationResults[*].[EvalActionName,EvalDecision]' --output table\n```\n\n### Step 6: Enforce Role Standards with SCPs\n\nApply Service Control Policies to prevent Lambda functions from using overly broad roles.\n\n```bash\n# SCP to deny Lambda functions using AdministratorAccess\ncat > scp-deny-lambda-admin.json \u003c\u003c 'EOF'\n{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [{\n    \"Sid\": \"DenyLambdaAdminRole\",\n    \"Effect\": \"Deny\",\n    \"Action\": \"lambda:CreateFunction\",\n    \"Resource\": \"*\",\n    \"Condition\": {\n      \"ForAnyValue:StringLike\": {\n        \"lambda:FunctionArn\": \"*\"\n      },\n      \"ArnLike\": {\n        \"iam:PassedToService\": \"lambda.amazonaws.com\"\n      }\n    }\n  },\n  {\n    \"Sid\": \"RequirePermissionBoundary\",\n    \"Effect\": \"Deny\",\n    \"Action\": [\n      \"iam:CreateRole\",\n      \"iam:AttachRolePolicy\",\n      \"iam:PutRolePolicy\"\n    ],\n    \"Resource\": \"arn:aws:iam::*:role/lambda-*\",\n    \"Condition\": {\n      \"StringNotEquals\": {\n        \"iam:PermissionsBoundary\": \"arn:aws:iam::*:policy/lambda-permission-boundary\"\n      }\n    }\n  }]\n}\nEOF\n\naws organizations create-policy \\\n  --name \"lambda-role-guardrails\" \\\n  --type SERVICE_CONTROL_POLICY \\\n  --content [file URL removed]scp-deny-lambda-admin.json\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| Execution Role | IAM role assumed by Lambda during function execution that defines all AWS API actions the function can perform |\n| Least Privilege | Security principle of granting only the minimum permissions required for a function to perform its intended operations |\n| Permission Boundary | IAM policy that sets the maximum permissions an execution role can have, even if identity policies grant broader access |\n| IAM Access Analyzer | AWS service that generates least-privilege policies based on actual CloudTrail usage and validates policies for security issues |\n| Resource-Scoped Policy | IAM policy that specifies exact resource ARNs rather than wildcards, limiting access to only the specific resources needed |\n| Confused Deputy Prevention | Adding `aws:SourceAccount` or `aws:SourceArn` conditions to trust policies to prevent cross-account role assumption attacks |\n\n## Tools & Systems\n\n- **IAM Access Analyzer**: Generates least-privilege policies from CloudTrail data and validates policy security\n- **IAM Policy Simulator**: Tests effective permissions for a role against specific API actions before deployment\n- **CloudTrail**: Audit log of all API calls used to determine actual function permission usage\n- **Prowler**: Security tool with Lambda-specific checks for role permissions and configuration\n- **Checkov**: Infrastructure-as-code scanner that validates Lambda IAM policies in CloudFormation/Terraform\n\n## Common Scenarios\n\n### Scenario: Reducing a Lambda Function from AdministratorAccess to Least Privilege\n\n**Context**: A security audit finds 12 Lambda functions using a shared execution role with `AdministratorAccess`. The team needs to scope each function to minimum required permissions without breaking production.\n\n**Approach**:\n1. Enable CloudTrail data events for Lambda to capture actual API usage per function\n2. Wait 30 days to collect a representative sample of API calls\n3. Use IAM Access Analyzer policy generation for each function's role usage\n4. Create individual scoped policies for each function based on actual API usage\n5. Apply permission boundaries to cap maximum permissions\n6. Deploy scoped roles to staging and run integration tests\n7. Roll out to production with canary deployment and rollback plan\n8. Validate with IAM Policy Simulator before removing the old broad role\n\n**Pitfalls**: Some Lambda functions may have infrequent code paths that only trigger monthly (batch jobs, error handlers). A 30-day observation window may miss rare API calls. Review the function code alongside CloudTrail data to identify all potential API calls. Use Access Analyzer's policy validation rather than relying solely on generated policies.\n\n## Output Format\n\n```\nLambda Execution Role Security Report\n========================================\nAccount: 123456789012\nReview Date: 2026-02-23\nFunctions Audited: 34\n\nROLE PERMISSION SUMMARY:\n  Functions with AdministratorAccess:    3 (CRITICAL)\n  Functions with PowerUserAccess:        5 (HIGH)\n  Functions with wildcard actions:      12 (MEDIUM)\n  Functions with scoped policies:       14 (OK)\n\nREMEDIATION PROGRESS:\n  [x] payment-processor: Scoped to DynamoDB + S3 + KMS (3 actions)\n  [x] order-notification: Scoped to SNS + SES (2 actions)\n  [ ] data-pipeline: Generating policy from 30-day CloudTrail data\n  [ ] image-resizer: Awaiting staging validation\n\nPERMISSION BOUNDARY STATUS:\n  Functions with boundary applied:  14 / 34\n  Functions without boundary:       20 / 34\n\nPOLICY VALIDATION RESULTS:\n  Policies with security warnings:   4\n  Policies with errors:              0\n  Policies with suggestions:        12\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("securing-aws-lambda-execution-roles-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

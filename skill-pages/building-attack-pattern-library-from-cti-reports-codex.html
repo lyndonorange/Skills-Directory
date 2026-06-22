@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>building-attack-pattern-library-from-cti-reports - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/building-attack-pattern-library-from-cti-reports-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>building-attack-pattern-library-from-cti-reports</h1>
+      <p class="description">Extract and catalog attack patterns from cyber threat intelligence reports</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>building-attack-pattern-library-from-cti-reports</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>building-attack-pattern-library-from-cti-reports</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Extract and catalog attack patterns from cyber threat intelligence reports</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose building-attack-pattern-library-from-cti-reports, then write the task. Fallback prompt: Use the building-attack-pattern-library-from-cti-reports skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Building Attack Pattern Library from CTI Reports</h2>
+<h3>Overview</h3>
+<p>Cyber threat intelligence (CTI) reports from vendors like Mandiant, CrowdStrike, Talos, and Microsoft contain detailed descriptions of adversary behaviors that can be extracted, normalized, and cataloged into a structured attack pattern library. This skill covers parsing CTI reports to extract adversary techniques, mapping behaviors to MITRE ATT&amp;CK technique IDs, creating STIX 2.1 Attack Pattern objects, building a searchable library indexed by tactic, technique, and threat actor, and generating detection rule templates from documented patterns.</p>
+<h3>When to Use</h3>
+<ul>
+<li>When deploying or configuring building attack pattern library from cti reports capabilities in your environment</li>
+<li>When establishing security controls aligned to compliance requirements</li>
+<li>When building or improving security architecture for this domain</li>
+<li>When conducting security assessments that require this implementation</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Python 3.9+ with <code>stix2</code>, <code>mitreattack-python</code>, <code>spacy</code>, <code>requests</code> libraries</li>
+<li>Collection of CTI reports (PDF, HTML, or text format)</li>
+<li>MITRE ATT&amp;CK STIX data (local or via TAXII)</li>
+<li>Understanding of ATT&amp;CK technique structure and naming conventions</li>
+<li>Familiarity with detection engineering concepts (Sigma, YARA)</li>
+</ul>
+<h3>Key Concepts</h3>
+<h4>Attack Pattern Extraction</h4>
+<p>CTI reports describe adversary behaviors in natural language. Extraction involves identifying action verbs and technical terms that map to ATT&amp;CK techniques, recognizing tool names and malware families, identifying infrastructure indicators, and mapping sequences of behaviors to attack chains (kill chain phases).</p>
+<h4>STIX 2.1 Attack Pattern Objects</h4>
+<p>STIX defines Attack Pattern as a Structured Domain Object (SDO) that describes ways threat actors attempt to compromise targets. Each pattern links to ATT&amp;CK via external references, includes kill chain phases (tactics), and can be related to Intrusion Sets, Malware, and Tool objects.</p>
+<h4>Detection Rule Generation</h4>
+<p>Extracted attack patterns inform detection engineering by providing: specific procedure examples for Sigma rule creation, behavioral sequences for correlation rules, IOC patterns for YARA and Snort rules, and data source requirements for telemetry gaps.</p>
+<h3>Workflow</h3>
+<h4>Step 1: Parse CTI Reports and Extract Behaviors</h4>
+<pre><code>import re
+import json
+from collections import defaultdict
+
+class CTIReportParser:
+    &quot;&quot;&quot;Parse CTI reports to extract adversary behaviors.&quot;&quot;&quot;
+
+    BEHAVIOR_INDICATORS = [
+        &quot;used&quot;, &quot;executed&quot;, &quot;deployed&quot;, &quot;leveraged&quot;, &quot;exploited&quot;,
+        &quot;established&quot;, &quot;created&quot;, &quot;modified&quot;, &quot;downloaded&quot;, &quot;uploaded&quot;,
+        &quot;exfiltrated&quot;, &quot;injected&quot;, &quot;enumerated&quot;, &quot;spawned&quot;, &quot;dropped&quot;,
+        &quot;persisted&quot;, &quot;escalated&quot;, &quot;moved laterally&quot;, &quot;collected&quot;,
+        &quot;encrypted&quot;, &quot;compressed&quot;, &quot;encoded&quot;, &quot;obfuscated&quot;,
+    ]
+
+    TOOL_PATTERNS = [
+        r'\b(Cobalt Strike|Mimikatz|PsExec|BloodHound|Rubeus|Impacket)\b',
+        r'\b(PowerShell|cmd\.exe|WMI|WMIC|certutil|bitsadmin)\b',
+        r'\b(Metasploit|Empire|Covenant|Sliver|Brute Ratel)\b',
+        r'\b(Lazagne|SharpHound|ADFind|Sharphound|Invoke-Obfuscation)\b',
+    ]
+
+    TECHNIQUE_KEYWORDS = {
+        &quot;spearphishing&quot;: &quot;T1566&quot;,
+        &quot;phishing attachment&quot;: &quot;T1566.001&quot;,
+        &quot;phishing link&quot;: &quot;T1566.002&quot;,
+        &quot;powershell&quot;: &quot;T1059.001&quot;,
+        &quot;command line&quot;: &quot;T1059.003&quot;,
+        &quot;scheduled task&quot;: &quot;T1053.005&quot;,
+        &quot;registry run key&quot;: &quot;T1547.001&quot;,
+        &quot;process injection&quot;: &quot;T1055&quot;,
+        &quot;dll side-loading&quot;: &quot;T1574.002&quot;,
+        &quot;credential dumping&quot;: &quot;T1003&quot;,
+        &quot;lsass&quot;: &quot;T1003.001&quot;,
+        &quot;kerberoasting&quot;: &quot;T1558.003&quot;,
+        &quot;pass the hash&quot;: &quot;T1550.002&quot;,
+        &quot;remote desktop&quot;: &quot;T1021.001&quot;,
+        &quot;smb&quot;: &quot;T1021.002&quot;,
+        &quot;winrm&quot;: &quot;T1021.006&quot;,
+        &quot;data staging&quot;: &quot;T1074&quot;,
+        &quot;exfiltration over c2&quot;: &quot;T1041&quot;,
+        &quot;dns tunneling&quot;: &quot;T1071.004&quot;,
+        &quot;web shell&quot;: &quot;T1505.003&quot;,
+    }
+
+    def parse_report(self, text, report_metadata=None):
+        &quot;&quot;&quot;Parse a CTI report and extract behaviors.&quot;&quot;&quot;
+        sentences = re.split(r'[.!?]\s+', text)
+        behaviors = []
+
+        for sentence in sentences:
+            sentence_lower = sentence.lower()
+            # Check for behavior indicators
+            for indicator in self.BEHAVIOR_INDICATORS:
+                if indicator in sentence_lower:
+                    behavior = {
+                        &quot;sentence&quot;: sentence.strip(),
+                        &quot;action&quot;: indicator,
+                        &quot;tools&quot;: self._extract_tools(sentence),
+                        &quot;technique_hints&quot;: self._match_techniques(sentence_lower),
+                    }
+                    if behavior[&quot;technique_hints&quot;]:
+                        behaviors.append(behavior)
+                    break
+
+        print(f&quot;[+] Extracted {len(behaviors)} behavioral indicators from report&quot;)
+        return behaviors
+
+    def _extract_tools(self, text):
+        &quot;&quot;&quot;Extract tool/malware names from text.&quot;&quot;&quot;
+        tools = set()
+        for pattern in self.TOOL_PATTERNS:
+            matches = re.findall(pattern, text, re.IGNORECASE)
+            tools.update(matches)
+        return list(tools)
+
+    def _match_techniques(self, text):
+        &quot;&quot;&quot;Match text to ATT&amp;CK technique hints.&quot;&quot;&quot;
+        matches = []
+        for keyword, tech_id in self.TECHNIQUE_KEYWORDS.items():
+            if keyword in text:
+                matches.append({&quot;keyword&quot;: keyword, &quot;technique_id&quot;: tech_id})
+        return matches
+
+parser = CTIReportParser()
+sample_report = &quot;&quot;&quot;
+The threat actor used spearphishing attachments with macro-enabled documents to
+gain initial access. Once inside, they executed PowerShell scripts to download
+additional tooling. The actor leveraged Mimikatz to dump credentials from LSASS
+memory. They then used pass the hash techniques for lateral movement via SMB
+to multiple systems. Data was staged in a compressed archive and exfiltrated
+over the existing C2 channel. The actor established persistence through
+scheduled tasks and registry run keys.
+&quot;&quot;&quot;
+behaviors = parser.parse_report(sample_report)</code></pre>
+<h4>Step 2: Map Behaviors to ATT&amp;CK Techniques</h4>
+<pre><code>from attackcti import attack_client
+
+class ATTACKMapper:
+    def __init__(self):
+        self.lift = attack_client()
+        self.techniques = {}
+        self._load_techniques()
+
+    def _load_techniques(self):
+        &quot;&quot;&quot;Load all ATT&amp;CK techniques for mapping.&quot;&quot;&quot;
+        all_techs = self.lift.get_enterprise_techniques()
+        for tech in all_techs:
+            tech_id = &quot;&quot;
+            for ref in tech.get(&quot;external_references&quot;, []):
+                if ref.get(&quot;source_name&quot;) == &quot;mitre-attack&quot;:
+                    tech_id = ref.get(&quot;external_id&quot;, &quot;&quot;)
+                    break
+            if tech_id:
+                self.techniques[tech_id] = {
+                    &quot;name&quot;: tech.get(&quot;name&quot;, &quot;&quot;),
+                    &quot;description&quot;: tech.get(&quot;description&quot;, &quot;&quot;)[:500],
+                    &quot;tactics&quot;: [p.get(&quot;phase_name&quot;) for p in tech.get(&quot;kill_chain_phases&quot;, [])],
+                    &quot;platforms&quot;: tech.get(&quot;x_mitre_platforms&quot;, []),
+                    &quot;data_sources&quot;: tech.get(&quot;x_mitre_data_sources&quot;, []),
+                }
+        print(f&quot;[+] Loaded {len(self.techniques)} ATT&amp;CK techniques&quot;)
+
+    def map_behaviors(self, behaviors):
+        &quot;&quot;&quot;Map extracted behaviors to ATT&amp;CK techniques.&quot;&quot;&quot;
+        mapped = []
+        for behavior in behaviors:
+            for hint in behavior.get(&quot;technique_hints&quot;, []):
+                tech_id = hint[&quot;technique_id&quot;]
+                if tech_id in self.techniques:
+                    tech_info = self.techniques[tech_id]
+                    mapped.append({
+                        &quot;technique_id&quot;: tech_id,
+                        &quot;technique_name&quot;: tech_info[&quot;name&quot;],
+                        &quot;tactics&quot;: tech_info[&quot;tactics&quot;],
+                        &quot;source_sentence&quot;: behavior[&quot;sentence&quot;],
+                        &quot;tools_observed&quot;: behavior[&quot;tools&quot;],
+                        &quot;keyword_matched&quot;: hint[&quot;keyword&quot;],
+                        &quot;data_sources&quot;: tech_info[&quot;data_sources&quot;],
+                    })
+        print(f&quot;[+] Mapped {len(mapped)} behaviors to ATT&amp;CK techniques&quot;)
+        return mapped
+
+mapper = ATTACKMapper()
+mapped_behaviors = mapper.map_behaviors(behaviors)</code></pre>
+<h4>Step 3: Create STIX 2.1 Attack Pattern Library</h4>
+<pre><code>from stix2 import AttackPattern, Relationship, Bundle, TLP_GREEN
+from datetime import datetime
+
+class AttackPatternLibrary:
+    def __init__(self):
+        self.patterns = []
+        self.relationships = []
+
+    def add_pattern_from_mapping(self, mapping, report_source=&quot;CTI Report&quot;):
+        &quot;&quot;&quot;Create STIX Attack Pattern from mapped behavior.&quot;&quot;&quot;
+        pattern = AttackPattern(
+            name=mapping[&quot;technique_name&quot;],
+            description=f&quot;Observed: {mapping['source_sentence']}\n\n&quot;
+                        f&quot;Tools: {', '.join(mapping['tools_observed']) or 'None identified'}\n&quot;
+                        f&quot;Source: {report_source}&quot;,
+            external_references=[{
+                &quot;source_name&quot;: &quot;mitre-attack&quot;,
+                &quot;external_id&quot;: mapping[&quot;technique_id&quot;],
+                &quot;url&quot;: f&quot;https://attack.mitre.org/techniques/{mapping['technique_id'].replace('.', '/')}/&quot;,
+            }],
+            kill_chain_phases=[{
+                &quot;kill_chain_name&quot;: &quot;mitre-attack&quot;,
+                &quot;phase_name&quot;: tactic,
+            } for tactic in mapping[&quot;tactics&quot;]],
+            object_marking_refs=[TLP_GREEN],
+        )
+        self.patterns.append(pattern)
+        return pattern
+
+    def build_library(self, mapped_behaviors, report_source=&quot;CTI Report&quot;):
+        &quot;&quot;&quot;Build complete attack pattern library from mappings.&quot;&quot;&quot;
+        seen_techniques = set()
+        for mapping in mapped_behaviors:
+            tech_id = mapping[&quot;technique_id&quot;]
+            if tech_id not in seen_techniques:
+                self.add_pattern_from_mapping(mapping, report_source)
+                seen_techniques.add(tech_id)
+
+        bundle = Bundle(objects=self.patterns + self.relationships)
+        print(f&quot;[+] Library: {len(self.patterns)} attack patterns&quot;)
+        return bundle
+
+    def export_library(self, output_file=&quot;attack_pattern_library.json&quot;):
+        bundle = Bundle(objects=self.patterns + self.relationships)
+        with open(output_file, &quot;w&quot;) as f:
+            f.write(bundle.serialize(pretty=True))
+        print(f&quot;[+] Library exported to {output_file}&quot;)
+
+    def generate_detection_templates(self, mapped_behaviors):
+        &quot;&quot;&quot;Generate Sigma rule templates from attack patterns.&quot;&quot;&quot;
+        templates = []
+        for mapping in mapped_behaviors:
+            template = {
+                &quot;title&quot;: f&quot;Detection: {mapping['technique_name']} ({mapping['technique_id']})&quot;,
+                &quot;status&quot;: &quot;experimental&quot;,
+                &quot;description&quot;: f&quot;Detects {mapping['technique_name']} based on CTI report observation&quot;,
+                &quot;references&quot;: [
+                    f&quot;https://attack.mitre.org/techniques/{mapping['technique_id'].replace('.', '/')}/&quot;,
+                ],
+                &quot;tags&quot;: [
+                    f&quot;attack.{mapping['tactics'][0]}&quot; if mapping['tactics'] else &quot;attack.unknown&quot;,
+                    f&quot;attack.{mapping['technique_id'].lower()}&quot;,
+                ],
+                &quot;data_sources&quot;: mapping.get(&quot;data_sources&quot;, []),
+                &quot;observed_tools&quot;: mapping.get(&quot;tools_observed&quot;, []),
+                &quot;source_context&quot;: mapping[&quot;source_sentence&quot;],
+            }
+            templates.append(template)
+
+        with open(&quot;detection_templates.json&quot;, &quot;w&quot;) as f:
+            json.dump(templates, f, indent=2)
+        print(f&quot;[+] Generated {len(templates)} detection templates&quot;)
+        return templates
+
+library = AttackPatternLibrary()
+bundle = library.build_library(mapped_behaviors, &quot;Sample CTI Report&quot;)
+library.export_library()
+templates = library.generate_detection_templates(mapped_behaviors)</code></pre>
+<h3>Validation Criteria</h3>
+<ul>
+<li>CTI report parsed and behavioral indicators extracted</li>
+<li>Behaviors mapped to ATT&amp;CK techniques with confidence</li>
+<li>STIX 2.1 Attack Pattern objects created with proper references</li>
+<li>Library searchable by tactic, technique, and threat actor</li>
+<li>Detection templates generated from documented patterns</li>
+<li>Library exportable as STIX bundle for sharing</li>
+</ul>
+<h3>References</h3>
+<ul>
+<li>[MITRE ATT&amp;CK](https://attack.mitre.org/)</li>
+<li>[STIX 2.1 Attack Pattern SDO](https://docs.oasis-open.org/cti/stix/v2.1/os/stix-v2.1-os.html#_axjijf603msy)</li>
+<li>[CISA: Best Practices for ATT&amp;CK Mapping](https://www.cisa.gov/sites/default/files/2023-01/Best%20Practices%20for%20MITRE%20ATTCK%20Mapping.pdf)</li>
+<li>[attackcti Python Library](https://github.com/OTRF/ATTACK-Python-Client)</li>
+<li>[Sigma Rules Project](https://github.com/SigmaHQ/sigma)</li>
+<li>[MITRE ATT&amp;CK STIX Data](https://github.com/mitre/cti)</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: building-attack-pattern-library-from-cti-reports\ndisplay_name: building-attack-pattern-library-from-cti-reports\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# building-attack-pattern-library-from-cti-reports - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `building-attack-pattern-library-from-cti-reports` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nCyber threat intelligence (CTI) reports from vendors like Mandiant, CrowdStrike, Talos, and Microsoft contain detailed descriptions of adversary behaviors that can be extracted, normalized, and cataloged into a structure\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose building-attack-pattern-library-from-cti-reports, then write the task. Fallback prompt: Use the building-attack-pattern-library-from-cti-reports skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `building-attack-pattern-library-from-cti-reports` |\n| Canonical name | `building-attack-pattern-library-from-cti-reports` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\nCyber threat intelligence (CTI) reports from vendors like Mandiant, CrowdStrike, Talos, and Microsoft contain detailed descriptions of adversary behaviors that can be extracted, normalized, and cataloged into a structure\n\n## Original SKILL.md\n\n---\nname: building-attack-pattern-library-from-cti-reports\ndescription: Extract and catalog attack patterns from cyber threat intelligence reports\n  into a structured STIX-based library mapped to MITRE ATT&CK for detection engineering\n  and threat-informed defense.\ndomain: cybersecurity\nsubdomain: threat-intelligence\ntags:\n- attack-pattern\n- cti-reports\n- mitre-attack\n- stix\n- detection-engineering\n- threat-intelligence\n- nlp\n- extraction\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nd3fend_techniques:\n- File Metadata Consistency Validation\n- Application Protocol Command Analysis\n- Identifier Analysis\n- Content Format Conversion\n- Message Analysis\nnist_csf:\n- ID.RA-01\n- ID.RA-05\n- DE.CM-01\n- DE.AE-02\nmitre_attack:\n- T1566.001\n- T1059.001\n- T1003.001\n- T1558.003\n- T1550.002\n---\n# Building Attack Pattern Library from CTI Reports\n\n## Overview\n\nCyber threat intelligence (CTI) reports from vendors like Mandiant, CrowdStrike, Talos, and Microsoft contain detailed descriptions of adversary behaviors that can be extracted, normalized, and cataloged into a structured attack pattern library. This skill covers parsing CTI reports to extract adversary techniques, mapping behaviors to MITRE ATT&CK technique IDs, creating STIX 2.1 Attack Pattern objects, building a searchable library indexed by tactic, technique, and threat actor, and generating detection rule templates from documented patterns.\n\n\n## When to Use\n\n- When deploying or configuring building attack pattern library from cti reports capabilities in your environment\n- When establishing security controls aligned to compliance requirements\n- When building or improving security architecture for this domain\n- When conducting security assessments that require this implementation\n\n## Prerequisites\n\n- Python 3.9+ with `stix2`, `mitreattack-python`, `spacy`, `requests` libraries\n- Collection of CTI reports (PDF, HTML, or text format)\n- MITRE ATT&CK STIX data (local or via TAXII)\n- Understanding of ATT&CK technique structure and naming conventions\n- Familiarity with detection engineering concepts (Sigma, YARA)\n\n## Key Concepts\n\n### Attack Pattern Extraction\n\nCTI reports describe adversary behaviors in natural language. Extraction involves identifying action verbs and technical terms that map to ATT&CK techniques, recognizing tool names and malware families, identifying infrastructure indicators, and mapping sequences of behaviors to attack chains (kill chain phases).\n\n### STIX 2.1 Attack Pattern Objects\n\nSTIX defines Attack Pattern as a Structured Domain Object (SDO) that describes ways threat actors attempt to compromise targets. Each pattern links to ATT&CK via external references, includes kill chain phases (tactics), and can be related to Intrusion Sets, Malware, and Tool objects.\n\n### Detection Rule Generation\n\nExtracted attack patterns inform detection engineering by providing: specific procedure examples for Sigma rule creation, behavioral sequences for correlation rules, IOC patterns for YARA and Snort rules, and data source requirements for telemetry gaps.\n\n## Workflow\n\n### Step 1: Parse CTI Reports and Extract Behaviors\n\n```python\nimport re\nimport json\nfrom collections import defaultdict\n\nclass CTIReportParser:\n    \"\"\"Parse CTI reports to extract adversary behaviors.\"\"\"\n\n    BEHAVIOR_INDICATORS = [\n        \"used\", \"executed\", \"deployed\", \"leveraged\", \"exploited\",\n        \"established\", \"created\", \"modified\", \"downloaded\", \"uploaded\",\n        \"exfiltrated\", \"injected\", \"enumerated\", \"spawned\", \"dropped\",\n        \"persisted\", \"escalated\", \"moved laterally\", \"collected\",\n        \"encrypted\", \"compressed\", \"encoded\", \"obfuscated\",\n    ]\n\n    TOOL_PATTERNS = [\n        r'\\b(Cobalt Strike|Mimikatz|PsExec|BloodHound|Rubeus|Impacket)\\b',\n        r'\\b(PowerShell|cmd\\.exe|WMI|WMIC|certutil|bitsadmin)\\b',\n        r'\\b(Metasploit|Empire|Covenant|Sliver|Brute Ratel)\\b',\n        r'\\b(Lazagne|SharpHound|ADFind|Sharphound|Invoke-Obfuscation)\\b',\n    ]\n\n    TECHNIQUE_KEYWORDS = {\n        \"spearphishing\": \"T1566\",\n        \"phishing attachment\": \"T1566.001\",\n        \"phishing link\": \"T1566.002\",\n        \"powershell\": \"T1059.001\",\n        \"command line\": \"T1059.003\",\n        \"scheduled task\": \"T1053.005\",\n        \"registry run key\": \"T1547.001\",\n        \"process injection\": \"T1055\",\n        \"dll side-loading\": \"T1574.002\",\n        \"credential dumping\": \"T1003\",\n        \"lsass\": \"T1003.001\",\n        \"kerberoasting\": \"T1558.003\",\n        \"pass the hash\": \"T1550.002\",\n        \"remote desktop\": \"T1021.001\",\n        \"smb\": \"T1021.002\",\n        \"winrm\": \"T1021.006\",\n        \"data staging\": \"T1074\",\n        \"exfiltration over c2\": \"T1041\",\n        \"dns tunneling\": \"T1071.004\",\n        \"web shell\": \"T1505.003\",\n    }\n\n    def parse_report(self, text, report_metadata=None):\n        \"\"\"Parse a CTI report and extract behaviors.\"\"\"\n        sentences = re.split(r'[.!?]\\s+', text)\n        behaviors = []\n\n        for sentence in sentences:\n            sentence_lower = sentence.lower()\n            # Check for behavior indicators\n            for indicator in self.BEHAVIOR_INDICATORS:\n                if indicator in sentence_lower:\n                    behavior = {\n                        \"sentence\": sentence.strip(),\n                        \"action\": indicator,\n                        \"tools\": self._extract_tools(sentence),\n                        \"technique_hints\": self._match_techniques(sentence_lower),\n                    }\n                    if behavior[\"technique_hints\"]:\n                        behaviors.append(behavior)\n                    break\n\n        print(f\"[+] Extracted {len(behaviors)} behavioral indicators from report\")\n        return behaviors\n\n    def _extract_tools(self, text):\n        \"\"\"Extract tool/malware names from text.\"\"\"\n        tools = set()\n        for pattern in self.TOOL_PATTERNS:\n            matches = re.findall(pattern, text, re.IGNORECASE)\n            tools.update(matches)\n        return list(tools)\n\n    def _match_techniques(self, text):\n        \"\"\"Match text to ATT&CK technique hints.\"\"\"\n        matches = []\n        for keyword, tech_id in self.TECHNIQUE_KEYWORDS.items():\n            if keyword in text:\n                matches.append({\"keyword\": keyword, \"technique_id\": tech_id})\n        return matches\n\nparser = CTIReportParser()\nsample_report = \"\"\"\nThe threat actor used spearphishing attachments with macro-enabled documents to\ngain initial access. Once inside, they executed PowerShell scripts to download\nadditional tooling. The actor leveraged Mimikatz to dump credentials from LSASS\nmemory. They then used pass the hash techniques for lateral movement via SMB\nto multiple systems. Data was staged in a compressed archive and exfiltrated\nover the existing C2 channel. The actor established persistence through\nscheduled tasks and registry run keys.\n\"\"\"\nbehaviors = parser.parse_report(sample_report)\n```\n\n### Step 2: Map Behaviors to ATT&CK Techniques\n\n```python\nfrom attackcti import attack_client\n\nclass ATTACKMapper:\n    def __init__(self):\n        self.lift = attack_client()\n        self.techniques = {}\n        self._load_techniques()\n\n    def _load_techniques(self):\n        \"\"\"Load all ATT&CK techniques for mapping.\"\"\"\n        all_techs = self.lift.get_enterprise_techniques()\n        for tech in all_techs:\n            tech_id = \"\"\n            for ref in tech.get(\"external_references\", []):\n                if ref.get(\"source_name\") == \"mitre-attack\":\n                    tech_id = ref.get(\"external_id\", \"\")\n                    break\n            if tech_id:\n                self.techniques[tech_id] = {\n                    \"name\": tech.get(\"name\", \"\"),\n                    \"description\": tech.get(\"description\", \"\")[:500],\n                    \"tactics\": [p.get(\"phase_name\") for p in tech.get(\"kill_chain_phases\", [])],\n                    \"platforms\": tech.get(\"x_mitre_platforms\", []),\n                    \"data_sources\": tech.get(\"x_mitre_data_sources\", []),\n                }\n        print(f\"[+] Loaded {len(self.techniques)} ATT&CK techniques\")\n\n    def map_behaviors(self, behaviors):\n        \"\"\"Map extracted behaviors to ATT&CK techniques.\"\"\"\n        mapped = []\n        for behavior in behaviors:\n            for hint in behavior.get(\"technique_hints\", []):\n                tech_id = hint[\"technique_id\"]\n                if tech_id in self.techniques:\n                    tech_info = self.techniques[tech_id]\n                    mapped.append({\n                        \"technique_id\": tech_id,\n                        \"technique_name\": tech_info[\"name\"],\n                        \"tactics\": tech_info[\"tactics\"],\n                        \"source_sentence\": behavior[\"sentence\"],\n                        \"tools_observed\": behavior[\"tools\"],\n                        \"keyword_matched\": hint[\"keyword\"],\n                        \"data_sources\": tech_info[\"data_sources\"],\n                    })\n        print(f\"[+] Mapped {len(mapped)} behaviors to ATT&CK techniques\")\n        return mapped\n\nmapper = ATTACKMapper()\nmapped_behaviors = mapper.map_behaviors(behaviors)\n```\n\n### Step 3: Create STIX 2.1 Attack Pattern Library\n\n```python\nfrom stix2 import AttackPattern, Relationship, Bundle, TLP_GREEN\nfrom datetime import datetime\n\nclass AttackPatternLibrary:\n    def __init__(self):\n        self.patterns = []\n        self.relationships = []\n\n    def add_pattern_from_mapping(self, mapping, report_source=\"CTI Report\"):\n        \"\"\"Create STIX Attack Pattern from mapped behavior.\"\"\"\n        pattern = AttackPattern(\n            name=mapping[\"technique_name\"],\n            description=f\"Observed: {mapping['source_sentence']}\\n\\n\"\n                        f\"Tools: {', '.join(mapping['tools_observed']) or 'None identified'}\\n\"\n                        f\"Source: {report_source}\",\n            external_references=[{\n                \"source_name\": \"mitre-attack\",\n                \"external_id\": mapping[\"technique_id\"],\n                \"url\": f\"https://attack.mitre.org/techniques/{mapping['technique_id'].replace('.', '/')}/\",\n            }],\n            kill_chain_phases=[{\n                \"kill_chain_name\": \"mitre-attack\",\n                \"phase_name\": tactic,\n            } for tactic in mapping[\"tactics\"]],\n            object_marking_refs=[TLP_GREEN],\n        )\n        self.patterns.append(pattern)\n        return pattern\n\n    def build_library(self, mapped_behaviors, report_source=\"CTI Report\"):\n        \"\"\"Build complete attack pattern library from mappings.\"\"\"\n        seen_techniques = set()\n        for mapping in mapped_behaviors:\n            tech_id = mapping[\"technique_id\"]\n            if tech_id not in seen_techniques:\n                self.add_pattern_from_mapping(mapping, report_source)\n                seen_techniques.add(tech_id)\n\n        bundle = Bundle(objects=self.patterns + self.relationships)\n        print(f\"[+] Library: {len(self.patterns)} attack patterns\")\n        return bundle\n\n    def export_library(self, output_file=\"attack_pattern_library.json\"):\n        bundle = Bundle(objects=self.patterns + self.relationships)\n        with open(output_file, \"w\") as f:\n            f.write(bundle.serialize(pretty=True))\n        print(f\"[+] Library exported to {output_file}\")\n\n    def generate_detection_templates(self, mapped_behaviors):\n        \"\"\"Generate Sigma rule templates from attack patterns.\"\"\"\n        templates = []\n        for mapping in mapped_behaviors:\n            template = {\n                \"title\": f\"Detection: {mapping['technique_name']} ({mapping['technique_id']})\",\n                \"status\": \"experimental\",\n                \"description\": f\"Detects {mapping['technique_name']} based on CTI report observation\",\n                \"references\": [\n                    f\"https://attack.mitre.org/techniques/{mapping['technique_id'].replace('.', '/')}/\",\n                ],\n                \"tags\": [\n                    f\"attack.{mapping['tactics'][0]}\" if mapping['tactics'] else \"attack.unknown\",\n                    f\"attack.{mapping['technique_id'].lower()}\",\n                ],\n                \"data_sources\": mapping.get(\"data_sources\", []),\n                \"observed_tools\": mapping.get(\"tools_observed\", []),\n                \"source_context\": mapping[\"source_sentence\"],\n            }\n            templates.append(template)\n\n        with open(\"detection_templates.json\", \"w\") as f:\n            json.dump(templates, f, indent=2)\n        print(f\"[+] Generated {len(templates)} detection templates\")\n        return templates\n\nlibrary = AttackPatternLibrary()\nbundle = library.build_library(mapped_behaviors, \"Sample CTI Report\")\nlibrary.export_library()\ntemplates = library.generate_detection_templates(mapped_behaviors)\n```\n\n## Validation Criteria\n\n- CTI report parsed and behavioral indicators extracted\n- Behaviors mapped to ATT&CK techniques with confidence\n- STIX 2.1 Attack Pattern objects created with proper references\n- Library searchable by tactic, technique, and threat actor\n- Detection templates generated from documented patterns\n- Library exportable as STIX bundle for sharing\n\n## References\n\n- [MITRE ATT&CK](https://attack.mitre.org/)\n- [STIX 2.1 Attack Pattern SDO](https://docs.oasis-open.org/cti/stix/v2.1/os/stix-v2.1-os.html#_axjijf603msy)\n- [CISA: Best Practices for ATT&CK Mapping](https://www.cisa.gov/sites/default/files/2023-01/Best%20Practices%20for%20MITRE%20ATTCK%20Mapping.pdf)\n- [attackcti Python Library](https://github.com/OTRF/ATTACK-Python-Client)\n- [Sigma Rules Project](https://github.com/SigmaHQ/sigma)\n- [MITRE ATT&CK STIX Data](https://github.com/mitre/cti)\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("building-attack-pattern-library-from-cti-reports-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

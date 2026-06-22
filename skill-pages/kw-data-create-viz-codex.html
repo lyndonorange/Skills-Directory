@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>kw-data-create-viz - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/kw-data-create-viz-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>kw-data-create-viz</h1>
+      <p class="description">Create publication-quality visualizations with Python. Use when turning query results or a DataFrame into a chart, selecting the right chart type for a trend or comparison, generating a plot for a report or presentation, or needing an interactive chart with hover and zoom.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>kw-data-create-viz</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>kw-data-create-viz</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Create publication-quality visualizations with Python. Use when turning query results or a DataFrame into a chart, selecting the right chart type for a trend or comparison, generating a plot for a report or presentation, or needing an interactive chart with hover and zoom.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose kw-data-create-viz, then write the task. Fallback prompt: Use the kw-data-create-viz skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>/create-viz - Create Visualizations</h2>
+<blockquote>If you see unfamiliar placeholders or need to check which tools are connected, see [CONNECTORS.md](../../CONNECTORS.md).</blockquote>
+<p>Create publication-quality data visualizations using Python. Generates charts from data with best practices for clarity, accuracy, and design.</p>
+<h3>Usage</h3>
+<pre><code>/create-viz &lt;data source&gt; [chart type] [additional instructions]</code></pre>
+<h3>Workflow</h3>
+<h4>1. Understand the Request</h4>
+<p>Determine:</p>
+<ul>
+<li><strong>Data source</strong>: Query results, pasted data, CSV/Excel file, or data to be queried</li>
+<li><strong>Chart type</strong>: Explicitly requested or needs to be recommended</li>
+<li><strong>Purpose</strong>: Exploration, presentation, report, dashboard component</li>
+<li><strong>Audience</strong>: Technical team, executives, external stakeholders</li>
+</ul>
+<h4>2. Get the Data</h4>
+<p><strong>If data warehouse is connected and data needs querying:</strong></p>
+<ol>
+<li>Write and execute the query</li>
+<li>Load results into a pandas DataFrame</li>
+</ol>
+<p><strong>If data is pasted or uploaded:</strong></p>
+<ol>
+<li>Parse the data into a pandas DataFrame</li>
+<li>Clean and prepare as needed (type conversions, null handling)</li>
+</ol>
+<p><strong>If data is from a previous analysis in the conversation:</strong></p>
+<ol>
+<li>Reference the existing data</li>
+</ol>
+<h4>3. Select Chart Type</h4>
+<p>If the user didn't specify a chart type, recommend one based on the data and question:</p>
+<p>| Data Relationship | Recommended Chart | |---|---| | Trend over time | Line chart | | Comparison across categories | Bar chart (horizontal if many categories) | | Part-to-whole composition | Stacked bar or area chart (avoid pie charts unless &lt;6 categories) | | Distribution of values | Histogram or box plot | | Correlation between two variables | Scatter plot | | Two-variable comparison over time | Dual-axis line or grouped bar | | Geographic data | Choropleth map | | Ranking | Horizontal bar chart | | Flow or process | Sankey diagram | | Matrix of relationships | Heatmap |</p>
+<p>Explain the recommendation briefly if the user didn't specify.</p>
+<h4>4. Generate the Visualization</h4>
+<p>Write Python code using one of these libraries based on the need:</p>
+<ul>
+<li><strong>matplotlib + seaborn</strong>: Best for static, publication-quality charts. Default choice.</li>
+<li><strong>plotly</strong>: Best for interactive charts or when the user requests interactivity.</li>
+</ul>
+<p><strong>Code requirements:</strong></p>
+<pre><code>import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+
+# Set professional style
+plt.style.use('seaborn-v0_8-whitegrid')
+sns.set_palette(&quot;husl&quot;)
+
+# Create figure with appropriate size
+fig, ax = plt.subplots(figsize=(10, 6))
+
+# [chart-specific code]
+
+# Always include:
+ax.set_title('Clear, Descriptive Title', fontsize=14, fontweight='bold')
+ax.set_xlabel('X-Axis Label', fontsize=11)
+ax.set_ylabel('Y-Axis Label', fontsize=11)
+
+# Format numbers appropriately
+# - Percentages: '45.2%' not '0.452'
+# - Currency: '$1.2M' not '1200000'
+# - Large numbers: '2.3K' or '1.5M' not '2300' or '1500000'
+
+# Remove chart junk
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+plt.tight_layout()
+plt.savefig('chart_name.png', dpi=150, bbox_inches='tight')
+plt.show()</code></pre>
+<h4>5. Apply Design Best Practices</h4>
+<p><strong>Color:</strong></p>
+<ul>
+<li>Use a consistent, colorblind-friendly palette</li>
+<li>Use color meaningfully (not decoratively)</li>
+<li>Highlight the key data point or trend with a contrasting color</li>
+<li>Grey out less important reference data</li>
+</ul>
+<p><strong>Typography:</strong></p>
+<ul>
+<li>Descriptive title that states the insight, not just the metric (e.g., &quot;Revenue grew 23% YoY&quot; not &quot;Revenue by Month&quot;)</li>
+<li>Readable axis labels (not rotated 90 degrees if avoidable)</li>
+<li>Data labels on key points when they add clarity</li>
+</ul>
+<p><strong>Layout:</strong></p>
+<ul>
+<li>Appropriate whitespace and margins</li>
+<li>Legend placement that doesn't obscure data</li>
+<li>Sorted categories by value (not alphabetically) unless there's a natural order</li>
+</ul>
+<p><strong>Accuracy:</strong></p>
+<ul>
+<li>Y-axis starts at zero for bar charts</li>
+<li>No misleading axis breaks without clear notation</li>
+<li>Consistent scales when comparing panels</li>
+<li>Appropriate precision (don't show 10 decimal places)</li>
+</ul>
+<h4>6. Save and Present</h4>
+<ol>
+<li>Save the chart as a PNG file with descriptive name</li>
+<li>Display the chart to the user</li>
+<li>Provide the code used so they can modify it</li>
+<li>Suggest variations (different chart type, different grouping, zoomed time range)</li>
+</ol>
+<h3>Examples</h3>
+<pre><code>/create-viz Show monthly revenue for the last 12 months as a line chart with the trend highlighted</code></pre>
+<pre><code>/create-viz Here's our NPS data by product: [pastes data]. Create a horizontal bar chart ranking products by score.</code></pre>
+<pre><code>/create-viz Query the orders table and create a heatmap of order volume by day-of-week and hour</code></pre>
+<h3>Tips</h3>
+<ul>
+<li>If you want interactive charts (hover, zoom, filter), mention &quot;interactive&quot; and Claude will use plotly</li>
+<li>Specify &quot;presentation&quot; if you need larger fonts and higher contrast</li>
+<li>You can request multiple charts at once (e.g., &quot;create a 2x2 grid of charts showing...&quot;)</li>
+<li>Charts are saved to your current directory as PNG files</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: kw-data-create-viz\ndisplay_name: kw-data-create-viz\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# kw-data-create-viz - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `kw-data-create-viz` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n> If you see unfamiliar placeholders or need to check which tools are connected, see [CONNECTORS.md](../../CONNECTORS.md).\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose kw-data-create-viz, then write the task. Fallback prompt: Use the kw-data-create-viz skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `kw-data-create-viz` |\n| Canonical name | `kw-data-create-viz` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\n> If you see unfamiliar placeholders or need to check which tools are connected, see [CONNECTORS.md](../../CONNECTORS.md).\n\n## Original SKILL.md\n\n---\nknowledge-work-plugin: data\nupstream-skill: create-viz\nname: kw-data-create-viz\ndescription: Create publication-quality visualizations with Python. Use when turning query results or a DataFrame into a chart, selecting the right chart type for a trend or comparison, generating a plot for a report or presentation, or needing an interactive chart with hover and zoom.\nargument-hint: \"\u003cdata source> [chart type]\"\n---\n\n# /create-viz - Create Visualizations\n\n> If you see unfamiliar placeholders or need to check which tools are connected, see [CONNECTORS.md](../../CONNECTORS.md).\n\nCreate publication-quality data visualizations using Python. Generates charts from data with best practices for clarity, accuracy, and design.\n\n## Usage\n\n```\n/create-viz \u003cdata source> [chart type] [additional instructions]\n```\n\n## Workflow\n\n### 1. Understand the Request\n\nDetermine:\n\n- **Data source**: Query results, pasted data, CSV/Excel file, or data to be queried\n- **Chart type**: Explicitly requested or needs to be recommended\n- **Purpose**: Exploration, presentation, report, dashboard component\n- **Audience**: Technical team, executives, external stakeholders\n\n### 2. Get the Data\n\n**If data warehouse is connected and data needs querying:**\n1. Write and execute the query\n2. Load results into a pandas DataFrame\n\n**If data is pasted or uploaded:**\n1. Parse the data into a pandas DataFrame\n2. Clean and prepare as needed (type conversions, null handling)\n\n**If data is from a previous analysis in the conversation:**\n1. Reference the existing data\n\n### 3. Select Chart Type\n\nIf the user didn't specify a chart type, recommend one based on the data and question:\n\n| Data Relationship | Recommended Chart |\n|---|---|\n| Trend over time | Line chart |\n| Comparison across categories | Bar chart (horizontal if many categories) |\n| Part-to-whole composition | Stacked bar or area chart (avoid pie charts unless \u003c6 categories) |\n| Distribution of values | Histogram or box plot |\n| Correlation between two variables | Scatter plot |\n| Two-variable comparison over time | Dual-axis line or grouped bar |\n| Geographic data | Choropleth map |\n| Ranking | Horizontal bar chart |\n| Flow or process | Sankey diagram |\n| Matrix of relationships | Heatmap |\n\nExplain the recommendation briefly if the user didn't specify.\n\n### 4. Generate the Visualization\n\nWrite Python code using one of these libraries based on the need:\n\n- **matplotlib + seaborn**: Best for static, publication-quality charts. Default choice.\n- **plotly**: Best for interactive charts or when the user requests interactivity.\n\n**Code requirements:**\n\n```python\nimport matplotlib.pyplot as plt\nimport seaborn as sns\nimport pandas as pd\n\n# Set professional style\nplt.style.use('seaborn-v0_8-whitegrid')\nsns.set_palette(\"husl\")\n\n# Create figure with appropriate size\nfig, ax = plt.subplots(figsize=(10, 6))\n\n# [chart-specific code]\n\n# Always include:\nax.set_title('Clear, Descriptive Title', fontsize=14, fontweight='bold')\nax.set_xlabel('X-Axis Label', fontsize=11)\nax.set_ylabel('Y-Axis Label', fontsize=11)\n\n# Format numbers appropriately\n# - Percentages: '45.2%' not '0.452'\n# - Currency: '$1.2M' not '1200000'\n# - Large numbers: '2.3K' or '1.5M' not '2300' or '1500000'\n\n# Remove chart junk\nax.spines['top'].set_visible(False)\nax.spines['right'].set_visible(False)\n\nplt.tight_layout()\nplt.savefig('chart_name.png', dpi=150, bbox_inches='tight')\nplt.show()\n```\n\n### 5. Apply Design Best Practices\n\n**Color:**\n- Use a consistent, colorblind-friendly palette\n- Use color meaningfully (not decoratively)\n- Highlight the key data point or trend with a contrasting color\n- Grey out less important reference data\n\n**Typography:**\n- Descriptive title that states the insight, not just the metric (e.g., \"Revenue grew 23% YoY\" not \"Revenue by Month\")\n- Readable axis labels (not rotated 90 degrees if avoidable)\n- Data labels on key points when they add clarity\n\n**Layout:**\n- Appropriate whitespace and margins\n- Legend placement that doesn't obscure data\n- Sorted categories by value (not alphabetically) unless there's a natural order\n\n**Accuracy:**\n- Y-axis starts at zero for bar charts\n- No misleading axis breaks without clear notation\n- Consistent scales when comparing panels\n- Appropriate precision (don't show 10 decimal places)\n\n### 6. Save and Present\n\n1. Save the chart as a PNG file with descriptive name\n2. Display the chart to the user\n3. Provide the code used so they can modify it\n4. Suggest variations (different chart type, different grouping, zoomed time range)\n\n## Examples\n\n```\n/create-viz Show monthly revenue for the last 12 months as a line chart with the trend highlighted\n```\n\n```\n/create-viz Here's our NPS data by product: [pastes data]. Create a horizontal bar chart ranking products by score.\n```\n\n```\n/create-viz Query the orders table and create a heatmap of order volume by day-of-week and hour\n```\n\n## Tips\n\n- If you want interactive charts (hover, zoom, filter), mention \"interactive\" and Claude will use plotly\n- Specify \"presentation\" if you need larger fonts and higher contrast\n- You can request multiple charts at once (e.g., \"create a 2x2 grid of charts showing...\")\n- Charts are saved to your current directory as PNG files\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("kw-data-create-viz-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

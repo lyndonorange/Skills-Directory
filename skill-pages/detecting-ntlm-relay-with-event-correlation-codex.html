@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>detecting-ntlm-relay-with-event-correlation - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/detecting-ntlm-relay-with-event-correlation-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>detecting-ntlm-relay-with-event-correlation</h1>
+      <p class="description">'Detect NTLM relay attacks through Windows Security Event correlation</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>detecting-ntlm-relay-with-event-correlation</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>detecting-ntlm-relay-with-event-correlation</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Detect NTLM relay attacks through Windows Security Event correlation</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose detecting-ntlm-relay-with-event-correlation, then write the task. Fallback prompt: Use the detecting-ntlm-relay-with-event-correlation skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Detecting NTLM Relay with Event Correlation</h2>
+<blockquote><strong>Authorized Testing Disclaimer</strong>: The offensive techniques and attack simulations described in this skill are intended exclusively for authorized penetration testing, red team engagements, purple team exercises, and security research conducted with explicit written permission from the system owner. Unauthorized use of these techniques against systems you do not own or have permission to test is illegal and unethical. Always operate within the scope of your engagement and comply with applicable laws and regulations.</blockquote>
+<h3>Overview</h3>
+<p>NTLM relay attacks intercept NTLM authentication messages and forward them to a target service to gain unauthorized access. Attackers use tools like Responder for LLMNR/NBT-NS/mDNS poisoning, ntlmrelayx (Fox-IT/Impacket) for multi-protocol relay, and coercion techniques like PetitPotam (MS-EFSRPC) and DFSCoerce to force authentication from high-value targets like domain controllers. This skill provides a comprehensive event correlation framework using Windows Security Event 4624 LogonType 3 analysis, IP-to-hostname mismatch detection, Responder traffic identification, SMB/LDAP signing audit, and NTLM downgrade detection to identify relay attacks across Active Directory environments.</p>
+<h3>When to Use</h3>
+<ul>
+<li>Hunting for credential relay activity in Active Directory environments where NTLM authentication is still in use</li>
+<li>Investigating alerts for authentication anomalies where the source IP does not match the expected workstation</li>
+<li>Auditing SMB signing and LDAP signing enforcement to assess exposure to relay attacks</li>
+<li>Detecting NTLM downgrade attacks where NTLMv2 is forced to NTLMv1 for easier offline cracking or relay</li>
+<li>Building SIEM correlation rules for MITRE ATT&amp;CK T1557.001 (LLMNR/NBT-NS Poisoning and SMB Relay)</li>
+<li>Responding to PetitPotam, DFSCoerce, or PrinterBug coercion alerts that may precede relay attacks</li>
+<li>During purple team exercises validating NTLM relay detection and SMB signing enforcement</li>
+</ul>
+<p><strong>Do not use</strong> without centralized Windows Security Event Log collection, as a substitute for enforcing SMB signing and Extended Protection for Authentication (EPA) which prevent relay attacks at the protocol level, or without an IP-to-hostname inventory for correlation.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>Windows Advanced Audit Policy configured to capture Event IDs 4624, 4625, 4648, 4776, and 8004</li>
+<li>Centralized log collection via Windows Event Forwarding (WEF) or agent-based shipping to SIEM</li>
+<li>SIEM platform (Splunk, Elastic, Microsoft Sentinel) with correlation and alerting capability</li>
+<li>IP address to hostname mapping inventory (DHCP logs, DNS records, or CMDB)</li>
+<li>Network monitoring for LLMNR (UDP 5355), NBT-NS (UDP 137), and mDNS (UDP 5353) traffic</li>
+<li>Understanding of MITRE ATT&amp;CK T1557.001 and T1187 (Forced Authentication)</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Understand NTLM Relay Attack Flow</h4>
+<p>The NTLM relay attack follows a three-phase pattern: coercion/poisoning, interception, and relay.</p>
+<p><strong>Phase 1 -- Coercion or Poisoning</strong>: The attacker forces or tricks a victim into initiating NTLM authentication. Methods include LLMNR/NBT-NS poisoning (Responder), PetitPotam (MS-EFSRPC abuse), PrinterBug (SpoolService), and DFSCoerce.</p>
+<p><strong>Phase 2 -- Interception</strong>: The attacker captures the NTLM Type 1 (Negotiate) and Type 3 (Authenticate) messages from the victim.</p>
+<p><strong>Phase 3 -- Relay</strong>: The attacker forwards the captured NTLM messages to a target service (SMB, LDAP, HTTP, MSSQL) to authenticate as the victim. This succeeds only when message signing is not enforced.</p>
+<pre><code>Victim ──NTLM Negotiate──&gt; Attacker ──NTLM Negotiate──&gt; Target
+Victim &lt;──NTLM Challenge── Attacker &lt;──NTLM Challenge── Target
+Victim ──NTLM Authenticate──&gt; Attacker ──NTLM Authenticate──&gt; Target
+                                                         ↓
+                                              Attacker authenticated
+                                              as Victim on Target</code></pre>
+<p><strong>Key Detection Insight</strong>: In a relay attack, Event 4624 on the target will show the victim's username but the attacker's IP address. The WorkstationName field may still reflect the victim's machine. This IP-to-hostname mismatch is the primary detection signal.</p>
+<h4>Step 2: Event 4624 LogonType 3 Analysis for Relay Detection</h4>
+<pre><code># Splunk: Detect IP-to-Hostname Mismatches in Network Logons
+# Core NTLM relay detection -- correlates WorkstationName with IpAddress
+
+index=wineventlog EventCode=4624 LogonType=3
+    AuthenticationPackageName=&quot;NTLM&quot; LmPackageName=&quot;NTLM V2&quot;
+| where TargetUserName != &quot;ANONYMOUS LOGON&quot;
+    AND TargetUserName != &quot;-&quot;
+    AND NOT match(TargetUserName, &quot;.*\\$$&quot;)
+| eval workstation_lower=lower(WorkstationName)
+| lookup dns_inventory.csv hostname AS workstation_lower OUTPUT expected_ip
+| where isnotnull(expected_ip) AND IpAddress != expected_ip
+| table _time ComputerName TargetUserName WorkstationName IpAddress expected_ip
+    LogonProcessName AuthenticationPackageName
+| sort -_time
+| rename ComputerName as TargetHost, IpAddress as ActualSourceIP,
+    expected_ip as ExpectedSourceIP</code></pre>
+<pre><code># Splunk: Detect Rapid Multi-Host Authentication (Relay Spraying)
+# Attackers relay captured credentials to multiple targets quickly
+
+index=wineventlog EventCode=4624 LogonType=3
+    AuthenticationPackageName=&quot;NTLM&quot;
+| where TargetUserName != &quot;ANONYMOUS LOGON&quot;
+    AND NOT match(TargetUserName, &quot;.*\\$$&quot;)
+| bin _time span=2m
+| stats dc(ComputerName) as target_count values(ComputerName) as targets
+    values(IpAddress) as source_ips by _time TargetUserName
+| where target_count &gt; 3
+| table _time TargetUserName source_ips target_count targets
+| sort -target_count</code></pre>
+<pre><code># Splunk: Detect NTLM Authentication from Non-Workstation IPs
+# Relay tools often run from Linux attack boxes not in DNS/DHCP inventory
+
+index=wineventlog EventCode=4624 LogonType=3
+    AuthenticationPackageName=&quot;NTLM&quot;
+| where TargetUserName != &quot;ANONYMOUS LOGON&quot;
+    AND NOT match(TargetUserName, &quot;.*\\$$&quot;)
+| lookup dhcp_leases.csv ip AS IpAddress OUTPUT mac_address hostname
+| where isnull(hostname)
+| stats count dc(ComputerName) as targets_hit values(ComputerName) as target_hosts
+    by IpAddress TargetUserName WorkstationName
+| where count &gt; 1
+| table IpAddress TargetUserName WorkstationName targets_hit target_hosts count
+| sort -targets_hit</code></pre>
+<pre><code>-- Microsoft Sentinel KQL: NTLM Relay Detection via IP-Hostname Mismatch
+
+let known_hosts = datatable(WorkstationName:string, ExpectedIP:string)
+[
+    // Populate from CMDB or use DeviceNetworkInfo table
+];
+SecurityEvent
+| where EventID == 4624 and LogonType == 3
+| where AuthenticationPackageName == &quot;NTLM&quot;
+| where TargetUserName !endswith &quot;$&quot;
+| where TargetUserName != &quot;ANONYMOUS LOGON&quot;
+| where IpAddress != &quot;-&quot; and IpAddress != &quot;::1&quot; and IpAddress != &quot;127.0.0.1&quot;
+| extend WorkstationClean = toupper(trim_end(@&quot;\s+&quot;, WorkstationName))
+| join kind=inner (known_hosts) on WorkstationName
+| where IpAddress != ExpectedIP
+| project TimeGenerated, Computer, TargetUserName, WorkstationName,
+    IpAddress, ExpectedIP, LogonProcessName, AuthenticationPackageName,
+    LmPackageName
+| sort by TimeGenerated desc</code></pre>
+<pre><code>-- Microsoft Sentinel KQL: Rapid NTLM Authentication to Multiple Targets
+
+SecurityEvent
+| where EventID == 4624 and LogonType == 3
+| where AuthenticationPackageName == &quot;NTLM&quot;
+| where TargetUserName !endswith &quot;$&quot;
+| where TargetUserName != &quot;ANONYMOUS LOGON&quot;
+| summarize TargetCount=dcount(Computer),
+    Targets=make_set(Computer),
+    SourceIPs=make_set(IpAddress),
+    AuthCount=count()
+    by TargetUserName, bin(TimeGenerated, 2m)
+| where TargetCount &gt; 3
+| project TimeGenerated, TargetUserName, SourceIPs, TargetCount, Targets, AuthCount
+| sort by TargetCount desc</code></pre>
+<h4>Step 3: Responder Detection via Network and Event Analysis</h4>
+<pre><code># Splunk: Detect Responder LLMNR/NBT-NS Poisoning via Network Logs
+# Responder answers LLMNR (UDP 5355) and NBT-NS (UDP 137) queries
+
+index=network sourcetype=zeek_dns
+| where query_type IN (&quot;LLMNR&quot;, &quot;NBNS&quot;)
+    OR id.resp_p IN (5355, 137)
+| stats dc(id.orig_h) as victims count by id.resp_h answers
+| where count &gt; 10
+| rename id.resp_h as responder_ip
+| table responder_ip victims answers count
+| sort -count</code></pre>
+<pre><code># Splunk: Detect LLMNR/NBT-NS Response from Non-DNS Servers
+# Legitimate DNS servers respond to these; Responder impersonates them
+
+index=network sourcetype=&quot;bro:dns:json&quot; OR sourcetype=&quot;zeek:conn:json&quot;
+| where id_resp_p=5355 OR id_resp_p=137
+| where NOT cidrmatch(&quot;10.10.0.0/24&quot;, id_resp_h)
+| stats count dc(id_orig_h) as unique_victims by id_resp_h
+| where unique_victims &gt; 3
+| table id_resp_h unique_victims count
+| rename id_resp_h as suspicious_responder</code></pre>
+<pre><code># PowerShell: Detect LLMNR and NBT-NS activity on local network
+# Run on a monitoring host to identify Responder-like behavior
+
+# Check if LLMNR is disabled (should be disabled to prevent poisoning)
+$llmnr = Get-ItemProperty -Path &quot;HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\DNSClient&quot; `
+    -Name &quot;EnableMulticast&quot; -ErrorAction SilentlyContinue
+Write-Host &quot;[*] LLMNR Status: $(if ($llmnr.EnableMulticast -eq 0) { 'DISABLED (Good)' } else { 'ENABLED (Vulnerable to Responder)' })&quot;
+
+# Check if NBT-NS is disabled
+$adapters = Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter &quot;IPEnabled=True&quot;
+foreach ($adapter in $adapters) {
+    $nbtns = $adapter.TcpipNetbios
+    $status = switch ($nbtns) {
+        0 { &quot;Default (Enabled)&quot; }
+        1 { &quot;Enabled&quot; }
+        2 { &quot;Disabled (Good)&quot; }
+    }
+    Write-Host &quot;[*] Adapter '$($adapter.Description)' NBT-NS: $status&quot;
+}
+
+# Query Windows Firewall logs for LLMNR/NBT-NS traffic
+Get-WinEvent -LogName &quot;Microsoft-Windows-Windows Firewall With Advanced Security/Firewall&quot; `
+    -MaxEvents 1000 -ErrorAction SilentlyContinue |
+    Where-Object {
+        $_.Message -match &quot;5355|137&quot; -and $_.Message -match &quot;UDP&quot;
+    } |
+    Select-Object TimeCreated, @{N='Detail';E={$_.Message.Substring(0,200)}} |
+    Format-Table -AutoSize</code></pre>
+<pre><code># Sigma Rule: Responder LLMNR/NBT-NS Poisoning Detection
+title: Potential Responder LLMNR/NBT-NS Poisoning Activity
+id: 7a8b9c0d-e1f2-3a4b-5c6d-7e8f9a0b1c2d
+status: stable
+description: &gt;
+  Detects a single host responding to LLMNR (UDP 5355) or NBT-NS (UDP 137)
+  queries from multiple unique sources, indicating possible Responder poisoning.
+references:
+    - https://www.hackthebox.com/blog/ntlm-relay-attack-detection
+    - https://blog.fox-it.com/2017/05/09/relaying-credentials-everywhere-with-ntlmrelayx/
+logsource:
+    category: firewall
+detection:
+    selection:
+        dst_port:
+            - 5355
+            - 137
+        action: allow
+    condition: selection | count(src_ip) by dst_ip &gt; 5
+    timeframe: 5m
+level: high
+tags:
+    - attack.credential_access
+    - attack.t1557.001
+falsepositives:
+    - Legitimate WINS servers or DNS servers responding to broadcast queries
+    - Network discovery tools performing name resolution</code></pre>
+<h4>Step 4: SMB Signing Enforcement Audit</h4>
+<pre><code># PowerShell: Audit SMB Signing Status Across Domain
+# SMB signing prevents NTLM relay to SMB services
+
+# Check local SMB signing configuration
+Write-Host &quot;=== LOCAL SMB SIGNING STATUS ===&quot;
+$smbServer = Get-SmbServerConfiguration
+Write-Host &quot;[*] SMB Server RequireSecuritySignature: $($smbServer.RequireSecuritySignature)&quot;
+Write-Host &quot;[*] SMB Server EnableSecuritySignature: $($smbServer.EnableSecuritySignature)&quot;
+
+$smbClient = Get-SmbClientConfiguration
+Write-Host &quot;[*] SMB Client RequireSecuritySignature: $($smbClient.RequireSecuritySignature)&quot;
+Write-Host &quot;[*] SMB Client EnableSecuritySignature: $($smbClient.EnableSecuritySignature)&quot;
+
+# Check via registry (works on older systems)
+$serverSigning = Get-ItemProperty -Path &quot;HKLM:\SYSTEM\CurrentControlSet\Services\LanManServer\Parameters&quot; `
+    -Name &quot;RequireSecuritySignature&quot; -ErrorAction SilentlyContinue
+$clientSigning = Get-ItemProperty -Path &quot;HKLM:\SYSTEM\CurrentControlSet\Services\LanManWorkstation\Parameters&quot; `
+    -Name &quot;RequireSecuritySignature&quot; -ErrorAction SilentlyContinue
+
+Write-Host &quot;`n=== REGISTRY VALUES ===&quot;
+Write-Host &quot;[*] Server RequireSecuritySignature: $($serverSigning.RequireSecuritySignature) (1=Required, 0=Not Required)&quot;
+Write-Host &quot;[*] Client RequireSecuritySignature: $($clientSigning.RequireSecuritySignature) (1=Required, 0=Not Required)&quot;</code></pre>
+<pre><code># PowerShell: Domain-Wide SMB Signing Audit
+# Scan all domain computers for SMB signing enforcement
+
+$domainComputers = Get-ADComputer -Filter * -Properties OperatingSystem |
+    Where-Object { $_.OperatingSystem -like &quot;*Windows*&quot; -and $_.Enabled -eq $true } |
+    Select-Object -ExpandProperty DNSHostName
+
+$results = @()
+foreach ($computer in $domainComputers) {
+    try {
+        $session = New-CimSession -ComputerName $computer -ErrorAction Stop
+        $smbConfig = Get-SmbServerConfiguration -CimSession $session -ErrorAction Stop
+        $results += [PSCustomObject]@{
+            Computer = $computer
+            RequireSigning = $smbConfig.RequireSecuritySignature
+            EnableSigning = $smbConfig.EnableSecuritySignature
+            Status = if ($smbConfig.RequireSecuritySignature) { &quot;ENFORCED&quot; } else { &quot;VULNERABLE&quot; }
+        }
+        Remove-CimSession $session
+    } catch {
+        $results += [PSCustomObject]@{
+            Computer = $computer
+            RequireSigning = &quot;ERROR&quot;
+            EnableSigning = &quot;ERROR&quot;
+            Status = &quot;UNREACHABLE&quot;
+        }
+    }
+}
+
+# Display results sorted by vulnerability
+$results | Sort-Object Status | Format-Table -AutoSize
+
+# Export vulnerable hosts
+$vulnerable = $results | Where-Object { $_.Status -eq &quot;VULNERABLE&quot; }
+Write-Host &quot;`n[!] VULNERABLE HOSTS (SMB Signing Not Required): $($vulnerable.Count)&quot;
+$vulnerable | Export-Csv -Path &quot;smb_signing_audit.csv&quot; -NoTypeInformation</code></pre>
+<pre><code># PowerShell: Audit LDAP Signing Status on Domain Controllers
+# LDAP signing prevents NTLM relay to LDAP/LDAPS services
+
+# Check LDAP signing requirement on domain controllers
+$dcs = Get-ADDomainController -Filter * | Select-Object -ExpandProperty HostName
+
+foreach ($dc in $dcs) {
+    # Check LDAP server signing requirement
+    $ldapSigning = Invoke-Command -ComputerName $dc -ScriptBlock {
+        $regPath = &quot;HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters&quot;
+        $value = Get-ItemProperty -Path $regPath -Name &quot;LDAPServerIntegrity&quot; -ErrorAction SilentlyContinue
+        return $value.LDAPServerIntegrity
+    } -ErrorAction SilentlyContinue
+
+    $status = switch ($ldapSigning) {
+        0 { &quot;NONE (Vulnerable)&quot; }
+        1 { &quot;Negotiate Signing (Default - Vulnerable to relay)&quot; }
+        2 { &quot;Require Signing (Secure)&quot; }
+        default { &quot;Unknown/Error&quot; }
+    }
+    Write-Host &quot;[*] $dc LDAP Signing: $status&quot;
+
+    # Check LDAP channel binding
+    $channelBinding = Invoke-Command -ComputerName $dc -ScriptBlock {
+        $regPath = &quot;HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters&quot;
+        $value = Get-ItemProperty -Path $regPath -Name &quot;LdapEnforceChannelBinding&quot; -ErrorAction SilentlyContinue
+        return $value.LdapEnforceChannelBinding
+    } -ErrorAction SilentlyContinue
+
+    $cbStatus = switch ($channelBinding) {
+        0 { &quot;Disabled (Vulnerable)&quot; }
+        1 { &quot;When Supported&quot; }
+        2 { &quot;Always Required (Secure)&quot; }
+        default { &quot;Not Configured (Vulnerable)&quot; }
+    }
+    Write-Host &quot;[*] $dc LDAP Channel Binding: $cbStatus&quot;
+}</code></pre>
+<pre><code># Splunk: Monitor for SMB sessions without signing
+# Requires Zeek SMB logging or packet capture analysis
+
+index=network sourcetype=&quot;zeek:smb_mapping:json&quot; OR sourcetype=&quot;bro:smb_mapping:json&quot;
+| where NOT security_mode=&quot;signing_required&quot;
+| stats count dc(id_orig_h) as unique_clients by id_resp_h security_mode
+| sort -unique_clients
+| rename id_resp_h as smb_server
+| table smb_server security_mode unique_clients count</code></pre>
+<h4>Step 5: NTLM Downgrade Detection</h4>
+<pre><code># Splunk: Detect NTLMv1 Authentication (Downgrade from NTLMv2)
+# NTLMv1 is weaker and easier to relay/crack -- should not be in use
+
+index=wineventlog EventCode=4624 LogonType=3
+    LmPackageName=&quot;NTLM V1&quot;
+| where TargetUserName != &quot;ANONYMOUS LOGON&quot;
+    AND NOT match(TargetUserName, &quot;.*\\$$&quot;)
+| stats count values(ComputerName) as targets
+    values(IpAddress) as source_ips
+    by TargetUserName LmPackageName
+| table TargetUserName LmPackageName source_ips targets count
+| sort -count</code></pre>
+<pre><code># Splunk: Detect NTLM Downgrade Attack Pattern
+# NTLMv1 appearing after a period of only NTLMv2 suggests active downgrade
+
+index=wineventlog EventCode=4624 LogonType=3
+    AuthenticationPackageName=&quot;NTLM&quot;
+| where TargetUserName != &quot;ANONYMOUS LOGON&quot;
+| bin _time span=1h
+| stats count(eval(LmPackageName=&quot;NTLM V1&quot;)) as ntlmv1_count
+    count(eval(LmPackageName=&quot;NTLM V2&quot;)) as ntlmv2_count
+    by _time
+| where ntlmv1_count &gt; 0
+| eval ntlmv1_ratio = round(ntlmv1_count / (ntlmv1_count + ntlmv2_count) * 100, 2)
+| table _time ntlmv1_count ntlmv2_count ntlmv1_ratio
+| sort -_time</code></pre>
+<pre><code>-- Microsoft Sentinel KQL: NTLMv1 Downgrade Detection
+
+SecurityEvent
+| where EventID == 4624 and LogonType == 3
+| where AuthenticationPackageName == &quot;NTLM&quot;
+| where LmPackageName == &quot;NTLM V1&quot;
+| where TargetUserName !endswith &quot;$&quot;
+| where TargetUserName != &quot;ANONYMOUS LOGON&quot;
+| project TimeGenerated, Computer, TargetUserName, WorkstationName,
+    IpAddress, LmPackageName, LogonProcessName
+| sort by TimeGenerated desc</code></pre>
+<pre><code># PowerShell: Detect NTLMv1 Authentication Events on Local System
+
+$ntlmv1Events = Get-WinEvent -LogName Security -FilterXPath @&quot;
+*[System[(EventID=4624)]]
+ and
+*[EventData[Data[@Name='LmPackageName']='NTLM V1']]
+&quot;@ -MaxEvents 500 -ErrorAction SilentlyContinue
+
+if ($ntlmv1Events.Count -gt 0) {
+    Write-Host &quot;[!] WARNING: $($ntlmv1Events.Count) NTLMv1 authentication events detected!&quot; -ForegroundColor Red
+    $ntlmv1Events | ForEach-Object {
+        $xml = [xml]$_.ToXml()
+        $eventData = $xml.Event.EventData.Data
+        [PSCustomObject]@{
+            Time         = $_.TimeCreated
+            TargetUser   = ($eventData | Where-Object { $_.Name -eq &quot;TargetUserName&quot; }).'#text'
+            Workstation  = ($eventData | Where-Object { $_.Name -eq &quot;WorkstationName&quot; }).'#text'
+            SourceIP     = ($eventData | Where-Object { $_.Name -eq &quot;IpAddress&quot; }).'#text'
+            LmPackage    = ($eventData | Where-Object { $_.Name -eq &quot;LmPackageName&quot; }).'#text'
+        }
+    } | Format-Table -AutoSize
+} else {
+    Write-Host &quot;[+] No NTLMv1 authentication events found (Good)&quot; -ForegroundColor Green
+}
+
+# Audit GPO settings for NTLM restriction
+Write-Host &quot;`n=== NTLM RESTRICTION POLICY ===&quot;
+$ntlmPolicy = Get-ItemProperty -Path &quot;HKLM:\SYSTEM\CurrentControlSet\Control\Lsa&quot; `
+    -Name &quot;LmCompatibilityLevel&quot; -ErrorAction SilentlyContinue
+
+$level = switch ($ntlmPolicy.LmCompatibilityLevel) {
+    0 { &quot;Send LM &amp; NTLM responses (Most Vulnerable)&quot; }
+    1 { &quot;Send LM &amp; NTLM - use NTLMv2 session security if negotiated&quot; }
+    2 { &quot;Send NTLM response only&quot; }
+    3 { &quot;Send NTLMv2 response only (Recommended minimum)&quot; }
+    4 { &quot;Send NTLMv2 response only, refuse LM&quot; }
+    5 { &quot;Send NTLMv2 response only, refuse LM &amp; NTLM (Most Secure)&quot; }
+    default { &quot;Not configured (defaults to 3 on modern Windows)&quot; }
+}
+Write-Host &quot;[*] LmCompatibilityLevel: $($ntlmPolicy.LmCompatibilityLevel) - $level&quot;</code></pre>
+<h4>Step 6: NTLM Audit and Restriction Policy Configuration</h4>
+<pre><code># PowerShell: Enable NTLM Auditing via Group Policy Registry Settings
+# Must be applied via GPO for domain-wide coverage
+
+# Audit all NTLM authentication in this domain
+# GPO: Computer Configuration &gt; Policies &gt; Windows Settings &gt; Security Settings &gt;
+#      Local Policies &gt; Security Options &gt;
+#      Network Security: Restrict NTLM: Audit NTLM authentication in this domain = Enable all
+
+# Registry equivalent (apply via GPO preferences or startup script)
+# Domain Controller setting:
+# Set-ItemProperty -Path &quot;HKLM:\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters&quot; `
+#     -Name &quot;AuditNTLMInDomain&quot; -Value 7 -Type DWord
+
+# Audit incoming NTLM traffic on all servers:
+# Set-ItemProperty -Path &quot;HKLM:\SYSTEM\CurrentControlSet\Control\Lsa\MSV1_0&quot; `
+#     -Name &quot;AuditReceivingNTLMTraffic&quot; -Value 2 -Type DWord
+
+# After enabling auditing, NTLM events appear in:
+# Applications and Services Logs &gt; Microsoft &gt; Windows &gt; NTLM &gt; Operational
+
+# Query NTLM operational log for audit events
+Get-WinEvent -LogName &quot;Microsoft-Windows-NTLM/Operational&quot; -MaxEvents 200 -ErrorAction SilentlyContinue |
+    Where-Object { $_.Id -in @(8001, 8002, 8003, 8004) } |
+    Select-Object TimeCreated, Id,
+        @{N='EventType'; E={
+            switch ($_.Id) {
+                8001 { &quot;NTLM client blocked audit&quot; }
+                8002 { &quot;NTLM server blocked audit&quot; }
+                8003 { &quot;NTLM server blocked in domain&quot; }
+                8004 { &quot;NTLM authentication to DC audit&quot; }
+            }
+        }},
+        @{N='Detail'; E={$_.Message.Substring(0, [Math]::Min(300, $_.Message.Length))}} |
+    Format-Table -AutoSize</code></pre>
+<pre><code># Splunk: Monitor NTLM Audit Events (Event ID 8004)
+# Shows all NTLM authentications passing through domain controllers
+
+index=wineventlog source=&quot;WinEventLog:Microsoft-Windows-NTLM/Operational&quot;
+    EventCode=8004
+| rex field=Message &quot;Calling client name:\s+(?&lt;client_name&gt;[^\r\n]+)&quot;
+| rex field=Message &quot;Calling client IP:\s+(?&lt;client_ip&gt;[^\r\n]+)&quot;
+| rex field=Message &quot;Server name:\s+(?&lt;server_name&gt;[^\r\n]+)&quot;
+| stats count dc(server_name) as unique_servers by client_name client_ip
+| sort -count
+| table client_name client_ip unique_servers count</code></pre>
+<h4>Step 7: PetitPotam and Coercion Attack Detection</h4>
+<pre><code># Splunk: Detect PetitPotam / EFSCoerce Attack
+# Monitor for machine account NTLM authentications relayed to other services
+
+index=wineventlog EventCode=4624 LogonType=3
+    AuthenticationPackageName=&quot;NTLM&quot;
+    TargetUserName=&quot;*$&quot;
+| where match(TargetUserName, &quot;^[A-Z0-9\\-]+\\$$&quot;)
+| eval is_dc = if(match(TargetUserName, &quot;(DC|DCSERVER|DOMCTRL)&quot;), &quot;Yes&quot;, &quot;No&quot;)
+| where IpAddress != &quot;127.0.0.1&quot; AND IpAddress != &quot;::1&quot;
+| stats count values(ComputerName) as target_hosts
+    values(IpAddress) as source_ips by TargetUserName
+| where count &gt; 2 OR mvcount(source_ips) &gt; 1
+| table TargetUserName source_ips target_hosts count
+| sort -count</code></pre>
+<pre><code>-- Microsoft Sentinel KQL: PetitPotam / Coercion Attack Detection
+-- Detects domain controller machine account authenticating from unexpected IPs
+
+let dc_accounts = SecurityEvent
+| where EventID == 4624 and LogonType == 3
+| where TargetUserName endswith &quot;$&quot;
+| where Computer startswith &quot;DC&quot;
+| distinct TargetUserName;
+
+SecurityEvent
+| where EventID == 4624 and LogonType == 3
+| where AuthenticationPackageName == &quot;NTLM&quot;
+| where TargetUserName in (dc_accounts)
+| where IpAddress != &quot;127.0.0.1&quot; and IpAddress != &quot;::1&quot;
+| extend SourceHostExpected = iff(
+    Computer == replace_string(TargetUserName, &quot;$&quot;, &quot;&quot;), true, false)
+| where SourceHostExpected == false
+| project TimeGenerated, Computer, TargetUserName, IpAddress,
+    WorkstationName, LogonProcessName, AuthenticationPackageName
+| sort by TimeGenerated desc</code></pre>
+<pre><code># Sigma Rule: NTLM Relay - Computer Account Authentication from Unexpected Source
+title: Potential NTLM Relay of Computer Account Credentials
+id: 5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b
+status: stable
+description: &gt;
+  Detects a computer account (ending in $) authenticating via NTLM LogonType 3
+  where the source IP does not match the computer's known IP, indicating possible
+  NTLM relay of coerced machine authentication (PetitPotam, DFSCoerce, PrinterBug).
+references:
+    - https://www.crowdstrike.com/en-us/blog/how-to-detect-domain-controller-account-relay-attacks-with-crowdstrike-identity-protection/
+    - https://www.fox-it.com/nl-en/research-blog/detecting-and-hunting-for-the-petitpotam-ntlm-relay-attack/
+    - https://www.nccgroup.com/research-blog/detecting-and-hunting-for-the-petitpotam-ntlm-relay-attack/
+logsource:
+    product: windows
+    service: security
+detection:
+    selection:
+        EventID: 4624
+        LogonType: 3
+        AuthenticationPackageName: NTLM
+        TargetUserName|endswith: '$'
+    filter_localhost:
+        IpAddress:
+            - '127.0.0.1'
+            - '::1'
+            - '-'
+    condition: selection and not filter_localhost
+level: high
+tags:
+    - attack.credential_access
+    - attack.t1557.001
+    - attack.t1187
+falsepositives:
+    - Legitimate NTLM authentication from machine accounts during failover
+    - Cluster service machine account authentication</code></pre>
+<h4>Step 8: Build Comprehensive Correlation Dashboard</h4>
+<pre><code># Splunk: NTLM Relay Detection Dashboard -- Combined Correlation Query
+
+# Panel 1: IP-Hostname Mismatches (Core Relay Indicator)
+index=wineventlog EventCode=4624 LogonType=3 AuthenticationPackageName=&quot;NTLM&quot;
+| where TargetUserName != &quot;ANONYMOUS LOGON&quot; AND NOT match(TargetUserName, &quot;.*\\$$&quot;)
+| eval mismatch=if(lower(WorkstationName) != lower(mvindex(split(IpAddress, &quot;.&quot;), 0)),
+    &quot;POSSIBLE_MISMATCH&quot;, &quot;OK&quot;)
+| where mismatch=&quot;POSSIBLE_MISMATCH&quot;
+| stats count by TargetUserName WorkstationName IpAddress ComputerName
+
+# Panel 2: NTLMv1 Downgrade Events
+index=wineventlog EventCode=4624 LmPackageName=&quot;NTLM V1&quot;
+| timechart span=1h count by ComputerName
+
+# Panel 3: Machine Account Relay (PetitPotam Indicator)
+index=wineventlog EventCode=4624 LogonType=3 AuthenticationPackageName=&quot;NTLM&quot;
+    TargetUserName=&quot;*$&quot;
+| stats count values(IpAddress) as relay_sources by TargetUserName ComputerName
+
+# Panel 4: NTLM Authentication Volume Anomaly
+index=wineventlog EventCode=4624 LogonType=3 AuthenticationPackageName=&quot;NTLM&quot;
+| timechart span=15m count
+| streamstats window=20 avg(count) as avg_count stdev(count) as stdev_count
+| eval upper_bound=avg_count + (3 * stdev_count)
+| where count &gt; upper_bound
+
+# Panel 5: SMB Signing Status (from audit results)
+| inputlookup smb_signing_audit.csv
+| stats count by Status
+| table Status count</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | <strong>NTLM Relay (T1557.001)</strong> | Attack that intercepts NTLM authentication messages and forwards them to a target service, authenticating as the victim without knowing their password | | <strong>Event 4624 LogonType 3</strong> | Windows Security Event for successful network logon -- the primary event generated on relay targets; source IP field reveals the relay attacker's address | | <strong>IP-Hostname Mismatch</strong> | When Event 4624 WorkstationName field does not correspond to the IpAddress field, indicating the authentication was relayed through a third party | | <strong>Responder</strong> | Attack tool that poisons LLMNR (UDP 5355), NBT-NS (UDP 137), and mDNS (UDP 5353) responses to capture NTLM authentication from victims on the local network | | <strong>ntlmrelayx</strong> | Fox-IT/Impacket tool that relays captured NTLM authentication to SMB, LDAP, HTTP, MSSQL, and other protocols to gain unauthorized access | | <strong>SMB Signing</strong> | Cryptographic signing of SMB packets that prevents relay attacks against SMB services; must be set to &quot;Required&quot; (not just &quot;Enabled&quot;) for protection | | <strong>LDAP Signing</strong> | Cryptographic signing of LDAP operations that prevents relay attacks against LDAP services on domain controllers; controlled by LDAPServerIntegrity registry value | | <strong>LDAP Channel Binding</strong> | Extended Protection for Authentication (EPA) that binds the NTLM authentication to the TLS channel, preventing relay to LDAPS | | <strong>NTLMv1 Downgrade</strong> | Attack forcing authentication from NTLMv2 to the weaker NTLMv1 protocol, which is easier to crack offline and has weaker relay protections | | <strong>PetitPotam</strong> | Coercion technique abusing MS-EFSRPC to force a domain controller to authenticate to an attacker-controlled host, enabling relay to AD CS or LDAP | | <strong>LmCompatibilityLevel</strong> | Registry setting controlling which NTLM version is used; value of 5 (Send NTLMv2 only, refuse LM and NTLM) provides strongest protection | | <strong>Event 8004</strong> | NTLM operational log event on domain controllers showing all NTLM authentication pass-through, critical for auditing NTLM usage before restriction |</p>
+<h3>Tools &amp; Systems</h3>
+<p>| Tool | Purpose | |------|---------| | <strong>Splunk / Elastic SIEM</strong> | Log aggregation and correlation for Event 4624 analysis, IP-hostname mismatch detection, and NTLM downgrade monitoring | | <strong>Microsoft Sentinel</strong> | Cloud SIEM with KQL queries for NTLM relay detection and built-in analytics rules for PetitPotam | | <strong>CrowdStrike Falcon Identity Protection</strong> | Detects NTLM relay attacks against domain controller accounts regardless of coercion method used | | <strong>Responder</strong> | LLMNR/NBT-NS/mDNS poisoning tool used by attackers -- understanding its behavior is essential for detection | | <strong>ntlmrelayx (Impacket)</strong> | Multi-protocol NTLM relay tool developed by Fox-IT -- used in testing and by adversaries | | <strong>PingCastle</strong> | Active Directory security assessment tool that audits SMB signing, LDAP signing, and NTLM configuration | | <strong>Zeek</strong> | Network security monitor for capturing SMB signing negotiation, LLMNR traffic, and DCE-RPC activity | | <strong>Sigma</strong> | Vendor-agnostic detection rule format for portable NTLM relay detection rules |</p>
+<h3>Common Scenarios</h3>
+<h4>Scenario 1: Responder Poisoning with NTLM Relay to File Server</h4>
+<p><strong>Context</strong>: A SOC analyst observes multiple Event 4624 LogonType 3 entries on a file server (10.10.20.100) where the WorkstationName field shows different workstation names but the IpAddress field consistently shows 10.10.5.50, a host not in the IT asset inventory.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Query Event 4624 on 10.10.20.100 filtered for IpAddress=10.10.5.50: find 15 successful NTLM logons in 30 minutes from 8 different user accounts</li>
+<li>Cross-reference 10.10.5.50 with DHCP logs and DNS: host is not a registered domain member, MAC address shows a Linux-based NIC</li>
+<li>Query Zeek network logs for 10.10.5.50: identify LLMNR responses (UDP 5355) to multiple workstations and SMB connections to 10.10.20.100</li>
+<li>Confirm IP-hostname mismatch: WorkstationName values (WS-FINANCE01, WS-HR03, etc.) all resolve to different IPs in DNS, not 10.10.5.50</li>
+<li>Check SMB signing on 10.10.20.100: RequireSecuritySignature is False, enabling the relay attack</li>
+<li>Contain: block 10.10.5.50 at the switch, force password reset for all 8 affected accounts, enable SMB signing on the file server</li>
+<li>Remediate: disable LLMNR and NBT-NS via GPO, enforce SMB signing domain-wide</li>
+</ol>
+<p><strong>Pitfalls</strong>:</p>
+<ul>
+<li>Dismissing the multiple logons as normal network activity without checking the IP-hostname correlation</li>
+<li>Not checking SMB signing status on the target server to understand why the relay succeeded</li>
+<li>Only resetting the password for one user instead of all accounts that were relayed</li>
+</ul>
+<h4>Scenario 2: PetitPotam Relay to AD Certificate Services</h4>
+<p><strong>Context</strong>: During a threat hunt, an analyst finds Event 4624 LogonType 3 on the AD CS server (ADCS01) showing the domain controller machine account (DC01$) authenticating via NTLM from IP 10.10.5.50, which is not the DC's IP address (10.10.1.10).</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Confirm the anomaly: DC01$ should only authenticate from 10.10.1.10, but Event 4624 shows authentication from 10.10.5.50 via NTLM (not Kerberos)</li>
+<li>Check for certificate enrollment: query AD CS logs for certificate requests from DC01$ around the same timestamp -- find a certificate issued for DC01$</li>
+<li>Identify the attack: PetitPotam coerced DC01 to authenticate to 10.10.5.50, which relayed the authentication to ADCS01 to request a certificate for DC01$</li>
+<li>Assess impact: with a DC certificate, the attacker can authenticate as DC01$ and perform DCSync to extract all domain credentials</li>
+<li>Revoke the fraudulently issued certificate immediately</li>
+<li>Check for DCSync activity: query Event 4662 for directory replication from non-DC sources</li>
+<li>Contain: isolate 10.10.5.50, revoke certificate, patch EFS (MS-EFSRPC), enforce EPA on AD CS, require LDAP signing on all DCs</li>
+</ol>
+<p><strong>Pitfalls</strong>:</p>
+<ul>
+<li>Not recognizing that machine account NTLM authentication from an unexpected IP is a critical indicator of coercion + relay</li>
+<li>Failing to check AD CS for fraudulent certificate issuance, which represents the actual objective of the attack</li>
+<li>Not auditing LDAP signing and EPA on AD CS servers, which would have prevented the relay</li>
+</ul>
+<h3>Output Format</h3>
+<pre><code>Hunt ID: TH-NTLM-RELAY-[DATE]-[SEQ]
+Alert Severity: Critical
+MITRE Technique: T1557.001 (LLMNR/NBT-NS Poisoning and SMB Relay)
+
+Relay Indicators:
+  Victim Account: [Domain\Username or Machine$]
+  WorkstationName: [Victim hostname from Event 4624]
+  Expected Source IP: [IP matching WorkstationName in DNS/DHCP]
+  Actual Source IP: [Attacker/relay IP from Event 4624 IpAddress field]
+  Target Host: [Server receiving the relayed authentication]
+
+Authentication Details:
+  Event ID: 4624
+  LogonType: 3 (Network)
+  AuthenticationPackage: NTLM
+  LmPackageName: [NTLM V1 or NTLM V2]
+  LogonProcess: [NtLmSsp]
+  Timestamp: [Event time]
+
+Signing Status:
+  Target SMB Signing: [Required/Not Required]
+  Target LDAP Signing: [Required/Not Required]
+  LDAP Channel Binding: [Required/Not Required]
+
+Poisoning Evidence:
+  LLMNR Activity: [Detected/Not Detected from relay IP]
+  NBT-NS Activity: [Detected/Not Detected from relay IP]
+  Coercion Method: [PetitPotam/DFSCoerce/PrinterBug/Unknown]
+
+Risk Assessment: [Critical - relay from DC / High - relay from user account]
+Recommended Actions:
+  - Immediate: [Block relay IP, reset affected credentials]
+  - Short-term: [Enable SMB/LDAP signing, disable LLMNR/NBT-NS]
+  - Long-term: [Migrate to Kerberos, enforce EPA, restrict NTLM via GPO]</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: detecting-ntlm-relay-with-event-correlation\ndisplay_name: detecting-ntlm-relay-with-event-correlation\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# detecting-ntlm-relay-with-event-correlation - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `detecting-ntlm-relay-with-event-correlation` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n> **Authorized Testing Disclaimer**: The offensive techniques and attack simulations described in this skill are intended exclusively for authorized penetration testing, red team engagements, purple team exercises, and s\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose detecting-ntlm-relay-with-event-correlation, then write the task. Fallback prompt: Use the detecting-ntlm-relay-with-event-correlation skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `detecting-ntlm-relay-with-event-correlation` |\n| Canonical name | `detecting-ntlm-relay-with-event-correlation` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\n> **Authorized Testing Disclaimer**: The offensive techniques and attack simulations described in this skill are intended exclusively for authorized penetration testing, red team engagements, purple team exercises, and s\n\n## Original SKILL.md\n\n---\nname: detecting-ntlm-relay-with-event-correlation\ndescription: 'Detect NTLM relay attacks through Windows Security Event correlation\n  by analyzing Event 4624 LogonType 3 for IP-to-hostname mismatches, identifying Responder/LLMNR\n  poisoning artifacts, auditing SMB and LDAP signing enforcement across the domain,\n  and detecting NTLM downgrade attacks from NTLMv2 to NTLMv1 using event log analysis.\n\n  '\ndomain: cybersecurity\nsubdomain: threat-hunting\ntags:\n- threat-hunting\n- NTLM-relay\n- event-correlation\n- T1557.001\n- Event-4624\n- Responder\n- SMB-signing\n- LDAP-signing\n- NTLM-downgrade\n- PetitPotam\n- Active-Directory\nversion: '1.0'\nauthor: mukul975\nlicense: Apache-2.0\natlas_techniques:\n- AML.T0051\n- AML.T0054\n- AML.T0056\n- AML.T0020\nd3fend_techniques:\n- Application Protocol Command Analysis\n- Network Isolation\n- Network Traffic Analysis\n- Client-server Payload Profiling\n- Network Traffic Community Deviation\nnist_ai_rmf:\n- MEASURE-2.7\n- MEASURE-2.5\n- GOVERN-6.1\n- MAP-5.1\nnist_csf:\n- DE.CM-01\n- DE.AE-02\n- DE.AE-07\n- ID.RA-05\nmitre_attack:\n- T1046\n- T1057\n- T1082\n- T1083\n- T1069\n---\n\n# Detecting NTLM Relay with Event Correlation\n\n> **Authorized Testing Disclaimer**: The offensive techniques and attack simulations described in this skill are intended exclusively for authorized penetration testing, red team engagements, purple team exercises, and security research conducted with explicit written permission from the system owner. Unauthorized use of these techniques against systems you do not own or have permission to test is illegal and unethical. Always operate within the scope of your engagement and comply with applicable laws and regulations.\n\n## Overview\n\nNTLM relay attacks intercept NTLM authentication messages and forward them to a target service to gain unauthorized access. Attackers use tools like Responder for LLMNR/NBT-NS/mDNS poisoning, ntlmrelayx (Fox-IT/Impacket) for multi-protocol relay, and coercion techniques like PetitPotam (MS-EFSRPC) and DFSCoerce to force authentication from high-value targets like domain controllers. This skill provides a comprehensive event correlation framework using Windows Security Event 4624 LogonType 3 analysis, IP-to-hostname mismatch detection, Responder traffic identification, SMB/LDAP signing audit, and NTLM downgrade detection to identify relay attacks across Active Directory environments.\n\n## When to Use\n\n- Hunting for credential relay activity in Active Directory environments where NTLM authentication is still in use\n- Investigating alerts for authentication anomalies where the source IP does not match the expected workstation\n- Auditing SMB signing and LDAP signing enforcement to assess exposure to relay attacks\n- Detecting NTLM downgrade attacks where NTLMv2 is forced to NTLMv1 for easier offline cracking or relay\n- Building SIEM correlation rules for MITRE ATT&CK T1557.001 (LLMNR/NBT-NS Poisoning and SMB Relay)\n- Responding to PetitPotam, DFSCoerce, or PrinterBug coercion alerts that may precede relay attacks\n- During purple team exercises validating NTLM relay detection and SMB signing enforcement\n\n**Do not use** without centralized Windows Security Event Log collection, as a substitute for enforcing SMB signing and Extended Protection for Authentication (EPA) which prevent relay attacks at the protocol level, or without an IP-to-hostname inventory for correlation.\n\n## Prerequisites\n\n- Windows Advanced Audit Policy configured to capture Event IDs 4624, 4625, 4648, 4776, and 8004\n- Centralized log collection via Windows Event Forwarding (WEF) or agent-based shipping to SIEM\n- SIEM platform (Splunk, Elastic, Microsoft Sentinel) with correlation and alerting capability\n- IP address to hostname mapping inventory (DHCP logs, DNS records, or CMDB)\n- Network monitoring for LLMNR (UDP 5355), NBT-NS (UDP 137), and mDNS (UDP 5353) traffic\n- Understanding of MITRE ATT&CK T1557.001 and T1187 (Forced Authentication)\n\n## Workflow\n\n### Step 1: Understand NTLM Relay Attack Flow\n\nThe NTLM relay attack follows a three-phase pattern: coercion/poisoning, interception, and relay.\n\n**Phase 1 -- Coercion or Poisoning**: The attacker forces or tricks a victim into initiating NTLM authentication. Methods include LLMNR/NBT-NS poisoning (Responder), PetitPotam (MS-EFSRPC abuse), PrinterBug (SpoolService), and DFSCoerce.\n\n**Phase 2 -- Interception**: The attacker captures the NTLM Type 1 (Negotiate) and Type 3 (Authenticate) messages from the victim.\n\n**Phase 3 -- Relay**: The attacker forwards the captured NTLM messages to a target service (SMB, LDAP, HTTP, MSSQL) to authenticate as the victim. This succeeds only when message signing is not enforced.\n\n```\nVictim ──NTLM Negotiate──> Attacker ──NTLM Negotiate──> Target\nVictim \u003c──NTLM Challenge── Attacker \u003c──NTLM Challenge── Target\nVictim ──NTLM Authenticate──> Attacker ──NTLM Authenticate──> Target\n                                                         ↓\n                                              Attacker authenticated\n                                              as Victim on Target\n```\n\n**Key Detection Insight**: In a relay attack, Event 4624 on the target will show the victim's username but the attacker's IP address. The WorkstationName field may still reflect the victim's machine. This IP-to-hostname mismatch is the primary detection signal.\n\n### Step 2: Event 4624 LogonType 3 Analysis for Relay Detection\n\n```spl\n# Splunk: Detect IP-to-Hostname Mismatches in Network Logons\n# Core NTLM relay detection -- correlates WorkstationName with IpAddress\n\nindex=wineventlog EventCode=4624 LogonType=3\n    AuthenticationPackageName=\"NTLM\" LmPackageName=\"NTLM V2\"\n| where TargetUserName != \"ANONYMOUS LOGON\"\n    AND TargetUserName != \"-\"\n    AND NOT match(TargetUserName, \".*\\\\$$\")\n| eval workstation_lower=lower(WorkstationName)\n| lookup dns_inventory.csv hostname AS workstation_lower OUTPUT expected_ip\n| where isnotnull(expected_ip) AND IpAddress != expected_ip\n| table _time ComputerName TargetUserName WorkstationName IpAddress expected_ip\n    LogonProcessName AuthenticationPackageName\n| sort -_time\n| rename ComputerName as TargetHost, IpAddress as ActualSourceIP,\n    expected_ip as ExpectedSourceIP\n```\n\n```spl\n# Splunk: Detect Rapid Multi-Host Authentication (Relay Spraying)\n# Attackers relay captured credentials to multiple targets quickly\n\nindex=wineventlog EventCode=4624 LogonType=3\n    AuthenticationPackageName=\"NTLM\"\n| where TargetUserName != \"ANONYMOUS LOGON\"\n    AND NOT match(TargetUserName, \".*\\\\$$\")\n| bin _time span=2m\n| stats dc(ComputerName) as target_count values(ComputerName) as targets\n    values(IpAddress) as source_ips by _time TargetUserName\n| where target_count > 3\n| table _time TargetUserName source_ips target_count targets\n| sort -target_count\n```\n\n```spl\n# Splunk: Detect NTLM Authentication from Non-Workstation IPs\n# Relay tools often run from Linux attack boxes not in DNS/DHCP inventory\n\nindex=wineventlog EventCode=4624 LogonType=3\n    AuthenticationPackageName=\"NTLM\"\n| where TargetUserName != \"ANONYMOUS LOGON\"\n    AND NOT match(TargetUserName, \".*\\\\$$\")\n| lookup dhcp_leases.csv ip AS IpAddress OUTPUT mac_address hostname\n| where isnull(hostname)\n| stats count dc(ComputerName) as targets_hit values(ComputerName) as target_hosts\n    by IpAddress TargetUserName WorkstationName\n| where count > 1\n| table IpAddress TargetUserName WorkstationName targets_hit target_hosts count\n| sort -targets_hit\n```\n\n```kql\n-- Microsoft Sentinel KQL: NTLM Relay Detection via IP-Hostname Mismatch\n\nlet known_hosts = datatable(WorkstationName:string, ExpectedIP:string)\n[\n    // Populate from CMDB or use DeviceNetworkInfo table\n];\nSecurityEvent\n| where EventID == 4624 and LogonType == 3\n| where AuthenticationPackageName == \"NTLM\"\n| where TargetUserName !endswith \"$\"\n| where TargetUserName != \"ANONYMOUS LOGON\"\n| where IpAddress != \"-\" and IpAddress != \"::1\" and IpAddress != \"127.0.0.1\"\n| extend WorkstationClean = toupper(trim_end(@\"\\s+\", WorkstationName))\n| join kind=inner (known_hosts) on WorkstationName\n| where IpAddress != ExpectedIP\n| project TimeGenerated, Computer, TargetUserName, WorkstationName,\n    IpAddress, ExpectedIP, LogonProcessName, AuthenticationPackageName,\n    LmPackageName\n| sort by TimeGenerated desc\n```\n\n```kql\n-- Microsoft Sentinel KQL: Rapid NTLM Authentication to Multiple Targets\n\nSecurityEvent\n| where EventID == 4624 and LogonType == 3\n| where AuthenticationPackageName == \"NTLM\"\n| where TargetUserName !endswith \"$\"\n| where TargetUserName != \"ANONYMOUS LOGON\"\n| summarize TargetCount=dcount(Computer),\n    Targets=make_set(Computer),\n    SourceIPs=make_set(IpAddress),\n    AuthCount=count()\n    by TargetUserName, bin(TimeGenerated, 2m)\n| where TargetCount > 3\n| project TimeGenerated, TargetUserName, SourceIPs, TargetCount, Targets, AuthCount\n| sort by TargetCount desc\n```\n\n### Step 3: Responder Detection via Network and Event Analysis\n\n```spl\n# Splunk: Detect Responder LLMNR/NBT-NS Poisoning via Network Logs\n# Responder answers LLMNR (UDP 5355) and NBT-NS (UDP 137) queries\n\nindex=network sourcetype=zeek_dns\n| where query_type IN (\"LLMNR\", \"NBNS\")\n    OR id.resp_p IN (5355, 137)\n| stats dc(id.orig_h) as victims count by id.resp_h answers\n| where count > 10\n| rename id.resp_h as responder_ip\n| table responder_ip victims answers count\n| sort -count\n```\n\n```spl\n# Splunk: Detect LLMNR/NBT-NS Response from Non-DNS Servers\n# Legitimate DNS servers respond to these; Responder impersonates them\n\nindex=network sourcetype=\"bro:dns:json\" OR sourcetype=\"zeek:conn:json\"\n| where id_resp_p=5355 OR id_resp_p=137\n| where NOT cidrmatch(\"10.10.0.0/24\", id_resp_h)\n| stats count dc(id_orig_h) as unique_victims by id_resp_h\n| where unique_victims > 3\n| table id_resp_h unique_victims count\n| rename id_resp_h as suspicious_responder\n```\n\n```powershell\n# PowerShell: Detect LLMNR and NBT-NS activity on local network\n# Run on a monitoring host to identify Responder-like behavior\n\n# Check if LLMNR is disabled (should be disabled to prevent poisoning)\n$llmnr = Get-ItemProperty -Path \"HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient\" `\n    -Name \"EnableMulticast\" -ErrorAction SilentlyContinue\nWrite-Host \"[*] LLMNR Status: $(if ($llmnr.EnableMulticast -eq 0) { 'DISABLED (Good)' } else { 'ENABLED (Vulnerable to Responder)' })\"\n\n# Check if NBT-NS is disabled\n$adapters = Get-WmiObject -Class Win32_NetworkAdapterConfiguration -Filter \"IPEnabled=True\"\nforeach ($adapter in $adapters) {\n    $nbtns = $adapter.TcpipNetbios\n    $status = switch ($nbtns) {\n        0 { \"Default (Enabled)\" }\n        1 { \"Enabled\" }\n        2 { \"Disabled (Good)\" }\n    }\n    Write-Host \"[*] Adapter '$($adapter.Description)' NBT-NS: $status\"\n}\n\n# Query Windows Firewall logs for LLMNR/NBT-NS traffic\nGet-WinEvent -LogName \"Microsoft-Windows-Windows Firewall With Advanced Security/Firewall\" `\n    -MaxEvents 1000 -ErrorAction SilentlyContinue |\n    Where-Object {\n        $_.Message -match \"5355|137\" -and $_.Message -match \"UDP\"\n    } |\n    Select-Object TimeCreated, @{N='Detail';E={$_.Message.Substring(0,200)}} |\n    Format-Table -AutoSize\n```\n\n```yaml\n# Sigma Rule: Responder LLMNR/NBT-NS Poisoning Detection\ntitle: Potential Responder LLMNR/NBT-NS Poisoning Activity\nid: 7a8b9c0d-e1f2-3a4b-5c6d-7e8f9a0b1c2d\nstatus: stable\ndescription: >\n  Detects a single host responding to LLMNR (UDP 5355) or NBT-NS (UDP 137)\n  queries from multiple unique sources, indicating possible Responder poisoning.\nreferences:\n    - https://www.hackthebox.com/blog/ntlm-relay-attack-detection\n    - https://blog.fox-it.com/2017/05/09/relaying-credentials-everywhere-with-ntlmrelayx/\nlogsource:\n    category: firewall\ndetection:\n    selection:\n        dst_port:\n            - 5355\n            - 137\n        action: allow\n    condition: selection | count(src_ip) by dst_ip > 5\n    timeframe: 5m\nlevel: high\ntags:\n    - attack.credential_access\n    - attack.t1557.001\nfalsepositives:\n    - Legitimate WINS servers or DNS servers responding to broadcast queries\n    - Network discovery tools performing name resolution\n```\n\n### Step 4: SMB Signing Enforcement Audit\n\n```powershell\n# PowerShell: Audit SMB Signing Status Across Domain\n# SMB signing prevents NTLM relay to SMB services\n\n# Check local SMB signing configuration\nWrite-Host \"=== LOCAL SMB SIGNING STATUS ===\"\n$smbServer = Get-SmbServerConfiguration\nWrite-Host \"[*] SMB Server RequireSecuritySignature: $($smbServer.RequireSecuritySignature)\"\nWrite-Host \"[*] SMB Server EnableSecuritySignature: $($smbServer.EnableSecuritySignature)\"\n\n$smbClient = Get-SmbClientConfiguration\nWrite-Host \"[*] SMB Client RequireSecuritySignature: $($smbClient.RequireSecuritySignature)\"\nWrite-Host \"[*] SMB Client EnableSecuritySignature: $($smbClient.EnableSecuritySignature)\"\n\n# Check via registry (works on older systems)\n$serverSigning = Get-ItemProperty -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Services\\LanManServer\\Parameters\" `\n    -Name \"RequireSecuritySignature\" -ErrorAction SilentlyContinue\n$clientSigning = Get-ItemProperty -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Services\\LanManWorkstation\\Parameters\" `\n    -Name \"RequireSecuritySignature\" -ErrorAction SilentlyContinue\n\nWrite-Host \"`n=== REGISTRY VALUES ===\"\nWrite-Host \"[*] Server RequireSecuritySignature: $($serverSigning.RequireSecuritySignature) (1=Required, 0=Not Required)\"\nWrite-Host \"[*] Client RequireSecuritySignature: $($clientSigning.RequireSecuritySignature) (1=Required, 0=Not Required)\"\n```\n\n```powershell\n# PowerShell: Domain-Wide SMB Signing Audit\n# Scan all domain computers for SMB signing enforcement\n\n$domainComputers = Get-ADComputer -Filter * -Properties OperatingSystem |\n    Where-Object { $_.OperatingSystem -like \"*Windows*\" -and $_.Enabled -eq $true } |\n    Select-Object -ExpandProperty DNSHostName\n\n$results = @()\nforeach ($computer in $domainComputers) {\n    try {\n        $session = New-CimSession -ComputerName $computer -ErrorAction Stop\n        $smbConfig = Get-SmbServerConfiguration -CimSession $session -ErrorAction Stop\n        $results += [PSCustomObject]@{\n            Computer = $computer\n            RequireSigning = $smbConfig.RequireSecuritySignature\n            EnableSigning = $smbConfig.EnableSecuritySignature\n            Status = if ($smbConfig.RequireSecuritySignature) { \"ENFORCED\" } else { \"VULNERABLE\" }\n        }\n        Remove-CimSession $session\n    } catch {\n        $results += [PSCustomObject]@{\n            Computer = $computer\n            RequireSigning = \"ERROR\"\n            EnableSigning = \"ERROR\"\n            Status = \"UNREACHABLE\"\n        }\n    }\n}\n\n# Display results sorted by vulnerability\n$results | Sort-Object Status | Format-Table -AutoSize\n\n# Export vulnerable hosts\n$vulnerable = $results | Where-Object { $_.Status -eq \"VULNERABLE\" }\nWrite-Host \"`n[!] VULNERABLE HOSTS (SMB Signing Not Required): $($vulnerable.Count)\"\n$vulnerable | Export-Csv -Path \"smb_signing_audit.csv\" -NoTypeInformation\n```\n\n```powershell\n# PowerShell: Audit LDAP Signing Status on Domain Controllers\n# LDAP signing prevents NTLM relay to LDAP/LDAPS services\n\n# Check LDAP signing requirement on domain controllers\n$dcs = Get-ADDomainController -Filter * | Select-Object -ExpandProperty HostName\n\nforeach ($dc in $dcs) {\n    # Check LDAP server signing requirement\n    $ldapSigning = Invoke-Command -ComputerName $dc -ScriptBlock {\n        $regPath = \"HKLM:\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Parameters\"\n        $value = Get-ItemProperty -Path $regPath -Name \"LDAPServerIntegrity\" -ErrorAction SilentlyContinue\n        return $value.LDAPServerIntegrity\n    } -ErrorAction SilentlyContinue\n\n    $status = switch ($ldapSigning) {\n        0 { \"NONE (Vulnerable)\" }\n        1 { \"Negotiate Signing (Default - Vulnerable to relay)\" }\n        2 { \"Require Signing (Secure)\" }\n        default { \"Unknown/Error\" }\n    }\n    Write-Host \"[*] $dc LDAP Signing: $status\"\n\n    # Check LDAP channel binding\n    $channelBinding = Invoke-Command -ComputerName $dc -ScriptBlock {\n        $regPath = \"HKLM:\\SYSTEM\\CurrentControlSet\\Services\\NTDS\\Parameters\"\n        $value = Get-ItemProperty -Path $regPath -Name \"LdapEnforceChannelBinding\" -ErrorAction SilentlyContinue\n        return $value.LdapEnforceChannelBinding\n    } -ErrorAction SilentlyContinue\n\n    $cbStatus = switch ($channelBinding) {\n        0 { \"Disabled (Vulnerable)\" }\n        1 { \"When Supported\" }\n        2 { \"Always Required (Secure)\" }\n        default { \"Not Configured (Vulnerable)\" }\n    }\n    Write-Host \"[*] $dc LDAP Channel Binding: $cbStatus\"\n}\n```\n\n```spl\n# Splunk: Monitor for SMB sessions without signing\n# Requires Zeek SMB logging or packet capture analysis\n\nindex=network sourcetype=\"zeek:smb_mapping:json\" OR sourcetype=\"bro:smb_mapping:json\"\n| where NOT security_mode=\"signing_required\"\n| stats count dc(id_orig_h) as unique_clients by id_resp_h security_mode\n| sort -unique_clients\n| rename id_resp_h as smb_server\n| table smb_server security_mode unique_clients count\n```\n\n### Step 5: NTLM Downgrade Detection\n\n```spl\n# Splunk: Detect NTLMv1 Authentication (Downgrade from NTLMv2)\n# NTLMv1 is weaker and easier to relay/crack -- should not be in use\n\nindex=wineventlog EventCode=4624 LogonType=3\n    LmPackageName=\"NTLM V1\"\n| where TargetUserName != \"ANONYMOUS LOGON\"\n    AND NOT match(TargetUserName, \".*\\\\$$\")\n| stats count values(ComputerName) as targets\n    values(IpAddress) as source_ips\n    by TargetUserName LmPackageName\n| table TargetUserName LmPackageName source_ips targets count\n| sort -count\n```\n\n```spl\n# Splunk: Detect NTLM Downgrade Attack Pattern\n# NTLMv1 appearing after a period of only NTLMv2 suggests active downgrade\n\nindex=wineventlog EventCode=4624 LogonType=3\n    AuthenticationPackageName=\"NTLM\"\n| where TargetUserName != \"ANONYMOUS LOGON\"\n| bin _time span=1h\n| stats count(eval(LmPackageName=\"NTLM V1\")) as ntlmv1_count\n    count(eval(LmPackageName=\"NTLM V2\")) as ntlmv2_count\n    by _time\n| where ntlmv1_count > 0\n| eval ntlmv1_ratio = round(ntlmv1_count / (ntlmv1_count + ntlmv2_count) * 100, 2)\n| table _time ntlmv1_count ntlmv2_count ntlmv1_ratio\n| sort -_time\n```\n\n```kql\n-- Microsoft Sentinel KQL: NTLMv1 Downgrade Detection\n\nSecurityEvent\n| where EventID == 4624 and LogonType == 3\n| where AuthenticationPackageName == \"NTLM\"\n| where LmPackageName == \"NTLM V1\"\n| where TargetUserName !endswith \"$\"\n| where TargetUserName != \"ANONYMOUS LOGON\"\n| project TimeGenerated, Computer, TargetUserName, WorkstationName,\n    IpAddress, LmPackageName, LogonProcessName\n| sort by TimeGenerated desc\n```\n\n```powershell\n# PowerShell: Detect NTLMv1 Authentication Events on Local System\n\n$ntlmv1Events = Get-WinEvent -LogName Security -FilterXPath @\"\n*[System[(EventID=4624)]]\n and\n*[EventData[Data[@Name='LmPackageName']='NTLM V1']]\n\"@ -MaxEvents 500 -ErrorAction SilentlyContinue\n\nif ($ntlmv1Events.Count -gt 0) {\n    Write-Host \"[!] WARNING: $($ntlmv1Events.Count) NTLMv1 authentication events detected!\" -ForegroundColor Red\n    $ntlmv1Events | ForEach-Object {\n        $xml = [xml]$_.ToXml()\n        $eventData = $xml.Event.EventData.Data\n        [PSCustomObject]@{\n            Time         = $_.TimeCreated\n            TargetUser   = ($eventData | Where-Object { $_.Name -eq \"TargetUserName\" }).'#text'\n            Workstation  = ($eventData | Where-Object { $_.Name -eq \"WorkstationName\" }).'#text'\n            SourceIP     = ($eventData | Where-Object { $_.Name -eq \"IpAddress\" }).'#text'\n            LmPackage    = ($eventData | Where-Object { $_.Name -eq \"LmPackageName\" }).'#text'\n        }\n    } | Format-Table -AutoSize\n} else {\n    Write-Host \"[+] No NTLMv1 authentication events found (Good)\" -ForegroundColor Green\n}\n\n# Audit GPO settings for NTLM restriction\nWrite-Host \"`n=== NTLM RESTRICTION POLICY ===\"\n$ntlmPolicy = Get-ItemProperty -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Lsa\" `\n    -Name \"LmCompatibilityLevel\" -ErrorAction SilentlyContinue\n\n$level = switch ($ntlmPolicy.LmCompatibilityLevel) {\n    0 { \"Send LM & NTLM responses (Most Vulnerable)\" }\n    1 { \"Send LM & NTLM - use NTLMv2 session security if negotiated\" }\n    2 { \"Send NTLM response only\" }\n    3 { \"Send NTLMv2 response only (Recommended minimum)\" }\n    4 { \"Send NTLMv2 response only, refuse LM\" }\n    5 { \"Send NTLMv2 response only, refuse LM & NTLM (Most Secure)\" }\n    default { \"Not configured (defaults to 3 on modern Windows)\" }\n}\nWrite-Host \"[*] LmCompatibilityLevel: $($ntlmPolicy.LmCompatibilityLevel) - $level\"\n```\n\n### Step 6: NTLM Audit and Restriction Policy Configuration\n\n```powershell\n# PowerShell: Enable NTLM Auditing via Group Policy Registry Settings\n# Must be applied via GPO for domain-wide coverage\n\n# Audit all NTLM authentication in this domain\n# GPO: Computer Configuration > Policies > Windows Settings > Security Settings >\n#      Local Policies > Security Options >\n#      Network Security: Restrict NTLM: Audit NTLM authentication in this domain = Enable all\n\n# Registry equivalent (apply via GPO preferences or startup script)\n# Domain Controller setting:\n# Set-ItemProperty -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Netlogon\\Parameters\" `\n#     -Name \"AuditNTLMInDomain\" -Value 7 -Type DWord\n\n# Audit incoming NTLM traffic on all servers:\n# Set-ItemProperty -Path \"HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Lsa\\MSV1_0\" `\n#     -Name \"AuditReceivingNTLMTraffic\" -Value 2 -Type DWord\n\n# After enabling auditing, NTLM events appear in:\n# Applications and Services Logs > Microsoft > Windows > NTLM > Operational\n\n# Query NTLM operational log for audit events\nGet-WinEvent -LogName \"Microsoft-Windows-NTLM/Operational\" -MaxEvents 200 -ErrorAction SilentlyContinue |\n    Where-Object { $_.Id -in @(8001, 8002, 8003, 8004) } |\n    Select-Object TimeCreated, Id,\n        @{N='EventType'; E={\n            switch ($_.Id) {\n                8001 { \"NTLM client blocked audit\" }\n                8002 { \"NTLM server blocked audit\" }\n                8003 { \"NTLM server blocked in domain\" }\n                8004 { \"NTLM authentication to DC audit\" }\n            }\n        }},\n        @{N='Detail'; E={$_.Message.Substring(0, [Math]::Min(300, $_.Message.Length))}} |\n    Format-Table -AutoSize\n```\n\n```spl\n# Splunk: Monitor NTLM Audit Events (Event ID 8004)\n# Shows all NTLM authentications passing through domain controllers\n\nindex=wineventlog source=\"WinEventLog:Microsoft-Windows-NTLM/Operational\"\n    EventCode=8004\n| rex field=Message \"Calling client name:\\s+(?\u003cclient_name>[^\\r\\n]+)\"\n| rex field=Message \"Calling client IP:\\s+(?\u003cclient_ip>[^\\r\\n]+)\"\n| rex field=Message \"Server name:\\s+(?\u003cserver_name>[^\\r\\n]+)\"\n| stats count dc(server_name) as unique_servers by client_name client_ip\n| sort -count\n| table client_name client_ip unique_servers count\n```\n\n### Step 7: PetitPotam and Coercion Attack Detection\n\n```spl\n# Splunk: Detect PetitPotam / EFSCoerce Attack\n# Monitor for machine account NTLM authentications relayed to other services\n\nindex=wineventlog EventCode=4624 LogonType=3\n    AuthenticationPackageName=\"NTLM\"\n    TargetUserName=\"*$\"\n| where match(TargetUserName, \"^[A-Z0-9\\\\-]+\\\\$$\")\n| eval is_dc = if(match(TargetUserName, \"(DC|DCSERVER|DOMCTRL)\"), \"Yes\", \"No\")\n| where IpAddress != \"127.0.0.1\" AND IpAddress != \"::1\"\n| stats count values(ComputerName) as target_hosts\n    values(IpAddress) as source_ips by TargetUserName\n| where count > 2 OR mvcount(source_ips) > 1\n| table TargetUserName source_ips target_hosts count\n| sort -count\n```\n\n```kql\n-- Microsoft Sentinel KQL: PetitPotam / Coercion Attack Detection\n-- Detects domain controller machine account authenticating from unexpected IPs\n\nlet dc_accounts = SecurityEvent\n| where EventID == 4624 and LogonType == 3\n| where TargetUserName endswith \"$\"\n| where Computer startswith \"DC\"\n| distinct TargetUserName;\n\nSecurityEvent\n| where EventID == 4624 and LogonType == 3\n| where AuthenticationPackageName == \"NTLM\"\n| where TargetUserName in (dc_accounts)\n| where IpAddress != \"127.0.0.1\" and IpAddress != \"::1\"\n| extend SourceHostExpected = iff(\n    Computer == replace_string(TargetUserName, \"$\", \"\"), true, false)\n| where SourceHostExpected == false\n| project TimeGenerated, Computer, TargetUserName, IpAddress,\n    WorkstationName, LogonProcessName, AuthenticationPackageName\n| sort by TimeGenerated desc\n```\n\n```yaml\n# Sigma Rule: NTLM Relay - Computer Account Authentication from Unexpected Source\ntitle: Potential NTLM Relay of Computer Account Credentials\nid: 5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b\nstatus: stable\ndescription: >\n  Detects a computer account (ending in $) authenticating via NTLM LogonType 3\n  where the source IP does not match the computer's known IP, indicating possible\n  NTLM relay of coerced machine authentication (PetitPotam, DFSCoerce, PrinterBug).\nreferences:\n    - https://www.crowdstrike.com/en-us/blog/how-to-detect-domain-controller-account-relay-attacks-with-crowdstrike-identity-protection/\n    - https://www.fox-it.com/nl-en/research-blog/detecting-and-hunting-for-the-petitpotam-ntlm-relay-attack/\n    - https://www.nccgroup.com/research-blog/detecting-and-hunting-for-the-petitpotam-ntlm-relay-attack/\nlogsource:\n    product: windows\n    service: security\ndetection:\n    selection:\n        EventID: 4624\n        LogonType: 3\n        AuthenticationPackageName: NTLM\n        TargetUserName|endswith: '$'\n    filter_localhost:\n        IpAddress:\n            - '127.0.0.1'\n            - '::1'\n            - '-'\n    condition: selection and not filter_localhost\nlevel: high\ntags:\n    - attack.credential_access\n    - attack.t1557.001\n    - attack.t1187\nfalsepositives:\n    - Legitimate NTLM authentication from machine accounts during failover\n    - Cluster service machine account authentication\n```\n\n### Step 8: Build Comprehensive Correlation Dashboard\n\n```spl\n# Splunk: NTLM Relay Detection Dashboard -- Combined Correlation Query\n\n# Panel 1: IP-Hostname Mismatches (Core Relay Indicator)\nindex=wineventlog EventCode=4624 LogonType=3 AuthenticationPackageName=\"NTLM\"\n| where TargetUserName != \"ANONYMOUS LOGON\" AND NOT match(TargetUserName, \".*\\\\$$\")\n| eval mismatch=if(lower(WorkstationName) != lower(mvindex(split(IpAddress, \".\"), 0)),\n    \"POSSIBLE_MISMATCH\", \"OK\")\n| where mismatch=\"POSSIBLE_MISMATCH\"\n| stats count by TargetUserName WorkstationName IpAddress ComputerName\n\n# Panel 2: NTLMv1 Downgrade Events\nindex=wineventlog EventCode=4624 LmPackageName=\"NTLM V1\"\n| timechart span=1h count by ComputerName\n\n# Panel 3: Machine Account Relay (PetitPotam Indicator)\nindex=wineventlog EventCode=4624 LogonType=3 AuthenticationPackageName=\"NTLM\"\n    TargetUserName=\"*$\"\n| stats count values(IpAddress) as relay_sources by TargetUserName ComputerName\n\n# Panel 4: NTLM Authentication Volume Anomaly\nindex=wineventlog EventCode=4624 LogonType=3 AuthenticationPackageName=\"NTLM\"\n| timechart span=15m count\n| streamstats window=20 avg(count) as avg_count stdev(count) as stdev_count\n| eval upper_bound=avg_count + (3 * stdev_count)\n| where count > upper_bound\n\n# Panel 5: SMB Signing Status (from audit results)\n| inputlookup smb_signing_audit.csv\n| stats count by Status\n| table Status count\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| **NTLM Relay (T1557.001)** | Attack that intercepts NTLM authentication messages and forwards them to a target service, authenticating as the victim without knowing their password |\n| **Event 4624 LogonType 3** | Windows Security Event for successful network logon -- the primary event generated on relay targets; source IP field reveals the relay attacker's address |\n| **IP-Hostname Mismatch** | When Event 4624 WorkstationName field does not correspond to the IpAddress field, indicating the authentication was relayed through a third party |\n| **Responder** | Attack tool that poisons LLMNR (UDP 5355), NBT-NS (UDP 137), and mDNS (UDP 5353) responses to capture NTLM authentication from victims on the local network |\n| **ntlmrelayx** | Fox-IT/Impacket tool that relays captured NTLM authentication to SMB, LDAP, HTTP, MSSQL, and other protocols to gain unauthorized access |\n| **SMB Signing** | Cryptographic signing of SMB packets that prevents relay attacks against SMB services; must be set to \"Required\" (not just \"Enabled\") for protection |\n| **LDAP Signing** | Cryptographic signing of LDAP operations that prevents relay attacks against LDAP services on domain controllers; controlled by LDAPServerIntegrity registry value |\n| **LDAP Channel Binding** | Extended Protection for Authentication (EPA) that binds the NTLM authentication to the TLS channel, preventing relay to LDAPS |\n| **NTLMv1 Downgrade** | Attack forcing authentication from NTLMv2 to the weaker NTLMv1 protocol, which is easier to crack offline and has weaker relay protections |\n| **PetitPotam** | Coercion technique abusing MS-EFSRPC to force a domain controller to authenticate to an attacker-controlled host, enabling relay to AD CS or LDAP |\n| **LmCompatibilityLevel** | Registry setting controlling which NTLM version is used; value of 5 (Send NTLMv2 only, refuse LM and NTLM) provides strongest protection |\n| **Event 8004** | NTLM operational log event on domain controllers showing all NTLM authentication pass-through, critical for auditing NTLM usage before restriction |\n\n## Tools & Systems\n\n| Tool | Purpose |\n|------|---------|\n| **Splunk / Elastic SIEM** | Log aggregation and correlation for Event 4624 analysis, IP-hostname mismatch detection, and NTLM downgrade monitoring |\n| **Microsoft Sentinel** | Cloud SIEM with KQL queries for NTLM relay detection and built-in analytics rules for PetitPotam |\n| **CrowdStrike Falcon Identity Protection** | Detects NTLM relay attacks against domain controller accounts regardless of coercion method used |\n| **Responder** | LLMNR/NBT-NS/mDNS poisoning tool used by attackers -- understanding its behavior is essential for detection |\n| **ntlmrelayx (Impacket)** | Multi-protocol NTLM relay tool developed by Fox-IT -- used in testing and by adversaries |\n| **PingCastle** | Active Directory security assessment tool that audits SMB signing, LDAP signing, and NTLM configuration |\n| **Zeek** | Network security monitor for capturing SMB signing negotiation, LLMNR traffic, and DCE-RPC activity |\n| **Sigma** | Vendor-agnostic detection rule format for portable NTLM relay detection rules |\n\n## Common Scenarios\n\n### Scenario 1: Responder Poisoning with NTLM Relay to File Server\n\n**Context**: A SOC analyst observes multiple Event 4624 LogonType 3 entries on a file server (10.10.20.100) where the WorkstationName field shows different workstation names but the IpAddress field consistently shows 10.10.5.50, a host not in the IT asset inventory.\n\n**Approach**:\n1. Query Event 4624 on 10.10.20.100 filtered for IpAddress=10.10.5.50: find 15 successful NTLM logons in 30 minutes from 8 different user accounts\n2. Cross-reference 10.10.5.50 with DHCP logs and DNS: host is not a registered domain member, MAC address shows a Linux-based NIC\n3. Query Zeek network logs for 10.10.5.50: identify LLMNR responses (UDP 5355) to multiple workstations and SMB connections to 10.10.20.100\n4. Confirm IP-hostname mismatch: WorkstationName values (WS-FINANCE01, WS-HR03, etc.) all resolve to different IPs in DNS, not 10.10.5.50\n5. Check SMB signing on 10.10.20.100: RequireSecuritySignature is False, enabling the relay attack\n6. Contain: block 10.10.5.50 at the switch, force password reset for all 8 affected accounts, enable SMB signing on the file server\n7. Remediate: disable LLMNR and NBT-NS via GPO, enforce SMB signing domain-wide\n\n**Pitfalls**:\n- Dismissing the multiple logons as normal network activity without checking the IP-hostname correlation\n- Not checking SMB signing status on the target server to understand why the relay succeeded\n- Only resetting the password for one user instead of all accounts that were relayed\n\n### Scenario 2: PetitPotam Relay to AD Certificate Services\n\n**Context**: During a threat hunt, an analyst finds Event 4624 LogonType 3 on the AD CS server (ADCS01) showing the domain controller machine account (DC01$) authenticating via NTLM from IP 10.10.5.50, which is not the DC's IP address (10.10.1.10).\n\n**Approach**:\n1. Confirm the anomaly: DC01$ should only authenticate from 10.10.1.10, but Event 4624 shows authentication from 10.10.5.50 via NTLM (not Kerberos)\n2. Check for certificate enrollment: query AD CS logs for certificate requests from DC01$ around the same timestamp -- find a certificate issued for DC01$\n3. Identify the attack: PetitPotam coerced DC01 to authenticate to 10.10.5.50, which relayed the authentication to ADCS01 to request a certificate for DC01$\n4. Assess impact: with a DC certificate, the attacker can authenticate as DC01$ and perform DCSync to extract all domain credentials\n5. Revoke the fraudulently issued certificate immediately\n6. Check for DCSync activity: query Event 4662 for directory replication from non-DC sources\n7. Contain: isolate 10.10.5.50, revoke certificate, patch EFS (MS-EFSRPC), enforce EPA on AD CS, require LDAP signing on all DCs\n\n**Pitfalls**:\n- Not recognizing that machine account NTLM authentication from an unexpected IP is a critical indicator of coercion + relay\n- Failing to check AD CS for fraudulent certificate issuance, which represents the actual objective of the attack\n- Not auditing LDAP signing and EPA on AD CS servers, which would have prevented the relay\n\n## Output Format\n\n```\nHunt ID: TH-NTLM-RELAY-[DATE]-[SEQ]\nAlert Severity: Critical\nMITRE Technique: T1557.001 (LLMNR/NBT-NS Poisoning and SMB Relay)\n\nRelay Indicators:\n  Victim Account: [Domain\\Username or Machine$]\n  WorkstationName: [Victim hostname from Event 4624]\n  Expected Source IP: [IP matching WorkstationName in DNS/DHCP]\n  Actual Source IP: [Attacker/relay IP from Event 4624 IpAddress field]\n  Target Host: [Server receiving the relayed authentication]\n\nAuthentication Details:\n  Event ID: 4624\n  LogonType: 3 (Network)\n  AuthenticationPackage: NTLM\n  LmPackageName: [NTLM V1 or NTLM V2]\n  LogonProcess: [NtLmSsp]\n  Timestamp: [Event time]\n\nSigning Status:\n  Target SMB Signing: [Required/Not Required]\n  Target LDAP Signing: [Required/Not Required]\n  LDAP Channel Binding: [Required/Not Required]\n\nPoisoning Evidence:\n  LLMNR Activity: [Detected/Not Detected from relay IP]\n  NBT-NS Activity: [Detected/Not Detected from relay IP]\n  Coercion Method: [PetitPotam/DFSCoerce/PrinterBug/Unknown]\n\nRisk Assessment: [Critical - relay from DC / High - relay from user account]\nRecommended Actions:\n  - Immediate: [Block relay IP, reset affected credentials]\n  - Short-term: [Enable SMB/LDAP signing, disable LLMNR/NBT-NS]\n  - Long-term: [Migrate to Kerberos, enforce EPA, restrict NTLM via GPO]\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("detecting-ntlm-relay-with-event-correlation-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

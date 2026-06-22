@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>processing-stix-taxii-feeds - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/processing-stix-taxii-feeds-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>processing-stix-taxii-feeds</h1>
+      <p class="description">'Processes STIX 2.1 threat intelligence bundles delivered via TAXII 2.1</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>processing-stix-taxii-feeds</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>processing-stix-taxii-feeds</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Processes STIX 2.1 threat intelligence bundles delivered via TAXII 2.1</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose processing-stix-taxii-feeds, then write the task. Fallback prompt: Use the processing-stix-taxii-feeds skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Processing STIX/TAXII Feeds</h2>
+<h3>When to Use</h3>
+<p>Use this skill when:</p>
+<ul>
+<li>Onboarding a new TAXII 2.1 collection from a government feed (CISA AIS, FS-ISAC) or commercial provider</li>
+<li>Validating that ingested STIX bundles conform to the OASIS STIX 2.1 specification before import</li>
+<li>Building automated pipelines that parse STIX relationship objects to reconstruct campaign context</li>
+</ul>
+<p><strong>Do not use</strong> this skill for proprietary vendor feed formats (Recorded Future JSON, CrowdStrike IOC lists) that require vendor-specific parsers rather than STIX processing.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>Python 3.9+ with <code>stix2</code> library (pip install stix2) and <code>taxii2-client</code> library</li>
+<li>Network access to TAXII 2.1 server endpoint with valid credentials</li>
+<li>Target TIP or SIEM with import API (MISP, OpenCTI, or Splunk ES)</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: Discover TAXII Server Collections</h4>
+<pre><code>from taxii2client.v21 import Server, as_pages
+
+server = Server(&quot;https://cti.example.com/taxii/&quot;,
+                user=&quot;apiuser&quot;, password=&quot;apikey&quot;)
+api_root = server.api_roots[0]
+for collection in api_root.collections:
+    print(collection.id, collection.title, collection.can_read)</code></pre>
+<p>Select collections relevant to your threat profile. CISA AIS provides collections segmented by sector (financial, energy, healthcare).</p>
+<h4>Step 2: Fetch STIX Bundles with Pagination</h4>
+<pre><code>from taxii2client.v21 import Collection
+from datetime import datetime, timedelta, timezone
+
+collection = Collection(
+    &quot;https://cti.example.com/taxii/api1/collections/&lt;id&gt;/objects/&quot;,
+    user=&quot;apiuser&quot;, password=&quot;apikey&quot;)
+
+# Fetch only objects added in the last 24 hours
+added_after = datetime.now(timezone.utc) - timedelta(hours=24)
+for bundle_page in as_pages(collection.get_objects,
+                             added_after=added_after, per_request=100):
+    process_bundle(bundle_page)</code></pre>
+<h4>Step 3: Parse and Validate STIX Objects</h4>
+<pre><code>import stix2
+
+def process_bundle(bundle_dict):
+    bundle = stix2.parse(bundle_dict, allow_custom=True)
+    for obj in bundle.objects:
+        if obj.type == &quot;indicator&quot;:
+            validate_indicator(obj)
+        elif obj.type == &quot;threat-actor&quot;:
+            upsert_threat_actor(obj)
+        elif obj.type == &quot;relationship&quot;:
+            link_objects(obj)
+
+def validate_indicator(indicator):
+    required = [&quot;id&quot;, &quot;type&quot;, &quot;spec_version&quot;, &quot;created&quot;,
+                &quot;modified&quot;, &quot;pattern&quot;, &quot;pattern_type&quot;, &quot;valid_from&quot;]
+    for field in required:
+        if not hasattr(indicator, field):
+            raise ValueError(f&quot;Missing required field: {field}&quot;)
+    # Check confidence range
+    if hasattr(indicator, &quot;confidence&quot;):
+        assert 0 &lt;= indicator.confidence &lt;= 100</code></pre>
+<h4>Step 4: Route Objects to Consuming Platforms</h4>
+<p>Map STIX object types to destination systems:</p>
+<ul>
+<li><code>indicator</code> objects → SIEM lookup tables and firewall blocklists</li>
+<li><code>malware</code> objects → EDR threat intelligence library</li>
+<li><code>threat-actor</code> / <code>campaign</code> objects → TIP for analyst context</li>
+<li><code>course-of-action</code> objects → Security team wiki or SOAR playbook triggers</li>
+</ul>
+<p>Use TLP marking definitions to enforce sharing restrictions:</p>
+<pre><code>for marking in obj.get(&quot;object_marking_refs&quot;, []):
+    if &quot;tlp-red&quot; in marking:
+        route_to_restricted_platform_only(obj)</code></pre>
+<h4>Step 5: Publish Back to TAXII (Bi-directional Sharing)</h4>
+<pre><code># Add validated local intelligence back to shared collection
+new_indicator = stix2.Indicator(
+    name=&quot;Malicious C2 Domain&quot;,
+    pattern=&quot;[domain-name:value = 'evil-c2.example.com']&quot;,
+    pattern_type=&quot;stix&quot;,
+    valid_from=&quot;2025-01-15T00:00:00Z&quot;,
+    confidence=80,
+    labels=[&quot;malicious-activity&quot;],
+    object_marking_refs=[&quot;marking-definition--34098fce-860f-479c-ae...&quot;]  # TLP:GREEN
+)
+collection.add_objects(stix2.Bundle(new_indicator))</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|-----------| | <strong>STIX Bundle</strong> | Top-level STIX container object (type: &quot;bundle&quot;) holding any number of STIX Domain Objects (SDOs) and STIX Relationship Objects (SROs) | | <strong>SDO</strong> | STIX Domain Object — core intelligence types: indicator, threat-actor, malware, campaign, attack-pattern, course-of-action | | <strong>SRO</strong> | STIX Relationship Object — links two SDOs with a labeled relationship (e.g., &quot;uses&quot;, &quot;attributed-to&quot;, &quot;indicates&quot;) | | <strong>Pattern Language</strong> | STIX pattern syntax for indicator conditions: <code>[network-traffic:dst_port = 443 AND ipv4-addr:value = '10.0.0.1']</code> | | <strong>Marking Definition</strong> | STIX object encoding TLP or statement restrictions on intelligence sharing | | <strong>added_after</strong> | TAXII 2.1 filter parameter (RFC 3339 timestamp) for incremental polling of new objects |</p>
+<h3>Tools &amp; Systems</h3>
+<ul>
+<li><strong>stix2 (Python)</strong>: Official OASIS Python library for creating, parsing, and validating STIX 2.0/2.1 objects</li>
+<li><strong>taxii2-client (Python)</strong>: Client library for TAXII 2.0/2.1 server discovery, collection enumeration, and object retrieval</li>
+<li><strong>MISP</strong>: Open-source TIP with native TAXII 2.1 server and client; MISP-TAXII-Server plugin for publishing MISP events</li>
+<li><strong>OpenCTI</strong>: CTI platform with built-in TAXII 2.1 connector; supports STIX 2.1 import/export natively</li>
+<li><strong>Cabby</strong>: Legacy Python TAXII 1.x client for older government feeds still on TAXII 1.1</li>
+</ul>
+<h3>Common Pitfalls</h3>
+<ul>
+<li><strong>Ignoring <code>spec_version</code> field</strong>: STIX 2.0 and 2.1 have incompatible schemas (2.1 adds <code>confidence</code>, <code>object_marking_refs</code> at bundle level). Always check <code>spec_version</code> before parsing.</li>
+<li><strong>No pagination handling</strong>: TAXII servers cap responses at 100–1000 objects per request. Missing pagination (via <code>next</code> link header) causes silent data loss.</li>
+<li><strong>Clock skew on <code>added_after</code></strong>: Server and client time misalignment causes missed objects at interval boundaries. Use UTC exclusively and add 5-minute overlap windows.</li>
+<li><strong>Storing raw STIX blobs without indexing</strong>: Storing bundles as opaque JSON prevents querying by indicator type or campaign. Parse into relational or graph database.</li>
+<li><strong>Sharing TLP:RED content inadvertently</strong>: Automated pipelines must filter marking definitions before routing to any shared platform or SIEM with broad analyst access.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: processing-stix-taxii-feeds\ndisplay_name: processing-stix-taxii-feeds\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# processing-stix-taxii-feeds - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `processing-stix-taxii-feeds` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nUse this skill when:\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose processing-stix-taxii-feeds, then write the task. Fallback prompt: Use the processing-stix-taxii-feeds skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `processing-stix-taxii-feeds` |\n| Canonical name | `processing-stix-taxii-feeds` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nUse this skill when:\n\n## Original SKILL.md\n\n---\nname: processing-stix-taxii-feeds\ndescription: 'Processes STIX 2.1 threat intelligence bundles delivered via TAXII 2.1\n  servers, normalizing objects into platform-native schemas and routing them to appropriate\n  consuming systems. Use when onboarding new TAXII collection endpoints, automating\n  bi-directional intelligence sharing with ISACs, or building pipeline validation\n  for malformed STIX bundles. Activates for requests involving OASIS STIX, TAXII server\n  configuration, MISP TAXII, or Cortex XSOAR feed integrations.\n\n  '\ndomain: cybersecurity\nsubdomain: threat-intelligence\ntags:\n- STIX-2.1\n- TAXII-2.1\n- OASIS\n- MISP\n- CTI\n- IOC\n- threat-intelligence\n- NIST-SP-800-150\nversion: 1.0.0\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- ID.RA-01\n- ID.RA-05\n- DE.CM-01\n- DE.AE-02\nmitre_attack:\n- T1591\n- T1592\n- T1593\n- T1589\n---\n# Processing STIX/TAXII Feeds\n\n## When to Use\n\nUse this skill when:\n- Onboarding a new TAXII 2.1 collection from a government feed (CISA AIS, FS-ISAC) or commercial provider\n- Validating that ingested STIX bundles conform to the OASIS STIX 2.1 specification before import\n- Building automated pipelines that parse STIX relationship objects to reconstruct campaign context\n\n**Do not use** this skill for proprietary vendor feed formats (Recorded Future JSON, CrowdStrike IOC lists) that require vendor-specific parsers rather than STIX processing.\n\n## Prerequisites\n\n- Python 3.9+ with `stix2` library (pip install stix2) and `taxii2-client` library\n- Network access to TAXII 2.1 server endpoint with valid credentials\n- Target TIP or SIEM with import API (MISP, OpenCTI, or Splunk ES)\n\n## Workflow\n\n### Step 1: Discover TAXII Server Collections\n\n```python\nfrom taxii2client.v21 import Server, as_pages\n\nserver = Server(\"https://cti.example.com/taxii/\",\n                user=\"apiuser\", password=\"apikey\")\napi_root = server.api_roots[0]\nfor collection in api_root.collections:\n    print(collection.id, collection.title, collection.can_read)\n```\n\nSelect collections relevant to your threat profile. CISA AIS provides collections segmented by sector (financial, energy, healthcare).\n\n### Step 2: Fetch STIX Bundles with Pagination\n\n```python\nfrom taxii2client.v21 import Collection\nfrom datetime import datetime, timedelta, timezone\n\ncollection = Collection(\n    \"https://cti.example.com/taxii/api1/collections/\u003cid>/objects/\",\n    user=\"apiuser\", password=\"apikey\")\n\n# Fetch only objects added in the last 24 hours\nadded_after = datetime.now(timezone.utc) - timedelta(hours=24)\nfor bundle_page in as_pages(collection.get_objects,\n                             added_after=added_after, per_request=100):\n    process_bundle(bundle_page)\n```\n\n### Step 3: Parse and Validate STIX Objects\n\n```python\nimport stix2\n\ndef process_bundle(bundle_dict):\n    bundle = stix2.parse(bundle_dict, allow_custom=True)\n    for obj in bundle.objects:\n        if obj.type == \"indicator\":\n            validate_indicator(obj)\n        elif obj.type == \"threat-actor\":\n            upsert_threat_actor(obj)\n        elif obj.type == \"relationship\":\n            link_objects(obj)\n\ndef validate_indicator(indicator):\n    required = [\"id\", \"type\", \"spec_version\", \"created\",\n                \"modified\", \"pattern\", \"pattern_type\", \"valid_from\"]\n    for field in required:\n        if not hasattr(indicator, field):\n            raise ValueError(f\"Missing required field: {field}\")\n    # Check confidence range\n    if hasattr(indicator, \"confidence\"):\n        assert 0 \u003c= indicator.confidence \u003c= 100\n```\n\n### Step 4: Route Objects to Consuming Platforms\n\nMap STIX object types to destination systems:\n- `indicator` objects → SIEM lookup tables and firewall blocklists\n- `malware` objects → EDR threat intelligence library\n- `threat-actor` / `campaign` objects → TIP for analyst context\n- `course-of-action` objects → Security team wiki or SOAR playbook triggers\n\nUse TLP marking definitions to enforce sharing restrictions:\n```python\nfor marking in obj.get(\"object_marking_refs\", []):\n    if \"tlp-red\" in marking:\n        route_to_restricted_platform_only(obj)\n```\n\n### Step 5: Publish Back to TAXII (Bi-directional Sharing)\n\n```python\n# Add validated local intelligence back to shared collection\nnew_indicator = stix2.Indicator(\n    name=\"Malicious C2 Domain\",\n    pattern=\"[domain-name:value = 'evil-c2.example.com']\",\n    pattern_type=\"stix\",\n    valid_from=\"2025-01-15T00:00:00Z\",\n    confidence=80,\n    labels=[\"malicious-activity\"],\n    object_marking_refs=[\"marking-definition--34098fce-860f-479c-ae...\"]  # TLP:GREEN\n)\ncollection.add_objects(stix2.Bundle(new_indicator))\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|-----------|\n| **STIX Bundle** | Top-level STIX container object (type: \"bundle\") holding any number of STIX Domain Objects (SDOs) and STIX Relationship Objects (SROs) |\n| **SDO** | STIX Domain Object — core intelligence types: indicator, threat-actor, malware, campaign, attack-pattern, course-of-action |\n| **SRO** | STIX Relationship Object — links two SDOs with a labeled relationship (e.g., \"uses\", \"attributed-to\", \"indicates\") |\n| **Pattern Language** | STIX pattern syntax for indicator conditions: `[network-traffic:dst_port = 443 AND ipv4-addr:value = '10.0.0.1']` |\n| **Marking Definition** | STIX object encoding TLP or statement restrictions on intelligence sharing |\n| **added_after** | TAXII 2.1 filter parameter (RFC 3339 timestamp) for incremental polling of new objects |\n\n## Tools & Systems\n\n- **stix2 (Python)**: Official OASIS Python library for creating, parsing, and validating STIX 2.0/2.1 objects\n- **taxii2-client (Python)**: Client library for TAXII 2.0/2.1 server discovery, collection enumeration, and object retrieval\n- **MISP**: Open-source TIP with native TAXII 2.1 server and client; MISP-TAXII-Server plugin for publishing MISP events\n- **OpenCTI**: CTI platform with built-in TAXII 2.1 connector; supports STIX 2.1 import/export natively\n- **Cabby**: Legacy Python TAXII 1.x client for older government feeds still on TAXII 1.1\n\n## Common Pitfalls\n\n- **Ignoring `spec_version` field**: STIX 2.0 and 2.1 have incompatible schemas (2.1 adds `confidence`, `object_marking_refs` at bundle level). Always check `spec_version` before parsing.\n- **No pagination handling**: TAXII servers cap responses at 100–1000 objects per request. Missing pagination (via `next` link header) causes silent data loss.\n- **Clock skew on `added_after`**: Server and client time misalignment causes missed objects at interval boundaries. Use UTC exclusively and add 5-minute overlap windows.\n- **Storing raw STIX blobs without indexing**: Storing bundles as opaque JSON prevents querying by indicator type or campaign. Parse into relational or graph database.\n- **Sharing TLP:RED content inadvertently**: Automated pipelines must filter marking definitions before routing to any shared platform or SIEM with broad analyst access.\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("processing-stix-taxii-feeds-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

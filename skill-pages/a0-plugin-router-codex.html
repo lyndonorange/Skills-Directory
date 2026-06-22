@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>a0-plugin-router - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/a0-plugin-router-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Agent platforms, tools, and automation</div>
+      <h1>a0-plugin-router</h1>
+      <p class="description">Main entry point for all Agent Zero plugin tasks. Routes to specialist skills for creating, reviewing, contributing, managing, or debugging plugins. Use when the user mentions plugins, asks how the plugin system works, wants to build/install/uninstall/publish/debug a plugin, or asks about the Plugin Hub.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Agent platforms, tools, and automation</span></div>
+<div class="meta-card"><strong>display name</strong><span>a0-plugin-router</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>a0-plugin-router</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Main entry point for all Agent Zero plugin tasks. Routes to specialist skills for creating, reviewing, contributing, managing, or debugging plugins. Use when the user mentions plugins, asks how the plugin system works, wants to build/install/uninstall/publish/debug a plugin, or asks about the Plugin Hub.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose a0-plugin-router, then write the task. Fallback prompt: Use the a0-plugin-router skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Agent Zero Plugin Router</h2>
+<h3>Routing Decision</h3>
+<p>Classify the user's request and read the appropriate specialist skill immediately.</p>
+<p>| User intent | Skill to read | |---|---| | Create / build / develop / write a new plugin | Read <code>/a0/skills/a0-create-plugin/SKILL.md</code> | | Review / audit / validate / check a plugin | Read <code>/a0/skills/a0-review-plugin/SKILL.md</code> | | Contribute / publish / submit / share to community | Read <code>/a0/skills/a0-contribute-plugin/SKILL.md</code> | | Install / update / uninstall / remove / browse / scan | Read <code>/a0/skills/a0-manage-plugin/SKILL.md</code> | | Plugin not working / crashing / missing / debug / troubleshoot | Read <code>/a0/skills/a0-debug-plugin/SKILL.md</code> | | Explain / how does it work / architecture | Answer inline using the overview below |</p>
+<p>If intent is ambiguous, ask one question before routing:</p>
+<blockquote>&quot;Are you trying to <strong>create</strong> a new plugin, <strong>review</strong> one, <strong>contribute</strong> it to the community, <strong>manage</strong> (install/update/uninstall) plugins, or <strong>debug</strong> a plugin that isn't working?&quot;</blockquote>
+<p>If the user says &quot;make a plugin for the community&quot; - start with <code>a0-create-plugin</code>, then note that <code>a0-contribute-plugin</code> handles the publishing step after the plugin is built and tested.</p>
+<hr>
+<h3>Plugin System Overview (for explain/explore queries)</h3>
+<h4>Roots and Discovery</h4>
+<p>Agent Zero discovers plugins from two roots, in priority order:</p>
+<ol>
+<li><code>usr/plugins/&lt;name&gt;/</code> - user plugins (your custom plugins go here)</li>
+<li><code>plugins/&lt;name&gt;/</code> - core system plugins (framework-bundled, do not modify)</li>
+</ol>
+<p>A plugin is valid when its directory contains a <code>plugin.yaml</code>. Directories starting with <code>.</code> are skipped.</p>
+<h4>Runtime Manifest (<code>plugin.yaml</code>)</h4>
+<p>Every plugin requires a <code>plugin.yaml</code> at its root:</p>
+<pre><code>name: my_plugin              # required by CI for community plugins (^[a-z0-9_]+$)
+title: My Plugin             # UI display name
+description: What it does.
+version: 1.0.0
+settings_sections: [agent]   # which Settings tabs show a subsection
+per_project_config: false    # enables project-scoped settings/toggle
+per_agent_config: false      # enables agent-profile-scoped settings/toggle
+always_enabled: false        # forces ON, disables toggle (framework use only)</code></pre>
+<p><code>settings_sections</code> valid values: <code>agent</code>, <code>external</code>, <code>mcp</code>, <code>developer</code>, <code>backup</code>. Use <code>[]</code> for none.</p>
+<h4>What a Plugin Can Provide</h4>
+<p>| Directory/File | Purpose | |---|---| | <code>api/</code> | API handlers (<code>ApiHandler</code> subclasses) | | <code>tools/</code> | Agent tools (<code>Tool</code> subclasses) | | <code>extensions/python/&lt;point&gt;/</code> and <code>extensions/python/_functions/&lt;module&gt;/&lt;qualname&gt;/&lt;start_or_end&gt;/</code> | Backend lifecycle hooks and implicit <code>@extensible</code> hooks | | <code>extensions/webui/&lt;point&gt;/</code> | HTML/JS injected into UI breakpoints | | <code>webui/config.html</code> | Plugin settings UI | | <code>webui/<em>.html</code>, <code>webui/</em>.js</code> | Full plugin pages and Alpine stores | | <code>hooks.py</code> | Framework runtime hooks (install, uninstall, pre_update, cache, registration) | | <code>execute.py</code> | User-triggered script (setup, maintenance, repair) | | <code>default_config.yaml</code> | Settings defaults | | <code>README.md</code> | Optional locally; strongly recommended for community plugins so Plugin Hub users can inspect the plugin | | <code>agents/&lt;profile&gt;/agent.yaml</code> | Plugin-distributed agent profiles | | <code>conf/model_providers.yaml</code> | Add/override model providers | | <code>LICENSE</code> | Optional under <code>usr/plugins/</code>; required at the root of a plugin GitHub repo before submitting to the Plugin Index |</p>
+<p>For <code>@extensible</code> targets, the only valid implicit hook layout is <code>extensions/python/_functions/&lt;module&gt;/&lt;qualname&gt;/&lt;start|end&gt;/</code>. The older flattened <code>extensions/python/&lt;module&gt;_&lt;qualname&gt;_&lt;start|end&gt;/</code> folders are obsolete.</p>
+<h4>Activation</h4>
+<ul>
+<li>Global toggle: <code>.toggle-1</code> (ON) / <code>.toggle-0</code> (OFF) files in the plugin dir</li>
+<li>Scoped toggles (project/agent) available when <code>per_project_config</code> or <code>per_agent_config</code> is true</li>
+<li>Default: enabled when no toggle file exists</li>
+<li><code>always_enabled: true</code> forces ON and hides controls (reserved for framework)</li>
+</ul>
+<h4>Settings Resolution (highest priority first)</h4>
+<ol>
+<li><code>project/.a0proj/agents/&lt;profile&gt;/plugins/&lt;name&gt;/config.json</code></li>
+<li><code>project/.a0proj/plugins/&lt;name&gt;/config.json</code></li>
+<li><code>usr/agents/&lt;profile&gt;/plugins/&lt;name&gt;/config.json</code></li>
+<li><code>usr/plugins/&lt;name&gt;/config.json</code></li>
+<li><code>plugins/&lt;name&gt;/default_config.yaml</code></li>
+</ol>
+<h4>Key API Routes</h4>
+<p>| Route | Purpose | |---|---| | <code>GET /plugins/&lt;name&gt;/&lt;path&gt;</code> | Serve static plugin assets | | <code>POST /api/plugins/&lt;name&gt;/&lt;handler&gt;</code> | Call plugin API endpoint | | <code>POST /api/plugins</code> | Management (toggle, config, docs) |</p>
+<h4>Deep-Dive References</h4>
+<ul>
+<li>Architecture + extension points: <code>/a0/plugins/AGENTS.md</code></li>
+<li>Developer guide: <code>/a0/docs/developer/plugins.md</code></li>
+<li>Component system: <code>/a0/webui/components/AGENTS.md</code></li>
+<li>Modal system: <code>/a0/webui/js/AGENTS.md</code> and <code>/a0/webui/css/AGENTS.md</code></li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: a0-plugin-router\ndisplay_name: a0-plugin-router\nplatform: Codex\ncategory: Agent platforms, tools, and automation\n---\n\n# a0-plugin-router - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `a0-plugin-router` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nClassify the user's request and read the appropriate specialist skill immediately.\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose a0-plugin-router, then write the task. Fallback prompt: Use the a0-plugin-router skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `a0-plugin-router` |\n| Canonical name | `a0-plugin-router` |\n| Platform | `Codex` |\n| Category | Agent platforms, tools, and automation |\n\n## Description\n\nClassify the user's request and read the appropriate specialist skill immediately.\n\n## Original SKILL.md\n\n---\nname: a0-plugin-router\ndescription: Main entry point for all Agent Zero plugin tasks. Routes to specialist skills for creating, reviewing, contributing, managing, or debugging plugins. Use when the user mentions plugins, asks how the plugin system works, wants to build/install/uninstall/publish/debug a plugin, or asks about the Plugin Hub.\nversion: 1.0.0\ntags: [\"plugins\", \"router\", \"meta\", \"create\", \"review\", \"contribute\", \"manage\", \"plugin-hub\"]\ntrigger_patterns:\n  - \"plugin\"\n  - \"create plugin\"\n  - \"build plugin\"\n  - \"review plugin\"\n  - \"contribute plugin\"\n  - \"publish plugin\"\n  - \"install plugin\"\n  - \"manage plugin\"\n  - \"plugin hub\"\n  - \"plugin index\"\n  - \"how does the plugin system work\"\n---\n\n# Agent Zero Plugin Router\n\n## Routing Decision\n\nClassify the user's request and read the appropriate specialist skill immediately.\n\n| User intent | Skill to read |\n|---|---|\n| Create / build / develop / write a new plugin | Read `/a0/skills/a0-create-plugin/SKILL.md` |\n| Review / audit / validate / check a plugin | Read `/a0/skills/a0-review-plugin/SKILL.md` |\n| Contribute / publish / submit / share to community | Read `/a0/skills/a0-contribute-plugin/SKILL.md` |\n| Install / update / uninstall / remove / browse / scan | Read `/a0/skills/a0-manage-plugin/SKILL.md` |\n| Plugin not working / crashing / missing / debug / troubleshoot | Read `/a0/skills/a0-debug-plugin/SKILL.md` |\n| Explain / how does it work / architecture | Answer inline using the overview below |\n\nIf intent is ambiguous, ask one question before routing:\n> \"Are you trying to **create** a new plugin, **review** one, **contribute** it to the community, **manage** (install/update/uninstall) plugins, or **debug** a plugin that isn't working?\"\n\nIf the user says \"make a plugin for the community\" - start with `a0-create-plugin`, then note that `a0-contribute-plugin` handles the publishing step after the plugin is built and tested.\n\n---\n\n## Plugin System Overview (for explain/explore queries)\n\n### Roots and Discovery\n\nAgent Zero discovers plugins from two roots, in priority order:\n1. `usr/plugins/\u003cname>/` - user plugins (your custom plugins go here)\n2. `plugins/\u003cname>/` - core system plugins (framework-bundled, do not modify)\n\nA plugin is valid when its directory contains a `plugin.yaml`. Directories starting with `.` are skipped.\n\n### Runtime Manifest (`plugin.yaml`)\n\nEvery plugin requires a `plugin.yaml` at its root:\n\n```yaml\nname: my_plugin              # required by CI for community plugins (^[a-z0-9_]+$)\ntitle: My Plugin             # UI display name\ndescription: What it does.\nversion: 1.0.0\nsettings_sections: [agent]   # which Settings tabs show a subsection\nper_project_config: false    # enables project-scoped settings/toggle\nper_agent_config: false      # enables agent-profile-scoped settings/toggle\nalways_enabled: false        # forces ON, disables toggle (framework use only)\n```\n\n`settings_sections` valid values: `agent`, `external`, `mcp`, `developer`, `backup`. Use `[]` for none.\n\n### What a Plugin Can Provide\n\n| Directory/File | Purpose |\n|---|---|\n| `api/` | API handlers (`ApiHandler` subclasses) |\n| `tools/` | Agent tools (`Tool` subclasses) |\n| `extensions/python/\u003cpoint>/` and `extensions/python/_functions/\u003cmodule>/\u003cqualname>/\u003cstart_or_end>/` | Backend lifecycle hooks and implicit `@extensible` hooks |\n| `extensions/webui/\u003cpoint>/` | HTML/JS injected into UI breakpoints |\n| `webui/config.html` | Plugin settings UI |\n| `webui/*.html`, `webui/*.js` | Full plugin pages and Alpine stores |\n| `hooks.py` | Framework runtime hooks (install, uninstall, pre_update, cache, registration) |\n| `execute.py` | User-triggered script (setup, maintenance, repair) |\n| `default_config.yaml` | Settings defaults |\n| `README.md` | Optional locally; strongly recommended for community plugins so Plugin Hub users can inspect the plugin |\n| `agents/\u003cprofile>/agent.yaml` | Plugin-distributed agent profiles |\n| `conf/model_providers.yaml` | Add/override model providers |\n| `LICENSE` | Optional under `usr/plugins/`; required at the root of a plugin GitHub repo before submitting to the Plugin Index |\n\nFor `@extensible` targets, the only valid implicit hook layout is `extensions/python/_functions/\u003cmodule>/\u003cqualname>/\u003cstart|end>/`. The older flattened `extensions/python/\u003cmodule>_\u003cqualname>_\u003cstart|end>/` folders are obsolete.\n\n### Activation\n\n- Global toggle: `.toggle-1` (ON) / `.toggle-0` (OFF) files in the plugin dir\n- Scoped toggles (project/agent) available when `per_project_config` or `per_agent_config` is true\n- Default: enabled when no toggle file exists\n- `always_enabled: true` forces ON and hides controls (reserved for framework)\n\n### Settings Resolution (highest priority first)\n\n1. `project/.a0proj/agents/\u003cprofile>/plugins/\u003cname>/config.json`\n2. `project/.a0proj/plugins/\u003cname>/config.json`\n3. `usr/agents/\u003cprofile>/plugins/\u003cname>/config.json`\n4. `usr/plugins/\u003cname>/config.json`\n5. `plugins/\u003cname>/default_config.yaml`\n\n### Key API Routes\n\n| Route | Purpose |\n|---|---|\n| `GET /plugins/\u003cname>/\u003cpath>` | Serve static plugin assets |\n| `POST /api/plugins/\u003cname>/\u003chandler>` | Call plugin API endpoint |\n| `POST /api/plugins` | Management (toggle, config, docs) |\n\n### Deep-Dive References\n\n- Architecture + extension points: `/a0/plugins/AGENTS.md`\n- Developer guide: `/a0/docs/developer/plugins.md`\n- Component system: `/a0/webui/components/AGENTS.md`\n- Modal system: `/a0/webui/js/AGENTS.md` and `/a0/webui/css/AGENTS.md`\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("a0-plugin-router-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

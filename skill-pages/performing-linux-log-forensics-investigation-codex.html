@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>performing-linux-log-forensics-investigation - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/performing-linux-log-forensics-investigation-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Security, forensics, and incident response</div>
+      <h1>performing-linux-log-forensics-investigation</h1>
+      <p class="description">Perform forensic investigation of Linux system logs including syslog,</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Security, forensics, and incident response</span></div>
+<div class="meta-card"><strong>display name</strong><span>performing-linux-log-forensics-investigation</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>performing-linux-log-forensics-investigation</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Perform forensic investigation of Linux system logs including syslog,</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose performing-linux-log-forensics-investigation, then write the task. Fallback prompt: Use the performing-linux-log-forensics-investigation skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Performing Linux Log Forensics Investigation</h2>
+<h3>Overview</h3>
+<p>Linux systems maintain extensive logs that serve as primary evidence sources in forensic investigations. Unlike Windows Event Logs, Linux logs are typically plain-text files stored in /var/log/ and binary journal files managed by systemd-journald. Key forensic logs include auth.log (authentication events, sudo usage, SSH sessions), syslog (system-wide messages), kern.log (kernel events), and application-specific logs. The Linux Audit framework (auditd) provides detailed security event logging comparable to Windows Security Event Logs. Forensic analysis of these logs enables investigators to reconstruct user sessions, identify unauthorized access, detect privilege escalation, trace lateral movement, and establish comprehensive event timelines.</p>
+<h3>When to Use</h3>
+<ul>
+<li>When conducting security assessments that involve performing linux log forensics investigation</li>
+<li>When following incident response procedures for related security events</li>
+<li>When performing scheduled security testing or auditing activities</li>
+<li>When validating security controls through hands-on testing</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Familiarity with digital forensics concepts and tools</li>
+<li>Access to a test or lab environment for safe execution</li>
+<li>Python 3.8+ with required dependencies installed</li>
+<li>Appropriate authorization for any testing activities</li>
+</ul>
+<h3>Key Log Files and Locations</h3>
+<p>| Log File | Path | Contents | |----------|------|----------| | auth.log / secure | /var/log/auth.log (Debian) or /var/log/secure (RHEL) | Authentication, sudo, SSH, PAM | | syslog / messages | /var/log/syslog (Debian) or /var/log/messages (RHEL) | General system messages | | kern.log | /var/log/kern.log | Kernel messages, USB events, driver loads | | lastlog | /var/log/lastlog | Last login per user (binary) | | wtmp | /var/log/wtmp | Login/logout records (binary, read with <code>last</code>) | | btmp | /var/log/btmp | Failed login attempts (binary, read with <code>lastb</code>) | | faillog | /var/log/faillog | Failed login counter (binary) | | cron.log | /var/log/cron or /var/log/syslog | Scheduled task execution | | audit.log | /var/log/audit/audit.log | Linux Audit Framework events | | journal | /var/log/journal/ or /run/log/journal/ | systemd binary journal | | dpkg.log | /var/log/dpkg.log | Package installation/removal (Debian) | | yum.log | /var/log/yum.log | Package installation/removal (RHEL) |</p>
+<h3>Analysis Techniques</h3>
+<h4>Authentication Log Analysis</h4>
+<pre><code># Find all successful SSH logins
+grep &quot;Accepted&quot; /var/log/auth.log
+
+# Find failed SSH login attempts
+grep &quot;Failed password&quot; /var/log/auth.log
+
+# Extract unique source IPs from failed logins
+grep &quot;Failed password&quot; /var/log/auth.log | grep -oP '\d+\.\d+\.\d+\.\d+' | sort -u
+
+# Find sudo command execution
+grep &quot;sudo:&quot; /var/log/auth.log | grep &quot;COMMAND&quot;
+
+# Detect brute force patterns (&gt;10 failures from same IP)
+grep &quot;Failed password&quot; /var/log/auth.log | awk '{print $(NF-3)}' | sort | uniq -c | sort -rn | head -20
+
+# Find account creation events
+grep &quot;useradd\|adduser&quot; /var/log/auth.log
+
+# Detect SSH key authentication
+grep &quot;Accepted publickey&quot; /var/log/auth.log</code></pre>
+<h4>Systemd Journal Analysis</h4>
+<pre><code># Export journal in JSON format for forensic processing
+journalctl --output=json --no-pager &gt; journal_export.json
+
+# Filter by time range
+journalctl --since &quot;2025-02-01&quot; --until &quot;2025-02-15&quot; --output=json &gt; timerange.json
+
+# Filter by unit/service
+journalctl -u sshd --output=json &gt; sshd_journal.json
+
+# Show kernel messages (USB events, module loads)
+journalctl -k --output=json &gt; kernel_journal.json
+
+# Filter by priority (0=emerg to 7=debug)
+journalctl -p err --output=json &gt; errors.json
+
+# Boot-specific logs
+journalctl -b 0 --output=json &gt; current_boot.json
+journalctl --list-boots  # List all recorded boot sessions</code></pre>
+<h4>Linux Audit Framework Analysis</h4>
+<pre><code># Search audit log for specific event types
+ausearch -m USER_AUTH --start today
+
+# Search for file access events
+ausearch -f /etc/shadow
+
+# Search for process execution
+ausearch -m EXECVE --start &quot;02/01/2025&quot; --end &quot;02/28/2025&quot;
+
+# Generate report of login events
+aureport --login --start &quot;02/01/2025&quot;
+
+# Generate summary of failed authentications
+aureport --auth --failed
+
+# Search for specific user activity
+ausearch -ua 1001  # By UID
+ausearch -ua username  # By username</code></pre>
+<h4>Cron Job Investigation</h4>
+<pre><code># Check system-wide crontab
+cat /etc/crontab
+
+# Check user crontabs
+ls -la /var/spool/cron/crontabs/
+
+# Review cron execution logs
+grep &quot;CRON&quot; /var/log/syslog
+
+# Check for at/batch jobs
+ls -la /var/spool/at/
+atq</code></pre>
+<h3>Python Forensic Log Parser</h3>
+<pre><code>import re
+import json
+import sys
+import os
+from datetime import datetime
+from collections import defaultdict
+
+
+class LinuxLogForensicAnalyzer:
+    &quot;&quot;&quot;Analyze Linux system logs for forensic investigation.&quot;&quot;&quot;
+
+    def __init__(self, log_dir: str, output_dir: str):
+        self.log_dir = log_dir
+        self.output_dir = output_dir
+        os.makedirs(output_dir, exist_ok=True)
+
+    def parse_auth_log(self, auth_log_path: str) -&gt; dict:
+        &quot;&quot;&quot;Parse auth.log for authentication events.&quot;&quot;&quot;
+        events = {
+            &quot;successful_logins&quot;: [],
+            &quot;failed_logins&quot;: [],
+            &quot;sudo_commands&quot;: [],
+            &quot;account_changes&quot;: [],
+            &quot;ssh_sessions&quot;: []
+        }
+
+        ssh_accepted = re.compile(
+            r'(\w+\s+\d+\s+[\d:]+)\s+(\S+)\s+sshd\[\d+\]:\s+Accepted\s+(\S+)\s+for\s+(\S+)\s+from\s+([\d.]+)'
+        )
+        ssh_failed = re.compile(
+            r'(\w+\s+\d+\s+[\d:]+)\s+(\S+)\s+sshd\[\d+\]:\s+Failed\s+password\s+for\s+(\S*)\s+from\s+([\d.]+)'
+        )
+        sudo_cmd = re.compile(
+            r'(\w+\s+\d+\s+[\d:]+)\s+(\S+)\s+sudo:\s+(\S+)\s+:.*COMMAND=(.*)'
+        )
+        useradd = re.compile(
+            r'(\w+\s+\d+\s+[\d:]+)\s+(\S+)\s+useradd\[\d+\]:\s+new user: name=(\S+)'
+        )
+
+        with open(auth_log_path, &quot;r&quot;, errors=&quot;replace&quot;) as f:
+            for line in f:
+                m = ssh_accepted.search(line)
+                if m:
+                    events[&quot;successful_logins&quot;].append({
+                        &quot;timestamp&quot;: m.group(1), &quot;host&quot;: m.group(2),
+                        &quot;method&quot;: m.group(3), &quot;user&quot;: m.group(4), &quot;source_ip&quot;: m.group(5)
+                    })
+                    continue
+
+                m = ssh_failed.search(line)
+                if m:
+                    events[&quot;failed_logins&quot;].append({
+                        &quot;timestamp&quot;: m.group(1), &quot;host&quot;: m.group(2),
+                        &quot;user&quot;: m.group(3), &quot;source_ip&quot;: m.group(4)
+                    })
+                    continue
+
+                m = sudo_cmd.search(line)
+                if m:
+                    events[&quot;sudo_commands&quot;].append({
+                        &quot;timestamp&quot;: m.group(1), &quot;host&quot;: m.group(2),
+                        &quot;user&quot;: m.group(3), &quot;command&quot;: m.group(4).strip()
+                    })
+                    continue
+
+                m = useradd.search(line)
+                if m:
+                    events[&quot;account_changes&quot;].append({
+                        &quot;timestamp&quot;: m.group(1), &quot;host&quot;: m.group(2),
+                        &quot;new_user&quot;: m.group(3)
+                    })
+
+        return events
+
+    def detect_brute_force(self, auth_events: dict, threshold: int = 10) -&gt; list:
+        &quot;&quot;&quot;Detect brute force attempts from auth log data.&quot;&quot;&quot;
+        ip_failures = defaultdict(int)
+        for event in auth_events.get(&quot;failed_logins&quot;, []):
+            ip_failures[event[&quot;source_ip&quot;]] += 1
+
+        brute_force = []
+        for ip, count in ip_failures.items():
+            if count &gt;= threshold:
+                brute_force.append({&quot;source_ip&quot;: ip, &quot;failed_attempts&quot;: count})
+
+        return sorted(brute_force, key=lambda x: x[&quot;failed_attempts&quot;], reverse=True)
+
+    def generate_report(self, auth_log_path: str) -&gt; str:
+        &quot;&quot;&quot;Generate comprehensive forensic analysis report.&quot;&quot;&quot;
+        auth_events = self.parse_auth_log(auth_log_path)
+        brute_force = self.detect_brute_force(auth_events)
+
+        report = {
+            &quot;analysis_timestamp&quot;: datetime.now().isoformat(),
+            &quot;log_source&quot;: auth_log_path,
+            &quot;summary&quot;: {
+                &quot;successful_logins&quot;: len(auth_events[&quot;successful_logins&quot;]),
+                &quot;failed_logins&quot;: len(auth_events[&quot;failed_logins&quot;]),
+                &quot;sudo_commands&quot;: len(auth_events[&quot;sudo_commands&quot;]),
+                &quot;account_changes&quot;: len(auth_events[&quot;account_changes&quot;]),
+                &quot;brute_force_sources&quot;: len(brute_force)
+            },
+            &quot;brute_force_detected&quot;: brute_force,
+            &quot;auth_events&quot;: auth_events
+        }
+
+        report_path = os.path.join(self.output_dir, &quot;linux_log_forensics.json&quot;)
+        with open(report_path, &quot;w&quot;) as f:
+            json.dump(report, f, indent=2)
+
+        print(f&quot;[*] Successful logins: {report['summary']['successful_logins']}&quot;)
+        print(f&quot;[*] Failed logins: {report['summary']['failed_logins']}&quot;)
+        print(f&quot;[*] Sudo commands: {report['summary']['sudo_commands']}&quot;)
+        print(f&quot;[*] Brute force sources: {report['summary']['brute_force_sources']}&quot;)
+        return report_path
+
+
+def main():
+    if len(sys.argv) &lt; 3:
+        print(&quot;Usage: python process.py &lt;auth_log_path&gt; &lt;output_dir&gt;&quot;)
+        sys.exit(1)
+    analyzer = LinuxLogForensicAnalyzer(os.path.dirname(sys.argv[1]), sys.argv[2])
+    analyzer.generate_report(sys.argv[1])
+
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre>
+<h3>References</h3>
+<ul>
+<li>Linux Forensics In Depth: https://amr-git-dot.github.io/forensic%20investigation/Linux_Forensics/</li>
+<li>SANS Practical Linux Forensics: https://nostarch.com/linuxforensics</li>
+<li>HackTricks Linux Forensics: https://book.hacktricks.xyz/generic-methodologies-and-resources/basic-forensic-methodology/linux-forensics</li>
+<li>Log Sources for Digital Forensics: https://letsdefend.io/blog/log-sources-for-digital-forensics-windows-and-linux</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: performing-linux-log-forensics-investigation\ndisplay_name: performing-linux-log-forensics-investigation\nplatform: Codex\ncategory: Security, forensics, and incident response\n---\n\n# performing-linux-log-forensics-investigation - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `performing-linux-log-forensics-investigation` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nLinux systems maintain extensive logs that serve as primary evidence sources in forensic investigations. Unlike Windows Event Logs, Linux logs are typically plain-text files stored in /var/log/ and binary journal files m\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose performing-linux-log-forensics-investigation, then write the task. Fallback prompt: Use the performing-linux-log-forensics-investigation skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `performing-linux-log-forensics-investigation` |\n| Canonical name | `performing-linux-log-forensics-investigation` |\n| Platform | `Codex` |\n| Category | Security, forensics, and incident response |\n\n## Description\n\nLinux systems maintain extensive logs that serve as primary evidence sources in forensic investigations. Unlike Windows Event Logs, Linux logs are typically plain-text files stored in /var/log/ and binary journal files m\n\n## Original SKILL.md\n\n---\nname: performing-linux-log-forensics-investigation\ndescription: Perform forensic investigation of Linux system logs including syslog,\n  auth.log, systemd journal, kern.log, and application logs to reconstruct user activity,\n  detect unauthorized access, and establish event timelines on compromised Linux systems.\ndomain: cybersecurity\nsubdomain: digital-forensics\ntags:\n- linux-forensics\n- syslog\n- auth-log\n- systemd-journal\n- journalctl\n- linux-logs\n- ssh-forensics\n- cron\n- audit-log\n- log-analysis\nversion: '1.0'\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- RS.AN-01\n- RS.AN-03\n- DE.AE-02\n- RS.MA-01\nmitre_attack:\n- T1005\n- T1074\n- T1119\n- T1070\n- T1059\n---\n\n# Performing Linux Log Forensics Investigation\n\n## Overview\n\nLinux systems maintain extensive logs that serve as primary evidence sources in forensic investigations. Unlike Windows Event Logs, Linux logs are typically plain-text files stored in /var/log/ and binary journal files managed by systemd-journald. Key forensic logs include auth.log (authentication events, sudo usage, SSH sessions), syslog (system-wide messages), kern.log (kernel events), and application-specific logs. The Linux Audit framework (auditd) provides detailed security event logging comparable to Windows Security Event Logs. Forensic analysis of these logs enables investigators to reconstruct user sessions, identify unauthorized access, detect privilege escalation, trace lateral movement, and establish comprehensive event timelines.\n\n\n## When to Use\n\n- When conducting security assessments that involve performing linux log forensics investigation\n- When following incident response procedures for related security events\n- When performing scheduled security testing or auditing activities\n- When validating security controls through hands-on testing\n\n## Prerequisites\n\n- Familiarity with digital forensics concepts and tools\n- Access to a test or lab environment for safe execution\n- Python 3.8+ with required dependencies installed\n- Appropriate authorization for any testing activities\n\n## Key Log Files and Locations\n\n| Log File | Path | Contents |\n|----------|------|----------|\n| auth.log / secure | /var/log/auth.log (Debian) or /var/log/secure (RHEL) | Authentication, sudo, SSH, PAM |\n| syslog / messages | /var/log/syslog (Debian) or /var/log/messages (RHEL) | General system messages |\n| kern.log | /var/log/kern.log | Kernel messages, USB events, driver loads |\n| lastlog | /var/log/lastlog | Last login per user (binary) |\n| wtmp | /var/log/wtmp | Login/logout records (binary, read with `last`) |\n| btmp | /var/log/btmp | Failed login attempts (binary, read with `lastb`) |\n| faillog | /var/log/faillog | Failed login counter (binary) |\n| cron.log | /var/log/cron or /var/log/syslog | Scheduled task execution |\n| audit.log | /var/log/audit/audit.log | Linux Audit Framework events |\n| journal | /var/log/journal/ or /run/log/journal/ | systemd binary journal |\n| dpkg.log | /var/log/dpkg.log | Package installation/removal (Debian) |\n| yum.log | /var/log/yum.log | Package installation/removal (RHEL) |\n\n## Analysis Techniques\n\n### Authentication Log Analysis\n\n```bash\n# Find all successful SSH logins\ngrep \"Accepted\" /var/log/auth.log\n\n# Find failed SSH login attempts\ngrep \"Failed password\" /var/log/auth.log\n\n# Extract unique source IPs from failed logins\ngrep \"Failed password\" /var/log/auth.log | grep -oP '\\d+\\.\\d+\\.\\d+\\.\\d+' | sort -u\n\n# Find sudo command execution\ngrep \"sudo:\" /var/log/auth.log | grep \"COMMAND\"\n\n# Detect brute force patterns (>10 failures from same IP)\ngrep \"Failed password\" /var/log/auth.log | awk '{print $(NF-3)}' | sort | uniq -c | sort -rn | head -20\n\n# Find account creation events\ngrep \"useradd\\|adduser\" /var/log/auth.log\n\n# Detect SSH key authentication\ngrep \"Accepted publickey\" /var/log/auth.log\n```\n\n### Systemd Journal Analysis\n\n```bash\n# Export journal in JSON format for forensic processing\njournalctl --output=json --no-pager > journal_export.json\n\n# Filter by time range\njournalctl --since \"2025-02-01\" --until \"2025-02-15\" --output=json > timerange.json\n\n# Filter by unit/service\njournalctl -u sshd --output=json > sshd_journal.json\n\n# Show kernel messages (USB events, module loads)\njournalctl -k --output=json > kernel_journal.json\n\n# Filter by priority (0=emerg to 7=debug)\njournalctl -p err --output=json > errors.json\n\n# Boot-specific logs\njournalctl -b 0 --output=json > current_boot.json\njournalctl --list-boots  # List all recorded boot sessions\n```\n\n### Linux Audit Framework Analysis\n\n```bash\n# Search audit log for specific event types\nausearch -m USER_AUTH --start today\n\n# Search for file access events\nausearch -f /etc/shadow\n\n# Search for process execution\nausearch -m EXECVE --start \"02/01/2025\" --end \"02/28/2025\"\n\n# Generate report of login events\naureport --login --start \"02/01/2025\"\n\n# Generate summary of failed authentications\naureport --auth --failed\n\n# Search for specific user activity\nausearch -ua 1001  # By UID\nausearch -ua username  # By username\n```\n\n### Cron Job Investigation\n\n```bash\n# Check system-wide crontab\ncat /etc/crontab\n\n# Check user crontabs\nls -la /var/spool/cron/crontabs/\n\n# Review cron execution logs\ngrep \"CRON\" /var/log/syslog\n\n# Check for at/batch jobs\nls -la /var/spool/at/\natq\n```\n\n## Python Forensic Log Parser\n\n```python\nimport re\nimport json\nimport sys\nimport os\nfrom datetime import datetime\nfrom collections import defaultdict\n\n\nclass LinuxLogForensicAnalyzer:\n    \"\"\"Analyze Linux system logs for forensic investigation.\"\"\"\n\n    def __init__(self, log_dir: str, output_dir: str):\n        self.log_dir = log_dir\n        self.output_dir = output_dir\n        os.makedirs(output_dir, exist_ok=True)\n\n    def parse_auth_log(self, auth_log_path: str) -> dict:\n        \"\"\"Parse auth.log for authentication events.\"\"\"\n        events = {\n            \"successful_logins\": [],\n            \"failed_logins\": [],\n            \"sudo_commands\": [],\n            \"account_changes\": [],\n            \"ssh_sessions\": []\n        }\n\n        ssh_accepted = re.compile(\n            r'(\\w+\\s+\\d+\\s+[\\d:]+)\\s+(\\S+)\\s+sshd\\[\\d+\\]:\\s+Accepted\\s+(\\S+)\\s+for\\s+(\\S+)\\s+from\\s+([\\d.]+)'\n        )\n        ssh_failed = re.compile(\n            r'(\\w+\\s+\\d+\\s+[\\d:]+)\\s+(\\S+)\\s+sshd\\[\\d+\\]:\\s+Failed\\s+password\\s+for\\s+(\\S*)\\s+from\\s+([\\d.]+)'\n        )\n        sudo_cmd = re.compile(\n            r'(\\w+\\s+\\d+\\s+[\\d:]+)\\s+(\\S+)\\s+sudo:\\s+(\\S+)\\s+:.*COMMAND=(.*)'\n        )\n        useradd = re.compile(\n            r'(\\w+\\s+\\d+\\s+[\\d:]+)\\s+(\\S+)\\s+useradd\\[\\d+\\]:\\s+new user: name=(\\S+)'\n        )\n\n        with open(auth_log_path, \"r\", errors=\"replace\") as f:\n            for line in f:\n                m = ssh_accepted.search(line)\n                if m:\n                    events[\"successful_logins\"].append({\n                        \"timestamp\": m.group(1), \"host\": m.group(2),\n                        \"method\": m.group(3), \"user\": m.group(4), \"source_ip\": m.group(5)\n                    })\n                    continue\n\n                m = ssh_failed.search(line)\n                if m:\n                    events[\"failed_logins\"].append({\n                        \"timestamp\": m.group(1), \"host\": m.group(2),\n                        \"user\": m.group(3), \"source_ip\": m.group(4)\n                    })\n                    continue\n\n                m = sudo_cmd.search(line)\n                if m:\n                    events[\"sudo_commands\"].append({\n                        \"timestamp\": m.group(1), \"host\": m.group(2),\n                        \"user\": m.group(3), \"command\": m.group(4).strip()\n                    })\n                    continue\n\n                m = useradd.search(line)\n                if m:\n                    events[\"account_changes\"].append({\n                        \"timestamp\": m.group(1), \"host\": m.group(2),\n                        \"new_user\": m.group(3)\n                    })\n\n        return events\n\n    def detect_brute_force(self, auth_events: dict, threshold: int = 10) -> list:\n        \"\"\"Detect brute force attempts from auth log data.\"\"\"\n        ip_failures = defaultdict(int)\n        for event in auth_events.get(\"failed_logins\", []):\n            ip_failures[event[\"source_ip\"]] += 1\n\n        brute_force = []\n        for ip, count in ip_failures.items():\n            if count >= threshold:\n                brute_force.append({\"source_ip\": ip, \"failed_attempts\": count})\n\n        return sorted(brute_force, key=lambda x: x[\"failed_attempts\"], reverse=True)\n\n    def generate_report(self, auth_log_path: str) -> str:\n        \"\"\"Generate comprehensive forensic analysis report.\"\"\"\n        auth_events = self.parse_auth_log(auth_log_path)\n        brute_force = self.detect_brute_force(auth_events)\n\n        report = {\n            \"analysis_timestamp\": datetime.now().isoformat(),\n            \"log_source\": auth_log_path,\n            \"summary\": {\n                \"successful_logins\": len(auth_events[\"successful_logins\"]),\n                \"failed_logins\": len(auth_events[\"failed_logins\"]),\n                \"sudo_commands\": len(auth_events[\"sudo_commands\"]),\n                \"account_changes\": len(auth_events[\"account_changes\"]),\n                \"brute_force_sources\": len(brute_force)\n            },\n            \"brute_force_detected\": brute_force,\n            \"auth_events\": auth_events\n        }\n\n        report_path = os.path.join(self.output_dir, \"linux_log_forensics.json\")\n        with open(report_path, \"w\") as f:\n            json.dump(report, f, indent=2)\n\n        print(f\"[*] Successful logins: {report['summary']['successful_logins']}\")\n        print(f\"[*] Failed logins: {report['summary']['failed_logins']}\")\n        print(f\"[*] Sudo commands: {report['summary']['sudo_commands']}\")\n        print(f\"[*] Brute force sources: {report['summary']['brute_force_sources']}\")\n        return report_path\n\n\ndef main():\n    if len(sys.argv) \u003c 3:\n        print(\"Usage: python process.py \u003cauth_log_path> \u003coutput_dir>\")\n        sys.exit(1)\n    analyzer = LinuxLogForensicAnalyzer(os.path.dirname(sys.argv[1]), sys.argv[2])\n    analyzer.generate_report(sys.argv[1])\n\n\nif __name__ == \"__main__\":\n    main()\n```\n\n## References\n\n- Linux Forensics In Depth: https://amr-git-dot.github.io/forensic%20investigation/Linux_Forensics/\n- SANS Practical Linux Forensics: https://nostarch.com/linuxforensics\n- HackTricks Linux Forensics: https://book.hacktricks.xyz/generic-methodologies-and-resources/basic-forensic-methodology/linux-forensics\n- Log Sources for Digital Forensics: https://letsdefend.io/blog/log-sources-for-digital-forensics-windows-and-linux\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("performing-linux-log-forensics-investigation-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

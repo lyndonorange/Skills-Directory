@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>implementing-browser-isolation-for-zero-trust - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/implementing-browser-isolation-for-zero-trust-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>implementing-browser-isolation-for-zero-trust</h1>
+      <p class="description">'Deploys remote browser isolation (RBI) as a core component of a Zero</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>implementing-browser-isolation-for-zero-trust</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>implementing-browser-isolation-for-zero-trust</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Deploys remote browser isolation (RBI) as a core component of a Zero</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose implementing-browser-isolation-for-zero-trust, then write the task. Fallback prompt: Use the implementing-browser-isolation-for-zero-trust skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Implementing Browser Isolation for Zero Trust</h2>
+<h3>When to Use</h3>
+<ul>
+<li>When deploying remote browser isolation as part of a Zero Trust security architecture</li>
+<li>When protecting users from zero-day browser exploits and drive-by downloads</li>
+<li>When implementing content disarming and reconstruction for file downloads</li>
+<li>When enforcing data loss prevention policies for web browsing sessions</li>
+<li>When securing access to untrusted or uncategorized websites</li>
+<li>When integrating browser isolation with existing SWG and ZTNA infrastructure</li>
+<li>When protecting against phishing and credential theft via isolated rendering</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>Familiarity with Zero Trust architecture principles and network security</li>
+<li>Understanding of Secure Web Gateway (SWG) and proxy deployment models</li>
+<li>Access to a test or lab environment for policy validation</li>
+<li>Python 3.8+ with required dependencies installed</li>
+<li>DNS and proxy infrastructure for traffic routing</li>
+</ul>
+<h3>Instructions</h3>
+<h4>Phase 1: URL Categorization and Risk Classification</h4>
+<p>Build a URL categorization engine that classifies websites by risk level to determine isolation policy. URLs are scored based on threat intelligence feeds, domain reputation, content category, and historical risk indicators.</p>
+<pre><code>from agent import BrowserIsolationPolicyEngine
+
+engine = BrowserIsolationPolicyEngine(
+    organization=&quot;Acme Corp&quot;,
+    default_isolation_mode=&quot;isolate_risky&quot;,
+)
+
+# Classify a URL and determine isolation action
+result = engine.classify_url(&quot;https://docs.google.com/spreadsheets/d/abc123&quot;)
+print(f&quot;Category: {result['category']}&quot;)
+print(f&quot;Risk Level: {result['risk_level']}&quot;)
+print(f&quot;Isolation Action: {result['action']}&quot;)
+# Output: Category: cloud_productivity
+#         Risk Level: low
+#         Action: allow_direct
+
+result = engine.classify_url(&quot;https://unknown-sketchy-domain.xyz/download.html&quot;)
+print(f&quot;Category: {result['category']}&quot;)
+print(f&quot;Risk Level: {result['risk_level']}&quot;)
+print(f&quot;Isolation Action: {result['action']}&quot;)
+# Output: Category: uncategorized
+#         Risk Level: high
+#         Action: full_isolation</code></pre>
+<h4>Phase 2: Isolation Policy Configuration</h4>
+<p>Define isolation policies that map URL categories and risk levels to specific isolation modes and DLP restrictions. Policies support granular controls including clipboard, file download, upload, and printing restrictions.</p>
+<pre><code># Configure isolation policies
+engine.add_isolation_policy(
+    name=&quot;Block Uncategorized Sites&quot;,
+    description=&quot;Fully isolate all uncategorized or newly registered domains&quot;,
+    match_criteria={
+        &quot;url_categories&quot;: [&quot;uncategorized&quot;, &quot;newly_registered&quot;],
+        &quot;risk_levels&quot;: [&quot;high&quot;, &quot;critical&quot;],
+    },
+    isolation_mode=&quot;full_isolation&quot;,
+    dlp_controls={
+        &quot;disable_copy_paste&quot;: True,
+        &quot;disable_download&quot;: True,
+        &quot;disable_upload&quot;: True,
+        &quot;disable_printing&quot;: True,
+        &quot;disable_keyboard_input&quot;: False,
+        &quot;watermark_session&quot;: True,
+    },
+)
+
+engine.add_isolation_policy(
+    name=&quot;Isolate Webmail with DLP&quot;,
+    description=&quot;Isolate personal webmail with download restrictions&quot;,
+    match_criteria={
+        &quot;url_categories&quot;: [&quot;webmail&quot;],
+        &quot;domains&quot;: [&quot;mail.google.com&quot;, &quot;outlook.live.com&quot;, &quot;mail.yahoo.com&quot;],
+    },
+    isolation_mode=&quot;read_only_isolation&quot;,
+    dlp_controls={
+        &quot;disable_copy_paste&quot;: True,
+        &quot;disable_download&quot;: True,
+        &quot;disable_upload&quot;: True,
+        &quot;disable_printing&quot;: True,
+        &quot;disable_keyboard_input&quot;: False,
+        &quot;watermark_session&quot;: False,
+    },
+)
+
+engine.add_isolation_policy(
+    name=&quot;CDR for File Downloads&quot;,
+    description=&quot;Apply content disarm and reconstruction to all file downloads&quot;,
+    match_criteria={
+        &quot;url_categories&quot;: [&quot;*&quot;],
+        &quot;file_types&quot;: [&quot;pdf&quot;, &quot;docx&quot;, &quot;xlsx&quot;, &quot;pptx&quot;, &quot;zip&quot;, &quot;exe&quot;, &quot;msi&quot;],
+    },
+    isolation_mode=&quot;cdr_passthrough&quot;,
+    cdr_config={
+        &quot;strip_macros&quot;: True,
+        &quot;strip_embedded_objects&quot;: True,
+        &quot;strip_javascript&quot;: True,
+        &quot;strip_active_content&quot;: True,
+        &quot;flatten_pdf&quot;: True,
+        &quot;reconstruct_to_safe_format&quot;: True,
+        &quot;max_file_size_mb&quot;: 50,
+        &quot;allowed_file_types&quot;: [&quot;pdf&quot;, &quot;docx&quot;, &quot;xlsx&quot;, &quot;pptx&quot;, &quot;png&quot;, &quot;jpg&quot;],
+    },
+)
+
+engine.add_isolation_policy(
+    name=&quot;Allow Trusted SaaS Direct&quot;,
+    description=&quot;Allow direct access to sanctioned SaaS applications&quot;,
+    match_criteria={
+        &quot;url_categories&quot;: [&quot;cloud_productivity&quot;, &quot;business_saas&quot;],
+        &quot;domains&quot;: [
+            &quot;*.office365.com&quot;, &quot;*.office.com&quot;, &quot;*.microsoft.com&quot;,
+            &quot;*.salesforce.com&quot;, &quot;*.slack.com&quot;, &quot;*.github.com&quot;,
+        ],
+        &quot;risk_levels&quot;: [&quot;low&quot;],
+    },
+    isolation_mode=&quot;allow_direct&quot;,
+    dlp_controls={
+        &quot;disable_copy_paste&quot;: False,
+        &quot;disable_download&quot;: False,
+        &quot;disable_upload&quot;: False,
+        &quot;log_all_downloads&quot;: True,
+    },
+)
+
+# List all policies
+for policy in engine.list_policies():
+    print(f&quot;  [{policy['priority']}] {policy['name']} -&gt; {policy['isolation_mode']}&quot;)</code></pre>
+<h4>Phase 3: Content Disarming and Reconstruction (CDR)</h4>
+<p>Implement CDR processing to sanitize downloaded files by deconstructing them, stripping potentially malicious elements (macros, embedded objects, scripts), and reconstructing clean versions that preserve usability.</p>
+<pre><code># Process a file through CDR
+cdr_result = engine.process_file_cdr(
+    file_path=&quot;/tmp/downloads/quarterly_report.docx&quot;,
+    source_url=&quot;https://partner-portal.example.com/reports/q4.docx&quot;,
+    cdr_profile=&quot;strict&quot;,
+)
+
+print(f&quot;Original file: {cdr_result['original']['filename']}&quot;)
+print(f&quot;Original size: {cdr_result['original']['size_bytes']} bytes&quot;)
+print(f&quot;Threats found: {cdr_result['threats_found']}&quot;)
+for threat in cdr_result['threats_detail']:
+    print(f&quot;  - {threat['type']}: {threat['description']} [{threat['action']}]&quot;)
+print(f&quot;Clean file: {cdr_result['reconstructed']['filename']}&quot;)
+print(f&quot;Clean size: {cdr_result['reconstructed']['size_bytes']} bytes&quot;)
+print(f&quot;File integrity preserved: {cdr_result['reconstructed']['usable']}&quot;)
+
+# Example output:
+# Original file: quarterly_report.docx
+# Original size: 245760 bytes
+# Threats found: 3
+#   - macro: VBA macro with AutoOpen trigger [STRIPPED]
+#   - embedded_ole: Embedded OLE object (executable) [STRIPPED]
+#   - external_link: External template reference [STRIPPED]
+# Clean file: quarterly_report_clean.docx
+# Clean size: 198432 bytes
+# File integrity preserved: True</code></pre>
+<h4>Phase 4: Session Control and Monitoring</h4>
+<p>Implement real-time session monitoring for isolated browsing sessions with keystroke logging policy, clipboard interception, and download tracking. Integrate with SIEM for security event correlation.</p>
+<pre><code># Create an isolation session
+session = engine.create_isolation_session(
+    user_id=&quot;jsmith@acme.com&quot;,
+    user_groups=[&quot;engineering&quot;, &quot;contractors&quot;],
+    device_posture={
+        &quot;os&quot;: &quot;Windows 11&quot;,
+        &quot;managed&quot;: True,
+        &quot;edr_running&quot;: True,
+        &quot;disk_encrypted&quot;: True,
+        &quot;os_patched&quot;: True,
+    },
+    target_url=&quot;https://external-vendor.example.com/portal&quot;,
+)
+
+print(f&quot;Session ID: {session['session_id']}&quot;)
+print(f&quot;Isolation Mode: {session['isolation_mode']}&quot;)
+print(f&quot;Applied Policy: {session['applied_policy']}&quot;)
+print(f&quot;DLP Controls: {json.dumps(session['dlp_controls'], indent=2)}&quot;)
+
+# Monitor session events
+events = engine.get_session_events(session_id=session[&quot;session_id&quot;])
+for event in events:
+    print(f&quot;  [{event['timestamp']}] {event['event_type']}: {event['details']}&quot;)
+
+# Generate session audit report
+audit = engine.generate_session_audit(
+    user_id=&quot;jsmith@acme.com&quot;,
+    date_range=(&quot;2026-03-01&quot;, &quot;2026-03-19&quot;),
+)
+print(f&quot;Total sessions: {audit['total_sessions']}&quot;)
+print(f&quot;Isolated sessions: {audit['isolated_sessions']}&quot;)
+print(f&quot;Files processed via CDR: {audit['cdr_processed_files']}&quot;)
+print(f&quot;DLP violations: {audit['dlp_violations']}&quot;)</code></pre>
+<h4>Phase 5: Integration with Zero Trust Platform</h4>
+<p>Integrate browser isolation with the broader Zero Trust architecture including identity provider, device posture checks, and conditional access policies.</p>
+<pre><code># Define Zero Trust conditional access integration
+zt_policy = engine.create_zero_trust_integration(
+    identity_provider=&quot;Azure AD&quot;,
+    conditional_access_rules=[
+        {
+            &quot;name&quot;: &quot;Unmanaged Device Isolation&quot;,
+            &quot;condition&quot;: {&quot;device_managed&quot;: False},
+            &quot;action&quot;: &quot;full_isolation&quot;,
+            &quot;dlp_override&quot;: {&quot;disable_download&quot;: True, &quot;disable_upload&quot;: True},
+        },
+        {
+            &quot;name&quot;: &quot;High Risk User Isolation&quot;,
+            &quot;condition&quot;: {&quot;user_risk_level&quot;: &quot;high&quot;},
+            &quot;action&quot;: &quot;full_isolation&quot;,
+            &quot;dlp_override&quot;: {&quot;disable_copy_paste&quot;: True, &quot;watermark_session&quot;: True},
+        },
+        {
+            &quot;name&quot;: &quot;Contractor Restricted Access&quot;,
+            &quot;condition&quot;: {&quot;user_group&quot;: &quot;contractors&quot;},
+            &quot;action&quot;: &quot;read_only_isolation&quot;,
+            &quot;dlp_override&quot;: {&quot;disable_download&quot;: True, &quot;disable_printing&quot;: True},
+        },
+        {
+            &quot;name&quot;: &quot;Privileged Admin Isolation&quot;,
+            &quot;condition&quot;: {&quot;user_group&quot;: &quot;admins&quot;, &quot;target_category&quot;: &quot;admin_console&quot;},
+            &quot;action&quot;: &quot;full_isolation&quot;,
+            &quot;dlp_override&quot;: {&quot;watermark_session&quot;: True, &quot;record_session&quot;: True},
+        },
+    ],
+    swg_integration={
+        &quot;proxy_mode&quot;: &quot;explicit&quot;,
+        &quot;pac_url&quot;: &quot;https://pac.acme.com/proxy.pac&quot;,
+        &quot;ssl_inspection&quot;: True,
+        &quot;bypass_domains&quot;: [&quot;*.acme.internal&quot;],
+    },
+)
+
+# Evaluate a request against all policies
+decision = engine.evaluate_access_request(
+    user_id=&quot;contractor@vendor.com&quot;,
+    user_groups=[&quot;contractors&quot;],
+    device_posture={&quot;managed&quot;: False, &quot;edr_running&quot;: False},
+    target_url=&quot;https://sensitive-app.acme.com/dashboard&quot;,
+    user_risk_level=&quot;medium&quot;,
+)
+print(f&quot;Decision: {decision['action']}&quot;)
+print(f&quot;Matched Rules: {[r['name'] for r in decision['matched_rules']]}&quot;)
+print(f&quot;DLP Controls: {decision['effective_dlp_controls']}&quot;)</code></pre>
+<h3>Examples</h3>
+<h4>Quick Policy Deployment for Phishing Protection</h4>
+<pre><code>engine = BrowserIsolationPolicyEngine(default_isolation_mode=&quot;isolate_risky&quot;)
+
+# Isolate all links from email
+engine.add_isolation_policy(
+    name=&quot;Email Link Isolation&quot;,
+    description=&quot;Isolate all URLs clicked from email clients&quot;,
+    match_criteria={
+        &quot;referrer_categories&quot;: [&quot;email_client&quot;],
+        &quot;url_categories&quot;: [&quot;*&quot;],
+    },
+    isolation_mode=&quot;full_isolation&quot;,
+    dlp_controls={
+        &quot;disable_keyboard_input&quot;: True,
+        &quot;disable_download&quot;: True,
+        &quot;watermark_session&quot;: True,
+    },
+)
+
+# Test against a phishing URL
+result = engine.evaluate_access_request(
+    user_id=&quot;user@acme.com&quot;,
+    target_url=&quot;https://micr0soft-login.phishing.com/auth&quot;,
+    referrer=&quot;https://mail.google.com&quot;,
+    user_risk_level=&quot;low&quot;,
+)
+print(f&quot;Action: {result['action']}&quot;)  # full_isolation</code></pre>
+<h4>CDR Pipeline for All Downloads</h4>
+<pre><code>engine = BrowserIsolationPolicyEngine()
+
+# Scan a batch of downloaded files through CDR
+files = [
+    &quot;/tmp/downloads/invoice.pdf&quot;,
+    &quot;/tmp/downloads/contract.docx&quot;,
+    &quot;/tmp/downloads/data_export.xlsx&quot;,
+    &quot;/tmp/downloads/presentation.pptx&quot;,
+]
+
+batch_result = engine.batch_cdr_process(
+    files=files,
+    cdr_profile=&quot;strict&quot;,
+    quarantine_on_threat=True,
+)
+
+print(f&quot;Processed: {batch_result['total_processed']}&quot;)
+print(f&quot;Clean: {batch_result['clean_count']}&quot;)
+print(f&quot;Threats neutralized: {batch_result['threats_neutralized']}&quot;)
+print(f&quot;Quarantined: {batch_result['quarantined_count']}&quot;)
+for f in batch_result[&quot;results&quot;]:
+    status = &quot;CLEAN&quot; if f[&quot;clean&quot;] else &quot;SANITIZED&quot;
+    print(f&quot;  [{status}] {f['filename']}: {f['threats_found']} threats&quot;)</code></pre>
+<h4>Generating Isolation Policy Compliance Report</h4>
+<pre><code>engine = BrowserIsolationPolicyEngine()
+
+report = engine.generate_compliance_report(
+    date_range=(&quot;2026-03-01&quot;, &quot;2026-03-19&quot;),
+    include_metrics=True,
+)
+
+print(f&quot;Total web requests: {report['total_requests']}&quot;)
+print(f&quot;Isolated requests: {report['isolated_requests']} ({report['isolation_rate']}%)&quot;)
+print(f&quot;CDR processed files: {report['cdr_stats']['total_files']}&quot;)
+print(f&quot;Threats neutralized: {report['cdr_stats']['threats_neutralized']}&quot;)
+print(f&quot;DLP violations blocked: {report['dlp_violations_blocked']}&quot;)
+print(f&quot;Zero-day attacks prevented: {report['zero_day_blocked']}&quot;)</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: implementing-browser-isolation-for-zero-trust\ndisplay_name: implementing-browser-isolation-for-zero-trust\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# implementing-browser-isolation-for-zero-trust - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `implementing-browser-isolation-for-zero-trust` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n- When deploying remote browser isolation as part of a Zero Trust security architecture\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose implementing-browser-isolation-for-zero-trust, then write the task. Fallback prompt: Use the implementing-browser-isolation-for-zero-trust skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `implementing-browser-isolation-for-zero-trust` |\n| Canonical name | `implementing-browser-isolation-for-zero-trust` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\n- When deploying remote browser isolation as part of a Zero Trust security architecture\n\n## Original SKILL.md\n\n---\nname: implementing-browser-isolation-for-zero-trust\ndescription: 'Deploys remote browser isolation (RBI) as a core component of a Zero\n  Trust architecture. Implements isolation policies with URL categorization and risk-based\n  routing, content disarming and reconstruction (CDR) for file sanitization, data\n  loss prevention controls within isolated sessions, and integration with Secure Web\n  Gateway and ZTNA platforms. Based on Cloudflare Browser Isolation, Menlo Security,\n  and Zscaler RBI approaches. Use when hardening web access against zero-day exploits,\n  phishing, credential theft, and browser-based data exfiltration.\n\n  '\ndomain: cybersecurity\nsubdomain: network-security\ntags:\n- browser-isolation\n- zero-trust\n- RBI\n- CDR\n- URL-categorization\n- content-disarming\n- secure-web-gateway\nversion: '1.0'\nauthor: mukul975\nlicense: Apache-2.0\nnist_csf:\n- PR.IR-01\n- DE.CM-01\n- ID.AM-03\n- PR.DS-02\nmitre_attack:\n- T1046\n- T1040\n- T1557\n- T1071\n- T1003\n---\n\n# Implementing Browser Isolation for Zero Trust\n\n## When to Use\n\n- When deploying remote browser isolation as part of a Zero Trust security architecture\n- When protecting users from zero-day browser exploits and drive-by downloads\n- When implementing content disarming and reconstruction for file downloads\n- When enforcing data loss prevention policies for web browsing sessions\n- When securing access to untrusted or uncategorized websites\n- When integrating browser isolation with existing SWG and ZTNA infrastructure\n- When protecting against phishing and credential theft via isolated rendering\n\n## Prerequisites\n\n- Familiarity with Zero Trust architecture principles and network security\n- Understanding of Secure Web Gateway (SWG) and proxy deployment models\n- Access to a test or lab environment for policy validation\n- Python 3.8+ with required dependencies installed\n- DNS and proxy infrastructure for traffic routing\n\n## Instructions\n\n### Phase 1: URL Categorization and Risk Classification\n\nBuild a URL categorization engine that classifies websites by risk level to\ndetermine isolation policy. URLs are scored based on threat intelligence feeds,\ndomain reputation, content category, and historical risk indicators.\n\n```python\nfrom agent import BrowserIsolationPolicyEngine\n\nengine = BrowserIsolationPolicyEngine(\n    organization=\"Acme Corp\",\n    default_isolation_mode=\"isolate_risky\",\n)\n\n# Classify a URL and determine isolation action\nresult = engine.classify_url(\"https://docs.google.com/spreadsheets/d/abc123\")\nprint(f\"Category: {result['category']}\")\nprint(f\"Risk Level: {result['risk_level']}\")\nprint(f\"Isolation Action: {result['action']}\")\n# Output: Category: cloud_productivity\n#         Risk Level: low\n#         Action: allow_direct\n\nresult = engine.classify_url(\"https://unknown-sketchy-domain.xyz/download.html\")\nprint(f\"Category: {result['category']}\")\nprint(f\"Risk Level: {result['risk_level']}\")\nprint(f\"Isolation Action: {result['action']}\")\n# Output: Category: uncategorized\n#         Risk Level: high\n#         Action: full_isolation\n```\n\n### Phase 2: Isolation Policy Configuration\n\nDefine isolation policies that map URL categories and risk levels to specific\nisolation modes and DLP restrictions. Policies support granular controls including\nclipboard, file download, upload, and printing restrictions.\n\n```python\n# Configure isolation policies\nengine.add_isolation_policy(\n    name=\"Block Uncategorized Sites\",\n    description=\"Fully isolate all uncategorized or newly registered domains\",\n    match_criteria={\n        \"url_categories\": [\"uncategorized\", \"newly_registered\"],\n        \"risk_levels\": [\"high\", \"critical\"],\n    },\n    isolation_mode=\"full_isolation\",\n    dlp_controls={\n        \"disable_copy_paste\": True,\n        \"disable_download\": True,\n        \"disable_upload\": True,\n        \"disable_printing\": True,\n        \"disable_keyboard_input\": False,\n        \"watermark_session\": True,\n    },\n)\n\nengine.add_isolation_policy(\n    name=\"Isolate Webmail with DLP\",\n    description=\"Isolate personal webmail with download restrictions\",\n    match_criteria={\n        \"url_categories\": [\"webmail\"],\n        \"domains\": [\"mail.google.com\", \"outlook.live.com\", \"mail.yahoo.com\"],\n    },\n    isolation_mode=\"read_only_isolation\",\n    dlp_controls={\n        \"disable_copy_paste\": True,\n        \"disable_download\": True,\n        \"disable_upload\": True,\n        \"disable_printing\": True,\n        \"disable_keyboard_input\": False,\n        \"watermark_session\": False,\n    },\n)\n\nengine.add_isolation_policy(\n    name=\"CDR for File Downloads\",\n    description=\"Apply content disarm and reconstruction to all file downloads\",\n    match_criteria={\n        \"url_categories\": [\"*\"],\n        \"file_types\": [\"pdf\", \"docx\", \"xlsx\", \"pptx\", \"zip\", \"exe\", \"msi\"],\n    },\n    isolation_mode=\"cdr_passthrough\",\n    cdr_config={\n        \"strip_macros\": True,\n        \"strip_embedded_objects\": True,\n        \"strip_javascript\": True,\n        \"strip_active_content\": True,\n        \"flatten_pdf\": True,\n        \"reconstruct_to_safe_format\": True,\n        \"max_file_size_mb\": 50,\n        \"allowed_file_types\": [\"pdf\", \"docx\", \"xlsx\", \"pptx\", \"png\", \"jpg\"],\n    },\n)\n\nengine.add_isolation_policy(\n    name=\"Allow Trusted SaaS Direct\",\n    description=\"Allow direct access to sanctioned SaaS applications\",\n    match_criteria={\n        \"url_categories\": [\"cloud_productivity\", \"business_saas\"],\n        \"domains\": [\n            \"*.office365.com\", \"*.office.com\", \"*.microsoft.com\",\n            \"*.salesforce.com\", \"*.slack.com\", \"*.github.com\",\n        ],\n        \"risk_levels\": [\"low\"],\n    },\n    isolation_mode=\"allow_direct\",\n    dlp_controls={\n        \"disable_copy_paste\": False,\n        \"disable_download\": False,\n        \"disable_upload\": False,\n        \"log_all_downloads\": True,\n    },\n)\n\n# List all policies\nfor policy in engine.list_policies():\n    print(f\"  [{policy['priority']}] {policy['name']} -> {policy['isolation_mode']}\")\n```\n\n### Phase 3: Content Disarming and Reconstruction (CDR)\n\nImplement CDR processing to sanitize downloaded files by deconstructing them,\nstripping potentially malicious elements (macros, embedded objects, scripts),\nand reconstructing clean versions that preserve usability.\n\n```python\n# Process a file through CDR\ncdr_result = engine.process_file_cdr(\n    file_path=\"/tmp/downloads/quarterly_report.docx\",\n    source_url=\"https://partner-portal.example.com/reports/q4.docx\",\n    cdr_profile=\"strict\",\n)\n\nprint(f\"Original file: {cdr_result['original']['filename']}\")\nprint(f\"Original size: {cdr_result['original']['size_bytes']} bytes\")\nprint(f\"Threats found: {cdr_result['threats_found']}\")\nfor threat in cdr_result['threats_detail']:\n    print(f\"  - {threat['type']}: {threat['description']} [{threat['action']}]\")\nprint(f\"Clean file: {cdr_result['reconstructed']['filename']}\")\nprint(f\"Clean size: {cdr_result['reconstructed']['size_bytes']} bytes\")\nprint(f\"File integrity preserved: {cdr_result['reconstructed']['usable']}\")\n\n# Example output:\n# Original file: quarterly_report.docx\n# Original size: 245760 bytes\n# Threats found: 3\n#   - macro: VBA macro with AutoOpen trigger [STRIPPED]\n#   - embedded_ole: Embedded OLE object (executable) [STRIPPED]\n#   - external_link: External template reference [STRIPPED]\n# Clean file: quarterly_report_clean.docx\n# Clean size: 198432 bytes\n# File integrity preserved: True\n```\n\n### Phase 4: Session Control and Monitoring\n\nImplement real-time session monitoring for isolated browsing sessions with\nkeystroke logging policy, clipboard interception, and download tracking.\nIntegrate with SIEM for security event correlation.\n\n```python\n# Create an isolation session\nsession = engine.create_isolation_session(\n    user_id=\"jsmith@acme.com\",\n    user_groups=[\"engineering\", \"contractors\"],\n    device_posture={\n        \"os\": \"Windows 11\",\n        \"managed\": True,\n        \"edr_running\": True,\n        \"disk_encrypted\": True,\n        \"os_patched\": True,\n    },\n    target_url=\"https://external-vendor.example.com/portal\",\n)\n\nprint(f\"Session ID: {session['session_id']}\")\nprint(f\"Isolation Mode: {session['isolation_mode']}\")\nprint(f\"Applied Policy: {session['applied_policy']}\")\nprint(f\"DLP Controls: {json.dumps(session['dlp_controls'], indent=2)}\")\n\n# Monitor session events\nevents = engine.get_session_events(session_id=session[\"session_id\"])\nfor event in events:\n    print(f\"  [{event['timestamp']}] {event['event_type']}: {event['details']}\")\n\n# Generate session audit report\naudit = engine.generate_session_audit(\n    user_id=\"jsmith@acme.com\",\n    date_range=(\"2026-03-01\", \"2026-03-19\"),\n)\nprint(f\"Total sessions: {audit['total_sessions']}\")\nprint(f\"Isolated sessions: {audit['isolated_sessions']}\")\nprint(f\"Files processed via CDR: {audit['cdr_processed_files']}\")\nprint(f\"DLP violations: {audit['dlp_violations']}\")\n```\n\n### Phase 5: Integration with Zero Trust Platform\n\nIntegrate browser isolation with the broader Zero Trust architecture including\nidentity provider, device posture checks, and conditional access policies.\n\n```python\n# Define Zero Trust conditional access integration\nzt_policy = engine.create_zero_trust_integration(\n    identity_provider=\"Azure AD\",\n    conditional_access_rules=[\n        {\n            \"name\": \"Unmanaged Device Isolation\",\n            \"condition\": {\"device_managed\": False},\n            \"action\": \"full_isolation\",\n            \"dlp_override\": {\"disable_download\": True, \"disable_upload\": True},\n        },\n        {\n            \"name\": \"High Risk User Isolation\",\n            \"condition\": {\"user_risk_level\": \"high\"},\n            \"action\": \"full_isolation\",\n            \"dlp_override\": {\"disable_copy_paste\": True, \"watermark_session\": True},\n        },\n        {\n            \"name\": \"Contractor Restricted Access\",\n            \"condition\": {\"user_group\": \"contractors\"},\n            \"action\": \"read_only_isolation\",\n            \"dlp_override\": {\"disable_download\": True, \"disable_printing\": True},\n        },\n        {\n            \"name\": \"Privileged Admin Isolation\",\n            \"condition\": {\"user_group\": \"admins\", \"target_category\": \"admin_console\"},\n            \"action\": \"full_isolation\",\n            \"dlp_override\": {\"watermark_session\": True, \"record_session\": True},\n        },\n    ],\n    swg_integration={\n        \"proxy_mode\": \"explicit\",\n        \"pac_url\": \"https://pac.acme.com/proxy.pac\",\n        \"ssl_inspection\": True,\n        \"bypass_domains\": [\"*.acme.internal\"],\n    },\n)\n\n# Evaluate a request against all policies\ndecision = engine.evaluate_access_request(\n    user_id=\"contractor@vendor.com\",\n    user_groups=[\"contractors\"],\n    device_posture={\"managed\": False, \"edr_running\": False},\n    target_url=\"https://sensitive-app.acme.com/dashboard\",\n    user_risk_level=\"medium\",\n)\nprint(f\"Decision: {decision['action']}\")\nprint(f\"Matched Rules: {[r['name'] for r in decision['matched_rules']]}\")\nprint(f\"DLP Controls: {decision['effective_dlp_controls']}\")\n```\n\n## Examples\n\n### Quick Policy Deployment for Phishing Protection\n\n```python\nengine = BrowserIsolationPolicyEngine(default_isolation_mode=\"isolate_risky\")\n\n# Isolate all links from email\nengine.add_isolation_policy(\n    name=\"Email Link Isolation\",\n    description=\"Isolate all URLs clicked from email clients\",\n    match_criteria={\n        \"referrer_categories\": [\"email_client\"],\n        \"url_categories\": [\"*\"],\n    },\n    isolation_mode=\"full_isolation\",\n    dlp_controls={\n        \"disable_keyboard_input\": True,\n        \"disable_download\": True,\n        \"watermark_session\": True,\n    },\n)\n\n# Test against a phishing URL\nresult = engine.evaluate_access_request(\n    user_id=\"user@acme.com\",\n    target_url=\"https://micr0soft-login.phishing.com/auth\",\n    referrer=\"https://mail.google.com\",\n    user_risk_level=\"low\",\n)\nprint(f\"Action: {result['action']}\")  # full_isolation\n```\n\n### CDR Pipeline for All Downloads\n\n```python\nengine = BrowserIsolationPolicyEngine()\n\n# Scan a batch of downloaded files through CDR\nfiles = [\n    \"/tmp/downloads/invoice.pdf\",\n    \"/tmp/downloads/contract.docx\",\n    \"/tmp/downloads/data_export.xlsx\",\n    \"/tmp/downloads/presentation.pptx\",\n]\n\nbatch_result = engine.batch_cdr_process(\n    files=files,\n    cdr_profile=\"strict\",\n    quarantine_on_threat=True,\n)\n\nprint(f\"Processed: {batch_result['total_processed']}\")\nprint(f\"Clean: {batch_result['clean_count']}\")\nprint(f\"Threats neutralized: {batch_result['threats_neutralized']}\")\nprint(f\"Quarantined: {batch_result['quarantined_count']}\")\nfor f in batch_result[\"results\"]:\n    status = \"CLEAN\" if f[\"clean\"] else \"SANITIZED\"\n    print(f\"  [{status}] {f['filename']}: {f['threats_found']} threats\")\n```\n\n### Generating Isolation Policy Compliance Report\n\n```python\nengine = BrowserIsolationPolicyEngine()\n\nreport = engine.generate_compliance_report(\n    date_range=(\"2026-03-01\", \"2026-03-19\"),\n    include_metrics=True,\n)\n\nprint(f\"Total web requests: {report['total_requests']}\")\nprint(f\"Isolated requests: {report['isolated_requests']} ({report['isolation_rate']}%)\")\nprint(f\"CDR processed files: {report['cdr_stats']['total_files']}\")\nprint(f\"Threats neutralized: {report['cdr_stats']['threats_neutralized']}\")\nprint(f\"DLP violations blocked: {report['dlp_violations_blocked']}\")\nprint(f\"Zero-day attacks prevented: {report['zero_day_blocked']}\")\n```\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("implementing-browser-isolation-for-zero-trust-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

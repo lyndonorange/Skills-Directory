@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>develop-web-game - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/develop-web-game-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Software engineering and app building</div>
+      <h1>develop-web-game</h1>
+      <p class="description">Use when Codex is building or iterating on a web game (HTML/JS) and needs a reliable development + testing loop: implement small changes, run a Playwright-based test script with short input bursts and intentional pauses, inspect screenshots/text, and review console errors with render_game_to_text.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Software engineering and app building</span></div>
+<div class="meta-card"><strong>display name</strong><span>develop-web-game</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>develop-web-game</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Use when Codex is building or iterating on a web game (HTML/JS) and needs a reliable development + testing loop: implement small changes, run a Playwright-based test script with short input bursts and intentional pauses, inspect screenshots/text, and review console errors with render_game_to_text.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose develop-web-game, then write the task. Fallback prompt: Use the develop-web-game skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Develop Web Game</h2>
+<p>Build games in small steps and validate every change. Treat each iteration as: implement → act → pause → observe → adjust.</p>
+<h3>Skill paths (set once)</h3>
+<pre><code>export CODEX_HOME=&quot;${CODEX_HOME:-$HOME/.codex}&quot;
+export WEB_GAME_CLIENT=&quot;$CODEX_HOME/skills/develop-web-game/scripts/web_game_playwright_client.js&quot;
+export WEB_GAME_ACTIONS=&quot;$CODEX_HOME/skills/develop-web-game/references/action_payloads.json&quot;</code></pre>
+<p>User-scoped skills install under <code>$CODEX_HOME/skills</code> (default: <code>~/.codex/skills</code>).</p>
+<h3>Workflow</h3>
+<ol>
+<li><strong>Pick a goal.</strong> Define a single feature or behavior to implement.</li>
+<li><strong>Implement small.</strong> Make the smallest change that moves the game forward.</li>
+<li><strong>Ensure integration points.</strong> Provide a single canvas and <code>window.render_game_to_text</code> so the test loop can read state.</li>
+<li><strong>Add <code>window.advanceTime(ms)</code>.</strong> Strongly prefer a deterministic step hook so the Playwright script can advance frames reliably; without it, automated tests can be flaky.</li>
+<li><strong>Initialize progress.md.</strong> If <code>progress.md</code> exists, read it first and confirm the original user prompt is recorded at the top (prefix with <code>Original prompt:</code>). Also note any TODOs and suggestions left by the previous agent. If missing, create it and write <code>Original prompt: &lt;prompt&gt;</code> at the top before appending updates.</li>
+<li><strong>Verify Playwright availability.</strong> Ensure <code>playwright</code> is available (local dependency or global install). If unsure, check <code>npx</code> first.</li>
+<li><strong>Run the Playwright test script.</strong> You must run <code>$WEB_GAME_CLIENT</code> after each meaningful change; do not invent a new client unless required.</li>
+<li><strong>Use the payload reference.</strong> Base actions on <code>$WEB_GAME_ACTIONS</code> to avoid guessing keys.</li>
+<li><strong>Inspect state.</strong> Capture screenshots and text state after each burst.</li>
+<li><strong>Inspect screenshots.</strong> Open the latest screenshot, verify expected visuals, fix any issues, and rerun the script. Repeat until correct.</li>
+<li><strong>Verify controls and state (multi-step focus).</strong> Exhaustively exercise all important interactions. For each, think through the full multi-step sequence it implies (cause → intermediate states → outcome) and verify the entire chain works end-to-end. Confirm <code>render_game_to_text</code> reflects the same state shown on screen. If anything is off, fix and rerun.</li>
+</ol>
+<p>Examples of important interactions: move, jump, shoot/attack, interact/use, select/confirm/cancel in menus, pause/resume, restart, and any special abilities or puzzle actions defined by the request. Multi-step examples: shooting an enemy should reduce its health; when health reaches 0 it should disappear and update the score; collecting a key should unlock a door and allow level progression.</p>
+<ol>
+<li><strong>Check errors.</strong> Review console errors and fix the first new issue before continuing.</li>
+<li><strong>Reset between scenarios.</strong> Avoid cross-test state when validating distinct features.</li>
+<li><strong>Iterate with small deltas.</strong> Change one variable at a time (frames, inputs, timing, positions), then repeat steps 7–13 until stable.</li>
+</ol>
+<p>Example command (actions required):</p>
+<pre><code>node &quot;$WEB_GAME_CLIENT&quot; --url http://localhost:5173 --actions-file &quot;$WEB_GAME_ACTIONS&quot; --click-selector &quot;#start-btn&quot; --iterations 3 --pause-ms 250</code></pre>
+<p>Example actions (inline JSON):</p>
+<pre><code>{
+  &quot;steps&quot;: [
+    { &quot;buttons&quot;: [&quot;left_mouse_button&quot;], &quot;frames&quot;: 2, &quot;mouse_x&quot;: 120, &quot;mouse_y&quot;: 80 },
+    { &quot;buttons&quot;: [], &quot;frames&quot;: 6 },
+    { &quot;buttons&quot;: [&quot;right&quot;], &quot;frames&quot;: 8 },
+    { &quot;buttons&quot;: [&quot;space&quot;], &quot;frames&quot;: 4 }
+  ]
+}</code></pre>
+<h3>Test Checklist</h3>
+<p>Test any new features added for the request and any areas your logic changes could affect. Identify issues, fix them, and re-run the tests to confirm they’re resolved.</p>
+<p>Examples of things to test:</p>
+<ul>
+<li>Primary movement/interaction inputs (e.g., move, jump, shoot, confirm/select).</li>
+<li>Win/lose or success/fail transitions.</li>
+<li>Score/health/resource changes.</li>
+<li>Boundary conditions (collisions, walls, screen edges).</li>
+<li>Menu/pause/start flow if present.</li>
+<li>Any special actions tied to the request (powerups, combos, abilities, puzzles, timers).</li>
+</ul>
+<h3>Test Artifacts to Review</h3>
+<ul>
+<li>Latest screenshots from the Playwright run.</li>
+<li>Latest <code>render_game_to_text</code> JSON output.</li>
+<li>Console error logs (fix the first new error before continuing).</li>
+</ul>
+<p>You must actually open and visually inspect the latest screenshots after running the Playwright script, not just generate them. Ensure everything that should be visible on screen is actually visible. Go beyond the start screen and capture gameplay screenshots that cover all newly added features. Treat the screenshots as the source of truth; if something is missing, it is missing in the build. If you suspect a headless/WebGL capture issue, rerun the Playwright script in headed mode and re-check. Fix and rerun in a tight loop until the screenshots and text state look correct. Once fixes are verified, re-test all important interactions and controls, confirm they work, and ensure your changes did not introduce regressions. If they did, fix them and rerun everything in a loop until interactions, text state, and controls all work as expected. Be exhaustive in testing controls; broken games are not acceptable.</p>
+<h3>Core Game Guidelines</h3>
+<h4>Canvas + Layout</h4>
+<ul>
+<li>Prefer a single canvas centered in the window.</li>
+</ul>
+<h4>Visuals</h4>
+<ul>
+<li>Keep on-screen text minimal; show controls on a start/menu screen rather than overlaying them during play.</li>
+<li>Avoid overly dark scenes unless the design calls for it. Make key elements easy to see.</li>
+<li>Draw the background on the canvas itself instead of relying on CSS backgrounds.</li>
+</ul>
+<h4>Text State Output (render_game_to_text)</h4>
+<p>Expose a <code>window.render_game_to_text</code> function that returns a concise JSON string representing the current game state. The text should include enough information to play the game without visuals.</p>
+<p>Minimal pattern:</p>
+<pre><code>function renderGameToText() {
+  const payload = {
+    mode: state.mode,
+    player: { x: state.player.x, y: state.player.y, r: state.player.r },
+    entities: state.entities.map((e) =&gt; ({ x: e.x, y: e.y, r: e.r })),
+    score: state.score,
+  };
+  return JSON.stringify(payload);
+}
+window.render_game_to_text = renderGameToText;</code></pre>
+<p>Keep the payload succinct and biased toward on-screen/interactive elements. Prefer current, visible entities over full history. Include a clear coordinate system note (origin and axis directions), and encode all player-relevant state: player position/velocity, active obstacles/enemies, collectibles, timers/cooldowns, score, and any mode/state flags needed to make correct decisions. Avoid large histories; only include what's currently relevant and visible.</p>
+<h4>Time Stepping Hook</h4>
+<p>Provide a deterministic time-stepping hook so the Playwright client can advance the game in controlled increments. Expose <code>window.advanceTime(ms)</code> (or a thin wrapper that forwards to your game update loop) and have the game loop use it when present. The Playwright test script uses this hook to step frames deterministically during automated testing.</p>
+<p>Minimal pattern:</p>
+<pre><code>window.advanceTime = (ms) =&gt; {
+  const steps = Math.max(1, Math.round(ms / (1000 / 60)));
+  for (let i = 0; i &lt; steps; i++) update(1 / 60);
+  render();
+};</code></pre>
+<h4>Fullscreen Toggle</h4>
+<ul>
+<li>Use a single key (prefer <code>f</code>) to toggle fullscreen on/off.</li>
+<li>Allow <code>Esc</code> to exit fullscreen.</li>
+<li>When fullscreen toggles, resize the canvas/rendering so visuals and input mapping stay correct.</li>
+</ul>
+<h3>Progress Tracking</h3>
+<p>Create a <code>progress.md</code> file if it doesn't exist, and append TODOs, notes, gotchas, and loose ends as you go so another agent can pick up seamlessly. If a <code>progress.md</code> file already exists, read it first, including the original user prompt at the top (you may be continuing another agent's work). Do not overwrite the original prompt; preserve it. Update <code>progress.md</code> after each meaningful chunk of work (feature added, bug found, test run, or decision made). At the end of your work, leave TODOs and suggestions for the next agent in <code>progress.md</code>.</p>
+<h3>Playwright Prerequisites</h3>
+<ul>
+<li>Prefer a local <code>playwright</code> dependency if the project already has it.</li>
+<li>If unsure whether Playwright is available, check for <code>npx</code>:</li>
+</ul>
+<pre><code>  command -v npx &gt;/dev/null 2&gt;&amp;1</code></pre>
+<ul>
+<li>If <code>npx</code> is missing, install Node/npm and then install Playwright globally:</li>
+</ul>
+<pre><code>  npm install -g @playwright/mcp@latest</code></pre>
+<ul>
+<li>Do not switch to <code>@playwright/test</code> unless explicitly asked; stick to the client script.</li>
+</ul>
+<h3>Scripts</h3>
+<ul>
+<li><code>$WEB_GAME_CLIENT</code> (installed default: <code>$CODEX_HOME/skills/develop-web-game/scripts/web_game_playwright_client.js</code>) — Playwright-based action loop with virtual-time stepping, screenshot capture, and console error buffering. You must pass an action burst via <code>--actions-file</code>, <code>--actions-json</code>, or <code>--click</code>.</li>
+</ul>
+<h3>References</h3>
+<ul>
+<li><code>$WEB_GAME_ACTIONS</code> (installed default: <code>$CODEX_HOME/skills/develop-web-game/references/action_payloads.json</code>) — example action payloads (keyboard + mouse, per-frame capture). Use these to build your burst.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: develop-web-game\ndisplay_name: develop-web-game\nplatform: Codex\ncategory: Software engineering and app building\n---\n\n# develop-web-game - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `develop-web-game` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nBuild games in small steps and validate every change. Treat each iteration as: implement → act → pause → observe → adjust.\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose develop-web-game, then write the task. Fallback prompt: Use the develop-web-game skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `develop-web-game` |\n| Canonical name | `develop-web-game` |\n| Platform | `Codex` |\n| Category | Software engineering and app building |\n\n## Description\n\nBuild games in small steps and validate every change. Treat each iteration as: implement → act → pause → observe → adjust.\n\n## Original SKILL.md\n\n---\nname: \"develop-web-game\"\ndescription: \"Use when Codex is building or iterating on a web game (HTML/JS) and needs a reliable development + testing loop: implement small changes, run a Playwright-based test script with short input bursts and intentional pauses, inspect screenshots/text, and review console errors with render_game_to_text.\"\n---\n\n\n# Develop Web Game\n\nBuild games in small steps and validate every change. Treat each iteration as: implement → act → pause → observe → adjust.\n\n## Skill paths (set once)\n\n```bash\nexport CODEX_HOME=\"${CODEX_HOME:-$HOME/.codex}\"\nexport WEB_GAME_CLIENT=\"$CODEX_HOME/skills/develop-web-game/scripts/web_game_playwright_client.js\"\nexport WEB_GAME_ACTIONS=\"$CODEX_HOME/skills/develop-web-game/references/action_payloads.json\"\n```\n\nUser-scoped skills install under `$CODEX_HOME/skills` (default: `~/.codex/skills`).\n\n## Workflow\n\n1. **Pick a goal.** Define a single feature or behavior to implement.\n2. **Implement small.** Make the smallest change that moves the game forward.\n3. **Ensure integration points.** Provide a single canvas and `window.render_game_to_text` so the test loop can read state.\n4. **Add `window.advanceTime(ms)`.** Strongly prefer a deterministic step hook so the Playwright script can advance frames reliably; without it, automated tests can be flaky.\n5. **Initialize progress.md.** If `progress.md` exists, read it first and confirm the original user prompt is recorded at the top (prefix with `Original prompt:`). Also note any TODOs and suggestions left by the previous agent. If missing, create it and write `Original prompt: \u003cprompt>` at the top before appending updates.\n6. **Verify Playwright availability.** Ensure `playwright` is available (local dependency or global install). If unsure, check `npx` first.\n7. **Run the Playwright test script.** You must run `$WEB_GAME_CLIENT` after each meaningful change; do not invent a new client unless required.\n8. **Use the payload reference.** Base actions on `$WEB_GAME_ACTIONS` to avoid guessing keys.\n9. **Inspect state.** Capture screenshots and text state after each burst.\n10. **Inspect screenshots.** Open the latest screenshot, verify expected visuals, fix any issues, and rerun the script. Repeat until correct.\n11. **Verify controls and state (multi-step focus).** Exhaustively exercise all important interactions. For each, think through the full multi-step sequence it implies (cause → intermediate states → outcome) and verify the entire chain works end-to-end. Confirm `render_game_to_text` reflects the same state shown on screen. If anything is off, fix and rerun.\n    Examples of important interactions: move, jump, shoot/attack, interact/use, select/confirm/cancel in menus, pause/resume, restart, and any special abilities or puzzle actions defined by the request. Multi-step examples: shooting an enemy should reduce its health; when health reaches 0 it should disappear and update the score; collecting a key should unlock a door and allow level progression.\n12. **Check errors.** Review console errors and fix the first new issue before continuing.\n13. **Reset between scenarios.** Avoid cross-test state when validating distinct features.\n14. **Iterate with small deltas.** Change one variable at a time (frames, inputs, timing, positions), then repeat steps 7–13 until stable.\n\nExample command (actions required):\n```\nnode \"$WEB_GAME_CLIENT\" --url http://localhost:5173 --actions-file \"$WEB_GAME_ACTIONS\" --click-selector \"#start-btn\" --iterations 3 --pause-ms 250\n```\n\nExample actions (inline JSON):\n```json\n{\n  \"steps\": [\n    { \"buttons\": [\"left_mouse_button\"], \"frames\": 2, \"mouse_x\": 120, \"mouse_y\": 80 },\n    { \"buttons\": [], \"frames\": 6 },\n    { \"buttons\": [\"right\"], \"frames\": 8 },\n    { \"buttons\": [\"space\"], \"frames\": 4 }\n  ]\n}\n```\n\n## Test Checklist\n\nTest any new features added for the request and any areas your logic changes could affect. Identify issues, fix them, and re-run the tests to confirm they’re resolved.\n\nExamples of things to test:\n- Primary movement/interaction inputs (e.g., move, jump, shoot, confirm/select).\n- Win/lose or success/fail transitions.\n- Score/health/resource changes.\n- Boundary conditions (collisions, walls, screen edges).\n- Menu/pause/start flow if present.\n- Any special actions tied to the request (powerups, combos, abilities, puzzles, timers).\n\n## Test Artifacts to Review\n\n- Latest screenshots from the Playwright run.\n- Latest `render_game_to_text` JSON output.\n- Console error logs (fix the first new error before continuing).\nYou must actually open and visually inspect the latest screenshots after running the Playwright script, not just generate them. Ensure everything that should be visible on screen is actually visible. Go beyond the start screen and capture gameplay screenshots that cover all newly added features. Treat the screenshots as the source of truth; if something is missing, it is missing in the build. If you suspect a headless/WebGL capture issue, rerun the Playwright script in headed mode and re-check. Fix and rerun in a tight loop until the screenshots and text state look correct. Once fixes are verified, re-test all important interactions and controls, confirm they work, and ensure your changes did not introduce regressions. If they did, fix them and rerun everything in a loop until interactions, text state, and controls all work as expected. Be exhaustive in testing controls; broken games are not acceptable.\n\n## Core Game Guidelines\n\n### Canvas + Layout\n- Prefer a single canvas centered in the window.\n\n### Visuals\n- Keep on-screen text minimal; show controls on a start/menu screen rather than overlaying them during play.\n- Avoid overly dark scenes unless the design calls for it. Make key elements easy to see.\n- Draw the background on the canvas itself instead of relying on CSS backgrounds.\n\n### Text State Output (render_game_to_text)\nExpose a `window.render_game_to_text` function that returns a concise JSON string representing the current game state. The text should include enough information to play the game without visuals.\n\nMinimal pattern:\n```js\nfunction renderGameToText() {\n  const payload = {\n    mode: state.mode,\n    player: { x: state.player.x, y: state.player.y, r: state.player.r },\n    entities: state.entities.map((e) => ({ x: e.x, y: e.y, r: e.r })),\n    score: state.score,\n  };\n  return JSON.stringify(payload);\n}\nwindow.render_game_to_text = renderGameToText;\n```\n\nKeep the payload succinct and biased toward on-screen/interactive elements. Prefer current, visible entities over full history.\nInclude a clear coordinate system note (origin and axis directions), and encode all player-relevant state: player position/velocity, active obstacles/enemies, collectibles, timers/cooldowns, score, and any mode/state flags needed to make correct decisions. Avoid large histories; only include what's currently relevant and visible.\n\n### Time Stepping Hook\nProvide a deterministic time-stepping hook so the Playwright client can advance the game in controlled increments. Expose `window.advanceTime(ms)` (or a thin wrapper that forwards to your game update loop) and have the game loop use it when present.\nThe Playwright test script uses this hook to step frames deterministically during automated testing.\n\nMinimal pattern:\n```js\nwindow.advanceTime = (ms) => {\n  const steps = Math.max(1, Math.round(ms / (1000 / 60)));\n  for (let i = 0; i \u003c steps; i++) update(1 / 60);\n  render();\n};\n```\n\n### Fullscreen Toggle\n- Use a single key (prefer `f`) to toggle fullscreen on/off.\n- Allow `Esc` to exit fullscreen.\n- When fullscreen toggles, resize the canvas/rendering so visuals and input mapping stay correct.\n\n## Progress Tracking\n\nCreate a `progress.md` file if it doesn't exist, and append TODOs, notes, gotchas, and loose ends as you go so another agent can pick up seamlessly.\nIf a `progress.md` file already exists, read it first, including the original user prompt at the top (you may be continuing another agent's work). Do not overwrite the original prompt; preserve it.\nUpdate `progress.md` after each meaningful chunk of work (feature added, bug found, test run, or decision made).\nAt the end of your work, leave TODOs and suggestions for the next agent in `progress.md`.\n\n## Playwright Prerequisites\n\n- Prefer a local `playwright` dependency if the project already has it.\n- If unsure whether Playwright is available, check for `npx`:\n  ```\n  command -v npx >/dev/null 2>&1\n  ```\n- If `npx` is missing, install Node/npm and then install Playwright globally:\n  ```\n  npm install -g @playwright/mcp@latest\n  ```\n- Do not switch to `@playwright/test` unless explicitly asked; stick to the client script.\n\n## Scripts\n\n- `$WEB_GAME_CLIENT` (installed default: `$CODEX_HOME/skills/develop-web-game/scripts/web_game_playwright_client.js`) — Playwright-based action loop with virtual-time stepping, screenshot capture, and console error buffering. You must pass an action burst via `--actions-file`, `--actions-json`, or `--click`.\n\n## References\n\n- `$WEB_GAME_ACTIONS` (installed default: `$CODEX_HOME/skills/develop-web-game/references/action_payloads.json`) — example action payloads (keyboard + mouse, per-frame capture). Use these to build your burst.\n\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("develop-web-game-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>
