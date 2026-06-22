@@ -1,15 +1,11 @@
-# Skills Directory
+# Skills Directory Share Export
 
-A friend-safe, static directory of AI agent skills.
+Open `index.html` to browse the friend-safe skills directory, or publish this folder with GitHub Pages.
 
-Open `index.html` locally or publish this repository with GitHub Pages. The page is self-contained and includes search, topic filters, platform filters, copy buttons, and downloadable Markdown packages for each skill.
+This export is self-contained and strips local filesystem paths, Finder-only links, and machine-specific source locations.
 
-## Privacy
+`skill-md/` contains readable, sanitized Markdown copies for each platform-specific skill install. Each file explains what the skill is, when to use it, how to call it, and includes the sanitized original `SKILL.md` body.
 
-This public export removes local filesystem paths, Finder-only links, local server routes, and machine-specific source locations.
+GitHub Pages URL after publishing:
 
-## GitHub Pages
-
-In the repository settings, enable **Pages** for the `main` branch from the repository root. The site will serve from:
-
-`https://lyndonorange.github.io/Skills-Directory/`
+https://lyndonorange.github.io/Skills-Directory/
