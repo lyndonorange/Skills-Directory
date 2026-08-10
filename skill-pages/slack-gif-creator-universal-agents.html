@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>slack-gif-creator - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/slack-gif-creator-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>slack-gif-creator</h1>
+      <p class="description">Knowledge and utilities for creating animated GIFs optimized for Slack. Provides constraints, validation tools, and animation concepts. Use when users request animated GIFs for Slack like &quot;make me a GIF of X doing Y for Slack.&quot;</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>slack-gif-creator</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>slack-gif-creator</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Knowledge and utilities for creating animated GIFs optimized for Slack. Provides constraints, validation tools, and animation concepts. Use when users request animated GIFs for Slack like &quot;make me a GIF of X doing Y for Slack.&quot;</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the slack-gif-creator skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Universal runtime boundary</h3>
+<ul>
+<li>Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.</li>
+<li>Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.</li>
+<li>Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.</li>
+<li>Read <code>references/upstream.md</code> when provenance, the pinned revision, licensing, or local adaptation details matter.</li>
+</ul>
+<h2>Slack GIF Creator</h2>
+<p>A toolkit providing utilities and knowledge for creating animated GIFs optimized for Slack.</p>
+<h3>Slack Requirements</h3>
+<p><strong>Dimensions:</strong></p>
+<ul>
+<li>Emoji GIFs: 128x128 (recommended)</li>
+<li>Message GIFs: 480x480</li>
+</ul>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li>FPS: 10-30 (lower is smaller file size)</li>
+<li>Colors: 48-128 (fewer = smaller file size)</li>
+<li>Duration: Keep under 3 seconds for emoji GIFs</li>
+</ul>
+<h3>Core Workflow</h3>
+<pre><code>from core.gif_builder import GIFBuilder
+from PIL import Image, ImageDraw
+
+# 1. Create builder
+builder = GIFBuilder(width=128, height=128, fps=10)
+
+# 2. Generate frames
+for i in range(12):
+    frame = Image.new('RGB', (128, 128), (240, 248, 255))
+    draw = ImageDraw.Draw(frame)
+
+    # Draw your animation using PIL primitives
+    # (circles, polygons, lines, etc.)
+
+    builder.add_frame(frame)
+
+# 3. Save with optimization
+builder.save('output.gif', num_colors=48, optimize_for_emoji=True)</code></pre>
+<h3>Drawing Graphics</h3>
+<h4>Working with User-Uploaded Images</h4>
+<p>If a user uploads an image, consider whether they want to:</p>
+<ul>
+<li><strong>Use it directly</strong> (e.g., &quot;animate this&quot;, &quot;split this into frames&quot;)</li>
+<li><strong>Use it as inspiration</strong> (e.g., &quot;make something like this&quot;)</li>
+</ul>
+<p>Load and work with images using PIL:</p>
+<pre><code>from PIL import Image
+
+uploaded = Image.open('file.png')
+# Use directly, or just as reference for colors/style</code></pre>
+<h4>Drawing from Scratch</h4>
+<p>When drawing graphics from scratch, use PIL ImageDraw primitives:</p>
+<pre><code>from PIL import ImageDraw
+
+draw = ImageDraw.Draw(frame)
+
+# Circles/ovals
+draw.ellipse([x1, y1, x2, y2], fill=(r, g, b), outline=(r, g, b), width=3)
+
+# Stars, triangles, any polygon
+points = [(x1, y1), (x2, y2), (x3, y3), ...]
+draw.polygon(points, fill=(r, g, b), outline=(r, g, b), width=3)
+
+# Lines
+draw.line([(x1, y1), (x2, y2)], fill=(r, g, b), width=5)
+
+# Rectangles
+draw.rectangle([x1, y1, x2, y2], fill=(r, g, b), outline=(r, g, b), width=3)</code></pre>
+<p><strong>Don't use:</strong> Emoji fonts (unreliable across platforms) or assume pre-packaged graphics exist in this skill.</p>
+<h4>Making Graphics Look Good</h4>
+<p>Graphics should look polished and creative, not basic. Here's how:</p>
+<p><strong>Use thicker lines</strong> - Always set <code>width=2</code> or higher for outlines and lines. Thin lines (width=1) look choppy and amateurish.</p>
+<p><strong>Add visual depth</strong>:</p>
+<ul>
+<li>Use gradients for backgrounds (<code>create_gradient_background</code>)</li>
+<li>Layer multiple shapes for complexity (e.g., a star with a smaller star inside)</li>
+</ul>
+<p><strong>Make shapes more interesting</strong>:</p>
+<ul>
+<li>Don't just draw a plain circle - add highlights, rings, or patterns</li>
+<li>Stars can have glows (draw larger, semi-transparent versions behind)</li>
+<li>Combine multiple shapes (stars + sparkles, circles + rings)</li>
+</ul>
+<p><strong>Pay attention to colors</strong>:</p>
+<ul>
+<li>Use vibrant, complementary colors</li>
+<li>Add contrast (dark outlines on light shapes, light outlines on dark shapes)</li>
+<li>Consider the overall composition</li>
+</ul>
+<p><strong>For complex shapes</strong> (hearts, snowflakes, etc.):</p>
+<ul>
+<li>Use combinations of polygons and ellipses</li>
+<li>Calculate points carefully for symmetry</li>
+<li>Add details (a heart can have a highlight curve, snowflakes have intricate branches)</li>
+</ul>
+<p>Be creative and detailed! A good Slack GIF should look polished, not like placeholder graphics.</p>
+<h3>Available Utilities</h3>
+<h4>GIFBuilder (<code>core.gif_builder</code>)</h4>
+<p>Assembles frames and optimizes for Slack:</p>
+<pre><code>builder = GIFBuilder(width=128, height=128, fps=10)
+builder.add_frame(frame)  # Add PIL Image
+builder.add_frames(frames)  # Add list of frames
+builder.save('out.gif', num_colors=48, optimize_for_emoji=True, remove_duplicates=True)</code></pre>
+<h4>Validators (<code>core.validators</code>)</h4>
+<p>Check if GIF meets Slack requirements:</p>
+<pre><code>from core.validators import validate_gif, is_slack_ready
+
+# Detailed validation
+passes, info = validate_gif('my.gif', is_emoji=True, verbose=True)
+
+# Quick check
+if is_slack_ready('my.gif'):
+    print(&quot;Ready!&quot;)</code></pre>
+<h4>Easing Functions (<code>core.easing</code>)</h4>
+<p>Smooth motion instead of linear:</p>
+<pre><code>from core.easing import interpolate
+
+# Progress from 0.0 to 1.0
+t = i / (num_frames - 1)
+
+# Apply easing
+y = interpolate(start=0, end=400, t=t, easing='ease_out')
+
+# Available: linear, ease_in, ease_out, ease_in_out,
+#           bounce_out, elastic_out, back_out</code></pre>
+<h4>Frame Helpers (<code>core.frame_composer</code>)</h4>
+<p>Convenience functions for common needs:</p>
+<pre><code>from core.frame_composer import (
+    create_blank_frame,         # Solid color background
+    create_gradient_background,  # Vertical gradient
+    draw_circle,                # Helper for circles
+    draw_text,                  # Simple text rendering
+    draw_star                   # 5-pointed star
+)</code></pre>
+<h3>Animation Concepts</h3>
+<h4>Shake/Vibrate</h4>
+<p>Offset object position with oscillation:</p>
+<ul>
+<li>Use <code>math.sin()</code> or <code>math.cos()</code> with frame index</li>
+<li>Add small random variations for natural feel</li>
+<li>Apply to x and/or y position</li>
+</ul>
+<h4>Pulse/Heartbeat</h4>
+<p>Scale object size rhythmically:</p>
+<ul>
+<li>Use <code>math.sin(t <em> frequency </em> 2 * math.pi)</code> for smooth pulse</li>
+<li>For heartbeat: two quick pulses then pause (adjust sine wave)</li>
+<li>Scale between 0.8 and 1.2 of base size</li>
+</ul>
+<h4>Bounce</h4>
+<p>Object falls and bounces:</p>
+<ul>
+<li>Use <code>interpolate()</code> with <code>easing='bounce_out'</code> for landing</li>
+<li>Use <code>easing='ease_in'</code> for falling (accelerating)</li>
+<li>Apply gravity by increasing y velocity each frame</li>
+</ul>
+<h4>Spin/Rotate</h4>
+<p>Rotate object around center:</p>
+<ul>
+<li>PIL: <code>image.rotate(angle, resample=Image.BICUBIC)</code></li>
+<li>For wobble: use sine wave for angle instead of linear</li>
+</ul>
+<h4>Fade In/Out</h4>
+<p>Gradually appear or disappear:</p>
+<ul>
+<li>Create RGBA image, adjust alpha channel</li>
+<li>Or use <code>Image.blend(image1, image2, alpha)</code></li>
+<li>Fade in: alpha from 0 to 1</li>
+<li>Fade out: alpha from 1 to 0</li>
+</ul>
+<h4>Slide</h4>
+<p>Move object from off-screen to position:</p>
+<ul>
+<li>Start position: outside frame bounds</li>
+<li>End position: target location</li>
+<li>Use <code>interpolate()</code> with <code>easing='ease_out'</code> for smooth stop</li>
+<li>For overshoot: use <code>easing='back_out'</code></li>
+</ul>
+<h4>Zoom</h4>
+<p>Scale and position for zoom effect:</p>
+<ul>
+<li>Zoom in: scale from 0.1 to 2.0, crop center</li>
+<li>Zoom out: scale from 2.0 to 1.0</li>
+<li>Can add motion blur for drama (PIL filter)</li>
+</ul>
+<h4>Explode/Particle Burst</h4>
+<p>Create particles radiating outward:</p>
+<ul>
+<li>Generate particles with random angles and velocities</li>
+<li>Update each particle: <code>x += vx</code>, <code>y += vy</code></li>
+<li>Add gravity: <code>vy += gravity_constant</code></li>
+<li>Fade out particles over time (reduce alpha)</li>
+</ul>
+<h3>Optimization Strategies</h3>
+<p>Only when asked to make the file size smaller, implement a few of the following methods:</p>
+<ol>
+<li><strong>Fewer frames</strong> - Lower FPS (10 instead of 20) or shorter duration</li>
+<li><strong>Fewer colors</strong> - <code>num_colors=48</code> instead of 128</li>
+<li><strong>Smaller dimensions</strong> - 128x128 instead of 480x480</li>
+<li><strong>Remove duplicates</strong> - <code>remove_duplicates=True</code> in save()</li>
+<li><strong>Emoji mode</strong> - <code>optimize_for_emoji=True</code> auto-optimizes</li>
+</ol>
+<pre><code># Maximum optimization for emoji
+builder.save(
+    'emoji.gif',
+    num_colors=48,
+    optimize_for_emoji=True,
+    remove_duplicates=True
+)</code></pre>
+<h3>Philosophy</h3>
+<p>This skill provides:</p>
+<ul>
+<li><strong>Knowledge</strong>: Slack's requirements and animation concepts</li>
+<li><strong>Utilities</strong>: GIFBuilder, validators, easing functions</li>
+<li><strong>Flexibility</strong>: Create the animation logic using PIL primitives</li>
+</ul>
+<p>It does NOT provide:</p>
+<ul>
+<li>Rigid animation templates or pre-made functions</li>
+<li>Emoji font rendering (unreliable across platforms)</li>
+<li>A library of pre-packaged graphics built into the skill</li>
+</ul>
+<p><strong>Note on user uploads</strong>: This skill doesn't include pre-built graphics, but if a user uploads an image, use PIL to load and work with it - interpret based on their request whether they want it used directly or just as inspiration.</p>
+<p>Be creative! Combine concepts (bouncing + rotating, pulsing + sliding, etc.) and use PIL's full capabilities.</p>
+<h3>Dependencies</h3>
+<pre><code>pip install pillow imageio numpy</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: slack-gif-creator\ndisplay_name: slack-gif-creator\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# slack-gif-creator - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `slack-gif-creator` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nKnowledge and utilities for creating animated GIFs optimized for Slack. Provides constraints, validation tools, and animation concepts. Use when users request animated GIFs for Slack like \"make me a GIF of X doing Y for\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the slack-gif-creator skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `slack-gif-creator` |\n| Canonical name | `slack-gif-creator` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\nKnowledge and utilities for creating animated GIFs optimized for Slack. Provides constraints, validation tools, and animation concepts. Use when users request animated GIFs for Slack like \"make me a GIF of X doing Y for\n\n\n## Original SKILL.md\n\n---\nname: slack-gif-creator\ndescription: Knowledge and utilities for creating animated GIFs optimized for Slack. Provides constraints, validation tools, and animation concepts. Use when users request animated GIFs for Slack like \"make me a GIF of X doing Y for Slack.\"\nlicense: Complete terms in LICENSE.txt\n---\n\n## Universal runtime boundary\n\n- Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.\n- Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.\n- Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.\n- Read `references/upstream.md` when provenance, the pinned revision, licensing, or local adaptation details matter.\n\n# Slack GIF Creator\n\nA toolkit providing utilities and knowledge for creating animated GIFs optimized for Slack.\n\n## Slack Requirements\n\n**Dimensions:**\n- Emoji GIFs: 128x128 (recommended)\n- Message GIFs: 480x480\n\n**Parameters:**\n- FPS: 10-30 (lower is smaller file size)\n- Colors: 48-128 (fewer = smaller file size)\n- Duration: Keep under 3 seconds for emoji GIFs\n\n## Core Workflow\n\n```python\nfrom core.gif_builder import GIFBuilder\nfrom PIL import Image, ImageDraw\n\n# 1. Create builder\nbuilder = GIFBuilder(width=128, height=128, fps=10)\n\n# 2. Generate frames\nfor i in range(12):\n    frame = Image.new('RGB', (128, 128), (240, 248, 255))\n    draw = ImageDraw.Draw(frame)\n\n    # Draw your animation using PIL primitives\n    # (circles, polygons, lines, etc.)\n\n    builder.add_frame(frame)\n\n# 3. Save with optimization\nbuilder.save('output.gif', num_colors=48, optimize_for_emoji=True)\n```\n\n## Drawing Graphics\n\n### Working with User-Uploaded Images\nIf a user uploads an image, consider whether they want to:\n- **Use it directly** (e.g., \"animate this\", \"split this into frames\")\n- **Use it as inspiration** (e.g., \"make something like this\")\n\nLoad and work with images using PIL:\n```python\nfrom PIL import Image\n\nuploaded = Image.open('file.png')\n# Use directly, or just as reference for colors/style\n```\n\n### Drawing from Scratch\nWhen drawing graphics from scratch, use PIL ImageDraw primitives:\n\n```python\nfrom PIL import ImageDraw\n\ndraw = ImageDraw.Draw(frame)\n\n# Circles/ovals\ndraw.ellipse([x1, y1, x2, y2], fill=(r, g, b), outline=(r, g, b), width=3)\n\n# Stars, triangles, any polygon\npoints = [(x1, y1), (x2, y2), (x3, y3), ...]\ndraw.polygon(points, fill=(r, g, b), outline=(r, g, b), width=3)\n\n# Lines\ndraw.line([(x1, y1), (x2, y2)], fill=(r, g, b), width=5)\n\n# Rectangles\ndraw.rectangle([x1, y1, x2, y2], fill=(r, g, b), outline=(r, g, b), width=3)\n```\n\n**Don't use:** Emoji fonts (unreliable across platforms) or assume pre-packaged graphics exist in this skill.\n\n### Making Graphics Look Good\n\nGraphics should look polished and creative, not basic. Here's how:\n\n**Use thicker lines** - Always set `width=2` or higher for outlines and lines. Thin lines (width=1) look choppy and amateurish.\n\n**Add visual depth**:\n- Use gradients for backgrounds (`create_gradient_background`)\n- Layer multiple shapes for complexity (e.g., a star with a smaller star inside)\n\n**Make shapes more interesting**:\n- Don't just draw a plain circle - add highlights, rings, or patterns\n- Stars can have glows (draw larger, semi-transparent versions behind)\n- Combine multiple shapes (stars + sparkles, circles + rings)\n\n**Pay attention to colors**:\n- Use vibrant, complementary colors\n- Add contrast (dark outlines on light shapes, light outlines on dark shapes)\n- Consider the overall composition\n\n**For complex shapes** (hearts, snowflakes, etc.):\n- Use combinations of polygons and ellipses\n- Calculate points carefully for symmetry\n- Add details (a heart can have a highlight curve, snowflakes have intricate branches)\n\nBe creative and detailed! A good Slack GIF should look polished, not like placeholder graphics.\n\n## Available Utilities\n\n### GIFBuilder (`core.gif_builder`)\nAssembles frames and optimizes for Slack:\n```python\nbuilder = GIFBuilder(width=128, height=128, fps=10)\nbuilder.add_frame(frame)  # Add PIL Image\nbuilder.add_frames(frames)  # Add list of frames\nbuilder.save('out.gif', num_colors=48, optimize_for_emoji=True, remove_duplicates=True)\n```\n\n### Validators (`core.validators`)\nCheck if GIF meets Slack requirements:\n```python\nfrom core.validators import validate_gif, is_slack_ready\n\n# Detailed validation\npasses, info = validate_gif('my.gif', is_emoji=True, verbose=True)\n\n# Quick check\nif is_slack_ready('my.gif'):\n    print(\"Ready!\")\n```\n\n### Easing Functions (`core.easing`)\nSmooth motion instead of linear:\n```python\nfrom core.easing import interpolate\n\n# Progress from 0.0 to 1.0\nt = i / (num_frames - 1)\n\n# Apply easing\ny = interpolate(start=0, end=400, t=t, easing='ease_out')\n\n# Available: linear, ease_in, ease_out, ease_in_out,\n#           bounce_out, elastic_out, back_out\n```\n\n### Frame Helpers (`core.frame_composer`)\nConvenience functions for common needs:\n```python\nfrom core.frame_composer import (\n    create_blank_frame,         # Solid color background\n    create_gradient_background,  # Vertical gradient\n    draw_circle,                # Helper for circles\n    draw_text,                  # Simple text rendering\n    draw_star                   # 5-pointed star\n)\n```\n\n## Animation Concepts\n\n### Shake/Vibrate\nOffset object position with oscillation:\n- Use `math.sin()` or `math.cos()` with frame index\n- Add small random variations for natural feel\n- Apply to x and/or y position\n\n### Pulse/Heartbeat\nScale object size rhythmically:\n- Use `math.sin(t * frequency * 2 * math.pi)` for smooth pulse\n- For heartbeat: two quick pulses then pause (adjust sine wave)\n- Scale between 0.8 and 1.2 of base size\n\n### Bounce\nObject falls and bounces:\n- Use `interpolate()` with `easing='bounce_out'` for landing\n- Use `easing='ease_in'` for falling (accelerating)\n- Apply gravity by increasing y velocity each frame\n\n### Spin/Rotate\nRotate object around center:\n- PIL: `image.rotate(angle, resample=Image.BICUBIC)`\n- For wobble: use sine wave for angle instead of linear\n\n### Fade In/Out\nGradually appear or disappear:\n- Create RGBA image, adjust alpha channel\n- Or use `Image.blend(image1, image2, alpha)`\n- Fade in: alpha from 0 to 1\n- Fade out: alpha from 1 to 0\n\n### Slide\nMove object from off-screen to position:\n- Start position: outside frame bounds\n- End position: target location\n- Use `interpolate()` with `easing='ease_out'` for smooth stop\n- For overshoot: use `easing='back_out'`\n\n### Zoom\nScale and position for zoom effect:\n- Zoom in: scale from 0.1 to 2.0, crop center\n- Zoom out: scale from 2.0 to 1.0\n- Can add motion blur for drama (PIL filter)\n\n### Explode/Particle Burst\nCreate particles radiating outward:\n- Generate particles with random angles and velocities\n- Update each particle: `x += vx`, `y += vy`\n- Add gravity: `vy += gravity_constant`\n- Fade out particles over time (reduce alpha)\n\n## Optimization Strategies\n\nOnly when asked to make the file size smaller, implement a few of the following methods:\n\n1. **Fewer frames** - Lower FPS (10 instead of 20) or shorter duration\n2. **Fewer colors** - `num_colors=48` instead of 128\n3. **Smaller dimensions** - 128x128 instead of 480x480\n4. **Remove duplicates** - `remove_duplicates=True` in save()\n5. **Emoji mode** - `optimize_for_emoji=True` auto-optimizes\n\n```python\n# Maximum optimization for emoji\nbuilder.save(\n    'emoji.gif',\n    num_colors=48,\n    optimize_for_emoji=True,\n    remove_duplicates=True\n)\n```\n\n## Philosophy\n\nThis skill provides:\n- **Knowledge**: Slack's requirements and animation concepts\n- **Utilities**: GIFBuilder, validators, easing functions\n- **Flexibility**: Create the animation logic using PIL primitives\n\nIt does NOT provide:\n- Rigid animation templates or pre-made functions\n- Emoji font rendering (unreliable across platforms)\n- A library of pre-packaged graphics built into the skill\n\n**Note on user uploads**: This skill doesn't include pre-built graphics, but if a user uploads an image, use PIL to load and work with it - interpret based on their request whether they want it used directly or just as inspiration.\n\nBe creative! Combine concepts (bouncing + rotating, pulsing + sliding, etc.) and use PIL's full capabilities.\n\n## Dependencies\n\n```bash\npip install pillow imageio numpy\n```\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("slack-gif-creator-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

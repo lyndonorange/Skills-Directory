@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>prd-to-plan - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/prd-to-plan-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / Product, growth, marketing, and PM</div>
+      <h1>prd-to-plan</h1>
+      <p class="description">Convert Product Requirements Documents (PRDs), feature specs, epics, design sprint outputs, and product briefs into phased implementation plans organized as vertical slices or tracer bullets. Use when a user asks to break requirements into build phases, create a local ./plans/ Markdown plan, identify durable architecture decisions before implementation, translate product requirements into end-to-end development slices, plan incremental verification, or structure feature delivery around complete user-visible layers instead of technical components.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>Product, growth, marketing, and PM</span></div>
+<div class="meta-card"><strong>display name</strong><span>prd-to-plan</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>prd-to-plan</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Convert Product Requirements Documents (PRDs), feature specs, epics, design sprint outputs, and product briefs into phased implementation plans organized as vertical slices or tracer bullets. Use when a user asks to break requirements into build phases, create a local ./plans/ Markdown plan, identify durable architecture decisions before implementation, translate product requirements into end-to-end development slices, plan incremental verification, or structure feature delivery around complete user-visible layers instead of technical components.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the prd-to-plan skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>PRD To Plan</h2>
+<h3>Core Purpose</h3>
+<p>Convert a PRD into an actionable implementation plan that can be built and verified incrementally. Prefer vertical slices: each phase should cut through UI, API, data, tests, and observability only as much as needed to prove a complete user or system outcome.</p>
+<h3>Discovery</h3>
+<p>Before writing the plan:</p>
+<ol>
+<li>Read the PRD, parent epic, architecture notes, ADRs, UX/design sprint artifacts, and existing plans when provided or discoverable.</li>
+<li>Identify users, workflows, acceptance criteria, non-functional requirements, constraints, and explicit out-of-scope items.</li>
+<li>Identify durable decisions needed before coding: data model, integration boundaries, authorization model, deployment assumptions, observability, and migration strategy.</li>
+<li>Inspect the repository enough to name likely files, modules, commands, frameworks, and tests.</li>
+<li>Ask concise clarifying questions only when missing information blocks a safe plan.</li>
+</ol>
+<h3>Design Sprint Lens</h3>
+<p>Use the design sprint frame when the PRD is still fuzzy or when planning prototype-first delivery:</p>
+<ul>
+<li>Understand: define challenge, sprint questions, user journey, and target area.</li>
+<li>Diverge: list solution options, inspiration, and alternative flows.</li>
+<li>Decide: choose the thin target workflow and storyboard the first tracer bullet.</li>
+<li>Prototype: plan the minimal realistic facade or working path.</li>
+<li>Test: define user, QA, and technical validation signals.</li>
+</ul>
+<p>Load <code>references/design-sprint-plan.md</code> when the user asks for a design sprint plan or the PRD needs discovery/prototyping before implementation.</p>
+<h3>Output Location</h3>
+<p>When saving a plan, write it under:</p>
+<pre><code>./plans/</code></pre>
+<p>Use filename format:</p>
+<pre><code>{feature-or-prd-name}-implementation-plan.md</code></pre>
+<p>Use lowercase hyphen-case. If the user asks only for chat output, provide the full Markdown plan without writing a file.</p>
+<h3>Planning Rules</h3>
+<ul>
+<li>Do not split phases by technical component alone, such as &quot;backend phase&quot; then &quot;frontend phase&quot;.</li>
+<li>Use vertical slices that deliver observable value or reduce the highest implementation risk.</li>
+<li>Put durable architecture decisions before slices that depend on them.</li>
+<li>Keep each phase independently verifiable.</li>
+<li>Include files, tests, commands, data changes, risks, and rollback or recovery notes when relevant.</li>
+<li>Preserve traceability from PRD requirement IDs or acceptance criteria to implementation phases.</li>
+<li>If the PRD includes design sprint outputs, map tested prototype learnings into phase goals.</li>
+</ul>
+<h3>Required Output</h3>
+<p>Use this structure for the generated plan:</p>
+<pre><code># Implementation Plan: [Feature Name]
+
+## Source Inputs
+
+- PRD: [path or title]
+- Epic/Product Brief: [path or title]
+- Architecture/ADRs: [path or title]
+- Design Sprint Artifacts: [path or title]
+
+## Product Outcome
+
+[One paragraph describing the target user/business outcome.]
+
+## Requirements Traceability
+
+| Requirement | Source | Plan Coverage |
+| --- | --- | --- |
+| REQ-001 | [PRD section] | Phase 1, Phase 2 |
+
+## Durable Decisions Before Build
+
+| Decision | Options | Recommendation | Needed By |
+| --- | --- | --- | --- |
+| [Decision] | [Options] | [Recommendation] | Phase [N] |
+
+## Vertical Slice Strategy
+
+[Explain the tracer-bullet ordering and why the first slice proves the riskiest or most central workflow.]
+
+## Phased Plan
+
+### Phase 0: Readiness And Decisions
+
+- [ ] [Decision, setup, spike, or alignment task.]
+- [ ] Verify: [Command, review, approval, or artifact.]
+
+### Phase 1: Tracer Bullet - [Thin End-To-End Outcome]
+
+- [ ] [End-to-end task touching only the minimum UI/API/data/test surface.]
+- [ ] Files: `[path]`, `[path]`
+- [ ] Verify: [Command and expected result.]
+- [ ] Requirement coverage: [REQ IDs.]
+
+### Phase 2: Expand Core Flow
+
+- [ ] [Next vertical slice.]
+- [ ] Files: `[path]`, `[path]`
+- [ ] Verify: [Command and expected result.]
+- [ ] Requirement coverage: [REQ IDs.]
+
+### Phase 3: Edge Cases, Hardening, And Observability
+
+- [ ] [Validation, permissions, failure modes, metrics, alerts, accessibility, performance.]
+- [ ] Verify: [Command and expected result.]
+
+### Phase 4: Release Readiness
+
+- [ ] [Docs, rollout, migrations, feature flags, support notes, post-release checks.]
+- [ ] Verify: [Final validation command.]
+
+## Test Plan
+
+| Test Type | Coverage | Command/Method |
+| --- | --- | --- |
+| Unit | [Coverage] | `[command]` |
+| Integration | [Coverage] | `[command]` |
+| E2E/User | [Coverage] | `[command or protocol]` |
+
+## Risks And Mitigations
+
+- **Risk**: [Risk.] **Mitigation**: [Mitigation.]
+
+## Rollback Or Recovery
+
+- [Rollback or recovery path for data, configuration, feature flags, and deployment.]
+
+## Open Questions
+
+- [Question, owner, and blocking phase.]</code></pre>
+<h3>Quality Bar</h3>
+<ul>
+<li>The first implementation slice must prove a real end-to-end path, even if narrow.</li>
+<li>Every phase must include verification.</li>
+<li>Every major PRD requirement must map to at least one phase or be explicitly deferred.</li>
+<li>Architecture decisions must be captured before dependent implementation work.</li>
+<li>Plans must be concrete enough for a developer or agent to execute without re-planning from scratch.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: prd-to-plan\ndisplay_name: prd-to-plan\nplatform: Universal Agents\ncategory: Product, growth, marketing, and PM\n---\n\n# prd-to-plan - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `prd-to-plan` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nConvert Product Requirements Documents (PRDs), feature specs, epics, design sprint outputs, and product briefs into phased implementation plans organized as vertical slices or tracer bullets. Use when a user asks to brea\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the prd-to-plan skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `prd-to-plan` |\n| Canonical name | `prd-to-plan` |\n| Platform | `Universal Agents` |\n| Category | Product, growth, marketing, and PM |\n\n## Description\n\nConvert Product Requirements Documents (PRDs), feature specs, epics, design sprint outputs, and product briefs into phased implementation plans organized as vertical slices or tracer bullets. Use when a user asks to brea\n\n\n## Original SKILL.md\n\n---\nname: prd-to-plan\ndescription: Convert Product Requirements Documents (PRDs), feature specs, epics, design sprint outputs, and product briefs into phased implementation plans organized as vertical slices or tracer bullets. Use when a user asks to break requirements into build phases, create a local ./plans/ Markdown plan, identify durable architecture decisions before implementation, translate product requirements into end-to-end development slices, plan incremental verification, or structure feature delivery around complete user-visible layers instead of technical components.\n---\n\n# PRD To Plan\n\n## Core Purpose\n\nConvert a PRD into an actionable implementation plan that can be built and verified incrementally. Prefer vertical slices: each phase should cut through UI, API, data, tests, and observability only as much as needed to prove a complete user or system outcome.\n\n## Discovery\n\nBefore writing the plan:\n\n1. Read the PRD, parent epic, architecture notes, ADRs, UX/design sprint artifacts, and existing plans when provided or discoverable.\n2. Identify users, workflows, acceptance criteria, non-functional requirements, constraints, and explicit out-of-scope items.\n3. Identify durable decisions needed before coding: data model, integration boundaries, authorization model, deployment assumptions, observability, and migration strategy.\n4. Inspect the repository enough to name likely files, modules, commands, frameworks, and tests.\n5. Ask concise clarifying questions only when missing information blocks a safe plan.\n\n## Design Sprint Lens\n\nUse the design sprint frame when the PRD is still fuzzy or when planning prototype-first delivery:\n\n- Understand: define challenge, sprint questions, user journey, and target area.\n- Diverge: list solution options, inspiration, and alternative flows.\n- Decide: choose the thin target workflow and storyboard the first tracer bullet.\n- Prototype: plan the minimal realistic facade or working path.\n- Test: define user, QA, and technical validation signals.\n\nLoad `references/design-sprint-plan.md` when the user asks for a design sprint plan or the PRD needs discovery/prototyping before implementation.\n\n## Output Location\n\nWhen saving a plan, write it under:\n\n```text\n./plans/\n```\n\nUse filename format:\n\n```text\n{feature-or-prd-name}-implementation-plan.md\n```\n\nUse lowercase hyphen-case. If the user asks only for chat output, provide the full Markdown plan without writing a file.\n\n## Planning Rules\n\n- Do not split phases by technical component alone, such as \"backend phase\" then \"frontend phase\".\n- Use vertical slices that deliver observable value or reduce the highest implementation risk.\n- Put durable architecture decisions before slices that depend on them.\n- Keep each phase independently verifiable.\n- Include files, tests, commands, data changes, risks, and rollback or recovery notes when relevant.\n- Preserve traceability from PRD requirement IDs or acceptance criteria to implementation phases.\n- If the PRD includes design sprint outputs, map tested prototype learnings into phase goals.\n\n## Required Output\n\nUse this structure for the generated plan:\n\n```markdown\n# Implementation Plan: [Feature Name]\n\n## Source Inputs\n\n- PRD: [path or title]\n- Epic/Product Brief: [path or title]\n- Architecture/ADRs: [path or title]\n- Design Sprint Artifacts: [path or title]\n\n## Product Outcome\n\n[One paragraph describing the target user/business outcome.]\n\n## Requirements Traceability\n\n| Requirement | Source | Plan Coverage |\n| --- | --- | --- |\n| REQ-001 | [PRD section] | Phase 1, Phase 2 |\n\n## Durable Decisions Before Build\n\n| Decision | Options | Recommendation | Needed By |\n| --- | --- | --- | --- |\n| [Decision] | [Options] | [Recommendation] | Phase [N] |\n\n## Vertical Slice Strategy\n\n[Explain the tracer-bullet ordering and why the first slice proves the riskiest or most central workflow.]\n\n## Phased Plan\n\n### Phase 0: Readiness And Decisions\n\n- [ ] [Decision, setup, spike, or alignment task.]\n- [ ] Verify: [Command, review, approval, or artifact.]\n\n### Phase 1: Tracer Bullet - [Thin End-To-End Outcome]\n\n- [ ] [End-to-end task touching only the minimum UI/API/data/test surface.]\n- [ ] Files: `[path]`, `[path]`\n- [ ] Verify: [Command and expected result.]\n- [ ] Requirement coverage: [REQ IDs.]\n\n### Phase 2: Expand Core Flow\n\n- [ ] [Next vertical slice.]\n- [ ] Files: `[path]`, `[path]`\n- [ ] Verify: [Command and expected result.]\n- [ ] Requirement coverage: [REQ IDs.]\n\n### Phase 3: Edge Cases, Hardening, And Observability\n\n- [ ] [Validation, permissions, failure modes, metrics, alerts, accessibility, performance.]\n- [ ] Verify: [Command and expected result.]\n\n### Phase 4: Release Readiness\n\n- [ ] [Docs, rollout, migrations, feature flags, support notes, post-release checks.]\n- [ ] Verify: [Final validation command.]\n\n## Test Plan\n\n| Test Type | Coverage | Command/Method |\n| --- | --- | --- |\n| Unit | [Coverage] | `[command]` |\n| Integration | [Coverage] | `[command]` |\n| E2E/User | [Coverage] | `[command or protocol]` |\n\n## Risks And Mitigations\n\n- **Risk**: [Risk.] **Mitigation**: [Mitigation.]\n\n## Rollback Or Recovery\n\n- [Rollback or recovery path for data, configuration, feature flags, and deployment.]\n\n## Open Questions\n\n- [Question, owner, and blocking phase.]\n```\n\n## Quality Bar\n\n- The first implementation slice must prove a real end-to-end path, even if narrow.\n- Every phase must include verification.\n- Every major PRD requirement must map to at least one phase or be explicitly deferred.\n- Architecture decisions must be captured before dependent implementation work.\n- Plans must be concrete enough for a developer or agent to execute without re-planning from scratch.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("prd-to-plan-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

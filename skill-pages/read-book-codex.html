@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>read-book - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/read-book-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>read-book</h1>
+      <p class="description">When you want to read and extract structured notes from a book — PDF, EPUB, MOBI, markdown, .txt, pasted text, or URL to a public-domain work. Reads in chunks (by chapter when a TOC exists, by 50-page blocks otherwise), extracts per-chapter TL;DR + key concepts + quotes + action items + frameworks, and offers to capture to second-brain raw/ as a highlights- file. Four modes — notes (default, chapter-by-chapter), summary (whole-book TL;DR + 3–5 takeaways), quotes (pull-quote highlights only), study (notes + Q&amp;A spaced-rep prep). Triggers on &quot;/read-book,&quot; &quot;read this book,&quot; &quot;extract notes from this PDF,&quot; &quot;what's in this book,&quot; &quot;summarize this ebook,&quot; &quot;pull quotes from this.&quot; Sibling to watch-video (same content-consumption pattern, different medium).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>read-book</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>read-book</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>When you want to read and extract structured notes from a book — PDF, EPUB, MOBI, markdown, .txt, pasted text, or URL to a public-domain work. Reads in chunks (by chapter when a TOC exists, by 50-page blocks otherwise), extracts per-chapter TL;DR + key concepts + quotes + action items + frameworks, and offers to capture to second-brain raw/ as a highlights- file. Four modes — notes (default, chapter-by-chapter), summary (whole-book TL;DR + 3–5 takeaways), quotes (pull-quote highlights only), study (notes + Q&amp;A spaced-rep prep). Triggers on &quot;/read-book,&quot; &quot;read this book,&quot; &quot;extract notes from this PDF,&quot; &quot;what's in this book,&quot; &quot;summarize this ebook,&quot; &quot;pull quotes from this.&quot; Sibling to watch-video (same content-consumption pattern, different medium).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose read-book, then write the task. Fallback prompt: Use the read-book skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>/read-book — Extract structured notes from books and long PDFs</h2>
+<p>Sibling to <code>watch-video</code>. Same content-consumption pattern: ingest → chunk → extract → optionally capture to second-brain.</p>
+<h3>Step 1 — Parse input</h3>
+<p>Accept:</p>
+<ul>
+<li><strong>PDF</strong>: file path (Claude reads PDFs natively in chunks via <code>Read pages:&quot;X-Y&quot;</code>)</li>
+<li><strong>EPUB / MOBI</strong>: file path (needs <code>pandoc</code> or <code>ebook-convert</code> to extract — see <code>references/sources.md</code>)</li>
+<li><strong>Markdown / .txt</strong>: file path (read directly)</li>
+<li><strong>Pasted text</strong>: just use what was pasted</li>
+<li><strong>URL</strong> to public-domain text: <code>WebFetch</code> (Project Gutenberg, archive.org, etc.)</li>
+</ul>
+<p>Detect type from file extension. If ambiguous, ask.</p>
+<h3>Step 2 — Parse mode</h3>
+<p>| Invocation | Mode | What you get | |---|---|---| | <code>/read-book &lt;input&gt;</code> | <strong>notes</strong> (default) | Chapter-by-chapter: TL;DR + key concepts + quotes + action items + frameworks | | <code>/read-book &lt;input&gt; summary</code> | summary | Whole-book TL;DR (1 paragraph) + 3–5 key takeaways + who-it's-for | | <code>/read-book &lt;input&gt; quotes</code> | quotes | Pull-quote highlights only, with chapter context and page refs | | <code>/read-book &lt;input&gt; study</code> | study | Notes mode + 10–20 spaced-repetition Q&amp;A cards |</p>
+<p>If the book is long (&gt;200 pages) and mode is unspecified, default to <code>notes</code> but warn it'll take many tool calls.</p>
+<h3>Step 3 — Get the text + chunk</h3>
+<p>See <code>references/sources.md</code> for per-source ingestion. Output of this step: text content + a chunking plan.</p>
+<p><strong>Chunking strategy</strong> (hybrid, in priority order):</p>
+<ol>
+<li><strong>By chapter</strong> if a TOC exists (PDF with bookmarks, EPUB/MOBI converted via pandoc preserves chapter headers)</li>
+</ol>
+<ul>
+<li>Use <code>pdfinfo &lt;pdf&gt; | grep &quot;Pages&quot;</code> for PDFs</li>
+<li>Use <code>pdftotext -layout &lt;pdf&gt; | grep -i &quot;^chapter\|^part&quot;</code> for chapter detection, or read TOC from page 1–5</li>
+<li>EPUB: after <code>pandoc &lt;epub&gt; -o tmp.md</code>, chunks are between <code># Chapter X</code> headers</li>
+</ul>
+<ol>
+<li><strong>By page count</strong> for PDFs without TOC: 50 pages per chunk</li>
+</ol>
+<ol>
+<li><strong>By character count</strong> for text/markdown: 30,000 chars per chunk (~7,500 words)</li>
+</ol>
+<p>Save the chunking plan as <code>~/Documents/books/&lt;author&gt;-&lt;title-slug&gt;-&lt;YYYY-MM-DD&gt;/chunks.json</code>:</p>
+<pre><code>{
+  &quot;source&quot;: &quot;&lt;path&gt;&quot;,
+  &quot;title&quot;: &quot;&lt;book title&gt;&quot;,
+  &quot;author&quot;: &quot;&lt;author&gt;&quot;,
+  &quot;type&quot;: &quot;pdf&quot;,
+  &quot;total_pages&quot;: 287,
+  &quot;chunking&quot;: &quot;by-chapter&quot;,
+  &quot;chunks&quot;: [
+    {&quot;i&quot;: 0, &quot;label&quot;: &quot;Introduction&quot;, &quot;pages&quot;: &quot;1-12&quot;},
+    {&quot;i&quot;: 1, &quot;label&quot;: &quot;Chapter 1: The Problem&quot;, &quot;pages&quot;: &quot;13-32&quot;},
+    ...
+  ]
+}</code></pre>
+<h3>Step 4 — Read each chunk</h3>
+<p>Loop:</p>
+<ol>
+<li>Read chunk N (<code>Read</code> tool with <code>pages:</code> for PDF, full file for text/MD)</li>
+<li>Extract per the chosen mode (see <code>references/output-modes.md</code> for templates)</li>
+<li>Append the chunk's notes to <code>~/Documents/books/&lt;workdir&gt;/notes-&lt;NNN&gt;-&lt;label-slug&gt;.md</code></li>
+</ol>
+<p>For PDFs, <strong>don't read the whole book in one call</strong> — Claude's PDF tool maxes around 10 pages. Process chunks individually.</p>
+<p>If a chunk fails to extract anything useful (e.g., it's mostly diagrams or front-matter), log the skip and continue.</p>
+<h3>Step 5 — Aggregate into final notes file</h3>
+<p>Combine all chunk notes into a single <code>~/Documents/books/&lt;workdir&gt;/notes.md</code> matching the mode's full-book template (see <code>references/output-modes.md</code>).</p>
+<p>Top of the file always has the metadata block + the second-brain-compatible frontmatter:</p>
+<pre><code>source: &lt;file path or URL&gt;
+captured: YYYY-MM-DD
+type: book
+book_title: &lt;title&gt;
+author: &lt;author&gt;
+mode: notes
+chunks: &lt;count&gt;
+chunking: &lt;strategy&gt;
+
+# &lt;title&gt; by &lt;author&gt;
+
+## TL;DR
+&lt;2–3 sentences&gt;
+
+## Key takeaways
+1. ...
+
+## Chapter notes
+...
+
+## Cross-references (suggested for wiki)
+- Could connect to [[Longevity Biomarkers]] (per Chapter 3 discussion of biomarkers)
+- Could connect to [[Productivity &amp; Systems]] (per Chapter 7 framework)</code></pre>
+<p>The cross-reference suggestions are advisory — they're suggestions for <code>/sb compile</code> to act on, not auto-applied. Keep responsibilities separated.</p>
+<h3>Step 6 — Offer to capture to second-brain</h3>
+<p>Ask:</p>
+<blockquote><em>&quot;Want to capture this to second-brain? I'll write it to <code>${SECOND_BRAIN_VAULT:-$HOME/Documents/SecondBrain}/raw/highlights-&lt;slug&gt;.md</code> matching your vault's <code>highlights-</code> type prefix.&quot;</em></blockquote>
+<p>Default is <strong>ask</strong>, never auto-write. If yes:</p>
+<ol>
+<li>Copy the final <code>notes.md</code> (with the second-brain-compatible frontmatter at top) to <code>${SECOND_BRAIN_VAULT:-$HOME/Documents/SecondBrain}/raw/highlights-&lt;slug&gt;.md</code></li>
+<li>Tell the user the path</li>
+<li>Suggest: <em>&quot;Run <code>/sb compile</code> later to merge this into wiki pages — the cross-reference suggestions in the footer are starting points.&quot;</em></li>
+</ol>
+<p>If the user skips capture, the workdir still has everything — they can grab the file later.</p>
+<h3>Step 7 — Report</h3>
+<p>In chat:</p>
+<ul>
+<li>One-line headline: <code>&lt;title&gt; · &lt;author&gt; · &lt;total_pages or word count&gt; · &lt;mode&gt; · &lt;chunks processed&gt;</code></li>
+<li>Workdir path</li>
+<li>The TL;DR section</li>
+<li>For <code>notes</code> / <code>study</code> modes: brief list of top 3 takeaways</li>
+<li>For <code>quotes</code> mode: top 3 quotes</li>
+<li>If captured to second-brain: that path too</li>
+</ul>
+<h3>Modes (quick invocations)</h3>
+<p>| Invocation | Mode | Behavior | |---|---|---| | <code>/read-book &lt;input&gt;</code> | notes | Full pipeline, default mode | | <code>/read-book &lt;input&gt; summary</code> | summary | Just TL;DR + key takeaways (1 read pass for short books, sampled chapters for long) | | <code>/read-book &lt;input&gt; quotes</code> | quotes | Chapter-by-chapter, but only output quotes | | <code>/read-book &lt;input&gt; study</code> | study | Notes + Q&amp;A spaced-rep cards | | <code>/read-book &lt;input&gt; --capture</code> | (any) | Skip the ask step, auto-write to second-brain raw/ | | <code>/read-book &lt;input&gt; --render pdf</code> | (any) | Also render the final <code>notes.md</code> to PDF via pandoc (uses <code>~/.local/share/makerskills/render.css</code>). See <code>references/output-modes.md</code>. | | <code>/read-book &lt;input&gt; --render html</code> | (any) | Same as above but HTML |</p>
+<h3>Composes with</h3>
+<ul>
+<li><code>second-brain</code> — primary integration: writes <code>highlights-&lt;slug&gt;.md</code> to <code>raw/</code>. Then <code>/sb compile</code> merges into wiki pages.</li>
+<li><code>deep-research</code> — when a research question turns up a book, <code>/read-book</code> is the next step. Notes feed back into the research brief.</li>
+<li><code>business-brainstorm</code> — when scoring an idea (e.g., business books on similar models), read-book provides the structured evidence.</li>
+<li><code>decide</code> — when a decision hinges on what an authority has written (e.g., &quot;should I take VC money?&quot; → read Naval / Jason Cohen), <code>read-book</code> extracts the relevant chapter.</li>
+<li><code>slide-deck</code> — book takeaways → talk material (book talk pattern).</li>
+<li><code>watch-video</code> — sibling skill, same content-consumption pattern. Audiobook? Use <code>watch-video transcript</code> mode.</li>
+<li><code>nonfictionskills</code> / <code>fictionskills</code> — when researching to <em>write</em> a book, this skill reads the comp titles.</li>
+</ul>
+<h3>Error handling</h3>
+<p>| Failure | Response | |---|---| | EPUB/MOBI without pandoc / ebook-convert | Tell the user: <code>brew install pandoc</code> or <code>brew install calibre</code> (calibre includes <code>ebook-convert</code>) | | PDF is scanned (no text layer) | Suggest OCR first: <code>brew install ocrmypdf &amp;&amp; ocrmypdf &lt;pdf&gt; &lt;pdf-ocr.pdf&gt;</code> | | PDF has no detectable TOC | Fall back to 50-page chunks. Note in the metadata. | | Book is unusually long (&gt;500 pages) | Warn cost / time, ask if the user wants summary mode instead of full notes | | Chunk extraction empty | Skip the chunk, log, continue. Don't fail the whole run. |</p>
+<h3>Notes on quality</h3>
+<ul>
+<li><strong>Don't summarize beyond recognition.</strong> A 30-page chapter should produce 8–15 lines of notes, not 3. Compression is good; flattening is bad.</li>
+<li><strong>Preserve specifics.</strong> Names, numbers, dates, quotes — keep them. The whole point is later-the user can grep &quot;what did Andy Wilkinson say about X&quot; and find it.</li>
+<li><strong>Quotes are sacred.</strong> When you flag a quote, copy it verbatim. Note the page if possible.</li>
+<li><strong>Action items are explicit.</strong> If the book makes you think &quot;I should do X,&quot; flag it explicitly. These are the highest-leverage outputs.</li>
+<li><strong>Frameworks deserve their own bullets.</strong> When the author names a framework (e.g., &quot;the 9-dimension filter,&quot; &quot;Save the Cat beats&quot;), call it out by name in the notes.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: read-book\ndisplay_name: read-book\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# read-book - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `read-book` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nWhen you want to read and extract structured notes from a book — PDF, EPUB, MOBI, markdown, .txt, pasted text, or URL to a public-domain work. Reads in chunks (by chapter when a TOC exists, by 50-page blocks otherwise),\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose read-book, then write the task. Fallback prompt: Use the read-book skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `read-book` |\n| Canonical name | `read-book` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nWhen you want to read and extract structured notes from a book — PDF, EPUB, MOBI, markdown, .txt, pasted text, or URL to a public-domain work. Reads in chunks (by chapter when a TOC exists, by 50-page blocks otherwise),\n\n\n## Original SKILL.md\n\n---\nname: read-book\ndescription: When you want to read and extract structured notes from a book — PDF, EPUB, MOBI, markdown, .txt, pasted text, or URL to a public-domain work. Reads in chunks (by chapter when a TOC exists, by 50-page blocks otherwise), extracts per-chapter TL;DR + key concepts + quotes + action items + frameworks, and offers to capture to second-brain raw/ as a highlights- file. Four modes — notes (default, chapter-by-chapter), summary (whole-book TL;DR + 3–5 takeaways), quotes (pull-quote highlights only), study (notes + Q&A spaced-rep prep). Triggers on \"/read-book,\" \"read this book,\" \"extract notes from this PDF,\" \"what's in this book,\" \"summarize this ebook,\" \"pull quotes from this.\" Sibling to watch-video (same content-consumption pattern, different medium).\nmetadata:\n  version: 0.1.0\n---\n\n# /read-book — Extract structured notes from books and long PDFs\n\nSibling to `watch-video`. Same content-consumption pattern: ingest → chunk → extract → optionally capture to second-brain.\n\n## Step 1 — Parse input\n\nAccept:\n- **PDF**: file path (Claude reads PDFs natively in chunks via `Read pages:\"X-Y\"`)\n- **EPUB / MOBI**: file path (needs `pandoc` or `ebook-convert` to extract — see `references/sources.md`)\n- **Markdown / .txt**: file path (read directly)\n- **Pasted text**: just use what was pasted\n- **URL** to public-domain text: `WebFetch` (Project Gutenberg, archive.org, etc.)\n\nDetect type from file extension. If ambiguous, ask.\n\n## Step 2 — Parse mode\n\n| Invocation | Mode | What you get |\n|---|---|---|\n| `/read-book \u003cinput>` | **notes** (default) | Chapter-by-chapter: TL;DR + key concepts + quotes + action items + frameworks |\n| `/read-book \u003cinput> summary` | summary | Whole-book TL;DR (1 paragraph) + 3–5 key takeaways + who-it's-for |\n| `/read-book \u003cinput> quotes` | quotes | Pull-quote highlights only, with chapter context and page refs |\n| `/read-book \u003cinput> study` | study | Notes mode + 10–20 spaced-repetition Q&A cards |\n\nIf the book is long (>200 pages) and mode is unspecified, default to `notes` but warn it'll take many tool calls.\n\n## Step 3 — Get the text + chunk\n\nSee `references/sources.md` for per-source ingestion. Output of this step: text content + a chunking plan.\n\n**Chunking strategy** (hybrid, in priority order):\n\n1. **By chapter** if a TOC exists (PDF with bookmarks, EPUB/MOBI converted via pandoc preserves chapter headers)\n   - Use `pdfinfo \u003cpdf> | grep \"Pages\"` for PDFs\n   - Use `pdftotext -layout \u003cpdf> | grep -i \"^chapter\\|^part\"` for chapter detection, or read TOC from page 1–5\n   - EPUB: after `pandoc \u003cepub> -o tmp.md`, chunks are between `# Chapter X` headers\n\n2. **By page count** for PDFs without TOC: 50 pages per chunk\n\n3. **By character count** for text/markdown: 30,000 chars per chunk (~7,500 words)\n\nSave the chunking plan as `~/Documents/books/\u003cauthor>-\u003ctitle-slug>-\u003cYYYY-MM-DD>/chunks.json`:\n\n```json\n{\n  \"source\": \"\u003cpath>\",\n  \"title\": \"\u003cbook title>\",\n  \"author\": \"\u003cauthor>\",\n  \"type\": \"pdf\",\n  \"total_pages\": 287,\n  \"chunking\": \"by-chapter\",\n  \"chunks\": [\n    {\"i\": 0, \"label\": \"Introduction\", \"pages\": \"1-12\"},\n    {\"i\": 1, \"label\": \"Chapter 1: The Problem\", \"pages\": \"13-32\"},\n    ...\n  ]\n}\n```\n\n## Step 4 — Read each chunk\n\nLoop:\n1. Read chunk N (`Read` tool with `pages:` for PDF, full file for text/MD)\n2. Extract per the chosen mode (see `references/output-modes.md` for templates)\n3. Append the chunk's notes to `~/Documents/books/\u003cworkdir>/notes-\u003cNNN>-\u003clabel-slug>.md`\n\nFor PDFs, **don't read the whole book in one call** — Claude's PDF tool maxes around 10 pages. Process chunks individually.\n\nIf a chunk fails to extract anything useful (e.g., it's mostly diagrams or front-matter), log the skip and continue.\n\n## Step 5 — Aggregate into final notes file\n\nCombine all chunk notes into a single `~/Documents/books/\u003cworkdir>/notes.md` matching the mode's full-book template (see `references/output-modes.md`).\n\nTop of the file always has the metadata block + the second-brain-compatible frontmatter:\n\n```markdown\nsource: \u003cfile path or URL>\ncaptured: YYYY-MM-DD\ntype: book\nbook_title: \u003ctitle>\nauthor: \u003cauthor>\nmode: notes\nchunks: \u003ccount>\nchunking: \u003cstrategy>\n\n# \u003ctitle> by \u003cauthor>\n\n## TL;DR\n\u003c2–3 sentences>\n\n## Key takeaways\n1. ...\n\n## Chapter notes\n...\n\n## Cross-references (suggested for wiki)\n- Could connect to [[Longevity Biomarkers]] (per Chapter 3 discussion of biomarkers)\n- Could connect to [[Productivity & Systems]] (per Chapter 7 framework)\n```\n\nThe cross-reference suggestions are advisory — they're suggestions for `/sb compile` to act on, not auto-applied. Keep responsibilities separated.\n\n## Step 6 — Offer to capture to second-brain\n\nAsk:\n\n> *\"Want to capture this to second-brain? I'll write it to `${SECOND_BRAIN_VAULT:-$HOME/Documents/SecondBrain}/raw/highlights-\u003cslug>.md` matching your vault's `highlights-` type prefix.\"*\n\nDefault is **ask**, never auto-write. If yes:\n1. Copy the final `notes.md` (with the second-brain-compatible frontmatter at top) to `${SECOND_BRAIN_VAULT:-$HOME/Documents/SecondBrain}/raw/highlights-\u003cslug>.md`\n2. Tell the user the path\n3. Suggest: *\"Run `/sb compile` later to merge this into wiki pages — the cross-reference suggestions in the footer are starting points.\"*\n\nIf the user skips capture, the workdir still has everything — they can grab the file later.\n\n## Step 7 — Report\n\nIn chat:\n- One-line headline: `\u003ctitle> · \u003cauthor> · \u003ctotal_pages or word count> · \u003cmode> · \u003cchunks processed>`\n- Workdir path\n- The TL;DR section\n- For `notes` / `study` modes: brief list of top 3 takeaways\n- For `quotes` mode: top 3 quotes\n- If captured to second-brain: that path too\n\n## Modes (quick invocations)\n\n| Invocation | Mode | Behavior |\n|---|---|---|\n| `/read-book \u003cinput>` | notes | Full pipeline, default mode |\n| `/read-book \u003cinput> summary` | summary | Just TL;DR + key takeaways (1 read pass for short books, sampled chapters for long) |\n| `/read-book \u003cinput> quotes` | quotes | Chapter-by-chapter, but only output quotes |\n| `/read-book \u003cinput> study` | study | Notes + Q&A spaced-rep cards |\n| `/read-book \u003cinput> --capture` | (any) | Skip the ask step, auto-write to second-brain raw/ |\n| `/read-book \u003cinput> --render pdf` | (any) | Also render the final `notes.md` to PDF via pandoc (uses `~/.local/share/makerskills/render.css`). See `references/output-modes.md`. |\n| `/read-book \u003cinput> --render html` | (any) | Same as above but HTML |\n\n## Composes with\n\n- `second-brain` — primary integration: writes `highlights-\u003cslug>.md` to `raw/`. Then `/sb compile` merges into wiki pages.\n- `deep-research` — when a research question turns up a book, `/read-book` is the next step. Notes feed back into the research brief.\n- `business-brainstorm` — when scoring an idea (e.g., business books on similar models), read-book provides the structured evidence.\n- `decide` — when a decision hinges on what an authority has written (e.g., \"should I take VC money?\" → read Naval / Jason Cohen), `read-book` extracts the relevant chapter.\n- `slide-deck` — book takeaways → talk material (book talk pattern).\n- `watch-video` — sibling skill, same content-consumption pattern. Audiobook? Use `watch-video transcript` mode.\n- `nonfictionskills` / `fictionskills` — when researching to *write* a book, this skill reads the comp titles.\n\n## Error handling\n\n| Failure | Response |\n|---|---|\n| EPUB/MOBI without pandoc / ebook-convert | Tell the user: `brew install pandoc` or `brew install calibre` (calibre includes `ebook-convert`) |\n| PDF is scanned (no text layer) | Suggest OCR first: `brew install ocrmypdf && ocrmypdf \u003cpdf> \u003cpdf-ocr.pdf>` |\n| PDF has no detectable TOC | Fall back to 50-page chunks. Note in the metadata. |\n| Book is unusually long (>500 pages) | Warn cost / time, ask if the user wants summary mode instead of full notes |\n| Chunk extraction empty | Skip the chunk, log, continue. Don't fail the whole run. |\n\n## Notes on quality\n\n- **Don't summarize beyond recognition.** A 30-page chapter should produce 8–15 lines of notes, not 3. Compression is good; flattening is bad.\n- **Preserve specifics.** Names, numbers, dates, quotes — keep them. The whole point is later-the user can grep \"what did Andy Wilkinson say about X\" and find it.\n- **Quotes are sacred.** When you flag a quote, copy it verbatim. Note the page if possible.\n- **Action items are explicit.** If the book makes you think \"I should do X,\" flag it explicitly. These are the highest-leverage outputs.\n- **Frameworks deserve their own bullets.** When the author names a framework (e.g., \"the 9-dimension filter,\" \"Save the Cat beats\"), call it out by name in the notes.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("read-book-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

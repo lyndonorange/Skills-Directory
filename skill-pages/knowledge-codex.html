@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Knowledge - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/knowledge-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>Knowledge</h1>
+      <p class="description">Manage the LifeOS Knowledge Archive — a curated, typed graph of notes across four entity domains: People, Companies, Ideas, and Research. Operations: search, add, harvest, develop, ingest (with ripple updates to related notes), contradictions, graph, retrieve, mine. Every note ships with typed `related:` frontmatter links across 8 relationship types. USE WHEN knowledge, knowledge base, search knowledge, what do we know about, archive, harvest, knowledge status, develop note, add to knowledge, ingest, contradictions, knowledge graph, retrieve, mine conversations. NOT FOR session/ISA context recovery (use ContextSearch), published content semantic search across blog/newsletter/X/LinkedIn (use _CONTENTSEARCH), or one-shot URL/YouTube ingestion via the Arbol harvester pipeline (use _HARVEST).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>Knowledge</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>Knowledge</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Manage the LifeOS Knowledge Archive — a curated, typed graph of notes across four entity domains: People, Companies, Ideas, and Research. Operations: search, add, harvest, develop, ingest (with ripple updates to related notes), contradictions, graph, retrieve, mine. Every note ships with typed `related:` frontmatter links across 8 relationship types. USE WHEN knowledge, knowledge base, search knowledge, what do we know about, archive, harvest, knowledge status, develop note, add to knowledge, ingest, contradictions, knowledge graph, retrieve, mine conversations. NOT FOR session/ISA context recovery (use ContextSearch), published content semantic search across blog/newsletter/X/LinkedIn (use _CONTENTSEARCH), or one-shot URL/YouTube ingestion via the Arbol harvester pipeline (use _HARVEST).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose Knowledge, then write the task. Fallback prompt: Use the Knowledge skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Knowledge Skill</h2>
+<h3>What It Does</h3>
+<p>Manage the LifeOS Knowledge Archive — a curated, typed graph of notes across four entity domains: People, Companies, Ideas, and Research. Operations cover search, add, harvest, develop, ingest, contradiction-finding, graph traversal, compressed retrieval, and mining recent conversations for memory candidates. Every note ships with typed <code>related:</code> cross-links, so the archive is a connected graph, not a pile of files.</p>
+<h3>The Problem</h3>
+<p>Notes you save in isolation are notes you never find again. A flat folder of facts has no way to tell you that two notes contradict each other, that a new source updates an old claim, or that an idea connects to a person and a company you wrote up months ago. Knowledge dies when it can't be retrieved or related. This archive forces every note into a typed schema with mandatory cross-links and ripples updates through related notes on ingest, so the connections are built in at write time instead of being reconstructed by hand later.</p>
+<h3>How It Works</h3>
+<p>Manage the LifeOS Knowledge Archive at <code>~/.claude/LIFEOS/MEMORY/KNOWLEDGE/</code>. Each operation routes through a subcommand below; notes follow the archive schema and ship with typed cross-links.</p>
+<p><strong>Archive schema:</strong> <code>~/.claude/LIFEOS/MEMORY/KNOWLEDGE/_schema.md</code></p>
+<h3>Workflow Routing</h3>
+<p>Workflows are inline command sections in this file (no Workflows/ dir); each row routes to the matching H2 section below.</p>
+<p>| Trigger | Workflow | Action | |---------|----------|--------| | <code>/knowledge</code> (no args) | <strong>status</strong> | Health dashboard | | <code>/knowledge &lt;query&gt;</code> | <strong>search</strong> | Search for notes matching query | | <code>/knowledge search &lt;query&gt;</code> | <strong>search</strong> | Explicit search | | <code>/knowledge add &lt;type&gt;</code> | <strong>add</strong> | Create a new note (People, Companies, or Ideas) | | <code>/knowledge harvest</code> | <strong>harvest</strong> | Run KnowledgeHarvester on all sources | | <code>/knowledge develop</code> | <strong>develop</strong> | Surface seedlings and enrich them | | <code>/knowledge ingest &lt;url-or-file&gt;</code> | <strong>ingest</strong> | Read source, create note, ripple updates to related notes | | <code>/knowledge contradictions</code> | <strong>contradictions</strong> | Find and review conflicting claims across notes | | <code>/knowledge graph</code> | <strong>graph</strong> | Knowledge graph stats and navigation | | <code>/knowledge graph &lt;slug&gt;</code> | <strong>graph</strong> | Traverse graph from a note | | <code>/knowledge retrieve &lt;query&gt;</code> | <strong>retrieve</strong> | Compressed context retrieval | | <code>/knowledge mine</code> | <strong>mine</strong> | Mine recent conversations for memory candidates |</p>
+<p>If <code>$ARGUMENTS</code> doesn't match a subcommand, treat it as a search query.</p>
+<hr>
+<h3>status (default, no args)</h3>
+<p>Run the harvester status command and display results:</p>
+<pre><code>bun ~/.claude/LIFEOS/TOOLS/KnowledgeHarvester.ts status</code></pre>
+<p>Also show:</p>
+<ul>
+<li>Quick summary of domains with note counts</li>
+<li>Any orphan wikilinks</li>
+<li>Any stale seedlings</li>
+<li>Time since last harvest</li>
+</ul>
+<p>Present in NATIVE mode.</p>
+<hr>
+<h3>search &lt;query&gt;</h3>
+<p>Search the Knowledge Archive for notes matching <code>$ARGUMENTS</code>.</p>
+<p><strong>Step 1 — Lexical search:</strong></p>
+<pre><code>rg -i &quot;$ARGUMENTS&quot; ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/ --type md -l</code></pre>
+<p><strong>Step 2 — Frontmatter search (tags and titles):</strong></p>
+<pre><code>rg -i &quot;title:.*$ARGUMENTS|tags:.*$ARGUMENTS&quot; ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/ --type md -l</code></pre>
+<p><strong>Step 3 — Wikilink search:</strong></p>
+<pre><code>rg &quot;\[\[.*$ARGUMENTS.*\]\]&quot; ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/ --type md -l</code></pre>
+<p>Deduplicate results across all three. For each match, read the first 5 lines of frontmatter to show title, domain, status, tags.</p>
+<p>Present results as a table:</p>
+<pre><code>| Note | Domain | Status | Tags | Relevance |</code></pre>
+<p>If no results found, say so and suggest checking the full MEMORY/ system or running a harvest.</p>
+<hr>
+<h3>add &lt;type&gt;</h3>
+<p>Create a new note manually in the specified entity type.</p>
+<ol>
+<li>Validate type is one of: People, Companies, Ideas, Research</li>
+<li>Ask for a title (or use remaining args after type)</li>
+<li>Generate kebab-case filename from title</li>
+<li><strong>MANDATORY: Find 2-3 related notes first.</strong> Before writing the new note, grep existing Knowledge for related entities by topic/tags/name. This becomes the <code>related:</code> frontmatter array. No Knowledge note ships without typed links. See Canonical Linking Requirement below.</li>
+<li>Create the note with proper frontmatter from <code>_schema.md</code> — schemas require: <code>title</code>, <code>type</code>, <code>tags</code> (min 1), <code>created</code>, <code>updated</code>, <code>quality</code> (0-10), plus type-specific body sections.</li>
+<li>Write the file to <code>KNOWLEDGE/&lt;Type&gt;/&lt;kebab-case-title&gt;.md</code> — slug max 60 chars</li>
+<li>Verify every slug in <code>related:</code> exists in the archive before saving</li>
+<li>Regenerate the type's MOC:</li>
+</ol>
+<pre><code>bun ~/.claude/LIFEOS/TOOLS/KnowledgeHarvester.ts index</code></pre>
+<p><strong>Topic is a tag, not a type.</strong> A security insight is an Idea with a <code>security</code> tag. A security company is a Company with a <code>security</code> tag. The entity type determines the schema; the tag determines the topic.</p>
+<h3>Canonical Linking Requirement (MANDATORY)</h3>
+<p><strong>Every new Knowledge note must ship with typed cross-links.</strong> This is not optional. The architecture is defined in <code>MEMORY/KNOWLEDGE/Ideas/pai-knowledge-linking-architecture.md</code> (quality 9) and the schema in <code>_schema.md</code>.</p>
+<p><strong>Every write must include:</strong></p>
+<ol>
+<li><strong><code>related:</code> frontmatter array</strong> — 2-4 typed entries linking to other Knowledge entries (any domain: People, Companies, Ideas, Research)</li>
+<li><strong>Body wikilinks</strong> — 1-3 <code>[[slug]]</code> references woven into the prose where natural (Implications, Evidence, or Context sections)</li>
+</ol>
+<p><strong>8 relationship types</strong> (pick the most accurate, prefer specific over generic):</p>
+<p>| Type | Meaning | |------|---------| | <code>related</code> | Generic association (default only if no better fit) | | <code>supports</code> | Provides evidence for the linked note | | <code>contradicts</code> | Conflicts with the linked note | | <code>extends</code> | Builds upon the linked note | | <code>part-of</code> | Component of a larger whole | | <code>instance-of</code> | Example of a pattern | | <code>caused-by</code> | Result of the linked note | | <code>preceded-by</code> | Came before temporally |</p>
+<p><strong>Frontmatter format:</strong></p>
+<pre><code>related:
+  - slug: other-note-slug
+    type: extends
+  - slug: another-note-slug
+    type: supports</code></pre>
+<p><strong>How to find related notes before writing:</strong></p>
+<pre><code># By topic/keyword
+rg -l &quot;TOPIC&quot; ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/ --type md
+
+# By tag overlap
+rg &quot;^tags:.*TAG&quot; ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/ --type md -l
+
+# For People/Companies — grep by name
+rg -l &quot;Person Name&quot; ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/</code></pre>
+<p><strong>Enforcement:</strong></p>
+<ul>
+<li>Writes that skip <code>related:</code> are incomplete and must be fixed before the skill/workflow returns success</li>
+<li>The <code>ingest</code> workflow runs this as part of the ripple pass</li>
+<li>The Algorithm LEARN phase includes this in its knowledge capture step</li>
+<li>All agents writing Knowledge entries must follow this rule — it is part of the schema, not an optional enhancement</li>
+</ul>
+<hr>
+<h3>harvest</h3>
+<p>Run the KnowledgeHarvester to pull new knowledge from all LifeOS sources:</p>
+<pre><code>bun ~/.claude/LIFEOS/TOOLS/KnowledgeHarvester.ts harvest</code></pre>
+<p>Display results. If nothing was harvested, explain that sources are already up to date.</p>
+<p>Optionally accept <code>--source</code> filter: <code>/knowledge harvest work</code> or <code>/knowledge harvest memory</code>.</p>
+<hr>
+<h3>develop</h3>
+<p>The weekly gardening workflow. Surface seedling notes that are ready for enrichment.</p>
+<p><strong>Step 1 — Find seedlings:</strong></p>
+<pre><code>rg &quot;^status: seedling&quot; ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/ --type md -l</code></pre>
+<p><strong>Step 2 — For each seedling:</strong></p>
+<ul>
+<li>Read the note</li>
+<li>Read related notes (follow wikilinks, search for same tags)</li>
+<li>Check if newer WORK/ ISAs or auto-memory entries have relevant context</li>
+<li>Enrich the note: add context, suggest wikilinks, flesh out content</li>
+</ul>
+<p><strong>Step 3 — Present the diff to the user for approval.</strong></p>
+<p><strong>Step 4 — If approved:</strong></p>
+<ul>
+<li>Write the updated note</li>
+<li>Promote status from <code>seedling</code> to <code>budding</code> (or <code>evergreen</code> if comprehensive)</li>
+<li>Update the <code>updated</code> date</li>
+<li>Regenerate affected MOCs</li>
+</ul>
+<p>If no seedlings exist, report archive is clean.</p>
+<hr>
+<h3>ingest &lt;url-or-file&gt;</h3>
+<p>Ingest a source into the Knowledge Archive. This is the key Karpathy-inspired upgrade: reading a source doesn't just create one note — it <strong>ripples updates through existing related notes</strong>.</p>
+<p><strong>If no argument provided:</strong> Show usage: <code>/knowledge ingest &lt;url-or-file-path&gt;</code></p>
+<h4>Step 1 — Fetch the source</h4>
+<ul>
+<li><strong>URL:</strong> Use WebFetch to retrieve and read the content. If WebFetch fails, try <code>curl -sL</code> via Bash.</li>
+<li><strong>File path:</strong> Use Read tool to read the local file.</li>
+</ul>
+<p>Summarize the source in 2-3 sentences. Identify key entities, claims, and insights.</p>
+<h4>Step 2 — Classify and create primary note</h4>
+<p>Determine entity type (People, Companies, Ideas, or Research) using the classification rules in <code>_schema.md</code>. Most ingested sources become Ideas.</p>
+<p>Create the primary note using the schema for that type:</p>
+<ul>
+<li>Generate kebab-case slug from title (max 60 chars)</li>
+<li>Write to <code>KNOWLEDGE/&lt;Type&gt;/&lt;slug&gt;.md</code> with proper frontmatter</li>
+<li>Include <code>source_url:</code> or <code>source_path:</code> in frontmatter</li>
+<li><strong>MANDATORY: Include <code>related:</code> array with 2-4 typed links</strong> — the ripple pass (Step 3) identifies these, and they must be baked into the frontmatter of the primary note at creation time, not added after</li>
+</ul>
+<h4>Step 3 — Ripple pass (the key innovation)</h4>
+<p>Search for existing notes that relate to this new content:</p>
+<pre><code># Search by extracted tags
+rg -i &quot;TAG1|TAG2|TAG3&quot; ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/ --type md -l --glob '!_*'
+
+# Search by key entities/concepts mentioned
+rg -i &quot;ENTITY1|ENTITY2&quot; ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/ --type md -l --glob '!_*'</code></pre>
+<p>For each related note found (up to 10):</p>
+<ol>
+<li>Read the note</li>
+<li>Determine if the new source adds information, context, or contradicts existing claims</li>
+<li>If yes, propose the specific update (add wikilink, add evidence, note contradiction)</li>
+</ol>
+<p><strong>Present the ripple plan to the user:</strong></p>
+<pre><code>📥 INGEST RIPPLE PLAN:
+  PRIMARY: Ideas/new-note-slug — &quot;Title&quot; (created)
+  PRIMARY related: frontmatter links (MANDATORY):
+    → Ideas/existing-note-1 — type: extends
+    → Ideas/existing-note-2 — type: supports
+    → People/person-slug — type: related
+  RIPPLE (reverse-direction updates to existing notes):
+    → Ideas/existing-note-1 — add body [[new-note-slug]] wikilink + add to its related: array (type: extends)
+    → Ideas/existing-note-2 — update Evidence section with new data point + add to related:
+    → Ideas/existing-note-3 — ⚠️ CONTRADICTION: new source says X, note says Y — type: contradicts
+  NO CHANGE: Ideas/tangentially-related — mentioned same tag but no substantive connection</code></pre>
+<h4>Step 4 — Execute ripple updates</h4>
+<p>After the user approves (or you determine updates are low-risk cross-references):</p>
+<ul>
+<li><strong>Primary note</strong>: ensure <code>related:</code> frontmatter array has 2-4 typed entries — this is mandatory, not optional</li>
+<li><strong>Related notes</strong>: add reverse-direction <code>related:</code> entries to their frontmatter with appropriate types</li>
+<li><strong>Body wikilinks</strong>: add <code>[[wikilinks]]</code> in existing prose where natural (not forced)</li>
+<li>Update <code>updated:</code> date on modified notes</li>
+<li>For contradictions: add a <code>&gt; ⚠️ <strong>Contradiction:</strong> [note] claims X — see [[new-note]] for counter-evidence</code> callout, AND add <code>type: contradicts</code> in related: arrays</li>
+</ul>
+<h4>Step 5 — Log and index</h4>
+<p>Append to <code>KNOWLEDGE/_log.md</code>:</p>
+<pre><code>## [YYYY-MM-DD] ingest | Title
+- Source: &lt;url or path&gt;
+- Primary: &lt;Type&gt;/&lt;slug&gt;
+- Ripple: N notes updated, N contradictions flagged</code></pre>
+<p>Regenerate MOCs:</p>
+<pre><code>bun ~/.claude/LIFEOS/TOOLS/KnowledgeHarvester.ts index</code></pre>
+<p>Present in NATIVE mode.</p>
+<hr>
+<h3>contradictions</h3>
+<p>Find and review conflicting claims across Knowledge notes.</p>
+<h4>Step 1 — Get contradiction candidates</h4>
+<p>Run the KnowledgeHarvester contradiction finder:</p>
+<pre><code>bun ~/.claude/LIFEOS/TOOLS/KnowledgeHarvester.ts contradictions</code></pre>
+<p>This outputs pairs of notes with high tag overlap (2+ shared tags), ranked by overlap count.</p>
+<h4>Step 2 — Semantic review</h4>
+<p>For each pair (up to 10 highest-overlap pairs):</p>
+<ol>
+<li>Read both notes</li>
+<li>Extract key claims from each (Thesis, Evidence, Key Facts sections)</li>
+<li>Check for:</li>
+</ol>
+<ul>
+<li><strong>Direct contradictions</strong> — Note A says X, Note B says not-X</li>
+<li><strong>Temporal supersession</strong> — Note A's claim is outdated by Note B's newer evidence</li>
+<li><strong>Scope conflicts</strong> — Both claim authority on the same topic but reach different conclusions</li>
+</ul>
+<h4>Step 3 — Report</h4>
+<p>Present findings:</p>
+<pre><code>🔍 CONTRADICTION SCAN:
+  Pairs checked: N
+  Contradictions found: N
+  Superseded claims: N
+
+  ⚠️ CONTRADICTION:
+    [[note-a]] claims: &quot;X&quot;
+    [[note-b]] claims: &quot;Y&quot;
+    Resolution: [suggest which is correct, or flag for the user]
+
+  📅 SUPERSEDED:
+    [[older-note]] (2026-01-15): &quot;X was true&quot;
+    [[newer-note]] (2026-03-20): &quot;X is no longer true because Y&quot;
+    Action: Update older note with correction</code></pre>
+<h4>Step 4 — Fix (with approval)</h4>
+<p>If the user approves resolutions:</p>
+<ul>
+<li>Update contradicted notes with correction callouts</li>
+<li>Update superseded notes with <code>&gt; 📅 <strong>Updated:</strong> See [[newer-note]] for current information</code></li>
+<li>Update <code>updated:</code> dates</li>
+<li>Regenerate MOCs</li>
+</ul>
+<p>Present in NATIVE mode.</p>
+<hr>
+<h3>graph [slug]</h3>
+<p>Navigate the Knowledge Archive as a graph.</p>
+<p><strong>No argument — stats overview:</strong></p>
+<pre><code>bun ~/.claude/LIFEOS/TOOLS/KnowledgeGraph.ts stats</code></pre>
+<p>Show node count, edge count, top clusters, most connected hubs, and isolated nodes.</p>
+<p><strong>With slug — traverse from a note:</strong></p>
+<pre><code>bun ~/.claude/LIFEOS/TOOLS/KnowledgeGraph.ts traverse &lt;slug&gt; --hops 2</code></pre>
+<p>Show all notes connected within 2 hops via tags, wikilinks, and typed relationships. Useful for exploring how knowledge connects across domains.</p>
+<p><strong>Related notes only:</strong></p>
+<pre><code>bun ~/.claude/LIFEOS/TOOLS/KnowledgeGraph.ts related &lt;slug&gt;</code></pre>
+<p>Present in NATIVE mode.</p>
+<hr>
+<h3>retrieve &lt;query&gt;</h3>
+<p>Compressed context retrieval over the Knowledge Archive using BM25-lite scoring.</p>
+<pre><code>bun ~/.claude/LIFEOS/TOOLS/MemoryRetriever.ts &quot;&lt;query&gt;&quot; --top 5</code></pre>
+<p>Returns the top matching notes with compressed summaries, ranked by title match, tag overlap, and content frequency. Useful for loading relevant knowledge context without reading full files.</p>
+<p>For raw excerpts without LLM compression:</p>
+<pre><code>bun ~/.claude/LIFEOS/TOOLS/MemoryRetriever.ts &quot;&lt;query&gt;&quot; --raw</code></pre>
+<p>Present in NATIVE mode.</p>
+<hr>
+<h3>mine</h3>
+<p>Mine recent conversations for memory candidates (decisions, preferences, milestones, problems).</p>
+<pre><code>bun ~/.claude/LIFEOS/TOOLS/SessionHarvester.ts --mine --recent 10</code></pre>
+<p>Candidates are written to <code>KNOWLEDGE/_harvest-queue/</code> for review — never directly to KNOWLEDGE/. Use <code>/knowledge harvest</code> to process the queue.</p>
+<p>For dry run (preview only):</p>
+<pre><code>bun ~/.claude/LIFEOS/TOOLS/SessionHarvester.ts --mine --recent 10 --dry-run</code></pre>
+<p>Present in NATIVE mode.</p>
+<hr>
+<h3>Gotchas</h3>
+<ul>
+<li><strong>4 entity types now.</strong> People (human beings), Companies (organizations), Ideas (insights/theses/analyses), Research (multi-source investigations with methodology). If it doesn't fit one of these, it's not knowledge — it belongs in WORK/ or LEARNING/.</li>
+<li><strong>Topic = tag, not domain.</strong> A security insight is an Idea with a <code>security</code> tag. Never create topic-based folders.</li>
+<li><strong>The lookup test.</strong> &quot;Would the user look this up by name?&quot; — if not, it's not knowledge.</li>
+<li><strong>Schema enforcement.</strong> Each entity type has required fields defined in <code>_schema.md</code>. Always read the schema before writing.</li>
+<li><strong>Algorithm LEARN phase writes directly.</strong> The LEARN phase has the best context — it writes to KNOWLEDGE/ with proper schemas. Harvester reflections are disabled.</li>
+<li><strong>Never delete notes without asking.</strong> Pruning is automatic (90-day seedling expiry via harvester). Manual deletion requires the user's approval.</li>
+<li><strong>Wikilinks use strict kebab-case.</strong> <code>[[prompt-injection]]</code> not <code>[[Prompt Injection]]</code>.</li>
+<li><strong>All harvested notes start as seedlings.</strong> Only <code>/knowledge develop</code> promotes them.</li>
+<li><strong>Temporal validity is optional.</strong> Notes can have <code>valid_from</code>/<code>valid_until</code> frontmatter fields to track when facts were true. The contradiction detector uses these to skip non-overlapping time windows.</li>
+</ul>
+<h3>Examples</h3>
+<p><strong>Example 1: Search the archive</strong></p>
+<pre><code>User: &quot;what do we know about prompt injection?&quot;
+→ Routes to search — 3-pass (lexical + frontmatter + wikilink) over MEMORY/KNOWLEDGE/
+→ Returns table of matching notes with domain, status, tags</code></pre>
+<p><strong>Example 2: Ingest a source</strong></p>
+<pre><code>User: &quot;/knowledge ingest https://example.com/article&quot;
+→ Fetches the source, classifies entity type, creates primary note with typed related: links
+→ Ripple pass proposes updates to existing related notes; user approves; MOCs regenerated</code></pre>
+<p><strong>Example 3: Status check</strong></p>
+<pre><code>User: &quot;knowledge status&quot;
+→ Runs KnowledgeHarvester.ts status
+→ Shows domain note counts, orphan wikilinks, stale seedlings, time since last harvest</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: Knowledge\ndisplay_name: Knowledge\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# Knowledge - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `Knowledge` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nManage the LifeOS Knowledge Archive — a curated, typed graph of notes across four entity domains: People, Companies, Ideas, and Research. Operations: search, add, harvest, develop, ingest (with ripple updates to related\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose Knowledge, then write the task. Fallback prompt: Use the Knowledge skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `Knowledge` |\n| Canonical name | `Knowledge` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nManage the LifeOS Knowledge Archive — a curated, typed graph of notes across four entity domains: People, Companies, Ideas, and Research. Operations: search, add, harvest, develop, ingest (with ripple updates to related\n\n\n## Original SKILL.md\n\n---\nname: Knowledge\ndescription: \"Manage the LifeOS Knowledge Archive — a curated, typed graph of notes across four entity domains: People, Companies, Ideas, and Research. Operations: search, add, harvest, develop, ingest (with ripple updates to related notes), contradictions, graph, retrieve, mine. Every note ships with typed `related:` frontmatter links across 8 relationship types. USE WHEN knowledge, knowledge base, search knowledge, what do we know about, archive, harvest, knowledge status, develop note, add to knowledge, ingest, contradictions, knowledge graph, retrieve, mine conversations. NOT FOR session/ISA context recovery (use ContextSearch), published content semantic search across blog/newsletter/X/LinkedIn (use _CONTENTSEARCH), or one-shot URL/YouTube ingestion via the Arbol harvester pipeline (use _HARVEST).\"\nargument-hint: [search|add|harvest|develop|ingest|contradictions|graph|retrieve|mine|\u003cquery>]\neffort: low\ncontext: fork\n---\n\n# Knowledge Skill\n\n## What It Does\n\nManage the LifeOS Knowledge Archive — a curated, typed graph of notes across four entity domains: People, Companies, Ideas, and Research. Operations cover search, add, harvest, develop, ingest, contradiction-finding, graph traversal, compressed retrieval, and mining recent conversations for memory candidates. Every note ships with typed `related:` cross-links, so the archive is a connected graph, not a pile of files.\n\n## The Problem\n\nNotes you save in isolation are notes you never find again. A flat folder of facts has no way to tell you that two notes contradict each other, that a new source updates an old claim, or that an idea connects to a person and a company you wrote up months ago. Knowledge dies when it can't be retrieved or related. This archive forces every note into a typed schema with mandatory cross-links and ripples updates through related notes on ingest, so the connections are built in at write time instead of being reconstructed by hand later.\n\n## How It Works\n\nManage the LifeOS Knowledge Archive at `~/.claude/LIFEOS/MEMORY/KNOWLEDGE/`. Each operation routes through a subcommand below; notes follow the archive schema and ship with typed cross-links.\n\n**Archive schema:** `~/.claude/LIFEOS/MEMORY/KNOWLEDGE/_schema.md`\n\n## Workflow Routing\n\nWorkflows are inline command sections in this file (no Workflows/ dir); each row routes to the matching H2 section below.\n\n| Trigger | Workflow | Action |\n|---------|----------|--------|\n| `/knowledge` (no args) | **status** | Health dashboard |\n| `/knowledge \u003cquery>` | **search** | Search for notes matching query |\n| `/knowledge search \u003cquery>` | **search** | Explicit search |\n| `/knowledge add \u003ctype>` | **add** | Create a new note (People, Companies, or Ideas) |\n| `/knowledge harvest` | **harvest** | Run KnowledgeHarvester on all sources |\n| `/knowledge develop` | **develop** | Surface seedlings and enrich them |\n| `/knowledge ingest \u003curl-or-file>` | **ingest** | Read source, create note, ripple updates to related notes |\n| `/knowledge contradictions` | **contradictions** | Find and review conflicting claims across notes |\n| `/knowledge graph` | **graph** | Knowledge graph stats and navigation |\n| `/knowledge graph \u003cslug>` | **graph** | Traverse graph from a note |\n| `/knowledge retrieve \u003cquery>` | **retrieve** | Compressed context retrieval |\n| `/knowledge mine` | **mine** | Mine recent conversations for memory candidates |\n\nIf `$ARGUMENTS` doesn't match a subcommand, treat it as a search query.\n\n---\n\n## status (default, no args)\n\nRun the harvester status command and display results:\n\n```bash\nbun ~/.claude/LIFEOS/TOOLS/KnowledgeHarvester.ts status\n```\n\nAlso show:\n- Quick summary of domains with note counts\n- Any orphan wikilinks\n- Any stale seedlings\n- Time since last harvest\n\nPresent in NATIVE mode.\n\n---\n\n## search \u003cquery>\n\nSearch the Knowledge Archive for notes matching `$ARGUMENTS`.\n\n**Step 1 — Lexical search:**\n```bash\nrg -i \"$ARGUMENTS\" ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/ --type md -l\n```\n\n**Step 2 — Frontmatter search (tags and titles):**\n```bash\nrg -i \"title:.*$ARGUMENTS|tags:.*$ARGUMENTS\" ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/ --type md -l\n```\n\n**Step 3 — Wikilink search:**\n```bash\nrg \"\\[\\[.*$ARGUMENTS.*\\]\\]\" ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/ --type md -l\n```\n\nDeduplicate results across all three. For each match, read the first 5 lines of frontmatter to show title, domain, status, tags.\n\nPresent results as a table:\n```\n| Note | Domain | Status | Tags | Relevance |\n```\n\nIf no results found, say so and suggest checking the full MEMORY/ system or running a harvest.\n\n---\n\n## add \u003ctype>\n\nCreate a new note manually in the specified entity type.\n\n1. Validate type is one of: People, Companies, Ideas, Research\n2. Ask for a title (or use remaining args after type)\n3. Generate kebab-case filename from title\n4. **MANDATORY: Find 2-3 related notes first.** Before writing the new note, grep existing Knowledge for related entities by topic/tags/name. This becomes the `related:` frontmatter array. No Knowledge note ships without typed links. See Canonical Linking Requirement below.\n5. Create the note with proper frontmatter from `_schema.md` — schemas require: `title`, `type`, `tags` (min 1), `created`, `updated`, `quality` (0-10), plus type-specific body sections.\n6. Write the file to `KNOWLEDGE/\u003cType>/\u003ckebab-case-title>.md` — slug max 60 chars\n7. Verify every slug in `related:` exists in the archive before saving\n8. Regenerate the type's MOC:\n```bash\nbun ~/.claude/LIFEOS/TOOLS/KnowledgeHarvester.ts index\n```\n\n**Topic is a tag, not a type.** A security insight is an Idea with a `security` tag. A security company is a Company with a `security` tag. The entity type determines the schema; the tag determines the topic.\n\n## Canonical Linking Requirement (MANDATORY)\n\n**Every new Knowledge note must ship with typed cross-links.** This is not optional. The architecture is defined in `MEMORY/KNOWLEDGE/Ideas/pai-knowledge-linking-architecture.md` (quality 9) and the schema in `_schema.md`.\n\n**Every write must include:**\n\n1. **`related:` frontmatter array** — 2-4 typed entries linking to other Knowledge entries (any domain: People, Companies, Ideas, Research)\n2. **Body wikilinks** — 1-3 `[[slug]]` references woven into the prose where natural (Implications, Evidence, or Context sections)\n\n**8 relationship types** (pick the most accurate, prefer specific over generic):\n\n| Type | Meaning |\n|------|---------|\n| `related` | Generic association (default only if no better fit) |\n| `supports` | Provides evidence for the linked note |\n| `contradicts` | Conflicts with the linked note |\n| `extends` | Builds upon the linked note |\n| `part-of` | Component of a larger whole |\n| `instance-of` | Example of a pattern |\n| `caused-by` | Result of the linked note |\n| `preceded-by` | Came before temporally |\n\n**Frontmatter format:**\n```yaml\nrelated:\n  - slug: other-note-slug\n    type: extends\n  - slug: another-note-slug\n    type: supports\n```\n\n**How to find related notes before writing:**\n```bash\n# By topic/keyword\nrg -l \"TOPIC\" ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/ --type md\n\n# By tag overlap\nrg \"^tags:.*TAG\" ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/ --type md -l\n\n# For People/Companies — grep by name\nrg -l \"Person Name\" ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/\n```\n\n**Enforcement:**\n- Writes that skip `related:` are incomplete and must be fixed before the skill/workflow returns success\n- The `ingest` workflow runs this as part of the ripple pass\n- The Algorithm LEARN phase includes this in its knowledge capture step\n- All agents writing Knowledge entries must follow this rule — it is part of the schema, not an optional enhancement\n\n---\n\n## harvest\n\nRun the KnowledgeHarvester to pull new knowledge from all LifeOS sources:\n\n```bash\nbun ~/.claude/LIFEOS/TOOLS/KnowledgeHarvester.ts harvest\n```\n\nDisplay results. If nothing was harvested, explain that sources are already up to date.\n\nOptionally accept `--source` filter: `/knowledge harvest work` or `/knowledge harvest memory`.\n\n---\n\n## develop\n\nThe weekly gardening workflow. Surface seedling notes that are ready for enrichment.\n\n**Step 1 — Find seedlings:**\n```bash\nrg \"^status: seedling\" ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/ --type md -l\n```\n\n**Step 2 — For each seedling:**\n- Read the note\n- Read related notes (follow wikilinks, search for same tags)\n- Check if newer WORK/ ISAs or auto-memory entries have relevant context\n- Enrich the note: add context, suggest wikilinks, flesh out content\n\n**Step 3 — Present the diff to the user for approval.**\n\n**Step 4 — If approved:**\n- Write the updated note\n- Promote status from `seedling` to `budding` (or `evergreen` if comprehensive)\n- Update the `updated` date\n- Regenerate affected MOCs\n\nIf no seedlings exist, report archive is clean.\n\n---\n\n## ingest \u003curl-or-file>\n\nIngest a source into the Knowledge Archive. This is the key Karpathy-inspired upgrade: reading a source doesn't just create one note — it **ripples updates through existing related notes**.\n\n**If no argument provided:** Show usage: `/knowledge ingest \u003curl-or-file-path>`\n\n### Step 1 — Fetch the source\n\n- **URL:** Use WebFetch to retrieve and read the content. If WebFetch fails, try `curl -sL` via Bash.\n- **File path:** Use Read tool to read the local file.\n\nSummarize the source in 2-3 sentences. Identify key entities, claims, and insights.\n\n### Step 2 — Classify and create primary note\n\nDetermine entity type (People, Companies, Ideas, or Research) using the classification rules in `_schema.md`. Most ingested sources become Ideas.\n\nCreate the primary note using the schema for that type:\n- Generate kebab-case slug from title (max 60 chars)\n- Write to `KNOWLEDGE/\u003cType>/\u003cslug>.md` with proper frontmatter\n- Include `source_url:` or `source_path:` in frontmatter\n- **MANDATORY: Include `related:` array with 2-4 typed links** — the ripple pass (Step 3) identifies these, and they must be baked into the frontmatter of the primary note at creation time, not added after\n\n### Step 3 — Ripple pass (the key innovation)\n\nSearch for existing notes that relate to this new content:\n\n```bash\n# Search by extracted tags\nrg -i \"TAG1|TAG2|TAG3\" ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/ --type md -l --glob '!_*'\n\n# Search by key entities/concepts mentioned\nrg -i \"ENTITY1|ENTITY2\" ~/.claude/LIFEOS/MEMORY/KNOWLEDGE/ --type md -l --glob '!_*'\n```\n\nFor each related note found (up to 10):\n1. Read the note\n2. Determine if the new source adds information, context, or contradicts existing claims\n3. If yes, propose the specific update (add wikilink, add evidence, note contradiction)\n\n**Present the ripple plan to the user:**\n```\n📥 INGEST RIPPLE PLAN:\n  PRIMARY: Ideas/new-note-slug — \"Title\" (created)\n  PRIMARY related: frontmatter links (MANDATORY):\n    → Ideas/existing-note-1 — type: extends\n    → Ideas/existing-note-2 — type: supports\n    → People/person-slug — type: related\n  RIPPLE (reverse-direction updates to existing notes):\n    → Ideas/existing-note-1 — add body [[new-note-slug]] wikilink + add to its related: array (type: extends)\n    → Ideas/existing-note-2 — update Evidence section with new data point + add to related:\n    → Ideas/existing-note-3 — ⚠️ CONTRADICTION: new source says X, note says Y — type: contradicts\n  NO CHANGE: Ideas/tangentially-related — mentioned same tag but no substantive connection\n```\n\n### Step 4 — Execute ripple updates\n\nAfter the user approves (or you determine updates are low-risk cross-references):\n- **Primary note**: ensure `related:` frontmatter array has 2-4 typed entries — this is mandatory, not optional\n- **Related notes**: add reverse-direction `related:` entries to their frontmatter with appropriate types\n- **Body wikilinks**: add `[[wikilinks]]` in existing prose where natural (not forced)\n- Update `updated:` date on modified notes\n- For contradictions: add a `> ⚠️ **Contradiction:** [note] claims X — see [[new-note]] for counter-evidence` callout, AND add `type: contradicts` in related: arrays\n\n### Step 5 — Log and index\n\nAppend to `KNOWLEDGE/_log.md`:\n```\n## [YYYY-MM-DD] ingest | Title\n- Source: \u003curl or path>\n- Primary: \u003cType>/\u003cslug>\n- Ripple: N notes updated, N contradictions flagged\n```\n\nRegenerate MOCs:\n```bash\nbun ~/.claude/LIFEOS/TOOLS/KnowledgeHarvester.ts index\n```\n\nPresent in NATIVE mode.\n\n---\n\n## contradictions\n\nFind and review conflicting claims across Knowledge notes.\n\n### Step 1 — Get contradiction candidates\n\nRun the KnowledgeHarvester contradiction finder:\n```bash\nbun ~/.claude/LIFEOS/TOOLS/KnowledgeHarvester.ts contradictions\n```\n\nThis outputs pairs of notes with high tag overlap (2+ shared tags), ranked by overlap count.\n\n### Step 2 — Semantic review\n\nFor each pair (up to 10 highest-overlap pairs):\n1. Read both notes\n2. Extract key claims from each (Thesis, Evidence, Key Facts sections)\n3. Check for:\n   - **Direct contradictions** — Note A says X, Note B says not-X\n   - **Temporal supersession** — Note A's claim is outdated by Note B's newer evidence\n   - **Scope conflicts** — Both claim authority on the same topic but reach different conclusions\n\n### Step 3 — Report\n\nPresent findings:\n```\n🔍 CONTRADICTION SCAN:\n  Pairs checked: N\n  Contradictions found: N\n  Superseded claims: N\n\n  ⚠️ CONTRADICTION:\n    [[note-a]] claims: \"X\"\n    [[note-b]] claims: \"Y\"\n    Resolution: [suggest which is correct, or flag for the user]\n\n  📅 SUPERSEDED:\n    [[older-note]] (2026-01-15): \"X was true\"\n    [[newer-note]] (2026-03-20): \"X is no longer true because Y\"\n    Action: Update older note with correction\n```\n\n### Step 4 — Fix (with approval)\n\nIf the user approves resolutions:\n- Update contradicted notes with correction callouts\n- Update superseded notes with `> 📅 **Updated:** See [[newer-note]] for current information`\n- Update `updated:` dates\n- Regenerate MOCs\n\nPresent in NATIVE mode.\n\n---\n\n## graph [slug]\n\nNavigate the Knowledge Archive as a graph.\n\n**No argument — stats overview:**\n```bash\nbun ~/.claude/LIFEOS/TOOLS/KnowledgeGraph.ts stats\n```\n\nShow node count, edge count, top clusters, most connected hubs, and isolated nodes.\n\n**With slug — traverse from a note:**\n```bash\nbun ~/.claude/LIFEOS/TOOLS/KnowledgeGraph.ts traverse \u003cslug> --hops 2\n```\n\nShow all notes connected within 2 hops via tags, wikilinks, and typed relationships. Useful for exploring how knowledge connects across domains.\n\n**Related notes only:**\n```bash\nbun ~/.claude/LIFEOS/TOOLS/KnowledgeGraph.ts related \u003cslug>\n```\n\nPresent in NATIVE mode.\n\n---\n\n## retrieve \u003cquery>\n\nCompressed context retrieval over the Knowledge Archive using BM25-lite scoring.\n\n```bash\nbun ~/.claude/LIFEOS/TOOLS/MemoryRetriever.ts \"\u003cquery>\" --top 5\n```\n\nReturns the top matching notes with compressed summaries, ranked by title match, tag overlap, and content frequency. Useful for loading relevant knowledge context without reading full files.\n\nFor raw excerpts without LLM compression:\n```bash\nbun ~/.claude/LIFEOS/TOOLS/MemoryRetriever.ts \"\u003cquery>\" --raw\n```\n\nPresent in NATIVE mode.\n\n---\n\n## mine\n\nMine recent conversations for memory candidates (decisions, preferences, milestones, problems).\n\n```bash\nbun ~/.claude/LIFEOS/TOOLS/SessionHarvester.ts --mine --recent 10\n```\n\nCandidates are written to `KNOWLEDGE/_harvest-queue/` for review — never directly to KNOWLEDGE/. Use `/knowledge harvest` to process the queue.\n\nFor dry run (preview only):\n```bash\nbun ~/.claude/LIFEOS/TOOLS/SessionHarvester.ts --mine --recent 10 --dry-run\n```\n\nPresent in NATIVE mode.\n\n---\n\n## Gotchas\n\n- **4 entity types now.** People (human beings), Companies (organizations), Ideas (insights/theses/analyses), Research (multi-source investigations with methodology). If it doesn't fit one of these, it's not knowledge — it belongs in WORK/ or LEARNING/.\n- **Topic = tag, not domain.** A security insight is an Idea with a `security` tag. Never create topic-based folders.\n- **The lookup test.** \"Would the user look this up by name?\" — if not, it's not knowledge.\n- **Schema enforcement.** Each entity type has required fields defined in `_schema.md`. Always read the schema before writing.\n- **Algorithm LEARN phase writes directly.** The LEARN phase has the best context — it writes to KNOWLEDGE/ with proper schemas. Harvester reflections are disabled.\n- **Never delete notes without asking.** Pruning is automatic (90-day seedling expiry via harvester). Manual deletion requires the user's approval.\n- **Wikilinks use strict kebab-case.** `[[prompt-injection]]` not `[[Prompt Injection]]`.\n- **All harvested notes start as seedlings.** Only `/knowledge develop` promotes them.\n- **Temporal validity is optional.** Notes can have `valid_from`/`valid_until` frontmatter fields to track when facts were true. The contradiction detector uses these to skip non-overlapping time windows.\n\n## Examples\n\n**Example 1: Search the archive**\n```\nUser: \"what do we know about prompt injection?\"\n→ Routes to search — 3-pass (lexical + frontmatter + wikilink) over MEMORY/KNOWLEDGE/\n→ Returns table of matching notes with domain, status, tags\n```\n\n**Example 2: Ingest a source**\n```\nUser: \"/knowledge ingest https://example.com/article\"\n→ Fetches the source, classifies entity type, creates primary note with typed related: links\n→ Ripple pass proposes updates to existing related notes; user approves; MOCs regenerated\n```\n\n**Example 3: Status check**\n```\nUser: \"knowledge status\"\n→ Runs KnowledgeHarvester.ts status\n→ Shows domain note counts, orphan wikilinks, stale seedlings, time since last harvest\n```\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("knowledge-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

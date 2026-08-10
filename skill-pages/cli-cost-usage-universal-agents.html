@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>cli-cost-usage - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/cli-cost-usage-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>cli-cost-usage</h1>
+      <p class="description">View cost breakdowns, token usage, and call logs from the CLI. Filter by provider, model, or date range. Export usage reports and inspect per-connection spending.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>cli-cost-usage</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>cli-cost-usage</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>View cost breakdowns, token usage, and call logs from the CLI. Filter by provider, model, or date range. Export usage reports and inspect per-connection spending.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the cli-cost-usage skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <p>&lt;!-- generated by src/lib/agentSkills/generator.ts; manual edits will be overwritten --&gt;</p>
+<h3>Overview</h3>
+<p>View cost breakdowns, token usage, and call logs from the CLI. Filter by provider, model, or date range. Export usage reports and inspect per-connection spending.</p>
+<h3>Quick install</h3>
+<pre><code>npm install -g omniroute   # or: npx omniroute
+omniroute --version</code></pre>
+<h3>Subcommands</h3>
+<h4><code>cost</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--period &lt;range&gt;</code></li>
+<li><code>--since &lt;date&gt;</code></li>
+<li><code>--until &lt;date&gt;</code></li>
+<li><code>--group-by &lt;field&gt;</code></li>
+<li><code>--api-key &lt;key&gt;</code></li>
+<li><code>--limit &lt;n&gt;</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute cost</code></pre>
+<h4><code>pricing</code></h4>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute pricing</code></pre>
+<h4><code>pricing sync</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--provider &lt;p&gt;</code></li>
+<li><code>--force</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute pricing sync</code></pre>
+<h4><code>pricing list</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--provider &lt;p&gt;</code></li>
+<li><code>--model &lt;m&gt;</code></li>
+<li><code>--limit &lt;n&gt;</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute pricing list</code></pre>
+<h4><code>pricing get &lt;model&gt;</code></h4>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute pricing get &lt;model&gt;</code></pre>
+<h4><code>pricing defaults</code></h4>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute pricing defaults</code></pre>
+<h4><code>pricing show</code></h4>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute pricing show</code></pre>
+<h4><code>pricing set</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--input &lt;p&gt;</code></li>
+<li><code>--output &lt;p&gt;</code></li>
+<li><code>--cache-read &lt;p&gt;</code></li>
+<li><code>--cache-write &lt;p&gt;</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute pricing set</code></pre>
+<h4><code>pricing diff</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--model &lt;m&gt;</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute pricing diff</code></pre>
+<h4><code>usage</code></h4>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute usage</code></pre>
+<h4><code>usage analytics</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--period &lt;range&gt;</code></li>
+<li><code>--provider &lt;id&gt;</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute usage analytics</code></pre>
+<h4><code>usage budget</code></h4>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute usage budget</code></pre>
+<h4><code>usage list</code></h4>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute usage list</code></pre>
+<h4><code>usage get [scope]</code></h4>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute usage get [scope]</code></pre>
+<h4><code>usage set &lt;amount&gt;</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--scope &lt;s&gt;</code></li>
+<li><code>--period &lt;p&gt;</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute usage set &lt;amount&gt;</code></pre>
+<h4><code>usage reset [scope]</code></h4>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute usage reset [scope]</code></pre>
+<h4><code>usage quota</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--provider &lt;id&gt;</code></li>
+<li><code>--check</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute usage quota</code></pre>
+<h4><code>usage logs</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--limit &lt;n&gt;</code></li>
+<li><code>--search &lt;q&gt;</code></li>
+<li><code>--since &lt;ts&gt;</code></li>
+<li><code>--follow</code></li>
+<li><code>--api-key &lt;k&gt;</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute usage logs</code></pre>
+<h4><code>usage utilization</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--api-key &lt;k&gt;</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute usage utilization</code></pre>
+<h4><code>usage history</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--limit &lt;n&gt;</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute usage history</code></pre>
+<h4><code>usage proxy-logs</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--limit &lt;n&gt;</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute usage proxy-logs</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: cli-cost-usage\ndisplay_name: cli-cost-usage\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# cli-cost-usage - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `cli-cost-usage` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nView cost breakdowns, token usage, and call logs from the CLI. Filter by provider, model, or date range. Export usage reports and inspect per-connection spending.\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the cli-cost-usage skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `cli-cost-usage` |\n| Canonical name | `cli-cost-usage` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\nView cost breakdowns, token usage, and call logs from the CLI. Filter by provider, model, or date range. Export usage reports and inspect per-connection spending.\n\n\n## Original SKILL.md\n\n---\nname: cli-cost-usage\ndescription: View cost breakdowns, token usage, and call logs from the CLI. Filter by provider, model, or date range. Export usage reports and inspect per-connection spending.\n---\n\u003c!-- generated by src/lib/agentSkills/generator.ts; manual edits will be overwritten -->\n\n## Overview\n\nView cost breakdowns, token usage, and call logs from the CLI. Filter by provider, model, or date range. Export usage reports and inspect per-connection spending.\n\n## Quick install\n\n```bash\nnpm install -g omniroute   # or: npx omniroute\nomniroute --version\n```\n\n## Subcommands\n\n### `cost`\n\n**Flags:**\n\n- `--period \u003crange>`\n- `--since \u003cdate>`\n- `--until \u003cdate>`\n- `--group-by \u003cfield>`\n- `--api-key \u003ckey>`\n- `--limit \u003cn>`\n\n**Example:**\n\n```bash\nomniroute cost\n```\n\n### `pricing`\n\n**Example:**\n\n```bash\nomniroute pricing\n```\n\n### `pricing sync`\n\n**Flags:**\n\n- `--provider \u003cp>`\n- `--force`\n\n**Example:**\n\n```bash\nomniroute pricing sync\n```\n\n### `pricing list`\n\n**Flags:**\n\n- `--provider \u003cp>`\n- `--model \u003cm>`\n- `--limit \u003cn>`\n\n**Example:**\n\n```bash\nomniroute pricing list\n```\n\n### `pricing get \u003cmodel>`\n\n**Example:**\n\n```bash\nomniroute pricing get \u003cmodel>\n```\n\n### `pricing defaults`\n\n**Example:**\n\n```bash\nomniroute pricing defaults\n```\n\n### `pricing show`\n\n**Example:**\n\n```bash\nomniroute pricing show\n```\n\n### `pricing set`\n\n**Flags:**\n\n- `--input \u003cp>`\n- `--output \u003cp>`\n- `--cache-read \u003cp>`\n- `--cache-write \u003cp>`\n\n**Example:**\n\n```bash\nomniroute pricing set\n```\n\n### `pricing diff`\n\n**Flags:**\n\n- `--model \u003cm>`\n\n**Example:**\n\n```bash\nomniroute pricing diff\n```\n\n### `usage`\n\n**Example:**\n\n```bash\nomniroute usage\n```\n\n### `usage analytics`\n\n**Flags:**\n\n- `--period \u003crange>`\n- `--provider \u003cid>`\n\n**Example:**\n\n```bash\nomniroute usage analytics\n```\n\n### `usage budget`\n\n**Example:**\n\n```bash\nomniroute usage budget\n```\n\n### `usage list`\n\n**Example:**\n\n```bash\nomniroute usage list\n```\n\n### `usage get [scope]`\n\n**Example:**\n\n```bash\nomniroute usage get [scope]\n```\n\n### `usage set \u003camount>`\n\n**Flags:**\n\n- `--scope \u003cs>`\n- `--period \u003cp>`\n\n**Example:**\n\n```bash\nomniroute usage set \u003camount>\n```\n\n### `usage reset [scope]`\n\n**Example:**\n\n```bash\nomniroute usage reset [scope]\n```\n\n### `usage quota`\n\n**Flags:**\n\n- `--provider \u003cid>`\n- `--check`\n\n**Example:**\n\n```bash\nomniroute usage quota\n```\n\n### `usage logs`\n\n**Flags:**\n\n- `--limit \u003cn>`\n- `--search \u003cq>`\n- `--since \u003cts>`\n- `--follow`\n- `--api-key \u003ck>`\n\n**Example:**\n\n```bash\nomniroute usage logs\n```\n\n### `usage utilization`\n\n**Flags:**\n\n- `--api-key \u003ck>`\n\n**Example:**\n\n```bash\nomniroute usage utilization\n```\n\n### `usage history`\n\n**Flags:**\n\n- `--limit \u003cn>`\n\n**Example:**\n\n```bash\nomniroute usage history\n```\n\n### `usage proxy-logs`\n\n**Flags:**\n\n- `--limit \u003cn>`\n\n**Example:**\n\n```bash\nomniroute usage proxy-logs\n```\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("cli-cost-usage-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

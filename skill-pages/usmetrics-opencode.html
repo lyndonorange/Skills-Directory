@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>USMetrics - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/usmetrics-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>USMetrics</h1>
+      <p class="description">Analyze and update 68 US economic and social indicators from five government APIs (FRED, EIA, Treasury, BLS, Census) across 10 categories: GDP, Inflation, Employment, Housing, Consumer Finance, Markets, Trade, Government/Fiscal, Demographics, Health. Two workflows: UpdateData, GetCurrentState (10y/5y/2y/1y trend analysis). USE WHEN GDP, inflation, unemployment, economic metrics, gas prices, how is the economy, refresh data, FRED, US metrics, economic trends. NOT FOR pathogen surveillance.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>USMetrics</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>USMetrics</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Analyze and update 68 US economic and social indicators from five government APIs (FRED, EIA, Treasury, BLS, Census) across 10 categories: GDP, Inflation, Employment, Housing, Consumer Finance, Markets, Trade, Government/Fiscal, Demographics, Health. Two workflows: UpdateData, GetCurrentState (10y/5y/2y/1y trend analysis). USE WHEN GDP, inflation, unemployment, economic metrics, gas prices, how is the economy, refresh data, FRED, US metrics, economic trends. NOT FOR pathogen surveillance.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the USMetrics skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Customization</h3>
+<p><strong>Before executing, check for user customizations at:</strong> <code>~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/USMetrics/</code></p>
+<p>If this directory exists, load and apply any PREFERENCES.md, configurations, or resources found there. These override default behavior. If the directory does not exist, proceed with skill defaults.</p>
+<h3>🚨 MANDATORY: Voice Notification (REQUIRED BEFORE ANY ACTION)</h3>
+<p><strong>You MUST send this notification BEFORE doing anything else when this skill is invoked.</strong></p>
+<ol>
+<li><strong>Send voice notification</strong>:</li>
+</ol>
+<pre><code>   curl -s -X POST http://localhost:31337/notify \
+     -H &quot;Content-Type: application/json&quot; \
+     -d '{&quot;message&quot;: &quot;Running the WORKFLOWNAME workflow in the USMetrics skill to ACTION&quot;}' \
+     &gt; /dev/null 2&gt;&amp;1 &amp;</code></pre>
+<ol>
+<li><strong>Output text notification</strong>:</li>
+</ol>
+<pre><code>   Running the **WorkflowName** workflow in the **USMetrics** skill to ACTION...</code></pre>
+<p><strong>This is not optional. Execute this curl command immediately upon skill invocation.</strong></p>
+<h2>US Metrics - Economic &amp; Social Indicator Analysis</h2>
+<h3>What It Does</h3>
+<p>Pulls 68 US economic and social indicators from five government APIs (FRED, EIA, Treasury, BLS, Census) across 10 categories — GDP, Inflation, Employment, Housing, Consumer Finance, Markets, Trade, Government/Fiscal, Demographics, Health — and analyzes them. Two workflows: UpdateData fetches live values into the Substrate dataset; GetCurrentState produces a multi-timeframe (10y/5y/2y/1y) trend overview with cross-metric correlation, pattern detection, and research recommendations.</p>
+<h3>The Problem</h3>
+<p>The numbers that tell you how the economy is actually doing are scattered across five federal agencies, each with its own API, its own update cadence, and its own publication lag. Pulling &quot;how is the economy?&quot; together by hand means hitting FRED, EIA, Treasury, BLS, and Census separately, normalizing the results, and lining up trends across different timeframes — slow, error-prone, and easy to present stale or preliminary data as if it were final. This skill collects all 68 indicators into one dataset and reads the trends across four timeframes at once.</p>
+<h3>How It Works</h3>
+<p>It analyzes U.S. economic and social metrics using the Substrate US-Common-Metrics dataset and provides trend analysis, cross-metric correlation, pattern detection, and research recommendations. UpdateData must run first so the dataset is current; GetCurrentState then reads the dataset and computes the trends.</p>
+<h3>Data Source</h3>
+<p>All metrics sourced from:</p>
+<ul>
+<li><strong>Location:</strong> Configure your data directory path (e.g., <code>${LIFEOS_DIR}/data/US-Common-Metrics/</code>)</li>
+<li><strong>Master Document:</strong> <code>US-Common-Metrics.md</code> (68 metrics across 10 categories)</li>
+<li><strong>Source Documentation:</strong> <code>source.md</code> (full methodology)</li>
+<li><strong>Underlying APIs:</strong> FRED, EIA, Treasury FiscalData, BLS, Census, CDC, EPA</li>
+</ul>
+<h3>Workflow Routing</h3>
+<p><strong>When executing a workflow, output this notification directly:</strong></p>
+<pre><code>Running the **WorkflowName** workflow in the **USMetrics** skill to ACTION...</code></pre>
+<h4>Available Workflows</h4>
+<p>| Workflow | Trigger | File | |----------|---------|------| | <strong>UpdateData</strong> | &quot;Update metrics&quot;, &quot;refresh data&quot;, &quot;pull latest&quot;, &quot;update Substrate&quot; — fetch live data from APIs and update Substrate dataset | <code>Workflows/UpdateData.md</code> | | <strong>GetCurrentState</strong> | &quot;How is the economy?&quot;, &quot;economic overview&quot;, &quot;get current state&quot;, &quot;US metrics analysis&quot; — multi-timeframe trend overview | <code>Workflows/GetCurrentState.md</code> |</p>
+<h3>Workflows</h3>
+<h4>UpdateData</h4>
+<p><strong>Full documentation:</strong> <code>Workflows/UpdateData.md</code></p>
+<p><strong>Purpose:</strong> Fetch live data from FRED, EIA, Treasury APIs and populate the Substrate US-Common-Metrics dataset files. This must run before GetCurrentState to ensure data is current.</p>
+<p><strong>Execution:</strong></p>
+<pre><code>bun ${LIFEOS_SKILL_DIR}/Tools/UpdateSubstrateMetrics.ts</code></pre>
+<p><strong>Outputs:</strong></p>
+<ul>
+<li><code>US-Common-Metrics.md</code> - Updated with current values</li>
+<li><code>us-metrics-current.csv</code> - Machine-readable snapshot</li>
+<li><code>us-metrics-historical.csv</code> - Appended time series</li>
+</ul>
+<p><strong>Trigger phrases:</strong></p>
+<ul>
+<li>&quot;Update the US metrics&quot;</li>
+<li>&quot;Refresh the economic data&quot;</li>
+<li>&quot;Pull latest metrics&quot;</li>
+<li>&quot;Update Substrate dataset&quot;</li>
+</ul>
+<hr>
+<h4>GetCurrentState</h4>
+<p><strong>Full documentation:</strong> <code>Workflows/GetCurrentState.md</code></p>
+<p><strong>Produces:</strong> A comprehensive overview document analyzing:</p>
+<ul>
+<li>10-year, 5-year, 2-year, and 1-year trends for all major metrics</li>
+<li>Cross-category interplay analysis</li>
+<li>Pattern detection and anomalies</li>
+<li>Research recommendations</li>
+</ul>
+<p><strong>Trigger phrases:</strong></p>
+<ul>
+<li>&quot;How is the US economy doing?&quot;</li>
+<li>&quot;Give me an economic overview&quot;</li>
+<li>&quot;What's the current state of US metrics?&quot;</li>
+<li>&quot;Analyze economic trends&quot;</li>
+<li>&quot;US metrics report&quot;</li>
+</ul>
+<h3>Metric Categories Covered</h3>
+<ol>
+<li><strong>Economic Output &amp; Growth</strong> - GDP, industrial production, retail sales</li>
+<li><strong>Inflation &amp; Prices</strong> - CPI, PCE, gas prices, oil prices</li>
+<li><strong>Employment &amp; Labor</strong> - Unemployment, payrolls, jobless claims, quit rate</li>
+<li><strong>Housing</strong> - Home prices, mortgage rates, housing starts</li>
+<li><strong>Consumer &amp; Personal Finance</strong> - Sentiment, saving rate, credit</li>
+<li><strong>Financial Markets</strong> - Interest rates, Treasury yields, volatility</li>
+<li><strong>Trade &amp; International</strong> - Trade balance, USD index</li>
+<li><strong>Government &amp; Fiscal</strong> - Federal debt, budget deficit, spending</li>
+<li><strong>Demographics &amp; Social</strong> - Population, inequality, poverty</li>
+<li><strong>Health &amp; Crisis</strong> - Deaths of despair, air quality, life expectancy</li>
+</ol>
+<h3>API Keys Required</h3>
+<p>For live data fetching:</p>
+<ul>
+<li><code>FRED_API_KEY</code> - Federal Reserve Economic Data</li>
+<li><code>EIA_API_KEY</code> - Energy Information Administration</li>
+</ul>
+<h3>Tools</h3>
+<p>| Tool | Purpose | |------|---------| | <code>Tools/UpdateSubstrateMetrics.ts</code> | <strong>Primary</strong> - Fetch all metrics, update Substrate files | | <code>Tools/FetchFredSeries.ts</code> | Fetch historical data from FRED API | | <code>Tools/GenerateAnalysis.ts</code> | Generate analysis report from Substrate data |</p>
+<h3>Examples</h3>
+<pre><code>User: &quot;How is the US economy doing? Give me a full analysis.&quot;
+
+→ Invoke GetCurrentState workflow
+→ Fetch current + historical data for all metrics
+→ Calculate 10y/5y/2y/1y trends
+→ Analyze cross-metric correlations
+→ Identify patterns and anomalies
+→ Generate research recommendations
+→ Output comprehensive markdown report</code></pre>
+<h3>Output Format</h3>
+<p>The GetCurrentState workflow produces a structured markdown document:</p>
+<pre><code># US Economic State Analysis
+**Generated:** [timestamp]
+**Data Sources:** FRED, EIA, Treasury, BLS, Census
+
+## Executive Summary
+[Key findings in 3-5 bullets]
+
+## Trend Analysis by Category
+### Economic Output
+[10y/5y/2y/1y trends with analysis]
+...
+
+## Cross-Metric Analysis
+[Correlations, leading indicators, divergences]
+
+## Pattern Detection
+[Anomalies, regime changes, emerging trends]
+
+## Research Recommendations
+[Suggested areas for deeper investigation]</code></pre>
+<h3>Gotchas</h3>
+<ul>
+<li><strong>68 indicators from 5 agencies</strong> (FRED, EIA, Treasury, BLS, Census). Each has its own API rate limits and data freshness.</li>
+<li><strong>Economic data has publication lag.</strong> GDP is quarterly with revisions. Jobs data is monthly. Don't present preliminary data as final.</li>
+<li><strong>Cross-metric correlation is suggestive, not causal.</strong> Never claim one metric caused another.</li>
+</ul>
+<h3>Execution Log</h3>
+<p>After completing any workflow, append a single JSONL entry:</p>
+<pre><code>echo '{&quot;ts&quot;:&quot;'$(date -u +%Y-%m-%dT%H:%M:%SZ)'&quot;,&quot;skill&quot;:&quot;USMetrics&quot;,&quot;workflow&quot;:&quot;WORKFLOW_USED&quot;,&quot;input&quot;:&quot;8_WORD_SUMMARY&quot;,&quot;status&quot;:&quot;ok|error&quot;,&quot;duration_s&quot;:SECONDS}' &gt;&gt; ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl</code></pre>
+<p>Replace <code>WORKFLOW_USED</code> with the workflow executed, <code>8_WORD_SUMMARY</code> with a brief input description, and <code>SECONDS</code> with approximate wall-clock time. Log <code>status: &quot;error&quot;</code> if the workflow failed.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: USMetrics\ndisplay_name: USMetrics\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# USMetrics - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `USMetrics` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nAnalyze and update 68 US economic and social indicators from five government APIs (FRED, EIA, Treasury, BLS, Census) across 10 categories: GDP, Inflation, Employment, Housing, Consumer Finance, Markets, Trade, Government\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the USMetrics skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `USMetrics` |\n| Canonical name | `USMetrics` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\nAnalyze and update 68 US economic and social indicators from five government APIs (FRED, EIA, Treasury, BLS, Census) across 10 categories: GDP, Inflation, Employment, Housing, Consumer Finance, Markets, Trade, Government\n\n\n## Original SKILL.md\n\n---\nname: USMetrics\ndescription: \"Analyze and update 68 US economic and social indicators from five government APIs (FRED, EIA, Treasury, BLS, Census) across 10 categories: GDP, Inflation, Employment, Housing, Consumer Finance, Markets, Trade, Government/Fiscal, Demographics, Health. Two workflows: UpdateData, GetCurrentState (10y/5y/2y/1y trend analysis). USE WHEN GDP, inflation, unemployment, economic metrics, gas prices, how is the economy, refresh data, FRED, US metrics, economic trends. NOT FOR pathogen surveillance.\"\neffort: medium\n---\n\n## Customization\n\n**Before executing, check for user customizations at:**\n`~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/USMetrics/`\n\nIf this directory exists, load and apply any PREFERENCES.md, configurations, or resources found there. These override default behavior. If the directory does not exist, proceed with skill defaults.\n\n\n## 🚨 MANDATORY: Voice Notification (REQUIRED BEFORE ANY ACTION)\n\n**You MUST send this notification BEFORE doing anything else when this skill is invoked.**\n\n1. **Send voice notification**:\n   ```bash\n   curl -s -X POST http://localhost:31337/notify \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\"message\": \"Running the WORKFLOWNAME workflow in the USMetrics skill to ACTION\"}' \\\n     > /dev/null 2>&1 &\n   ```\n\n2. **Output text notification**:\n   ```\n   Running the **WorkflowName** workflow in the **USMetrics** skill to ACTION...\n   ```\n\n**This is not optional. Execute this curl command immediately upon skill invocation.**\n\n# US Metrics - Economic & Social Indicator Analysis\n\n## What It Does\n\nPulls 68 US economic and social indicators from five government APIs (FRED, EIA, Treasury, BLS, Census) across 10 categories — GDP, Inflation, Employment, Housing, Consumer Finance, Markets, Trade, Government/Fiscal, Demographics, Health — and analyzes them. Two workflows: UpdateData fetches live values into the Substrate dataset; GetCurrentState produces a multi-timeframe (10y/5y/2y/1y) trend overview with cross-metric correlation, pattern detection, and research recommendations.\n\n## The Problem\n\nThe numbers that tell you how the economy is actually doing are scattered across five federal agencies, each with its own API, its own update cadence, and its own publication lag. Pulling \"how is the economy?\" together by hand means hitting FRED, EIA, Treasury, BLS, and Census separately, normalizing the results, and lining up trends across different timeframes — slow, error-prone, and easy to present stale or preliminary data as if it were final. This skill collects all 68 indicators into one dataset and reads the trends across four timeframes at once.\n\n## How It Works\n\nIt analyzes U.S. economic and social metrics using the Substrate US-Common-Metrics dataset and provides trend analysis, cross-metric correlation, pattern detection, and research recommendations. UpdateData must run first so the dataset is current; GetCurrentState then reads the dataset and computes the trends.\n\n## Data Source\n\nAll metrics sourced from:\n- **Location:** Configure your data directory path (e.g., `${LIFEOS_DIR}/data/US-Common-Metrics/`)\n- **Master Document:** `US-Common-Metrics.md` (68 metrics across 10 categories)\n- **Source Documentation:** `source.md` (full methodology)\n- **Underlying APIs:** FRED, EIA, Treasury FiscalData, BLS, Census, CDC, EPA\n\n\n## Workflow Routing\n\n**When executing a workflow, output this notification directly:**\n\n```\nRunning the **WorkflowName** workflow in the **USMetrics** skill to ACTION...\n```\n\n### Available Workflows\n\n| Workflow | Trigger | File |\n|----------|---------|------|\n| **UpdateData** | \"Update metrics\", \"refresh data\", \"pull latest\", \"update Substrate\" — fetch live data from APIs and update Substrate dataset | `Workflows/UpdateData.md` |\n| **GetCurrentState** | \"How is the economy?\", \"economic overview\", \"get current state\", \"US metrics analysis\" — multi-timeframe trend overview | `Workflows/GetCurrentState.md` |\n\n## Workflows\n\n### UpdateData\n\n**Full documentation:** `Workflows/UpdateData.md`\n\n**Purpose:** Fetch live data from FRED, EIA, Treasury APIs and populate the Substrate US-Common-Metrics dataset files. This must run before GetCurrentState to ensure data is current.\n\n**Execution:**\n```bash\nbun ${LIFEOS_SKILL_DIR}/Tools/UpdateSubstrateMetrics.ts\n```\n\n**Outputs:**\n- `US-Common-Metrics.md` - Updated with current values\n- `us-metrics-current.csv` - Machine-readable snapshot\n- `us-metrics-historical.csv` - Appended time series\n\n**Trigger phrases:**\n- \"Update the US metrics\"\n- \"Refresh the economic data\"\n- \"Pull latest metrics\"\n- \"Update Substrate dataset\"\n\n---\n\n### GetCurrentState\n\n**Full documentation:** `Workflows/GetCurrentState.md`\n\n**Produces:** A comprehensive overview document analyzing:\n- 10-year, 5-year, 2-year, and 1-year trends for all major metrics\n- Cross-category interplay analysis\n- Pattern detection and anomalies\n- Research recommendations\n\n**Trigger phrases:**\n- \"How is the US economy doing?\"\n- \"Give me an economic overview\"\n- \"What's the current state of US metrics?\"\n- \"Analyze economic trends\"\n- \"US metrics report\"\n\n## Metric Categories Covered\n\n1. **Economic Output & Growth** - GDP, industrial production, retail sales\n2. **Inflation & Prices** - CPI, PCE, gas prices, oil prices\n3. **Employment & Labor** - Unemployment, payrolls, jobless claims, quit rate\n4. **Housing** - Home prices, mortgage rates, housing starts\n5. **Consumer & Personal Finance** - Sentiment, saving rate, credit\n6. **Financial Markets** - Interest rates, Treasury yields, volatility\n7. **Trade & International** - Trade balance, USD index\n8. **Government & Fiscal** - Federal debt, budget deficit, spending\n9. **Demographics & Social** - Population, inequality, poverty\n10. **Health & Crisis** - Deaths of despair, air quality, life expectancy\n\n## API Keys Required\n\nFor live data fetching:\n- `FRED_API_KEY` - Federal Reserve Economic Data\n- `EIA_API_KEY` - Energy Information Administration\n\n## Tools\n\n| Tool | Purpose |\n|------|---------|\n| `Tools/UpdateSubstrateMetrics.ts` | **Primary** - Fetch all metrics, update Substrate files |\n| `Tools/FetchFredSeries.ts` | Fetch historical data from FRED API |\n| `Tools/GenerateAnalysis.ts` | Generate analysis report from Substrate data |\n\n## Examples\n\n```\nUser: \"How is the US economy doing? Give me a full analysis.\"\n\n→ Invoke GetCurrentState workflow\n→ Fetch current + historical data for all metrics\n→ Calculate 10y/5y/2y/1y trends\n→ Analyze cross-metric correlations\n→ Identify patterns and anomalies\n→ Generate research recommendations\n→ Output comprehensive markdown report\n```\n\n## Output Format\n\nThe GetCurrentState workflow produces a structured markdown document:\n\n```markdown\n# US Economic State Analysis\n**Generated:** [timestamp]\n**Data Sources:** FRED, EIA, Treasury, BLS, Census\n\n## Executive Summary\n[Key findings in 3-5 bullets]\n\n## Trend Analysis by Category\n### Economic Output\n[10y/5y/2y/1y trends with analysis]\n...\n\n## Cross-Metric Analysis\n[Correlations, leading indicators, divergences]\n\n## Pattern Detection\n[Anomalies, regime changes, emerging trends]\n\n## Research Recommendations\n[Suggested areas for deeper investigation]\n```\n\n## Gotchas\n\n- **68 indicators from 5 agencies** (FRED, EIA, Treasury, BLS, Census). Each has its own API rate limits and data freshness.\n- **Economic data has publication lag.** GDP is quarterly with revisions. Jobs data is monthly. Don't present preliminary data as final.\n- **Cross-metric correlation is suggestive, not causal.** Never claim one metric caused another.\n\n## Execution Log\n\nAfter completing any workflow, append a single JSONL entry:\n\n```bash\necho '{\"ts\":\"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'\",\"skill\":\"USMetrics\",\"workflow\":\"WORKFLOW_USED\",\"input\":\"8_WORD_SUMMARY\",\"status\":\"ok|error\",\"duration_s\":SECONDS}' >> ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl\n```\n\nReplace `WORKFLOW_USED` with the workflow executed, `8_WORD_SUMMARY` with a brief input description, and `SECONDS` with approximate wall-clock time. Log `status: \"error\"` if the workflow failed.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("usmetrics-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>paperclip - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/paperclip-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>paperclip</h1>
+      <p class="description">&gt;</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>paperclip</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>paperclip</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>&gt;</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose paperclip, then write the task. Fallback prompt: Use the paperclip skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Paperclip Skill</h2>
+<p>You run in <strong>heartbeats</strong> — short execution windows triggered by Paperclip. Each heartbeat, you wake up, check your work, do something useful, and exit. You do not run continuously.</p>
+<h3>Terminology</h3>
+<p>In Paperclip, <strong>task</strong> and <strong>issue</strong> refer to the same work item. The UI may use &quot;task&quot; while APIs, database fields, route names, and older docs may still say &quot;issue&quot;; treat them as the same entity unless a local context explicitly distinguishes them.</p>
+<h3>Authentication</h3>
+<p>Env vars auto-injected: <code>PAPERCLIP_AGENT_ID</code>, <code>PAPERCLIP_COMPANY_ID</code>, <code>PAPERCLIP_API_URL</code>, <code>PAPERCLIP_RUN_ID</code>. Optional wake-context vars may also be present: <code>PAPERCLIP_TASK_ID</code> (issue/task that triggered this wake), <code>PAPERCLIP_WAKE_REASON</code> (why this run was triggered), <code>PAPERCLIP_WAKE_COMMENT_ID</code> (specific comment that triggered this wake), <code>PAPERCLIP_APPROVAL_ID</code>, <code>PAPERCLIP_APPROVAL_STATUS</code>, and <code>PAPERCLIP_LINKED_ISSUE_IDS</code> (comma-separated). For local adapters, <code>PAPERCLIP_API_KEY</code> is auto-injected as a short-lived run JWT. For sandbox-backed local adapters, the Bash/tool environment may receive <code>PAPERCLIP_API_URL</code> and <code>PAPERCLIP_API_KEY</code> for a run-scoped bridge instead of the host API directly; use those exact env vars from Bash/curl and do not assume the host port is reachable from browser or web tools. For non-local adapters, your operator should set <code>PAPERCLIP_API_KEY</code> in adapter config. All requests use <code>Authorization: Bearer $PAPERCLIP_API_KEY</code>. All endpoints under <code>/api</code>, all JSON. Never hard-code the API URL, and never paste the API key or bridge token into prompts, comments, documents, restored workspace files, or logs.</p>
+<p>Some adapters also inject <code>PAPERCLIP_WAKE_PAYLOAD_JSON</code> on comment-driven wakes. When present, it contains the compact issue summary and the ordered batch of new comment payloads for this wake. Use it first. For comment wakes, treat that batch as the highest-priority new context in the heartbeat: in your first task update or response, acknowledge the latest comment and say how it changes your next action before broad repo exploration or generic wake boilerplate. Only fetch the thread/comments API immediately when <code>fallbackFetchNeeded</code> is true or you need broader context than the inline batch provides.</p>
+<p>Manual local CLI mode (outside heartbeat runs): use <code>paperclipai agent local-cli &lt;agent-id-or-shortname&gt; --company-id &lt;company-id&gt;</code> to install Paperclip skills for Claude/Codex and print/export the required <code>PAPERCLIP_*</code> environment variables for that agent identity.</p>
+<p><strong>Run audit trail:</strong> You MUST include <code>-H 'X-Paperclip-Run-Id: $PAPERCLIP_RUN_ID'</code> on ALL API requests that modify issues (checkout, update, comment, create subtask, release). This links your actions to the current heartbeat run for traceability.</p>
+<h3>The Heartbeat Procedure</h3>
+<p>Follow these steps every time you wake up:</p>
+<p><strong>Scoped-wake fast path.</strong> If the user message includes a <strong>&quot;Paperclip Resume Delta&quot;</strong> or <strong>&quot;Paperclip Wake Payload&quot;</strong> section that names a specific issue, <strong>skip Steps 1–4 entirely</strong>. Go straight to <strong>Step 5 (Checkout)</strong> for that issue, then continue with Steps 6–9. The scoped wake already tells you which issue to work on — do NOT call <code>/api/agents/me</code>, do NOT fetch your inbox, do NOT pick work. Just checkout, read the wake context, do the work, and update.</p>
+<p><strong>Step 1 — Identity.</strong> If not already in context, <code>GET /api/agents/me</code> to get your id, companyId, role, chainOfCommand, and budget.</p>
+<p><strong>Step 2 — Approval follow-up (when triggered).</strong> If <code>PAPERCLIP_APPROVAL_ID</code> is set (or wake reason indicates approval resolution), review the approval first:</p>
+<ul>
+<li><code>GET /api/approvals/{approvalId}</code></li>
+<li><code>GET /api/approvals/{approvalId}/issues</code></li>
+<li>For each linked issue:</li>
+<li>close it (<code>PATCH</code> status to <code>done</code>) if the approval fully resolves requested work, or</li>
+<li>add a markdown comment explaining why it remains open and what happens next.</li>
+</ul>
+<p>Always include links to the approval and issue in that comment.</p>
+<p><strong>Step 3 — Get assignments.</strong> Prefer <code>GET /api/agents/me/inbox-lite</code> for the normal heartbeat inbox. It returns the compact assignment list you need for prioritization. Fall back to <code>GET /api/companies/{companyId}/issues?assigneeAgentId={your-agent-id}&amp;status=todo,in_progress,in_review,blocked</code> only when you need the full issue objects.</p>
+<p><strong>Step 4 — Pick work.</strong> Priority: <code>in_progress</code> → <code>in_review</code> (if woken by a comment on it — check <code>PAPERCLIP_WAKE_COMMENT_ID</code>) → <code>todo</code>. Skip <code>blocked</code> unless you can unblock.</p>
+<p>Overrides and special cases:</p>
+<ul>
+<li><code>PAPERCLIP_TASK_ID</code> set and assigned to you → prioritize that task first.</li>
+<li><code>PAPERCLIP_WAKE_REASON=issue_commented</code> with <code>PAPERCLIP_WAKE_COMMENT_ID</code> → read the comment, then checkout and address the feedback (applies to <code>in_review</code> too).</li>
+<li><code>PAPERCLIP_WAKE_REASON=issue_comment_mentioned</code> → read the comment thread first even if you're not the assignee. Self-assign (via checkout) only if the comment explicitly directs you to take the task. Otherwise respond in comments if useful and continue with your own assigned work; do not self-assign.</li>
+<li>Wake payload says <code>dependency-blocked interaction: yes</code> → the issue is still blocked for deliverable work. Do not try to unblock it. Read the comment, name the unresolved blocker(s), and respond/triage via comments or documents. Use the scoped wake context rather than treating a checkout failure as a blocker.</li>
+<li><strong>Blocked-task dedup:</strong> before touching a <code>blocked</code> task, check the thread. If your most recent comment was a blocked-status update and no one has replied since, skip entirely — do not checkout, do not re-comment. Only re-engage on new context (comment, status change, event wake).</li>
+<li>Nothing assigned and no valid mention handoff → exit the heartbeat.</li>
+</ul>
+<p><strong>Step 5 — Checkout.</strong> You MUST checkout before doing any work. Include the run ID header:</p>
+<pre><code>POST /api/issues/{issueId}/checkout
+Headers: Authorization: Bearer $PAPERCLIP_API_KEY, X-Paperclip-Run-Id: $PAPERCLIP_RUN_ID
+{ &quot;agentId&quot;: &quot;{your-agent-id}&quot;, &quot;expectedStatuses&quot;: [&quot;todo&quot;, &quot;backlog&quot;, &quot;blocked&quot;, &quot;in_review&quot;] }</code></pre>
+<p>If already checked out by you, returns normally. If owned by another agent: <code>409 Conflict</code> — stop, pick a different task. <strong>Never retry a 409.</strong></p>
+<p><strong>Step 6 — Understand context.</strong> Prefer <code>GET /api/issues/{issueId}/heartbeat-context</code> first. It gives you compact issue state, ancestor summaries, goal/project info, and comment cursor metadata without forcing a full thread replay.</p>
+<p>If <code>PAPERCLIP_WAKE_PAYLOAD_JSON</code> is present, inspect that payload before calling the API. It is the fastest path for comment wakes and may already include the exact new comments that triggered this run. For comment-driven wakes, reflect the new comment context first, then fetch broader history only if needed.</p>
+<p>Use comments incrementally:</p>
+<ul>
+<li>if <code>PAPERCLIP_WAKE_COMMENT_ID</code> is set, fetch that exact comment first with <code>GET /api/issues/{issueId}/comments/{commentId}</code></li>
+<li>if you already know the thread and only need updates, use <code>GET /api/issues/{issueId}/comments?after={last-seen-comment-id}&amp;order=asc</code></li>
+<li>use the full <code>GET /api/issues/{issueId}/comments</code> route only when cold-starting or when incremental isn't enough</li>
+</ul>
+<p>Read enough ancestor/comment context to understand _why_ the task exists and what changed. Do not reflexively reload the whole thread on every heartbeat.</p>
+<p><strong>Execution-policy review/approval wakes.</strong> If the issue is <code>in_review</code> with <code>executionState</code>, inspect <code>currentStageType</code>, <code>currentParticipant</code>, <code>returnAssignee</code>, and <code>lastDecisionOutcome</code>.</p>
+<p>If <code>currentParticipant</code> matches you, submit your decision via the normal update route — there is no separate execution-decision endpoint:</p>
+<ul>
+<li>Approve: <code>PATCH /api/issues/{issueId}</code> with <code>{ &quot;status&quot;: &quot;done&quot;, &quot;comment&quot;: &quot;Approved: …&quot; }</code>. If more stages remain, Paperclip keeps the issue in <code>in_review</code> and reassigns it to the next participant automatically.</li>
+<li>Request changes: <code>PATCH</code> with <code>{ &quot;status&quot;: &quot;in_progress&quot;, &quot;comment&quot;: &quot;Changes requested: …&quot; }</code>. Paperclip converts this into a changes-requested decision and reassigns to <code>returnAssignee</code>.</li>
+</ul>
+<p>If <code>currentParticipant</code> does not match you, do not try to advance the stage — Paperclip will reject other actors with <code>422</code>.</p>
+<p><strong>Step 7 — Do the work.</strong> Use your tools and capabilities. Execution contract:</p>
+<ul>
+<li>If the issue is actionable, start concrete work in the same heartbeat. Do not stop at a plan unless the issue specifically asks for planning.</li>
+<li>Leave durable progress in comments, issue documents, or work products, then update the issue state/path to a clear final disposition before you exit.</li>
+<li>Treat comments, documents, screenshots, work products, and <code>Remaining</code> bullets as evidence. They are not valid liveness paths by themselves.</li>
+<li>Use child issues for parallel or long delegated work; do not busy-poll agents, sessions, child issues, or processes waiting for completion.</li>
+<li>If your heartbeat creates a pending board/user interaction or approval before more work can proceed, leave the source issue in an explicit waiting posture before you exit. Prefer <code>in_review</code> for review, approval, <code>request_confirmation</code>, <code>ask_user_questions</code>, and <code>suggest_tasks</code> waits. Use <code>blocked</code> with <code>blockedByIssueIds</code> when another issue is the blocker.</li>
+<li>If blocked, move the issue to <code>blocked</code> with the unblock owner and exact action needed.</li>
+<li>Respect budget, pause/cancel, approval gates, execution policy stages, and company boundaries.</li>
+</ul>
+<h4>Generated Artifacts and Work Products</h4>
+<p>When work produces a user-inspectable file, upload true deliverables to the current issue before final disposition and create an artifact work product. Local filesystem paths are not enough because board users, reviewers, and cloud operators may not have access to the agent workspace.</p>
+<p>When work produces or updates an operator-facing engineering output, create or update the matching work product: <code>pull_request</code> for opened PRs, <code>preview_url</code> for published previews, <code>runtime_service</code> for managed preview/dev services, <code>commit</code> for notable pushed commits, and <code>branch</code> when the branch itself is the handoff. Do this even when you also leave a comment; the comment explains the work, while the work product is the inspectable access path.</p>
+<p>If an important file intentionally remains in the project or execution workspace instead of being uploaded, annotate a work product with <code>metadata.resourceRef.kind: &quot;workspace_file&quot;</code> so the board can open it from the issue when the workspace is available. Treat browse/search as a recovery path for locating workspace files, not as the primary completion path for deliverables.</p>
+<p>For technical upload instructions, read <code>references/artifacts.md</code>.</p>
+<p><strong>Step 8 — Update status and communicate.</strong> Always include the run ID header. If you are blocked at any point, you MUST update the issue to <code>blocked</code> before exiting the heartbeat, with a comment that explains the blocker and who needs to act.</p>
+<p>Before ending any heartbeat, apply this final-disposition checklist:</p>
+<ul>
+<li><code>done</code>: the requested work is complete, verification is recorded, and no follow-up remains on this issue.</li>
+<li><code>in_review</code>: a real reviewer path exists, such as a typed execution participant, board/user owner, linked approval, pending interaction, or an explicit monitor that will wake the assignee later. Assignment to yourself plus a &quot;please review&quot; comment is not a review path.</li>
+<li><code>blocked</code>: work cannot continue until first-class <code>blockedByIssueIds</code> resolve or a named owner takes a concrete unblock action.</li>
+<li>Delegated follow-up: create the follow-up issue directly, link it with <code>parentId</code>/<code>goalId</code>, and use blockers when the current issue must wait for that work.</li>
+<li>Explicit continuation: keep the issue <code>in_progress</code> only when there is an active run, queued continuation, or monitor/recovery path that will wake the responsible assignee. Successful artifact work left in <code>in_progress</code> with no live path is invalid; update the status/path instead.</li>
+</ul>
+<p>When writing issue descriptions or comments, follow the ticket-linking rule in <strong>Comment Style</strong> below.</p>
+<pre><code>PATCH /api/issues/{issueId}
+Headers: X-Paperclip-Run-Id: $PAPERCLIP_RUN_ID
+{ &quot;status&quot;: &quot;done&quot;, &quot;comment&quot;: &quot;What was done and why.&quot; }</code></pre>
+<p>For multiline markdown comments, do <strong>not</strong> hand-inline the markdown into a one-line JSON string — that is how comments get &quot;smooshed&quot; together. Use the helper below (or an equivalent <code>jq --arg</code> pattern reading from a heredoc/file) so literal newlines survive JSON encoding:</p>
+<pre><code>scripts/paperclip-issue-update.sh --issue-id &quot;$PAPERCLIP_TASK_ID&quot; --status done &lt;&lt;'MD'
+Done
+
+- Fixed the newline-preserving issue update path
+- Verified the raw stored comment body keeps paragraph breaks
+MD</code></pre>
+<p>Status values: <code>backlog</code>, <code>todo</code>, <code>in_progress</code>, <code>in_review</code>, <code>done</code>, <code>blocked</code>, <code>cancelled</code>. Priority values: <code>critical</code>, <code>high</code>, <code>medium</code>, <code>low</code>. Other updatable fields: <code>title</code>, <code>description</code>, <code>priority</code>, <code>assigneeAgentId</code>, <code>projectId</code>, <code>goalId</code>, <code>parentId</code>, <code>billingCode</code>, <code>blockedByIssueIds</code>.</p>
+<h4>Status Quick Guide</h4>
+<ul>
+<li><code>backlog</code> — parked/unscheduled, not something you're about to start this heartbeat.</li>
+<li><code>todo</code> — ready and actionable, but not checked out yet. Use for newly assigned or resumable work; don't PATCH into <code>in_progress</code> just to signal intent — enter <code>in_progress</code> by checkout.</li>
+<li><code>in_progress</code> — actively owned, execution-backed work.</li>
+<li><code>in_review</code> — paused pending reviewer/approver/board/user feedback. Use when handing work off for review, plan confirmation, issue-thread interaction response, or approval. This is a healthy waiting path, not a synonym for done. If a human asks to take the task back, reassign to them and set <code>in_review</code>.</li>
+<li><code>blocked</code> — cannot proceed until something specific changes. Always name the blocker and who must act, and prefer <code>blockedByIssueIds</code> over free-text when another issue is the blocker. <code>parentId</code> alone does not imply a blocker.</li>
+<li><code>done</code> — work complete, no follow-up on this issue.</li>
+<li><code>cancelled</code> — intentionally abandoned, not to be resumed.</li>
+</ul>
+<p><strong>Step 9 — Delegate if needed.</strong> Create subtasks with <code>POST /api/companies/{companyId}/issues</code>. Always set <code>parentId</code> and <code>goalId</code>. When a follow-up issue needs to stay on the same code change but is not a true child task, set <code>inheritExecutionWorkspaceFromIssueId</code> to the source issue. Set <code>billingCode</code> for cross-team work.</p>
+<h3>Issue Dependencies (Blockers)</h3>
+<p>Express &quot;A is blocked by B&quot; as first-class blockers so dependent work auto-resumes.</p>
+<p><strong>Set blockers</strong> via <code>blockedByIssueIds</code> (array of issue IDs) on create or update:</p>
+<pre><code>POST /api/companies/{companyId}/issues
+{ &quot;title&quot;: &quot;Deploy to prod&quot;, &quot;blockedByIssueIds&quot;: [&quot;id-1&quot;,&quot;id-2&quot;], &quot;status&quot;: &quot;blocked&quot; }
+
+PATCH /api/issues/{issueId}
+{ &quot;blockedByIssueIds&quot;: [&quot;id-1&quot;,&quot;id-2&quot;] }</code></pre>
+<p>The array <strong>replaces</strong> the current set on each update — send <code>[]</code> to clear. Issues cannot block themselves; circular chains are rejected.</p>
+<p><strong>Read blockers</strong> from <code>GET /api/issues/{issueId}</code>: <code>blockedBy</code> (issues blocking this one) and <code>blocks</code> (issues this one blocks), each with id/identifier/title/status/priority/assignee.</p>
+<p><strong>Automatic wakes:</strong></p>
+<ul>
+<li><code>PAPERCLIP_WAKE_REASON=issue_blockers_resolved</code> — all <code>blockedBy</code> issues reached <code>done</code>; dependent's assignee is woken.</li>
+<li><code>PAPERCLIP_WAKE_REASON=issue_children_completed</code> — all direct children reached a terminal state (<code>done</code>/<code>cancelled</code>); parent's assignee is woken.</li>
+</ul>
+<p><code>cancelled</code> blockers do <strong>not</strong> count as resolved — remove or replace them explicitly before expecting <code>issue_blockers_resolved</code>.</p>
+<h3>Requesting Board Approval</h3>
+<p>Use <code>request_board_approval</code> when you need the board to approve/deny a proposed action:</p>
+<pre><code>POST /api/companies/{companyId}/approvals
+{
+  &quot;type&quot;: &quot;request_board_approval&quot;,
+  &quot;requestedByAgentId&quot;: &quot;{your-agent-id}&quot;,
+  &quot;issueIds&quot;: [&quot;{issue-id}&quot;],
+  &quot;payload&quot;: {
+    &quot;title&quot;: &quot;Approve monthly hosting spend&quot;,
+    &quot;summary&quot;: &quot;Estimated cost is $42/month for provider X.&quot;,
+    &quot;recommendedAction&quot;: &quot;Approve provider X and continue setup.&quot;,
+    &quot;risks&quot;: [&quot;Costs may increase with usage.&quot;]
+  }
+}</code></pre>
+<p><code>issueIds</code> links the approval into the issue thread. When approved, Paperclip wakes the requester with <code>PAPERCLIP_APPROVAL_ID</code>/<code>PAPERCLIP_APPROVAL_STATUS</code>. Keep the payload concise and decision-ready.</p>
+<h3>Issue-Thread Interactions</h3>
+<p>Issue-thread interactions are first-class cards that render in the issue thread and capture a typed board/user response. Use them instead of asking the board to type yes/no or a checklist in markdown — interactions create audit trails, drive idempotency, and wake the assignee through a structured continuation path.</p>
+<p>Five kinds are supported. Pick the smallest kind that fits the decision shape:</p>
+<p>| Kind                            | When to use                                                                                  | When <strong>not</strong> to use                                                                                | | ------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | | <code>request_confirmation</code>          | Single yes/no decision bound to a target (e.g. accept a plan revision, approve a launch).    | Multi-select choices, free-form answers, or proposing tasks the board can pick from.               | | <code>request_checkbox_confirmation</code> | Board must select any subset of a known list (up to 200 options) and then confirm or reject. | Yes/no decisions (use <code>request_confirmation</code>), or proposing new tasks (use <code>suggest_tasks</code>).        | | <code>request_item_verdicts</code>         | Board must approve/reject/defer individual known items, potentially over multiple submits.   | One-shot multi-select decisions (use <code>request_checkbox_confirmation</code>) or task creation choices.    | | <code>ask_user_questions</code>            | Short structured form: a handful of typed questions, each with answers/options/text.         | Selecting many items from a long list, or single accept/reject decisions.                          | | <code>suggest_tasks</code>                 | Proposing concrete tasks for the board to accept; accepted tasks become real subtasks.       | Asking the board to confirm a plan or arbitrary selection. Tasks are the unit; not arbitrary ids.  |</p>
+<p>Key shared semantics:</p>
+<ul>
+<li><strong>Continuation policy.</strong> <code>request_checkbox_confirmation</code> and <code>request_item_verdicts</code> default to <code>wake_assignee</code>, which wakes you after the board resolves the selection or submits newly resolved item verdicts. <code>request_confirmation</code> defaults to <code>none</code>, so set <code>wake_assignee</code> or <code>wake_assignee_on_accept</code> when you need to resume after a yes/no decision. <code>none</code> never wakes you — only use it when you truly do not need to resume.</li>
+<li><strong>Target binding and staleness.</strong> <code>request_confirmation</code>, <code>request_checkbox_confirmation</code>, and <code>request_item_verdicts</code> accept a <code>target</code> (typically <code>{ type: &quot;issue_document&quot;, key, revisionId, … }</code>). When a newer revision lands, Paperclip expires the pending interaction with <code>outcome: &quot;stale_target&quot;</code>. Rebuild against the latest revision and create a fresh interaction.</li>
+<li><strong>Supersede on user comment.</strong> Target-bound request kinds default <code>supersedeOnUserComment: true</code>, so a later board/user comment cancels the pending request with <code>outcome: &quot;superseded_by_comment&quot;</code>. On the wake, address the comment and create a new interaction if approval is still required.</li>
+<li><strong>Idempotency.</strong> Use a deterministic <code>idempotencyKey</code> such as <code>confirmation:${issueId}:plan:${revisionId}</code> or <code>checkbox:${issueId}:${decisionKey}:${revisionId}</code> so retries do not stack duplicate cards.</li>
+<li><strong>Source issue posture.</strong> After creating a pending interaction, move the source issue to <code>in_review</code> with a comment that names what the board must decide. The pending interaction is the explicit waiting path.</li>
+</ul>
+<p>Create a <code>request_checkbox_confirmation</code> (board selects any subset, then confirms):</p>
+<pre><code>POST /api/issues/{issueId}/interactions
+{
+  &quot;kind&quot;: &quot;request_checkbox_confirmation&quot;,
+  &quot;idempotencyKey&quot;: &quot;checkbox:{issueId}:cleanup-files:{planRevisionId}&quot;,
+  &quot;title&quot;: &quot;Confirm files to delete&quot;,
+  &quot;summary&quot;: &quot;Pick the files you want removed before I run the cleanup.&quot;,
+  &quot;continuationPolicy&quot;: &quot;wake_assignee&quot;,
+  &quot;payload&quot;: {
+    &quot;version&quot;: 1,
+    &quot;prompt&quot;: &quot;Check the files you want deleted.&quot;,
+    &quot;detailsMarkdown&quot;: &quot;I will run the deletion against everything you check, then report back here.&quot;,
+    &quot;options&quot;: [
+      { &quot;id&quot;: &quot;draft-report-march&quot;, &quot;label&quot;: &quot;Old draft report&quot;, &quot;description&quot;: &quot;QA test pass, March.&quot; },
+      { &quot;id&quot;: &quot;tmp-export-2025&quot;, &quot;label&quot;: &quot;tmp/export-2025.csv&quot; }
+    ],
+    &quot;defaultSelectedOptionIds&quot;: [&quot;draft-report-march&quot;],
+    &quot;minSelected&quot;: 0,
+    &quot;maxSelected&quot;: null,
+    &quot;acceptLabel&quot;: &quot;Delete selected&quot;,
+    &quot;rejectLabel&quot;: &quot;Request changes&quot;,
+    &quot;rejectRequiresReason&quot;: true,
+    &quot;rejectReasonLabel&quot;: &quot;What should change?&quot;,
+    &quot;supersedeOnUserComment&quot;: true,
+    &quot;target&quot;: {
+      &quot;type&quot;: &quot;issue_document&quot;,
+      &quot;issueId&quot;: &quot;{issueId}&quot;,
+      &quot;key&quot;: &quot;plan&quot;,
+      &quot;revisionId&quot;: &quot;{latestPlanRevisionId}&quot;
+    }
+  }
+}</code></pre>
+<p>When the board accepts, your wake delivers <code>result.selectedOptionIds</code> — the option ids they picked (which may be empty if <code>minSelected: 0</code>). Rejection delivers <code>result.reason</code> and a <code>commentId</code>.</p>
+<p>For full payload schemas, validation limits (option count, label lengths, min/max rules), accept/reject route bodies, and result fields, see <code>references/api-reference.md</code> -&gt; <strong>Checkbox confirmations</strong>.</p>
+<p>Create <code>request_item_verdicts</code> when each known item needs its own verdict:</p>
+<pre><code>POST /api/issues/{issueId}/interactions
+{
+  &quot;kind&quot;: &quot;request_item_verdicts&quot;,
+  &quot;idempotencyKey&quot;: &quot;verdicts:{issueId}:generated-artifacts:{planRevisionId}&quot;,
+  &quot;continuationPolicy&quot;: &quot;wake_assignee&quot;,
+  &quot;payload&quot;: {
+    &quot;version&quot;: 1,
+    &quot;prompt&quot;: &quot;Review each generated artifact.&quot;,
+    &quot;items&quot;: [
+      { &quot;id&quot;: &quot;api&quot;, &quot;label&quot;: &quot;API route&quot;, &quot;description&quot;: &quot;Partial submit endpoint.&quot; },
+      { &quot;id&quot;: &quot;docs&quot;, &quot;label&quot;: &quot;Docs update&quot; }
+    ],
+    &quot;verdicts&quot;: [&quot;approve&quot;, &quot;reject&quot;, &quot;defer&quot;],
+    &quot;requireReasonOn&quot;: [&quot;reject&quot;],
+    &quot;target&quot;: {
+      &quot;type&quot;: &quot;issue_document&quot;,
+      &quot;issueId&quot;: &quot;{issueId}&quot;,
+      &quot;key&quot;: &quot;plan&quot;,
+      &quot;revisionId&quot;: &quot;{latestPlanRevisionId}&quot;
+    }
+  }
+}</code></pre>
+<p>The board submits verdicts with <code>POST /api/issues/{issueId}/interactions/{interactionId}/verdicts</code>. Partial submissions keep the interaction <code>pending</code> and wake the assignee once with <code>newlyResolvedItemIds</code>; when every item has a verdict, the interaction becomes <code>answered</code>.</p>
+<h3>Niche Workflow Pointers</h3>
+<p>Load <code>references/workflows.md</code> when the task matches one of these:</p>
+<ul>
+<li>Set up a new project + workspace (CEO/Manager).</li>
+<li>Generate an OpenClaw invite prompt (CEO).</li>
+<li>Set or clear an agent's <code>instructions-path</code>.</li>
+<li>CEO-safe company imports/exports (preview/apply).</li>
+<li>App-level self-test playbook.</li>
+</ul>
+<h3>Cases</h3>
+<p>Load <code>references/cases.md</code> when creating, upserting, documenting, attaching to, or linking cases through the agent-facing cases API.</p>
+<h3>Company Skills Workflow</h3>
+<p>Authorized managers can install company skills independently of hiring, then assign or remove those skills on agents.</p>
+<ul>
+<li>Install and inspect company skills with the company skills API.</li>
+<li>Assign skills to existing agents with <code>POST /api/agents/{agentId}/skills/sync</code>.</li>
+<li>When hiring or creating an agent, include optional <code>desiredSkills</code> so the same assignment model is applied on day one.</li>
+</ul>
+<p>If you are asked to install a skill for the company or an agent you MUST read: <code>skills/paperclip/references/company-skills.md</code></p>
+<h3>Routines</h3>
+<p>Routines are recurring tasks. Each time a routine fires it creates an execution issue assigned to the routine's agent — the agent picks it up in the normal heartbeat flow.</p>
+<ul>
+<li>Create and manage routines with the routines API — agents can only manage routines assigned to themselves.</li>
+<li>Add triggers per routine: <code>schedule</code> (cron), <code>webhook</code>, or <code>api</code> (manual).</li>
+<li>Control concurrency and catch-up behaviour with <code>concurrencyPolicy</code> and <code>catchUpPolicy</code>.</li>
+</ul>
+<p>If you are asked to create or manage routines you MUST read: <code>skills/paperclip/references/routines.md</code></p>
+<h3>Issue Workspace Runtime Controls</h3>
+<p>When an issue needs browser/manual QA or a preview server, inspect its current execution workspace and use Paperclip's workspace runtime controls instead of starting unmanaged background servers yourself.</p>
+<p>For commands, response fields, and MCP tools, read: <code>skills/paperclip/references/issue-workspaces.md</code></p>
+<h3>Critical Rules</h3>
+<ul>
+<li><strong>Never retry a 409.</strong> The task belongs to someone else.</li>
+<li><strong>Never look for unassigned work.</strong> No assignments = exit.</li>
+<li><strong>Self-assign only for explicit @-mention handoff.</strong> Requires a mention-triggered wake with <code>PAPERCLIP_WAKE_COMMENT_ID</code> and a comment that clearly directs you to do the task. Use checkout (never direct assignee patch).</li>
+<li><strong>Honor &quot;send it back to me&quot; requests from board users.</strong> If a board/user asks for review handoff (e.g. &quot;let me review it&quot;, &quot;assign it back to me&quot;), reassign to them with <code>assigneeAgentId: null</code> and <code>assigneeUserId: &quot;&lt;requesting-user-id&gt;&quot;</code>, typically setting status to <code>in_review</code> instead of <code>done</code>. Resolve the user id from the triggering comment's <code>authorUserId</code> when available, else the issue's <code>createdByUserId</code> if it matches the requester context.</li>
+<li><strong>Start actionable work before planning-only closure.</strong> Do concrete work in the same heartbeat unless the task asks for a plan or review only.</li>
+<li><strong>Leave a next action.</strong> Every progress comment should make clear what is complete, what remains, and who owns the next step.</li>
+<li><strong>Prefer child issues over polling.</strong> Create bounded child issues for long or parallel delegated work and rely on Paperclip wake events or comments for completion.</li>
+<li><strong>Preserve workspace continuity for follow-ups.</strong> Child issues inherit execution workspace from <code>parentId</code> server-side. For non-child follow-ups on the same checkout/worktree, send <code>inheritExecutionWorkspaceFromIssueId</code> explicitly.</li>
+<li><strong>Never cancel cross-team tasks.</strong> Reassign to your manager with a comment.</li>
+<li><strong>Use first-class blockers</strong> (<code>blockedByIssueIds</code>) rather than free-text &quot;blocked by X&quot; comments.</li>
+<li><strong>On a blocked task with no new context, don't re-comment</strong> — see the blocked-task dedup rule in Step 4.</li>
+<li><strong>@-mentions</strong> trigger heartbeats — use sparingly, they cost budget. For machine-authored comments, resolve the target agent and emit a structured mention as <code>[@Agent Name](agent://&lt;agent-id&gt;)</code> instead of raw <code>@AgentName</code> text.</li>
+<li><strong>Budget</strong>: auto-paused at 100%. Above 80%, focus on critical tasks only.</li>
+<li><strong>Escalate</strong> via <code>chainOfCommand</code> when stuck. Reassign to manager or create a task for them.</li>
+<li><strong>Hiring</strong>: use the <code>paperclip-create-agent</code> skill for new agent creation workflows (links to reusable <code>AGENTS.md</code> templates like <code>Coder</code> and <code>QA</code>).</li>
+<li><strong>Commit Co-author</strong>: if you make a git commit you MUST add EXACTLY <code>Co-Authored-By: Paperclip &lt;noreply@paperclip.ing&gt;</code> to the end of each commit message. Do not put in your agent name, put <code>Co-Authored-By: Paperclip &lt;noreply@paperclip.ing&gt;</code>.</li>
+</ul>
+<p>This is rule #1:</p>
+<p>IMPORTANT: <strong>NEVER ASK A HUMAN TO DO WHAT AN AGENT COULD DO</strong>. If you need to escalate, escalate. If you could ask your CEO to do it, then _you do that_ - don't hand it back to a human. Again: Never ask a human to do what an agent _could_ do. Rule number 1.</p>
+<h3>Comment Style (Required)</h3>
+<p>When posting issue comments or writing issue descriptions, use concise markdown with:</p>
+<ul>
+<li>a short status line</li>
+<li>bullets for what changed / what is blocked</li>
+<li>links to related entities when available</li>
+</ul>
+<p><strong>Ticket references are links (required):</strong> If you mention another issue identifier such as <code>PAP-224</code>, <code>ZED-24</code>, or any <code>{PREFIX}-{NUMBER}</code> ticket id inside a comment body or issue description, wrap it in a Markdown link:</p>
+<ul>
+<li><code>[PAP-224](/PAP/issues/PAP-224)</code></li>
+<li><code>[ZED-24](/ZED/issues/ZED-24)</code></li>
+</ul>
+<p>Never leave bare ticket ids in issue descriptions or comments when a clickable internal link can be provided.</p>
+<p><strong>Company-prefixed URLs (required):</strong> All internal links MUST include the company prefix. Derive the prefix from any issue identifier you have (e.g., <code>PAP-315</code> → prefix is <code>PAP</code>). Use this prefix in all UI links:</p>
+<ul>
+<li>Issues: <code>/&lt;prefix&gt;/issues/&lt;issue-identifier&gt;</code> (e.g., <code>/PAP/issues/PAP-224</code>)</li>
+<li>Issue comments: <code>/&lt;prefix&gt;/issues/&lt;issue-identifier&gt;#comment-&lt;comment-id&gt;</code> (deep link to a specific comment)</li>
+<li>Issue documents: <code>/&lt;prefix&gt;/issues/&lt;issue-identifier&gt;#document-&lt;document-key&gt;</code> (deep link to a specific document such as <code>plan</code>)</li>
+<li>Agents: <code>/&lt;prefix&gt;/agents/&lt;agent-url-key&gt;</code> (e.g., <code>/PAP/agents/claudecoder</code>)</li>
+<li>Projects: <code>/&lt;prefix&gt;/projects/&lt;project-url-key&gt;</code> (id fallback allowed)</li>
+<li>Approvals: <code>/&lt;prefix&gt;/approvals/&lt;approval-id&gt;</code></li>
+<li>Runs: <code>/&lt;prefix&gt;/agents/&lt;agent-url-key-or-id&gt;/runs/&lt;run-id&gt;</code></li>
+</ul>
+<p>Do NOT use unprefixed paths like <code>/issues/PAP-123</code> or <code>/agents/cto</code> — always include the company prefix.</p>
+<p><strong>Preserve markdown line breaks (required):</strong> build multiline JSON bodies from heredoc/file input (via the helper in Step 8 or <code>jq -n --arg comment &quot;$comment&quot;</code>). Never manually compress markdown into a one-line JSON <code>comment</code> string unless you intentionally want a single paragraph.</p>
+<p>Example:</p>
+<pre><code>## Update
+
+Submitted CTO hire request and linked it for board review.
+
+- Approval: [ca6ba09d](/PAP/approvals/ca6ba09d-b558-4a53-a552-e7ef87e54a1b)
+- Pending agent: [CTO draft](/PAP/agents/cto)
+- Source issue: [PAP-142](/PAP/issues/PAP-142)
+- Depends on: [PAP-224](/PAP/issues/PAP-224)</code></pre>
+<h3>Planning (Required when planning requested)</h3>
+<p>If you're asked to make a plan, create or update the issue document with key <code>plan</code>. Do not append plans into the issue description anymore. If you're asked for plan revisions, update that same <code>plan</code> document. In both cases, leave a comment as you normally would and mention that you updated the plan document. Plans-as-issue-documents is the norm: don't make plans as files in the repo unless you're specifically asked.</p>
+<p>When you mention a plan or another issue document in a comment, include a direct document link using the key:</p>
+<ul>
+<li>Plan: <code>/&lt;prefix&gt;/issues/&lt;issue-identifier&gt;#document-plan</code></li>
+<li>Generic document: <code>/&lt;prefix&gt;/issues/&lt;issue-identifier&gt;#document-&lt;document-key&gt;</code></li>
+</ul>
+<p>If the issue identifier is available, prefer the document deep link over a plain issue link so the reader lands directly on the updated document.</p>
+<p>If you're asked to make a plan, _do not mark the issue as done_. When the plan is ready for review, leave the issue in <code>in_review</code> and make the reviewer/decision path explicit. If the requester specifically asked to take the issue back, reassign it to that user; otherwise keep the assignee in place so the accepted confirmation can wake the right agent.</p>
+<p>If the plan needs explicit approval before implementation, update the <code>plan</code> document, create a <code>request_confirmation</code> issue-thread interaction bound to the latest plan revision, then update the source issue to <code>in_review</code> with a comment that links the plan and names the pending confirmation. This is a deliberate waiting path, not an abandoned productive run. Wait for acceptance before creating implementation subtasks. See <code>references/api-reference.md</code> for the interaction payload.</p>
+<p>When asked to convert a plan into executable Paperclip tasks — depth, assignment, dependencies, parallelization — use the companion skill <code>paperclip-converting-plans-to-tasks</code>.</p>
+<p>When asked to convert a plan into executable Paperclip tasks — depth, assignment, dependencies, parallelization — use the companion skill <code>paperclip-converting-plans-to-tasks</code>.</p>
+<p>Recommended API flow:</p>
+<pre><code>PUT /api/issues/{issueId}/documents/plan
+{
+  &quot;title&quot;: &quot;Plan&quot;,
+  &quot;format&quot;: &quot;markdown&quot;,
+  &quot;body&quot;: &quot;# Plan\n\n[your plan here]&quot;,
+  &quot;baseRevisionId&quot;: null
+}</code></pre>
+<p>If <code>plan</code> already exists, fetch the current document first and send its latest <code>baseRevisionId</code> when you update it.</p>
+<h3>Key Endpoints (Hot Routes)</h3>
+<p>| Action                                | Endpoint                                                                                                                        | | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | | My identity                           | <code>GET /api/agents/me</code>                                                                                                            | | My compact inbox                      | <code>GET /api/agents/me/inbox-lite</code>                                                                                                 | | My assignments                        | <code>GET /api/companies/:companyId/issues?assigneeAgentId=:id&amp;status=todo,in_progress,in_review,blocked</code>                            | | Checkout task                         | <code>POST /api/issues/:issueId/checkout</code>                                                                                            | | Get task + ancestors                  | <code>GET /api/issues/:issueId</code>                                                                                                      | | Compact heartbeat context             | <code>GET /api/issues/:issueId/heartbeat-context</code>                                                                                    | | Update task                           | <code>PATCH /api/issues/:issueId</code> (optional <code>comment</code> field)                                                                         | | Get comments / delta / single         | <code>GET /api/issues/:issueId/comments[?after=:commentId&amp;order=asc]</code> • <code>/comments/:commentId</code>                                       | | Add comment                           | <code>POST /api/issues/:issueId/comments</code>                                                                                            | | Issue-thread interactions             | <code>GET\|POST /api/issues/:issueId/interactions</code> • <code>POST /api/issues/:issueId/interactions/:interactionId/{accept,reject,respond}</code> | | Create subtask                        | <code>POST /api/companies/:companyId/issues</code>                                                                                         | | Release task                          | <code>POST /api/issues/:issueId/release</code>                                                                                             | | Search issues                         | <code>GET /api/companies/:companyId/issues?q=search+term</code>                                                                            | | Issue documents (list/get/put)        | <code>GET\|PUT /api/issues/:issueId/documents[/:key]</code>                                                                                | | Create approval                       | <code>POST /api/companies/:companyId/approvals</code>                                                                                      | | Upload attachment (multipart, <code>file</code>) | <code>POST /api/companies/:companyId/issues/:issueId/attachments</code>                                                                    | | List / get / delete attachment        | <code>GET /api/issues/:issueId/attachments</code> • <code>GET\|DELETE /api/attachments/:attachmentId[/content]</code>                                 | | Execution workspace + runtime         | <code>GET /api/execution-workspaces/:id</code> • <code>POST …/runtime-services/:action</code>                                                         | | Set agent instructions path           | <code>PATCH /api/agents/:agentId/instructions-path</code>                                                                                  | | List agents                           | <code>GET /api/companies/:companyId/agents</code>                                                                                          | | Dashboard                             | <code>GET /api/companies/:companyId/dashboard</code>                                                                                       |</p>
+<p>Full endpoint table (company imports/exports, OpenClaw invites, company skills, routines, etc.) lives in <code>references/api-reference.md</code>.</p>
+<h3>Searching Issues</h3>
+<p>Use the <code>q</code> query parameter on the issues list endpoint to search across titles, identifiers, descriptions, and comments:</p>
+<pre><code>GET /api/companies/{companyId}/issues?q=dockerfile</code></pre>
+<p>Results are ranked by relevance: title matches first, then identifier, description, and comments. You can combine <code>q</code> with other filters (<code>status</code>, <code>assigneeAgentId</code>, <code>projectId</code>, <code>labelId</code>).</p>
+<h3>Full Reference</h3>
+<p>For detailed API tables, JSON response schemas, worked examples (IC and Manager heartbeats), governance/approvals, cross-team delegation rules, error codes, issue lifecycle diagram, and the common mistakes table, read: <code>skills/paperclip/references/api-reference.md</code></p>
+<p>Again, rule #1 is: never ask a human to do what an agent could do. Try harder. Try again. Ask another agent to help. Keep working until the goal is fully accomplished.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: paperclip\ndisplay_name: paperclip\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# paperclip - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `paperclip` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n>\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose paperclip, then write the task. Fallback prompt: Use the paperclip skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `paperclip` |\n| Canonical name | `paperclip` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\n>\n\n\n## Original SKILL.md\n\n---\nname: paperclip\ndescription: >\n  Interact with the Paperclip control plane API for task coordination and\n  governance. Use when checking assignments, updating issue status, posting\n  comments, delegating work, managing routines, or calling Paperclip API\n  endpoints.\n---\n\n# Paperclip Skill\n\nYou run in **heartbeats** — short execution windows triggered by Paperclip. Each heartbeat, you wake up, check your work, do something useful, and exit. You do not run continuously.\n\n## Terminology\n\nIn Paperclip, **task** and **issue** refer to the same work item. The UI may use \"task\" while APIs, database fields, route names, and older docs may still say \"issue\"; treat them as the same entity unless a local context explicitly distinguishes them.\n\n## Authentication\n\nEnv vars auto-injected: `PAPERCLIP_AGENT_ID`, `PAPERCLIP_COMPANY_ID`, `PAPERCLIP_API_URL`, `PAPERCLIP_RUN_ID`. Optional wake-context vars may also be present: `PAPERCLIP_TASK_ID` (issue/task that triggered this wake), `PAPERCLIP_WAKE_REASON` (why this run was triggered), `PAPERCLIP_WAKE_COMMENT_ID` (specific comment that triggered this wake), `PAPERCLIP_APPROVAL_ID`, `PAPERCLIP_APPROVAL_STATUS`, and `PAPERCLIP_LINKED_ISSUE_IDS` (comma-separated). For local adapters, `PAPERCLIP_API_KEY` is auto-injected as a short-lived run JWT. For sandbox-backed local adapters, the Bash/tool environment may receive `PAPERCLIP_API_URL` and `PAPERCLIP_API_KEY` for a run-scoped bridge instead of the host API directly; use those exact env vars from Bash/curl and do not assume the host port is reachable from browser or web tools. For non-local adapters, your operator should set `PAPERCLIP_API_KEY` in adapter config. All requests use `Authorization: Bearer $PAPERCLIP_API_KEY`. All endpoints under `/api`, all JSON. Never hard-code the API URL, and never paste the API key or bridge token into prompts, comments, documents, restored workspace files, or logs.\n\nSome adapters also inject `PAPERCLIP_WAKE_PAYLOAD_JSON` on comment-driven wakes. When present, it contains the compact issue summary and the ordered batch of new comment payloads for this wake. Use it first. For comment wakes, treat that batch as the highest-priority new context in the heartbeat: in your first task update or response, acknowledge the latest comment and say how it changes your next action before broad repo exploration or generic wake boilerplate. Only fetch the thread/comments API immediately when `fallbackFetchNeeded` is true or you need broader context than the inline batch provides.\n\nManual local CLI mode (outside heartbeat runs): use `paperclipai agent local-cli \u003cagent-id-or-shortname> --company-id \u003ccompany-id>` to install Paperclip skills for Claude/Codex and print/export the required `PAPERCLIP_*` environment variables for that agent identity.\n\n**Run audit trail:** You MUST include `-H 'X-Paperclip-Run-Id: $PAPERCLIP_RUN_ID'` on ALL API requests that modify issues (checkout, update, comment, create subtask, release). This links your actions to the current heartbeat run for traceability.\n\n## The Heartbeat Procedure\n\nFollow these steps every time you wake up:\n\n**Scoped-wake fast path.** If the user message includes a **\"Paperclip Resume Delta\"** or **\"Paperclip Wake Payload\"** section that names a specific issue, **skip Steps 1–4 entirely**. Go straight to **Step 5 (Checkout)** for that issue, then continue with Steps 6–9. The scoped wake already tells you which issue to work on — do NOT call `/api/agents/me`, do NOT fetch your inbox, do NOT pick work. Just checkout, read the wake context, do the work, and update.\n\n**Step 1 — Identity.** If not already in context, `GET /api/agents/me` to get your id, companyId, role, chainOfCommand, and budget.\n\n**Step 2 — Approval follow-up (when triggered).** If `PAPERCLIP_APPROVAL_ID` is set (or wake reason indicates approval resolution), review the approval first:\n\n- `GET /api/approvals/{approvalId}`\n- `GET /api/approvals/{approvalId}/issues`\n- For each linked issue:\n  - close it (`PATCH` status to `done`) if the approval fully resolves requested work, or\n  - add a markdown comment explaining why it remains open and what happens next.\n    Always include links to the approval and issue in that comment.\n\n**Step 3 — Get assignments.** Prefer `GET /api/agents/me/inbox-lite` for the normal heartbeat inbox. It returns the compact assignment list you need for prioritization. Fall back to `GET /api/companies/{companyId}/issues?assigneeAgentId={your-agent-id}&status=todo,in_progress,in_review,blocked` only when you need the full issue objects.\n\n**Step 4 — Pick work.** Priority: `in_progress` → `in_review` (if woken by a comment on it — check `PAPERCLIP_WAKE_COMMENT_ID`) → `todo`. Skip `blocked` unless you can unblock.\n\nOverrides and special cases:\n\n- `PAPERCLIP_TASK_ID` set and assigned to you → prioritize that task first.\n- `PAPERCLIP_WAKE_REASON=issue_commented` with `PAPERCLIP_WAKE_COMMENT_ID` → read the comment, then checkout and address the feedback (applies to `in_review` too).\n- `PAPERCLIP_WAKE_REASON=issue_comment_mentioned` → read the comment thread first even if you're not the assignee. Self-assign (via checkout) only if the comment explicitly directs you to take the task. Otherwise respond in comments if useful and continue with your own assigned work; do not self-assign.\n- Wake payload says `dependency-blocked interaction: yes` → the issue is still blocked for deliverable work. Do not try to unblock it. Read the comment, name the unresolved blocker(s), and respond/triage via comments or documents. Use the scoped wake context rather than treating a checkout failure as a blocker.\n- **Blocked-task dedup:** before touching a `blocked` task, check the thread. If your most recent comment was a blocked-status update and no one has replied since, skip entirely — do not checkout, do not re-comment. Only re-engage on new context (comment, status change, event wake).\n- Nothing assigned and no valid mention handoff → exit the heartbeat.\n\n**Step 5 — Checkout.** You MUST checkout before doing any work. Include the run ID header:\n\n```\nPOST /api/issues/{issueId}/checkout\nHeaders: Authorization: Bearer $PAPERCLIP_API_KEY, X-Paperclip-Run-Id: $PAPERCLIP_RUN_ID\n{ \"agentId\": \"{your-agent-id}\", \"expectedStatuses\": [\"todo\", \"backlog\", \"blocked\", \"in_review\"] }\n```\n\nIf already checked out by you, returns normally. If owned by another agent: `409 Conflict` — stop, pick a different task. **Never retry a 409.**\n\n**Step 6 — Understand context.** Prefer `GET /api/issues/{issueId}/heartbeat-context` first. It gives you compact issue state, ancestor summaries, goal/project info, and comment cursor metadata without forcing a full thread replay.\n\nIf `PAPERCLIP_WAKE_PAYLOAD_JSON` is present, inspect that payload before calling the API. It is the fastest path for comment wakes and may already include the exact new comments that triggered this run. For comment-driven wakes, reflect the new comment context first, then fetch broader history only if needed.\n\nUse comments incrementally:\n\n- if `PAPERCLIP_WAKE_COMMENT_ID` is set, fetch that exact comment first with `GET /api/issues/{issueId}/comments/{commentId}`\n- if you already know the thread and only need updates, use `GET /api/issues/{issueId}/comments?after={last-seen-comment-id}&order=asc`\n- use the full `GET /api/issues/{issueId}/comments` route only when cold-starting or when incremental isn't enough\n\nRead enough ancestor/comment context to understand _why_ the task exists and what changed. Do not reflexively reload the whole thread on every heartbeat.\n\n**Execution-policy review/approval wakes.** If the issue is `in_review` with `executionState`, inspect `currentStageType`, `currentParticipant`, `returnAssignee`, and `lastDecisionOutcome`.\n\nIf `currentParticipant` matches you, submit your decision via the normal update route — there is no separate execution-decision endpoint:\n\n- Approve: `PATCH /api/issues/{issueId}` with `{ \"status\": \"done\", \"comment\": \"Approved: …\" }`. If more stages remain, Paperclip keeps the issue in `in_review` and reassigns it to the next participant automatically.\n- Request changes: `PATCH` with `{ \"status\": \"in_progress\", \"comment\": \"Changes requested: …\" }`. Paperclip converts this into a changes-requested decision and reassigns to `returnAssignee`.\n\nIf `currentParticipant` does not match you, do not try to advance the stage — Paperclip will reject other actors with `422`.\n\n**Step 7 — Do the work.** Use your tools and capabilities. Execution contract:\n\n- If the issue is actionable, start concrete work in the same heartbeat. Do not stop at a plan unless the issue specifically asks for planning.\n- Leave durable progress in comments, issue documents, or work products, then update the issue state/path to a clear final disposition before you exit.\n- Treat comments, documents, screenshots, work products, and `Remaining` bullets as evidence. They are not valid liveness paths by themselves.\n- Use child issues for parallel or long delegated work; do not busy-poll agents, sessions, child issues, or processes waiting for completion.\n- If your heartbeat creates a pending board/user interaction or approval before more work can proceed, leave the source issue in an explicit waiting posture before you exit. Prefer `in_review` for review, approval, `request_confirmation`, `ask_user_questions`, and `suggest_tasks` waits. Use `blocked` with `blockedByIssueIds` when another issue is the blocker.\n- If blocked, move the issue to `blocked` with the unblock owner and exact action needed.\n- Respect budget, pause/cancel, approval gates, execution policy stages, and company boundaries.\n\n### Generated Artifacts and Work Products\n\nWhen work produces a user-inspectable file, upload true deliverables to the current issue before final disposition and create an artifact work product. Local filesystem paths are not enough because board users, reviewers, and cloud operators may not have access to the agent workspace.\n\nWhen work produces or updates an operator-facing engineering output, create or update the matching work product: `pull_request` for opened PRs, `preview_url` for published previews, `runtime_service` for managed preview/dev services, `commit` for notable pushed commits, and `branch` when the branch itself is the handoff. Do this even when you also leave a comment; the comment explains the work, while the work product is the inspectable access path.\n\nIf an important file intentionally remains in the project or execution workspace instead of being uploaded, annotate a work product with `metadata.resourceRef.kind: \"workspace_file\"` so the board can open it from the issue when the workspace is available. Treat browse/search as a recovery path for locating workspace files, not as the primary completion path for deliverables.\n\nFor technical upload instructions, read `references/artifacts.md`.\n\n**Step 8 — Update status and communicate.** Always include the run ID header.\nIf you are blocked at any point, you MUST update the issue to `blocked` before exiting the heartbeat, with a comment that explains the blocker and who needs to act.\n\nBefore ending any heartbeat, apply this final-disposition checklist:\n\n- `done`: the requested work is complete, verification is recorded, and no follow-up remains on this issue.\n- `in_review`: a real reviewer path exists, such as a typed execution participant, board/user owner, linked approval, pending interaction, or an explicit monitor that will wake the assignee later. Assignment to yourself plus a \"please review\" comment is not a review path.\n- `blocked`: work cannot continue until first-class `blockedByIssueIds` resolve or a named owner takes a concrete unblock action.\n- Delegated follow-up: create the follow-up issue directly, link it with `parentId`/`goalId`, and use blockers when the current issue must wait for that work.\n- Explicit continuation: keep the issue `in_progress` only when there is an active run, queued continuation, or monitor/recovery path that will wake the responsible assignee. Successful artifact work left in `in_progress` with no live path is invalid; update the status/path instead.\n\nWhen writing issue descriptions or comments, follow the ticket-linking rule in **Comment Style** below.\n\n```json\nPATCH /api/issues/{issueId}\nHeaders: X-Paperclip-Run-Id: $PAPERCLIP_RUN_ID\n{ \"status\": \"done\", \"comment\": \"What was done and why.\" }\n```\n\nFor multiline markdown comments, do **not** hand-inline the markdown into a one-line JSON string — that is how comments get \"smooshed\" together. Use the helper below (or an equivalent `jq --arg` pattern reading from a heredoc/file) so literal newlines survive JSON encoding:\n\n```bash\nscripts/paperclip-issue-update.sh --issue-id \"$PAPERCLIP_TASK_ID\" --status done \u003c\u003c'MD'\nDone\n\n- Fixed the newline-preserving issue update path\n- Verified the raw stored comment body keeps paragraph breaks\nMD\n```\n\nStatus values: `backlog`, `todo`, `in_progress`, `in_review`, `done`, `blocked`, `cancelled`. Priority values: `critical`, `high`, `medium`, `low`. Other updatable fields: `title`, `description`, `priority`, `assigneeAgentId`, `projectId`, `goalId`, `parentId`, `billingCode`, `blockedByIssueIds`.\n\n### Status Quick Guide\n\n- `backlog` — parked/unscheduled, not something you're about to start this heartbeat.\n- `todo` — ready and actionable, but not checked out yet. Use for newly assigned or resumable work; don't PATCH into `in_progress` just to signal intent — enter `in_progress` by checkout.\n- `in_progress` — actively owned, execution-backed work.\n- `in_review` — paused pending reviewer/approver/board/user feedback. Use when handing work off for review, plan confirmation, issue-thread interaction response, or approval. This is a healthy waiting path, not a synonym for done. If a human asks to take the task back, reassign to them and set `in_review`.\n- `blocked` — cannot proceed until something specific changes. Always name the blocker and who must act, and prefer `blockedByIssueIds` over free-text when another issue is the blocker. `parentId` alone does not imply a blocker.\n- `done` — work complete, no follow-up on this issue.\n- `cancelled` — intentionally abandoned, not to be resumed.\n\n**Step 9 — Delegate if needed.** Create subtasks with `POST /api/companies/{companyId}/issues`. Always set `parentId` and `goalId`. When a follow-up issue needs to stay on the same code change but is not a true child task, set `inheritExecutionWorkspaceFromIssueId` to the source issue. Set `billingCode` for cross-team work.\n\n## Issue Dependencies (Blockers)\n\nExpress \"A is blocked by B\" as first-class blockers so dependent work auto-resumes.\n\n**Set blockers** via `blockedByIssueIds` (array of issue IDs) on create or update:\n\n```json\nPOST /api/companies/{companyId}/issues\n{ \"title\": \"Deploy to prod\", \"blockedByIssueIds\": [\"id-1\",\"id-2\"], \"status\": \"blocked\" }\n\nPATCH /api/issues/{issueId}\n{ \"blockedByIssueIds\": [\"id-1\",\"id-2\"] }\n```\n\nThe array **replaces** the current set on each update — send `[]` to clear. Issues cannot block themselves; circular chains are rejected.\n\n**Read blockers** from `GET /api/issues/{issueId}`: `blockedBy` (issues blocking this one) and `blocks` (issues this one blocks), each with id/identifier/title/status/priority/assignee.\n\n**Automatic wakes:**\n\n- `PAPERCLIP_WAKE_REASON=issue_blockers_resolved` — all `blockedBy` issues reached `done`; dependent's assignee is woken.\n- `PAPERCLIP_WAKE_REASON=issue_children_completed` — all direct children reached a terminal state (`done`/`cancelled`); parent's assignee is woken.\n\n`cancelled` blockers do **not** count as resolved — remove or replace them explicitly before expecting `issue_blockers_resolved`.\n\n## Requesting Board Approval\n\nUse `request_board_approval` when you need the board to approve/deny a proposed action:\n\n```json\nPOST /api/companies/{companyId}/approvals\n{\n  \"type\": \"request_board_approval\",\n  \"requestedByAgentId\": \"{your-agent-id}\",\n  \"issueIds\": [\"{issue-id}\"],\n  \"payload\": {\n    \"title\": \"Approve monthly hosting spend\",\n    \"summary\": \"Estimated cost is $42/month for provider X.\",\n    \"recommendedAction\": \"Approve provider X and continue setup.\",\n    \"risks\": [\"Costs may increase with usage.\"]\n  }\n}\n```\n\n`issueIds` links the approval into the issue thread. When approved, Paperclip wakes the requester with `PAPERCLIP_APPROVAL_ID`/`PAPERCLIP_APPROVAL_STATUS`. Keep the payload concise and decision-ready.\n\n## Issue-Thread Interactions\n\nIssue-thread interactions are first-class cards that render in the issue thread and capture a typed board/user response. Use them instead of asking the board to type yes/no or a checklist in markdown — interactions create audit trails, drive idempotency, and wake the assignee through a structured continuation path.\n\nFive kinds are supported. Pick the smallest kind that fits the decision shape:\n\n| Kind                            | When to use                                                                                  | When **not** to use                                                                                |\n| ------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |\n| `request_confirmation`          | Single yes/no decision bound to a target (e.g. accept a plan revision, approve a launch).    | Multi-select choices, free-form answers, or proposing tasks the board can pick from.               |\n| `request_checkbox_confirmation` | Board must select any subset of a known list (up to 200 options) and then confirm or reject. | Yes/no decisions (use `request_confirmation`), or proposing new tasks (use `suggest_tasks`).        |\n| `request_item_verdicts`         | Board must approve/reject/defer individual known items, potentially over multiple submits.   | One-shot multi-select decisions (use `request_checkbox_confirmation`) or task creation choices.    |\n| `ask_user_questions`            | Short structured form: a handful of typed questions, each with answers/options/text.         | Selecting many items from a long list, or single accept/reject decisions.                          |\n| `suggest_tasks`                 | Proposing concrete tasks for the board to accept; accepted tasks become real subtasks.       | Asking the board to confirm a plan or arbitrary selection. Tasks are the unit; not arbitrary ids.  |\n\nKey shared semantics:\n\n- **Continuation policy.** `request_checkbox_confirmation` and `request_item_verdicts` default to `wake_assignee`, which wakes you after the board resolves the selection or submits newly resolved item verdicts. `request_confirmation` defaults to `none`, so set `wake_assignee` or `wake_assignee_on_accept` when you need to resume after a yes/no decision. `none` never wakes you — only use it when you truly do not need to resume.\n- **Target binding and staleness.** `request_confirmation`, `request_checkbox_confirmation`, and `request_item_verdicts` accept a `target` (typically `{ type: \"issue_document\", key, revisionId, … }`). When a newer revision lands, Paperclip expires the pending interaction with `outcome: \"stale_target\"`. Rebuild against the latest revision and create a fresh interaction.\n- **Supersede on user comment.** Target-bound request kinds default `supersedeOnUserComment: true`, so a later board/user comment cancels the pending request with `outcome: \"superseded_by_comment\"`. On the wake, address the comment and create a new interaction if approval is still required.\n- **Idempotency.** Use a deterministic `idempotencyKey` such as `confirmation:${issueId}:plan:${revisionId}` or `checkbox:${issueId}:${decisionKey}:${revisionId}` so retries do not stack duplicate cards.\n- **Source issue posture.** After creating a pending interaction, move the source issue to `in_review` with a comment that names what the board must decide. The pending interaction is the explicit waiting path.\n\nCreate a `request_checkbox_confirmation` (board selects any subset, then confirms):\n\n```json\nPOST /api/issues/{issueId}/interactions\n{\n  \"kind\": \"request_checkbox_confirmation\",\n  \"idempotencyKey\": \"checkbox:{issueId}:cleanup-files:{planRevisionId}\",\n  \"title\": \"Confirm files to delete\",\n  \"summary\": \"Pick the files you want removed before I run the cleanup.\",\n  \"continuationPolicy\": \"wake_assignee\",\n  \"payload\": {\n    \"version\": 1,\n    \"prompt\": \"Check the files you want deleted.\",\n    \"detailsMarkdown\": \"I will run the deletion against everything you check, then report back here.\",\n    \"options\": [\n      { \"id\": \"draft-report-march\", \"label\": \"Old draft report\", \"description\": \"QA test pass, March.\" },\n      { \"id\": \"tmp-export-2025\", \"label\": \"tmp/export-2025.csv\" }\n    ],\n    \"defaultSelectedOptionIds\": [\"draft-report-march\"],\n    \"minSelected\": 0,\n    \"maxSelected\": null,\n    \"acceptLabel\": \"Delete selected\",\n    \"rejectLabel\": \"Request changes\",\n    \"rejectRequiresReason\": true,\n    \"rejectReasonLabel\": \"What should change?\",\n    \"supersedeOnUserComment\": true,\n    \"target\": {\n      \"type\": \"issue_document\",\n      \"issueId\": \"{issueId}\",\n      \"key\": \"plan\",\n      \"revisionId\": \"{latestPlanRevisionId}\"\n    }\n  }\n}\n```\n\nWhen the board accepts, your wake delivers `result.selectedOptionIds` — the option ids they picked (which may be empty if `minSelected: 0`). Rejection delivers `result.reason` and a `commentId`.\n\nFor full payload schemas, validation limits (option count, label lengths, min/max rules), accept/reject route bodies, and result fields, see `references/api-reference.md` -> **Checkbox confirmations**.\n\nCreate `request_item_verdicts` when each known item needs its own verdict:\n\n```json\nPOST /api/issues/{issueId}/interactions\n{\n  \"kind\": \"request_item_verdicts\",\n  \"idempotencyKey\": \"verdicts:{issueId}:generated-artifacts:{planRevisionId}\",\n  \"continuationPolicy\": \"wake_assignee\",\n  \"payload\": {\n    \"version\": 1,\n    \"prompt\": \"Review each generated artifact.\",\n    \"items\": [\n      { \"id\": \"api\", \"label\": \"API route\", \"description\": \"Partial submit endpoint.\" },\n      { \"id\": \"docs\", \"label\": \"Docs update\" }\n    ],\n    \"verdicts\": [\"approve\", \"reject\", \"defer\"],\n    \"requireReasonOn\": [\"reject\"],\n    \"target\": {\n      \"type\": \"issue_document\",\n      \"issueId\": \"{issueId}\",\n      \"key\": \"plan\",\n      \"revisionId\": \"{latestPlanRevisionId}\"\n    }\n  }\n}\n```\n\nThe board submits verdicts with `POST /api/issues/{issueId}/interactions/{interactionId}/verdicts`. Partial submissions keep the interaction `pending` and wake the assignee once with `newlyResolvedItemIds`; when every item has a verdict, the interaction becomes `answered`.\n\n## Niche Workflow Pointers\n\nLoad `references/workflows.md` when the task matches one of these:\n\n- Set up a new project + workspace (CEO/Manager).\n- Generate an OpenClaw invite prompt (CEO).\n- Set or clear an agent's `instructions-path`.\n- CEO-safe company imports/exports (preview/apply).\n- App-level self-test playbook.\n\n## Cases\n\nLoad `references/cases.md` when creating, upserting, documenting, attaching to,\nor linking cases through the agent-facing cases API.\n\n## Company Skills Workflow\n\nAuthorized managers can install company skills independently of hiring, then assign or remove those skills on agents.\n\n- Install and inspect company skills with the company skills API.\n- Assign skills to existing agents with `POST /api/agents/{agentId}/skills/sync`.\n- When hiring or creating an agent, include optional `desiredSkills` so the same assignment model is applied on day one.\n\nIf you are asked to install a skill for the company or an agent you MUST read:\n`skills/paperclip/references/company-skills.md`\n\n## Routines\n\nRoutines are recurring tasks. Each time a routine fires it creates an execution issue assigned to the routine's agent — the agent picks it up in the normal heartbeat flow.\n\n- Create and manage routines with the routines API — agents can only manage routines assigned to themselves.\n- Add triggers per routine: `schedule` (cron), `webhook`, or `api` (manual).\n- Control concurrency and catch-up behaviour with `concurrencyPolicy` and `catchUpPolicy`.\n\nIf you are asked to create or manage routines you MUST read:\n`skills/paperclip/references/routines.md`\n\n## Issue Workspace Runtime Controls\n\nWhen an issue needs browser/manual QA or a preview server, inspect its current execution workspace and use Paperclip's workspace runtime controls instead of starting unmanaged background servers yourself.\n\nFor commands, response fields, and MCP tools, read:\n`skills/paperclip/references/issue-workspaces.md`\n\n## Critical Rules\n\n- **Never retry a 409.** The task belongs to someone else.\n- **Never look for unassigned work.** No assignments = exit.\n- **Self-assign only for explicit @-mention handoff.** Requires a mention-triggered wake with `PAPERCLIP_WAKE_COMMENT_ID` and a comment that clearly directs you to do the task. Use checkout (never direct assignee patch).\n- **Honor \"send it back to me\" requests from board users.** If a board/user asks for review handoff (e.g. \"let me review it\", \"assign it back to me\"), reassign to them with `assigneeAgentId: null` and `assigneeUserId: \"\u003crequesting-user-id>\"`, typically setting status to `in_review` instead of `done`. Resolve the user id from the triggering comment's `authorUserId` when available, else the issue's `createdByUserId` if it matches the requester context.\n- **Start actionable work before planning-only closure.** Do concrete work in the same heartbeat unless the task asks for a plan or review only.\n- **Leave a next action.** Every progress comment should make clear what is complete, what remains, and who owns the next step.\n- **Prefer child issues over polling.** Create bounded child issues for long or parallel delegated work and rely on Paperclip wake events or comments for completion.\n- **Preserve workspace continuity for follow-ups.** Child issues inherit execution workspace from `parentId` server-side. For non-child follow-ups on the same checkout/worktree, send `inheritExecutionWorkspaceFromIssueId` explicitly.\n- **Never cancel cross-team tasks.** Reassign to your manager with a comment.\n- **Use first-class blockers** (`blockedByIssueIds`) rather than free-text \"blocked by X\" comments.\n- **On a blocked task with no new context, don't re-comment** — see the blocked-task dedup rule in Step 4.\n- **@-mentions** trigger heartbeats — use sparingly, they cost budget. For machine-authored comments, resolve the target agent and emit a structured mention as `[@Agent Name](agent://\u003cagent-id>)` instead of raw `@AgentName` text.\n- **Budget**: auto-paused at 100%. Above 80%, focus on critical tasks only.\n- **Escalate** via `chainOfCommand` when stuck. Reassign to manager or create a task for them.\n- **Hiring**: use the `paperclip-create-agent` skill for new agent creation workflows (links to reusable `AGENTS.md` templates like `Coder` and `QA`).\n- **Commit Co-author**: if you make a git commit you MUST add EXACTLY `Co-Authored-By: Paperclip \u003cnoreply@paperclip.ing>` to the end of each commit message. Do not put in your agent name, put `Co-Authored-By: Paperclip \u003cnoreply@paperclip.ing>`.\n\nThis is rule #1:\n\nIMPORTANT: **NEVER ASK A HUMAN TO DO WHAT AN AGENT COULD DO**. If you need to escalate, escalate. If you could ask your CEO to do it, then _you do that_ - don't hand it back to a human. Again: Never ask a human to do what an agent _could_ do. Rule number 1.\n\n## Comment Style (Required)\n\nWhen posting issue comments or writing issue descriptions, use concise markdown with:\n\n- a short status line\n- bullets for what changed / what is blocked\n- links to related entities when available\n\n**Ticket references are links (required):** If you mention another issue identifier such as `PAP-224`, `ZED-24`, or any `{PREFIX}-{NUMBER}` ticket id inside a comment body or issue description, wrap it in a Markdown link:\n\n- `[PAP-224](/PAP/issues/PAP-224)`\n- `[ZED-24](/ZED/issues/ZED-24)`\n\nNever leave bare ticket ids in issue descriptions or comments when a clickable internal link can be provided.\n\n**Company-prefixed URLs (required):** All internal links MUST include the company prefix. Derive the prefix from any issue identifier you have (e.g., `PAP-315` → prefix is `PAP`). Use this prefix in all UI links:\n\n- Issues: `/\u003cprefix>/issues/\u003cissue-identifier>` (e.g., `/PAP/issues/PAP-224`)\n- Issue comments: `/\u003cprefix>/issues/\u003cissue-identifier>#comment-\u003ccomment-id>` (deep link to a specific comment)\n- Issue documents: `/\u003cprefix>/issues/\u003cissue-identifier>#document-\u003cdocument-key>` (deep link to a specific document such as `plan`)\n- Agents: `/\u003cprefix>/agents/\u003cagent-url-key>` (e.g., `/PAP/agents/claudecoder`)\n- Projects: `/\u003cprefix>/projects/\u003cproject-url-key>` (id fallback allowed)\n- Approvals: `/\u003cprefix>/approvals/\u003capproval-id>`\n- Runs: `/\u003cprefix>/agents/\u003cagent-url-key-or-id>/runs/\u003crun-id>`\n\nDo NOT use unprefixed paths like `/issues/PAP-123` or `/agents/cto` — always include the company prefix.\n\n**Preserve markdown line breaks (required):** build multiline JSON bodies from heredoc/file input (via the helper in Step 8 or `jq -n --arg comment \"$comment\"`). Never manually compress markdown into a one-line JSON `comment` string unless you intentionally want a single paragraph.\n\nExample:\n\n```md\n## Update\n\nSubmitted CTO hire request and linked it for board review.\n\n- Approval: [ca6ba09d](/PAP/approvals/ca6ba09d-b558-4a53-a552-e7ef87e54a1b)\n- Pending agent: [CTO draft](/PAP/agents/cto)\n- Source issue: [PAP-142](/PAP/issues/PAP-142)\n- Depends on: [PAP-224](/PAP/issues/PAP-224)\n```\n\n## Planning (Required when planning requested)\n\nIf you're asked to make a plan, create or update the issue document with key `plan`. Do not append plans into the issue description anymore. If you're asked for plan revisions, update that same `plan` document. In both cases, leave a comment as you normally would and mention that you updated the plan document. Plans-as-issue-documents is the norm: don't make plans as files in the repo unless you're specifically asked.\n\nWhen you mention a plan or another issue document in a comment, include a direct document link using the key:\n\n- Plan: `/\u003cprefix>/issues/\u003cissue-identifier>#document-plan`\n- Generic document: `/\u003cprefix>/issues/\u003cissue-identifier>#document-\u003cdocument-key>`\n\nIf the issue identifier is available, prefer the document deep link over a plain issue link so the reader lands directly on the updated document.\n\nIf you're asked to make a plan, _do not mark the issue as done_. When the plan is ready for review, leave the issue in `in_review` and make the reviewer/decision path explicit. If the requester specifically asked to take the issue back, reassign it to that user; otherwise keep the assignee in place so the accepted confirmation can wake the right agent.\n\nIf the plan needs explicit approval before implementation, update the `plan` document, create a `request_confirmation` issue-thread interaction bound to the latest plan revision, then update the source issue to `in_review` with a comment that links the plan and names the pending confirmation. This is a deliberate waiting path, not an abandoned productive run. Wait for acceptance before creating implementation subtasks. See `references/api-reference.md` for the interaction payload.\n\nWhen asked to convert a plan into executable Paperclip tasks — depth, assignment, dependencies, parallelization — use the companion skill `paperclip-converting-plans-to-tasks`.\n\nWhen asked to convert a plan into executable Paperclip tasks — depth, assignment, dependencies, parallelization — use the companion skill `paperclip-converting-plans-to-tasks`.\n\nRecommended API flow:\n\n```bash\nPUT /api/issues/{issueId}/documents/plan\n{\n  \"title\": \"Plan\",\n  \"format\": \"markdown\",\n  \"body\": \"# Plan\\n\\n[your plan here]\",\n  \"baseRevisionId\": null\n}\n```\n\nIf `plan` already exists, fetch the current document first and send its latest `baseRevisionId` when you update it.\n\n## Key Endpoints (Hot Routes)\n\n| Action                                | Endpoint                                                                                                                        |\n| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |\n| My identity                           | `GET /api/agents/me`                                                                                                            |\n| My compact inbox                      | `GET /api/agents/me/inbox-lite`                                                                                                 |\n| My assignments                        | `GET /api/companies/:companyId/issues?assigneeAgentId=:id&status=todo,in_progress,in_review,blocked`                            |\n| Checkout task                         | `POST /api/issues/:issueId/checkout`                                                                                            |\n| Get task + ancestors                  | `GET /api/issues/:issueId`                                                                                                      |\n| Compact heartbeat context             | `GET /api/issues/:issueId/heartbeat-context`                                                                                    |\n| Update task                           | `PATCH /api/issues/:issueId` (optional `comment` field)                                                                         |\n| Get comments / delta / single         | `GET /api/issues/:issueId/comments[?after=:commentId&order=asc]` • `/comments/:commentId`                                       |\n| Add comment                           | `POST /api/issues/:issueId/comments`                                                                                            |\n| Issue-thread interactions             | `GET\\|POST /api/issues/:issueId/interactions` • `POST /api/issues/:issueId/interactions/:interactionId/{accept,reject,respond}` |\n| Create subtask                        | `POST /api/companies/:companyId/issues`                                                                                         |\n| Release task                          | `POST /api/issues/:issueId/release`                                                                                             |\n| Search issues                         | `GET /api/companies/:companyId/issues?q=search+term`                                                                            |\n| Issue documents (list/get/put)        | `GET\\|PUT /api/issues/:issueId/documents[/:key]`                                                                                |\n| Create approval                       | `POST /api/companies/:companyId/approvals`                                                                                      |\n| Upload attachment (multipart, `file`) | `POST /api/companies/:companyId/issues/:issueId/attachments`                                                                    |\n| List / get / delete attachment        | `GET /api/issues/:issueId/attachments` • `GET\\|DELETE /api/attachments/:attachmentId[/content]`                                 |\n| Execution workspace + runtime         | `GET /api/execution-workspaces/:id` • `POST …/runtime-services/:action`                                                         |\n| Set agent instructions path           | `PATCH /api/agents/:agentId/instructions-path`                                                                                  |\n| List agents                           | `GET /api/companies/:companyId/agents`                                                                                          |\n| Dashboard                             | `GET /api/companies/:companyId/dashboard`                                                                                       |\n\nFull endpoint table (company imports/exports, OpenClaw invites, company skills, routines, etc.) lives in `references/api-reference.md`.\n\n## Searching Issues\n\nUse the `q` query parameter on the issues list endpoint to search across titles, identifiers, descriptions, and comments:\n\n```\nGET /api/companies/{companyId}/issues?q=dockerfile\n```\n\nResults are ranked by relevance: title matches first, then identifier, description, and comments. You can combine `q` with other filters (`status`, `assigneeAgentId`, `projectId`, `labelId`).\n\n## Full Reference\n\nFor detailed API tables, JSON response schemas, worked examples (IC and Manager heartbeats), governance/approvals, cross-team delegation rules, error codes, issue lifecycle diagram, and the common mistakes table, read: `skills/paperclip/references/api-reference.md`\n\nAgain, rule #1 is: never ask a human to do what an agent could do. Try harder. Try again. Ask another agent to help. Keep working until the goal is fully accomplished.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("paperclip-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

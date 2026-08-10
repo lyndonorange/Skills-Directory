@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CreateSkill - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/createskill-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>CreateSkill</h1>
+      <p class="description">MANDATORY for ALL skill work — you MUST invoke this skill BEFORE creating, modifying, adding a workflow/tool to, renaming, validating, or canonicalizing ANY skill. Handrolling skill files (writing SKILL.md or Workflows/Tools/References by hand) is FORBIDDEN per skills/CLAUDE.md — ALWAYS spawn this first and let it orchestrate; reading its workflows and doing the steps yourself is the exact anti-pattern it prevents. Owns the LifeOS skill lifecycle: scaffold (public TitleCase vs private _ALLCAPS, flat 2-level, mandatory Gotchas + Examples, BPE check), validate, canonicalize, test, improve, optimize descriptions. USE WHEN create skill, new skill, make a skill, build a skill, set up a skill, private skill, make a X skill, add a workflow, add a tool, edit/change/update/rename a skill, skill frontmatter, validate skill, check skill, canonicalize, scaffold skill, test skill, improve skill, optimize description, skill not triggering, overtriggering. NOT FOR TypeScript CLI generation (use CreateCLI).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>CreateSkill</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>CreateSkill</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>MANDATORY for ALL skill work — you MUST invoke this skill BEFORE creating, modifying, adding a workflow/tool to, renaming, validating, or canonicalizing ANY skill. Handrolling skill files (writing SKILL.md or Workflows/Tools/References by hand) is FORBIDDEN per skills/CLAUDE.md — ALWAYS spawn this first and let it orchestrate; reading its workflows and doing the steps yourself is the exact anti-pattern it prevents. Owns the LifeOS skill lifecycle: scaffold (public TitleCase vs private _ALLCAPS, flat 2-level, mandatory Gotchas + Examples, BPE check), validate, canonicalize, test, improve, optimize descriptions. USE WHEN create skill, new skill, make a skill, build a skill, set up a skill, private skill, make a X skill, add a workflow, add a tool, edit/change/update/rename a skill, skill frontmatter, validate skill, check skill, canonicalize, scaffold skill, test skill, improve skill, optimize description, skill not triggering, overtriggering. NOT FOR TypeScript CLI generation (use CreateCLI).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose CreateSkill, then write the task. Fallback prompt: Use the CreateSkill skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Customization</h3>
+<p><strong>Before executing, check for user customizations at:</strong> <code>~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/CreateSkill/</code></p>
+<p>If this directory exists, load and apply any PREFERENCES.md, configurations, or resources found there. These override default behavior. If the directory does not exist, proceed with skill defaults.</p>
+<h3>🚨 MANDATORY: Voice Notification (REQUIRED BEFORE ANY ACTION)</h3>
+<p><strong>You MUST send this notification BEFORE doing anything else when this skill is invoked.</strong></p>
+<ol>
+<li><strong>Send voice notification</strong>:</li>
+</ol>
+<pre><code>   curl -s -X POST http://localhost:31337/notify \
+     -H &quot;Content-Type: application/json&quot; \
+     -d '{&quot;message&quot;: &quot;Running the WORKFLOWNAME workflow in the CreateSkill skill to ACTION&quot;}' \
+     &gt; /dev/null 2&gt;&amp;1 &amp;</code></pre>
+<ol>
+<li><strong>Output text notification</strong>:</li>
+</ol>
+<pre><code>   Running the **WorkflowName** workflow in the **CreateSkill** skill to ACTION...</code></pre>
+<p><strong>This is not optional. Execute this curl command immediately upon skill invocation.</strong></p>
+<h2>CreateSkill</h2>
+<p>Complete skill development lifecycle: <strong>structure</strong> (create, validate, canonicalize) + <strong>effectiveness</strong> (test, improve, optimize triggers). Structural workflows ensure skills follow LifeOS conventions. Effectiveness workflows — inspired by Anthropic's skill-creator — ensure skills actually work and trigger reliably.</p>
+<h3>Authoritative Source</h3>
+<p><strong>Before creating ANY skill, READ:</strong> <code>~/.claude/LIFEOS/DOCUMENTATION/Skills/SkillSystem.md</code></p>
+<p><strong>Canonical example to follow:</strong> any well-formed public skill in <code>~/.claude/skills/</code> (e.g. <code>Research/SKILL.md</code>, <code>Daemon/SKILL.md</code>, <code>CreateSkill/SKILL.md</code> itself).</p>
+<h3>Naming Convention — Public vs Private</h3>
+<p><strong>Skill name encodes its public/private status. There are exactly two valid forms.</strong></p>
+<p>| Skill type | Directory format | Example | Allowed content | |------------|------------------|---------|-----------------| | <strong>Public</strong> | <code>TitleCase</code> | <code>Blogging</code>, <code>Daemon</code>, <code>CreateSkill</code> | Templated, safe, generic, ready for public release | | <strong>Private</strong> | <code>_ALLCAPS</code> (underscore prefix, all uppercase) | <code>&lt;your-release-skill&gt;</code>, <code>_INBOX</code>, <code>_BROADCAST</code>, <code>_DOTFILES</code> | Anything personal, sensitive, identity-bound, customer-bound, or environment-specific |</p>
+<p><strong>The leading underscore is the public-release boundary.</strong> Release tooling skips <code>_*</code> skills entirely — they never leave <code>~/.claude</code>. Public skills (no underscore) are mirrored into the LifeOS public release and MUST contain only generic, templated content.</p>
+<p><strong>Sub-file naming (both public and private skills):</strong></p>
+<p>| Component | Format | Example | |-----------|--------|---------| | Workflow files | <code>TitleCase.md</code> | <code>Create.md</code>, <code>UpdateDaemonInfo.md</code> | | Reference docs | <code>TitleCase.md</code> | <code>ProsodyGuide.md</code>, <code>ApiReference.md</code> | | Tool files | <code>TitleCase.ts</code> | <code>ManageServer.ts</code> | | Help files | <code>TitleCase.help.md</code> | <code>ManageServer.help.md</code> |</p>
+<p><strong>Wrong (NEVER use):</strong></p>
+<ul>
+<li>Skill dirs: <code>createskill</code>, <code>create-skill</code>, <code>CREATE_SKILL</code> (no underscore + caps for public; no kebab/snake for private)</li>
+<li>Files: <code>create.md</code>, <code>update-info.md</code>, <code>SYNC_REPO.md</code></li>
+</ul>
+<h4>Choosing public vs private — the decision rule</h4>
+<p>Ask: <strong>&quot;Could this skill be dropped, as-is, into a stranger's <code>~/.claude/skills/</code> and just work?&quot;</strong></p>
+<ul>
+<li><strong>Yes</strong> → public skill (<code>TitleCase</code>). Body must be generic; user-specific config layers in via <code>LIFEOS/USER/CUSTOMIZATIONS/SKILLS/&lt;SkillName&gt;/</code>.</li>
+<li><strong>No, because it references my identity, my contacts, my business, my customer, my paid API, my private infra, my domain, my private repo, my partner, or my financial/health/security data</strong> → private skill (<code>_ALLCAPS</code>).</li>
+</ul>
+<p><strong>When in doubt, build it private first (<code>_ALLCAPS</code>). Promoting <code>_FOO</code> → <code>Foo</code> later is easy. Discovering a public skill leaks your life is permanent.</strong></p>
+<hr>
+<h3>Public Release Readiness (MANDATORY)</h3>
+<p><strong>Public skills (<code>TitleCase</code>) ship to the world. Private skills (<code>_ALLCAPS</code>) never leave the local repo.</strong> Sensitivity is decided by skill name, not by per-file scrubbing at share-time.</p>
+<h4>The Bright Line</h4>
+<p><strong>Public skill (<code>TitleCase</code>) — content rule:</strong></p>
+<p>ONLY templated, safe, public, ready content. Period.</p>
+<ul>
+<li>✅ Generic instructions any LifeOS user could follow</li>
+<li>✅ Templated patterns with placeholders for user-specific values</li>
+<li>✅ Public API references and dependencies on public tools</li>
+<li>❌ Real names (people, products, companies, customers)</li>
+<li>❌ Real domains, hostnames, IPs, internal URLs</li>
+<li>❌ API keys, tokens, credentials, session cookies, OAuth secrets — even example-looking ones</li>
+<li>❌ Private repo paths or references (<code>github.com/&lt;org&gt;/&lt;private-repo&gt;</code>)</li>
+<li>❌ Customer data, customer-specific workflows, customer engagement context</li>
+<li>❌ First-person war stories tied to a specific incident, project, or person</li>
+<li>❌ User-specific filesystem paths (<code>/Users/&lt;name&gt;/...</code>, <code>/home/&lt;name&gt;/...</code>)</li>
+<li>❌ Identity-bound preferences (DA name, principal name, partner name, pet name, financial figures, health data)</li>
+</ul>
+<p><strong>Private skill (<code>_ALLCAPS</code>) — content rule:</strong></p>
+<p>Anything goes. Real names, real domains, real customers, real credentials-by-reference (env var names, never values), real war stories, real internal infra. The underscore IS the safety boundary. These skills are excluded from release tooling.</p>
+<h4>The Decision Test</h4>
+<p>When you find yourself wanting to write any of the following into a skill body, that skill MUST be <code>_ALLCAPS</code>:</p>
+<p>| If the skill mentions… | Skill must be | |------------------------|---------------| | A specific person's name (yours, your partner's, your team's, a customer's) | <code>_ALLCAPS</code> | | A specific product name you own or sell | <code>_ALLCAPS</code> | | A specific customer or client | <code>_ALLCAPS</code> | | A specific paid API account, billing realm, or subscription | <code>_ALLCAPS</code> | | A specific private domain, hostname, internal IP, or VPN | <code>_ALLCAPS</code> | | A specific private repo, dotfile location, or local infra | <code>_ALLCAPS</code> | | A specific business process tied to your company | <code>_ALLCAPS</code> | | A specific financial, health, security, or legal context | <code>_ALLCAPS</code> | | A specific incident or one-off war story | <code>_ALLCAPS</code> | | Anything that would be wrong, embarrassing, or unsafe in someone else's <code>~/.claude/</code> | <code>_ALLCAPS</code> |</p>
+<p>If none of the above apply and the skill is fully generic — it can be <code>TitleCase</code> (public).</p>
+<h4>Where Personal Layering Goes for Public Skills</h4>
+<p>A public skill can be made user-specific at runtime via <code>~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/&lt;SkillName&gt;/PREFERENCES.md</code>. The skill body stays generic; the user's customization file overlays per-instance context. Use this when a skill is fundamentally generic but benefits from per-user tweaks (preferred voice, default formats, personal taste).</p>
+<p><strong>Do not use SKILLCUSTOMIZATIONS to smuggle private content into a public skill.</strong> If the skill <em>requires</em> private context to function (real customer name, real API account, real internal infra), it is a private skill — name it <code>_ALLCAPS</code> and stop.</p>
+<h4>Allowed in Public Skills</h4>
+<ul>
+<li>Generic <code>~/</code> paths (<code>~/.claude/skills/</code>, <code>~/Projects/&lt;tool&gt;/</code>) — resolve per-user</li>
+<li>Public repo URLs for tools the skill depends on</li>
+<li>Public API endpoints that are conventions, not secrets (e.g., <code>localhost:31337/notify</code>)</li>
+<li>Example values clearly marked as placeholders (<code>&lt;url&gt;</code>, <code>&lt;SESSION_ID&gt;</code>, <code>test@example.com</code>)</li>
+<li>Generic env var <em>names</em> (never values): <code>STRIPE_API_KEY</code>, <code>OPENAI_API_KEY</code></li>
+</ul>
+<h4>Pre-Flight Grep (Public Skills Only)</h4>
+<p>Before shipping or modifying any <code>TitleCase</code> skill, run:</p>
+<pre><code>rg -i &quot;&lt;your-name&gt;|&lt;your-org&gt;|&lt;your-product&gt;|&lt;your-domain&gt;|/Users/[a-z]+/&quot; ~/.claude/skills/&lt;SkillName&gt;/</code></pre>
+<p>Zero matches = ready for public release. Any match = either scrub it, move it to SKILLCUSTOMIZATIONS, or rename the skill to <code>_ALLCAPS</code> and stop pretending it's public. <strong><code>_ALLCAPS</code> skills are exempt from this grep — they are private by design.</strong></p>
+<hr>
+<h3>Flat Folder Structure (MANDATORY)</h3>
+<p><strong>CRITICAL: Keep folder structure FLAT - maximum 2 levels deep.</strong></p>
+<h4>The Rule</h4>
+<p><strong>Maximum depth:</strong> <code>skills/SkillName/Category/</code></p>
+<h4>✅ ALLOWED (2 levels max)</h4>
+<pre><code>skills/SkillName/SKILL.md                    # Skill root
+skills/SkillName/Workflows/Create.md         # Workflow - one level deep - GOOD
+skills/SkillName/Tools/Manage.ts             # Tool - one level deep - GOOD
+skills/SkillName/QuickStartGuide.md          # Context file - in root - GOOD
+skills/SkillName/Examples.md                 # Context file - in root - GOOD</code></pre>
+<h4>❌ FORBIDDEN (Too deep OR wrong location)</h4>
+<pre><code>skills/SkillName/Resources/Guide.md              # Context files go in root, NOT Resources/
+skills/SkillName/Docs/Examples.md                # Context files go in root, NOT Docs/
+skills/SkillName/Workflows/Category/File.md      # THREE levels - NO
+skills/SkillName/Templates/Primitives/File.md    # THREE levels - NO
+skills/SkillName/Tools/Utils/Helper.ts           # THREE levels - NO</code></pre>
+<h4>Allowed Subdirectories</h4>
+<p><strong>These subdirectories are allowed:</strong></p>
+<ul>
+<li><strong>Workflows/</strong> - Execution workflows ONLY</li>
+<li><strong>Tools/</strong> - Executable scripts/tools ONLY</li>
+<li><strong>References/</strong> - Extended reference material for large skills (API docs, detailed guides)</li>
+</ul>
+<p><strong>Context files (documentation, guides, references) go in the skill ROOT or in References/.</strong></p>
+<p><strong>When to use References/:</strong> When SKILL.md exceeds ~500 lines and has substantial reference content (API signatures, detailed examples, troubleshooting guides). Keep SKILL.md as a routing guide; move encyclopedic content to References/.</p>
+<h4>Why</h4>
+<ol>
+<li><strong>Discoverability</strong> - Easy to find files</li>
+<li><strong>Simplicity</strong> - Less navigation overhead</li>
+<li><strong>Speed</strong> - Faster file operations</li>
+<li><strong>Consistency</strong> - Every skill follows same pattern</li>
+</ol>
+<p><strong>If you need to organize many workflows, use clear filenames instead of subdirectories:</strong></p>
+<p><strong>See:</strong> <code>~/.claude/LIFEOS/DOCUMENTATION/Skills/SkillSystem.md</code> (Flat Folder Structure section)</p>
+<hr>
+<h3>Dynamic Loading Pattern (Large Skills)</h3>
+<p><strong>For skills with SKILL.md &gt; 100 lines:</strong> Use dynamic loading to reduce context on skill invocation.</p>
+<h4>How Loading Works</h4>
+<p><strong>Session startup:</strong> Only frontmatter loads for routing <strong>Skill invocation:</strong> Full SKILL.md loads <strong>Context files:</strong> Load only when workflows reference them</p>
+<h4>The Pattern</h4>
+<p><strong>SKILL.md</strong> = Minimal (30-50 lines) - loads on skill invocation</p>
+<ul>
+<li>YAML frontmatter with triggers</li>
+<li>Brief description</li>
+<li>Workflow routing table</li>
+<li>Quick reference</li>
+<li>Pointers to context files</li>
+</ul>
+<p><strong>Additional .md files</strong> = Context files - SOPs for specific aspects (loaded on-demand)</p>
+<ul>
+<li>These are Standard Operating Procedures, not just documentation</li>
+<li>They provide specific handling instructions</li>
+<li>Can reference Workflows/, Tools/, etc.</li>
+</ul>
+<h4>🚨 CRITICAL: NO Context/ Subdirectory 🚨</h4>
+<p><strong>NEVER create Context/ or Docs/ subdirectories.</strong></p>
+<p>Additional .md files ARE the context files. They live <strong>directly in skill root</strong>.</p>
+<p><strong>WRONG:</strong></p>
+<pre><code>skills/Art/
+├── SKILL.md
+└── Context/              ❌ NEVER CREATE THIS
+    └── Aesthetic.md</code></pre>
+<p><strong>CORRECT:</strong></p>
+<pre><code>skills/Art/
+├── SKILL.md
+├── Aesthetic.md          ✅ Context file in skill root
+├── Examples.md           ✅ Context file in skill root
+└── Tools.md              ✅ Context file in skill root</code></pre>
+<p><strong>The skill directory IS the context.</strong></p>
+<h4>Example Structure</h4>
+<pre><code>skills/Art/
+├── SKILL.md              # 40 lines - minimal routing
+├── Aesthetic.md          # Context file - SOP for aesthetic
+├── Examples.md           # Context file - SOP for examples
+├── Tools.md              # Context file - SOP for tools
+├── Workflows/            # Workflows
+│   └── Essay.md
+└── Tools/                # CLI tools
+    └── Generate.ts</code></pre>
+<h4>Minimal SKILL.md Template</h4>
+<pre><code>---
+name: SkillName
+description: Create, test, and optimize LifeOS skills — scaffolding, effectiveness testing, description optimization. USE WHEN create skill, new skill, validate skill, test skill, improve skill, optimize description.
+---
+
+# SkillName
+
+Brief description.
+
+## Workflow Routing
+
+| Trigger | Workflow |
+|---------|----------|
+| &quot;trigger&quot; | `Workflows/WorkflowName.md` |
+
+## Quick Reference
+
+**Key points** (3-5 bullet points)
+
+**Full Documentation:**
+- Detail 1: `SkillSearch('skillname detail1')` → loads Detail1.md
+- Detail 2: `SkillSearch('skillname detail2')` → loads Detail2.md</code></pre>
+<h4>When To Use</h4>
+<p>✅ <strong>Use dynamic loading for:</strong></p>
+<ul>
+<li>SKILL.md &gt; 100 lines</li>
+<li>Multiple documentation sections</li>
+<li>Extensive API reference</li>
+<li>Detailed examples</li>
+</ul>
+<p>❌ <strong>Don't use for:</strong></p>
+<ul>
+<li>Simple skills (&lt; 50 lines)</li>
+<li>Pure utility wrappers (use LIFEOS/TOOLS.md instead)</li>
+</ul>
+<h4>Benefits</h4>
+<ul>
+<li><strong>Token Savings:</strong> 70%+ reduction on skill invocation (when full docs not needed)</li>
+<li><strong>Organization:</strong> SKILL.md = routing, context files = SOPs for specific aspects</li>
+<li><strong>Efficiency:</strong> Workflows load only what they actually need</li>
+<li><strong>Maintainability:</strong> Easier to update individual sections</li>
+</ul>
+<p><strong>See:</strong> <code>~/.claude/LIFEOS/DOCUMENTATION/Skills/SkillSystem.md</code> (Dynamic Loading Pattern section)</p>
+<hr>
+<h3>Workflow Routing</h3>
+<h4>Structure Workflows (scaffolding and conventions)</h4>
+<p>| Workflow | Trigger | File | |----------|---------|------| | <strong>CreateSkill</strong> | &quot;create a new skill&quot; | <code>Workflows/CreateSkill.md</code> | | <strong>ValidateSkill</strong> | &quot;validate skill&quot;, &quot;check skill&quot; | <code>Workflows/ValidateSkill.md</code> | | <strong>UpdateSkill</strong> | &quot;update skill&quot;, &quot;add workflow&quot; | <code>Workflows/UpdateSkill.md</code> | | <strong>CanonicalizeSkill</strong> | &quot;canonicalize&quot;, &quot;fix skill structure&quot; | <code>Workflows/CanonicalizeSkill.md</code> |</p>
+<h4>Effectiveness Workflows (testing and optimization)</h4>
+<p>| Workflow | Trigger | File | |----------|---------|------| | <strong>TestSkill</strong> | &quot;test skill&quot;, &quot;does this skill work&quot;, &quot;skill not working&quot; | <code>Workflows/TestSkill.md</code> | | <strong>ImproveSkill</strong> | &quot;improve skill&quot;, &quot;skill quality&quot;, &quot;fix skill instructions&quot; | <code>Workflows/ImproveSkill.md</code> | | <strong>OptimizeDescription</strong> | &quot;optimize description&quot;, &quot;skill not triggering&quot;, &quot;trigger accuracy&quot; | <code>Workflows/OptimizeDescription.md</code> |</p>
+<h3>Skill Types (Choose Before Building)</h3>
+<p>Before creating any skill, identify which of the 9 types it is (from Anthropic's internal skill taxonomy, Thariq Shihipar, Mar 2026). The type shapes structure and testing decisions.</p>
+<p>| Type | Focus | Key Structure | Example | |------|-------|---------------|---------| | 1. Library/API Reference | Gotchas, edge cases Claude gets wrong | Lightweight, gotchas-heavy, reference snippets | HonoReference, D1Reference | | 2. Product Validation | Test/verify code works | State assertions, browser automation, output recording | Browser | | 3. Data Fetching | Connect to data systems | Credential refs, query patterns, dashboard pointers | USMetrics, _METRICS | | 4. Business Process | Automate repetitive workflows | Execution logs, consistency tracking | _CLICKUP, _BROADCAST | | 5. Code Scaffolding | Generate framework boilerplate | Template files, project-aware scripts | CreateCLI, CreateSkill | | 6. Code Quality | Enforce standards, review | Deterministic scripts, hook integration | /simplify, /code-review | | 7. CI/CD &amp; Deployment | Deploy with safety patterns | Pre-deploy checks, smoke tests, rollback | (gap — needs Deploy skill) | | 8. Operations Runbooks | Map phenomena to diagnostics | Phenomenon → tool → query → report | _HEALTHCHECK | | 9. Infrastructure Ops | Maintenance with safety guardrails | Safety gates, audit logging, orphan detection | _LIFEOS, _DOTFILES |</p>
+<h3>Skill Writing Guidance</h3>
+<p>When writing or improving skill instructions, follow these principles from Anthropic's skill-creator methodology and Thariq Shihipar's &quot;Lessons from Building Claude Code&quot; (Mar 2026):</p>
+<h4>Core Principles</h4>
+<ul>
+<li><strong>Don't state the obvious.</strong> Claude is competent at programming and knows codebases. Focus on information that <strong>breaks Claude's default patterns</strong> — things it gets wrong without guidance. Test: &quot;Would Claude do this wrong without being told?&quot; If not, remove it.</li>
+<li><strong>Explain the why, not just the what.</strong> Models with good theory of mind + clear reasoning outperform models with rigid constraints. Instead of &quot;ALWAYS use 3 bullets&quot;, explain why bullets matter for the audience.</li>
+<li><strong>Keep it lean.</strong> The context window is a public good. Remove instructions that don't improve output. If test transcripts show the agent wasting time on unproductive steps, cut them. SKILL.md should be under 500 lines.</li>
+<li><strong>Cut intensifier-only lines.</strong> Stating a rule once is the instruction. <code>MANDATORY</code>, <code>CRITICAL</code>, &quot;not optional&quot;, and a third restatement add volume, not constraint — the model obeys specificity and code, not emphasis. Delete any line whose only content is shouting a rule stated elsewhere. Watch <code>## Best Practices</code> / <code>## Tips</code> sections: they collect default-restating filler (&quot;be thorough&quot;, &quot;keep it simple&quot;, &quot;validate carefully&quot;). Run the delete-test in <code>Prompting/Standards.md</code> § Signal-to-Noise on every line: cut it, and restore only if you can name the specific non-default behavior it forces.</li>
+<li><strong>Generalize, don't overfit.</strong> Fix underlying patterns, not specific test failures. The skill will be used on many prompts beyond your test set.</li>
+<li><strong>Bundle repeated work.</strong> If test agents all independently wrote similar helper scripts, add that script to Tools/ so every future invocation benefits.</li>
+<li><strong>Set appropriate degrees of freedom.</strong> Match specificity to task fragility. Database migrations need exact commands; code reviews need general direction.</li>
+<li><strong>Don't over-constrain.</strong> Skills are reused heavily. Avoid overly specific instructions. Provide needed information but leave flexibility for different contexts.</li>
+</ul>
+<h4>Description Best Practices</h4>
+<ul>
+<li><strong>Descriptions are for models, not humans.</strong> The description is injected into the system prompt. Claude reads it to decide whether to invoke the skill.</li>
+<li><strong>Descriptions should be slightly pushy.</strong> Models tend to undertrigger. Name specific scenarios even if the user might not explicitly mention the skill.</li>
+<li><strong>Include negative triggers for confusable skills.</strong> Add &quot;NOT FOR&quot; clauses when skills share vocabulary: <code>&quot;NOT FOR web pentesting (use WebAssessment)&quot;</code>.</li>
+<li><strong>Undertriggering signals:</strong> Skill doesn't load when it should, users manually invoking it.</li>
+<li><strong>Overtriggering signals:</strong> Skill loads for irrelevant queries, users disabling it.</li>
+</ul>
+<h4>Gotchas Section (MANDATORY)</h4>
+<p>Every skill MUST have a <code>## Gotchas</code> section after the workflow routing table. Thariq: &quot;The highest information density in any Skill comes from gotchas sections.&quot;</p>
+<p>Populate with:</p>
+<ul>
+<li>API quirks Claude doesn't know about</li>
+<li>Common mistakes observed during usage</li>
+<li>Ordering/sequencing requirements that aren't obvious</li>
+<li>Edge cases that cause silent failures</li>
+</ul>
+<p><strong>Gotchas accumulate over time.</strong> After every skill failure, add the lesson.</p>
+<h4>BPE (Bitter-Pilled Engineering) Check</h4>
+<p>Before finalizing any skill, ask: <strong>&quot;Would a smarter model make this skill unnecessary?&quot;</strong></p>
+<ul>
+<li><strong>Anti-fragile (keep):</strong> Verification harnesses, data pipelines, tool wrappers, accumulated gotchas, deterministic scripts</li>
+<li><strong>Fragile (question):</strong> CoT orchestrators, format parsers, retry cascades, elaborate reasoning scaffolding</li>
+</ul>
+<p>Focus skills on knowledge Claude can't derive (failure modes, API quirks), tools Claude can't replicate (API calls, automation), and workflows that benefit from consistency.</p>
+<h4>Progressive Disclosure (from Anthropic)</h4>
+<p>Three levels of information loading — use this to manage large skills:</p>
+<ol>
+<li><strong>Level 1 (YAML frontmatter):</strong> Always in system prompt. Triggering info only.</li>
+<li><strong>Level 2 (SKILL.md body):</strong> Loaded when skill is invoked. Routing + key guidance.</li>
+<li><strong>Level 3 (Reference files):</strong> Root-level <code>.md</code> files or <code>References/</code> subdirectory loaded on demand.</li>
+</ol>
+<p>Tell Claude what files exist; it will read them when appropriate. SKILL.md should be under 500 lines — if over, extract detailed content to reference files.</p>
+<h4>Testing Best Practices (from Anthropic)</h4>
+<p>Three testing levels for skills:</p>
+<ol>
+<li><strong>Manual testing</strong> — Run queries and observe behavior</li>
+<li><strong>Scripted testing</strong> — Automate test cases (use TestSkill workflow)</li>
+<li><strong>Programmatic testing</strong> — Build evaluation suites (use Evals skill)</li>
+</ol>
+<p><strong>Evaluation-driven development:</strong> Define what &quot;this skill working&quot; looks like before building the skill. Iterate on a single challenging task until Claude succeeds, then extract the winning approach.</p>
+<h4>On-Demand Hook Pattern (from Anthropic)</h4>
+<p>Skills can include hooks that activate only when invoked, remaining effective for the session:</p>
+<ul>
+<li><code>/careful</code> — Intercept dangerous commands (rm -rf, DROP TABLE, force-push)</li>
+<li><code>/freeze</code> — Block edits outside specific directories</li>
+<li><code>/audit</code> — Log all tool calls for session review</li>
+</ul>
+<p><em>All guidance above derived from Thariq Shihipar's &quot;Lessons from Building Claude Code&quot; (Mar 2026), Anthropic's official skill guide, and platform documentation.</em></p>
+<h3>Examples</h3>
+<p><strong>Example 1: Create a new skill from scratch</strong></p>
+<pre><code>User: &quot;Create a skill for managing my recipes&quot;
+→ Invokes CreateSkill workflow
+→ Reads SkillSystem.md for structure requirements
+→ Creates skill directory with TitleCase naming
+→ Creates SKILL.md, Workflows/, Tools/
+→ Suggests running TestSkill to verify effectiveness</code></pre>
+<p><strong>Example 2: Fix an existing skill that's not routing properly</strong></p>
+<pre><code>User: &quot;The research skill isn't triggering - validate it&quot;
+→ Invokes ValidateSkill workflow
+→ Checks SKILL.md against canonical format
+→ Verifies TitleCase naming and USE WHEN triggers
+→ Reports compliance issues with fixes</code></pre>
+<p><strong>Example 3: Test if a skill actually helps</strong></p>
+<pre><code>User: &quot;Test the Blogging skill to see if it's effective&quot;
+→ Invokes TestSkill workflow
+→ Generates 3 realistic test prompts
+→ Spawns with-skill and baseline agents in parallel
+→ Compares outputs, presents results
+→ Iterates with ImproveSkill based on feedback</code></pre>
+<p><strong>Example 4: Skill isn't triggering on relevant prompts</strong></p>
+<pre><code>User: &quot;The Security skill doesn't trigger when I ask about pentesting&quot;
+→ Invokes OptimizeDescription workflow
+→ Generates 20 should/shouldn't-trigger queries
+→ Tests description accuracy via subagents
+→ Rewrites description, re-tests, reports improvement</code></pre>
+<p><strong>Example 5: Improve a skill that produces weak output</strong></p>
+<pre><code>User: &quot;The research skill output is too verbose — improve it&quot;
+→ Invokes ImproveSkill workflow
+→ Reads skill + user feedback
+→ Diagnoses root cause (over-specified instructions)
+→ Rewrites with reasoning instead of rigid MUSTs
+→ Suggests TestSkill to verify improvement</code></pre>
+<h3>Gotchas</h3>
+<ul>
+<li><strong>This file's own description is at ~1022 chars — 2 under the 1024 cap.</strong> Any edit that adds characters to the frontmatter description must re-measure before saving (2026-06-13 audit).</li>
+<li><strong>Two <code>## Workflow Routing</code> headers exist in this file</strong> — the first (~l.276) is inside the embedded template example, the second (~l.315) is the real one. Header-scanning tools must take the LAST match, not the first.</li>
+<li><strong>Reading this skill's workflows and executing the steps by hand is the handrolling anti-pattern</strong> — <code>skills/CLAUDE.md</code> requires invoking the skill, not imitating it. The skill that mandates Gotchas sections went without one until 2026-06-13; treat checklist items as applying to this skill too.</li>
+</ul>
+<h3>Execution Log</h3>
+<p>After completing any workflow, append a single JSONL entry:</p>
+<pre><code>echo '{&quot;ts&quot;:&quot;'$(date -u +%Y-%m-%dT%H:%M:%SZ)'&quot;,&quot;skill&quot;:&quot;CreateSkill&quot;,&quot;workflow&quot;:&quot;WORKFLOW_USED&quot;,&quot;input&quot;:&quot;8_WORD_SUMMARY&quot;,&quot;status&quot;:&quot;ok|error&quot;,&quot;duration_s&quot;:SECONDS}' &gt;&gt; ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl</code></pre>
+<p>Replace <code>WORKFLOW_USED</code> with the workflow executed, <code>8_WORD_SUMMARY</code> with a brief input description, and <code>SECONDS</code> with approximate wall-clock time. Log <code>status: &quot;error&quot;</code> if the workflow failed.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: CreateSkill\ndisplay_name: CreateSkill\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# CreateSkill - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `CreateSkill` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nMANDATORY for ALL skill work — you MUST invoke this skill BEFORE creating, modifying, adding a workflow/tool to, renaming, validating, or canonicalizing ANY skill. Handrolling skill files (writing SKILL.md or Workflows/T\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose CreateSkill, then write the task. Fallback prompt: Use the CreateSkill skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `CreateSkill` |\n| Canonical name | `CreateSkill` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nMANDATORY for ALL skill work — you MUST invoke this skill BEFORE creating, modifying, adding a workflow/tool to, renaming, validating, or canonicalizing ANY skill. Handrolling skill files (writing SKILL.md or Workflows/T\n\n\n## Original SKILL.md\n\n---\nname: CreateSkill\ndescription: \"MANDATORY for ALL skill work — you MUST invoke this skill BEFORE creating, modifying, adding a workflow/tool to, renaming, validating, or canonicalizing ANY skill. Handrolling skill files (writing SKILL.md or Workflows/Tools/References by hand) is FORBIDDEN per skills/CLAUDE.md — ALWAYS spawn this first and let it orchestrate; reading its workflows and doing the steps yourself is the exact anti-pattern it prevents. Owns the LifeOS skill lifecycle: scaffold (public TitleCase vs private _ALLCAPS, flat 2-level, mandatory Gotchas + Examples, BPE check), validate, canonicalize, test, improve, optimize descriptions. USE WHEN create skill, new skill, make a skill, build a skill, set up a skill, private skill, make a X skill, add a workflow, add a tool, edit/change/update/rename a skill, skill frontmatter, validate skill, check skill, canonicalize, scaffold skill, test skill, improve skill, optimize description, skill not triggering, overtriggering. NOT FOR TypeScript CLI generation (use CreateCLI).\"\neffort: medium\n---\n\n## Customization\n\n**Before executing, check for user customizations at:**\n`~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/CreateSkill/`\n\nIf this directory exists, load and apply any PREFERENCES.md, configurations, or resources found there. These override default behavior. If the directory does not exist, proceed with skill defaults.\n\n\n## 🚨 MANDATORY: Voice Notification (REQUIRED BEFORE ANY ACTION)\n\n**You MUST send this notification BEFORE doing anything else when this skill is invoked.**\n\n1. **Send voice notification**:\n   ```bash\n   curl -s -X POST http://localhost:31337/notify \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\"message\": \"Running the WORKFLOWNAME workflow in the CreateSkill skill to ACTION\"}' \\\n     > /dev/null 2>&1 &\n   ```\n\n2. **Output text notification**:\n   ```\n   Running the **WorkflowName** workflow in the **CreateSkill** skill to ACTION...\n   ```\n\n**This is not optional. Execute this curl command immediately upon skill invocation.**\n\n# CreateSkill\n\nComplete skill development lifecycle: **structure** (create, validate, canonicalize) + **effectiveness** (test, improve, optimize triggers). Structural workflows ensure skills follow LifeOS conventions. Effectiveness workflows — inspired by Anthropic's skill-creator — ensure skills actually work and trigger reliably.\n\n## Authoritative Source\n\n**Before creating ANY skill, READ:** `~/.claude/LIFEOS/DOCUMENTATION/Skills/SkillSystem.md`\n\n**Canonical example to follow:** any well-formed public skill in `~/.claude/skills/` (e.g. `Research/SKILL.md`, `Daemon/SKILL.md`, `CreateSkill/SKILL.md` itself).\n\n## Naming Convention — Public vs Private\n\n**Skill name encodes its public/private status. There are exactly two valid forms.**\n\n| Skill type | Directory format | Example | Allowed content |\n|------------|------------------|---------|-----------------|\n| **Public** | `TitleCase` | `Blogging`, `Daemon`, `CreateSkill` | Templated, safe, generic, ready for public release |\n| **Private** | `_ALLCAPS` (underscore prefix, all uppercase) | `\u003cyour-release-skill>`, `_INBOX`, `_BROADCAST`, `_DOTFILES` | Anything personal, sensitive, identity-bound, customer-bound, or environment-specific |\n\n**The leading underscore is the public-release boundary.** Release tooling skips `_*` skills entirely — they never leave `~/.claude`. Public skills (no underscore) are mirrored into the LifeOS public release and MUST contain only generic, templated content.\n\n**Sub-file naming (both public and private skills):**\n\n| Component | Format | Example |\n|-----------|--------|---------|\n| Workflow files | `TitleCase.md` | `Create.md`, `UpdateDaemonInfo.md` |\n| Reference docs | `TitleCase.md` | `ProsodyGuide.md`, `ApiReference.md` |\n| Tool files | `TitleCase.ts` | `ManageServer.ts` |\n| Help files | `TitleCase.help.md` | `ManageServer.help.md` |\n\n**Wrong (NEVER use):**\n- Skill dirs: `createskill`, `create-skill`, `CREATE_SKILL` (no underscore + caps for public; no kebab/snake for private)\n- Files: `create.md`, `update-info.md`, `SYNC_REPO.md`\n\n### Choosing public vs private — the decision rule\n\nAsk: **\"Could this skill be dropped, as-is, into a stranger's `~/.claude/skills/` and just work?\"**\n\n- **Yes** → public skill (`TitleCase`). Body must be generic; user-specific config layers in via `LIFEOS/USER/CUSTOMIZATIONS/SKILLS/\u003cSkillName>/`.\n- **No, because it references my identity, my contacts, my business, my customer, my paid API, my private infra, my domain, my private repo, my partner, or my financial/health/security data** → private skill (`_ALLCAPS`).\n\n**When in doubt, build it private first (`_ALLCAPS`). Promoting `_FOO` → `Foo` later is easy. Discovering a public skill leaks your life is permanent.**\n\n---\n\n## Public Release Readiness (MANDATORY)\n\n**Public skills (`TitleCase`) ship to the world. Private skills (`_ALLCAPS`) never leave the local repo.** Sensitivity is decided by skill name, not by per-file scrubbing at share-time.\n\n### The Bright Line\n\n**Public skill (`TitleCase`) — content rule:**\n\nONLY templated, safe, public, ready content. Period.\n\n- ✅ Generic instructions any LifeOS user could follow\n- ✅ Templated patterns with placeholders for user-specific values\n- ✅ Public API references and dependencies on public tools\n- ❌ Real names (people, products, companies, customers)\n- ❌ Real domains, hostnames, IPs, internal URLs\n- ❌ API keys, tokens, credentials, session cookies, OAuth secrets — even example-looking ones\n- ❌ Private repo paths or references (`github.com/\u003corg>/\u003cprivate-repo>`)\n- ❌ Customer data, customer-specific workflows, customer engagement context\n- ❌ First-person war stories tied to a specific incident, project, or person\n- ❌ User-specific filesystem paths (`/Users/\u003cname>/...`, `/home/\u003cname>/...`)\n- ❌ Identity-bound preferences (DA name, principal name, partner name, pet name, financial figures, health data)\n\n**Private skill (`_ALLCAPS`) — content rule:**\n\nAnything goes. Real names, real domains, real customers, real credentials-by-reference (env var names, never values), real war stories, real internal infra. The underscore IS the safety boundary. These skills are excluded from release tooling.\n\n### The Decision Test\n\nWhen you find yourself wanting to write any of the following into a skill body, that skill MUST be `_ALLCAPS`:\n\n| If the skill mentions… | Skill must be |\n|------------------------|---------------|\n| A specific person's name (yours, your partner's, your team's, a customer's) | `_ALLCAPS` |\n| A specific product name you own or sell | `_ALLCAPS` |\n| A specific customer or client | `_ALLCAPS` |\n| A specific paid API account, billing realm, or subscription | `_ALLCAPS` |\n| A specific private domain, hostname, internal IP, or VPN | `_ALLCAPS` |\n| A specific private repo, dotfile location, or local infra | `_ALLCAPS` |\n| A specific business process tied to your company | `_ALLCAPS` |\n| A specific financial, health, security, or legal context | `_ALLCAPS` |\n| A specific incident or one-off war story | `_ALLCAPS` |\n| Anything that would be wrong, embarrassing, or unsafe in someone else's `~/.claude/` | `_ALLCAPS` |\n\nIf none of the above apply and the skill is fully generic — it can be `TitleCase` (public).\n\n### Where Personal Layering Goes for Public Skills\n\nA public skill can be made user-specific at runtime via `~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/\u003cSkillName>/PREFERENCES.md`. The skill body stays generic; the user's customization file overlays per-instance context. Use this when a skill is fundamentally generic but benefits from per-user tweaks (preferred voice, default formats, personal taste).\n\n**Do not use SKILLCUSTOMIZATIONS to smuggle private content into a public skill.** If the skill *requires* private context to function (real customer name, real API account, real internal infra), it is a private skill — name it `_ALLCAPS` and stop.\n\n### Allowed in Public Skills\n\n- Generic `~/` paths (`~/.claude/skills/`, `~/Projects/\u003ctool>/`) — resolve per-user\n- Public repo URLs for tools the skill depends on\n- Public API endpoints that are conventions, not secrets (e.g., `localhost:31337/notify`)\n- Example values clearly marked as placeholders (`\u003curl>`, `\u003cSESSION_ID>`, `test@example.com`)\n- Generic env var *names* (never values): `STRIPE_API_KEY`, `OPENAI_API_KEY`\n\n### Pre-Flight Grep (Public Skills Only)\n\nBefore shipping or modifying any `TitleCase` skill, run:\n```bash\nrg -i \"\u003cyour-name>|\u003cyour-org>|\u003cyour-product>|\u003cyour-domain>|/Users/[a-z]+/\" ~/.claude/skills/\u003cSkillName>/\n```\n\nZero matches = ready for public release. Any match = either scrub it, move it to SKILLCUSTOMIZATIONS, or rename the skill to `_ALLCAPS` and stop pretending it's public. **`_ALLCAPS` skills are exempt from this grep — they are private by design.**\n\n---\n\n## Flat Folder Structure (MANDATORY)\n\n**CRITICAL: Keep folder structure FLAT - maximum 2 levels deep.**\n\n### The Rule\n\n**Maximum depth:** `skills/SkillName/Category/`\n\n### ✅ ALLOWED (2 levels max)\n\n```\nskills/SkillName/SKILL.md                    # Skill root\nskills/SkillName/Workflows/Create.md         # Workflow - one level deep - GOOD\nskills/SkillName/Tools/Manage.ts             # Tool - one level deep - GOOD\nskills/SkillName/QuickStartGuide.md          # Context file - in root - GOOD\nskills/SkillName/Examples.md                 # Context file - in root - GOOD\n```\n\n### ❌ FORBIDDEN (Too deep OR wrong location)\n\n```\nskills/SkillName/Resources/Guide.md              # Context files go in root, NOT Resources/\nskills/SkillName/Docs/Examples.md                # Context files go in root, NOT Docs/\nskills/SkillName/Workflows/Category/File.md      # THREE levels - NO\nskills/SkillName/Templates/Primitives/File.md    # THREE levels - NO\nskills/SkillName/Tools/Utils/Helper.ts           # THREE levels - NO\n```\n\n### Allowed Subdirectories\n\n**These subdirectories are allowed:**\n- **Workflows/** - Execution workflows ONLY\n- **Tools/** - Executable scripts/tools ONLY\n- **References/** - Extended reference material for large skills (API docs, detailed guides)\n\n**Context files (documentation, guides, references) go in the skill ROOT or in References/.**\n\n**When to use References/:** When SKILL.md exceeds ~500 lines and has substantial reference content (API signatures, detailed examples, troubleshooting guides). Keep SKILL.md as a routing guide; move encyclopedic content to References/.\n\n### Why\n\n1. **Discoverability** - Easy to find files\n2. **Simplicity** - Less navigation overhead\n3. **Speed** - Faster file operations\n4. **Consistency** - Every skill follows same pattern\n\n**If you need to organize many workflows, use clear filenames instead of subdirectories:**\n\n**See:** `~/.claude/LIFEOS/DOCUMENTATION/Skills/SkillSystem.md` (Flat Folder Structure section)\n\n---\n\n## Dynamic Loading Pattern (Large Skills)\n\n**For skills with SKILL.md > 100 lines:** Use dynamic loading to reduce context on skill invocation.\n\n### How Loading Works\n\n**Session startup:** Only frontmatter loads for routing\n**Skill invocation:** Full SKILL.md loads\n**Context files:** Load only when workflows reference them\n\n### The Pattern\n\n**SKILL.md** = Minimal (30-50 lines) - loads on skill invocation\n- YAML frontmatter with triggers\n- Brief description\n- Workflow routing table\n- Quick reference\n- Pointers to context files\n\n**Additional .md files** = Context files - SOPs for specific aspects (loaded on-demand)\n- These are Standard Operating Procedures, not just documentation\n- They provide specific handling instructions\n- Can reference Workflows/, Tools/, etc.\n\n### 🚨 CRITICAL: NO Context/ Subdirectory 🚨\n\n**NEVER create Context/ or Docs/ subdirectories.**\n\nAdditional .md files ARE the context files. They live **directly in skill root**.\n\n**WRONG:**\n```\nskills/Art/\n├── SKILL.md\n└── Context/              ❌ NEVER CREATE THIS\n    └── Aesthetic.md\n```\n\n**CORRECT:**\n```\nskills/Art/\n├── SKILL.md\n├── Aesthetic.md          ✅ Context file in skill root\n├── Examples.md           ✅ Context file in skill root\n└── Tools.md              ✅ Context file in skill root\n```\n\n**The skill directory IS the context.**\n\n### Example Structure\n\n```\nskills/Art/\n├── SKILL.md              # 40 lines - minimal routing\n├── Aesthetic.md          # Context file - SOP for aesthetic\n├── Examples.md           # Context file - SOP for examples\n├── Tools.md              # Context file - SOP for tools\n├── Workflows/            # Workflows\n│   └── Essay.md\n└── Tools/                # CLI tools\n    └── Generate.ts\n```\n\n### Minimal SKILL.md Template\n\n```markdown\n---\nname: SkillName\ndescription: Create, test, and optimize LifeOS skills — scaffolding, effectiveness testing, description optimization. USE WHEN create skill, new skill, validate skill, test skill, improve skill, optimize description.\n---\n\n# SkillName\n\nBrief description.\n\n## Workflow Routing\n\n| Trigger | Workflow |\n|---------|----------|\n| \"trigger\" | `Workflows/WorkflowName.md` |\n\n## Quick Reference\n\n**Key points** (3-5 bullet points)\n\n**Full Documentation:**\n- Detail 1: `SkillSearch('skillname detail1')` → loads Detail1.md\n- Detail 2: `SkillSearch('skillname detail2')` → loads Detail2.md\n```\n\n### When To Use\n\n✅ **Use dynamic loading for:**\n- SKILL.md > 100 lines\n- Multiple documentation sections\n- Extensive API reference\n- Detailed examples\n\n❌ **Don't use for:**\n- Simple skills (\u003c 50 lines)\n- Pure utility wrappers (use LIFEOS/TOOLS.md instead)\n\n### Benefits\n\n- **Token Savings:** 70%+ reduction on skill invocation (when full docs not needed)\n- **Organization:** SKILL.md = routing, context files = SOPs for specific aspects\n- **Efficiency:** Workflows load only what they actually need\n- **Maintainability:** Easier to update individual sections\n\n**See:** `~/.claude/LIFEOS/DOCUMENTATION/Skills/SkillSystem.md` (Dynamic Loading Pattern section)\n\n---\n\n\n## Workflow Routing\n\n### Structure Workflows (scaffolding and conventions)\n\n| Workflow | Trigger | File |\n|----------|---------|------|\n| **CreateSkill** | \"create a new skill\" | `Workflows/CreateSkill.md` |\n| **ValidateSkill** | \"validate skill\", \"check skill\" | `Workflows/ValidateSkill.md` |\n| **UpdateSkill** | \"update skill\", \"add workflow\" | `Workflows/UpdateSkill.md` |\n| **CanonicalizeSkill** | \"canonicalize\", \"fix skill structure\" | `Workflows/CanonicalizeSkill.md` |\n\n### Effectiveness Workflows (testing and optimization)\n\n| Workflow | Trigger | File |\n|----------|---------|------|\n| **TestSkill** | \"test skill\", \"does this skill work\", \"skill not working\" | `Workflows/TestSkill.md` |\n| **ImproveSkill** | \"improve skill\", \"skill quality\", \"fix skill instructions\" | `Workflows/ImproveSkill.md` |\n| **OptimizeDescription** | \"optimize description\", \"skill not triggering\", \"trigger accuracy\" | `Workflows/OptimizeDescription.md` |\n\n## Skill Types (Choose Before Building)\n\nBefore creating any skill, identify which of the 9 types it is (from Anthropic's internal skill taxonomy, Thariq Shihipar, Mar 2026). The type shapes structure and testing decisions.\n\n| Type | Focus | Key Structure | Example |\n|------|-------|---------------|---------|\n| 1. Library/API Reference | Gotchas, edge cases Claude gets wrong | Lightweight, gotchas-heavy, reference snippets | HonoReference, D1Reference |\n| 2. Product Validation | Test/verify code works | State assertions, browser automation, output recording | Browser |\n| 3. Data Fetching | Connect to data systems | Credential refs, query patterns, dashboard pointers | USMetrics, _METRICS |\n| 4. Business Process | Automate repetitive workflows | Execution logs, consistency tracking | _CLICKUP, _BROADCAST |\n| 5. Code Scaffolding | Generate framework boilerplate | Template files, project-aware scripts | CreateCLI, CreateSkill |\n| 6. Code Quality | Enforce standards, review | Deterministic scripts, hook integration | /simplify, /code-review |\n| 7. CI/CD & Deployment | Deploy with safety patterns | Pre-deploy checks, smoke tests, rollback | (gap — needs Deploy skill) |\n| 8. Operations Runbooks | Map phenomena to diagnostics | Phenomenon → tool → query → report | _HEALTHCHECK |\n| 9. Infrastructure Ops | Maintenance with safety guardrails | Safety gates, audit logging, orphan detection | _LIFEOS, _DOTFILES |\n\n## Skill Writing Guidance\n\nWhen writing or improving skill instructions, follow these principles from Anthropic's skill-creator methodology and Thariq Shihipar's \"Lessons from Building Claude Code\" (Mar 2026):\n\n### Core Principles\n\n- **Don't state the obvious.** Claude is competent at programming and knows codebases. Focus on information that **breaks Claude's default patterns** — things it gets wrong without guidance. Test: \"Would Claude do this wrong without being told?\" If not, remove it.\n- **Explain the why, not just the what.** Models with good theory of mind + clear reasoning outperform models with rigid constraints. Instead of \"ALWAYS use 3 bullets\", explain why bullets matter for the audience.\n- **Keep it lean.** The context window is a public good. Remove instructions that don't improve output. If test transcripts show the agent wasting time on unproductive steps, cut them. SKILL.md should be under 500 lines.\n- **Cut intensifier-only lines.** Stating a rule once is the instruction. `MANDATORY`, `CRITICAL`, \"not optional\", and a third restatement add volume, not constraint — the model obeys specificity and code, not emphasis. Delete any line whose only content is shouting a rule stated elsewhere. Watch `## Best Practices` / `## Tips` sections: they collect default-restating filler (\"be thorough\", \"keep it simple\", \"validate carefully\"). Run the delete-test in `Prompting/Standards.md` § Signal-to-Noise on every line: cut it, and restore only if you can name the specific non-default behavior it forces.\n- **Generalize, don't overfit.** Fix underlying patterns, not specific test failures. The skill will be used on many prompts beyond your test set.\n- **Bundle repeated work.** If test agents all independently wrote similar helper scripts, add that script to Tools/ so every future invocation benefits.\n- **Set appropriate degrees of freedom.** Match specificity to task fragility. Database migrations need exact commands; code reviews need general direction.\n- **Don't over-constrain.** Skills are reused heavily. Avoid overly specific instructions. Provide needed information but leave flexibility for different contexts.\n\n### Description Best Practices\n\n- **Descriptions are for models, not humans.** The description is injected into the system prompt. Claude reads it to decide whether to invoke the skill.\n- **Descriptions should be slightly pushy.** Models tend to undertrigger. Name specific scenarios even if the user might not explicitly mention the skill.\n- **Include negative triggers for confusable skills.** Add \"NOT FOR\" clauses when skills share vocabulary: `\"NOT FOR web pentesting (use WebAssessment)\"`.\n- **Undertriggering signals:** Skill doesn't load when it should, users manually invoking it.\n- **Overtriggering signals:** Skill loads for irrelevant queries, users disabling it.\n\n### Gotchas Section (MANDATORY)\n\nEvery skill MUST have a `## Gotchas` section after the workflow routing table. Thariq: \"The highest information density in any Skill comes from gotchas sections.\"\n\nPopulate with:\n- API quirks Claude doesn't know about\n- Common mistakes observed during usage\n- Ordering/sequencing requirements that aren't obvious\n- Edge cases that cause silent failures\n\n**Gotchas accumulate over time.** After every skill failure, add the lesson.\n\n### BPE (Bitter-Pilled Engineering) Check\n\nBefore finalizing any skill, ask: **\"Would a smarter model make this skill unnecessary?\"**\n\n- **Anti-fragile (keep):** Verification harnesses, data pipelines, tool wrappers, accumulated gotchas, deterministic scripts\n- **Fragile (question):** CoT orchestrators, format parsers, retry cascades, elaborate reasoning scaffolding\n\nFocus skills on knowledge Claude can't derive (failure modes, API quirks), tools Claude can't replicate (API calls, automation), and workflows that benefit from consistency.\n\n### Progressive Disclosure (from Anthropic)\n\nThree levels of information loading — use this to manage large skills:\n1. **Level 1 (YAML frontmatter):** Always in system prompt. Triggering info only.\n2. **Level 2 (SKILL.md body):** Loaded when skill is invoked. Routing + key guidance.\n3. **Level 3 (Reference files):** Root-level `.md` files or `References/` subdirectory loaded on demand.\n\nTell Claude what files exist; it will read them when appropriate. SKILL.md should be under 500 lines — if over, extract detailed content to reference files.\n\n### Testing Best Practices (from Anthropic)\n\nThree testing levels for skills:\n1. **Manual testing** — Run queries and observe behavior\n2. **Scripted testing** — Automate test cases (use TestSkill workflow)\n3. **Programmatic testing** — Build evaluation suites (use Evals skill)\n\n**Evaluation-driven development:** Define what \"this skill working\" looks like before building the skill. Iterate on a single challenging task until Claude succeeds, then extract the winning approach.\n\n### On-Demand Hook Pattern (from Anthropic)\n\nSkills can include hooks that activate only when invoked, remaining effective for the session:\n- `/careful` — Intercept dangerous commands (rm -rf, DROP TABLE, force-push)\n- `/freeze` — Block edits outside specific directories\n- `/audit` — Log all tool calls for session review\n\n*All guidance above derived from Thariq Shihipar's \"Lessons from Building Claude Code\" (Mar 2026), Anthropic's official skill guide, and platform documentation.*\n\n## Examples\n\n**Example 1: Create a new skill from scratch**\n```\nUser: \"Create a skill for managing my recipes\"\n→ Invokes CreateSkill workflow\n→ Reads SkillSystem.md for structure requirements\n→ Creates skill directory with TitleCase naming\n→ Creates SKILL.md, Workflows/, Tools/\n→ Suggests running TestSkill to verify effectiveness\n```\n\n**Example 2: Fix an existing skill that's not routing properly**\n```\nUser: \"The research skill isn't triggering - validate it\"\n→ Invokes ValidateSkill workflow\n→ Checks SKILL.md against canonical format\n→ Verifies TitleCase naming and USE WHEN triggers\n→ Reports compliance issues with fixes\n```\n\n**Example 3: Test if a skill actually helps**\n```\nUser: \"Test the Blogging skill to see if it's effective\"\n→ Invokes TestSkill workflow\n→ Generates 3 realistic test prompts\n→ Spawns with-skill and baseline agents in parallel\n→ Compares outputs, presents results\n→ Iterates with ImproveSkill based on feedback\n```\n\n**Example 4: Skill isn't triggering on relevant prompts**\n```\nUser: \"The Security skill doesn't trigger when I ask about pentesting\"\n→ Invokes OptimizeDescription workflow\n→ Generates 20 should/shouldn't-trigger queries\n→ Tests description accuracy via subagents\n→ Rewrites description, re-tests, reports improvement\n```\n\n**Example 5: Improve a skill that produces weak output**\n```\nUser: \"The research skill output is too verbose — improve it\"\n→ Invokes ImproveSkill workflow\n→ Reads skill + user feedback\n→ Diagnoses root cause (over-specified instructions)\n→ Rewrites with reasoning instead of rigid MUSTs\n→ Suggests TestSkill to verify improvement\n```\n\n## Gotchas\n\n- **This file's own description is at ~1022 chars — 2 under the 1024 cap.** Any edit that adds characters to the frontmatter description must re-measure before saving (2026-06-13 audit).\n- **Two `## Workflow Routing` headers exist in this file** — the first (~l.276) is inside the embedded template example, the second (~l.315) is the real one. Header-scanning tools must take the LAST match, not the first.\n- **Reading this skill's workflows and executing the steps by hand is the handrolling anti-pattern** — `skills/CLAUDE.md` requires invoking the skill, not imitating it. The skill that mandates Gotchas sections went without one until 2026-06-13; treat checklist items as applying to this skill too.\n\n## Execution Log\n\nAfter completing any workflow, append a single JSONL entry:\n\n```bash\necho '{\"ts\":\"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'\",\"skill\":\"CreateSkill\",\"workflow\":\"WORKFLOW_USED\",\"input\":\"8_WORD_SUMMARY\",\"status\":\"ok|error\",\"duration_s\":SECONDS}' >> ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl\n```\n\nReplace `WORKFLOW_USED` with the workflow executed, `8_WORD_SUMMARY` with a brief input description, and `SECONDS` with approximate wall-clock time. Log `status: \"error\"` if the workflow failed.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("createskill-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

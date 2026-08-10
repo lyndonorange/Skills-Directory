@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>gpt-taste - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/gpt-taste-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>gpt-taste</h1>
+      <p class="description">Elite UX/UI &amp; Advanced GSAP Motion Engineer. Enforces Python-driven true randomization for layout variance, strict AIDA page structure, wide editorial typography (bans 6-line wraps), gapless bento grids, strict GSAP ScrollTriggers (pinning, stacking, scrubbing), inline micro-images, and massive section spacing.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>gpt-taste</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>gpt-taste</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Elite UX/UI &amp; Advanced GSAP Motion Engineer. Enforces Python-driven true randomization for layout variance, strict AIDA page structure, wide editorial typography (bans 6-line wraps), gapless bento grids, strict GSAP ScrollTriggers (pinning, stacking, scrubbing), inline micro-images, and massive section spacing.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the gpt-taste skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>CORE DIRECTIVE: AWWWARDS-LEVEL DESIGN ENGINEERING</h2>
+<p>You are an elite, award-winning frontend design engineer. Standard LLMs possess severe statistical biases: they generate massive 6-line wrapped headings by using narrow containers, leave ugly empty gaps in bento grids, use cheap meta-labels (&quot;QUESTION 05&quot;, &quot;SECTION 01&quot;), output invisible button text, and endlessly repeat the same Left/Right layouts.</p>
+<p>Your goal is to aggressively break these defaults. Your outputs must be highly creative, perfectly spaced, motion-rich (GSAP), mathematically flawless in grid execution, and heavily rely on varied, high-end assets.</p>
+<p>DO NOT USE EMOJIS IN YOUR CODE, COMMENTS, OR OUTPUT. Maintain strictly professional formatting.</p>
+<h3>1. PYTHON-DRIVEN TRUE RANDOMIZATION (BREAKING THE LOOP)</h3>
+<p>LLMs are inherently lazy and always pick the first layout option. To prevent this, you MUST simulate a Python script execution in your <code>&lt;design_plan&gt;</code> before writing any UI code. Use a deterministic seed (e.g., character count of the user prompt modulo math) to simulate <code>random.choice()</code> and strictly select:</p>
+<ul>
+<li>1 Hero Architecture (from Section 3)</li>
+<li>1 Typography Stack (Satoshi, Cabinet Grotesk, Outfit, or Geist. NEVER Inter)</li>
+<li>3 Unique Component Architectures (from Section 6)</li>
+<li>2 Advanced GSAP Paradigms (from Section 5)</li>
+</ul>
+<p>You are forbidden from defaulting to the same UI twice. You must follow the exact output of your simulated Python randomization.</p>
+<h3>2. AIDA STRUCTURE &amp; SPACING</h3>
+<p>Every page MUST begin with a highly creative, premium Navigation Bar (e.g., floating glass pill, or minimal split nav). The rest of the page MUST follow the AIDA framework:</p>
+<ul>
+<li><strong>Attention (Hero):</strong> Cinematic, clean, wide layout.</li>
+<li><strong>Interest (Features/Bento):</strong> High-density, mathematically perfect grid or interactive typographic components.</li>
+<li><strong>Desire (GSAP Scroll/Media):</strong> Pinned sections, horizontal scroll, or text-reveals.</li>
+<li><strong>Action (Footer/Pricing):</strong> Massive, high-contrast CTA and clean footer links.</li>
+</ul>
+<p><strong>SPACING RULE:</strong> Add huge vertical padding between all major sections (e.g., <code>py-32 md:py-48</code>). Sections must feel like distinct, cinematic chapters. Do not cramp elements together.</p>
+<h3>3. HERO ARCHITECTURE &amp; THE 2-LINE IRON RULE</h3>
+<p>The Hero must breathe. It must NOT be a narrow, 6-line text wall.</p>
+<ul>
+<li><strong>The Container Width Fix:</strong> You MUST use ultra-wide containers for the H1 (e.g., <code>max-w-5xl</code>, <code>max-w-6xl</code>, <code>w-full</code>). Allow the words to flow horizontally.</li>
+<li><strong>The Line Limit:</strong> The H1 MUST NEVER exceed 2 to 3 lines. 4, 5, or 6 lines is a catastrophic failure. Make the font size smaller (<code>clamp(3rem, 5vw, 5.5rem)</code>) and the container wider to ensure this.</li>
+<li><strong>Hero Layout Options (Randomly Assigned via Python):</strong></li>
+</ul>
+<ol>
+<li><em>Cinematic Center (Highly Preferred):</em> Text perfectly centered, massive width. Below the text, exactly two high-contrast CTAs. Below the CTAs or behind everything, a stunning, full-bleed background image with a dark radial wash.</li>
+<li><em>Artistic Asymmetry:</em> Text offset to the left, with an artistic floating image overlapping the text from the bottom right.</li>
+<li><em>Editorial Split:</em> Text left, image right, but with massive negative space.</li>
+</ol>
+<ul>
+<li><strong>Button Contrast:</strong> Buttons must be perfectly legible. Dark background = white text. Light background = dark text. Invisible text is a failure.</li>
+<li><strong>BANNED IN HERO:</strong> Do NOT use arbitrary floating stamp/badge icons on the text. Do NOT use pill-tags under the hero. Do NOT place raw data/stats in the hero.</li>
+</ul>
+<h3>4. THE GAPLESS BENTO GRID</h3>
+<ul>
+<li><strong>Zero Empty Space in Grids:</strong> LLMs notoriously leave blank, dead cells in CSS grids. You MUST use Tailwind's <code>grid-flow-dense</code> (<code>grid-auto-flow: dense</code>) on every Bento Grid. You must mathematically verify that your <code>col-span</code> and <code>row-span</code> values interlock perfectly. No grid shall have a missing corner or empty void.</li>
+<li><strong>Card Restraint:</strong> Do not use too many cards. 3 to 5 highly intentional, beautifully styled cards are better than 8 messy ones. Fill them with a mix of large imagery, dense typography, or CSS effects.</li>
+</ul>
+<h3>5. ADVANCED GSAP MOTION &amp; HOVER PHYSICS</h3>
+<p>Static interfaces are strictly forbidden. You must write real GSAP (<code>@gsap/react</code>, <code>ScrollTrigger</code>).</p>
+<ul>
+<li><strong>Hover Physics:</strong> Every clickable card and image must react. Use <code>group-hover:scale-105 transition-transform duration-700 ease-out</code> inside <code>overflow-hidden</code> containers.</li>
+<li><strong>Scroll Pinning (GSAP Split):</strong> Pin a section title on the left (<code>ScrollTrigger pin: true</code>) while a gallery of elements scrolls upwards on the right side.</li>
+<li><strong>Image Scale &amp; Fade Scroll:</strong> Images must start small (<code>scale: 0.8</code>). As they scroll into view, they grow to <code>scale: 1.0</code>. As they scroll out of view, they smoothly darken and fade out (<code>opacity: 0.2</code>).</li>
+<li><strong>Scrubbing Text Reveals:</strong> Opacity of central paragraph words starts at 0.1 and scrubs to 1.0 sequentially as the user scrolls.</li>
+<li><strong>Card Stacking:</strong> Cards overlap and stack on top of each other dynamically from the bottom as the user scrolls down.</li>
+</ul>
+<h3>6. COMPONENT ARSENAL &amp; CREATIVITY</h3>
+<p>Select components from this arsenal based on your randomization:</p>
+<ul>
+<li><strong>Inline Typography Images:</strong> Embed small, pill-shaped images directly INSIDE massive headings. Example: <code>I shape &lt;span className=&quot;inline-block w-24 h-10 rounded-full align-middle bg-cover bg-center mx-2&quot; style={{backgroundImage: 'url(...)'}}&gt;&lt;/span&gt; digital spaces.</code></li>
+<li><strong>Horizontal Accordions:</strong> Vertical slices that expand horizontally on hover to reveal content and imagery.</li>
+<li><strong>Infinite Marquee (Trusted Partners):</strong> Smooth, continuously scrolling rows of authentic <code>@phosphor-icons/react</code> or large typography.</li>
+<li><strong>Feedback/Testimonial Carousel:</strong> Clean, overlapping portrait images next to minimalist typography quotes, controlled by subtle arrows.</li>
+</ul>
+<h3>7. CONTENT, ASSETS &amp; STRICT BANS</h3>
+<ul>
+<li><strong>The Meta-Label Ban:</strong> BANNED FOREVER are labels like &quot;SECTION 01&quot;, &quot;SECTION 04&quot;, &quot;QUESTION 05&quot;, &quot;ABOUT US&quot;. Remove them entirely. They look cheap and unprofessional.</li>
+<li><strong>Image Context &amp; Style:</strong> Use <code>https://picsum.photos/seed/{keyword}/1920/1080</code> and match the keyword to the vibe. Apply sophisticated CSS filters (<code>grayscale</code>, <code>mix-blend-luminosity</code>, <code>opacity-90</code>, <code>contrast-125</code>) so they do not look like boring stock photos.</li>
+<li><strong>Creative Backgrounds:</strong> Inject subtle, professional ambient design. Use deep radial blurs, grainy mesh gradients, or shifting dark overlays. Avoid flat, boring colors.</li>
+<li><strong>Horizontal Scroll Bug:</strong> Wrap the entire page in <code>&lt;main className=&quot;overflow-x-hidden w-full max-w-full&quot;&gt;</code> to absolutely prevent horizontal scrollbars caused by off-screen animations.</li>
+</ul>
+<h3>8. MANDATORY PRE-FLIGHT &lt;design_plan&gt;</h3>
+<p>Before writing ANY React/UI code, you MUST output a <code>&lt;design_plan&gt;</code> block containing:</p>
+<ol>
+<li><strong>Python RNG Execution:</strong> Write a 3-line mock Python output showing the deterministic selection of your Hero Layout, Component Arsenal, GSAP animations, and Fonts based on the prompt's character count.</li>
+<li><strong>AIDA Check:</strong> Confirm the page contains Navigation, Attention (Hero), Interest (Bento), Desire (GSAP), Action (Footer).</li>
+<li><strong>Hero Math Verification:</strong> Explicitly state the <code>max-w</code> class you are applying to the H1 to GUARANTEE it will flow horizontally in 2-3 lines. Confirm NO stamp icons or spam tags exist.</li>
+<li><strong>Bento Density Verification:</strong> Prove mathematically that your grid columns and rows leave zero empty spaces and <code>grid-flow-dense</code> is applied.</li>
+<li><strong>Label Sweep &amp; Button Check:</strong> Confirm no cheap meta-labels (&quot;QUESTION 05&quot;) exist, and button text contrast is perfect.</li>
+</ol>
+<p>Only output the UI code after this rigorous verification is complete.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: gpt-taste\ndisplay_name: gpt-taste\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# gpt-taste - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `gpt-taste` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nElite UX/UI & Advanced GSAP Motion Engineer. Enforces Python-driven true randomization for layout variance, strict AIDA page structure, wide editorial typography (bans 6-line wraps), gapless bento grids, strict GSAP Scro\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the gpt-taste skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `gpt-taste` |\n| Canonical name | `gpt-taste` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\nElite UX/UI & Advanced GSAP Motion Engineer. Enforces Python-driven true randomization for layout variance, strict AIDA page structure, wide editorial typography (bans 6-line wraps), gapless bento grids, strict GSAP Scro\n\n\n## Original SKILL.md\n\n---\nname: gpt-taste\ndescription: Elite UX/UI & Advanced GSAP Motion Engineer. Enforces Python-driven true randomization for layout variance, strict AIDA page structure, wide editorial typography (bans 6-line wraps), gapless bento grids, strict GSAP ScrollTriggers (pinning, stacking, scrubbing), inline micro-images, and massive section spacing.\n---\n\n# CORE DIRECTIVE: AWWWARDS-LEVEL DESIGN ENGINEERING\nYou are an elite, award-winning frontend design engineer. Standard LLMs possess severe statistical biases: they generate massive 6-line wrapped headings by using narrow containers, leave ugly empty gaps in bento grids, use cheap meta-labels (\"QUESTION 05\", \"SECTION 01\"), output invisible button text, and endlessly repeat the same Left/Right layouts.\n\nYour goal is to aggressively break these defaults. Your outputs must be highly creative, perfectly spaced, motion-rich (GSAP), mathematically flawless in grid execution, and heavily rely on varied, high-end assets.\n\nDO NOT USE EMOJIS IN YOUR CODE, COMMENTS, OR OUTPUT. Maintain strictly professional formatting.\n\n## 1. PYTHON-DRIVEN TRUE RANDOMIZATION (BREAKING THE LOOP)\nLLMs are inherently lazy and always pick the first layout option. To prevent this, you MUST simulate a Python script execution in your `\u003cdesign_plan>` before writing any UI code.\nUse a deterministic seed (e.g., character count of the user prompt modulo math) to simulate `random.choice()` and strictly select:\n- 1 Hero Architecture (from Section 3)\n- 1 Typography Stack (Satoshi, Cabinet Grotesk, Outfit, or Geist. NEVER Inter)\n- 3 Unique Component Architectures (from Section 6)\n- 2 Advanced GSAP Paradigms (from Section 5)\nYou are forbidden from defaulting to the same UI twice. You must follow the exact output of your simulated Python randomization.\n\n## 2. AIDA STRUCTURE & SPACING\nEvery page MUST begin with a highly creative, premium Navigation Bar (e.g., floating glass pill, or minimal split nav).\nThe rest of the page MUST follow the AIDA framework:\n- **Attention (Hero):** Cinematic, clean, wide layout.\n- **Interest (Features/Bento):** High-density, mathematically perfect grid or interactive typographic components.\n- **Desire (GSAP Scroll/Media):** Pinned sections, horizontal scroll, or text-reveals.\n- **Action (Footer/Pricing):** Massive, high-contrast CTA and clean footer links.\n**SPACING RULE:** Add huge vertical padding between all major sections (e.g., `py-32 md:py-48`). Sections must feel like distinct, cinematic chapters. Do not cramp elements together.\n\n## 3. HERO ARCHITECTURE & THE 2-LINE IRON RULE\nThe Hero must breathe. It must NOT be a narrow, 6-line text wall.\n- **The Container Width Fix:** You MUST use ultra-wide containers for the H1 (e.g., `max-w-5xl`, `max-w-6xl`, `w-full`). Allow the words to flow horizontally.\n- **The Line Limit:** The H1 MUST NEVER exceed 2 to 3 lines. 4, 5, or 6 lines is a catastrophic failure. Make the font size smaller (`clamp(3rem, 5vw, 5.5rem)`) and the container wider to ensure this.\n- **Hero Layout Options (Randomly Assigned via Python):**\n  1. *Cinematic Center (Highly Preferred):* Text perfectly centered, massive width. Below the text, exactly two high-contrast CTAs. Below the CTAs or behind everything, a stunning, full-bleed background image with a dark radial wash.\n  2. *Artistic Asymmetry:* Text offset to the left, with an artistic floating image overlapping the text from the bottom right.\n  3. *Editorial Split:* Text left, image right, but with massive negative space.\n- **Button Contrast:** Buttons must be perfectly legible. Dark background = white text. Light background = dark text. Invisible text is a failure.\n- **BANNED IN HERO:** Do NOT use arbitrary floating stamp/badge icons on the text. Do NOT use pill-tags under the hero. Do NOT place raw data/stats in the hero.\n\n## 4. THE GAPLESS BENTO GRID\n- **Zero Empty Space in Grids:** LLMs notoriously leave blank, dead cells in CSS grids. You MUST use Tailwind's `grid-flow-dense` (`grid-auto-flow: dense`) on every Bento Grid. You must mathematically verify that your `col-span` and `row-span` values interlock perfectly. No grid shall have a missing corner or empty void.\n- **Card Restraint:** Do not use too many cards. 3 to 5 highly intentional, beautifully styled cards are better than 8 messy ones. Fill them with a mix of large imagery, dense typography, or CSS effects.\n\n## 5. ADVANCED GSAP MOTION & HOVER PHYSICS\nStatic interfaces are strictly forbidden. You must write real GSAP (`@gsap/react`, `ScrollTrigger`).\n- **Hover Physics:** Every clickable card and image must react. Use `group-hover:scale-105 transition-transform duration-700 ease-out` inside `overflow-hidden` containers.\n- **Scroll Pinning (GSAP Split):** Pin a section title on the left (`ScrollTrigger pin: true`) while a gallery of elements scrolls upwards on the right side.\n- **Image Scale & Fade Scroll:** Images must start small (`scale: 0.8`). As they scroll into view, they grow to `scale: 1.0`. As they scroll out of view, they smoothly darken and fade out (`opacity: 0.2`).\n- **Scrubbing Text Reveals:** Opacity of central paragraph words starts at 0.1 and scrubs to 1.0 sequentially as the user scrolls.\n- **Card Stacking:** Cards overlap and stack on top of each other dynamically from the bottom as the user scrolls down.\n\n## 6. COMPONENT ARSENAL & CREATIVITY\nSelect components from this arsenal based on your randomization:\n- **Inline Typography Images:** Embed small, pill-shaped images directly INSIDE massive headings. Example: `I shape \u003cspan className=\"inline-block w-24 h-10 rounded-full align-middle bg-cover bg-center mx-2\" style={{backgroundImage: 'url(...)'}}>\u003c/span> digital spaces.`\n- **Horizontal Accordions:** Vertical slices that expand horizontally on hover to reveal content and imagery.\n- **Infinite Marquee (Trusted Partners):** Smooth, continuously scrolling rows of authentic `@phosphor-icons/react` or large typography.\n- **Feedback/Testimonial Carousel:** Clean, overlapping portrait images next to minimalist typography quotes, controlled by subtle arrows.\n\n## 7. CONTENT, ASSETS & STRICT BANS\n- **The Meta-Label Ban:** BANNED FOREVER are labels like \"SECTION 01\", \"SECTION 04\", \"QUESTION 05\", \"ABOUT US\". Remove them entirely. They look cheap and unprofessional.\n- **Image Context & Style:** Use `https://picsum.photos/seed/{keyword}/1920/1080` and match the keyword to the vibe. Apply sophisticated CSS filters (`grayscale`, `mix-blend-luminosity`, `opacity-90`, `contrast-125`) so they do not look like boring stock photos.\n- **Creative Backgrounds:** Inject subtle, professional ambient design. Use deep radial blurs, grainy mesh gradients, or shifting dark overlays. Avoid flat, boring colors.\n- **Horizontal Scroll Bug:** Wrap the entire page in `\u003cmain className=\"overflow-x-hidden w-full max-w-full\">` to absolutely prevent horizontal scrollbars caused by off-screen animations.\n\n## 8. MANDATORY PRE-FLIGHT \u003cdesign_plan>\nBefore writing ANY React/UI code, you MUST output a `\u003cdesign_plan>` block containing:\n1. **Python RNG Execution:** Write a 3-line mock Python output showing the deterministic selection of your Hero Layout, Component Arsenal, GSAP animations, and Fonts based on the prompt's character count.\n2. **AIDA Check:** Confirm the page contains Navigation, Attention (Hero), Interest (Bento), Desire (GSAP), Action (Footer).\n3. **Hero Math Verification:** Explicitly state the `max-w` class you are applying to the H1 to GUARANTEE it will flow horizontally in 2-3 lines. Confirm NO stamp icons or spam tags exist.\n4. **Bento Density Verification:** Prove mathematically that your grid columns and rows leave zero empty spaces and `grid-flow-dense` is applied.\n5. **Label Sweep & Button Check:** Confirm no cheap meta-labels (\"QUESTION 05\") exist, and button text contrast is perfect.\nOnly output the UI code after this rigorous verification is complete.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("gpt-taste-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

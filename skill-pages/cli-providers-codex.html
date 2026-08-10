@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>cli-providers - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/cli-providers-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>cli-providers</h1>
+      <p class="description">Manage provider connections from the CLI: list available/configured providers, add, test, test-all, validate, rotate API keys, and view per-provider metrics.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>cli-providers</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>cli-providers</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Manage provider connections from the CLI: list available/configured providers, add, test, test-all, validate, rotate API keys, and view per-provider metrics.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose cli-providers, then write the task. Fallback prompt: Use the cli-providers skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <p>&lt;!-- generated by src/lib/agentSkills/generator.ts; manual edits will be overwritten --&gt;</p>
+<h3>Overview</h3>
+<p>Manage provider connections from the CLI: list available/configured providers, add, test, test-all, validate, rotate API keys, and view per-provider metrics.</p>
+<h3>Quick install</h3>
+<pre><code>npm install -g omniroute   # or: npx omniroute
+omniroute --version</code></pre>
+<h3>Subcommands</h3>
+<h4><code>provider-cmd provider [subcommand]</code></h4>
+<p>Manage provider connections (use</p>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute provider-cmd provider [subcommand]</code></pre>
+<h4><code>providers</code></h4>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute providers</code></pre>
+<h4><code>providers available</code></h4>
+<p>Show available providers in the OmniRoute catalog</p>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--json</code></li>
+<li><code>--search &lt;query&gt;</code></li>
+<li><code>-q, --q &lt;query&gt;</code></li>
+<li><code>--category &lt;category&gt;</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute providers available</code></pre>
+<h4><code>providers list</code></h4>
+<p>List configured provider connections</p>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--json</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute providers list</code></pre>
+<h4><code>providers test &lt;idOrName&gt;</code></h4>
+<p>Test a configured provider connection</p>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--json</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute providers test &lt;idOrName&gt;</code></pre>
+<h4><code>providers test-all</code></h4>
+<p>Test all active provider connections</p>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--json</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute providers test-all</code></pre>
+<h4><code>providers validate</code></h4>
+<p>Validate local provider configuration without calling upstream</p>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--json</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute providers validate</code></pre>
+<h4><code>providers rotate &lt;idOrName&gt;</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--new-key &lt;key&gt;</code></li>
+<li><code>--from-env &lt;VAR&gt;</code></li>
+<li><code>--oauth</code></li>
+<li><code>--yes</code></li>
+<li><code>--skip-test</code></li>
+<li><code>--dry-run</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute providers rotate &lt;idOrName&gt;</code></pre>
+<h4><code>providers status</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--provider &lt;name&gt;</code></li>
+<li><code>--json</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute providers status</code></pre>
+<h4><code>providers metrics</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--provider &lt;id&gt;</code></li>
+<li><code>--connection-id &lt;id&gt;</code></li>
+<li><code>--period &lt;p&gt;</code></li>
+<li><code>--metric &lt;m&gt;</code></li>
+<li><code>--sort-by &lt;field&gt;</code></li>
+<li><code>--limit &lt;n&gt;</code></li>
+<li><code>--watch</code></li>
+<li><code>--compare &lt;list&gt;</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute providers metrics</code></pre>
+<h4><code>providers metric &lt;connectionId&gt; &lt;metric&gt;</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--period &lt;p&gt;</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute providers metric &lt;connectionId&gt; &lt;metric&gt;</code></pre>
+<h4><code>test-provider test [provider] [model]</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--all-providers</code></li>
+<li><code>--json</code></li>
+<li><code>--latency</code></li>
+<li><code>--repeat &lt;n&gt;</code></li>
+<li><code>--compare &lt;models&gt;</code></li>
+<li><code>--save &lt;path&gt;</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute test-provider test [provider] [model]</code></pre>
+<p>&lt;!-- skill:custom-start --&gt; &lt;!-- Migrated from skills/omniroute-cli-providers/SKILL.md (preserved curated content) --&gt;</p>
+<h2>OmniRoute — CLI Providers &amp; Keys</h2>
+<p>Requires the <code>omniroute</code> CLI. See [CLI entry-point skill](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omniroute-cli/SKILL.md) for install + global flags.</p>
+<h3>Provider catalog (available providers)</h3>
+<pre><code>omniroute providers available                        # Full OmniRoute provider catalog
+omniroute providers available --search openai        # Filter by id, name, alias
+omniroute providers available --category api-key     # Filter by category
+omniroute providers available --json                 # Machine-readable JSON</code></pre>
+<p>Categories: <code>api-key</code>, <code>oauth</code>, <code>free</code>, <code>local</code>, <code>combo</code>.</p>
+<h3>Configured provider connections</h3>
+<pre><code>omniroute providers list                             # Connections in your DB
+omniroute providers list --json</code></pre>
+<h3>Testing connections</h3>
+<pre><code>omniroute providers test &lt;id|name&gt;                   # Test one configured connection
+omniroute providers test-all                         # Test every active connection (TUI progress)
+omniroute providers validate                         # Local-only structural validation (no HTTP)</code></pre>
+<p><code>test-all</code> opens an interactive TUI that shows live pass/fail per connection. Use <code>--json</code> to get a machine-readable result:</p>
+<pre><code>omniroute providers test-all --json</code></pre>
+<h3>API key management (OmniRoute keys)</h3>
+<p>These manage the OmniRoute API keys issued under <strong>API Manager</strong> — not provider credentials.</p>
+<pre><code>omniroute keys list                                  # List all OmniRoute API keys
+omniroute keys add &lt;provider&gt; [apiKey]               # Add an API key for a provider
+omniroute keys remove &lt;provider&gt;                     # Remove an API key
+omniroute keys regenerate &lt;id&gt;                       # Regenerate (rotate) a key
+omniroute keys revoke &lt;id&gt;                           # Revoke a key (disables it)
+omniroute keys reveal &lt;id&gt;                           # Show the full key value
+omniroute keys usage &lt;id&gt;                            # Show usage stats for a key
+
+omniroute keys rotate &lt;id&gt;                           # Rotate + revoke old key atomically
+omniroute keys expiration list                       # List key expiration times</code></pre>
+<h4>Key policies</h4>
+<pre><code>omniroute keys policy show &lt;id&gt;                      # Show rate-limit / permission policy
+omniroute keys policy set &lt;id&gt; \
+  --rate-limit 100 \
+  --rate-window minute \
+  --permissions chat,models                          # Set policy on a key</code></pre>
+<h3>Models</h3>
+<pre><code>omniroute models                                     # List all models (all providers)
+omniroute models openai                              # Filter by provider
+omniroute models --search gpt                        # Search by name
+omniroute models --json                              # JSON output</code></pre>
+<h3>OAuth providers</h3>
+<pre><code>omniroute oauth list                                 # List OAuth-configured providers
+omniroute oauth login &lt;provider&gt;                     # Start browser-based OAuth flow
+omniroute oauth logout &lt;provider&gt;                    # Revoke OAuth token
+omniroute oauth status &lt;provider&gt;                    # Show token state + expiry
+omniroute oauth refresh &lt;provider&gt;                   # Force token refresh</code></pre>
+<p>For OAuth providers (Gemini, Windsurf, Antigravity, etc.) the <code>login</code> command opens the OmniRoute dashboard OAuth flow in your browser.</p>
+<h3>Provider nodes (multi-account routing)</h3>
+<p>Provider nodes let you attach multiple API keys / accounts to one logical provider for round-robin or failover.</p>
+<pre><code>omniroute nodes list &lt;provider&gt;                      # List nodes for a provider
+omniroute nodes add &lt;provider&gt; --api-key &lt;key&gt;       # Add a node
+omniroute nodes remove &lt;provider&gt; &lt;nodeId&gt;           # Remove a node
+omniroute nodes test &lt;provider&gt; &lt;nodeId&gt;             # Test one node</code></pre>
+<h3>Routing combos (CLI)</h3>
+<p>Create and manage routing combos from the terminal:</p>
+<pre><code>omniroute combo list                                 # List all combos
+omniroute combo create &lt;name&gt; \
+  --strategy priority \
+  --targets anthropic/claude-opus-4-7,openai/gpt-4o  # Create combo
+omniroute combo switch &lt;name&gt;                        # Activate a combo as default
+omniroute combo delete &lt;name&gt;                        # Delete a combo
+omniroute combo suggest --task &quot;code review&quot;         # Ask OmniRoute to recommend a combo</code></pre>
+<p>For the full REST API for combos see [omniroute-routing skill](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omniroute-routing/SKILL.md).</p>
+<h3>Quota &amp; usage</h3>
+<pre><code>omniroute quota                                      # Provider quota usage + reset times
+omniroute usage                                      # Request + token usage summary
+omniroute cost                                       # Cost breakdown (by provider/model)</code></pre>
+<h3>Compression (CLI)</h3>
+<pre><code>omniroute compression status                         # Current compression mode + savings stats
+omniroute compression set --mode rtk                 # Enable RTK compression
+omniroute compression set --mode stacked             # Enable stacked (RTK + Caveman)
+omniroute compression set --mode off                 # Disable compression
+omniroute compression preview --mode rtk --text &quot;...&quot;  # Preview savings for sample text</code></pre>
+<h3>Health</h3>
+<pre><code>omniroute health                                     # Detailed health: circuit breakers, cache, memory</code></pre>
+<h3>Errors</h3>
+<ul>
+<li><code>providers test &lt;id&gt;</code> fails with 401 → API key stored for that provider is wrong; use <code>keys remove</code> + <code>keys add</code> to reset it</li>
+<li><code>oauth login</code> opens but doesn't complete → the OAuth token endpoint may be firewalled; use API key auth instead</li>
+<li><code>combo create</code> fails with <code>strategy unknown</code> → use one of: <code>priority</code>, <code>weighted</code>, <code>round-robin</code>, <code>fill-first</code>, <code>least-used</code>, <code>cost-optimized</code>, <code>auto</code>, <code>random</code>, <code>strict-random</code>, <code>p2c</code>, <code>reset-aware</code>, <code>lkgp</code>, <code>context-optimized</code>, <code>context-relay</code></li>
+</ul>
+<p>&lt;!-- skill:custom-end --&gt;</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: cli-providers\ndisplay_name: cli-providers\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# cli-providers - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `cli-providers` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nManage provider connections from the CLI: list available/configured providers, add, test, test-all, validate, rotate API keys, and view per-provider metrics.\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose cli-providers, then write the task. Fallback prompt: Use the cli-providers skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `cli-providers` |\n| Canonical name | `cli-providers` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nManage provider connections from the CLI: list available/configured providers, add, test, test-all, validate, rotate API keys, and view per-provider metrics.\n\n\n## Original SKILL.md\n\n---\nname: cli-providers\ndescription: \"Manage provider connections from the CLI: list available/configured providers, add, test, test-all, validate, rotate API keys, and view per-provider metrics.\"\n---\n\u003c!-- generated by src/lib/agentSkills/generator.ts; manual edits will be overwritten -->\n\n## Overview\n\nManage provider connections from the CLI: list available/configured providers, add, test, test-all, validate, rotate API keys, and view per-provider metrics.\n\n## Quick install\n\n```bash\nnpm install -g omniroute   # or: npx omniroute\nomniroute --version\n```\n\n## Subcommands\n\n### `provider-cmd provider [subcommand]`\n\nManage provider connections (use\n\n**Example:**\n\n```bash\nomniroute provider-cmd provider [subcommand]\n```\n\n### `providers`\n\n**Example:**\n\n```bash\nomniroute providers\n```\n\n### `providers available`\n\nShow available providers in the OmniRoute catalog\n\n**Flags:**\n\n- `--json`\n- `--search \u003cquery>`\n- `-q, --q \u003cquery>`\n- `--category \u003ccategory>`\n\n**Example:**\n\n```bash\nomniroute providers available\n```\n\n### `providers list`\n\nList configured provider connections\n\n**Flags:**\n\n- `--json`\n\n**Example:**\n\n```bash\nomniroute providers list\n```\n\n### `providers test \u003cidOrName>`\n\nTest a configured provider connection\n\n**Flags:**\n\n- `--json`\n\n**Example:**\n\n```bash\nomniroute providers test \u003cidOrName>\n```\n\n### `providers test-all`\n\nTest all active provider connections\n\n**Flags:**\n\n- `--json`\n\n**Example:**\n\n```bash\nomniroute providers test-all\n```\n\n### `providers validate`\n\nValidate local provider configuration without calling upstream\n\n**Flags:**\n\n- `--json`\n\n**Example:**\n\n```bash\nomniroute providers validate\n```\n\n### `providers rotate \u003cidOrName>`\n\n**Flags:**\n\n- `--new-key \u003ckey>`\n- `--from-env \u003cVAR>`\n- `--oauth`\n- `--yes`\n- `--skip-test`\n- `--dry-run`\n\n**Example:**\n\n```bash\nomniroute providers rotate \u003cidOrName>\n```\n\n### `providers status`\n\n**Flags:**\n\n- `--provider \u003cname>`\n- `--json`\n\n**Example:**\n\n```bash\nomniroute providers status\n```\n\n### `providers metrics`\n\n**Flags:**\n\n- `--provider \u003cid>`\n- `--connection-id \u003cid>`\n- `--period \u003cp>`\n- `--metric \u003cm>`\n- `--sort-by \u003cfield>`\n- `--limit \u003cn>`\n- `--watch`\n- `--compare \u003clist>`\n\n**Example:**\n\n```bash\nomniroute providers metrics\n```\n\n### `providers metric \u003cconnectionId> \u003cmetric>`\n\n**Flags:**\n\n- `--period \u003cp>`\n\n**Example:**\n\n```bash\nomniroute providers metric \u003cconnectionId> \u003cmetric>\n```\n\n### `test-provider test [provider] [model]`\n\n**Flags:**\n\n- `--all-providers`\n- `--json`\n- `--latency`\n- `--repeat \u003cn>`\n- `--compare \u003cmodels>`\n- `--save \u003cpath>`\n\n**Example:**\n\n```bash\nomniroute test-provider test [provider] [model]\n```\n\n\u003c!-- skill:custom-start -->\n\u003c!-- Migrated from skills/omniroute-cli-providers/SKILL.md (preserved curated content) -->\n\n# OmniRoute — CLI Providers & Keys\n\nRequires the `omniroute` CLI. See [CLI entry-point skill](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omniroute-cli/SKILL.md) for install + global flags.\n\n## Provider catalog (available providers)\n\n```bash\nomniroute providers available                        # Full OmniRoute provider catalog\nomniroute providers available --search openai        # Filter by id, name, alias\nomniroute providers available --category api-key     # Filter by category\nomniroute providers available --json                 # Machine-readable JSON\n```\n\nCategories: `api-key`, `oauth`, `free`, `local`, `combo`.\n\n## Configured provider connections\n\n```bash\nomniroute providers list                             # Connections in your DB\nomniroute providers list --json\n```\n\n## Testing connections\n\n```bash\nomniroute providers test \u003cid|name>                   # Test one configured connection\nomniroute providers test-all                         # Test every active connection (TUI progress)\nomniroute providers validate                         # Local-only structural validation (no HTTP)\n```\n\n`test-all` opens an interactive TUI that shows live pass/fail per connection. Use `--json` to get a machine-readable result:\n\n```bash\nomniroute providers test-all --json\n```\n\n## API key management (OmniRoute keys)\n\nThese manage the OmniRoute API keys issued under **API Manager** — not provider credentials.\n\n```bash\nomniroute keys list                                  # List all OmniRoute API keys\nomniroute keys add \u003cprovider> [apiKey]               # Add an API key for a provider\nomniroute keys remove \u003cprovider>                     # Remove an API key\nomniroute keys regenerate \u003cid>                       # Regenerate (rotate) a key\nomniroute keys revoke \u003cid>                           # Revoke a key (disables it)\nomniroute keys reveal \u003cid>                           # Show the full key value\nomniroute keys usage \u003cid>                            # Show usage stats for a key\n\nomniroute keys rotate \u003cid>                           # Rotate + revoke old key atomically\nomniroute keys expiration list                       # List key expiration times\n```\n\n### Key policies\n\n```bash\nomniroute keys policy show \u003cid>                      # Show rate-limit / permission policy\nomniroute keys policy set \u003cid> \\\n  --rate-limit 100 \\\n  --rate-window minute \\\n  --permissions chat,models                          # Set policy on a key\n```\n\n## Models\n\n```bash\nomniroute models                                     # List all models (all providers)\nomniroute models openai                              # Filter by provider\nomniroute models --search gpt                        # Search by name\nomniroute models --json                              # JSON output\n```\n\n## OAuth providers\n\n```bash\nomniroute oauth list                                 # List OAuth-configured providers\nomniroute oauth login \u003cprovider>                     # Start browser-based OAuth flow\nomniroute oauth logout \u003cprovider>                    # Revoke OAuth token\nomniroute oauth status \u003cprovider>                    # Show token state + expiry\nomniroute oauth refresh \u003cprovider>                   # Force token refresh\n```\n\nFor OAuth providers (Gemini, Windsurf, Antigravity, etc.) the `login` command opens the OmniRoute dashboard OAuth flow in your browser.\n\n## Provider nodes (multi-account routing)\n\nProvider nodes let you attach multiple API keys / accounts to one logical provider for round-robin or failover.\n\n```bash\nomniroute nodes list \u003cprovider>                      # List nodes for a provider\nomniroute nodes add \u003cprovider> --api-key \u003ckey>       # Add a node\nomniroute nodes remove \u003cprovider> \u003cnodeId>           # Remove a node\nomniroute nodes test \u003cprovider> \u003cnodeId>             # Test one node\n```\n\n## Routing combos (CLI)\n\nCreate and manage routing combos from the terminal:\n\n```bash\nomniroute combo list                                 # List all combos\nomniroute combo create \u003cname> \\\n  --strategy priority \\\n  --targets anthropic/claude-opus-4-7,openai/gpt-4o  # Create combo\nomniroute combo switch \u003cname>                        # Activate a combo as default\nomniroute combo delete \u003cname>                        # Delete a combo\nomniroute combo suggest --task \"code review\"         # Ask OmniRoute to recommend a combo\n```\n\nFor the full REST API for combos see [omniroute-routing skill](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omniroute-routing/SKILL.md).\n\n## Quota & usage\n\n```bash\nomniroute quota                                      # Provider quota usage + reset times\nomniroute usage                                      # Request + token usage summary\nomniroute cost                                       # Cost breakdown (by provider/model)\n```\n\n## Compression (CLI)\n\n```bash\nomniroute compression status                         # Current compression mode + savings stats\nomniroute compression set --mode rtk                 # Enable RTK compression\nomniroute compression set --mode stacked             # Enable stacked (RTK + Caveman)\nomniroute compression set --mode off                 # Disable compression\nomniroute compression preview --mode rtk --text \"...\"  # Preview savings for sample text\n```\n\n## Health\n\n```bash\nomniroute health                                     # Detailed health: circuit breakers, cache, memory\n```\n\n## Errors\n\n- `providers test \u003cid>` fails with 401 → API key stored for that provider is wrong; use `keys remove` + `keys add` to reset it\n- `oauth login` opens but doesn't complete → the OAuth token endpoint may be firewalled; use API key auth instead\n- `combo create` fails with `strategy unknown` → use one of: `priority`, `weighted`, `round-robin`, `fill-first`, `least-used`, `cost-optimized`, `auto`, `random`, `strict-random`, `p2c`, `reset-aware`, `lkgp`, `context-optimized`, `context-relay`\n\u003c!-- skill:custom-end -->\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("cli-providers-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

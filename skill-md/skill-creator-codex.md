@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `skill-creator` for Codex. It removes loc
 
 Use this skill when your task matches this description:
 
-This skill provides guidance for creating effective skills.
+Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Codex's capabilities with specialized knowledge, workflows, or tool integrat
 
 ## How To Use It In Codex
 
@@ -32,7 +32,8 @@ In Codex, click the chat box, press /, choose skill-creator, then write the task
 
 ## Description
 
-This skill provides guidance for creating effective skills.
+Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Codex's capabilities with specialized knowledge, workflows, or tool integrat
+
 
 ## Original SKILL.md
 
@@ -452,4 +453,3 @@ Considerations when forward-testing:
 
 If forward-testing only succeeds when subagents see leaked context, tighten the skill or the
 forward-testing setup before trusting the result.
-

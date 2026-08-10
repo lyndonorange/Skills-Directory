@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>agent-platform-inference - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/agent-platform-inference-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>agent-platform-inference</h1>
+      <p class="description">Connects to and performs inference with Google Cloud Agent Platform GenAI models, including First-Party Gemini models and Third-Party OpenMaaS models (Llama, DeepSeek, Qwen, etc.). Use when you need to generate code for calling Gemini or OpenMaaS models, authenticate with GenAI SDK, OpenAI SDK, or legacy Agent Platform SDK, configure base URLs and global/regional endpoints, or troubleshoot 429 Resource Exhausted (DSQ), 400 User Validation, or 404 Not Found errors. Don't use for deploying models to endpoints or for running model evaluations.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>agent-platform-inference</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>agent-platform-inference</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Connects to and performs inference with Google Cloud Agent Platform GenAI models, including First-Party Gemini models and Third-Party OpenMaaS models (Llama, DeepSeek, Qwen, etc.). Use when you need to generate code for calling Gemini or OpenMaaS models, authenticate with GenAI SDK, OpenAI SDK, or legacy Agent Platform SDK, configure base URLs and global/regional endpoints, or troubleshoot 429 Resource Exhausted (DSQ), 400 User Validation, or 404 Not Found errors. Don't use for deploying models to endpoints or for running model evaluations.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose agent-platform-inference, then write the task. Fallback prompt: Use the agent-platform-inference skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+        <div class="usage-card"><strong>Upstream provenance</strong><p><a href="https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39">Google Agent Skills</a> at 092e210b243601797a0fb939040be2b1288e6d39 (Apache-2.0).</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Universal runtime boundary</h3>
+<ul>
+<li>Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.</li>
+<li>Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.</li>
+<li>Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.</li>
+<li>Read <code>references/upstream.md</code> when provenance, the pinned revision, licensing, or local adaptation details matter.</li>
+</ul>
+<h2>Agent Platform GenAI Inference Skill</h2>
+<p>This skill provides instructions for authenticating and connecting to Google Cloud Agent Platform to use Generative AI models. It covers:</p>
+<ul>
+<li><strong>First-Party publisher models</strong> (Gemini) — section 2.</li>
+<li><strong>Third-Party publisher models</strong> (OpenMaaS: Llama, DeepSeek, Qwen, etc.)</li>
+</ul>
+<p>— section 3.</p>
+<ul>
+<li><strong>Custom endpoints</strong> (any model on a numeric <code>projects/.../endpoints/&lt;id&gt;</code></li>
+</ul>
+<p>resource — tuned Gemini models, OSS LLMs self-deployed from Model Garden via the <code>agent-platform-deploy</code> skill, and legacy custom models) — section 4.</p>
+<h3>Safety &amp; Confirmation Tiers (CRITICAL)</h3>
+<p>Before executing any commands or scripts on behalf of the user, you must adhere to the following safety tiers based on the action requested. (The skill is read-only; other safety tiers are omitted):</p>
+<ol>
+<li>**Tier R: Read-only / Inference (<code>client.models.generate_content</code>,</li>
+</ol>
+<p><code>client.chat.completions.create</code>, <code>client.completions.create</code>, <code>client.embeddings.create</code>)**</p>
+<ul>
+<li>Requires <strong>interactive confirmation</strong> with 'Yes'/ 'No' options before</li>
+</ul>
+<p>executing model inference on behalf of the user, to prevent unexpected cost or quota consumption. The confirmation prompt must clearly explain the proposed inference execution and its key parameters (e.g., target model ID, SDK choice, input prompt). Natural-language paraphrases without specifying the parameters are NOT sufficient.</p>
+<ul>
+<li><strong>Same-turn restriction</strong>: Do not execute the inference scripts or</li>
+</ul>
+<p>commands in the same turn as presenting the confirmation prompt. Stop and wait for the user's reply; only execute after explicit 'Yes' / approval.</p>
+<ul>
+<li><strong>Gold Standard Example</strong>: &gt; I will perform model inference with the</li>
+</ul>
+<p>following parameters. Please &gt; confirm this information before I proceed: &gt; <em> <strong>Model ID</strong>: <code>deepseek-ai/deepseek-v3.2-maas</code> &gt; </em> <strong>SDK</strong>: OpenAI SDK (via Vertex AI Endpoint) &gt; * <strong>Input Prompt</strong>: &quot;Explain the concept of quantum computing...&quot; &gt; Do you confirm? [Yes/No]</p>
+<h3>Phase 0: Environment Setup</h3>
+<p><strong>CRITICAL</strong>: Before running any of the Python sample scripts in the <code>scripts/</code> directory (e.g., <code>scripts/openmaas_openai_sdk.py</code>), you MUST ensure the environment is correctly initialized by following these steps:</p>
+<ol>
+<li><strong>Google Cloud Authentication</strong>: Authenticate with your Google Cloud</li>
+</ol>
+<p>credentials and configure active Application Default Credentials (ADC) for Agent Platform access:</p>
+<pre><code>    gcloud auth login
+    gcloud auth application-default login</code></pre>
+<ol>
+<li><strong>Enable API</strong> (if not already enabled):</li>
+</ol>
+<pre><code>    gcloud services enable aiplatform.googleapis.com</code></pre>
+<ol>
+<li><strong>Python Dependencies</strong>: The scripts import <code>vertexai</code> (from</li>
+</ol>
+<p><code>google-cloud-aiplatform</code>), <code>google-genai</code>, and <code>openai</code>. Do <strong>not</strong> create a virtual environment — it starts empty and hides packages the environment already provides, forcing a redundant install. Probe, and install only what is missing:</p>
+<pre><code>    python3 -c &quot;import vertexai, google.genai, openai&quot; \
+      || pip install -r scripts/requirements.txt</code></pre>
+<p>The pins in <code>scripts/requirements.txt</code> are a fallback for an environment that does not already provide these SDKs; do not apply them on top of a working environment.</p>
+<ol>
+<li><strong>Verify Setup (Optional)</strong>: Run all sample scripts at once to verify the</li>
+</ol>
+<p>environment is working end-to-end:</p>
+<pre><code>    ./scripts/verify_all.sh</code></pre>
+<ol>
+<li><strong>Execution</strong>: Run the scripts with a plain <code>python3 scripts/...</code>. There is</li>
+</ol>
+<p>no environment to activate first.</p>
+<blockquote>[!IMPORTANT] <strong>CRITICAL: Model IDs &amp; Availability</strong> * <strong>Gemini Models</strong>: See</blockquote>
+<blockquote>[Gemini Models][gemini-models-docs] for valid Model IDs and Regions. *</blockquote>
+<blockquote><strong>OpenMaaS Models</strong>: See</blockquote>
+<blockquote>[Use Open Models on Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/maas/use-open-models)</blockquote>
+<blockquote>for Llama, DeepSeek, Qwen, etc. * <strong>Incomplete Lists</strong>: The Model IDs listed</blockquote>
+<blockquote>in this skill are <strong>examples only</strong> and may be incomplete or outdated. *</blockquote>
+<blockquote><strong>Action</strong>: Always verify the Model ID and Region using the links above before</blockquote>
+<blockquote>generating code.</blockquote>
+<blockquote></blockquote>
+<blockquote>\[gemini-models-docs]:</blockquote>
+<blockquote>https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/migrate</blockquote>
+<blockquote></blockquote>
+<blockquote></blockquote>
+<blockquote>## Workflow Decision Tree</blockquote>
+<ol>
+<li><strong>Model Family Identification</strong>: Has the user specified whether they want to</li>
+</ol>
+<p>call a <strong>Gemini</strong> (First-Party) model or an <strong>OpenMaaS</strong> (Third-Party, e.g. Llama, DeepSeek, Qwen) model?</p>
+<ul>
+<li><strong>No</strong> -&gt; Ask the user which model family they want to use. If they</li>
+</ul>
+<p>provide a specific model name, infer the family from the name.</p>
+<ul>
+<li><strong>Yes</strong> -&gt; Proceed to Step 2.</li>
+</ul>
+<ol>
+<li><strong>SDK Choice</strong>: Which SDK does the user want to use?</li>
+</ol>
+<ul>
+<li><strong>Gemini + GenAI SDK</strong> (preferred for Gemini) -&gt; Proceed to [1. Gemini</li>
+</ul>
+<p>Models].</p>
+<ul>
+<li><strong>Gemini + legacy Vertex AI SDK</strong> -&gt; Proceed to [1. Gemini Models].</li>
+<li><strong>OpenMaaS + OpenAI SDK</strong> (preferred for OpenMaaS) -&gt; Proceed to [2.</li>
+</ul>
+<p>OpenMaaS Models].</p>
+<ul>
+<li><strong>OpenMaaS + GenAI SDK</strong> -&gt; Proceed to [2. OpenMaaS Models].</li>
+<li><strong>Unsure</strong> -&gt; Default to the preferred SDK for the chosen family.</li>
+</ul>
+<ol>
+<li><strong>Troubleshooting</strong>: Is the user reporting an error (429 Resource Exhausted,</li>
+</ol>
+<p>400 User Validation, 404 Not Found, etc.)?</p>
+<ul>
+<li><strong>Yes</strong> -&gt; Proceed to [3. Troubleshooting &amp; Common Error Codes].</li>
+<li><strong>No</strong> -&gt; Proceed with the SDK choice from Step 2.</li>
+</ul>
+<h3>0.5 Region Availability Check for Publisher Endpoints (Gemini + LoRA base)</h3>
+<blockquote>[!NOTE] <strong>Skip this section</strong> if either of these applies:</blockquote>
+<blockquote></blockquote>
+<blockquote>- The user is calling a custom endpoint (§4) — a tuned Gemini model served on</blockquote>
+<blockquote>  a numeric <code>projects/.../endpoints/&lt;id&gt;</code>, a self-deployed OSS LLM (Llama,</blockquote>
+<blockquote>  DeepSeek, Qwen, Gemma, etc.), or a legacy custom model. Those requests hit</blockquote>
+<blockquote>  a specific endpoint resource whose region is fixed at deploy time; if the</blockquote>
+<blockquote>  caller-side region doesn't match, the endpoint lookup returns a clean 404</blockquote>
+<blockquote>  without incurring inference cost. Go to §4.</blockquote>
+<blockquote>- The user is calling an OpenMaaS publisher model (§2) — Llama, DeepSeek,</blockquote>
+<blockquote>  Qwen, etc. served via the global <code>openapi</code> base URL. These don't have</blockquote>
+<blockquote>  per-region availability restrictions in the same way first-party Gemini</blockquote>
+<blockquote>  does. Go to §2.</blockquote>
+<blockquote></blockquote>
+<blockquote><strong>Apply this section</strong> only if the user is calling a first-party managed</blockquote>
+<blockquote>Gemini model (<code>gemini-*</code>, via §1), including fine-tuned LoRA adapters on</blockquote>
+<blockquote>top of Gemini — these route through a publisher endpoint whose regional</blockquote>
+<blockquote>availability actually varies.</blockquote>
+<p>Before responding to any inference request that names a specific region for a first-party managed Gemini model (<code>gemini-*</code>) or a fine-tuned Gemini LoRA adapter (identified by numeric endpoint ID + user-stated base model), you <strong>MUST</strong> verify the model is actually available in that region by making a live API call. Do not rely on Google Search, training-corpus knowledge, or publisher documentation for availability claims — regional availability changes frequently and grounded text can be stale or wrong.</p>
+<p>Probe only the exact model and region the user asked about. Do not probe other models as a &quot;control&quot; — you cannot infer anything about model A's availability from model B's status, because a different model may itself be unavailable in the reference region for unrelated reasons.</p>
+<p>For first-party Gemini models, probe with a real <code>:generateContent</code> call using a minimal valid payload:</p>
+<pre><code>curl -sS -o /dev/null -w &quot;%{http_code}\n&quot; \
+    -H &quot;Authorization: Bearer $(gcloud auth print-access-token)&quot; \
+    -H &quot;Content-Type: application/json&quot; \
+    &quot;https://${LOCATION_ID}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${LOCATION_ID}/publishers/google/${MODEL_ID}:generateContent&quot; \
+    -d &quot;{\&quot;contents\&quot;:{\&quot;role\&quot;:\&quot;user\&quot;,\&quot;parts\&quot;:{\&quot;text\&quot;:\&quot;${PROBE_TEXT:-hi}\&quot;}}}&quot;</code></pre>
+<p>For inference against a fine-tuned Gemini LoRA adapter, probe the <strong>base model</strong> in the target region using the same <code>:generateContent</code> call above with <code>${MODEL_ID}</code> set to the base (e.g. <code>gemini-2.5-flash</code> if the adapter was tuned on <code>gemini-2.5-flash</code>). The LoRA adapter cannot serve in a region where its base model isn't available.</p>
+<p>Interpret the probe result and act:</p>
+<ul>
+<li><strong>200</strong> — model is available in that region. Proceed with the SDK setup in</li>
+</ul>
+<p>§1.</p>
+<ul>
+<li><strong>404</strong> — model is not available in that region. STOP. Tell the user</li>
+</ul>
+<p>plainly that the model isn't offered in that region and list the regions where it is available (from [Gemini Models][gemini-models-docs] or <code>gcloud ai model-garden models list --filter=&quot;name~$MODEL_NAME&quot;</code> without <code>--region</code>). Do not silently switch regions. Do not proceed to write inference code or SDK initialization for the unsupported region. Do not run additional &quot;control&quot; probes to double-check the 404 — the target-region probe is authoritative.</p>
+<ul>
+<li><strong>Any other outcome</strong> (permission denied, quota, transient failure, etc.)</li>
+</ul>
+<p>— do not conclude the model is available or unavailable. Explain the underlying cause in plain language (e.g. &quot;your account doesn't have access to this project's Vertex AI API — enable it in the console or switch projects&quot;) and the concrete next action.</p>
+<h3>1. Gemini Models</h3>
+<p>For Gemini models (e.g., <code>gemini-2.5-pro</code>, <code>gemini-3-flash-preview</code>), the <strong>GenAI SDK</strong> (<code>google-genai</code>) is the <strong>PREFERRED</strong> method. The legacy <code>vertexai</code> SDK is still supported but GenAI SDK is recommended for new projects.</p>
+<blockquote>[!IMPORTANT]</blockquote>
+<blockquote><strong>Preview Models (including Gemini 3.1)</strong> are often <strong>ONLY</strong> available in the</blockquote>
+<blockquote><code>global</code> region. Stable models are available in <code>us-central1</code> and other</blockquote>
+<blockquote>regions.</blockquote>
+<h4>Choosing the Right SDK</h4>
+<ul>
+<li><strong>Gemini Models</strong>: <strong>GenAI SDK</strong> (<code>google-genai</code>) is <strong>PREFERRED</strong>. Use</li>
+</ul>
+<p>OpenAI SDK for compatibility, or Legacy SDK (<code>vertexai</code>) if needed.</p>
+<ul>
+<li><strong>OpenMaaS Models</strong>: <strong>OpenAI SDK</strong> is <strong>HIGHLY RECOMMENDED</strong>. Use GenAI SDK</li>
+</ul>
+<p>or Legacy SDK if you have specific infrastructure requirements.</p>
+<h4>Installation</h4>
+<pre><code>pip install google-genai</code></pre>
+<h4>Python Example (GenAI SDK - Preferred)</h4>
+<p>See [<code>scripts/gemini_genai_sdk.py</code>](scripts/gemini_genai_sdk.py) for the complete code.</p>
+<h4>Alternative: OpenAI SDK (Chat Completions)</h4>
+<p>Use the standard OpenAI SDK with the Agent Platform endpoint. This is great for cross-compatibility.</p>
+<p>See [<code>scripts/gemini_openai_sdk.py</code>](scripts/gemini_openai_sdk.py) for the complete code.</p>
+<h4>Legacy: Agent Platform SDK</h4>
+<p>The legacy <code>vertexai</code> SDK is still widely used but <code>google-genai</code> is preferred for new Gemini projects.</p>
+<p>See [<code>scripts/gemini_vertexai_sdk.py</code>](scripts/gemini_vertexai_sdk.py) for the complete code.</p>
+<p><strong>Documentation</strong>: [Google GenAI SDK](https://github.com/googleapis/python-genai)</p>
+<p><strong>Documentation</strong>: [Agent Platform Gemini Models](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/google-models)</p>
+<h3>2. OpenMaaS Models (Llama, DeepSeek, Qwen, etc.)</h3>
+<p>For OpenMaaS (Model-as-a-Service) models, the <strong>HIGHLY RECOMMENDED</strong> approach is to use the standard <strong>OpenAI SDK</strong> with a specific Vertex AI endpoint.</p>
+<blockquote>[!WARNING] While <code>GenerativeModel</code> <em>can</em> support some OpenMaaS models, it is</blockquote>
+<blockquote><strong>discouraged</strong>. Use the OpenAI SDK for best compatibility (especially for</blockquote>
+<blockquote>Chat Completions).</blockquote>
+<h4>Installation</h4>
+<pre><code>pip install openai google-auth</code></pre>
+<h4>Authentication for OpenAI SDK</h4>
+<p>You <strong>MUST</strong> use a Google Cloud OAuth access token as the API key for the OpenAI SDK.</p>
+<pre><code>import google.auth
+from google.auth.transport.requests import Request
+
+def get_gcp_access_token():
+    creds, _ = google.auth.default()
+    creds.refresh(Request())
+    return creds.token</code></pre>
+<blockquote>[!NOTE] Google Cloud access tokens typically expire after 1 hour. The</blockquote>
+<blockquote><code>get_gcp_access_token()</code> function above retrieves a <em>fresh</em> token at the time</blockquote>
+<blockquote>it is called. For long-running</blockquote>
+<blockquote>applications, you implement a refresh mechanism. See</blockquote>
+<blockquote>[Refresh the access token](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/migrate/openai/auth-and-credentials?hl=en#refresh_your_credentials)</blockquote>
+<blockquote>for details.</blockquote>
+<h4>Configuration (Base URL)</h4>
+<ul>
+<li><strong>Global Endpoint</strong> (Recommended for most models requiring global</li>
+</ul>
+<p>availability): <code>https://aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/global/endpoints/openapi</code></p>
+<ul>
+<li><strong>Regional Endpoint</strong>:</li>
+</ul>
+<p><code>https://{REGION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{REGION}/endpoints/openapi</code></p>
+<h4>Python Example (OpenMaaS - Chat Completions)</h4>
+<p>See [<code>scripts/openmaas_openai_sdk.py</code>](scripts/openmaas_openai_sdk.py) for the complete code.</p>
+<blockquote>[!TIP] <strong>Alternative: Environment Variables</strong> You can set environment</blockquote>
+<blockquote>variables in your shell instead of updating the code.</blockquote>
+<blockquote></blockquote>
+<blockquote><strong>Alternative: Environment Variables</strong> You can set environment variables in</blockquote>
+<blockquote>your shell instead of updating the code.</blockquote>
+<pre><code>export OPENAI_BASE_URL=&quot;https://aiplatform.googleapis.com/v1/projects/YOUR_PROJECT_ID/locations/global/endpoints/openapi&quot;
+export OPENAI_API_KEY=&quot;$(gcloud auth application-default print-access-token)&quot;</code></pre>
+<blockquote>Then initialize the client without arguments: <code>client = OpenAI()</code></blockquote>
+<h4>Python Example (OpenMaaS - Completions API)</h4>
+<p>The following models support the legacy Completions API: <code>zai-org/glm-5-maas</code>, <code>moonshotai/kimi-k2-thinking-maas</code>, <code>minimaxai/minimax-m2-maas</code>, <code>deepseek-ai/deepseek-v3.1-maas</code>, and <code>deepseek-ai/deepseek-v3.2-maas</code>.</p>
+<pre><code>response = client.completions.create(
+    model=&quot;deepseek-ai/deepseek-v3.2-maas&quot;,
+    prompt=&quot;Once upon a time&quot;,
+    max_tokens=100
+)
+print(response.choices[0].text)</code></pre>
+<h4>Python Example (OpenMaaS - Embeddings)</h4>
+<pre><code># Verify specific Embedding Model ID on Model Garden (e.g., intfloat/multilingual-e5-small)
+response = client.embeddings.create(
+    model=&quot;intfloat/multilingual-e5-large-maas&quot;,
+    input=&quot;The quick brown fox jumps over the lazy dog&quot;,
+)
+print(response.data[0].embedding)</code></pre>
+<h4>Alternative: GenAI SDK</h4>
+<p>The <code>google-genai</code> SDK can also access OpenMaaS models via the <code>vertexai</code> backend.</p>
+<p>See [<code>scripts/openmaas_genai_sdk.py</code>](scripts/openmaas_genai_sdk.py) for the complete code.</p>
+<blockquote>[!IMPORTANT]</blockquote>
+<blockquote><strong>Model ID Format</strong>: For GenAI SDK with OpenMaaS, you <strong>MUST</strong> use the full</blockquote>
+<blockquote>path: <code>publishers/PUBLISHER/models/MODEL</code> (e.g.,</blockquote>
+<blockquote><code>publishers/zai-org/models/glm-5-maas</code>).</blockquote>
+<h4>Legacy: Agent Platform SDK (OpenMaaS)</h4>
+<p>For OpenMaaS, you can also use <code>GenerativeModel</code> (if supported).</p>
+<p>See [<code>scripts/openmaas_vertexai_sdk.py</code>](scripts/openmaas_vertexai_sdk.py) for the complete code.</p>
+<blockquote>[!IMPORTANT] <strong>Model ID Format</strong>: For Agent Platform SDK with OpenMaaS, you</blockquote>
+<blockquote><strong>MUST</strong> use the full path: <code>publishers/PUBLISHER/models/MODEL</code>.</blockquote>
+<h4>Model Reference &amp; Availability</h4>
+<p><strong>Documentation</strong>: [Use Open Models on Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/maas/use-open-models)</p>
+<blockquote>[!TIP]</blockquote>
+<blockquote><strong>Self-Deployment for Control</strong>: If you need <strong>dedicated hardware</strong></blockquote>
+<blockquote>(GPUs/TPUs), <strong>guaranteed capacity</strong>, or <strong>specific regional placement</strong> not</blockquote>
+<blockquote>offered by MaaS, you can <strong>Self-Deploy</strong> these models to Agent Platform</blockquote>
+<blockquote>Endpoints. Search for the model in Model Garden and click &quot;Deploy&quot; to select</blockquote>
+<blockquote>your machine type. See the <code>agent-platform-deploy</code> skill for the deployment</blockquote>
+<blockquote>workflow, and <strong>section 4 of this skill</strong> for how to invoke the resulting</blockquote>
+<blockquote>self-deployed endpoint (use <code>/chat/completions</code> on the dedicated endpoint</blockquote>
+<blockquote>DNS, NOT the OpenMaaS publisher URL above).</blockquote>
+<blockquote>[!IMPORTANT] <strong>Finding Inference Examples</strong>: The list above is a starting</blockquote>
+<blockquote>point. For the <strong>definitive</strong> inference snippets (especially for Chat</blockquote>
+<blockquote>Completions payload structure): 1. Consult the</blockquote>
+<blockquote>[Use Open Models on Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/maas/use-open-models)</blockquote>
+<blockquote>list. 2. Click the link for your specific model (e.g., &quot;DeepSeek-V3&quot;) to visit</blockquote>
+<blockquote>its <strong>Model Garden</strong> page. 3. Look for the <strong>&quot;Sample Code&quot;</strong> or **&quot;Use this</blockquote>
+<blockquote>model&quot;** button on the Model Garden page to get the exact <code>curl</code> or Python</blockquote>
+<blockquote>code for that specific model version.</blockquote>
+<blockquote>[!NOTE] This list is <strong>INCOMPLETE</strong>. See</blockquote>
+<blockquote>[Use Open Models on Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/maas/use-open-models)</blockquote>
+<blockquote>for the full list of supported models.</blockquote>
+<p>Model Family  | Model ID Examples                              | Location      | Notes :------------ | :--------------------------------------------- | :------------ | :---- <strong>Llama 4</strong>   | <code>meta/llama-4-maverick-17b-128e-instruct-maas</code> | <code>us-east5</code>    | <strong>Llama 4</strong>   | <code>meta/llama-4-scout-17b-16e-instruct-maas</code>     | <code>us-east5</code>    | <strong>Llama 3.3</strong> | <code>meta/llama-3.3-70b-instruct-maas</code>             | <code>us-central1</code> | <strong>DeepSeek</strong>  | <code>deepseek-ai/deepseek-v3.2-maas</code>               | <code>global</code>      | Global ONLY <strong>DeepSeek</strong>  | <code>deepseek-ai/deepseek-v3.1-maas</code>               | <code>us-west2</code>    | US-West2 ONLY <strong>DeepSeek</strong>  | <code>deepseek-ai/deepseek-r1-0528-maas</code>            | <code>us-central1</code> | <strong>Qwen 3</strong>    | <code>qwen/qwen3-coder-480b-a35b-instruct-maas</code>     | <code>global</code>      | <strong>Qwen 3</strong>    | <code>qwen/qwen3-next-80b-a3b-instruct-maas</code>        | <code>global</code>      | <strong>Kimi</strong>      | <code>moonshotai/kimi-k2-thinking-maas</code>             | <code>global</code>      | <strong>MiniMax</strong>   | <code>minimaxai/minimax-m2-maas</code>                    | <code>global</code>      | <strong>GLM</strong>       | <code>zai-org/glm-4.7-maas</code>, <code>zai-org/glm-5-maas</code>   | <code>global</code>      |</p>
+<h3>4. Custom Endpoints (tuned Gemini, self-deployed OSS LLM, legacy custom)</h3>
+<p>This section covers how to invoke a model on an Agent Platform <strong>Endpoint</strong> that belongs to your project — i.e., something with a numeric resource name like <code>projects/.../endpoints/5875254126916403200</code>. This is distinct from calling the publisher MaaS surfaces in sections 2 and 3 (which hit <code>publishers/.../models/...</code> or <code>endpoints/openapi</code>, not your endpoint ID).</p>
+<blockquote>[!IMPORTANT]</blockquote>
+<blockquote></blockquote>
+<blockquote><strong>Publisher MaaS vs your endpoint (don't confuse them).</strong> Section 3's</blockquote>
+<blockquote>OpenMaaS examples (e.g. <code>meta/llama-3.3-70b-instruct-maas</code>) hit a</blockquote>
+<blockquote><strong>shared publisher URL</strong> at</blockquote>
+<blockquote><code>/v1/projects/.../locations/.../endpoints/openapi</code>. This section's</blockquote>
+<blockquote>recipes hit <strong>YOUR</strong> endpoint at <code>/v1/projects/.../endpoints/&lt;id&gt;</code>.</blockquote>
+<blockquote>If you have a Llama / Gemma / etc. model deployed via Model Garden</blockquote>
+<blockquote>&quot;Deploy&quot; (NOT the MaaS publisher product), follow this section — not</blockquote>
+<blockquote>section 3.</blockquote>
+<blockquote>[!IMPORTANT]</blockquote>
+<blockquote></blockquote>
+<blockquote><strong>Two orthogonal axes determine the call shape:</strong></blockquote>
+<blockquote></blockquote>
+<blockquote><strong>Axis 1 — model family</strong> drives the RPC method and payload:</blockquote>
+<blockquote></blockquote>
+<blockquote>| Endpoint serves | Method | Payload |</blockquote>
+<blockquote>|---|---|---|</blockquote>
+<blockquote>| A <strong>tuned Gemini model</strong> (output of Gemini tuning — the endpoint is already deployed for you) | <code>:generateContent</code> | <code>contents</code> / <code>generationConfig</code> |</blockquote>
+<blockquote>| A <strong>self-deployed OSS LLM</strong> (Llama, DeepSeek, Qwen, Gemma, Mistral, etc., deployed via Model Garden) | <code>/chat/completions</code> | OpenAI-compatible <code>messages</code> |</blockquote>
+<blockquote>| A <strong>legacy custom model</strong> (classification, regression, custom-trained, embedding) | <code>:predict</code> | <code>instances</code> / <code>parameters</code> |</blockquote>
+<blockquote></blockquote>
+<blockquote>Run `gcloud ai endpoints describe &lt;ENDPOINT_ID&gt; --region=&lt;REGION&gt;</blockquote>
+<blockquote>--format=json<code> and inspect </code>deployedModels[].model` to decide:</blockquote>
+<blockquote>contains <code>gemini</code> → tuned Gemini; matches an OSS publisher</blockquote>
+<blockquote>(<code>meta/</code>, <code>google/gemma-</code>, <code>deepseek-ai/</code>, <code>qwen/</code>, ...) → OSS LLM;</blockquote>
+<blockquote>otherwise → likely legacy custom.</blockquote>
+<blockquote></blockquote>
+<blockquote><strong>Axis 2 — endpoint type (shared vs dedicated)</strong> drives the URL host:</blockquote>
+<blockquote></blockquote>
+<blockquote>| <code>dedicatedEndpointEnabled</code> | Host |</blockquote>
+<blockquote>|---|---|</blockquote>
+<blockquote>| <code>false</code> (default — shared endpoint) | <code>&lt;REGION&gt;-aiplatform.googleapis.com</code> |</blockquote>
+<blockquote>| <code>true</code> (dedicated endpoint, has its own DNS) | the value of <code>dedicatedEndpointDns</code> (format: <code>&lt;ENDPOINT_ID&gt;.&lt;REGION&gt;-&lt;PROJECT_NUM&gt;.prediction.vertexai.goog</code>) |</blockquote>
+<blockquote></blockquote>
+<blockquote>A dedicated endpoint <strong>cannot</strong> be reached via the shared</blockquote>
+<blockquote><code>&lt;REGION&gt;-aiplatform.googleapis.com</code> host (per the</blockquote>
+<blockquote><code>Endpoint.dedicated_endpoint_enabled</code> proto: *&quot;Once you enabled</blockquote>
+<blockquote>dedicated endpoint, you won't be able to send request to the shared</blockquote>
+<blockquote>DNS&quot;*). Always check <code>dedicatedEndpointDns</code> in the describe output:</blockquote>
+<blockquote>if it's set, use it as the host; otherwise use the shared host.</blockquote>
+<blockquote></blockquote>
+<blockquote>**Path is always</blockquote>
+<blockquote><code>/v1/projects/.../locations/.../endpoints/&lt;id&gt;/...</code>** on both hosts.</blockquote>
+<blockquote>Both <code>/v1/</code> (GA) and <code>/v1beta1/</code> (beta) route to the same backend; the</blockquote>
+<blockquote>recipes in this skill use <code>/v1/</code>. The public</blockquote>
+<blockquote>[Gemma deployment notebook](https://github.com/GoogleCloudPlatform/vertex-ai-samples/blob/main/notebooks/community/model_garden/model_garden_gemma_deployment_on_vertex.ipynb)</blockquote>
+<blockquote>still uses <code>/v1beta1/</code>, which also works.</blockquote>
+<h4>4a. REST recipe — tuned Gemini model</h4>
+<p>Output of Gemini tuning is always an endpoint that's already deployed for you, reachable on the shared host with <code>:generateContent</code>.</p>
+<pre><code>PROJECT_ID=my-project
+ENDPOINT_ID=5875254126916403200
+REGION=us-central1
+TOKEN=$(gcloud auth application-default print-access-token)
+
+curl -sS -X POST \
+  -H &quot;Authorization: Bearer $TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  &quot;https://${REGION}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${REGION}/endpoints/${ENDPOINT_ID}:generateContent&quot; \
+  -d '{
+    &quot;contents&quot;: [
+      {&quot;role&quot;: &quot;user&quot;, &quot;parts&quot;: [{&quot;text&quot;: &quot;Hello! Introduce yourself briefly.&quot;}]}
+    ],
+    &quot;generationConfig&quot;: {
+      &quot;temperature&quot;: 0.2
+    }
+  }'</code></pre>
+<blockquote>[!WARNING]</blockquote>
+<blockquote></blockquote>
+<blockquote><strong>If you set <code>maxOutputTokens</code>, be generous for thinking models.</strong></blockquote>
+<blockquote>Gemini 2.5 Pro (and other thinking-enabled models) emit &quot;thoughts&quot;</blockquote>
+<blockquote>tokens that count against <code>maxOutputTokens</code> BEFORE any user-visible</blockquote>
+<blockquote>text. With a small cap (e.g. 100), the entire budget is consumed by</blockquote>
+<blockquote>thoughts and the response has empty <code>text</code> parts but a non-zero</blockquote>
+<blockquote><code>usageMetadata.candidatesTokenCount</code>.</blockquote>
+<blockquote></blockquote>
+<blockquote>If you don't need to constrain output length, omit <code>maxOutputTokens</code></blockquote>
+<blockquote>entirely and let the model emit as much as it wants. If you do set</blockquote>
+<blockquote>it: <code>&gt;= 512</code> for any chat-like use, <code>&gt;= 1024</code> for a paragraph of</blockquote>
+<blockquote>output. If you see <code>finishReason: &quot;MAX_TOKENS&quot;</code> and no <code>text</code></blockquote>
+<blockquote>content in the response, your cap is too low.</blockquote>
+<h4>4b. REST recipe — self-deployed OSS LLM (Llama, DeepSeek, Qwen, Gemma, etc.)</h4>
+<p>Self-deployed OSS LLMs may be on a <strong>shared</strong> or <strong>dedicated</strong> endpoint depending on how the deploy was configured (<code>dedicated_endpoint_enabled</code> at create time). The recipe below handles both cases by checking <code>dedicatedEndpointDns</code> in the describe output.</p>
+<pre><code>PROJECT_ID=my-project
+ENDPOINT_ID=5875254126916403200
+REGION=us-central1
+TOKEN=$(gcloud auth application-default print-access-token)
+
+# Step 1: discover host. dedicatedEndpointDns is empty for shared endpoints.
+DEDICATED_DNS=$(gcloud ai endpoints describe &quot;$ENDPOINT_ID&quot; \
+  --project=&quot;$PROJECT_ID&quot; --region=&quot;$REGION&quot; \
+  --format=&quot;value(dedicatedEndpointDns)&quot;)
+
+if [ -n &quot;$DEDICATED_DNS&quot; ]; then
+  HOST=&quot;$DEDICATED_DNS&quot;
+else
+  HOST=&quot;${REGION}-aiplatform.googleapis.com&quot;
+fi
+
+# Step 2: call /chat/completions. Path is identical for both hosts.
+curl -sS -X POST \
+  -H &quot;Authorization: Bearer $TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  &quot;https://${HOST}/v1/projects/${PROJECT_ID}/locations/${REGION}/endpoints/${ENDPOINT_ID}/chat/completions&quot; \
+  -d '{
+    &quot;messages&quot;: [
+      {&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Hello! Introduce yourself briefly.&quot;}
+    ]
+  }'</code></pre>
+<blockquote>[!NOTE]</blockquote>
+<blockquote></blockquote>
+<blockquote>-   <code>max_tokens</code> (NOT <code>maxOutputTokens</code>) — this is OpenAI-compatible</blockquote>
+<blockquote>    vocabulary, not Vertex. Omit it entirely to let the model emit as</blockquote>
+<blockquote>    much as it wants; set it explicitly only if you need to cap output.</blockquote>
+<blockquote>-   The <code>&quot;model&quot;</code> field in the OpenAI-style payload can be omitted (or</blockquote>
+<blockquote>    set to <code>&quot;&quot;</code>) for endpoint deployments — the endpoint already</blockquote>
+<blockquote>    determines which model serves the request.</blockquote>
+<blockquote>-   Same endpoint also exposes <code>/completions</code> (legacy text completion)</blockquote>
+<blockquote>    and <code>/embeddings</code> for embedding models.</blockquote>
+<blockquote>-   <strong>Reasoning models</strong> (DeepSeek-R1, Kimi-K2-Thinking, GLM-5 variants,</blockquote>
+<blockquote>    etc.) emit thinking tokens that count against <code>max_tokens</code> BEFORE</blockquote>
+<blockquote>    the final answer — same pathology as Gemini 2.5 Pro in section 4a.</blockquote>
+<blockquote>    If you DO set <code>max_tokens</code> and get an empty</blockquote>
+<blockquote>    <code>choices[0].message.content</code> or <code>finish_reason: &quot;length&quot;</code>, raise it</blockquote>
+<blockquote>    (&gt;= 1024 for chat, &gt;= 2048 for longer thinking chains) or omit it.</blockquote>
+<p>Python equivalent (OpenAI SDK) — mirrors the public [Gemma deployment notebook](https://github.com/GoogleCloudPlatform/vertex-ai-samples/blob/main/notebooks/community/model_garden/model_garden_gemma_deployment_on_vertex.ipynb):</p>
+<pre><code>import google.auth
+from google.auth.transport.requests import Request
+import openai
+
+from google.cloud import aiplatform
+
+PROJECT_ID = &quot;my-project&quot;
+ENDPOINT_ID = &quot;5875254126916403200&quot;
+REGION = &quot;us-central1&quot;
+
+aiplatform.init(project=PROJECT_ID, location=REGION)
+endpoint = aiplatform.Endpoint(
+    f&quot;projects/{PROJECT_ID}/locations/{REGION}/endpoints/{ENDPOINT_ID}&quot;
+)
+endpoint_resource_name = endpoint.resource_name  # full projects/.../endpoints/&lt;id&gt;
+dedicated_dns = endpoint.gca_resource.dedicated_endpoint_dns  # empty if shared
+
+host = dedicated_dns if dedicated_dns else f&quot;{REGION}-aiplatform.googleapis.com&quot;
+base_url = f&quot;https://{host}/v1/{endpoint_resource_name}&quot;
+
+creds, _ = google.auth.default()
+creds.refresh(Request())
+
+client = openai.OpenAI(base_url=base_url, api_key=creds.token)
+response = client.chat.completions.create(
+    model=&quot;&quot;,  # endpoint determines the served model
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Hello! Introduce yourself briefly.&quot;}],
+    # Omit max_tokens to let the model emit as much as it wants. Set it
+    # only if you need to cap output length (see notes above).
+)
+print(response.choices[0].message.content)</code></pre>
+<p>See also: <code>agent-platform-deploy</code> skill section 4 &quot;Verifying Deployment&quot;, which uses the same pattern post-deploy.</p>
+<h4>4c. REST recipe — legacy <code>:predict</code> (custom / classification / embedding)</h4>
+<p>Same host-discovery logic as 4b (shared or dedicated based on <code>dedicatedEndpointDns</code>):</p>
+<pre><code>DEDICATED_DNS=$(gcloud ai endpoints describe &quot;$ENDPOINT_ID&quot; \
+  --project=&quot;$PROJECT_ID&quot; --region=&quot;$REGION&quot; \
+  --format=&quot;value(dedicatedEndpointDns)&quot;)
+HOST=${DEDICATED_DNS:-${REGION}-aiplatform.googleapis.com}
+
+curl -sS -X POST \
+  -H &quot;Authorization: Bearer $TOKEN&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  &quot;https://${HOST}/v1/projects/${PROJECT_ID}/locations/${REGION}/endpoints/${ENDPOINT_ID}:predict&quot; \
+  -d '{
+    &quot;instances&quot;: [{&quot;key&quot;: &quot;value&quot;}],
+    &quot;parameters&quot;: {}
+  }'</code></pre>
+<p>The exact <code>instances</code> shape is model-specific; consult the deployed model's documentation or the Model Garden card it was deployed from.</p>
+<h4>4d. Python (Vertex AI SDK) — tuned Gemini model</h4>
+<pre><code>from google import genai
+import google.auth
+
+_, project_id = google.auth.default()
+client = genai.Client(vertexai=True, project=project_id, location=&quot;us-central1&quot;)
+
+ENDPOINT_ID = &quot;5875254126916403200&quot;
+response = client.models.generate_content(
+    model=f&quot;projects/{project_id}/locations/us-central1/endpoints/{ENDPOINT_ID}&quot;,
+    contents=&quot;Hello! Introduce yourself briefly.&quot;,
+    config={&quot;temperature&quot;: 0.2},  # add max_output_tokens only if you need a cap
+)
+print(response.text)</code></pre>
+<h3>5. Troubleshooting &amp; Common Error Codes</h3>
+<h4>429: Resource Exhausted</h4>
+<ul>
+<li><strong>Cause</strong>: OpenMaaS and Gemini models use <strong>Dynamic Shared Quota (DSQ)</strong>.</li>
+</ul>
+<p>Resources are pooled and allocated dynamically based on availability. A 429 error indicates the shared pool is temporarily exhausted, not necessarily that <em>your</em> specific project quota is hit (though it can be).</p>
+<ul>
+<li><strong>Solution</strong>: Implement strict <strong>exponential backoff and retry</strong> strategies.</li>
+<li><strong>High Throughput</strong>: For production workloads requiring high throughput or</li>
+</ul>
+<p>guaranteed capacity, consider <strong>Provisioned Throughput (PT)</strong>.</p>
+<ul>
+<li><strong>Important</strong>: Quota increases through normal cloud processes (Cloud</li>
+</ul>
+<p>Console) are <strong>NOT</strong> applicable for DSQ constraints.</p>
+<ul>
+<li><strong>Documentation</strong>:</li>
+</ul>
+<p>[Quotas and limits (DSQ)](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/quotas)</p>
+<h4>400: User Validation Error</h4>
+<ul>
+<li><strong>Cause</strong>: Invalid request format, unsupported parameter, or incorrect Model</li>
+</ul>
+<p>ID.</p>
+<ul>
+<li><strong>Action</strong>: Double-check your request payload and parameters. Verify the</li>
+</ul>
+<p>Model ID and Region are correct.</p>
+<ul>
+<li><strong>Custom endpoints</strong>: pick the right method + host per section 4's</li>
+</ul>
+<p>decision tables:</p>
+<ul>
+<li>Tuned Gemini + you called <code>:predict</code> → switch to <code>:generateContent</code></li>
+</ul>
+<p>(section 4a). Error mentions &quot;Required instances format mismatch&quot;.</p>
+<ul>
+<li>OSS LLM (Llama/DeepSeek/Qwen/Gemma/etc.) + you called</li>
+</ul>
+<p><code>:generateContent</code> or <code>:predict</code> → switch to <code>/chat/completions</code> (section 4b). Error may be 404, 405, or &quot;method not allowed&quot;.</p>
+<ul>
+<li>Legacy / custom-trained + you called <code>:generateContent</code> or</li>
+</ul>
+<p><code>/chat/completions</code> → switch to <code>:predict</code> (section 4c).</p>
+<ul>
+<li><strong>Dedicated endpoint reached on the shared host (or vice versa)</strong>:</li>
+<li>Symptom: DNS resolution failure (<code>Could not resolve host</code>) or 404.</li>
+<li>Cause: dedicated endpoints don't accept traffic on</li>
+</ul>
+<p><code>&lt;REGION&gt;-aiplatform.googleapis.com</code>, and the dedicated DNS (<code>*.prediction.vertexai.goog</code>) only exists when <code>dedicatedEndpointEnabled</code> is true.</p>
+<ul>
+<li>Action: re-check <code>gcloud ai endpoints describe ... --format=json</code></li>
+</ul>
+<p>for the <code>dedicatedEndpointDns</code> field; use it iff non-empty (per the host-discovery snippets in section 4b/4c).</p>
+<h4>Empty response text on Gemini deployed endpoints</h4>
+<ul>
+<li><strong>Cause</strong>: <code>maxOutputTokens</code> is set too low. Gemini 2.5 Pro and other</li>
+</ul>
+<p>thinking models emit &quot;thoughts&quot; tokens that count against the budget BEFORE any user-visible text. With a small cap (e.g. 100), the entire budget is consumed by thoughts and the response has empty <code>text</code> parts but a non-zero <code>usageMetadata.candidatesTokenCount</code> and <code>finishReason: &quot;MAX_TOKENS&quot;</code>.</p>
+<ul>
+<li><strong>Action</strong>: Omit <code>maxOutputTokens</code> entirely (let the model emit as much</li>
+</ul>
+<p>as it wants), or raise it to &gt;= 512 for chat-like use, &gt;= 1024 for longer output. See section 4 &quot;Custom Endpoints&quot; for details.</p>
+<h4>404: Not Found / Model Not Available</h4>
+<ul>
+<li><strong>Cause</strong>: The model is not enabled, or not available in the specified</li>
+</ul>
+<p>project or region.</p>
+<ul>
+<li><strong>Action</strong>:</li>
+</ul>
+<ol>
+<li><strong>Check Location Availability</strong>:</li>
+</ol>
+<ul>
+<li><strong>OpenMaaS</strong>: Verify the model is available in your region. See</li>
+</ul>
+<p>[Model Availability by Location](https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/locations#genai-open-models).</p>
+<ul>
+<li><strong>Gemini</strong>:</li>
+<li><strong>Source of Truth</strong>: Always check</li>
+</ul>
+<p>[Gemini Model Locations](https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/locations#google-models) for the authoritative list.</p>
+<ul>
+<li><strong>Preview Models</strong>: All Preview models (e.g., Gemini 3.1,</li>
+</ul>
+<p>experimental versions) are often <strong>ONLY</strong> available in the <code>us-central1</code> or <code>global</code> regions.</p>
+<ul>
+<li><strong>Stable Models</strong>: (e.g., Gemini 2.5 Pro) Available in</li>
+</ul>
+<p><code>us-central1</code>, <code>europe-west4</code>, and many other regions.</p>
+<ul>
+<li><strong>Important</strong>: If you get a 404/400 error, try switching your</li>
+</ul>
+<p>client location to <code>us-central1</code> or <code>global</code>.</p>
+<ol>
+<li><strong>Enable Llama Models</strong>: For <strong>Llama 3.3</strong> and <strong>Llama 4</strong>, you <strong>MUST</strong></li>
+</ol>
+<p>enable the model in Model Garden before use. Go to the [Model Garden](https://console.cloud.google.com/agent-platform/model-garden), search for the model card (e.g., &quot;Llama 3.3 API Service&quot;), and click <strong>Enable</strong>. Only then can you make inference requests.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: agent-platform-inference\ndisplay_name: agent-platform-inference\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# agent-platform-inference - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `agent-platform-inference` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nConnects to and performs inference with Google Cloud Agent Platform GenAI models, including First-Party Gemini models and Third-Party OpenMaaS models (Llama, DeepSeek, Qwen, etc.). Use when you need to generate code for\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose agent-platform-inference, then write the task. Fallback prompt: Use the agent-platform-inference skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `agent-platform-inference` |\n| Canonical name | `agent-platform-inference` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nConnects to and performs inference with Google Cloud Agent Platform GenAI models, including First-Party Gemini models and Third-Party OpenMaaS models (Llama, DeepSeek, Qwen, etc.). Use when you need to generate code for\n\n## Upstream provenance\n\nThis adapted package derives from [Google Agent Skills](https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39) at commit `092e210b243601797a0fb939040be2b1288e6d39`, licensed under `Apache-2.0`.\n\n\n## Original SKILL.md\n\n---\nname: agent-platform-inference\ndescription: \"Connects to and performs inference with Google Cloud Agent Platform GenAI models, including First-Party Gemini models and Third-Party OpenMaaS models (Llama, DeepSeek, Qwen, etc.). Use when you need to generate code for calling Gemini or OpenMaaS models, authenticate with GenAI SDK, OpenAI SDK, or legacy Agent Platform SDK, configure base URLs and global/regional endpoints, or troubleshoot 429 Resource Exhausted (DSQ), 400 User Validation, or 404 Not Found errors. Don't use for deploying models to endpoints or for running model evaluations.\"\nlicense: Apache-2.0\n---\n\n## Universal runtime boundary\n\n- Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.\n- Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.\n- Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.\n- Read `references/upstream.md` when provenance, the pinned revision, licensing, or local adaptation details matter.\n\n# Agent Platform GenAI Inference Skill\n\nThis skill provides instructions for authenticating and connecting to Google\nCloud Agent Platform to use Generative AI models. It covers:\n\n*   **First-Party publisher models** (Gemini) — section 2.\n*   **Third-Party publisher models** (OpenMaaS: Llama, DeepSeek, Qwen, etc.)\n    — section 3.\n*   **Custom endpoints** (any model on a numeric `projects/.../endpoints/\u003cid>`\n    resource — tuned Gemini models, OSS LLMs self-deployed from Model Garden\n    via the `agent-platform-deploy` skill, and legacy custom models) —\n    section 4.\n\n## Safety & Confirmation Tiers (CRITICAL)\n\nBefore executing any commands or scripts on behalf of the user, you must adhere\nto the following safety tiers based on the action requested. (The skill is\nread-only; other safety tiers are omitted):\n\n1.  **Tier R: Read-only / Inference (`client.models.generate_content`,\n    `client.chat.completions.create`, `client.completions.create`,\n    `client.embeddings.create`)**\n    *   Requires **interactive confirmation** with 'Yes'/ 'No' options before\n        executing model inference on behalf of the user, to prevent unexpected\n        cost or quota consumption. The confirmation prompt must clearly explain\n        the proposed inference execution and its key parameters (e.g., target\n        model ID, SDK choice, input prompt). Natural-language paraphrases\n        without specifying the parameters are NOT sufficient.\n    *   **Same-turn restriction**: Do not execute the inference scripts or\n        commands in the same turn as presenting the confirmation prompt. Stop\n        and wait for the user's reply; only execute after explicit 'Yes' /\n        approval.\n    *   **Gold Standard Example**: > I will perform model inference with the\n        following parameters. Please > confirm this information before I\n        proceed: > * **Model ID**: `deepseek-ai/deepseek-v3.2-maas` > * **SDK**:\n        OpenAI SDK (via Vertex AI Endpoint) > * **Input Prompt**: \"Explain the\n        concept of quantum computing...\" > Do you confirm? [Yes/No]\n\n## Phase 0: Environment Setup\n\n**CRITICAL**: Before running any of the Python sample scripts in the `scripts/`\ndirectory (e.g., `scripts/openmaas_openai_sdk.py`), you MUST ensure the\nenvironment is correctly initialized by following these steps:\n\n1.  **Google Cloud Authentication**: Authenticate with your Google Cloud\n    credentials and configure active Application Default Credentials (ADC) for\n    Agent Platform access:\n\n    ```bash\n    gcloud auth login\n    gcloud auth application-default login\n    ```\n\n2.  **Enable API** (if not already enabled):\n\n    ```bash\n    gcloud services enable aiplatform.googleapis.com\n    ```\n\n3.  **Python Dependencies**: The scripts import `vertexai` (from\n    `google-cloud-aiplatform`), `google-genai`, and `openai`. Do **not** create\n    a virtual environment — it starts empty and hides packages the environment\n    already provides, forcing a redundant install. Probe, and install only what\n    is missing:\n\n    ```bash\n    python3 -c \"import vertexai, google.genai, openai\" \\\n      || pip install -r scripts/requirements.txt\n    ```\n\n    The pins in `scripts/requirements.txt` are a fallback for an environment\n    that does not already provide these SDKs; do not apply them on top of a\n    working environment.\n\n4.  **Verify Setup (Optional)**: Run all sample scripts at once to verify the\n    environment is working end-to-end:\n\n    ```bash\n    ./scripts/verify_all.sh\n    ```\n\n5.  **Execution**: Run the scripts with a plain `python3 scripts/...`. There is\n    no environment to activate first.\n\n\n\n> [!IMPORTANT] **CRITICAL: Model IDs & Availability** * **Gemini Models**: See\n> [Gemini Models][gemini-models-docs] for valid Model IDs and Regions. *\n> **OpenMaaS Models**: See\n> [Use Open Models on Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/maas/use-open-models)\n> for Llama, DeepSeek, Qwen, etc. * **Incomplete Lists**: The Model IDs listed\n> in this skill are **examples only** and may be incomplete or outdated. *\n> **Action**: Always verify the Model ID and Region using the links above before\n> generating code.\n>\n> \\[gemini-models-docs]:\n> https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/migrate\n>\n>\n> ## Workflow Decision Tree\n\n1.  **Model Family Identification**: Has the user specified whether they want to\n    call a **Gemini** (First-Party) model or an **OpenMaaS** (Third-Party, e.g.\n    Llama, DeepSeek, Qwen) model?\n\n    *   **No** -> Ask the user which model family they want to use. If they\n        provide a specific model name, infer the family from the name.\n    *   **Yes** -> Proceed to Step 2.\n\n2.  **SDK Choice**: Which SDK does the user want to use?\n\n    *   **Gemini + GenAI SDK** (preferred for Gemini) -> Proceed to [1. Gemini\n        Models].\n    *   **Gemini + legacy Vertex AI SDK** -> Proceed to [1. Gemini Models].\n    *   **OpenMaaS + OpenAI SDK** (preferred for OpenMaaS) -> Proceed to [2.\n        OpenMaaS Models].\n    *   **OpenMaaS + GenAI SDK** -> Proceed to [2. OpenMaaS Models].\n    *   **Unsure** -> Default to the preferred SDK for the chosen family.\n\n3.  **Troubleshooting**: Is the user reporting an error (429 Resource Exhausted,\n    400 User Validation, 404 Not Found, etc.)?\n\n    *   **Yes** -> Proceed to [3. Troubleshooting & Common Error Codes].\n    *   **No** -> Proceed with the SDK choice from Step 2.\n\n## 0.5 Region Availability Check for Publisher Endpoints (Gemini + LoRA base)\n\n> [!NOTE] **Skip this section** if either of these applies:\n>\n> - The user is calling a custom endpoint (§4) — a tuned Gemini model served on\n>   a numeric `projects/.../endpoints/\u003cid>`, a self-deployed OSS LLM (Llama,\n>   DeepSeek, Qwen, Gemma, etc.), or a legacy custom model. Those requests hit\n>   a specific endpoint resource whose region is fixed at deploy time; if the\n>   caller-side region doesn't match, the endpoint lookup returns a clean 404\n>   without incurring inference cost. Go to §4.\n> - The user is calling an OpenMaaS publisher model (§2) — Llama, DeepSeek,\n>   Qwen, etc. served via the global `openapi` base URL. These don't have\n>   per-region availability restrictions in the same way first-party Gemini\n>   does. Go to §2.\n>\n> **Apply this section** only if the user is calling a first-party managed\n> Gemini model (`gemini-*`, via §1), including fine-tuned LoRA adapters on\n> top of Gemini — these route through a publisher endpoint whose regional\n> availability actually varies.\n\nBefore responding to any inference request that names a specific region for a\nfirst-party managed Gemini model (`gemini-*`) or a fine-tuned Gemini LoRA\nadapter (identified by numeric endpoint ID + user-stated base model), you\n**MUST** verify the model is actually available in that region by making a\nlive API call. Do not rely on Google Search, training-corpus knowledge, or\npublisher documentation for availability claims — regional availability\nchanges frequently and grounded text can be stale or wrong.\n\nProbe only the exact model and region the user asked about. Do not probe other\nmodels as a \"control\" — you cannot infer anything about model A's availability\nfrom model B's status, because a different model may itself be unavailable in\nthe reference region for unrelated reasons.\n\nFor first-party Gemini models, probe with a real `:generateContent` call using\na minimal valid payload:\n\n```bash\ncurl -sS -o /dev/null -w \"%{http_code}\\n\" \\\n    -H \"Authorization: Bearer $(gcloud auth print-access-token)\" \\\n    -H \"Content-Type: application/json\" \\\n    \"https://${LOCATION_ID}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${LOCATION_ID}/publishers/google/${MODEL_ID}:generateContent\" \\\n    -d \"{\\\"contents\\\":{\\\"role\\\":\\\"user\\\",\\\"parts\\\":{\\\"text\\\":\\\"${PROBE_TEXT:-hi}\\\"}}}\"\n```\n\nFor inference against a fine-tuned Gemini LoRA adapter, probe the **base\nmodel** in the target region using the same `:generateContent` call above with\n`${MODEL_ID}` set to the base (e.g. `gemini-2.5-flash` if the adapter was\ntuned on `gemini-2.5-flash`). The LoRA adapter cannot serve in a region where\nits base model isn't available.\n\nInterpret the probe result and act:\n\n-   **200** — model is available in that region. Proceed with the SDK setup in\n    §1.\n-   **404** — model is not available in that region. STOP. Tell the user\n    plainly that the model isn't offered in that region and list the regions\n    where it is available (from\n    [Gemini Models][gemini-models-docs] or `gcloud ai model-garden models list\n    --filter=\"name~$MODEL_NAME\"` without `--region`). Do not silently switch\n    regions. Do not proceed to write inference code or SDK initialization for\n    the unsupported region. Do not run additional \"control\" probes to\n    double-check the 404 — the target-region probe is authoritative.\n-   **Any other outcome** (permission denied, quota, transient failure, etc.)\n    — do not conclude the model is available or unavailable. Explain the\n    underlying cause in plain language (e.g. \"your account doesn't have access\n    to this project's Vertex AI API — enable it in the console or switch\n    projects\") and the concrete next action.\n\n## 1. Gemini Models\n\nFor Gemini models (e.g., `gemini-2.5-pro`, `gemini-3-flash-preview`), the\n**GenAI SDK** (`google-genai`) is the **PREFERRED** method. The legacy\n`vertexai` SDK is still supported but GenAI SDK is recommended for new projects.\n\n> [!IMPORTANT]\n> **Preview Models (including Gemini 3.1)** are often **ONLY** available in the\n> `global` region. Stable models are available in `us-central1` and other\n> regions.\n\n### Choosing the Right SDK\n\n*   **Gemini Models**: **GenAI SDK** (`google-genai`) is **PREFERRED**. Use\n    OpenAI SDK for compatibility, or Legacy SDK (`vertexai`) if needed.\n*   **OpenMaaS Models**: **OpenAI SDK** is **HIGHLY RECOMMENDED**. Use GenAI SDK\n    or Legacy SDK if you have specific infrastructure requirements.\n\n### Installation\n\n```bash\npip install google-genai\n```\n\n### Python Example (GenAI SDK - Preferred)\n\nSee [`scripts/gemini_genai_sdk.py`](scripts/gemini_genai_sdk.py) for the\ncomplete code.\n\n### Alternative: OpenAI SDK (Chat Completions)\n\nUse the standard OpenAI SDK with the Agent Platform endpoint. This is great for\ncross-compatibility.\n\nSee [`scripts/gemini_openai_sdk.py`](scripts/gemini_openai_sdk.py) for the\ncomplete code.\n\n### Legacy: Agent Platform SDK\n\nThe legacy `vertexai` SDK is still widely used but `google-genai` is preferred\nfor new Gemini projects.\n\nSee [`scripts/gemini_vertexai_sdk.py`](scripts/gemini_vertexai_sdk.py) for the\ncomplete code.\n\n**Documentation**:\n[Google GenAI SDK](https://github.com/googleapis/python-genai)\n\n**Documentation**:\n[Agent Platform Gemini Models](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/google-models)\n\n## 2. OpenMaaS Models (Llama, DeepSeek, Qwen, etc.)\n\nFor OpenMaaS (Model-as-a-Service) models, the **HIGHLY RECOMMENDED** approach is\nto use the standard **OpenAI SDK** with a specific Vertex AI endpoint.\n\n> [!WARNING] While `GenerativeModel` *can* support some OpenMaaS models, it is\n> **discouraged**. Use the OpenAI SDK for best compatibility (especially for\n> Chat Completions).\n\n### Installation\n\n```bash\npip install openai google-auth\n```\n\n### Authentication for OpenAI SDK\n\nYou **MUST** use a Google Cloud OAuth access token as the API key for the OpenAI\nSDK.\n\n```python\nimport google.auth\nfrom google.auth.transport.requests import Request\n\ndef get_gcp_access_token():\n    creds, _ = google.auth.default()\n    creds.refresh(Request())\n    return creds.token\n```\n\n> [!NOTE] Google Cloud access tokens typically expire after 1 hour. The\n> `get_gcp_access_token()` function above retrieves a *fresh* token at the time\n> it is called. For long-running\n> applications, you implement a refresh mechanism. See\n> [Refresh the access token](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/migrate/openai/auth-and-credentials?hl=en#refresh_your_credentials)\n> for details.\n\n### Configuration (Base URL)\n\n\n\n-   **Global Endpoint** (Recommended for most models requiring global\n    availability):\n    `https://aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/global/endpoints/openapi`\n-   **Regional Endpoint**:\n    `https://{REGION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{REGION}/endpoints/openapi`\n\n\n### Python Example (OpenMaaS - Chat Completions)\n\nSee [`scripts/openmaas_openai_sdk.py`](scripts/openmaas_openai_sdk.py) for the\ncomplete code.\n\n> [!TIP] **Alternative: Environment Variables** You can set environment\n> variables in your shell instead of updating the code.\n>\n> **Alternative: Environment Variables** You can set environment variables in\n> your shell instead of updating the code.\n\n```bash\nexport OPENAI_BASE_URL=\"https://aiplatform.googleapis.com/v1/projects/YOUR_PROJECT_ID/locations/global/endpoints/openapi\"\nexport OPENAI_API_KEY=\"$(gcloud auth application-default print-access-token)\"\n```\n> Then initialize the client without arguments: `client = OpenAI()`\n\n### Python Example (OpenMaaS - Completions API)\n\nThe following models support the legacy Completions API: `zai-org/glm-5-maas`,\n`moonshotai/kimi-k2-thinking-maas`, `minimaxai/minimax-m2-maas`,\n`deepseek-ai/deepseek-v3.1-maas`, and `deepseek-ai/deepseek-v3.2-maas`.\n\n```python\nresponse = client.completions.create(\n    model=\"deepseek-ai/deepseek-v3.2-maas\",\n    prompt=\"Once upon a time\",\n    max_tokens=100\n)\nprint(response.choices[0].text)\n```\n\n### Python Example (OpenMaaS - Embeddings)\n\n```python\n# Verify specific Embedding Model ID on Model Garden (e.g., intfloat/multilingual-e5-small)\nresponse = client.embeddings.create(\n    model=\"intfloat/multilingual-e5-large-maas\",\n    input=\"The quick brown fox jumps over the lazy dog\",\n)\nprint(response.data[0].embedding)\n```\n\n### Alternative: GenAI SDK\n\nThe `google-genai` SDK can also access OpenMaaS models via the `vertexai`\nbackend.\n\nSee [`scripts/openmaas_genai_sdk.py`](scripts/openmaas_genai_sdk.py) for the\ncomplete code.\n\n> [!IMPORTANT]\n> **Model ID Format**: For GenAI SDK with OpenMaaS, you **MUST** use the full\n> path: `publishers/PUBLISHER/models/MODEL` (e.g.,\n> `publishers/zai-org/models/glm-5-maas`).\n\n### Legacy: Agent Platform SDK (OpenMaaS)\n\nFor OpenMaaS, you can also use `GenerativeModel` (if supported).\n\nSee [`scripts/openmaas_vertexai_sdk.py`](scripts/openmaas_vertexai_sdk.py) for\nthe complete code.\n\n> [!IMPORTANT] **Model ID Format**: For Agent Platform SDK with OpenMaaS, you\n> **MUST** use the full path: `publishers/PUBLISHER/models/MODEL`.\n\n### Model Reference & Availability\n\n**Documentation**:\n[Use Open Models on Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/maas/use-open-models)\n\n> [!TIP]\n> **Self-Deployment for Control**: If you need **dedicated hardware**\n> (GPUs/TPUs), **guaranteed capacity**, or **specific regional placement** not\n> offered by MaaS, you can **Self-Deploy** these models to Agent Platform\n> Endpoints. Search for the model in Model Garden and click \"Deploy\" to select\n> your machine type. See the `agent-platform-deploy` skill for the deployment\n> workflow, and **section 4 of this skill** for how to invoke the resulting\n> self-deployed endpoint (use `/chat/completions` on the dedicated endpoint\n> DNS, NOT the OpenMaaS publisher URL above).\n\n> [!IMPORTANT] **Finding Inference Examples**: The list above is a starting\n> point. For the **definitive** inference snippets (especially for Chat\n> Completions payload structure): 1. Consult the\n> [Use Open Models on Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/maas/use-open-models)\n> list. 2. Click the link for your specific model (e.g., \"DeepSeek-V3\") to visit\n> its **Model Garden** page. 3. Look for the **\"Sample Code\"** or **\"Use this\n> model\"** button on the Model Garden page to get the exact `curl` or Python\n> code for that specific model version.\n\n> [!NOTE] This list is **INCOMPLETE**. See\n> [Use Open Models on Agent Platform](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/maas/use-open-models)\n> for the full list of supported models.\n\nModel Family  | Model ID Examples                              | Location      | Notes\n:------------ | :--------------------------------------------- | :------------ | :----\n**Llama 4**   | `meta/llama-4-maverick-17b-128e-instruct-maas` | `us-east5`    |\n**Llama 4**   | `meta/llama-4-scout-17b-16e-instruct-maas`     | `us-east5`    |\n**Llama 3.3** | `meta/llama-3.3-70b-instruct-maas`             | `us-central1` |\n**DeepSeek**  | `deepseek-ai/deepseek-v3.2-maas`               | `global`      | Global ONLY\n**DeepSeek**  | `deepseek-ai/deepseek-v3.1-maas`               | `us-west2`    | US-West2 ONLY\n**DeepSeek**  | `deepseek-ai/deepseek-r1-0528-maas`            | `us-central1` |\n**Qwen 3**    | `qwen/qwen3-coder-480b-a35b-instruct-maas`     | `global`      |\n**Qwen 3**    | `qwen/qwen3-next-80b-a3b-instruct-maas`        | `global`      |\n**Kimi**      | `moonshotai/kimi-k2-thinking-maas`             | `global`      |\n**MiniMax**   | `minimaxai/minimax-m2-maas`                    | `global`      |\n**GLM**       | `zai-org/glm-4.7-maas`, `zai-org/glm-5-maas`   | `global`      |\n\n## 4. Custom Endpoints (tuned Gemini, self-deployed OSS LLM, legacy custom)\n\nThis section covers how to invoke a model on an Agent Platform\n**Endpoint** that belongs to your project — i.e., something with a\nnumeric resource name like\n`projects/.../endpoints/5875254126916403200`. This is distinct from\ncalling the publisher MaaS surfaces in sections 2 and 3 (which hit\n`publishers/.../models/...` or `endpoints/openapi`, not your endpoint\nID).\n\n> [!IMPORTANT]\n>\n> **Publisher MaaS vs your endpoint (don't confuse them).** Section 3's\n> OpenMaaS examples (e.g. `meta/llama-3.3-70b-instruct-maas`) hit a\n> **shared publisher URL** at\n> `/v1/projects/.../locations/.../endpoints/openapi`. This section's\n> recipes hit **YOUR** endpoint at `/v1/projects/.../endpoints/\u003cid>`.\n> If you have a Llama / Gemma / etc. model deployed via Model Garden\n> \"Deploy\" (NOT the MaaS publisher product), follow this section — not\n> section 3.\n\n> [!IMPORTANT]\n>\n> **Two orthogonal axes determine the call shape:**\n>\n> **Axis 1 — model family** drives the RPC method and payload:\n>\n> | Endpoint serves | Method | Payload |\n> |---|---|---|\n> | A **tuned Gemini model** (output of Gemini tuning — the endpoint is already deployed for you) | `:generateContent` | `contents` / `generationConfig` |\n> | A **self-deployed OSS LLM** (Llama, DeepSeek, Qwen, Gemma, Mistral, etc., deployed via Model Garden) | `/chat/completions` | OpenAI-compatible `messages` |\n> | A **legacy custom model** (classification, regression, custom-trained, embedding) | `:predict` | `instances` / `parameters` |\n>\n> Run `gcloud ai endpoints describe \u003cENDPOINT_ID> --region=\u003cREGION>\n> --format=json` and inspect `deployedModels[].model` to decide:\n> contains `gemini` → tuned Gemini; matches an OSS publisher\n> (`meta/`, `google/gemma-`, `deepseek-ai/`, `qwen/`, ...) → OSS LLM;\n> otherwise → likely legacy custom.\n>\n> **Axis 2 — endpoint type (shared vs dedicated)** drives the URL host:\n>\n> | `dedicatedEndpointEnabled` | Host |\n> |---|---|\n> | `false` (default — shared endpoint) | `\u003cREGION>-aiplatform.googleapis.com` |\n> | `true` (dedicated endpoint, has its own DNS) | the value of `dedicatedEndpointDns` (format: `\u003cENDPOINT_ID>.\u003cREGION>-\u003cPROJECT_NUM>.prediction.vertexai.goog`) |\n>\n> A dedicated endpoint **cannot** be reached via the shared\n> `\u003cREGION>-aiplatform.googleapis.com` host (per the\n> `Endpoint.dedicated_endpoint_enabled` proto: *\"Once you enabled\n> dedicated endpoint, you won't be able to send request to the shared\n> DNS\"*). Always check `dedicatedEndpointDns` in the describe output:\n> if it's set, use it as the host; otherwise use the shared host.\n>\n> **Path is always\n> `/v1/projects/.../locations/.../endpoints/\u003cid>/...`** on both hosts.\n> Both `/v1/` (GA) and `/v1beta1/` (beta) route to the same backend; the\n> recipes in this skill use `/v1/`. The public\n> [Gemma deployment notebook](https://github.com/GoogleCloudPlatform/vertex-ai-samples/blob/main/notebooks/community/model_garden/model_garden_gemma_deployment_on_vertex.ipynb)\n> still uses `/v1beta1/`, which also works.\n\n### 4a. REST recipe — tuned Gemini model\n\nOutput of Gemini tuning is always an endpoint that's already deployed for\nyou, reachable on the shared host with `:generateContent`.\n\n```bash\nPROJECT_ID=my-project\nENDPOINT_ID=5875254126916403200\nREGION=us-central1\nTOKEN=$(gcloud auth application-default print-access-token)\n\ncurl -sS -X POST \\\n  -H \"Authorization: Bearer $TOKEN\" \\\n  -H \"Content-Type: application/json\" \\\n  \"https://${REGION}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${REGION}/endpoints/${ENDPOINT_ID}:generateContent\" \\\n  -d '{\n    \"contents\": [\n      {\"role\": \"user\", \"parts\": [{\"text\": \"Hello! Introduce yourself briefly.\"}]}\n    ],\n    \"generationConfig\": {\n      \"temperature\": 0.2\n    }\n  }'\n```\n\n> [!WARNING]\n>\n> **If you set `maxOutputTokens`, be generous for thinking models.**\n> Gemini 2.5 Pro (and other thinking-enabled models) emit \"thoughts\"\n> tokens that count against `maxOutputTokens` BEFORE any user-visible\n> text. With a small cap (e.g. 100), the entire budget is consumed by\n> thoughts and the response has empty `text` parts but a non-zero\n> `usageMetadata.candidatesTokenCount`.\n>\n> If you don't need to constrain output length, omit `maxOutputTokens`\n> entirely and let the model emit as much as it wants. If you do set\n> it: `>= 512` for any chat-like use, `>= 1024` for a paragraph of\n> output. If you see `finishReason: \"MAX_TOKENS\"` and no `text`\n> content in the response, your cap is too low.\n\n### 4b. REST recipe — self-deployed OSS LLM (Llama, DeepSeek, Qwen, Gemma, etc.)\n\nSelf-deployed OSS LLMs may be on a **shared** or **dedicated** endpoint\ndepending on how the deploy was configured (`dedicated_endpoint_enabled`\nat create time). The recipe below handles both cases by checking\n`dedicatedEndpointDns` in the describe output.\n\n```bash\nPROJECT_ID=my-project\nENDPOINT_ID=5875254126916403200\nREGION=us-central1\nTOKEN=$(gcloud auth application-default print-access-token)\n\n# Step 1: discover host. dedicatedEndpointDns is empty for shared endpoints.\nDEDICATED_DNS=$(gcloud ai endpoints describe \"$ENDPOINT_ID\" \\\n  --project=\"$PROJECT_ID\" --region=\"$REGION\" \\\n  --format=\"value(dedicatedEndpointDns)\")\n\nif [ -n \"$DEDICATED_DNS\" ]; then\n  HOST=\"$DEDICATED_DNS\"\nelse\n  HOST=\"${REGION}-aiplatform.googleapis.com\"\nfi\n\n# Step 2: call /chat/completions. Path is identical for both hosts.\ncurl -sS -X POST \\\n  -H \"Authorization: Bearer $TOKEN\" \\\n  -H \"Content-Type: application/json\" \\\n  \"https://${HOST}/v1/projects/${PROJECT_ID}/locations/${REGION}/endpoints/${ENDPOINT_ID}/chat/completions\" \\\n  -d '{\n    \"messages\": [\n      {\"role\": \"user\", \"content\": \"Hello! Introduce yourself briefly.\"}\n    ]\n  }'\n```\n\n> [!NOTE]\n>\n> -   `max_tokens` (NOT `maxOutputTokens`) — this is OpenAI-compatible\n>     vocabulary, not Vertex. Omit it entirely to let the model emit as\n>     much as it wants; set it explicitly only if you need to cap output.\n> -   The `\"model\"` field in the OpenAI-style payload can be omitted (or\n>     set to `\"\"`) for endpoint deployments — the endpoint already\n>     determines which model serves the request.\n> -   Same endpoint also exposes `/completions` (legacy text completion)\n>     and `/embeddings` for embedding models.\n> -   **Reasoning models** (DeepSeek-R1, Kimi-K2-Thinking, GLM-5 variants,\n>     etc.) emit thinking tokens that count against `max_tokens` BEFORE\n>     the final answer — same pathology as Gemini 2.5 Pro in section 4a.\n>     If you DO set `max_tokens` and get an empty\n>     `choices[0].message.content` or `finish_reason: \"length\"`, raise it\n>     (>= 1024 for chat, >= 2048 for longer thinking chains) or omit it.\n\nPython equivalent (OpenAI SDK) — mirrors the public\n[Gemma deployment notebook](https://github.com/GoogleCloudPlatform/vertex-ai-samples/blob/main/notebooks/community/model_garden/model_garden_gemma_deployment_on_vertex.ipynb):\n\n```python\nimport google.auth\nfrom google.auth.transport.requests import Request\nimport openai\n\nfrom google.cloud import aiplatform\n\nPROJECT_ID = \"my-project\"\nENDPOINT_ID = \"5875254126916403200\"\nREGION = \"us-central1\"\n\naiplatform.init(project=PROJECT_ID, location=REGION)\nendpoint = aiplatform.Endpoint(\n    f\"projects/{PROJECT_ID}/locations/{REGION}/endpoints/{ENDPOINT_ID}\"\n)\nendpoint_resource_name = endpoint.resource_name  # full projects/.../endpoints/\u003cid>\ndedicated_dns = endpoint.gca_resource.dedicated_endpoint_dns  # empty if shared\n\nhost = dedicated_dns if dedicated_dns else f\"{REGION}-aiplatform.googleapis.com\"\nbase_url = f\"https://{host}/v1/{endpoint_resource_name}\"\n\ncreds, _ = google.auth.default()\ncreds.refresh(Request())\n\nclient = openai.OpenAI(base_url=base_url, api_key=creds.token)\nresponse = client.chat.completions.create(\n    model=\"\",  # endpoint determines the served model\n    messages=[{\"role\": \"user\", \"content\": \"Hello! Introduce yourself briefly.\"}],\n    # Omit max_tokens to let the model emit as much as it wants. Set it\n    # only if you need to cap output length (see notes above).\n)\nprint(response.choices[0].message.content)\n```\n\nSee also: `agent-platform-deploy` skill section 4 \"Verifying Deployment\",\nwhich uses the same pattern post-deploy.\n\n### 4c. REST recipe — legacy `:predict` (custom / classification / embedding)\n\nSame host-discovery logic as 4b (shared or dedicated based on\n`dedicatedEndpointDns`):\n\n```bash\nDEDICATED_DNS=$(gcloud ai endpoints describe \"$ENDPOINT_ID\" \\\n  --project=\"$PROJECT_ID\" --region=\"$REGION\" \\\n  --format=\"value(dedicatedEndpointDns)\")\nHOST=${DEDICATED_DNS:-${REGION}-aiplatform.googleapis.com}\n\ncurl -sS -X POST \\\n  -H \"Authorization: Bearer $TOKEN\" \\\n  -H \"Content-Type: application/json\" \\\n  \"https://${HOST}/v1/projects/${PROJECT_ID}/locations/${REGION}/endpoints/${ENDPOINT_ID}:predict\" \\\n  -d '{\n    \"instances\": [{\"key\": \"value\"}],\n    \"parameters\": {}\n  }'\n```\n\nThe exact `instances` shape is model-specific; consult the deployed\nmodel's documentation or the Model Garden card it was deployed from.\n\n### 4d. Python (Vertex AI SDK) — tuned Gemini model\n\n```python\nfrom google import genai\nimport google.auth\n\n_, project_id = google.auth.default()\nclient = genai.Client(vertexai=True, project=project_id, location=\"us-central1\")\n\nENDPOINT_ID = \"5875254126916403200\"\nresponse = client.models.generate_content(\n    model=f\"projects/{project_id}/locations/us-central1/endpoints/{ENDPOINT_ID}\",\n    contents=\"Hello! Introduce yourself briefly.\",\n    config={\"temperature\": 0.2},  # add max_output_tokens only if you need a cap\n)\nprint(response.text)\n```\n\n## 5. Troubleshooting & Common Error Codes\n\n### 429: Resource Exhausted\n\n*   **Cause**: OpenMaaS and Gemini models use **Dynamic Shared Quota (DSQ)**.\n    Resources are pooled and allocated dynamically based on availability. A 429\n    error indicates the shared pool is temporarily exhausted, not necessarily\n    that *your* specific project quota is hit (though it can be).\n*   **Solution**: Implement strict **exponential backoff and retry** strategies.\n*   **High Throughput**: For production workloads requiring high throughput or\n    guaranteed capacity, consider **Provisioned Throughput (PT)**.\n*   **Important**: Quota increases through normal cloud processes (Cloud\n    Console) are **NOT** applicable for DSQ constraints.\n*   **Documentation**:\n    [Quotas and limits (DSQ)](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/quotas)\n\n### 400: User Validation Error\n\n*   **Cause**: Invalid request format, unsupported parameter, or incorrect Model\n    ID.\n*   **Action**: Double-check your request payload and parameters. Verify the\n    Model ID and Region are correct.\n*   **Custom endpoints**: pick the right method + host per section 4's\n    decision tables:\n    *   Tuned Gemini + you called `:predict` → switch to `:generateContent`\n        (section 4a). Error mentions \"Required instances format mismatch\".\n    *   OSS LLM (Llama/DeepSeek/Qwen/Gemma/etc.) + you called\n        `:generateContent` or `:predict` → switch to `/chat/completions`\n        (section 4b). Error may be 404, 405, or \"method not allowed\".\n    *   Legacy / custom-trained + you called `:generateContent` or\n        `/chat/completions` → switch to `:predict` (section 4c).\n*   **Dedicated endpoint reached on the shared host (or vice versa)**:\n    *   Symptom: DNS resolution failure (`Could not resolve host`) or 404.\n    *   Cause: dedicated endpoints don't accept traffic on\n        `\u003cREGION>-aiplatform.googleapis.com`, and the dedicated DNS\n        (`*.prediction.vertexai.goog`) only exists when\n        `dedicatedEndpointEnabled` is true.\n    *   Action: re-check `gcloud ai endpoints describe ... --format=json`\n        for the `dedicatedEndpointDns` field; use it iff non-empty (per\n        the host-discovery snippets in section 4b/4c).\n\n### Empty response text on Gemini deployed endpoints\n\n*   **Cause**: `maxOutputTokens` is set too low. Gemini 2.5 Pro and other\n    thinking models emit \"thoughts\" tokens that count against the budget\n    BEFORE any user-visible text. With a small cap (e.g. 100), the entire\n    budget is consumed by thoughts and the response has empty `text` parts\n    but a non-zero `usageMetadata.candidatesTokenCount` and\n    `finishReason: \"MAX_TOKENS\"`.\n*   **Action**: Omit `maxOutputTokens` entirely (let the model emit as much\n    as it wants), or raise it to >= 512 for chat-like use, >= 1024 for\n    longer output. See section 4 \"Custom Endpoints\" for details.\n\n### 404: Not Found / Model Not Available\n\n*   **Cause**: The model is not enabled, or not available in the specified\n    project or region.\n*   **Action**:\n    1.  **Check Location Availability**:\n        *   **OpenMaaS**: Verify the model is available in your region. See\n            [Model Availability by Location](https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/locations#genai-open-models).\n        *   **Gemini**:\n            *   **Source of Truth**: Always check\n                [Gemini Model Locations](https://docs.cloud.google.com/gemini-enterprise-agent-platform/resources/locations#google-models)\n                for the authoritative list.\n            *   **Preview Models**: All Preview models (e.g., Gemini 3.1,\n                experimental versions) are often **ONLY** available in the\n                `us-central1` or `global` regions.\n            *   **Stable Models**: (e.g., Gemini 2.5 Pro) Available in\n                `us-central1`, `europe-west4`, and many other regions.\n            *   **Important**: If you get a 404/400 error, try switching your\n                client location to `us-central1` or `global`.\n    2.  **Enable Llama Models**: For **Llama 3.3** and **Llama 4**, you **MUST**\n        enable the model in Model Garden before use. Go to the\n        [Model Garden](https://console.cloud.google.com/agent-platform/model-garden),\n        search for the model card (e.g., \"Llama 3.3 API Service\"), and click\n        **Enable**. Only then can you make inference requests.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("agent-platform-inference-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

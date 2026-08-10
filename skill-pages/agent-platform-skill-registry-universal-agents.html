@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>agent-platform-skill-registry - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/agent-platform-skill-registry-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>agent-platform-skill-registry</h1>
+      <p class="description">Interact with the Gemini Enterprise Agent Platform Skill Registry to create and search for available skills. Use this skill to enable agents to register functionality or discover new capabilities.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>agent-platform-skill-registry</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>agent-platform-skill-registry</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Interact with the Gemini Enterprise Agent Platform Skill Registry to create and search for available skills. Use this skill to enable agents to register functionality or discover new capabilities.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the agent-platform-skill-registry skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+        <div class="usage-card"><strong>Upstream provenance</strong><p><a href="https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39">Google Agent Skills</a> at 092e210b243601797a0fb939040be2b1288e6d39 (Apache-2.0).</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Universal runtime boundary</h3>
+<ul>
+<li>Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.</li>
+<li>Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.</li>
+<li>Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.</li>
+<li>Read <code>references/upstream.md</code> when provenance, the pinned revision, licensing, or local adaptation details matter.</li>
+</ul>
+<h2>Skill Registry</h2>
+<p>This skill provides instructions for interacting with the <strong>Skill Registry</strong> on the Gemini Enterprise Agent Platform.</p>
+<h3>Core Capabilities</h3>
+<ul>
+<li><strong>Skill Discovery</strong> - Query the registry to easily search, list, get</li>
+</ul>
+<p>specific skills, and inspect revision histories.</p>
+<ul>
+<li><strong>Skill Lifecycle Management</strong> - Upload, update, or permanently delete</li>
+</ul>
+<p>skills.</p>
+<ul>
+<li><strong>Operation Monitoring</strong> - Utility to check the completion status of</li>
+</ul>
+<p>long-running state changes (LROs).</p>
+<ul>
+<li><strong>Generate Skill</strong> - Automate the initial scaffolding of new agent skills</li>
+</ul>
+<p>locally.</p>
+<h3>Core Directives</h3>
+<ul>
+<li><strong>Mandatory Validation</strong>: ALWAYS execute the environment validation check</li>
+</ul>
+<p>before performing any operations.</p>
+<p>Before any operation, you <strong>must</strong> validate the core environment.</p>
+<pre><code>    # Execute the validation script
+    python3 scripts/validate_env.py</code></pre>
+<h3>Prerequisites &amp; Authentication</h3>
+<h4>Library &amp; Authentication</h4>
+<p>Ensure you have the latest Google Cloud credentials and libraries installed.</p>
+<pre><code># Install required libraries
+pip install google-auth requests
+
+# Authenticate with Google Cloud
+gcloud auth application-default login</code></pre>
+<h4>Environment Variables</h4>
+<p>The following variables are required for operations:</p>
+<ul>
+<li><code>GCP_PROJECT_ID</code>: Your Google Cloud Project ID.</li>
+<li><code>GCP_LOCATION</code>: The region (e.g., <code>us-central1</code>).</li>
+</ul>
+<hr>
+<h3>Quickstart</h3>
+<p>Quickly search for available skills in the registry:</p>
+<pre><code>python3 scripts/skill_registry_ops.py search \
+  --query &quot;test skill&quot; \
+  --top-k 5</code></pre>
+<hr>
+<h3>Operations</h3>
+<ul>
+<li><strong>Skill Discovery</strong>: [query-skills.md](references/query-skills.md)</li>
+<li><strong>Skill Lifecycle</strong>: [manage-skills.md](references/manage-skills.md)</li>
+<li><strong>Monitor Operations</strong>:</li>
+</ul>
+<p>[monitor-operations.md](references/monitor-operations.md)</p>
+<ul>
+<li><strong>Generate Skill</strong>: [generate-skill.md](references/generate-skill.md)</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: agent-platform-skill-registry\ndisplay_name: agent-platform-skill-registry\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# agent-platform-skill-registry - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `agent-platform-skill-registry` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nInteract with the Gemini Enterprise Agent Platform Skill Registry to create and search for available skills. Use this skill to enable agents to register functionality or discover new capabilities.\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the agent-platform-skill-registry skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `agent-platform-skill-registry` |\n| Canonical name | `agent-platform-skill-registry` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\nInteract with the Gemini Enterprise Agent Platform Skill Registry to create and search for available skills. Use this skill to enable agents to register functionality or discover new capabilities.\n\n## Upstream provenance\n\nThis adapted package derives from [Google Agent Skills](https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39) at commit `092e210b243601797a0fb939040be2b1288e6d39`, licensed under `Apache-2.0`.\n\n\n## Original SKILL.md\n\n---\nname: agent-platform-skill-registry\ndescription: \"Interact with the Gemini Enterprise Agent Platform Skill Registry to create and search for available skills. Use this skill to enable agents to register functionality or discover new capabilities.\"\nlicense: Apache-2.0\n---\n\n## Universal runtime boundary\n\n- Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.\n- Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.\n- Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.\n- Read `references/upstream.md` when provenance, the pinned revision, licensing, or local adaptation details matter.\n\n# Skill Registry\n\nThis skill provides instructions for interacting with the **Skill Registry** on\nthe Gemini Enterprise Agent Platform.\n\n## Core Capabilities\n\n-   **Skill Discovery** - Query the registry to easily search, list, get\n    specific skills, and inspect revision histories.\n-   **Skill Lifecycle Management** - Upload, update, or permanently delete\n    skills.\n-   **Operation Monitoring** - Utility to check the completion status of\n    long-running state changes (LROs).\n-   **Generate Skill** - Automate the initial scaffolding of new agent skills\n    locally.\n\n## Core Directives\n\n-   **Mandatory Validation**: ALWAYS execute the environment validation check\n    before performing any operations.\n\n    Before any operation, you **must** validate the core environment.\n\n    ```bash\n    # Execute the validation script\n    python3 scripts/validate_env.py\n    ```\n\n## Prerequisites & Authentication\n\n### Library & Authentication\n\nEnsure you have the latest Google Cloud credentials and libraries installed.\n\n```bash\n# Install required libraries\npip install google-auth requests\n\n# Authenticate with Google Cloud\ngcloud auth application-default login\n```\n\n### Environment Variables\n\nThe following variables are required for operations:\n\n-   `GCP_PROJECT_ID`: Your Google Cloud Project ID.\n-   `GCP_LOCATION`: The region (e.g., `us-central1`).\n\n--------------------------------------------------------------------------------\n\n## Quickstart\n\nQuickly search for available skills in the registry:\n\n```bash\npython3 scripts/skill_registry_ops.py search \\\n  --query \"test skill\" \\\n  --top-k 5\n```\n\n--------------------------------------------------------------------------------\n\n## Operations\n\n-   **Skill Discovery**: [query-skills.md](references/query-skills.md)\n-   **Skill Lifecycle**: [manage-skills.md](references/manage-skills.md)\n-   **Monitor Operations**:\n    [monitor-operations.md](references/monitor-operations.md)\n-   **Generate Skill**: [generate-skill.md](references/generate-skill.md)\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("agent-platform-skill-registry-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

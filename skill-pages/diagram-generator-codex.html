@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>diagram-generator - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/diagram-generator-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>diagram-generator</h1>
+      <p class="description">generate, refine, validate, and render diagrams from natural language, notes, code snippets, schemas, tables, or existing diagram source. use for flowcharts, swimlanes, sequence diagrams, state diagrams, er diagrams, class diagrams, architecture/c4-style diagrams, dependency graphs, gantt charts, mind maps, user journeys, sankey-style flows, org charts, network graphs, and other visual models. supports mermaid by default, graphviz dot for complex graph layout, plantuml for uml-heavy engineering diagrams, and svg output when direct markup is more reliable.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>diagram-generator</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>diagram-generator</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>generate, refine, validate, and render diagrams from natural language, notes, code snippets, schemas, tables, or existing diagram source. use for flowcharts, swimlanes, sequence diagrams, state diagrams, er diagrams, class diagrams, architecture/c4-style diagrams, dependency graphs, gantt charts, mind maps, user journeys, sankey-style flows, org charts, network graphs, and other visual models. supports mermaid by default, graphviz dot for complex graph layout, plantuml for uml-heavy engineering diagrams, and svg output when direct markup is more reliable.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose diagram-generator, then write the task. Fallback prompt: Use the diagram-generator skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Diagram Generator</h2>
+<h3>ACTION REQUIRED（读完后立刻执行）</h3>
+<ol>
+<li><code>NOW</code>：确认当前任务是否命中本 skill 的适用范围</li>
+<li><code>NOW</code>：读取 <code>../tool-index.md</code>，校验工具可用性和实际路径</li>
+<li><code>NEXT</code>：缺工具时调用 bootstrap，不要猜路径</li>
+<li><code>ACT</code>：进入&quot;工作流&quot;第一步并执行，不要停在确认状态</li>
+</ol>
+<h3>Purpose</h3>
+<p>Create clear, editable diagrams from messy or structured inputs. Prefer text-based diagram source first so the result can be reviewed, versioned, and refined. Render to files only when the user asks for an image/PDF or when a downloadable artifact would materially help.</p>
+<h3>Default workflow</h3>
+<ol>
+<li>Identify the user's intent, audience, and source material.</li>
+<li>Choose the diagram family and language using the decision table below.</li>
+<li>Normalize entities, relationships, labels, states, branches, and time/order information before writing diagram code.</li>
+<li>Generate concise, readable diagram source.</li>
+<li>Validate the syntax mentally and, when creating files, run <code>scripts/render_diagram.py</code>.</li>
+<li>Return the diagram source plus a short note about assumptions. When files are generated, include links to the output files.</li>
+</ol>
+<p>Do not over-ask for clarification. If the request is underspecified, make reasonable assumptions and label them briefly.</p>
+<h3>Diagram language decision table</h3>
+<p>Use Mermaid unless another language is clearly better.</p>
+<p>| User wants | Prefer | Why | |---|---|---| | process flow, decision tree, simple swimlane | Mermaid flowchart | readable and easy to paste into Markdown | | sequence of system/user interactions | Mermaid sequenceDiagram or PlantUML sequence | Mermaid for docs; PlantUML for UML formality | | lifecycle, state machine, transitions | Mermaid stateDiagram-v2 or PlantUML state | compact transition syntax | | database schema, entities, relationships | Mermaid erDiagram | portable ER notation | | class/interface/object model | Mermaid classDiagram or PlantUML class | Mermaid for docs; PlantUML for detailed UML | | project schedule | Mermaid gantt | concise timeline syntax | | hierarchy, ideas, notes | Mermaid mindmap | good default for idea maps | | customer/product journey | Mermaid journey | built-in journey notation | | git history | Mermaid gitGraph | built-in git notation | | dependency graph, package graph, large network | Graphviz DOT | better layout engines for dense graphs | | architecture with layers, clusters, boundaries | Mermaid flowchart with subgraphs, Graphviz clusters, or PlantUML C4-style | choose based on requested fidelity | | weighted flow/sankey-like relationship | Mermaid sankey-beta when supported, otherwise SVG or Graphviz | Mermaid support may vary by renderer | | custom visual where source languages fit poorly | SVG | precise control over layout and styling |</p>
+<h3>Output policy</h3>
+<ul>
+<li>Always provide editable source unless the user explicitly asks only for an image.</li>
+<li>Default to a single best diagram. Offer alternatives only when genuinely useful.</li>
+<li>Prefer stable, simple syntax over fancy features that may not render in older Mermaid/PlantUML versions.</li>
+<li>Use short labels. Split long text into notes outside the diagram when needed.</li>
+<li>Avoid ambiguous node IDs. Use ASCII IDs and human-readable labels.</li>
+<li>Preserve user terminology, but standardize capitalization within a diagram.</li>
+<li>For technical diagrams, include boundaries such as client, service, database, queue, external API, and operator/user when they are implied.</li>
+<li>For business-process diagrams, distinguish happy path, decision points, failures, retries, and manual steps when present.</li>
+<li>For diagrams created from uncertain text, include an <code>Assumptions</code> section after the code.</li>
+</ul>
+<h3>Mermaid generation rules</h3>
+<p>Consult <code>references/diagram-patterns.md</code> for compact templates.</p>
+<p>General Mermaid rules:</p>
+<ul>
+<li>Start with the correct diagram directive, for example <code>flowchart TD</code>, <code>sequenceDiagram</code>, <code>erDiagram</code>, <code>gantt</code>, <code>mindmap</code>, or <code>journey</code>.</li>
+<li>For flowcharts, use <code>flowchart TD</code> unless the user asks for left-to-right; use <code>flowchart LR</code> for architecture and pipelines.</li>
+<li>Use subgraphs for swimlanes or architecture layers. Name subgraphs with readable labels.</li>
+<li>Keep node IDs stable and ASCII-only, for example <code>ingest_service[Ingest Service]</code>.</li>
+<li>Quote labels that contain punctuation likely to confuse the parser.</li>
+<li>Use decision diamonds for branching: <code>decision{Condition?}</code>.</li>
+<li>Use consistent edge labels: <code>-- yes --&gt;</code>, <code>-- no --&gt;</code>, <code>-. async .-&gt;</code>, or <code>== critical ==&gt;</code> only when meaningful.</li>
+<li>In sequence diagrams, declare participants before messages. Use <code>actor</code> for humans and <code>participant</code> for systems.</li>
+<li>Use <code>alt/else/end</code>, <code>opt/end</code>, <code>loop/end</code>, and <code>par/and/end</code> blocks for conditional, optional, repeated, and parallel flows.</li>
+</ul>
+<h3>Graphviz DOT generation rules</h3>
+<p>Use Graphviz for large, dense, or layout-sensitive relationship diagrams.</p>
+<ul>
+<li>Prefer <code>digraph G</code> for directed relationships and <code>graph G</code> for undirected networks.</li>
+<li>Set layout-friendly graph attributes at the top: <code>rankdir=LR</code>, <code>nodesep</code>, <code>ranksep</code>, and <code>splines=true</code> when helpful.</li>
+<li>Use <code>subgraph cluster_name</code> for boundaries and subsystems.</li>
+<li>Use plain labels and restrained styling.</li>
+<li>Use edge labels only when they add meaning.</li>
+<li>For many nodes, group by domain with clusters and avoid crossing-heavy all-to-all edges.</li>
+</ul>
+<h3>PlantUML generation rules</h3>
+<p>Use PlantUML when the user asks for UML or needs formal UML notation.</p>
+<ul>
+<li>Wrap diagrams with <code>@startuml</code> and <code>@enduml</code>.</li>
+<li>Use <code>actor</code>, <code>participant</code>, <code>database</code>, <code>queue</code>, <code>collections</code>, or <code>component</code> stereotypes when useful.</li>
+<li>Use <code>package</code>, <code>rectangle</code>, or <code>node</code> for architecture boundaries.</li>
+<li>For class diagrams, include only important fields/methods unless the user asks for exhaustive detail.</li>
+<li>For activity diagrams, use clear start/end markers and explicit branch labels.</li>
+</ul>
+<h3>SVG generation rules</h3>
+<p>Use SVG only when text diagram languages cannot express the requested visual reliably.</p>
+<ul>
+<li>Keep SVG simple, accessible, and editable.</li>
+<li>Include <code>&lt;title&gt;</code> and meaningful text labels.</li>
+<li>Prefer rectangles, lines, arrows, and groups over complex paths.</li>
+<li>Do not embed external fonts or remote images.</li>
+</ul>
+<h3>Rendering files</h3>
+<p>When the user asks for PNG/SVG/PDF, create a source file and run:</p>
+<pre><code>python &quot;&lt;SKILL_ROOT&gt;/diagram-generator/scripts/render_diagram.py&quot; input.mmd --format svg --out output.svg
+python &quot;&lt;SKILL_ROOT&gt;/diagram-generator/scripts/render_diagram.py&quot; input.dot --format png --out output.png
+python &quot;&lt;SKILL_ROOT&gt;/diagram-generator/scripts/render_diagram.py&quot; input.puml --format svg --out output.svg</code></pre>
+<blockquote><code>&lt;SKILL_ROOT&gt;</code> 是本包 <code>skills/</code> 目录的实际路径，AI 应自动检测。</blockquote>
+<p>The renderer is intentionally dependency-tolerant. It tries common local tools and reports actionable installation hints if a renderer is unavailable. Do not claim an image was rendered unless the script completed successfully and the output file exists.</p>
+<h3>Validation checklist</h3>
+<p>Before finalizing:</p>
+<ul>
+<li>The diagram type matches the user's task.</li>
+<li>The source is syntactically plausible for the chosen language.</li>
+<li>Labels are short enough to fit.</li>
+<li>Edges and message order reflect the input accurately.</li>
+<li>Assumptions are called out when the input was incomplete.</li>
+<li>For generated files, the output exists and opens or has nonzero size.</li>
+</ul>
+<h3>Common response template</h3>
+<p>Use this structure for most diagram answers:</p>
+<pre><code>下面是可编辑的 [language] 版本：
+</code></pre>
+<p>[source]</p>
+<pre><code>
+Assumptions:
+- [only if needed]
+
+Rendered file: [link] [only if generated]</code></pre>
+<p>For English user requests, respond in English. For Chinese user requests, respond in Chinese unless they ask otherwise.</p>
+<hr>
+<h3>按需自举（On-Demand Bootstrap）</h3>
+<h4>自动化能力边界</h4>
+<p>| 工具 | 可自动安装 | 安装方式 | 说明 | |------|-----------|---------|------| | Mermaid CLI (mmdc) | ✓ | npm install -g @mermaid-js/mermaid-cli | 渲染 Mermaid 为 PNG/SVG | | Graphviz (dot) | ✗ | 手动安装 | https://graphviz.org/download/ | | PlantUML | ✗ | 需要 Java + plantuml.jar | https://plantuml.com/download | | Python (render script) | ✓ | 已在 bootstrap 中 | <code>scripts/render_diagram.py</code> 依赖 |</p>
+<h4>说明</h4>
+<p>本 skill 主要输出文本格式的图表源码（Mermaid/DOT/PlantUML），不一定需要本地渲染工具。只有当用户明确要求生成 PNG/SVG/PDF 文件时才需要对应的渲染器。</p>
+<p>如果渲染器不可用，<code>scripts/render_diagram.py</code> 会输出安装提示而不是报错。</p>
+<hr>
+<h3>路由上下文</h3>
+<p><strong>上游入口</strong>: <code>skills/SKILL.md</code>（总控）、<code>routing.md</code> <strong>触发条件</strong>: 用户说&quot;画图&quot;、&quot;流程图&quot;、&quot;架构图&quot;、&quot;攻击路径图&quot;、&quot;时序图&quot;、&quot;Mermaid&quot;、&quot;Graphviz&quot;、&quot;PlantUML&quot; <strong>下游出口</strong>:</p>
+<ul>
+<li>生成的图表可嵌入 <code>docs-generator/</code> 的报告中</li>
+<li>攻击路径图可配合 <code>pentest-tools/</code> 的渗透报告</li>
+</ul>
+<p><strong>同级关联模块</strong>: <code>docs-generator/</code>（报告中嵌入图表）</p>
+<h3>任务完成自检（声称完成前 MUST 通过）</h3>
+<ul>
+<li>[ ] 我是否执行了工作流中的每一步（而不是只阅读）？</li>
+<li>[ ] 我是否基于 <code>tool-index</code> 使用了真实工具路径？</li>
+<li>[ ] 我是否产出了可复现证据（命令/脚本/截图/报告）？</li>
+<li>[ ] 我是否完成并回写了 RULES 要求的 Checklist 项？</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: diagram-generator\ndisplay_name: diagram-generator\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# diagram-generator - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `diagram-generator` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\ngenerate, refine, validate, and render diagrams from natural language, notes, code snippets, schemas, tables, or existing diagram source. use for flowcharts, swimlanes, sequence diagrams, state diagrams, er diagrams, cla\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose diagram-generator, then write the task. Fallback prompt: Use the diagram-generator skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `diagram-generator` |\n| Canonical name | `diagram-generator` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\ngenerate, refine, validate, and render diagrams from natural language, notes, code snippets, schemas, tables, or existing diagram source. use for flowcharts, swimlanes, sequence diagrams, state diagrams, er diagrams, cla\n\n\n## Original SKILL.md\n\n---\nname: diagram-generator\ndescription: generate, refine, validate, and render diagrams from natural language, notes, code snippets, schemas, tables, or existing diagram source. use for flowcharts, swimlanes, sequence diagrams, state diagrams, er diagrams, class diagrams, architecture/c4-style diagrams, dependency graphs, gantt charts, mind maps, user journeys, sankey-style flows, org charts, network graphs, and other visual models. supports mermaid by default, graphviz dot for complex graph layout, plantuml for uml-heavy engineering diagrams, and svg output when direct markup is more reliable.\n---\n\n# Diagram Generator\n\n## ACTION REQUIRED（读完后立刻执行）\n\n1. `NOW`：确认当前任务是否命中本 skill 的适用范围\n2. `NOW`：读取 `../tool-index.md`，校验工具可用性和实际路径\n3. `NEXT`：缺工具时调用 bootstrap，不要猜路径\n4. `ACT`：进入\"工作流\"第一步并执行，不要停在确认状态\n\n## Purpose\n\nCreate clear, editable diagrams from messy or structured inputs. Prefer text-based diagram source first so the result can be reviewed, versioned, and refined. Render to files only when the user asks for an image/PDF or when a downloadable artifact would materially help.\n\n## Default workflow\n\n1. Identify the user's intent, audience, and source material.\n2. Choose the diagram family and language using the decision table below.\n3. Normalize entities, relationships, labels, states, branches, and time/order information before writing diagram code.\n4. Generate concise, readable diagram source.\n5. Validate the syntax mentally and, when creating files, run `scripts/render_diagram.py`.\n6. Return the diagram source plus a short note about assumptions. When files are generated, include links to the output files.\n\nDo not over-ask for clarification. If the request is underspecified, make reasonable assumptions and label them briefly.\n\n## Diagram language decision table\n\nUse Mermaid unless another language is clearly better.\n\n| User wants | Prefer | Why |\n|---|---|---|\n| process flow, decision tree, simple swimlane | Mermaid flowchart | readable and easy to paste into Markdown |\n| sequence of system/user interactions | Mermaid sequenceDiagram or PlantUML sequence | Mermaid for docs; PlantUML for UML formality |\n| lifecycle, state machine, transitions | Mermaid stateDiagram-v2 or PlantUML state | compact transition syntax |\n| database schema, entities, relationships | Mermaid erDiagram | portable ER notation |\n| class/interface/object model | Mermaid classDiagram or PlantUML class | Mermaid for docs; PlantUML for detailed UML |\n| project schedule | Mermaid gantt | concise timeline syntax |\n| hierarchy, ideas, notes | Mermaid mindmap | good default for idea maps |\n| customer/product journey | Mermaid journey | built-in journey notation |\n| git history | Mermaid gitGraph | built-in git notation |\n| dependency graph, package graph, large network | Graphviz DOT | better layout engines for dense graphs |\n| architecture with layers, clusters, boundaries | Mermaid flowchart with subgraphs, Graphviz clusters, or PlantUML C4-style | choose based on requested fidelity |\n| weighted flow/sankey-like relationship | Mermaid sankey-beta when supported, otherwise SVG or Graphviz | Mermaid support may vary by renderer |\n| custom visual where source languages fit poorly | SVG | precise control over layout and styling |\n\n## Output policy\n\n- Always provide editable source unless the user explicitly asks only for an image.\n- Default to a single best diagram. Offer alternatives only when genuinely useful.\n- Prefer stable, simple syntax over fancy features that may not render in older Mermaid/PlantUML versions.\n- Use short labels. Split long text into notes outside the diagram when needed.\n- Avoid ambiguous node IDs. Use ASCII IDs and human-readable labels.\n- Preserve user terminology, but standardize capitalization within a diagram.\n- For technical diagrams, include boundaries such as client, service, database, queue, external API, and operator/user when they are implied.\n- For business-process diagrams, distinguish happy path, decision points, failures, retries, and manual steps when present.\n- For diagrams created from uncertain text, include an `Assumptions` section after the code.\n\n## Mermaid generation rules\n\nConsult `references/diagram-patterns.md` for compact templates.\n\nGeneral Mermaid rules:\n- Start with the correct diagram directive, for example `flowchart TD`, `sequenceDiagram`, `erDiagram`, `gantt`, `mindmap`, or `journey`.\n- For flowcharts, use `flowchart TD` unless the user asks for left-to-right; use `flowchart LR` for architecture and pipelines.\n- Use subgraphs for swimlanes or architecture layers. Name subgraphs with readable labels.\n- Keep node IDs stable and ASCII-only, for example `ingest_service[Ingest Service]`.\n- Quote labels that contain punctuation likely to confuse the parser.\n- Use decision diamonds for branching: `decision{Condition?}`.\n- Use consistent edge labels: `-- yes -->`, `-- no -->`, `-. async .->`, or `== critical ==>` only when meaningful.\n- In sequence diagrams, declare participants before messages. Use `actor` for humans and `participant` for systems.\n- Use `alt/else/end`, `opt/end`, `loop/end`, and `par/and/end` blocks for conditional, optional, repeated, and parallel flows.\n\n## Graphviz DOT generation rules\n\nUse Graphviz for large, dense, or layout-sensitive relationship diagrams.\n\n- Prefer `digraph G` for directed relationships and `graph G` for undirected networks.\n- Set layout-friendly graph attributes at the top: `rankdir=LR`, `nodesep`, `ranksep`, and `splines=true` when helpful.\n- Use `subgraph cluster_name` for boundaries and subsystems.\n- Use plain labels and restrained styling.\n- Use edge labels only when they add meaning.\n- For many nodes, group by domain with clusters and avoid crossing-heavy all-to-all edges.\n\n## PlantUML generation rules\n\nUse PlantUML when the user asks for UML or needs formal UML notation.\n\n- Wrap diagrams with `@startuml` and `@enduml`.\n- Use `actor`, `participant`, `database`, `queue`, `collections`, or `component` stereotypes when useful.\n- Use `package`, `rectangle`, or `node` for architecture boundaries.\n- For class diagrams, include only important fields/methods unless the user asks for exhaustive detail.\n- For activity diagrams, use clear start/end markers and explicit branch labels.\n\n## SVG generation rules\n\nUse SVG only when text diagram languages cannot express the requested visual reliably.\n\n- Keep SVG simple, accessible, and editable.\n- Include `\u003ctitle>` and meaningful text labels.\n- Prefer rectangles, lines, arrows, and groups over complex paths.\n- Do not embed external fonts or remote images.\n\n## Rendering files\n\nWhen the user asks for PNG/SVG/PDF, create a source file and run:\n\n```bash\npython \"\u003cSKILL_ROOT>/diagram-generator/scripts/render_diagram.py\" input.mmd --format svg --out output.svg\npython \"\u003cSKILL_ROOT>/diagram-generator/scripts/render_diagram.py\" input.dot --format png --out output.png\npython \"\u003cSKILL_ROOT>/diagram-generator/scripts/render_diagram.py\" input.puml --format svg --out output.svg\n```\n\n> `\u003cSKILL_ROOT>` 是本包 `skills/` 目录的实际路径，AI 应自动检测。\n\nThe renderer is intentionally dependency-tolerant. It tries common local tools and reports actionable installation hints if a renderer is unavailable. Do not claim an image was rendered unless the script completed successfully and the output file exists.\n\n## Validation checklist\n\nBefore finalizing:\n\n- The diagram type matches the user's task.\n- The source is syntactically plausible for the chosen language.\n- Labels are short enough to fit.\n- Edges and message order reflect the input accurately.\n- Assumptions are called out when the input was incomplete.\n- For generated files, the output exists and opens or has nonzero size.\n\n## Common response template\n\nUse this structure for most diagram answers:\n\n```markdown\n下面是可编辑的 [language] 版本：\n\n```[language]\n[source]\n```\n\nAssumptions:\n- [only if needed]\n\nRendered file: [link] [only if generated]\n```\n\nFor English user requests, respond in English. For Chinese user requests, respond in Chinese unless they ask otherwise.\n\n---\n\n## 按需自举（On-Demand Bootstrap）\n\n### 自动化能力边界\n\n| 工具 | 可自动安装 | 安装方式 | 说明 |\n|------|-----------|---------|------|\n| Mermaid CLI (mmdc) | ✓ | npm install -g @mermaid-js/mermaid-cli | 渲染 Mermaid 为 PNG/SVG |\n| Graphviz (dot) | ✗ | 手动安装 | https://graphviz.org/download/ |\n| PlantUML | ✗ | 需要 Java + plantuml.jar | https://plantuml.com/download |\n| Python (render script) | ✓ | 已在 bootstrap 中 | `scripts/render_diagram.py` 依赖 |\n\n### 说明\n\n本 skill 主要输出文本格式的图表源码（Mermaid/DOT/PlantUML），不一定需要本地渲染工具。只有当用户明确要求生成 PNG/SVG/PDF 文件时才需要对应的渲染器。\n\n如果渲染器不可用，`scripts/render_diagram.py` 会输出安装提示而不是报错。\n\n---\n\n## 路由上下文\n\n**上游入口**: `skills/SKILL.md`（总控）、`routing.md`\n**触发条件**: 用户说\"画图\"、\"流程图\"、\"架构图\"、\"攻击路径图\"、\"时序图\"、\"Mermaid\"、\"Graphviz\"、\"PlantUML\"\n**下游出口**:\n- 生成的图表可嵌入 `docs-generator/` 的报告中\n- 攻击路径图可配合 `pentest-tools/` 的渗透报告\n\n**同级关联模块**: `docs-generator/`（报告中嵌入图表）\n\n\n## 任务完成自检（声称完成前 MUST 通过）\n\n- [ ] 我是否执行了工作流中的每一步（而不是只阅读）？\n- [ ] 我是否基于 `tool-index` 使用了真实工具路径？\n- [ ] 我是否产出了可复现证据（命令/脚本/截图/报告）？\n- [ ] 我是否完成并回写了 RULES 要求的 Checklist 项？\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("diagram-generator-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

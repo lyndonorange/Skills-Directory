@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>pdf-to-markdown - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/pdf-to-markdown-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>pdf-to-markdown</h1>
+      <p class="description">Extract text from a PDF as structured Markdown for analysis, RAG, or LLM context. Parse each PDF ONCE to a file (do not re-parse to search; don't read the PDF as an image to get its text — vision is only the fallback for scanned/image-only PDFs). To find a specific fact, prefer a bounded `grep -n -i -C2 &quot;term&quot; file | head` (context in one command, batched, capped). Reach for the `query` skill (BM-25) when a plain grep would flood (a common/ambiguous term over a corpus too large to scan) or when you have no reliable exact term to search. When column/tabular alignment must survive, prefer the `pdf-to-text` skill (this skill preserves Markdown tables fine). ALWAYS use this skill when the user has a PDF and needs its content as text or Markdown — even if they don't explicitly say &quot;convert to markdown&quot;.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>pdf-to-markdown</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>pdf-to-markdown</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Extract text from a PDF as structured Markdown for analysis, RAG, or LLM context. Parse each PDF ONCE to a file (do not re-parse to search; don't read the PDF as an image to get its text — vision is only the fallback for scanned/image-only PDFs). To find a specific fact, prefer a bounded `grep -n -i -C2 &quot;term&quot; file | head` (context in one command, batched, capped). Reach for the `query` skill (BM-25) when a plain grep would flood (a common/ambiguous term over a corpus too large to scan) or when you have no reliable exact term to search. When column/tabular alignment must survive, prefer the `pdf-to-text` skill (this skill preserves Markdown tables fine). ALWAYS use this skill when the user has a PDF and needs its content as text or Markdown — even if they don't explicitly say &quot;convert to markdown&quot;.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose pdf-to-markdown, then write the task. Fallback prompt: Use the pdf-to-markdown skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Rules for agents (read first)</h3>
+<ul>
+<li><strong>Parse once</strong> to a file — never re-parse the same PDF to search again.</li>
+<li><strong>Default search = bounded grep:</strong> <code>grep -n -i -C2 &quot;term&quot; file | head</code>. Get context in one command, batch lookups, cap with <code>head</code>.</li>
+<li><strong>Use the <code>query</code> skill only when grep would flood</strong> — the discriminating term is common/ambiguous AND the corpus is too large to scan (many matches to sift). query returns a bounded, ranked top-k (small <code>-k</code>), keeping context small. Add <code>--language &lt;lang&gt;</code> for non-English.</li>
+<li><strong>Tables where column alignment must survive -&gt; <code>pdf-to-text</code></strong> (this skill preserves Markdown tables fine; prefer <code>pdf-to-text</code> only when whitespace/columnar alignment matters). <strong>Don't read the source PDF as an image to get its text</strong> (vision is the fallback only for scanned/image-only PDFs with no text layer).</li>
+</ul>
+<h2>PDF to Markdown</h2>
+<p>Convert PDFs into structured, semantic Markdown that preserves the document's logical structure — headings, tables, lists, and reading order — rather than producing flat text. This is significantly higher quality than reading a PDF directly with the <code>read</code> tool, which only extracts raw text without structure.</p>
+<h3>Related Nutrient skills</h3>
+<p>This is one of a family of Nutrient document skills that install separately but are built to work together (same underlying binary). When your task calls for one, add it the way your agent installs skills:</p>
+<ul>
+<li><strong><code>query</code></strong> — to <em>search</em> the converted file instead of reading a large output back into context: ranked BM-25 search that returns only the top line windows. The recommended way to pull facts from big conversions (&quot;parse once, query many&quot;).</li>
+<li><strong><code>pdf-to-text</code></strong> — for plain text instead of Markdown, when column/tabular alignment must survive or the consumer can't parse Markdown.</li>
+</ul>
+<h3>Usage</h3>
+<p>Before running any commands, set <code>SKILL_DIR</code> to the absolute path of the directory containing this SKILL.md file. Use <code>$SKILL_DIR/bin/pdf-to-markdown</code> in all commands below.</p>
+<p>The <code>$SKILL_DIR/bin/pdf-to-markdown</code> wrapper automatically installs the platform-specific binary into <code>~/.local/share/nutrient/cli/</code> from the CDN. It caches the binary and only checks for updates every 6 hours, so subsequent runs are fast.</p>
+<h4>Single file</h4>
+<pre><code>$SKILL_DIR/bin/pdf-to-markdown INPUT.pdf OUTPUT.md</code></pre>
+<p>If <code>OUTPUT.md</code> is omitted, the converter writes the Markdown to stdout instead.</p>
+<h4>Batch directory (2+ files)</h4>
+<p>For multiple files, pass directories instead of individual files. The converter processes all PDFs in the input directory in parallel, which is much faster than converting one at a time.</p>
+<pre><code>$SKILL_DIR/bin/pdf-to-markdown INPUT_DIR/ OUTPUT_DIR/</code></pre>
+<h4>Image export</h4>
+<p>To extract images from the PDF and reference them in the output Markdown, add the <code>--enable-image-export</code> flag:</p>
+<pre><code>$SKILL_DIR/bin/pdf-to-markdown --enable-image-export INPUT.pdf OUTPUT.md</code></pre>
+<p>Images are saved to <code>{output}_resources/</code> alongside the output file and referenced as standard Markdown image links. This is useful when feeding output to LLMs that support vision, or when image context improves downstream accuracy. Off by default because it increases processing time for image-heavy documents.</p>
+<h3>Workflow</h3>
+<ol>
+<li><strong>Choose mode</strong>: Use batch directory mode for 2+ files, single file mode otherwise.</li>
+<li><strong>Run the converter</strong>: <code>$SKILL_DIR/bin/pdf-to-markdown INPUT [OUTPUT]</code></li>
+<li><strong>Check the exit code</strong>: Exit 0 means success. On failure, read stderr for the error message.</li>
+<li><strong>Validate the output</strong>: If the output file is empty or near-empty, see Troubleshooting below.</li>
+<li><strong>Report the output path</strong>: Tell the user where the converted file(s) are. Do NOT read the markdown back into context by default — converted documents can be very large and will fill the context window. Only read the output if the user's task specifically requires analyzing or summarizing the content (e.g., &quot;summarize this PDF&quot;, &quot;what does this contract say about X&quot;).</li>
+</ol>
+<h3>Troubleshooting</h3>
+<ul>
+<li><strong>Empty or minimal output</strong>: The PDF may be scanned/image-only and contains no extractable text.</li>
+<li><strong>Non-zero exit code</strong>: Read stderr for the specific error. Common causes: corrupted PDF, unsupported encryption, or network issues during first-run binary download.</li>
+<li><strong>First run is slow</strong>: The wrapper downloads the platform binary on first use (~a few seconds). Subsequent runs use the cached binary.</li>
+</ul>
+<h3>License</h3>
+<p>Free for processing up to 1,000 documents per calendar month.</p>
+<p>Commercial license required for:</p>
+<ul>
+<li>processing over 1,000 documents/month</li>
+<li>redistributing the binary</li>
+<li>OEM/white-label use</li>
+</ul>
+<p>Contact <code>sales@nutrient.io</code> for commercial licensing.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: pdf-to-markdown\ndisplay_name: pdf-to-markdown\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# pdf-to-markdown - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `pdf-to-markdown` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nExtract text from a PDF as structured Markdown for analysis, RAG, or LLM context. Parse each PDF ONCE to a file (do not re-parse to search; don't read the PDF as an image to get its text — vision is only the fallback for\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose pdf-to-markdown, then write the task. Fallback prompt: Use the pdf-to-markdown skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `pdf-to-markdown` |\n| Canonical name | `pdf-to-markdown` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nExtract text from a PDF as structured Markdown for analysis, RAG, or LLM context. Parse each PDF ONCE to a file (do not re-parse to search; don't read the PDF as an image to get its text — vision is only the fallback for\n\n\n## Original SKILL.md\n\n---\nname: pdf-to-markdown\ndescription: Extract text from a PDF as structured Markdown for analysis, RAG, or LLM context. Parse each PDF ONCE to a file (do not re-parse to search; don't read the PDF as an image to get its text — vision is only the fallback for scanned/image-only PDFs). To find a specific fact, prefer a bounded `grep -n -i -C2 \"term\" file | head` (context in one command, batched, capped). Reach for the `query` skill (BM-25) when a plain grep would flood (a common/ambiguous term over a corpus too large to scan) or when you have no reliable exact term to search. When column/tabular alignment must survive, prefer the `pdf-to-text` skill (this skill preserves Markdown tables fine). ALWAYS use this skill when the user has a PDF and needs its content as text or Markdown — even if they don't explicitly say \"convert to markdown\".\nlicense: Proprietary\n---\n\n## Rules for agents (read first)\n\n- **Parse once** to a file — never re-parse the same PDF to search again.\n- **Default search = bounded grep:** `grep -n -i -C2 \"term\" file | head`. Get context in one command, batch lookups, cap with `head`.\n- **Use the `query` skill only when grep would flood** — the discriminating term is common/ambiguous AND the corpus is too large to scan (many matches to sift). query returns a bounded, ranked top-k (small `-k`), keeping context small. Add `--language \u003clang>` for non-English.\n- **Tables where column alignment must survive -> `pdf-to-text`** (this skill preserves Markdown tables fine; prefer `pdf-to-text` only when whitespace/columnar alignment matters). **Don't read the source PDF as an image to get its text** (vision is the fallback only for scanned/image-only PDFs with no text layer).\n\n# PDF to Markdown\n\nConvert PDFs into structured, semantic Markdown that preserves the document's logical structure — headings, tables, lists, and reading order — rather than producing flat text. This is significantly higher quality than reading a PDF directly with the `read` tool, which only extracts raw text without structure.\n\n## Related Nutrient skills\n\nThis is one of a family of Nutrient document skills that install separately but are built to work together (same underlying binary). When your task calls for one, add it the way your agent installs skills:\n\n- **`query`** — to *search* the converted file instead of reading a large output back into context: ranked BM-25 search that returns only the top line windows. The recommended way to pull facts from big conversions (\"parse once, query many\").\n- **`pdf-to-text`** — for plain text instead of Markdown, when column/tabular alignment must survive or the consumer can't parse Markdown.\n\n## Usage\n\nBefore running any commands, set `SKILL_DIR` to the absolute path of the directory containing this SKILL.md file. Use `$SKILL_DIR/bin/pdf-to-markdown` in all commands below.\n\nThe `$SKILL_DIR/bin/pdf-to-markdown` wrapper automatically installs the platform-specific binary into `~/.local/share/nutrient/cli/` from the CDN. It caches the binary and only checks for updates every 6 hours, so subsequent runs are fast.\n\n### Single file\n\n```bash\n$SKILL_DIR/bin/pdf-to-markdown INPUT.pdf OUTPUT.md\n```\n\nIf `OUTPUT.md` is omitted, the converter writes the Markdown to stdout instead.\n\n### Batch directory (2+ files)\n\nFor multiple files, pass directories instead of individual files. The converter processes all PDFs in the input directory in parallel, which is much faster than converting one at a time.\n\n```bash\n$SKILL_DIR/bin/pdf-to-markdown INPUT_DIR/ OUTPUT_DIR/\n```\n\n### Image export\n\nTo extract images from the PDF and reference them in the output Markdown, add the `--enable-image-export` flag:\n\n```bash\n$SKILL_DIR/bin/pdf-to-markdown --enable-image-export INPUT.pdf OUTPUT.md\n```\n\nImages are saved to `{output}_resources/` alongside the output file and referenced as standard Markdown image links. This is useful when feeding output to LLMs that support vision, or when image context improves downstream accuracy. Off by default because it increases processing time for image-heavy documents.\n\n## Workflow\n\n1. **Choose mode**: Use batch directory mode for 2+ files, single file mode otherwise.\n2. **Run the converter**: `$SKILL_DIR/bin/pdf-to-markdown INPUT [OUTPUT]`\n3. **Check the exit code**: Exit 0 means success. On failure, read stderr for the error message.\n4. **Validate the output**: If the output file is empty or near-empty, see Troubleshooting below.\n5. **Report the output path**: Tell the user where the converted file(s) are. Do NOT read the markdown back into context by default — converted documents can be very large and will fill the context window. Only read the output if the user's task specifically requires analyzing or summarizing the content (e.g., \"summarize this PDF\", \"what does this contract say about X\").\n\n## Troubleshooting\n\n- **Empty or minimal output**: The PDF may be scanned/image-only and contains no extractable text.\n- **Non-zero exit code**: Read stderr for the specific error. Common causes: corrupted PDF, unsupported encryption, or network issues during first-run binary download.\n- **First run is slow**: The wrapper downloads the platform binary on first use (~a few seconds). Subsequent runs use the cached binary.\n\n## License\n\nFree for processing up to 1,000 documents per calendar month.\n\nCommercial license required for:\n- processing over 1,000 documents/month\n- redistributing the binary\n- OEM/white-label use\n\nContact `sales@nutrient.io` for commercial licensing.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("pdf-to-markdown-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

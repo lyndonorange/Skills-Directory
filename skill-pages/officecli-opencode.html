@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>officecli - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/officecli-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>officecli</h1>
+      <p class="description">Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check formatting, find issues, add charts, or modify Office documents.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>officecli</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>officecli</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check formatting, find issues, add charts, or modify Office documents.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the officecli skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>officecli</h2>
+<p>AI-friendly CLI for .docx, .xlsx, .pptx. Single binary, no dependencies, no Office installation needed.</p>
+<h3>Install</h3>
+<p>If <code>officecli</code> is not installed:</p>
+<pre><code># macOS / Linux
+curl -fsSL https://d.officecli.ai/install.sh | bash
+
+# Windows (PowerShell)
+irm https://d.officecli.ai/install.ps1 | iex</code></pre>
+<p>Verify with <code>officecli --version</code>. If still not found after install, open a new terminal.</p>
+<hr>
+<h3>Strategy</h3>
+<p><strong>L1 (read) → L2 (DOM edit) → L3 (raw XML)</strong>. Always prefer higher layers. Add <code>--json</code> for structured output.</p>
+<p><strong>Before doc work, check Specialized Skills</strong> (bottom of this file). Fundraising decks, academic papers, financial models, dashboards, and Morph animations need their own skill loaded first — <code>load_skill</code> once, then proceed.</p>
+<hr>
+<h3>Help System (IMPORTANT)</h3>
+<p><strong>When unsure about property names, value formats, or command syntax, ALWAYS run help instead of guessing.</strong> One help query beats guess-fail-retry loops.</p>
+<p><code>officecli help</code> ≡ <code>officecli --help</code>, and <code>officecli &lt;cmd&gt; --help</code> ≡ <code>officecli help &lt;cmd&gt;</code> — same content.</p>
+<pre><code>officecli help                                  # All commands + global options + schema entry points
+officecli help docx                             # List all docx elements
+officecli help docx paragraph                   # Full schema: properties, aliases, examples, readbacks
+officecli help docx set paragraph               # Verb-filtered: only props usable with `set`
+officecli help docx paragraph --json            # Structured schema (machine-readable)</code></pre>
+<p>Format aliases: <code>word</code>→<code>docx</code>, <code>excel</code>→<code>xlsx</code>, <code>ppt</code>/<code>powerpoint</code>→<code>pptx</code>. Verbs: <code>add</code>, <code>set</code>, <code>get</code>, <code>query</code>, <code>remove</code>. MCP exposes the same schema via the single <code>command</code> string param: <code>{&quot;command&quot;:&quot;help docx paragraph&quot;}</code> (not a structured <code>{&quot;format&quot;:...,&quot;type&quot;:...}</code> object — the MCP tool has exactly one param, <code>command</code>, and passes it through to the CLI verbatim).</p>
+<hr>
+<h3>Performance: Resident Mode</h3>
+<p><strong>Every command auto-starts a resident on first access</strong> (60s idle timeout) — file-lock conflicts are automatically avoided. Explicit <code>open</code>/<code>close</code> is still recommended for longer sessions (12min idle):</p>
+<pre><code>officecli open report.docx       # explicitly keep in memory
+officecli set report.docx ...    # no file I/O overhead
+officecli close report.docx      # save and release</code></pre>
+<p>Opt out of auto-start: <code>OFFICECLI_NO_AUTO_RESIDENT=1</code>.</p>
+<p><strong>Flush only at the non-officecli boundary.</strong> officecli's own reads (<code>get</code>/<code>query</code>/<code>view</code>/<code>dump</code>) always see your latest edits, so you never need to save mid-workflow. Run <code>save</code> (keeps the resident) or <code>close</code> (flush + release) only <strong>before a non-officecli program reads the file</strong> — python-docx/openpyxl, Word, a renderer, delivery/upload. (Idle sessions auto-flush within seconds; <code>OFFICECLI_RESIDENT_FLUSH=each</code> makes every mutation flush before returning.)</p>
+<hr>
+<h3>Quick Start</h3>
+<p><strong>PPT:</strong></p>
+<pre><code>officecli create slides.pptx
+officecli add slides.pptx / --type slide --prop title=&quot;Q4 Report&quot; --prop background=1A1A2E
+officecli add slides.pptx '/slide[1]' --type shape --prop text=&quot;Revenue grew 25%&quot; --prop x=2cm --prop y=5cm --prop font=Arial --prop size=24 --prop color=FFFFFF</code></pre>
+<p><strong>Word:</strong></p>
+<pre><code>officecli create report.docx
+officecli add report.docx /body --type paragraph --prop text=&quot;Executive Summary&quot; --prop style=Heading1
+officecli add report.docx /body --type paragraph --prop text=&quot;Revenue increased by 25% year-over-year.&quot;</code></pre>
+<p><strong>Excel:</strong></p>
+<pre><code>officecli create data.xlsx
+officecli set data.xlsx /Sheet1/A1 --prop value=&quot;Name&quot; --prop bold=true
+officecli set data.xlsx /Sheet1/A2 --prop value=&quot;Alice&quot;</code></pre>
+<hr>
+<h3>L1: Create, Read &amp; Inspect</h3>
+<pre><code>officecli create &lt;file&gt;               # Create blank .docx/.xlsx/.pptx (type from extension)
+officecli view &lt;file&gt; &lt;mode&gt;          # outline | stats | issues | text | annotated | html
+officecli get &lt;file&gt; &lt;path&gt; --depth N # Get a node and its children [--json]
+officecli query &lt;file&gt; &lt;selector&gt;     # CSS-like query
+officecli validate &lt;file&gt;             # Validate against OpenXML schema</code></pre>
+<h4>view modes</h4>
+<p>| Mode | Description | Useful flags | |------|-------------|-------------| | <code>outline</code> | Document structure | | | <code>stats</code> | Statistics (pages, words, shapes) | | | <code>issues</code> | Formatting/content/structure problems | <code>--type format\|content\|structure</code>, <code>--limit N</code> | | <code>text</code> | Plain text extraction | <code>--start N --end N</code>, <code>--max-lines N</code> | | <code>annotated</code> | Text with formatting annotations | | | <code>html</code> | Static HTML snapshot — same renderer as <code>watch</code>, no server needed | <code>--browser</code>, <code>--page N</code> (docx), <code>--start N --end N</code> (pptx) | | <code>screenshot</code> / <code>svg</code> / <code>pdf</code> / <code>forms</code> | PNG via headless browser / SVG (pptx slide) / PDF via exporter plugin / form-fields JSON via format-handler plugin | <code>-o</code>, <code>--screenshot-width/-height</code>, pptx <code>--grid N</code> |</p>
+<p>Use <code>view html</code> for one-shot snapshots (CI artifacts, archival, diffing); use <code>watch</code> when you need live refresh or browser-side click-to-select.</p>
+<h4>get</h4>
+<p>Any XML path via element localName. Use <code>--depth N</code> to expand children. Add <code>--json</code> for structured output. Default text output is grep-friendly: <code>path (type) &quot;text&quot; key=val key=val ...</code></p>
+<pre><code>officecli get report.docx '/body/p[3]' --depth 2 --json
+officecli get slides.pptx '/slide[1]' --depth 1          # list all shapes on slide 1
+officecli get data.xlsx '/Sheet1/B2' --json</code></pre>
+<h4>Stable ID Addressing</h4>
+<p>Elements with stable IDs return <code>@attr=value</code> paths instead of positional indices. Prefer these in multi-step workflows — positional indices shift on insert/delete, stable IDs do not.</p>
+<pre><code>/slide[1]/shape[@id=550950021]                    # PPT shape
+/slide[1]/table[@id=1388430425]/tr[1]/tc[2]       # PPT table
+/body/p[@paraId=1A2B3C4D]                         # Word paragraph
+/comments/comment[@commentId=1]                    # Word comment</code></pre>
+<p>PPT also accepts <code>@name=</code> (e.g. <code>shape[@name=Title 1]</code>), with morph <code>!!</code> prefix awareness. Elements without stable IDs (slide, run, tr/tc, row) fall back to positional indices.</p>
+<h4>query</h4>
+<p>CSS-like selectors: <code>[attr=value]</code>, <code>[attr!=value]</code>, <code>[attr~=text]</code>, <code>[attr&gt;=value]</code>, <code>[attr&lt;=value]</code>, <code>:contains(&quot;text&quot;)</code>, <code>:empty</code>, <code>:has(formula)</code>, <code>:no-alt</code>. Boolean <code>and</code>/<code>or</code> supported across <code>query</code>/<code>set</code>/<code>remove</code>: <code>cell[value&gt;5000 or value&lt;100]</code>, <code>cell[(type=Number or type=Date) and value&gt;0]</code>. Excel row-by-column-name: <code>Sheet1!row[Salary&gt;5000]</code>. <code>set</code> accepts selectors and Excel-native paths (parity with <code>get</code>/<code>query</code>). Bare unscoped selectors rejected on <code>set</code>/<code>remove</code>.</p>
+<pre><code>officecli query report.docx 'paragraph[style=Normal] &gt; run[font!=Arial]'
+officecli query slides.pptx 'shape[fill=FF0000]'</code></pre>
+<hr>
+<h3>Watch &amp; Interactive Selection</h3>
+<p>Live HTML preview that auto-refreshes on every file change. Browsers can click / shift-click / box-drag to select shapes; the CLI can read the current browser selection and act on it.</p>
+<pre><code>officecli watch &lt;file&gt; [--port N]      # Start preview server (default port 26315)
+officecli unwatch &lt;file&gt;               # Stop
+officecli goto &lt;file&gt; &lt;path&gt;           # Scroll watching browser(s) to element (docx: p / table / tr / tc)</code></pre>
+<p>Open the printed <code>http://localhost:N</code> URL. Click to select; shift/cmd/ctrl+click to multi-select; drag from empty space to box-select. PPT/Word use blue outline; Excel uses native-style green selection (double-click cell to edit inline; drag a chart to reposition).</p>
+<h4><code>get &lt;file&gt; selected</code> — read what the user clicked</h4>
+<pre><code>officecli get &lt;file&gt; selected [--json]</code></pre>
+<p>Returns DocumentNodes for whatever is currently selected. Empty result if nothing selected. Exit code != 0 if no watch is running.</p>
+<pre><code># User clicks shapes in the browser, then asks &quot;make these red&quot;
+PATHS=$(officecli get deck.pptx selected --json | jq -r '.data.Results[].path')
+for p in $PATHS; do officecli set deck.pptx &quot;$p&quot; --prop fill=FF0000; done</code></pre>
+<h4>Key properties</h4>
+<ul>
+<li><strong>Selection survives file edits.</strong> Paths use stable <code>@id=</code> form.</li>
+<li><strong>All connected browsers share one selection.</strong> Last-write-wins.</li>
+<li><strong>Same-file single-watch.</strong> A given file can have only one watch process at a time.</li>
+<li><strong>Group shapes select as a whole.</strong> Drilling into individual children of a group is not supported in v1.</li>
+<li><strong>Coverage:</strong> <code>.pptx</code> shapes/pictures/tables/charts/connectors/groups; <code>.docx</code> top-level paragraphs and tables. Inherited layout/master decorations and Word nested elements (table cells, run-level) are not addressable. <strong><code>.xlsx</code> does not emit <code>data-path</code></strong> — <code>mark</code>/<code>selection</code> on xlsx always resolve <code>stale=true</code> (v2 candidate).</li>
+</ul>
+<h4>Marks — edit proposals waiting for review</h4>
+<p>Use <code>mark</code> when changes need human review BEFORE they hit the file. Marks live in the watch process only; a separate <code>set</code> pipeline applies accepted ones. For one-shot changes use <code>set</code> directly; for permanent file annotations use <code>add --type comment</code> (Word native).</p>
+<pre><code>officecli mark &lt;file&gt; &lt;path&gt; [--prop find=... color=... note=... tofix=... regex=true] [--json]
+officecli unmark &lt;file&gt; [--path &lt;p&gt; | --all] [--json]
+officecli get-marks &lt;file&gt; [--json]</code></pre>
+<p>Props: <code>find</code> (literal or regex when <code>regex=true</code>; raw form <code>find='r&quot;[abc]&quot;'</code>), <code>color</code> (hex / <code>rgb(...)</code> / 22 named whitelist), <code>note</code>, <code>tofix</code> (drives apply pipeline). <strong>Path</strong> must be <code>data-path</code> format from watch HTML — see subskills for full pipeline.</p>
+<hr>
+<h3>L2: DOM Operations</h3>
+<h4>set — modify properties</h4>
+<pre><code>officecli set &lt;file&gt; &lt;path&gt; --prop key=value [--prop ...]</code></pre>
+<p><strong>Any XML attribute is settable</strong> via element path (found via <code>get --depth N</code>) — even attributes not currently present. Without <code>find=</code>, <code>set</code> applies format to the entire element.</p>
+<p><strong>Value formats:</strong></p>
+<p>| Type | Format | Examples | |------|--------|---------| | Colors | Hex (with/without <code>#</code>), named, RGB, theme | <code>FF0000</code>, <code>#FF0000</code>, <code>red</code>, <code>rgb(255,0,0)</code>, <code>accent1</code>..<code>accent6</code> | | Spacing | Unit-qualified | <code>12pt</code>, <code>0.5cm</code>, <code>1.5x</code>, <code>150%</code> | | Dimensions | EMU or suffixed | <code>914400</code>, <code>2.54cm</code>, <code>1in</code>, <code>72pt</code>, <code>96px</code> |</p>
+<p><strong>Dotted-attr aliases</strong> — <code>font.&lt;attr&gt;</code> forms accepted on shape/run/paragraph/table/row/cell/section/styles, e.g. <code>--prop font.color=red --prop font.bold=true --prop font.size=14pt</code>. Run <code>officecli help &lt;fmt&gt; &lt;element&gt;</code> for the full list.</p>
+<h4>find — format or replace matched text</h4>
+<p>Use top-level <code>--find</code> / <code>--replace</code> on <code>set</code> (and <code>--find</code> on <code>query</code>). Legacy <code>--prop find=X</code> still works but emits a hint.</p>
+<pre><code># Format matched text (auto-splits runs)
+officecli set doc.docx '/body/p[1]' --find weather --prop bold=true --prop color=red
+
+# Regex matching (regex= still a prop flag)
+officecli set doc.docx '/body/p[1]' --find '\d+%' --prop regex=true --prop color=red
+
+# Replace text (use `/` for whole-document scope)
+officecli set doc.docx / --find draft --replace final
+
+# docx: tracked Find&amp;Replace
+officecli set doc.docx / --find draft --replace final --prop revision.author=Alice
+
+# PPT — same syntax, different paths
+officecli set slides.pptx / --find draft --replace final</code></pre>
+<p><strong>Path controls search scope:</strong> <code>/</code> = whole document, <code>/body/p[1]</code> or <code>/slide[N]/shape[M]</code> = specific element, <code>/header[1]</code> / <code>/footer[1]</code> = headers/footers.</p>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>Case-sensitive by default. Case-insensitive: <code>--prop 'find=(?i)error' --prop regex=true</code></li>
+<li>Matches work across run boundaries</li>
+<li>No match = silent success. <code>--json</code> includes <code>&quot;matched&quot;: N</code></li>
+<li><strong>Excel:</strong> only <code>find</code> + <code>replace</code> supported (no find + format props)</li>
+</ul>
+<h4>add — add elements or clone</h4>
+<pre><code>officecli add &lt;file&gt; &lt;parent&gt; --type &lt;type&gt; [--prop ...]
+officecli add &lt;file&gt; &lt;parent&gt; --type &lt;type&gt; --after &lt;path&gt; [--prop ...]   # insert after anchor
+officecli add &lt;file&gt; &lt;parent&gt; --type &lt;type&gt; --before &lt;path&gt; [--prop ...]  # insert before anchor
+officecli add &lt;file&gt; &lt;parent&gt; --type &lt;type&gt; --index N [--prop ...]        # 0-based position (legacy)
+officecli add &lt;file&gt; &lt;parent&gt; --from &lt;path&gt;                               # clone existing element</code></pre>
+<p><code>--after</code>, <code>--before</code>, <code>--index</code> are mutually exclusive. No position flag = append to end.</p>
+<p><strong>Element types (with aliases):</strong></p>
+<p>| Format | Types | |--------|-------| | <strong>pptx</strong> | slide (incl. hidden), shape (font.latin/ea/cs, direction=rtl, underline.color, highlight=COLOR (Add/Set/Get/HTML preview), effective.X+effective.X.src; arrow alias for rightArrow; slideMaster/slideLayout typed add/set/remove), picture (SVG, brightness/contrast/glow/shadow, rotation, link, tooltip), chart (direction=rtl, pieOfPie, barOfPie, axisLine/gridline per-attr setters, animation+chartBuild=byCategory|bySeries, line dropLines/hiLowLines/upDownBars, anchor=x,y,w,h shorthand), table (cell direction=rtl, fill/background, built-in PowerPoint style catalogue, /col[C] get + swap/copyFrom, row/col Move/CopyFrom), row (tr), connector (from/to accept full-path <code>@name=</code>/<code>@id=</code> forms — bare <code>@name=Foo</code> is rejected, must be <code>/slide[N]/shape[@name=Foo]</code> — startshape/endshape SetByPath; edge-to-edge anchoring by default, fromSide/toSide to force an edge, fromIdx/toIdx for raw cxn index), group (link, tooltip, deep walk by get/query/add/remove, ungroup=true dissolves back to slide-absolute), align/distribute (targets= accepts shape[@id=N] paths, not just positional), video/audio (loop, autoStart alias), equation, notes (direction=rtl, lang), comment (legacy + modern p188 threaded round-trip), animation (15 emphasis + 16 exit presets, multi-effect chains, motion-path presets, repeat/restart/autoReverse, chart animations), transition (12 p15 presets + morph/p14), paragraph (para), run, zoom, ole (preview=, full dump round-trip via add-part+raw-set), placeholder (phType=...), model3d (rotation=ax,ay,az; full dump round-trip), smartart (dump round-trip via add-part), diagram (add-only mermaid → native shapes or rendered image, <code>--type diagram</code>/<code>flowchart</code>). | | <strong>docx</strong> | paragraph (direction/font.latin/ea/cs, bold.cs/italic.cs/size.cs, lang.latin/ea/cs, wordWrap, framePr.\<em>, tabs shorthand), run (lang slots, direction, underline.color, position half-pts, <strong>revision.type=ins\|del\|format\|moveFrom\|moveTo + revision.action=accept\|reject</strong> with .author/.date — bare <code>@author=</code>/<code>@type=</code> selector on <code>set /revision[...]</code> for filtered accept/reject, but <code>query 'revision[...]'</code> needs the dotted <code>revision.author=</code>/<code>revision.type=</code> form; move+revision is run-level paths only, not paragraph-level; <strong>range=START:END</strong> on a paragraph/shape path formats a char span by explicit 0-based half-open offset instead of addressing a run — the offset sibling of find=), table (direction=rtl, hMerge, cantSplit on row/nowrap on cell (both add+set), <strong>virtual column ops</strong>: add/remove/move/copyfrom on /body/tbl[N]/col), row (tr), cell (td), image, header/footer (direction), section (pageNumFmt full enum, direction=rtl, rtlGutter, pgBorders=box), bookmark, comment, footnote, endnote, formfield, sdt, chart, equation, field (28 types), hyperlink, style (direction, indents, pbdr, lineSpacing on Add/Set), toc, watermark, break, ole, <strong>num/abstractNum/lvl</strong>, <strong>tab</strong>, <strong>textbox/shape</strong> (add-mostly — Get returns raw XML preview only, no structured readback; Set is limited to width/height/geometry/fill/line.\</em>; position is <code>anchor.x</code>/<code>anchor.y</code> not bare x/y; <strong>textbox-only</strong> <code>textDirection</code>/rotation/gradient/shadow — docx shape itself has neither rotation nor gradient), embedded <strong>OLE round-trip on dump→batch</strong>, <strong>diagram</strong> (add-only mermaid → native shapes or rendered image, <code>--type diagram</code>/<code>flowchart</code>, no x/y at add-time — reposition via <code>set /body/group[N]</code>). docDefaults.rtl, autoHyphenation, <code>get /</code> exposes locale + /comments /footnotes /endnotes. <code>create --minimal</code> for raw OOXML scaffolding. | | <strong>xlsx</strong> | sheet (visible/hidden/veryHidden, print margins, printTitleRows/Cols, rightToLeft sheetView, cascade-aware rename), row (c{N}= cell-content shorthand; add accepts --from /Sheet/col[L]; formula-ref rewrite on insert), col (formula-ref rewrite, named-range follow on move), cell (type=richtext+runs, merge=range/sweep, direction=rtl, phonetic; <strong>--shift left\|up on remove, shift=right\|down on add</strong> — Excel UI dialog parity; formula auto-detect; OFFSET/INDIRECT in calc), chart (per-axis RTL/title, anchor=x,y,w,h, pareto), image (SVG), comment (direction=rtl), table (listobject), namedrange (definedname, volatile, <code>[@name=X]</code>; formula-body inlined at parse), pivottable (cache CoW + cross-pivot sharing, labelFilter=field:type:value add-time-only, topN=integer add-time-only, fillDownLabels is an alias of repeatLabels not a separate feature, calculatedField), sparkline, validation, autofilter, shape, textbox, CF (databar/colorscale/iconset/formulacf/cellIs/topN/aboveAverage), ole, csv. Query supports <code>merge</code>/<code>mergedrange</code>. Workbook: password. Shape selector enumerates leaves inside grpSp. |</p>
+<h4>Pivot tables (xlsx)</h4>
+<pre><code>officecli add data.xlsx /Sheet1 --type pivottable \
+  --prop source=&quot;Sheet1!A1:E100&quot; --prop rows=Region,Category \
+  --prop cols=Year --prop values=&quot;Sales:sum,Qty:count&quot; \
+  --prop grandTotals=rows --prop subtotals=off --prop sort=asc</code></pre>
+<p>Key props: <code>rows</code>, <code>cols</code>, <code>values</code> (Field:func[:showDataAs]), <code>filters</code>, <code>source</code>, <code>position</code>, <code>layout</code> (compact/outline/tabular), <code>repeatLabels</code>, <code>blankRows</code>, <code>aggregate</code>, <code>showDataAs</code> (percent_of_total/row/col, running_total), <code>grandTotals</code>, <code>subtotals</code>, <code>sort</code>. Aggregators: sum, count, average, max, min, product, stdDev, stdDevp, var, varp, countNums. Date columns auto-group. Run <code>officecli help xlsx pivottable</code> for full schema.</p>
+<h4>Document-level properties (all formats)</h4>
+<pre><code>officecli set doc.docx / --prop docDefaults.font=Arial --prop docDefaults.fontSize=11pt
+officecli set doc.docx / --prop protection=forms --prop evenAndOddHeaders=true
+officecli set data.xlsx / --prop calc.mode=manual --prop calc.refMode=r1c1
+officecli set slides.pptx / --prop defaultFont=Arial --prop show.loop=true --prop print.what=handouts</code></pre>
+<p>Run <code>officecli help &lt;format&gt; /</code> for all document-level properties (docDefaults, docGrid, CJK spacing, calc, print, show, theme, extended).</p>
+<h4>Sort (xlsx)</h4>
+<pre><code>officecli set data.xlsx /Sheet1 --prop sort=&quot;C desc&quot; --prop sortHeader=true
+officecli set data.xlsx '/Sheet1/A1:D100' --prop sort=&quot;A asc&quot; --prop sortHeader=true</code></pre>
+<p>Format: <code>COL DIR[, COL DIR ...]</code>. Rejects ranges with merged cells or formulas. Sidecar metadata (hyperlinks, comments, conditional formatting, drawings) follows rows automatically.</p>
+<h4>Text-anchored insert (<code>--after find:X</code> / <code>--before find:X</code>)</h4>
+<p>Locate an insertion point by text match within a paragraph. Inline types (run, picture, hyperlink) insert within the paragraph; block types (table, paragraph) auto-split it. PPT only supports inline.</p>
+<pre><code># Word: inline run after matched text
+officecli add doc.docx '/body/p[1]' --type run --after find:weather --prop text=&quot; (sunny)&quot;
+
+# Word: block table after matched text (auto-splits paragraph)
+officecli add doc.docx '/body/p[1]' --type table --after &quot;find:First sentence.&quot; --prop rows=2 --prop cols=2</code></pre>
+<h4>Clone</h4>
+<p><code>officecli add &lt;file&gt; / --from '/slide[1]'</code> — copies with all cross-part relationships.</p>
+<h4>move, swap, remove</h4>
+<pre><code>officecli move &lt;file&gt; &lt;path&gt; [--to &lt;parent&gt;] [--index N] [--after &lt;path&gt;] [--before &lt;path&gt;]
+officecli swap &lt;file&gt; &lt;path1&gt; &lt;path2&gt;
+officecli remove &lt;file&gt; '/body/p[4]'</code></pre>
+<p>When using <code>--after</code> or <code>--before</code>, <code>--to</code> can be omitted — the target container is inferred from the anchor.</p>
+<h4>batch — multiple operations in one save cycle</h4>
+<p>Continues on error by default (returns exit 1 if any item fails). Use <code>--stop-on-error</code> to abort on the first failure. <code>--force</code> is the docx-protection bypass.</p>
+<p><code>officecli dump &lt;file&gt; [&lt;path&gt;]</code> emits a replayable batch JSON for round-trip — <code>.docx</code> (full coverage), <code>.pptx</code> (text/tables/pictures/charts/notes/theme + OLE/3D/video/audio/SmartArt/morph/p15 transitions via raw-set passthrough), and <code>.xlsx</code> (cells/formulas/styles + tables, conditional formatting, validations, comments, charts, sparklines, pictures, shapes, pivot tables; slicers/chartEx/OLE via verbatim carrier). Path defaults to <code>/</code> (whole document); pass a subtree path (docx: <code>/body</code>, <code>/body/p[N]</code>, <code>/body/tbl[N]</code>, <code>/theme</code>, <code>/settings</code>, <code>/numbering</code>, <code>/styles</code>; xlsx: <code>/SheetName</code>, <code>/sheet[N]</code>) to scope the dump. <code>officecli refresh &lt;file.docx&gt;</code> recalculates TOC page numbers / PAGE / cross-references after replay (Word backend on Windows; headless-HTML fallback elsewhere). <code>officecli plugins list</code> extends support to <code>.doc</code>, <code>.hwpx</code>, <code>.pdf</code> export.</p>
+<pre><code>echo '[
+  {&quot;command&quot;:&quot;set&quot;,&quot;path&quot;:&quot;/Sheet1/A1&quot;,&quot;props&quot;:{&quot;value&quot;:&quot;Name&quot;,&quot;bold&quot;:&quot;true&quot;}},
+  {&quot;command&quot;:&quot;set&quot;,&quot;path&quot;:&quot;/Sheet1/B1&quot;,&quot;props&quot;:{&quot;value&quot;:&quot;Score&quot;,&quot;bold&quot;:&quot;true&quot;}}
+]' | officecli batch data.xlsx --json
+
+officecli batch data.xlsx --commands '[{&quot;op&quot;:&quot;set&quot;,&quot;path&quot;:&quot;/Sheet1/A1&quot;,&quot;props&quot;:{&quot;value&quot;:&quot;Done&quot;}}]' --json
+officecli batch data.xlsx --input updates.json --force --json</code></pre>
+<p>Supports: <code>add</code>, <code>set</code>, <code>get</code>, <code>query</code>, <code>remove</code>, <code>move</code>, <code>swap</code>, <code>view</code>, <code>raw</code>, <code>raw-set</code>, <code>validate</code>. Fields: <code>command</code> (or <code>op</code>), <code>path</code>, <code>parent</code>, <code>type</code>, <code>from</code>, <code>to</code>, <code>index</code>, <code>after</code>, <code>before</code>, <code>props</code>, <code>selector</code>, <code>mode</code>, <code>depth</code>, <code>part</code>, <code>xpath</code>, <code>action</code>, <code>xml</code>.</p>
+<hr>
+<h3>L3: Raw XML</h3>
+<p>Use when L2 cannot express what you need. No xmlns declarations needed — prefixes auto-registered.</p>
+<pre><code>officecli raw &lt;file&gt; &lt;part&gt;                          # view raw XML
+officecli raw-set &lt;file&gt; &lt;part&gt; --xpath &quot;...&quot; --action replace --xml '&lt;w:p&gt;...&lt;/w:p&gt;'
+officecli add-part &lt;file&gt; &lt;parent&gt;                   # create new document part (returns rId)</code></pre>
+<p><code>raw-set</code> actions: <code>append</code>, <code>prepend</code>, <code>insertbefore</code>, <code>insertafter</code>, <code>replace</code>, <code>remove</code>, <code>setattr</code>. Run <code>officecli help &lt;format&gt; raw</code> for available parts.</p>
+<hr>
+<h3>Common Pitfalls</h3>
+<p>| Pitfall | Correct Approach | |---------|-----------------| | <code>--name &quot;foo&quot;</code> | Use <code>--prop name=&quot;foo&quot;</code> — all attributes go through <code>--prop</code> | | Unquoted <code>[N]</code> paths in zsh/bash | Always quote: <code>'/slide[1]'</code> or <code>&quot;/slide[1]&quot;</code> (shell glob-expands brackets) | | PPT <code>shape[1]</code> for content | <code>shape[1]</code> is typically the title placeholder. Use <code>shape[2]+</code> for content shapes | | <code>/shape[myname]</code> | Name indexing not supported. Use numeric index or <code>@name=</code> (PPT only) | | Guessing property names | Run <code>officecli help &lt;format&gt; &lt;element&gt;</code> to see exact names | | Modifying an open file | Close the file in PowerPoint/WPS first | | <code>\n</code> in shell strings | Use <code>\\n</code> for newlines in <code>--prop text=&quot;...&quot;</code> | | <code>$</code> in shell text | <code>--prop text=&quot;$15M&quot;</code> strips <code>$15</code>. Use single quotes: <code>--prop text='$15M'</code>, or heredoc batch |</p>
+<hr>
+<h3>Specialized Skills</h3>
+<p><code>officecli load_skill &lt;name&gt;</code> — output is a SKILL.md, follow its rules.</p>
+<p><strong>Loading rule</strong>:</p>
+<ul>
+<li>Pick the most specific match in &quot;When to use&quot;; if none fits, load the format default (<code>word</code> / <code>pptx</code> / <code>excel</code>).</li>
+<li>Scenes already contain the format default's rules — load <strong>one</strong> skill per artifact, never stack.</li>
+<li>Loaded rules persist across turns; don't re-load each reply.</li>
+<li>Two distinct artifacts → two separate loads.</li>
+</ul>
+<h4>Word (.docx)</h4>
+<p>| Name | When to use | |------|-------------| | <code>word</code> | Reports, letters, memos, proposals, generic documents | | <code>academic-paper</code> | Journal / conference / thesis: APA / Chicago / IEEE / MLA citations, equations, SEQ + PAGEREF cross-refs, multi-column journal layout, bibliography. NOT for business reports or letters (route those to <code>word</code>) |</p>
+<h4>PowerPoint (.pptx)</h4>
+<p>| Name | When to use | |------|-------------| | <code>pptx</code> | Generic decks: board reviews, sales decks, all-hands, product launches | | <code>pitch-deck</code> | <strong>Fundraising only</strong> — seed / Series A-C / SAFE / convertible / strategic raise. NOT for sales / product / board decks (route those to <code>pptx</code>) | | <code>morph-ppt</code> | Cinematic Morph-animated presentations. NOT for static decks (route those to <code>pptx</code>) | | <code>morph-ppt-3d</code> | 3D Morph: GLB models, camera moves, depth. NOT for 2D-only Morph (route those to <code>morph-ppt</code>) |</p>
+<h4>Excel (.xlsx)</h4>
+<p>| Name | When to use | |------|-------------| | <code>excel</code> | Generic workbooks, formulas, pivots, trackers | | <code>financial-model</code> | Financial models, scenarios, projections. NOT for general data analysis (route those to <code>excel</code>) | | <code>data-dashboard</code> | CSV/tabular data → KPI / analytics / executive dashboards with charts and sparklines. NOT for raw data tracking (route those to <code>excel</code>) |</p>
+<p>Example: a fundraising deck task → <code>officecli load_skill pitch-deck</code> → use the printed rules.</p>
+<hr>
+<h3>Notes</h3>
+<ul>
+<li>Paths are <strong>1-based</strong> (XPath convention): <code>'/body/p[3]'</code> = third paragraph</li>
+<li><code>--index</code> is <strong>0-based</strong> (array convention): <code>--index 0</code> = first position</li>
+<li><strong>Excel exception</strong>: for <code>add --type row</code> and <code>add --type col</code>, <code>--index N</code> is <strong>1-based</strong> (matches OOXML RowIndex / column letter index). <code>--index 5</code> inserts at row 5 / column 5.</li>
+<li>After modifications, verify with <code>validate</code> and/or <code>view issues</code></li>
+<li><strong>When unsure</strong>, run <code>officecli help &lt;format&gt; &lt;element&gt;</code> instead of guessing</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: officecli\ndisplay_name: officecli\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# officecli - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `officecli` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nCreate, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check formatting, find issues, add charts, or modify Office document\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the officecli skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `officecli` |\n| Canonical name | `officecli` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\nCreate, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check formatting, find issues, add charts, or modify Office document\n\n\n## Original SKILL.md\n\n---\nname: officecli\ndescription: Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check formatting, find issues, add charts, or modify Office documents.\n---\n\n# officecli\n\nAI-friendly CLI for .docx, .xlsx, .pptx. Single binary, no dependencies, no Office installation needed.\n\n## Install\n\nIf `officecli` is not installed:\n\n```bash\n# macOS / Linux\ncurl -fsSL https://d.officecli.ai/install.sh | bash\n\n# Windows (PowerShell)\nirm https://d.officecli.ai/install.ps1 | iex\n```\n\nVerify with `officecli --version`. If still not found after install, open a new terminal.\n\n---\n\n## Strategy\n\n**L1 (read) → L2 (DOM edit) → L3 (raw XML)**. Always prefer higher layers. Add `--json` for structured output.\n\n**Before doc work, check Specialized Skills** (bottom of this file). Fundraising decks, academic papers, financial models, dashboards, and Morph animations need their own skill loaded first — `load_skill` once, then proceed.\n\n---\n\n## Help System (IMPORTANT)\n\n**When unsure about property names, value formats, or command syntax, ALWAYS run help instead of guessing.** One help query beats guess-fail-retry loops.\n\n`officecli help` ≡ `officecli --help`, and `officecli \u003ccmd> --help` ≡ `officecli help \u003ccmd>` — same content.\n\n```bash\nofficecli help                                  # All commands + global options + schema entry points\nofficecli help docx                             # List all docx elements\nofficecli help docx paragraph                   # Full schema: properties, aliases, examples, readbacks\nofficecli help docx set paragraph               # Verb-filtered: only props usable with `set`\nofficecli help docx paragraph --json            # Structured schema (machine-readable)\n```\n\nFormat aliases: `word`→`docx`, `excel`→`xlsx`, `ppt`/`powerpoint`→`pptx`. Verbs: `add`, `set`, `get`, `query`, `remove`. MCP exposes the same schema via the single `command` string param: `{\"command\":\"help docx paragraph\"}` (not a structured `{\"format\":...,\"type\":...}` object — the MCP tool has exactly one param, `command`, and passes it through to the CLI verbatim).\n\n---\n\n## Performance: Resident Mode\n\n**Every command auto-starts a resident on first access** (60s idle timeout) — file-lock conflicts are automatically avoided. Explicit `open`/`close` is still recommended for longer sessions (12min idle):\n```bash\nofficecli open report.docx       # explicitly keep in memory\nofficecli set report.docx ...    # no file I/O overhead\nofficecli close report.docx      # save and release\n```\n\nOpt out of auto-start: `OFFICECLI_NO_AUTO_RESIDENT=1`.\n\n**Flush only at the non-officecli boundary.** officecli's own reads (`get`/`query`/`view`/`dump`) always see your latest edits, so you never need to save mid-workflow. Run `save` (keeps the resident) or `close` (flush + release) only **before a non-officecli program reads the file** — python-docx/openpyxl, Word, a renderer, delivery/upload. (Idle sessions auto-flush within seconds; `OFFICECLI_RESIDENT_FLUSH=each` makes every mutation flush before returning.)\n\n---\n\n## Quick Start\n\n**PPT:**\n```bash\nofficecli create slides.pptx\nofficecli add slides.pptx / --type slide --prop title=\"Q4 Report\" --prop background=1A1A2E\nofficecli add slides.pptx '/slide[1]' --type shape --prop text=\"Revenue grew 25%\" --prop x=2cm --prop y=5cm --prop font=Arial --prop size=24 --prop color=FFFFFF\n```\n\n**Word:**\n```bash\nofficecli create report.docx\nofficecli add report.docx /body --type paragraph --prop text=\"Executive Summary\" --prop style=Heading1\nofficecli add report.docx /body --type paragraph --prop text=\"Revenue increased by 25% year-over-year.\"\n```\n\n**Excel:**\n```bash\nofficecli create data.xlsx\nofficecli set data.xlsx /Sheet1/A1 --prop value=\"Name\" --prop bold=true\nofficecli set data.xlsx /Sheet1/A2 --prop value=\"Alice\"\n```\n\n---\n\n## L1: Create, Read & Inspect\n\n```bash\nofficecli create \u003cfile>               # Create blank .docx/.xlsx/.pptx (type from extension)\nofficecli view \u003cfile> \u003cmode>          # outline | stats | issues | text | annotated | html\nofficecli get \u003cfile> \u003cpath> --depth N # Get a node and its children [--json]\nofficecli query \u003cfile> \u003cselector>     # CSS-like query\nofficecli validate \u003cfile>             # Validate against OpenXML schema\n```\n\n### view modes\n\n| Mode | Description | Useful flags |\n|------|-------------|-------------|\n| `outline` | Document structure | |\n| `stats` | Statistics (pages, words, shapes) | |\n| `issues` | Formatting/content/structure problems | `--type format\\|content\\|structure`, `--limit N` |\n| `text` | Plain text extraction | `--start N --end N`, `--max-lines N` |\n| `annotated` | Text with formatting annotations | |\n| `html` | Static HTML snapshot — same renderer as `watch`, no server needed | `--browser`, `--page N` (docx), `--start N --end N` (pptx) |\n| `screenshot` / `svg` / `pdf` / `forms` | PNG via headless browser / SVG (pptx slide) / PDF via exporter plugin / form-fields JSON via format-handler plugin | `-o`, `--screenshot-width/-height`, pptx `--grid N` |\n\nUse `view html` for one-shot snapshots (CI artifacts, archival, diffing); use `watch` when you need live refresh or browser-side click-to-select.\n\n### get\n\nAny XML path via element localName. Use `--depth N` to expand children. Add `--json` for structured output. Default text output is grep-friendly: `path (type) \"text\" key=val key=val ...`\n\n```bash\nofficecli get report.docx '/body/p[3]' --depth 2 --json\nofficecli get slides.pptx '/slide[1]' --depth 1          # list all shapes on slide 1\nofficecli get data.xlsx '/Sheet1/B2' --json\n```\n\n### Stable ID Addressing\n\nElements with stable IDs return `@attr=value` paths instead of positional indices. Prefer these in multi-step workflows — positional indices shift on insert/delete, stable IDs do not.\n\n```\n/slide[1]/shape[@id=550950021]                    # PPT shape\n/slide[1]/table[@id=1388430425]/tr[1]/tc[2]       # PPT table\n/body/p[@paraId=1A2B3C4D]                         # Word paragraph\n/comments/comment[@commentId=1]                    # Word comment\n```\n\nPPT also accepts `@name=` (e.g. `shape[@name=Title 1]`), with morph `!!` prefix awareness. Elements without stable IDs (slide, run, tr/tc, row) fall back to positional indices.\n\n### query\n\nCSS-like selectors: `[attr=value]`, `[attr!=value]`, `[attr~=text]`, `[attr>=value]`, `[attr\u003c=value]`, `:contains(\"text\")`, `:empty`, `:has(formula)`, `:no-alt`. Boolean `and`/`or` supported across `query`/`set`/`remove`: `cell[value>5000 or value\u003c100]`, `cell[(type=Number or type=Date) and value>0]`. Excel row-by-column-name: `Sheet1!row[Salary>5000]`. `set` accepts selectors and Excel-native paths (parity with `get`/`query`). Bare unscoped selectors rejected on `set`/`remove`.\n\n```bash\nofficecli query report.docx 'paragraph[style=Normal] > run[font!=Arial]'\nofficecli query slides.pptx 'shape[fill=FF0000]'\n```\n\n---\n\n## Watch & Interactive Selection\n\nLive HTML preview that auto-refreshes on every file change. Browsers can click / shift-click / box-drag to select shapes; the CLI can read the current browser selection and act on it.\n\n```bash\nofficecli watch \u003cfile> [--port N]      # Start preview server (default port 26315)\nofficecli unwatch \u003cfile>               # Stop\nofficecli goto \u003cfile> \u003cpath>           # Scroll watching browser(s) to element (docx: p / table / tr / tc)\n```\n\nOpen the printed `http://localhost:N` URL. Click to select; shift/cmd/ctrl+click to multi-select; drag from empty space to box-select. PPT/Word use blue outline; Excel uses native-style green selection (double-click cell to edit inline; drag a chart to reposition).\n\n### `get \u003cfile> selected` — read what the user clicked\n\n```bash\nofficecli get \u003cfile> selected [--json]\n```\n\nReturns DocumentNodes for whatever is currently selected. Empty result if nothing selected. Exit code != 0 if no watch is running.\n\n```bash\n# User clicks shapes in the browser, then asks \"make these red\"\nPATHS=$(officecli get deck.pptx selected --json | jq -r '.data.Results[].path')\nfor p in $PATHS; do officecli set deck.pptx \"$p\" --prop fill=FF0000; done\n```\n\n### Key properties\n\n- **Selection survives file edits.** Paths use stable `@id=` form.\n- **All connected browsers share one selection.** Last-write-wins.\n- **Same-file single-watch.** A given file can have only one watch process at a time.\n- **Group shapes select as a whole.** Drilling into individual children of a group is not supported in v1.\n- **Coverage:** `.pptx` shapes/pictures/tables/charts/connectors/groups; `.docx` top-level paragraphs and tables. Inherited layout/master decorations and Word nested elements (table cells, run-level) are not addressable. **`.xlsx` does not emit `data-path`** — `mark`/`selection` on xlsx always resolve `stale=true` (v2 candidate).\n\n### Marks — edit proposals waiting for review\n\nUse `mark` when changes need human review BEFORE they hit the file. Marks live in the watch process only; a separate `set` pipeline applies accepted ones. For one-shot changes use `set` directly; for permanent file annotations use `add --type comment` (Word native).\n\n```bash\nofficecli mark \u003cfile> \u003cpath> [--prop find=... color=... note=... tofix=... regex=true] [--json]\nofficecli unmark \u003cfile> [--path \u003cp> | --all] [--json]\nofficecli get-marks \u003cfile> [--json]\n```\n\nProps: `find` (literal or regex when `regex=true`; raw form `find='r\"[abc]\"'`), `color` (hex / `rgb(...)` / 22 named whitelist), `note`, `tofix` (drives apply pipeline). **Path** must be `data-path` format from watch HTML — see subskills for full pipeline.\n\n---\n\n## L2: DOM Operations\n\n### set — modify properties\n\n```bash\nofficecli set \u003cfile> \u003cpath> --prop key=value [--prop ...]\n```\n\n**Any XML attribute is settable** via element path (found via `get --depth N`) — even attributes not currently present. Without `find=`, `set` applies format to the entire element.\n\n**Value formats:**\n\n| Type | Format | Examples |\n|------|--------|---------|\n| Colors | Hex (with/without `#`), named, RGB, theme | `FF0000`, `#FF0000`, `red`, `rgb(255,0,0)`, `accent1`..`accent6` |\n| Spacing | Unit-qualified | `12pt`, `0.5cm`, `1.5x`, `150%` |\n| Dimensions | EMU or suffixed | `914400`, `2.54cm`, `1in`, `72pt`, `96px` |\n\n**Dotted-attr aliases** — `font.\u003cattr>` forms accepted on shape/run/paragraph/table/row/cell/section/styles, e.g. `--prop font.color=red --prop font.bold=true --prop font.size=14pt`. Run `officecli help \u003cfmt> \u003celement>` for the full list.\n\n### find — format or replace matched text\n\nUse top-level `--find` / `--replace` on `set` (and `--find` on `query`). Legacy `--prop find=X` still works but emits a hint.\n\n```bash\n# Format matched text (auto-splits runs)\nofficecli set doc.docx '/body/p[1]' --find weather --prop bold=true --prop color=red\n\n# Regex matching (regex= still a prop flag)\nofficecli set doc.docx '/body/p[1]' --find '\\d+%' --prop regex=true --prop color=red\n\n# Replace text (use `/` for whole-document scope)\nofficecli set doc.docx / --find draft --replace final\n\n# docx: tracked Find&Replace\nofficecli set doc.docx / --find draft --replace final --prop revision.author=Alice\n\n# PPT — same syntax, different paths\nofficecli set slides.pptx / --find draft --replace final\n```\n\n**Path controls search scope:** `/` = whole document, `/body/p[1]` or `/slide[N]/shape[M]` = specific element, `/header[1]` / `/footer[1]` = headers/footers.\n\n**Notes:**\n- Case-sensitive by default. Case-insensitive: `--prop 'find=(?i)error' --prop regex=true`\n- Matches work across run boundaries\n- No match = silent success. `--json` includes `\"matched\": N`\n- **Excel:** only `find` + `replace` supported (no find + format props)\n\n### add — add elements or clone\n\n```bash\nofficecli add \u003cfile> \u003cparent> --type \u003ctype> [--prop ...]\nofficecli add \u003cfile> \u003cparent> --type \u003ctype> --after \u003cpath> [--prop ...]   # insert after anchor\nofficecli add \u003cfile> \u003cparent> --type \u003ctype> --before \u003cpath> [--prop ...]  # insert before anchor\nofficecli add \u003cfile> \u003cparent> --type \u003ctype> --index N [--prop ...]        # 0-based position (legacy)\nofficecli add \u003cfile> \u003cparent> --from \u003cpath>                               # clone existing element\n```\n\n`--after`, `--before`, `--index` are mutually exclusive. No position flag = append to end.\n\n**Element types (with aliases):**\n\n| Format | Types |\n|--------|-------|\n| **pptx** | slide (incl. hidden), shape (font.latin/ea/cs, direction=rtl, underline.color, highlight=COLOR (Add/Set/Get/HTML preview), effective.X+effective.X.src; arrow alias for rightArrow; slideMaster/slideLayout typed add/set/remove), picture (SVG, brightness/contrast/glow/shadow, rotation, link, tooltip), chart (direction=rtl, pieOfPie, barOfPie, axisLine/gridline per-attr setters, animation+chartBuild=byCategory|bySeries, line dropLines/hiLowLines/upDownBars, anchor=x,y,w,h shorthand), table (cell direction=rtl, fill/background, built-in PowerPoint style catalogue, /col[C] get + swap/copyFrom, row/col Move/CopyFrom), row (tr), connector (from/to accept full-path `@name=`/`@id=` forms — bare `@name=Foo` is rejected, must be `/slide[N]/shape[@name=Foo]` — startshape/endshape SetByPath; edge-to-edge anchoring by default, fromSide/toSide to force an edge, fromIdx/toIdx for raw cxn index), group (link, tooltip, deep walk by get/query/add/remove, ungroup=true dissolves back to slide-absolute), align/distribute (targets= accepts shape[@id=N] paths, not just positional), video/audio (loop, autoStart alias), equation, notes (direction=rtl, lang), comment (legacy + modern p188 threaded round-trip), animation (15 emphasis + 16 exit presets, multi-effect chains, motion-path presets, repeat/restart/autoReverse, chart animations), transition (12 p15 presets + morph/p14), paragraph (para), run, zoom, ole (preview=, full dump round-trip via add-part+raw-set), placeholder (phType=...), model3d (rotation=ax,ay,az; full dump round-trip), smartart (dump round-trip via add-part), diagram (add-only mermaid → native shapes or rendered image, `--type diagram`/`flowchart`). |\n| **docx** | paragraph (direction/font.latin/ea/cs, bold.cs/italic.cs/size.cs, lang.latin/ea/cs, wordWrap, framePr.\\*, tabs shorthand), run (lang slots, direction, underline.color, position half-pts, **revision.type=ins\\|del\\|format\\|moveFrom\\|moveTo + revision.action=accept\\|reject** with .author/.date — bare `@author=`/`@type=` selector on `set /revision[...]` for filtered accept/reject, but `query 'revision[...]'` needs the dotted `revision.author=`/`revision.type=` form; move+revision is run-level paths only, not paragraph-level; **range=START:END** on a paragraph/shape path formats a char span by explicit 0-based half-open offset instead of addressing a run — the offset sibling of find=), table (direction=rtl, hMerge, cantSplit on row/nowrap on cell (both add+set), **virtual column ops**: add/remove/move/copyfrom on /body/tbl[N]/col), row (tr), cell (td), image, header/footer (direction), section (pageNumFmt full enum, direction=rtl, rtlGutter, pgBorders=box), bookmark, comment, footnote, endnote, formfield, sdt, chart, equation, field (28 types), hyperlink, style (direction, indents, pbdr, lineSpacing on Add/Set), toc, watermark, break, ole, **num/abstractNum/lvl**, **tab**, **textbox/shape** (add-mostly — Get returns raw XML preview only, no structured readback; Set is limited to width/height/geometry/fill/line.\\*; position is `anchor.x`/`anchor.y` not bare x/y; **textbox-only** `textDirection`/rotation/gradient/shadow — docx shape itself has neither rotation nor gradient), embedded **OLE round-trip on dump→batch**, **diagram** (add-only mermaid → native shapes or rendered image, `--type diagram`/`flowchart`, no x/y at add-time — reposition via `set /body/group[N]`). docDefaults.rtl, autoHyphenation, `get /` exposes locale + /comments /footnotes /endnotes. `create --minimal` for raw OOXML scaffolding. |\n| **xlsx** | sheet (visible/hidden/veryHidden, print margins, printTitleRows/Cols, rightToLeft sheetView, cascade-aware rename), row (c{N}= cell-content shorthand; add accepts --from /Sheet/col[L]; formula-ref rewrite on insert), col (formula-ref rewrite, named-range follow on move), cell (type=richtext+runs, merge=range/sweep, direction=rtl, phonetic; **--shift left\\|up on remove, shift=right\\|down on add** — Excel UI dialog parity; formula auto-detect; OFFSET/INDIRECT in calc), chart (per-axis RTL/title, anchor=x,y,w,h, pareto), image (SVG), comment (direction=rtl), table (listobject), namedrange (definedname, volatile, `[@name=X]`; formula-body inlined at parse), pivottable (cache CoW + cross-pivot sharing, labelFilter=field:type:value add-time-only, topN=integer add-time-only, fillDownLabels is an alias of repeatLabels not a separate feature, calculatedField), sparkline, validation, autofilter, shape, textbox, CF (databar/colorscale/iconset/formulacf/cellIs/topN/aboveAverage), ole, csv. Query supports `merge`/`mergedrange`. Workbook: password. Shape selector enumerates leaves inside grpSp. |\n\n### Pivot tables (xlsx)\n\n```bash\nofficecli add data.xlsx /Sheet1 --type pivottable \\\n  --prop source=\"Sheet1!A1:E100\" --prop rows=Region,Category \\\n  --prop cols=Year --prop values=\"Sales:sum,Qty:count\" \\\n  --prop grandTotals=rows --prop subtotals=off --prop sort=asc\n```\n\nKey props: `rows`, `cols`, `values` (Field:func[:showDataAs]), `filters`, `source`, `position`, `layout` (compact/outline/tabular), `repeatLabels`, `blankRows`, `aggregate`, `showDataAs` (percent_of_total/row/col, running_total), `grandTotals`, `subtotals`, `sort`. Aggregators: sum, count, average, max, min, product, stdDev, stdDevp, var, varp, countNums. Date columns auto-group. Run `officecli help xlsx pivottable` for full schema.\n\n### Document-level properties (all formats)\n\n```bash\nofficecli set doc.docx / --prop docDefaults.font=Arial --prop docDefaults.fontSize=11pt\nofficecli set doc.docx / --prop protection=forms --prop evenAndOddHeaders=true\nofficecli set data.xlsx / --prop calc.mode=manual --prop calc.refMode=r1c1\nofficecli set slides.pptx / --prop defaultFont=Arial --prop show.loop=true --prop print.what=handouts\n```\n\nRun `officecli help \u003cformat> /` for all document-level properties (docDefaults, docGrid, CJK spacing, calc, print, show, theme, extended).\n\n### Sort (xlsx)\n\n```bash\nofficecli set data.xlsx /Sheet1 --prop sort=\"C desc\" --prop sortHeader=true\nofficecli set data.xlsx '/Sheet1/A1:D100' --prop sort=\"A asc\" --prop sortHeader=true\n```\n\nFormat: `COL DIR[, COL DIR ...]`. Rejects ranges with merged cells or formulas. Sidecar metadata (hyperlinks, comments, conditional formatting, drawings) follows rows automatically.\n\n### Text-anchored insert (`--after find:X` / `--before find:X`)\n\nLocate an insertion point by text match within a paragraph. Inline types (run, picture, hyperlink) insert within the paragraph; block types (table, paragraph) auto-split it. PPT only supports inline.\n\n```bash\n# Word: inline run after matched text\nofficecli add doc.docx '/body/p[1]' --type run --after find:weather --prop text=\" (sunny)\"\n\n# Word: block table after matched text (auto-splits paragraph)\nofficecli add doc.docx '/body/p[1]' --type table --after \"find:First sentence.\" --prop rows=2 --prop cols=2\n```\n\n### Clone\n\n`officecli add \u003cfile> / --from '/slide[1]'` — copies with all cross-part relationships.\n\n### move, swap, remove\n\n```bash\nofficecli move \u003cfile> \u003cpath> [--to \u003cparent>] [--index N] [--after \u003cpath>] [--before \u003cpath>]\nofficecli swap \u003cfile> \u003cpath1> \u003cpath2>\nofficecli remove \u003cfile> '/body/p[4]'\n```\n\nWhen using `--after` or `--before`, `--to` can be omitted — the target container is inferred from the anchor.\n\n### batch — multiple operations in one save cycle\n\nContinues on error by default (returns exit 1 if any item fails). Use `--stop-on-error` to abort on the first failure. `--force` is the docx-protection bypass.\n\n`officecli dump \u003cfile> [\u003cpath>]` emits a replayable batch JSON for round-trip — `.docx` (full coverage), `.pptx` (text/tables/pictures/charts/notes/theme + OLE/3D/video/audio/SmartArt/morph/p15 transitions via raw-set passthrough), and `.xlsx` (cells/formulas/styles + tables, conditional formatting, validations, comments, charts, sparklines, pictures, shapes, pivot tables; slicers/chartEx/OLE via verbatim carrier). Path defaults to `/` (whole document); pass a subtree path (docx: `/body`, `/body/p[N]`, `/body/tbl[N]`, `/theme`, `/settings`, `/numbering`, `/styles`; xlsx: `/SheetName`, `/sheet[N]`) to scope the dump. `officecli refresh \u003cfile.docx>` recalculates TOC page numbers / PAGE / cross-references after replay (Word backend on Windows; headless-HTML fallback elsewhere). `officecli plugins list` extends support to `.doc`, `.hwpx`, `.pdf` export.\n\n```bash\necho '[\n  {\"command\":\"set\",\"path\":\"/Sheet1/A1\",\"props\":{\"value\":\"Name\",\"bold\":\"true\"}},\n  {\"command\":\"set\",\"path\":\"/Sheet1/B1\",\"props\":{\"value\":\"Score\",\"bold\":\"true\"}}\n]' | officecli batch data.xlsx --json\n\nofficecli batch data.xlsx --commands '[{\"op\":\"set\",\"path\":\"/Sheet1/A1\",\"props\":{\"value\":\"Done\"}}]' --json\nofficecli batch data.xlsx --input updates.json --force --json\n```\n\nSupports: `add`, `set`, `get`, `query`, `remove`, `move`, `swap`, `view`, `raw`, `raw-set`, `validate`. Fields: `command` (or `op`), `path`, `parent`, `type`, `from`, `to`, `index`, `after`, `before`, `props`, `selector`, `mode`, `depth`, `part`, `xpath`, `action`, `xml`.\n\n---\n\n## L3: Raw XML\n\nUse when L2 cannot express what you need. No xmlns declarations needed — prefixes auto-registered.\n\n```bash\nofficecli raw \u003cfile> \u003cpart>                          # view raw XML\nofficecli raw-set \u003cfile> \u003cpart> --xpath \"...\" --action replace --xml '\u003cw:p>...\u003c/w:p>'\nofficecli add-part \u003cfile> \u003cparent>                   # create new document part (returns rId)\n```\n\n`raw-set` actions: `append`, `prepend`, `insertbefore`, `insertafter`, `replace`, `remove`, `setattr`. Run `officecli help \u003cformat> raw` for available parts.\n\n---\n\n## Common Pitfalls\n\n| Pitfall | Correct Approach |\n|---------|-----------------|\n| `--name \"foo\"` | Use `--prop name=\"foo\"` — all attributes go through `--prop` |\n| Unquoted `[N]` paths in zsh/bash | Always quote: `'/slide[1]'` or `\"/slide[1]\"` (shell glob-expands brackets) |\n| PPT `shape[1]` for content | `shape[1]` is typically the title placeholder. Use `shape[2]+` for content shapes |\n| `/shape[myname]` | Name indexing not supported. Use numeric index or `@name=` (PPT only) |\n| Guessing property names | Run `officecli help \u003cformat> \u003celement>` to see exact names |\n| Modifying an open file | Close the file in PowerPoint/WPS first |\n| `\\n` in shell strings | Use `\\\\n` for newlines in `--prop text=\"...\"` |\n| `$` in shell text | `--prop text=\"$15M\"` strips `$15`. Use single quotes: `--prop text='$15M'`, or heredoc batch |\n\n---\n\n## Specialized Skills\n\n`officecli load_skill \u003cname>` — output is a SKILL.md, follow its rules.\n\n**Loading rule**:\n- Pick the most specific match in \"When to use\"; if none fits, load the format default (`word` / `pptx` / `excel`).\n- Scenes already contain the format default's rules — load **one** skill per artifact, never stack.\n- Loaded rules persist across turns; don't re-load each reply.\n- Two distinct artifacts → two separate loads.\n\n### Word (.docx)\n\n| Name | When to use |\n|------|-------------|\n| `word` | Reports, letters, memos, proposals, generic documents |\n| `academic-paper` | Journal / conference / thesis: APA / Chicago / IEEE / MLA citations, equations, SEQ + PAGEREF cross-refs, multi-column journal layout, bibliography. NOT for business reports or letters (route those to `word`) |\n\n### PowerPoint (.pptx)\n\n| Name | When to use |\n|------|-------------|\n| `pptx` | Generic decks: board reviews, sales decks, all-hands, product launches |\n| `pitch-deck` | **Fundraising only** — seed / Series A-C / SAFE / convertible / strategic raise. NOT for sales / product / board decks (route those to `pptx`) |\n| `morph-ppt` | Cinematic Morph-animated presentations. NOT for static decks (route those to `pptx`) |\n| `morph-ppt-3d` | 3D Morph: GLB models, camera moves, depth. NOT for 2D-only Morph (route those to `morph-ppt`) |\n\n### Excel (.xlsx)\n\n| Name | When to use |\n|------|-------------|\n| `excel` | Generic workbooks, formulas, pivots, trackers |\n| `financial-model` | Financial models, scenarios, projections. NOT for general data analysis (route those to `excel`) |\n| `data-dashboard` | CSV/tabular data → KPI / analytics / executive dashboards with charts and sparklines. NOT for raw data tracking (route those to `excel`) |\n\nExample: a fundraising deck task → `officecli load_skill pitch-deck` → use the printed rules.\n\n---\n\n## Notes\n\n- Paths are **1-based** (XPath convention): `'/body/p[3]'` = third paragraph\n- `--index` is **0-based** (array convention): `--index 0` = first position\n- **Excel exception**: for `add --type row` and `add --type col`, `--index N` is **1-based** (matches OOXML RowIndex / column letter index). `--index 5` inserts at row 5 / column 5.\n- After modifications, verify with `validate` and/or `view issues`\n- **When unsure**, run `officecli help \u003cformat> \u003celement>` instead of guessing\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("officecli-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

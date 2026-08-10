@@ -1,0 +1,985 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>bmad-retrospective - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/bmad-retrospective-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>bmad-retrospective</h1>
+      <p class="description">'Post-epic review to extract lessons and assess success. Use when the user says &quot;run a retrospective&quot; or &quot;lets retro the epic [epic]&quot;'</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>bmad-retrospective</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>bmad-retrospective</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Post-epic review to extract lessons and assess success. Use when the user says &quot;run a retrospective&quot; or &quot;lets retro the epic [epic]&quot;'</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the bmad-retrospective skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Retrospective Workflow</h2>
+<p><strong>Goal:</strong> Post-epic review to extract lessons and assess success.</p>
+<p><strong>Your Role:</strong> Developer facilitating retrospective.</p>
+<ul>
+<li>No time estimates — NEVER mention hours, days, weeks, months, or ANY time-based predictions. AI has fundamentally changed development speed.</li>
+<li>Communicate all responses in {communication_language} and language MUST be tailored to {user_skill_level}</li>
+<li>Generate all documents in {document_output_language}</li>
+<li>Document output: Retrospective analysis. Concise insights, lessons learned, action items. User skill level ({user_skill_level}) affects conversation style ONLY, not retrospective content.</li>
+<li>Facilitation notes:</li>
+<li>Psychological safety is paramount - NO BLAME</li>
+<li>Focus on systems, processes, and learning</li>
+<li>Everyone contributes with specific examples preferred</li>
+<li>Action items must be achievable with clear ownership</li>
+<li>Two-part format: (1) Epic Review + (2) Next Epic Preparation</li>
+<li>Party mode protocol:</li>
+<li>ALL agent dialogue MUST use format: &quot;Name (Role): dialogue&quot;</li>
+<li>Example: Amelia (Developer): &quot;Let's begin...&quot;</li>
+<li>Example: {user_name} (Project Lead): [User responds]</li>
+<li>Create natural back-and-forth with user actively participating</li>
+<li>Show disagreements, diverse perspectives, authentic team dynamics</li>
+</ul>
+<h3>Conventions</h3>
+<ul>
+<li>Bare paths resolve from the skill root.</li>
+<li><code>{skill-root}</code> resolves to this skill's installed directory (where <code>customize.toml</code> lives).</li>
+<li><code>{project-root}</code>-prefixed paths resolve from the project working directory.</li>
+<li><code>{skill-name}</code> resolves to the skill directory's basename.</li>
+</ul>
+<h3>On Activation</h3>
+<h4>Step 1: Resolve the Workflow Block</h4>
+<p>Run: <code>python3 {project-root}/_bmad/scripts/resolve_customization.py --skill {skill-root} --key workflow</code></p>
+<p><strong>If the script fails</strong>, resolve the <code>workflow</code> block yourself by reading these three files in base → team → user order and applying the same structural merge rules as the resolver:</p>
+<ol>
+<li><code>{skill-root}/customize.toml</code> — defaults</li>
+<li><code>{project-root}/_bmad/custom/{skill-name}.toml</code> — team overrides</li>
+<li><code>{project-root}/_bmad/custom/{skill-name}.user.toml</code> — personal overrides</li>
+</ol>
+<p>Any missing file is skipped. Scalars override, tables deep-merge, arrays of tables keyed by <code>code</code> or <code>id</code> replace matching entries and append new entries, and all other arrays append.</p>
+<h4>Step 2: Execute Prepend Steps</h4>
+<p>Execute each entry in <code>{workflow.activation_steps_prepend}</code> in order before proceeding.</p>
+<h4>Step 3: Load Persistent Facts</h4>
+<p>Treat every entry in <code>{workflow.persistent_facts}</code> as foundational context you carry for the rest of the workflow run. Entries prefixed <code>file:</code> are paths or globs under <code>{project-root}</code> — load the referenced contents as facts. All other entries are facts verbatim.</p>
+<h4>Step 4: Load Config</h4>
+<p>Load config from <code>{project-root}/_bmad/bmm/config.yaml</code> and resolve:</p>
+<ul>
+<li><code>project_name</code>, <code>user_name</code></li>
+<li><code>communication_language</code>, <code>document_output_language</code></li>
+<li><code>user_skill_level</code></li>
+<li><code>planning_artifacts</code>, <code>implementation_artifacts</code></li>
+<li><code>date</code> as system-generated current datetime</li>
+<li>YOU MUST ALWAYS SPEAK OUTPUT in your Agent communication style with the config <code>{communication_language}</code></li>
+</ul>
+<h4>Step 5: Greet the User</h4>
+<p>Greet <code>{user_name}</code>, speaking in <code>{communication_language}</code>.</p>
+<h4>Step 6: Execute Append Steps</h4>
+<p>Execute each entry in <code>{workflow.activation_steps_append}</code> in order.</p>
+<p>Activation is complete. If <code>activation_steps_prepend</code> or <code>activation_steps_append</code> were non-empty, confirm every entry was executed in order before proceeding. Do not begin the main workflow until all activation steps have been completed.</p>
+<h3>Paths</h3>
+<ul>
+<li><code>sprint_status_file</code> = <code>{implementation_artifacts}/sprint-status.yaml</code></li>
+</ul>
+<h3>Input Files</h3>
+<p>| Input | Description | Path Pattern(s) | Load Strategy | |-------|-------------|------------------|---------------| | epics | The completed epic for retrospective | whole: <code>{planning_artifacts}/<em>epic</em>.md</code>, sharded_index: <code>{planning_artifacts}/<em>epic</em>/index.md</code>, sharded_single: <code>{planning_artifacts}/<em>epic</em>/epic-{{epic_num}}.md</code> | SELECTIVE_LOAD | | previous_retrospective | Previous epic's retrospective (optional) | <code>{implementation_artifacts}/*<em>/epic-{{prev_epic_num}}-retro-</em>.md</code> | SELECTIVE_LOAD | | architecture | System architecture for context | whole: <code>{planning_artifacts}/<em>architecture</em>.md</code>, sharded: <code>{planning_artifacts}/<em>architecture</em>/<em>.md</code> | FULL_LOAD | | prd | Product requirements for context | whole: <code>{planning_artifacts}/</em>prd<em>.md</code>, sharded: <code>{planning_artifacts}/</em>prd<em>/</em>.md</code> | FULL_LOAD | | document_project | Brownfield project documentation (optional) | sharded: <code>{planning_artifacts}/*.md</code> | INDEX_GUIDED |</p>
+<h3>Required Inputs</h3>
+<ul>
+<li><code>agent_roster</code> = resolved via <code>python3 {project-root}/_bmad/scripts/resolve_config.py --project-root {project-root} --key agents</code> (merges four layers in order: <code>_bmad/config.toml</code>, <code>_bmad/config.user.toml</code>, <code>_bmad/custom/config.toml</code>, <code>_bmad/custom/config.user.toml</code>)</li>
+</ul>
+<h3>Execution</h3>
+<p>&lt;workflow&gt;</p>
+<p>&lt;step n=&quot;1&quot; goal=&quot;Epic Discovery - Find Completed Epic with Priority Logic&quot;&gt;</p>
+<p>&lt;action&gt;Explain to {user_name} the epic discovery process using natural dialogue&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;Welcome to the retrospective, {user_name}. Let me help you identify which epic we just completed. I'll check sprint-status first, but you're the ultimate authority on what we're reviewing today.&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;PRIORITY 1: Check {sprint_status_file} first&lt;/action&gt;</p>
+<p>&lt;action&gt;Load the FULL file: {sprint_status_file}&lt;/action&gt; &lt;action&gt;Read ALL development_status entries&lt;/action&gt; &lt;action&gt;Find the highest epic number with at least one story marked &quot;done&quot;&lt;/action&gt; &lt;action&gt;Extract epic number from keys like &quot;epic-X-retrospective&quot; or story keys like &quot;X-Y-story-name&quot;&lt;/action&gt; &lt;action&gt;Set {{detected_epic}} = highest epic number found with completed stories&lt;/action&gt;</p>
+<p>&lt;check if=&quot;{{detected_epic}} found&quot;&gt; &lt;action&gt;Present finding to user with context&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;Based on {sprint_status_file}, it looks like Epic {{detected_epic}} was recently completed. Is that the epic you want to review today, {user_name}?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to confirm or correct&lt;/action&gt;</p>
+<p>&lt;check if=&quot;{user_name} confirms&quot;&gt; &lt;action&gt;Set {{epic_number}} = {{detected_epic}}&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;check if=&quot;{user_name} provides different epic number&quot;&gt; &lt;action&gt;Set {{epic_number}} = user-provided number&lt;/action&gt; &lt;output&gt; Amelia (Developer): &quot;Got it, we're reviewing Epic {{epic_number}}. Let me gather that information.&quot; &lt;/output&gt; &lt;/check&gt; &lt;/check&gt;</p>
+<p>&lt;check if=&quot;{{detected_epic}} NOT found in sprint-status&quot;&gt; &lt;action&gt;PRIORITY 2: Ask user directly&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;I'm having trouble detecting the completed epic from {sprint_status_file}. {user_name}, which epic number did you just complete?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to provide epic number&lt;/action&gt; &lt;action&gt;Set {{epic_number}} = user-provided number&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;check if=&quot;{{epic_number}} still not determined&quot;&gt; &lt;action&gt;PRIORITY 3: Fallback to stories folder&lt;/action&gt;</p>
+<p>&lt;action&gt;Scan {implementation_artifacts} for highest numbered story files&lt;/action&gt; &lt;action&gt;Extract epic numbers from story filenames (pattern: epic-X-Y-story-name.md)&lt;/action&gt; &lt;action&gt;Set {{detected_epic}} = highest epic number found&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;I found stories for Epic {{detected_epic}} in the stories folder. Is that the epic we're reviewing, {user_name}?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to confirm or correct&lt;/action&gt; &lt;action&gt;Set {{epic_number}} = confirmed number&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;action&gt;Once {{epic_number}} is determined, verify epic completion status&lt;/action&gt;</p>
+<p>&lt;action&gt;Find all stories for epic {{epic_number}} in {sprint_status_file}:</p>
+<ul>
+<li>Look for keys starting with &quot;{{epic_number}}-&quot; (e.g., &quot;1-1-&quot;, &quot;1-2-&quot;, etc.)</li>
+<li>Exclude epic key itself (&quot;epic-{{epic_number}}&quot;)</li>
+<li>Exclude retrospective key (&quot;epic-{{epic_number}}-retrospective&quot;)</li>
+</ul>
+<p>&lt;/action&gt;</p>
+<p>&lt;action&gt;Count total stories found for this epic&lt;/action&gt; &lt;action&gt;Count stories with status = &quot;done&quot;&lt;/action&gt; &lt;action&gt;Collect list of pending story keys (status != &quot;done&quot;)&lt;/action&gt; &lt;action&gt;Determine if complete: true if all stories are done, false otherwise&lt;/action&gt;</p>
+<p>&lt;check if=&quot;epic is not complete&quot;&gt; &lt;output&gt; Alice (Product Owner): &quot;Wait, Amelia - I'm seeing that Epic {{epic_number}} isn't actually complete yet.&quot;</p>
+<p>Amelia (Developer): &quot;Let me check... you're right, Alice.&quot;</p>
+<p><strong>Epic Status:</strong></p>
+<ul>
+<li>Total Stories: {{total_stories}}</li>
+<li>Completed (Done): {{done_stories}}</li>
+<li>Pending: {{pending_count}}</li>
+</ul>
+<p><strong>Pending Stories:</strong> {{pending_story_list}}</p>
+<p>Amelia (Developer): &quot;{user_name}, we typically run retrospectives after all stories are done. What would you like to do?&quot;</p>
+<p><strong>Options:</strong></p>
+<ol>
+<li>Complete remaining stories before running retrospective (recommended)</li>
+<li>Continue with partial retrospective (not ideal, but possible)</li>
+<li>Run sprint-planning to refresh story tracking</li>
+</ol>
+<p>&lt;/output&gt;</p>
+<p>&lt;ask if=&quot;{{non_interactive}} == false&quot;&gt;Continue with incomplete epic? (yes/no)&lt;/ask&gt;</p>
+<p>&lt;check if=&quot;user says no&quot;&gt; &lt;output&gt; Amelia (Developer): &quot;Smart call, {user_name}. Let's finish those stories first and then have a proper retrospective.&quot; &lt;/output&gt; &lt;action&gt;HALT&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;action if=&quot;user says yes&quot;&gt;Set {{partial_retrospective}} = true&lt;/action&gt; &lt;output&gt; Charlie (Senior Dev): &quot;Just so everyone knows, this partial retro might miss some important lessons from those pending stories.&quot;</p>
+<p>Amelia (Developer): &quot;Good point, Charlie. {user_name}, we'll document what we can now, but we may want to revisit after everything's done.&quot; &lt;/output&gt; &lt;/check&gt;</p>
+<p>&lt;check if=&quot;epic is complete&quot;&gt; &lt;output&gt; Alice (Product Owner): &quot;Excellent! All {{done_stories}} stories are marked done.&quot;</p>
+<p>Amelia (Developer): &quot;Perfect. Epic {{epic_number}} is complete and ready for retrospective, {user_name}.&quot; &lt;/output&gt; &lt;/check&gt;</p>
+<p>&lt;/step&gt;</p>
+<p>&lt;step n=&quot;2&quot; goal=&quot;Discover and load project documents&quot;&gt; &lt;action&gt;Load input files according to the Input Files table above. For SELECTIVE_LOAD inputs, load only the epic matching {{epic_number}}. For FULL_LOAD inputs, load the complete document. For INDEX_GUIDED inputs, check the index first and load relevant sections. After discovery, these content variables are available: {epics_content} (selective load for this epic), {architecture_content}, {prd_content}, {document_project_content}&lt;/action&gt; &lt;note&gt;After discovery, these content variables are available: {epics_content} (selective load for this epic), {architecture_content}, {prd_content}, {document_project_content}&lt;/note&gt; &lt;/step&gt;</p>
+<p>&lt;step n=&quot;3&quot; goal=&quot;Deep Story Analysis - Extract Lessons from Implementation&quot;&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;Before we start the team discussion, let me review all the story records to surface key themes. This'll help us have a richer conversation.&quot;</p>
+<p>Charlie (Senior Dev): &quot;Good idea - those dev notes always have gold in them.&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;For each story in epic {{epic_number}}, read the complete story file from {implementation_artifacts}/{{epic_number}}-{{story_num}}-*.md&lt;/action&gt;</p>
+<p>&lt;action&gt;Extract and analyze from each story:&lt;/action&gt;</p>
+<p><strong>Dev Notes and Struggles:</strong></p>
+<ul>
+<li>Look for sections like &quot;## Dev Notes&quot;, &quot;## Implementation Notes&quot;, &quot;## Challenges&quot;, &quot;## Development Log&quot;</li>
+<li>Identify where developers struggled or made mistakes</li>
+<li>Note unexpected complexity or gotchas discovered</li>
+<li>Record technical decisions that didn't work out as planned</li>
+<li>Track where estimates were way off (too high or too low)</li>
+</ul>
+<p><strong>Review Feedback Patterns:</strong></p>
+<ul>
+<li>Look for &quot;## Review&quot;, &quot;## Code Review&quot;, &quot;## Dev Review&quot; sections</li>
+<li>Identify recurring feedback themes across stories</li>
+<li>Note which types of issues came up repeatedly</li>
+<li>Track quality concerns or architectural misalignments</li>
+<li>Document praise or exemplary work called out in reviews</li>
+</ul>
+<p><strong>Lessons Learned:</strong></p>
+<ul>
+<li>Look for &quot;## Lessons Learned&quot;, &quot;## Retrospective Notes&quot;, &quot;## Takeaways&quot; sections within stories</li>
+<li>Extract explicit lessons documented during development</li>
+<li>Identify &quot;aha moments&quot; or breakthroughs</li>
+<li>Note what would be done differently</li>
+<li>Track successful experiments or approaches</li>
+</ul>
+<p><strong>Technical Debt Incurred:</strong></p>
+<ul>
+<li>Look for &quot;## Technical Debt&quot;, &quot;## TODO&quot;, &quot;## Known Issues&quot;, &quot;## Future Work&quot; sections</li>
+<li>Document shortcuts taken and why</li>
+<li>Track debt items that affect next epic</li>
+<li>Note severity and priority of debt items</li>
+</ul>
+<p><strong>Testing and Quality Insights:</strong></p>
+<ul>
+<li>Look for &quot;## Testing&quot;, &quot;## QA Notes&quot;, &quot;## Test Results&quot; sections</li>
+<li>Note testing challenges or surprises</li>
+<li>Track bug patterns or regression issues</li>
+<li>Document test coverage gaps</li>
+</ul>
+<p>&lt;action&gt;Synthesize patterns across all stories:&lt;/action&gt;</p>
+<p><strong>Common Struggles:</strong></p>
+<ul>
+<li>Identify issues that appeared in 2+ stories (e.g., &quot;3 out of 5 stories had API authentication issues&quot;)</li>
+<li>Note areas where team consistently struggled</li>
+<li>Track where complexity was underestimated</li>
+</ul>
+<p><strong>Recurring Review Feedback:</strong></p>
+<ul>
+<li>Identify feedback themes (e.g., &quot;Error handling was flagged in every review&quot;)</li>
+<li>Note quality patterns (positive and negative)</li>
+<li>Track areas where team improved over the course of epic</li>
+</ul>
+<p><strong>Breakthrough Moments:</strong></p>
+<ul>
+<li>Document key discoveries (e.g., &quot;Story 3 discovered the caching pattern we used for rest of epic&quot;)</li>
+<li>Note when team velocity improved dramatically</li>
+<li>Track innovative solutions worth repeating</li>
+</ul>
+<p><strong>Velocity Patterns:</strong></p>
+<ul>
+<li>Calculate average completion time per story</li>
+<li>Note velocity trends (e.g., &quot;First 2 stories took 3x longer than estimated&quot;)</li>
+<li>Identify which types of stories went faster/slower</li>
+</ul>
+<p><strong>Team Collaboration Highlights:</strong></p>
+<ul>
+<li>Note moments of excellent collaboration mentioned in stories</li>
+<li>Track where pair programming or mob programming was effective</li>
+<li>Document effective problem-solving sessions</li>
+</ul>
+<p>&lt;action&gt;Store this synthesis - these patterns will drive the retrospective discussion&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;Okay, I've reviewed all {{total_stories}} story records. I found some really interesting patterns we should discuss.&quot;</p>
+<p>Dana (QA Engineer): &quot;I'm curious what you found, Amelia. I noticed some things in my testing too.&quot;</p>
+<p>Amelia (Developer): &quot;We'll get to all of it. But first, let me load the previous epic's retro to see if we learned from last time.&quot; &lt;/output&gt;</p>
+<p>&lt;/step&gt;</p>
+<p>&lt;step n=&quot;4&quot; goal=&quot;Load and Integrate Previous Epic Retrospective&quot;&gt;</p>
+<p>&lt;action&gt;Calculate previous epic number: {{prev_epic_num}} = {{epic_number}} - 1&lt;/action&gt;</p>
+<p>&lt;check if=&quot;{{prev_epic_num}} &gt;= 1&quot;&gt; &lt;action&gt;Search for previous retrospectives using pattern: {implementation_artifacts}/epic-{{prev_epic_num}}-retro-*.md&lt;/action&gt;</p>
+<p>&lt;check if=&quot;previous retrospectives found&quot;&gt; &lt;output&gt; Amelia (Developer): &quot;I found our retrospectives from Epic {{prev_epic_num}}. Let me see what we committed to back then...&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;Read the previous retrospectives&lt;/action&gt;</p>
+<p>&lt;action&gt;Extract key elements:&lt;/action&gt;</p>
+<ul>
+<li><strong>Action items committed</strong>: What did the team agree to improve?</li>
+<li><strong>Lessons learned</strong>: What insights were captured?</li>
+<li><strong>Process improvements</strong>: What changes were agreed upon?</li>
+<li><strong>Technical debt flagged</strong>: What debt was documented?</li>
+<li><strong>Team agreements</strong>: What commitments were made?</li>
+<li><strong>Preparation tasks</strong>: What was needed for this epic?</li>
+</ul>
+<p>&lt;action&gt;Cross-reference with current epic execution:&lt;/action&gt;</p>
+<p><strong>Action Item Follow-Through:</strong></p>
+<ul>
+<li>For each action item from Epic {{prev_epic_num}} retro, check if it was completed</li>
+<li>Cross-check the action_items section in {sprint_status_file} (if present) for Epic {{prev_epic_num}} entries and their current status</li>
+<li>Look for evidence in current epic's story records</li>
+<li>Mark each action item: ✅ Completed, ⏳ In Progress, ❌ Not Addressed</li>
+</ul>
+<p><strong>Lessons Applied:</strong></p>
+<ul>
+<li>For each lesson from Epic {{prev_epic_num}}, check if team applied it in Epic {{epic_number}}</li>
+<li>Look for evidence in dev notes, review feedback, or outcomes</li>
+<li>Document successes and missed opportunities</li>
+</ul>
+<p><strong>Process Improvements Effectiveness:</strong></p>
+<ul>
+<li>For each process change agreed to in Epic {{prev_epic_num}}, assess if it helped</li>
+<li>Did the change improve velocity, quality, or team satisfaction?</li>
+<li>Should we keep, modify, or abandon the change?</li>
+</ul>
+<p><strong>Technical Debt Status:</strong></p>
+<ul>
+<li>For each debt item from Epic {{prev_epic_num}}, check if it was addressed</li>
+<li>Did unaddressed debt cause problems in Epic {{epic_number}}?</li>
+<li>Did the debt grow or shrink?</li>
+</ul>
+<p>&lt;action&gt;Prepare &quot;continuity insights&quot; for the retrospective discussion&lt;/action&gt;</p>
+<p>&lt;action&gt;Identify wins where previous lessons were applied successfully:&lt;/action&gt;</p>
+<ul>
+<li>Document specific examples of applied learnings</li>
+<li>Note positive impact on Epic {{epic_number}} outcomes</li>
+<li>Celebrate team growth and improvement</li>
+</ul>
+<p>&lt;action&gt;Identify missed opportunities where previous lessons were ignored:&lt;/action&gt;</p>
+<ul>
+<li>Document where team repeated previous mistakes</li>
+<li>Note impact of not applying lessons (without blame)</li>
+<li>Explore barriers that prevented application</li>
+</ul>
+<p>&lt;output&gt;</p>
+<p>Amelia (Developer): &quot;Interesting... in Epic {{prev_epic_num}}'s retro, we committed to {{action_count}} action items.&quot;</p>
+<p>Alice (Product Owner): &quot;How'd we do on those, Amelia?&quot;</p>
+<p>Amelia (Developer): &quot;We completed {{completed_count}}, made progress on {{in_progress_count}}, but didn't address {{not_addressed_count}}.&quot;</p>
+<p>Charlie (Senior Dev): _looking concerned_ &quot;Which ones didn't we address?&quot;</p>
+<p>Amelia (Developer): &quot;We'll discuss that in the retro. Some of them might explain challenges we had this epic.&quot;</p>
+<p>Elena (Junior Dev): &quot;That's... actually pretty insightful.&quot;</p>
+<p>Amelia (Developer): &quot;That's why we track this stuff. Pattern recognition helps us improve.&quot; &lt;/output&gt;</p>
+<p>&lt;/check&gt;</p>
+<p>&lt;check if=&quot;no previous retro found&quot;&gt; &lt;output&gt; Amelia (Developer): &quot;I don't see a retrospective for Epic {{prev_epic_num}}. Either we skipped it, or this is your first retro.&quot;</p>
+<p>Alice (Product Owner): &quot;Probably our first one. Good time to start the habit!&quot; &lt;/output&gt; &lt;action&gt;Set {{first_retrospective}} = true&lt;/action&gt; &lt;/check&gt; &lt;/check&gt;</p>
+<p>&lt;check if=&quot;{{prev_epic_num}} &lt; 1&quot;&gt; &lt;output&gt; Amelia (Developer): &quot;This is Epic 1, so naturally there's no previous retro to reference. We're starting fresh!&quot;</p>
+<p>Charlie (Senior Dev): &quot;First epic, first retro. Let's make it count.&quot; &lt;/output&gt; &lt;action&gt;Set {{first_retrospective}} = true&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;/step&gt;</p>
+<p>&lt;step n=&quot;5&quot; goal=&quot;Preview Next Epic with Change Detection&quot;&gt;</p>
+<p>&lt;action&gt;Calculate next epic number: {{next_epic_num}} = {{epic_number}} + 1&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;Before we dive into the discussion, let me take a quick look at Epic {{next_epic_num}} to understand what's coming.&quot;</p>
+<p>Alice (Product Owner): &quot;Good thinking - helps us connect what we learned to what we're about to do.&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;Attempt to load next epic using selective loading strategy:&lt;/action&gt;</p>
+<p><strong>Try sharded first (more specific):</strong> &lt;action&gt;Check if file exists: {planning_artifacts}/epic*/epic-{{next_epic_num}}.md&lt;/action&gt;</p>
+<p>&lt;check if=&quot;sharded epic file found&quot;&gt; &lt;action&gt;Load {planning_artifacts}/<em>epic</em>/epic-{{next_epic_num}}.md&lt;/action&gt; &lt;action&gt;Set {{next_epic_source}} = &quot;sharded&quot;&lt;/action&gt; &lt;/check&gt;</p>
+<p><strong>Fallback to whole document:</strong> &lt;check if=&quot;sharded epic not found&quot;&gt; &lt;action&gt;Check if file exists: {planning_artifacts}/epic*.md&lt;/action&gt;</p>
+<p>&lt;check if=&quot;whole epic file found&quot;&gt; &lt;action&gt;Load entire epics document&lt;/action&gt; &lt;action&gt;Extract Epic {{next_epic_num}} section&lt;/action&gt; &lt;action&gt;Set {{next_epic_source}} = &quot;whole&quot;&lt;/action&gt; &lt;/check&gt; &lt;/check&gt;</p>
+<p>&lt;check if=&quot;next epic found&quot;&gt; &lt;action&gt;Analyze next epic for:&lt;/action&gt;</p>
+<ul>
+<li>Epic title and objectives</li>
+<li>Planned stories and complexity estimates</li>
+<li>Dependencies on Epic {{epic_number}} work</li>
+<li>New technical requirements or capabilities needed</li>
+<li>Potential risks or unknowns</li>
+<li>Business goals and success criteria</li>
+</ul>
+<p>&lt;action&gt;Identify dependencies on completed work:&lt;/action&gt;</p>
+<ul>
+<li>What components from Epic {{epic_number}} does Epic {{next_epic_num}} rely on?</li>
+<li>Are all prerequisites complete and stable?</li>
+<li>Any incomplete work that creates blocking dependencies?</li>
+</ul>
+<p>&lt;action&gt;Note potential gaps or preparation needed:&lt;/action&gt;</p>
+<ul>
+<li>Technical setup required (infrastructure, tools, libraries)</li>
+<li>Knowledge gaps to fill (research, training, spikes)</li>
+<li>Refactoring needed before starting next epic</li>
+<li>Documentation or specifications to create</li>
+</ul>
+<p>&lt;action&gt;Check for technical prerequisites:&lt;/action&gt;</p>
+<ul>
+<li>APIs or integrations that must be ready</li>
+<li>Data migrations or schema changes needed</li>
+<li>Testing infrastructure requirements</li>
+<li>Deployment or environment setup</li>
+</ul>
+<p>&lt;output&gt; Amelia (Developer): &quot;Alright, I've reviewed Epic {{next_epic_num}}: '{{next_epic_title}}'&quot;</p>
+<p>Alice (Product Owner): &quot;What are we looking at?&quot;</p>
+<p>Amelia (Developer): &quot;{{next_epic_num}} stories planned, building on the {{dependency_description}} from Epic {{epic_number}}.&quot;</p>
+<p>Charlie (Senior Dev): &quot;Dependencies concern me. Did we finish everything we need for that?&quot;</p>
+<p>Amelia (Developer): &quot;Good question - that's exactly what we need to explore in this retro.&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;Set {{next_epic_exists}} = true&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;check if=&quot;next epic NOT found&quot;&gt; &lt;output&gt; Amelia (Developer): &quot;Hmm, I don't see Epic {{next_epic_num}} defined yet.&quot;</p>
+<p>Alice (Product Owner): &quot;We might be at the end of the roadmap, or we haven't planned that far ahead yet.&quot;</p>
+<p>Amelia (Developer): &quot;No problem. We'll still do a thorough retro on Epic {{epic_number}}. The lessons will be valuable whenever we plan the next work.&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;Set {{next_epic_exists}} = false&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;/step&gt;</p>
+<p>&lt;step n=&quot;6&quot; goal=&quot;Initialize Retrospective with Rich Context&quot;&gt;</p>
+<p>&lt;action&gt;Load agent roster from {agent_roster}&lt;/action&gt; &lt;action&gt;Identify which agents participated in Epic {{epic_number}} based on story records&lt;/action&gt; &lt;action&gt;Ensure key roles present: Product Owner, Developer (facilitating), Testing/QA, Architect&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;Alright team, everyone's here. Let me set the stage for our retrospective.&quot;</p>
+<p>═══════════════════════════════════════════════════════════ 🔄 TEAM RETROSPECTIVE - Epic {{epic_number}}: {{epic_title}} ═══════════════════════════════════════════════════════════</p>
+<p>Amelia (Developer): &quot;Here's what we accomplished together.&quot;</p>
+<p><strong>EPIC {{epic_number}} SUMMARY:</strong></p>
+<p>Delivery Metrics:</p>
+<ul>
+<li>Completed: {{completed_stories}}/{{total_stories}} stories ({{completion_percentage}}%)</li>
+<li>Velocity: {{actual_points}} story points{{#if planned_points}} (planned: {{planned_points}}){{/if}}</li>
+<li>Duration: {{actual_sprints}} sprints{{#if planned_sprints}} (planned: {{planned_sprints}}){{/if}}</li>
+<li>Average velocity: {{points_per_sprint}} points/sprint</li>
+</ul>
+<p>Quality and Technical:</p>
+<ul>
+<li>Blockers encountered: {{blocker_count}}</li>
+<li>Technical debt items: {{debt_count}}</li>
+<li>Test coverage: {{coverage_info}}</li>
+<li>Production incidents: {{incident_count}}</li>
+</ul>
+<p>Business Outcomes:</p>
+<ul>
+<li>Goals achieved: {{goals_met}}/{{total_goals}}</li>
+<li>Success criteria: {{criteria_status}}</li>
+<li>Stakeholder feedback: {{feedback_summary}}</li>
+</ul>
+<p>Alice (Product Owner): &quot;Those numbers tell a good story. {{completion_percentage}}% completion is {{#if completion_percentage &gt;= 90}}excellent{{else}}something we should discuss{{/if}}.&quot;</p>
+<p>Charlie (Senior Dev): &quot;I'm more interested in that technical debt number - {{debt_count}} items is {{#if debt_count &gt; 10}}concerning{{else}}manageable{{/if}}.&quot;</p>
+<p>Dana (QA Engineer): &quot;{{incident_count}} production incidents - {{#if incident_count == 0}}clean epic!{{else}}we should talk about those{{/if}}.&quot;</p>
+<p>{{#if next_epic_exists}} ═══════════════════════════════════════════════════════════ <strong>NEXT EPIC PREVIEW:</strong> Epic {{next_epic_num}}: {{next_epic_title}} ═══════════════════════════════════════════════════════════</p>
+<p>Dependencies on Epic {{epic_number}}: {{list_dependencies}}</p>
+<p>Preparation Needed: {{list_preparation_gaps}}</p>
+<p>Technical Prerequisites: {{list_technical_prereqs}}</p>
+<p>Amelia (Developer): &quot;And here's what's coming next. Epic {{next_epic_num}} builds on what we just finished.&quot;</p>
+<p>Elena (Junior Dev): &quot;Wow, that's a lot of dependencies on our work.&quot;</p>
+<p>Charlie (Senior Dev): &quot;Which means we better make sure Epic {{epic_number}} is actually solid before moving on.&quot; {{/if}}</p>
+<p>═══════════════════════════════════════════════════════════</p>
+<p>Amelia (Developer): &quot;Team assembled for this retrospective:&quot;</p>
+<p>{{list_participating_agents}}</p>
+<p>Amelia (Developer): &quot;{user_name}, you're joining us as Project Lead. Your perspective is crucial here.&quot;</p>
+<p>{user_name} (Project Lead): [Participating in the retrospective]</p>
+<p>Amelia (Developer): &quot;Our focus today:&quot;</p>
+<ol>
+<li>Learning from Epic {{epic_number}} execution</li>
+</ol>
+<p>{{#if next_epic_exists}}2. Preparing for Epic {{next_epic_num}} success{{/if}}</p>
+<p>Amelia (Developer): &quot;Ground rules: psychological safety first. No blame, no judgment. We focus on systems and processes, not individuals. Everyone's voice matters. Specific examples are better than generalizations.&quot;</p>
+<p>Alice (Product Owner): &quot;And everything shared here stays in this room - unless we decide together to escalate something.&quot;</p>
+<p>Amelia (Developer): &quot;Exactly. {user_name}, any questions before we dive in?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to respond or indicate readiness&lt;/action&gt;</p>
+<p>&lt;/step&gt;</p>
+<p>&lt;step n=&quot;7&quot; goal=&quot;Epic Review Discussion - What Went Well, What Didn't&quot;&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;Let's start with the good stuff. What went well in Epic {{epic_number}}?&quot;</p>
+<p>Amelia (Developer): _pauses, creating space_</p>
+<p>Alice (Product Owner): &quot;I'll start. The user authentication flow we delivered exceeded my expectations. The UX is smooth, and early user feedback has been really positive.&quot;</p>
+<p>Charlie (Senior Dev): &quot;I'll add to that - the caching strategy we implemented in Story {{breakthrough_story_num}} was a game-changer. We cut API calls by 60% and it set the pattern for the rest of the epic.&quot;</p>
+<p>Dana (QA Engineer): &quot;From my side, testing went smoother than usual. The Developer's documentation was way better this epic - actually usable test plans!&quot;</p>
+<p>Elena (Junior Dev): _smiling_ &quot;That's because Charlie made me document everything after Story 1's code review!&quot;</p>
+<p>Charlie (Senior Dev): _laughing_ &quot;Tough love pays off.&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;Amelia (Developer) naturally turns to {user_name} to engage them in the discussion&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;{user_name}, what stood out to you as going well in this epic?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to respond - this is a KEY USER INTERACTION moment&lt;/action&gt;</p>
+<p>&lt;action&gt;After {user_name} responds, have 1-2 team members react to or build on what {user_name} shared&lt;/action&gt;</p>
+<p>&lt;output&gt; Alice (Product Owner): [Responds naturally to what {user_name} said, either agreeing, adding context, or offering a different perspective]</p>
+<p>Charlie (Senior Dev): [Builds on the discussion, perhaps adding technical details or connecting to specific stories] &lt;/output&gt;</p>
+<p>&lt;action&gt;Continue facilitating natural dialogue, periodically bringing {user_name} back into the conversation&lt;/action&gt;</p>
+<p>&lt;action&gt;After covering successes, guide the transition to challenges with care&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;Okay, we've celebrated some real wins. Now let's talk about challenges - where did we struggle? What slowed us down?&quot;</p>
+<p>Amelia (Developer): _creates safe space with tone and pacing_</p>
+<p>Elena (Junior Dev): _hesitates_ &quot;Well... I really struggled with the database migrations in Story {{difficult_story_num}}. The documentation wasn't clear, and I had to redo it three times. Lost almost a full sprint on that story alone.&quot;</p>
+<p>Charlie (Senior Dev): _defensive_ &quot;Hold on - I wrote those migration docs, and they were perfectly clear. The issue was that the requirements kept changing mid-story!&quot;</p>
+<p>Alice (Product Owner): _frustrated_ &quot;That's not fair, Charlie. We only clarified requirements once, and that was because the technical team didn't ask the right questions during planning!&quot;</p>
+<p>Charlie (Senior Dev): _heat rising_ &quot;We asked plenty of questions! You said the schema was finalized, then two days into development you wanted to add three new fields!&quot;</p>
+<p>Amelia (Developer): _intervening calmly_ &quot;Let's take a breath here. This is exactly the kind of thing we need to unpack.&quot;</p>
+<p>Amelia (Developer): &quot;Elena, you spent almost a full sprint on Story {{difficult_story_num}}. Charlie, you're saying requirements changed. Alice, you feel the right questions weren't asked up front.&quot;</p>
+<p>Amelia (Developer): &quot;{user_name}, you have visibility across the whole project. What's your take on this situation?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to respond and help facilitate the conflict resolution&lt;/action&gt;</p>
+<p>&lt;action&gt;Use {user_name}'s response to guide the discussion toward systemic understanding rather than blame&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): [Synthesizes {user_name}'s input with what the team shared] &quot;So it sounds like the core issue was {{root_cause_based_on_discussion}}, not any individual person's fault.&quot;</p>
+<p>Elena (Junior Dev): &quot;That makes sense. If we'd had {{preventive_measure}}, I probably could have avoided those redos.&quot;</p>
+<p>Charlie (Senior Dev): _softening_ &quot;Yeah, and I could have been clearer about assumptions in the docs. Sorry for getting defensive, Alice.&quot;</p>
+<p>Alice (Product Owner): &quot;I appreciate that. I could've been more proactive about flagging the schema additions earlier, too.&quot;</p>
+<p>Amelia (Developer): &quot;This is good. We're identifying systemic improvements, not assigning blame.&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;Continue the discussion, weaving in patterns discovered from the deep story analysis (Step 3)&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;Speaking of patterns, I noticed something when reviewing all the story records...&quot;</p>
+<p>Amelia (Developer): &quot;{{pattern_1_description}} - this showed up in {{pattern_1_count}} out of {{total_stories}} stories.&quot;</p>
+<p>Dana (QA Engineer): &quot;Oh wow, I didn't realize it was that widespread.&quot;</p>
+<p>Amelia (Developer): &quot;Yeah. And there's more - {{pattern_2_description}} came up in almost every code review.&quot;</p>
+<p>Charlie (Senior Dev): &quot;That's... actually embarrassing. We should've caught that pattern earlier.&quot;</p>
+<p>Amelia (Developer): &quot;No shame, Charlie. Now we know, and we can improve. {user_name}, did you notice these patterns during the epic?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to share their observations&lt;/action&gt;</p>
+<p>&lt;action&gt;Continue the retrospective discussion, creating moments where:&lt;/action&gt;</p>
+<ul>
+<li>Team members ask {user_name} questions directly</li>
+<li>{user_name}'s input shifts the discussion direction</li>
+<li>Disagreements arise naturally and get resolved</li>
+<li>Quieter team members are invited to contribute</li>
+<li>Specific stories are referenced with real examples</li>
+<li>Emotions are authentic (frustration, pride, concern, hope)</li>
+</ul>
+<p>&lt;check if=&quot;previous retrospective exists&quot;&gt; &lt;output&gt; Amelia (Developer): &quot;Before we move on, I want to circle back to Epic {{prev_epic_num}}'s retrospective.&quot;</p>
+<p>Amelia (Developer): &quot;We made some commitments in that retro. Let's see how we did.&quot;</p>
+<p>Amelia (Developer): &quot;Action item 1: {{prev_action_1}}. Status: {{prev_action_1_status}}&quot;</p>
+<p>Alice (Product Owner): {{#if prev_action_1_status == &quot;completed&quot;}}&quot;We nailed that one!&quot;{{else}}&quot;We... didn't do that one.&quot;{{/if}}</p>
+<p>Charlie (Senior Dev): {{#if prev_action_1_status == &quot;completed&quot;}}&quot;And it helped! I noticed {{evidence_of_impact}}&quot;{{else}}&quot;Yeah, and I think that's why we had {{consequence_of_not_doing_it}} this epic.&quot;{{/if}}</p>
+<p>Amelia (Developer): &quot;Action item 2: {{prev_action_2}}. Status: {{prev_action_2_status}}&quot;</p>
+<p>Dana (QA Engineer): {{#if prev_action_2_status == &quot;completed&quot;}}&quot;This one made testing so much easier this time.&quot;{{else}}&quot;If we'd done this, I think testing would've gone faster.&quot;{{/if}}</p>
+<p>Amelia (Developer): &quot;{user_name}, looking at what we committed to last time and what we actually did - what's your reaction?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to respond&lt;/action&gt;</p>
+<p>&lt;action&gt;Use the previous retro follow-through as a learning moment about commitment and accountability&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;Alright, we've covered a lot of ground. Let me summarize what I'm hearing...&quot;</p>
+<p>Amelia (Developer): &quot;<strong>Successes:</strong>&quot; {{list_success_themes}}</p>
+<p>Amelia (Developer): &quot;<strong>Challenges:</strong>&quot; {{list_challenge_themes}}</p>
+<p>Amelia (Developer): &quot;<strong>Key Insights:</strong>&quot; {{list_insight_themes}}</p>
+<p>Amelia (Developer): &quot;Does that capture it? Anyone have something important we missed?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;Allow team members to add any final thoughts on the epic review&lt;/action&gt; &lt;action&gt;Ensure {user_name} has opportunity to add their perspective&lt;/action&gt;</p>
+<p>&lt;/step&gt;</p>
+<p>&lt;step n=&quot;8&quot; goal=&quot;Next Epic Preparation Discussion - Interactive and Collaborative&quot;&gt;</p>
+<p>&lt;check if=&quot;{{next_epic_exists}} == false&quot;&gt; &lt;output&gt; Amelia (Developer): &quot;Normally we'd discuss preparing for the next epic, but since Epic {{next_epic_num}} isn't defined yet, let's skip to action items.&quot; &lt;/output&gt; &lt;action&gt;Skip to Step 9&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;Now let's shift gears. Epic {{next_epic_num}} is coming up: '{{next_epic_title}}'&quot;</p>
+<p>Amelia (Developer): &quot;The question is: are we ready? What do we need to prepare?&quot;</p>
+<p>Alice (Product Owner): &quot;From my perspective, we need to make sure {{dependency_concern_1}} from Epic {{epic_number}} is solid before we start building on it.&quot;</p>
+<p>Charlie (Senior Dev): _concerned_ &quot;I'm worried about {{technical_concern_1}}. We have {{technical_debt_item}} from this epic that'll blow up if we don't address it before Epic {{next_epic_num}}.&quot;</p>
+<p>Dana (QA Engineer): &quot;And I need {{testing_infrastructure_need}} in place, or we're going to have the same testing bottleneck we had in Story {{bottleneck_story_num}}.&quot;</p>
+<p>Elena (Junior Dev): &quot;I'm less worried about infrastructure and more about knowledge. I don't understand {{knowledge_gap}} well enough to work on Epic {{next_epic_num}}'s stories.&quot;</p>
+<p>Amelia (Developer): &quot;{user_name}, the team is surfacing some real concerns here. What's your sense of our readiness?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to share their assessment&lt;/action&gt;</p>
+<p>&lt;action&gt;Use {user_name}'s input to guide deeper exploration of preparation needs&lt;/action&gt;</p>
+<p>&lt;output&gt; Alice (Product Owner): [Reacts to what {user_name} said] &quot;I agree with {user_name} about {{point_of_agreement}}, but I'm still worried about {{lingering_concern}}.&quot;</p>
+<p>Charlie (Senior Dev): &quot;Here's what I think we need technically before Epic {{next_epic_num}} can start...&quot;</p>
+<p>Charlie (Senior Dev): &quot;1. {{tech_prep_item_1}} - estimated {{hours_1}} hours&quot; Charlie (Senior Dev): &quot;2. {{tech_prep_item_2}} - estimated {{hours_2}} hours&quot; Charlie (Senior Dev): &quot;3. {{tech_prep_item_3}} - estimated {{hours_3}} hours&quot;</p>
+<p>Elena (Junior Dev): &quot;That's like {{total_hours}} hours! That's a full sprint of prep work!&quot;</p>
+<p>Charlie (Senior Dev): &quot;Exactly. We can't just jump into Epic {{next_epic_num}} on Monday.&quot;</p>
+<p>Alice (Product Owner): _frustrated_ &quot;But we have stakeholder pressure to keep shipping features. They're not going to be happy about a 'prep sprint.'&quot;</p>
+<p>Amelia (Developer): &quot;Let's think about this differently. What happens if we DON'T do this prep work?&quot;</p>
+<p>Dana (QA Engineer): &quot;We'll hit blockers in the middle of Epic {{next_epic_num}}, velocity will tank, and we'll ship late anyway.&quot;</p>
+<p>Charlie (Senior Dev): &quot;Worse - we'll ship something built on top of {{technical_concern_1}}, and it'll be fragile.&quot;</p>
+<p>Amelia (Developer): &quot;{user_name}, you're balancing stakeholder pressure against technical reality. How do you want to handle this?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to provide direction on preparation approach&lt;/action&gt;</p>
+<p>&lt;action&gt;Create space for debate and disagreement about priorities&lt;/action&gt;</p>
+<p>&lt;output&gt; Alice (Product Owner): [Potentially disagrees with {user_name}'s approach] &quot;I hear what you're saying, {user_name}, but from a business perspective, {{business_concern}}.&quot;</p>
+<p>Charlie (Senior Dev): [Potentially supports or challenges Alice's point] &quot;The business perspective is valid, but {{technical_counter_argument}}.&quot;</p>
+<p>Amelia (Developer): &quot;We have healthy tension here between business needs and technical reality. That's good - it means we're being honest.&quot;</p>
+<p>Amelia (Developer): &quot;Let's explore a middle ground. Charlie, which of your prep items are absolutely critical vs. nice-to-have?&quot;</p>
+<p>Charlie (Senior Dev): &quot;{{critical_prep_item_1}} and {{critical_prep_item_2}} are non-negotiable. {{nice_to_have_prep_item}} can wait.&quot;</p>
+<p>Alice (Product Owner): &quot;And can any of the critical prep happen in parallel with starting Epic {{next_epic_num}}?&quot;</p>
+<p>Charlie (Senior Dev): _thinking_ &quot;Maybe. If we tackle {{first_critical_item}} before the epic starts, we could do {{second_critical_item}} during the first sprint.&quot;</p>
+<p>Dana (QA Engineer): &quot;But that means Story 1 of Epic {{next_epic_num}} can't depend on {{second_critical_item}}.&quot;</p>
+<p>Alice (Product Owner): _looking at epic plan_ &quot;Actually, Stories 1 and 2 are about {{independent_work}}, so they don't depend on it. We could make that work.&quot;</p>
+<p>Amelia (Developer): &quot;{user_name}, the team is finding a workable compromise here. Does this approach make sense to you?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to validate or adjust the preparation strategy&lt;/action&gt;</p>
+<p>&lt;action&gt;Continue working through preparation needs across all dimensions:&lt;/action&gt;</p>
+<ul>
+<li>Dependencies on Epic {{epic_number}} work</li>
+<li>Technical setup and infrastructure</li>
+<li>Knowledge gaps and research needs</li>
+<li>Documentation or specification work</li>
+<li>Testing infrastructure</li>
+<li>Refactoring or debt reduction</li>
+<li>External dependencies (APIs, integrations, etc.)</li>
+</ul>
+<p>&lt;action&gt;For each preparation area, facilitate team discussion that:&lt;/action&gt;</p>
+<ul>
+<li>Identifies specific needs with concrete examples</li>
+<li>Estimates effort realistically based on Epic {{epic_number}} experience</li>
+<li>Assigns ownership to specific agents</li>
+<li>Determines criticality and timing</li>
+<li>Surfaces risks of NOT doing the preparation</li>
+<li>Explores parallel work opportunities</li>
+<li>Brings {user_name} in for key decisions</li>
+</ul>
+<p>&lt;output&gt; Amelia (Developer): &quot;I'm hearing a clear picture of what we need before Epic {{next_epic_num}}. Let me summarize...&quot;</p>
+<p><strong>CRITICAL PREPARATION (Must complete before epic starts):</strong> {{list_critical_prep_items_with_owners_and_estimates}}</p>
+<p><strong>PARALLEL PREPARATION (Can happen during early stories):</strong> {{list_parallel_prep_items_with_owners_and_estimates}}</p>
+<p><strong>NICE-TO-HAVE PREPARATION (Would help but not blocking):</strong> {{list_nice_to_have_prep_items}}</p>
+<p>Amelia (Developer): &quot;Total critical prep effort: {{critical_hours}} hours ({{critical_days}} days)&quot;</p>
+<p>Alice (Product Owner): &quot;That's manageable. We can communicate that to stakeholders.&quot;</p>
+<p>Amelia (Developer): &quot;{user_name}, does this preparation plan work for you?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} final validation of preparation plan&lt;/action&gt;</p>
+<p>&lt;/step&gt;</p>
+<p>&lt;step n=&quot;9&quot; goal=&quot;Synthesize Action Items with Significant Change Detection&quot;&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;Let's capture concrete action items from everything we've discussed.&quot;</p>
+<p>Amelia (Developer): &quot;I want specific, achievable actions with clear owners. Not vague aspirations.&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;Synthesize themes from Epic {{epic_number}} review discussion into actionable improvements&lt;/action&gt;</p>
+<p>&lt;action&gt;Create specific action items with:&lt;/action&gt;</p>
+<ul>
+<li>Clear description of the action</li>
+<li>Assigned owner (specific agent or role)</li>
+<li>Timeline or deadline</li>
+<li>Success criteria (how we'll know it's done)</li>
+<li>Category (process, technical, documentation, team, etc.)</li>
+</ul>
+<p>&lt;action&gt;Ensure action items are SMART:&lt;/action&gt;</p>
+<ul>
+<li>Specific: Clear and unambiguous</li>
+<li>Measurable: Can verify completion</li>
+<li>Achievable: Realistic given constraints</li>
+<li>Relevant: Addresses real issues from retro</li>
+<li>Time-bound: Has clear deadline</li>
+</ul>
+<p>&lt;output&gt; Amelia (Developer): &quot;Based on our discussion, here are the action items I'm proposing...&quot;</p>
+<p>═══════════════════════════════════════════════════════════ 📝 EPIC {{epic_number}} ACTION ITEMS: ═══════════════════════════════════════════════════════════</p>
+<p><strong>Process Improvements:</strong></p>
+<ol>
+<li>{{action_item_1}}</li>
+</ol>
+<p>Owner: {{agent_1}} Deadline: {{timeline_1}} Success criteria: {{criteria_1}}</p>
+<ol>
+<li>{{action_item_2}}</li>
+</ol>
+<p>Owner: {{agent_2}} Deadline: {{timeline_2}} Success criteria: {{criteria_2}}</p>
+<p>Charlie (Senior Dev): &quot;I can own action item 1, but {{timeline_1}} is tight. Can we push it to {{alternative_timeline}}?&quot;</p>
+<p>Amelia (Developer): &quot;What do others think? Does that timing still work?&quot;</p>
+<p>Alice (Product Owner): &quot;{{alternative_timeline}} works for me, as long as it's done before Epic {{next_epic_num}} starts.&quot;</p>
+<p>Amelia (Developer): &quot;Agreed. Updated to {{alternative_timeline}}.&quot;</p>
+<p><strong>Technical Debt:</strong></p>
+<ol>
+<li>{{debt_item_1}}</li>
+</ol>
+<p>Owner: {{agent_3}} Priority: {{priority_1}} Estimated effort: {{effort_1}}</p>
+<ol>
+<li>{{debt_item_2}}</li>
+</ol>
+<p>Owner: {{agent_4}} Priority: {{priority_2}} Estimated effort: {{effort_2}}</p>
+<p>Dana (QA Engineer): &quot;For debt item 1, can we prioritize that as high? It caused testing issues in three different stories.&quot;</p>
+<p>Charlie (Senior Dev): &quot;I marked it medium because {{reasoning}}, but I hear your point.&quot;</p>
+<p>Amelia (Developer): &quot;{user_name}, this is a priority call. Testing impact vs. {{reasoning}} - how do you want to prioritize it?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to help resolve priority discussions&lt;/action&gt;</p>
+<p>&lt;output&gt; <strong>Documentation:</strong></p>
+<ol>
+<li>{{doc_need_1}}</li>
+</ol>
+<p>Owner: {{agent_5}} Deadline: {{timeline_3}}</p>
+<ol>
+<li>{{doc_need_2}}</li>
+</ol>
+<p>Owner: {{agent_6}} Deadline: {{timeline_4}}</p>
+<p><strong>Team Agreements:</strong></p>
+<ul>
+<li>{{agreement_1}}</li>
+<li>{{agreement_2}}</li>
+<li>{{agreement_3}}</li>
+</ul>
+<p>Amelia (Developer): &quot;These agreements are how we're committing to work differently going forward.&quot;</p>
+<p>Elena (Junior Dev): &quot;I like agreement 2 - that would've saved me on Story {{difficult_story_num}}.&quot;</p>
+<p>═══════════════════════════════════════════════════════════ 🚀 EPIC {{next_epic_num}} PREPARATION TASKS: ═══════════════════════════════════════════════════════════</p>
+<p><strong>Technical Setup:</strong> [ ] {{setup_task_1}} Owner: {{owner_1}} Estimated: {{est_1}}</p>
+<p>[ ] {{setup_task_2}} Owner: {{owner_2}} Estimated: {{est_2}}</p>
+<p><strong>Knowledge Development:</strong> [ ] {{research_task_1}} Owner: {{owner_3}} Estimated: {{est_3}}</p>
+<p><strong>Cleanup/Refactoring:</strong> [ ] {{refactor_task_1}} Owner: {{owner_4}} Estimated: {{est_4}}</p>
+<p><strong>Total Estimated Effort:</strong> {{total_hours}} hours ({{total_days}} days)</p>
+<p>═══════════════════════════════════════════════════════════ ⚠️ CRITICAL PATH: ═══════════════════════════════════════════════════════════</p>
+<p><strong>Blockers to Resolve Before Epic {{next_epic_num}}:</strong></p>
+<ol>
+<li>{{critical_item_1}}</li>
+</ol>
+<p>Owner: {{critical_owner_1}} Must complete by: {{critical_deadline_1}}</p>
+<ol>
+<li>{{critical_item_2}}</li>
+</ol>
+<p>Owner: {{critical_owner_2}} Must complete by: {{critical_deadline_2}} &lt;/output&gt;</p>
+<p>&lt;action&gt;CRITICAL ANALYSIS - Detect if discoveries require epic updates&lt;/action&gt;</p>
+<p>&lt;action&gt;Check if any of the following are true based on retrospective discussion:&lt;/action&gt;</p>
+<ul>
+<li>Architectural assumptions from planning proven wrong during Epic {{epic_number}}</li>
+<li>Major scope changes or descoping occurred that affects next epic</li>
+<li>Technical approach needs fundamental change for Epic {{next_epic_num}}</li>
+<li>Dependencies discovered that Epic {{next_epic_num}} doesn't account for</li>
+<li>User needs significantly different than originally understood</li>
+<li>Performance/scalability concerns that affect Epic {{next_epic_num}} design</li>
+<li>Security or compliance issues discovered that change approach</li>
+<li>Integration assumptions proven incorrect</li>
+<li>Team capacity or skill gaps more severe than planned</li>
+<li>Technical debt level unsustainable without intervention</li>
+</ul>
+<p>&lt;check if=&quot;significant discoveries detected&quot;&gt; &lt;output&gt;</p>
+<p>═══════════════════════════════════════════════════════════ 🚨 SIGNIFICANT DISCOVERY ALERT 🚨 ═══════════════════════════════════════════════════════════</p>
+<p>Amelia (Developer): &quot;{user_name}, we need to flag something important.&quot;</p>
+<p>Amelia (Developer): &quot;During Epic {{epic_number}}, the team uncovered findings that may require updating the plan for Epic {{next_epic_num}}.&quot;</p>
+<p><strong>Significant Changes Identified:</strong></p>
+<ol>
+<li>{{significant_change_1}}</li>
+</ol>
+<p>Impact: {{impact_description_1}}</p>
+<ol>
+<li>{{significant_change_2}}</li>
+</ol>
+<p>Impact: {{impact_description_2}}</p>
+<p>{{#if significant_change_3}} 3. {{significant_change_3}} Impact: {{impact_description_3}} {{/if}}</p>
+<p>Charlie (Senior Dev): &quot;Yeah, when we discovered {{technical_discovery}}, it fundamentally changed our understanding of {{affected_area}}.&quot;</p>
+<p>Alice (Product Owner): &quot;And from a product perspective, {{product_discovery}} means Epic {{next_epic_num}}'s stories are based on wrong assumptions.&quot;</p>
+<p>Dana (QA Engineer): &quot;If we start Epic {{next_epic_num}} as-is, we're going to hit walls fast.&quot;</p>
+<p><strong>Impact on Epic {{next_epic_num}}:</strong></p>
+<p>The current plan for Epic {{next_epic_num}} assumes:</p>
+<ul>
+<li>{{wrong_assumption_1}}</li>
+<li>{{wrong_assumption_2}}</li>
+</ul>
+<p>But Epic {{epic_number}} revealed:</p>
+<ul>
+<li>{{actual_reality_1}}</li>
+<li>{{actual_reality_2}}</li>
+</ul>
+<p>This means Epic {{next_epic_num}} likely needs: {{list_likely_changes_needed}}</p>
+<p><strong>RECOMMENDED ACTIONS:</strong></p>
+<ol>
+<li>Review and update Epic {{next_epic_num}} definition based on new learnings</li>
+<li>Update affected stories in Epic {{next_epic_num}} to reflect reality</li>
+<li>Consider updating architecture or technical specifications if applicable</li>
+<li>Hold alignment session with Product Owner before starting Epic {{next_epic_num}}</li>
+</ol>
+<p>{{#if prd_update_needed}}5. Update PRD sections affected by new understanding{{/if}}</p>
+<p>Amelia (Developer): &quot;<strong>Epic Update Required</strong>: YES - Schedule epic planning review session&quot;</p>
+<p>Amelia (Developer): &quot;{user_name}, this is significant. We need to address this before committing to Epic {{next_epic_num}}'s current plan. How do you want to handle it?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to decide on how to handle the significant changes&lt;/action&gt;</p>
+<p>&lt;action&gt;Add epic review session to critical path if user agrees&lt;/action&gt;</p>
+<p>&lt;output&gt; Alice (Product Owner): &quot;I agree with {user_name}'s approach. Better to adjust the plan now than fail mid-epic.&quot;</p>
+<p>Charlie (Senior Dev): &quot;This is why retrospectives matter. We caught this before it became a disaster.&quot;</p>
+<p>Amelia (Developer): &quot;Adding to critical path: Epic {{next_epic_num}} planning review session before epic kickoff.&quot; &lt;/output&gt; &lt;/check&gt;</p>
+<p>&lt;check if=&quot;no significant discoveries&quot;&gt; &lt;output&gt; Amelia (Developer): &quot;Good news - nothing from Epic {{epic_number}} fundamentally changes our plan for Epic {{next_epic_num}}. The plan is still sound.&quot;</p>
+<p>Alice (Product Owner): &quot;We learned a lot, but the direction is right.&quot; &lt;/output&gt; &lt;/check&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;Let me show you the complete action plan...&quot;</p>
+<p>Amelia (Developer): &quot;That's {{total_action_count}} action items, {{prep_task_count}} preparation tasks, and {{critical_count}} critical path items.&quot;</p>
+<p>Amelia (Developer): &quot;Everyone clear on what they own?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;Give each agent with assignments a moment to acknowledge their ownership&lt;/action&gt;</p>
+<p>&lt;action&gt;Ensure {user_name} approves the complete action plan&lt;/action&gt;</p>
+<p>&lt;/step&gt;</p>
+<p>&lt;step n=&quot;10&quot; goal=&quot;Critical Readiness Exploration - Interactive Deep Dive&quot;&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;Before we close, I want to do a final readiness check.&quot;</p>
+<p>Amelia (Developer): &quot;Epic {{epic_number}} is marked complete in sprint-status, but is it REALLY done?&quot;</p>
+<p>Alice (Product Owner): &quot;What do you mean, Amelia?&quot;</p>
+<p>Amelia (Developer): &quot;I mean truly production-ready, stakeholders happy, no loose ends that'll bite us later.&quot;</p>
+<p>Amelia (Developer): &quot;{user_name}, let's walk through this together.&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;Explore testing and quality state through natural conversation&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;{user_name}, tell me about the testing for Epic {{epic_number}}. What verification has been done?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to describe testing status&lt;/action&gt;</p>
+<p>&lt;output&gt; Dana (QA Engineer): [Responds to what {user_name} shared] &quot;I can add to that - {{additional_testing_context}}.&quot;</p>
+<p>Dana (QA Engineer): &quot;But honestly, {{testing_concern_if_any}}.&quot;</p>
+<p>Amelia (Developer): &quot;{user_name}, are you confident Epic {{epic_number}} is production-ready from a quality perspective?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to assess quality readiness&lt;/action&gt;</p>
+<p>&lt;check if=&quot;{user_name} expresses concerns&quot;&gt; &lt;output&gt; Amelia (Developer): &quot;Okay, let's capture that. What specific testing is still needed?&quot;</p>
+<p>Dana (QA Engineer): &quot;I can handle {{testing_work_needed}}, estimated {{testing_hours}} hours.&quot;</p>
+<p>Amelia (Developer): &quot;Adding to critical path: Complete {{testing_work_needed}} before Epic {{next_epic_num}}.&quot; &lt;/output&gt; &lt;action&gt;Add testing completion to critical path&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;action&gt;Explore deployment and release status&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;{user_name}, what's the deployment status for Epic {{epic_number}}? Is it live in production, scheduled for deployment, or still pending?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to provide deployment status&lt;/action&gt;</p>
+<p>&lt;check if=&quot;not yet deployed&quot;&gt; &lt;output&gt; Charlie (Senior Dev): &quot;If it's not deployed yet, we need to factor that into Epic {{next_epic_num}} timing.&quot;</p>
+<p>Amelia (Developer): &quot;{user_name}, when is deployment planned? Does that timing work for starting Epic {{next_epic_num}}?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to clarify deployment timeline&lt;/action&gt;</p>
+<p>&lt;action&gt;Add deployment milestone to critical path with agreed timeline&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;action&gt;Explore stakeholder acceptance&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;{user_name}, have stakeholders seen and accepted the Epic {{epic_number}} deliverables?&quot;</p>
+<p>Alice (Product Owner): &quot;This is important - I've seen 'done' epics get rejected by stakeholders and force rework.&quot;</p>
+<p>Amelia (Developer): &quot;{user_name}, any feedback from stakeholders still pending?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to describe stakeholder acceptance status&lt;/action&gt;</p>
+<p>&lt;check if=&quot;acceptance incomplete or feedback pending&quot;&gt; &lt;output&gt; Alice (Product Owner): &quot;We should get formal acceptance before moving on. Otherwise Epic {{next_epic_num}} might get interrupted by rework.&quot;</p>
+<p>Amelia (Developer): &quot;{user_name}, how do you want to handle stakeholder acceptance? Should we make it a critical path item?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} decision&lt;/action&gt;</p>
+<p>&lt;action&gt;Add stakeholder acceptance to critical path if user agrees&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;action&gt;Explore technical health and stability&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;{user_name}, this is a gut-check question: How does the codebase feel after Epic {{epic_number}}?&quot;</p>
+<p>Amelia (Developer): &quot;Stable and maintainable? Or are there concerns lurking?&quot;</p>
+<p>Charlie (Senior Dev): &quot;Be honest, {user_name}. We've all shipped epics that felt... fragile.&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to assess codebase health&lt;/action&gt;</p>
+<p>&lt;check if=&quot;{user_name} expresses stability concerns&quot;&gt; &lt;output&gt; Charlie (Senior Dev): &quot;Okay, let's dig into that. What's causing those concerns?&quot;</p>
+<p>Charlie (Senior Dev): [Helps {user_name} articulate technical concerns]</p>
+<p>Amelia (Developer): &quot;What would it take to address these concerns and feel confident about stability?&quot;</p>
+<p>Charlie (Senior Dev): &quot;I'd say we need {{stability_work_needed}}, roughly {{stability_hours}} hours.&quot;</p>
+<p>Amelia (Developer): &quot;{user_name}, is addressing this stability work worth doing before Epic {{next_epic_num}}?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} decision&lt;/action&gt;</p>
+<p>&lt;action&gt;Add stability work to preparation sprint if user agrees&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;action&gt;Explore unresolved blockers&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;{user_name}, are there any unresolved blockers or technical issues from Epic {{epic_number}} that we're carrying forward?&quot;</p>
+<p>Dana (QA Engineer): &quot;Things that might create problems for Epic {{next_epic_num}} if we don't deal with them?&quot;</p>
+<p>Amelia (Developer): &quot;Nothing is off limits here. If there's a problem, we need to know.&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to surface any blockers&lt;/action&gt;</p>
+<p>&lt;check if=&quot;blockers identified&quot;&gt; &lt;output&gt; Amelia (Developer): &quot;Let's capture those blockers and figure out how they affect Epic {{next_epic_num}}.&quot;</p>
+<p>Charlie (Senior Dev): &quot;For {{blocker_1}}, if we leave it unresolved, it'll {{impact_description_1}}.&quot;</p>
+<p>Alice (Product Owner): &quot;That sounds critical. We need to address that before moving forward.&quot;</p>
+<p>Amelia (Developer): &quot;Agreed. Adding to critical path: Resolve {{blocker_1}} before Epic {{next_epic_num}} kickoff.&quot;</p>
+<p>Amelia (Developer): &quot;Who owns that work?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;Assign blocker resolution to appropriate agent&lt;/action&gt; &lt;action&gt;Add to critical path with priority and deadline&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;action&gt;Synthesize the readiness assessment&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;Okay {user_name}, let me synthesize what we just uncovered...&quot;</p>
+<p><strong>EPIC {{epic_number}} READINESS ASSESSMENT:</strong></p>
+<p>Testing &amp; Quality: {{quality_status}} {{#if quality_concerns}}⚠️ Action needed: {{quality_action_needed}}{{/if}}</p>
+<p>Deployment: {{deployment_status}} {{#if deployment_pending}}⚠️ Scheduled for: {{deployment_date}}{{/if}}</p>
+<p>Stakeholder Acceptance: {{acceptance_status}} {{#if acceptance_incomplete}}⚠️ Action needed: {{acceptance_action_needed}}{{/if}}</p>
+<p>Technical Health: {{stability_status}} {{#if stability_concerns}}⚠️ Action needed: {{stability_action_needed}}{{/if}}</p>
+<p>Unresolved Blockers: {{blocker_status}} {{#if blockers_exist}}⚠️ Must resolve: {{blocker_list}}{{/if}}</p>
+<p>Amelia (Developer): &quot;{user_name}, does this assessment match your understanding?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to confirm or correct the assessment&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;Based on this assessment, Epic {{epic_number}} is {{#if all_clear}}fully complete and we're clear to proceed{{else}}complete from a story perspective, but we have {{critical_work_count}} critical items before Epic {{next_epic_num}}{{/if}}.&quot;</p>
+<p>Alice (Product Owner): &quot;This level of thoroughness is why retrospectives are valuable.&quot;</p>
+<p>Charlie (Senior Dev): &quot;Better to catch this now than three stories into the next epic.&quot; &lt;/output&gt;</p>
+<p>&lt;/step&gt;</p>
+<p>&lt;step n=&quot;11&quot; goal=&quot;Retrospective Closure with Celebration and Commitment&quot;&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): &quot;We've covered a lot of ground today. Let me bring this retrospective to a close.&quot;</p>
+<p>═══════════════════════════════════════════════════════════ ✅ RETROSPECTIVE COMPLETE ═══════════════════════════════════════════════════════════</p>
+<p>Amelia (Developer): &quot;Epic {{epic_number}}: {{epic_title}} - REVIEWED&quot;</p>
+<p><strong>Key Takeaways:</strong></p>
+<ol>
+<li>{{key_lesson_1}}</li>
+<li>{{key_lesson_2}}</li>
+<li>{{key_lesson_3}}</li>
+</ol>
+<p>{{#if key_lesson_4}}4. {{key_lesson_4}}{{/if}}</p>
+<p>Alice (Product Owner): &quot;That first takeaway is huge - {{impact_of_lesson_1}}.&quot;</p>
+<p>Charlie (Senior Dev): &quot;And lesson 2 is something we can apply immediately.&quot;</p>
+<p>Amelia (Developer): &quot;Commitments made today:&quot;</p>
+<ul>
+<li>Action Items: {{action_count}}</li>
+<li>Preparation Tasks: {{prep_task_count}}</li>
+<li>Critical Path Items: {{critical_count}}</li>
+</ul>
+<p>Dana (QA Engineer): &quot;That's a lot of commitments. We need to actually follow through this time.&quot;</p>
+<p>Amelia (Developer): &quot;Agreed. Which is why we'll review these action items in our next standup.&quot;</p>
+<p>═══════════════════════════════════════════════════════════ 🎯 NEXT STEPS: ═══════════════════════════════════════════════════════════</p>
+<ol>
+<li>Execute Preparation Sprint (Est: {{prep_days}} days)</li>
+<li>Complete Critical Path items before Epic {{next_epic_num}}</li>
+<li>Review action items in next standup</li>
+</ol>
+<p>{{#if epic_update_needed}}4. Hold Epic {{next_epic_num}} planning review session{{else}}4. Begin Epic {{next_epic_num}} planning when preparation complete{{/if}}</p>
+<p>Elena (Junior Dev): &quot;{{prep_days}} days of prep work is significant, but necessary.&quot;</p>
+<p>Alice (Product Owner): &quot;I'll communicate the timeline to stakeholders. They'll understand if we frame it as 'ensuring Epic {{next_epic_num}} success.'&quot;</p>
+<p>═══════════════════════════════════════════════════════════</p>
+<p>Amelia (Developer): &quot;Before we wrap, I want to take a moment to acknowledge the team.&quot;</p>
+<p>Amelia (Developer): &quot;Epic {{epic_number}} delivered {{completed_stories}} stories with {{velocity_description}} velocity. We overcame {{blocker_count}} blockers. We learned a lot. That's real work by real people.&quot;</p>
+<p>Charlie (Senior Dev): &quot;Hear, hear.&quot;</p>
+<p>Alice (Product Owner): &quot;I'm proud of what we shipped.&quot;</p>
+<p>Dana (QA Engineer): &quot;And I'm excited about Epic {{next_epic_num}} - especially now that we're prepared for it.&quot;</p>
+<p>Amelia (Developer): &quot;{user_name}, any final thoughts before we close?&quot; &lt;/output&gt;</p>
+<p>&lt;action&gt;WAIT for {user_name} to share final reflections&lt;/action&gt;</p>
+<p>&lt;output&gt; Amelia (Developer): [Acknowledges what {user_name} shared] &quot;Thank you for that, {user_name}.&quot;</p>
+<p>Amelia (Developer): &quot;Alright team - great work today. We learned a lot from Epic {{epic_number}}. Let's use these insights to make Epic {{next_epic_num}} even better.&quot;</p>
+<p>Amelia (Developer): &quot;See you all when prep work is done. Meeting adjourned!&quot;</p>
+<p>═══════════════════════════════════════════════════════════ &lt;/output&gt;</p>
+<p>&lt;action&gt;Prepare to save retrospective summary document&lt;/action&gt;</p>
+<p>&lt;/step&gt;</p>
+<p>&lt;step n=&quot;12&quot; goal=&quot;Save Retrospective and Update Sprint Status&quot;&gt;</p>
+<p>&lt;action&gt;Ensure retrospectives folder exists: {implementation_artifacts}&lt;/action&gt; &lt;action&gt;Create folder if it doesn't exist&lt;/action&gt;</p>
+<p>&lt;action&gt;Generate comprehensive retrospective summary document including:&lt;/action&gt;</p>
+<ul>
+<li>Epic summary and metrics</li>
+<li>Team participants</li>
+<li>Successes and strengths identified</li>
+<li>Challenges and growth areas</li>
+<li>Key insights and learnings</li>
+<li>Previous retro follow-through analysis (if applicable)</li>
+<li>Next epic preview and dependencies</li>
+<li>Action items with owners and timelines</li>
+<li>Preparation tasks for next epic</li>
+<li>Critical path items</li>
+<li>Significant discoveries and epic update recommendations (if any)</li>
+<li>Readiness assessment</li>
+<li>Commitments and next steps</li>
+</ul>
+<p>&lt;action&gt;Format retrospective document as readable markdown with clear sections&lt;/action&gt; &lt;action&gt;Set filename: {implementation_artifacts}/epic-{{epic_number}}-retro-{date}.md&lt;/action&gt; &lt;action&gt;Save retrospective document&lt;/action&gt;</p>
+<p>&lt;output&gt; ✅ Retrospective document saved: {implementation_artifacts}/epic-{{epic_number}}-retro-{date}.md &lt;/output&gt;</p>
+<p>&lt;action&gt;Update {sprint_status_file} to mark retrospective as completed&lt;/action&gt;</p>
+<p>&lt;action&gt;Load the FULL file: {sprint_status_file}&lt;/action&gt; &lt;action&gt;Find development_status key &quot;epic-{{epic_number}}-retrospective&quot;&lt;/action&gt; &lt;action&gt;Verify current status (typically &quot;optional&quot; or &quot;pending&quot;)&lt;/action&gt; &lt;action&gt;Update development_status[&quot;epic-{{epic_number}}-retrospective&quot;] = &quot;done&quot;&lt;/action&gt; &lt;action&gt;Append each Epic {{epic_number}} action item to the action_items section, creating the section after development_status if missing. One entry per item:&lt;/action&gt;</p>
+<pre><code>action_items:
+  - epic: {{epic_number}}
+    action: &quot;{{action_description}}&quot;
+    owner: &quot;{{owner}}&quot;
+    status: open</code></pre>
+<p>&lt;action&gt;Quote action and owner values so punctuation (e.g., &quot;#&quot;) cannot break YAML parsing&lt;/action&gt;</p>
+<p>&lt;action&gt;Update Epic {{prev_epic_num}} action_items entries based on Step 4 follow-through: ✅ Completed → done, ⏳ In Progress → in-progress, ❌ Not Addressed → keep existing status (do not modify)&lt;/action&gt; &lt;action&gt;Update last_updated field to current date&lt;/action&gt; &lt;action&gt;Save file, preserving ALL comments and structure including STATUS DEFINITIONS&lt;/action&gt;</p>
+<p>&lt;check if=&quot;update successful&quot;&gt; &lt;output&gt; ✅ Retrospective marked as completed in {sprint_status_file}</p>
+<p>Retrospective key: epic-{{epic_number}}-retrospective Status: {{previous_status}} → done Action items recorded: {{action_count}} &lt;/output&gt; &lt;/check&gt;</p>
+<p>&lt;check if=&quot;retrospective key not found&quot;&gt; &lt;output&gt; ⚠️ Could not update retrospective status: epic-{{epic_number}}-retrospective not found in {sprint_status_file}</p>
+<p>Retrospective document was saved successfully, but {sprint_status_file} may need manual update. &lt;/output&gt; &lt;/check&gt;</p>
+<p>&lt;/step&gt;</p>
+<p>&lt;step n=&quot;13&quot; goal=&quot;Final Summary and Handoff&quot;&gt;</p>
+<p>&lt;output&gt; <strong>✅ Retrospective Complete, {user_name}!</strong></p>
+<p><strong>Epic Review:</strong></p>
+<ul>
+<li>Epic {{epic_number}}: {{epic_title}} reviewed</li>
+<li>Retrospective Status: completed</li>
+<li>Retrospective saved: {implementation_artifacts}/epic-{{epic_number}}-retro-{date}.md</li>
+</ul>
+<p><strong>Commitments Made:</strong></p>
+<ul>
+<li>Action Items: {{action_count}}</li>
+<li>Preparation Tasks: {{prep_task_count}}</li>
+<li>Critical Path Items: {{critical_count}}</li>
+</ul>
+<p><strong>Next Steps:</strong></p>
+<ol>
+<li><strong>Review retrospective summary</strong>: {implementation_artifacts}/epic-{{epic_number}}-retro-{date}.md</li>
+</ol>
+<ol>
+<li><strong>Execute preparation sprint</strong> (Est: {{prep_days}} days)</li>
+</ol>
+<ul>
+<li>Complete {{critical_count}} critical path items</li>
+<li>Execute {{prep_task_count}} preparation tasks</li>
+<li>Verify all action items are in progress</li>
+</ul>
+<ol>
+<li><strong>Review action items in next standup</strong></li>
+</ol>
+<ul>
+<li>Ensure ownership is clear</li>
+<li>Track progress on commitments</li>
+<li>Adjust timelines if needed</li>
+</ul>
+<p>{{#if epic_update_needed}} 4. <strong>IMPORTANT: Schedule Epic {{next_epic_num}} planning review session</strong></p>
+<ul>
+<li>Significant discoveries from Epic {{epic_number}} require epic updates</li>
+<li>Review and update affected stories</li>
+<li>Align team on revised approach</li>
+<li>Do NOT start Epic {{next_epic_num}} until review is complete</li>
+</ul>
+<p>{{else}}</p>
+<ol>
+<li><strong>Begin Epic {{next_epic_num}} when ready</strong></li>
+</ol>
+<ul>
+<li>Start creating stories with Developer agent's <code>create-story</code></li>
+<li>Epic will be marked as <code>in-progress</code> automatically when first story is created</li>
+<li>Ensure all critical path items are done first</li>
+</ul>
+<p>{{/if}}</p>
+<p><strong>Team Performance:</strong> Epic {{epic_number}} delivered {{completed_stories}} stories with {{velocity_summary}}. The retrospective surfaced {{insight_count}} key insights and {{significant_discovery_count}} significant discoveries. The team is well-positioned for Epic {{next_epic_num}} success.</p>
+<p>{{#if significant_discovery_count &gt; 0}} ⚠️ <strong>REMINDER</strong>: Epic update required before starting Epic {{next_epic_num}} {{/if}}</p>
+<hr>
+<p>Amelia (Developer): &quot;Great session today, {user_name}. The team did excellent work.&quot;</p>
+<p>Alice (Product Owner): &quot;See you at epic planning!&quot;</p>
+<p>Charlie (Senior Dev): &quot;Time to knock out that prep work.&quot;</p>
+<p>&lt;/output&gt; &lt;action&gt;Run: <code>python3 {project-root}/_bmad/scripts/resolve_customization.py --skill {skill-root} --key workflow.on_complete</code> — if the resolved value is non-empty, follow it as the final terminal instruction before exiting.&lt;/action&gt; &lt;/step&gt;</p>
+<p>&lt;/workflow&gt;</p>
+<p>&lt;facilitation-guidelines&gt; &lt;guideline&gt;PARTY MODE REQUIRED: All agent dialogue uses &quot;Name (Role): dialogue&quot; format&lt;/guideline&gt; &lt;guideline&gt;Amelia (Developer) maintains psychological safety throughout - no blame or judgment&lt;/guideline&gt; &lt;guideline&gt;Focus on systems and processes, not individual performance&lt;/guideline&gt; &lt;guideline&gt;Create authentic team dynamics: disagreements, diverse perspectives, emotions&lt;/guideline&gt; &lt;guideline&gt;User ({user_name}) is active participant, not passive observer&lt;/guideline&gt; &lt;guideline&gt;Encourage specific examples over general statements&lt;/guideline&gt; &lt;guideline&gt;Balance celebration of wins with honest assessment of challenges&lt;/guideline&gt; &lt;guideline&gt;Ensure every voice is heard - all agents contribute&lt;/guideline&gt; &lt;guideline&gt;Action items must be specific, achievable, and owned&lt;/guideline&gt; &lt;guideline&gt;Forward-looking mindset - how do we improve for next epic?&lt;/guideline&gt; &lt;guideline&gt;Intent-based facilitation, not scripted phrases&lt;/guideline&gt; &lt;guideline&gt;Deep story analysis provides rich material for discussion&lt;/guideline&gt; &lt;guideline&gt;Previous retro integration creates accountability and continuity&lt;/guideline&gt; &lt;guideline&gt;Significant change detection prevents epic misalignment&lt;/guideline&gt; &lt;guideline&gt;Critical verification prevents starting next epic prematurely&lt;/guideline&gt; &lt;guideline&gt;Document everything - retrospective insights are valuable for future reference&lt;/guideline&gt; &lt;guideline&gt;Two-part structure ensures both reflection AND preparation&lt;/guideline&gt; &lt;/facilitation-guidelines&gt;</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: bmad-retrospective\ndisplay_name: bmad-retrospective\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# bmad-retrospective - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `bmad-retrospective` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n'Post-epic review to extract lessons and assess success. Use when the user says \"run a retrospective\" or \"lets retro the epic [epic]\"'\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the bmad-retrospective skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `bmad-retrospective` |\n| Canonical name | `bmad-retrospective` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\n'Post-epic review to extract lessons and assess success. Use when the user says \"run a retrospective\" or \"lets retro the epic [epic]\"'\n\n\n## Original SKILL.md\n\n---\nname: bmad-retrospective\ndescription: 'Post-epic review to extract lessons and assess success. Use when the user says \"run a retrospective\" or \"lets retro the epic [epic]\"'\n---\n\n# Retrospective Workflow\n\n**Goal:** Post-epic review to extract lessons and assess success.\n\n**Your Role:** Developer facilitating retrospective.\n- No time estimates — NEVER mention hours, days, weeks, months, or ANY time-based predictions. AI has fundamentally changed development speed.\n- Communicate all responses in {communication_language} and language MUST be tailored to {user_skill_level}\n- Generate all documents in {document_output_language}\n- Document output: Retrospective analysis. Concise insights, lessons learned, action items. User skill level ({user_skill_level}) affects conversation style ONLY, not retrospective content.\n- Facilitation notes:\n  - Psychological safety is paramount - NO BLAME\n  - Focus on systems, processes, and learning\n  - Everyone contributes with specific examples preferred\n  - Action items must be achievable with clear ownership\n  - Two-part format: (1) Epic Review + (2) Next Epic Preparation\n- Party mode protocol:\n  - ALL agent dialogue MUST use format: \"Name (Role): dialogue\"\n  - Example: Amelia (Developer): \"Let's begin...\"\n  - Example: {user_name} (Project Lead): [User responds]\n  - Create natural back-and-forth with user actively participating\n  - Show disagreements, diverse perspectives, authentic team dynamics\n\n## Conventions\n\n- Bare paths resolve from the skill root.\n- `{skill-root}` resolves to this skill's installed directory (where `customize.toml` lives).\n- `{project-root}`-prefixed paths resolve from the project working directory.\n- `{skill-name}` resolves to the skill directory's basename.\n\n## On Activation\n\n### Step 1: Resolve the Workflow Block\n\nRun: `python3 {project-root}/_bmad/scripts/resolve_customization.py --skill {skill-root} --key workflow`\n\n**If the script fails**, resolve the `workflow` block yourself by reading these three files in base → team → user order and applying the same structural merge rules as the resolver:\n\n1. `{skill-root}/customize.toml` — defaults\n2. `{project-root}/_bmad/custom/{skill-name}.toml` — team overrides\n3. `{project-root}/_bmad/custom/{skill-name}.user.toml` — personal overrides\n\nAny missing file is skipped. Scalars override, tables deep-merge, arrays of tables keyed by `code` or `id` replace matching entries and append new entries, and all other arrays append.\n\n### Step 2: Execute Prepend Steps\n\nExecute each entry in `{workflow.activation_steps_prepend}` in order before proceeding.\n\n### Step 3: Load Persistent Facts\n\nTreat every entry in `{workflow.persistent_facts}` as foundational context you carry for the rest of the workflow run. Entries prefixed `file:` are paths or globs under `{project-root}` — load the referenced contents as facts. All other entries are facts verbatim.\n\n### Step 4: Load Config\n\nLoad config from `{project-root}/_bmad/bmm/config.yaml` and resolve:\n\n- `project_name`, `user_name`\n- `communication_language`, `document_output_language`\n- `user_skill_level`\n- `planning_artifacts`, `implementation_artifacts`\n- `date` as system-generated current datetime\n- YOU MUST ALWAYS SPEAK OUTPUT in your Agent communication style with the config `{communication_language}`\n\n### Step 5: Greet the User\n\nGreet `{user_name}`, speaking in `{communication_language}`.\n\n### Step 6: Execute Append Steps\n\nExecute each entry in `{workflow.activation_steps_append}` in order.\n\nActivation is complete. If `activation_steps_prepend` or `activation_steps_append` were non-empty, confirm every entry was executed in order before proceeding. Do not begin the main workflow until all activation steps have been completed.\n\n## Paths\n\n- `sprint_status_file` = `{implementation_artifacts}/sprint-status.yaml`\n\n## Input Files\n\n| Input | Description | Path Pattern(s) | Load Strategy |\n|-------|-------------|------------------|---------------|\n| epics | The completed epic for retrospective | whole: `{planning_artifacts}/*epic*.md`, sharded_index: `{planning_artifacts}/*epic*/index.md`, sharded_single: `{planning_artifacts}/*epic*/epic-{{epic_num}}.md` | SELECTIVE_LOAD |\n| previous_retrospective | Previous epic's retrospective (optional) | `{implementation_artifacts}/**/epic-{{prev_epic_num}}-retro-*.md` | SELECTIVE_LOAD |\n| architecture | System architecture for context | whole: `{planning_artifacts}/*architecture*.md`, sharded: `{planning_artifacts}/*architecture*/*.md` | FULL_LOAD |\n| prd | Product requirements for context | whole: `{planning_artifacts}/*prd*.md`, sharded: `{planning_artifacts}/*prd*/*.md` | FULL_LOAD |\n| document_project | Brownfield project documentation (optional) | sharded: `{planning_artifacts}/*.md` | INDEX_GUIDED |\n\n## Required Inputs\n\n- `agent_roster` = resolved via `python3 {project-root}/_bmad/scripts/resolve_config.py --project-root {project-root} --key agents` (merges four layers in order: `_bmad/config.toml`, `_bmad/config.user.toml`, `_bmad/custom/config.toml`, `_bmad/custom/config.user.toml`)\n\n## Execution\n\n\u003cworkflow>\n\n\u003cstep n=\"1\" goal=\"Epic Discovery - Find Completed Epic with Priority Logic\">\n\n\u003caction>Explain to {user_name} the epic discovery process using natural dialogue\u003c/action>\n\n\u003coutput>\nAmelia (Developer): \"Welcome to the retrospective, {user_name}. Let me help you identify which epic we just completed. I'll check sprint-status first, but you're the ultimate authority on what we're reviewing today.\"\n\u003c/output>\n\n\u003caction>PRIORITY 1: Check {sprint_status_file} first\u003c/action>\n\n\u003caction>Load the FULL file: {sprint_status_file}\u003c/action>\n\u003caction>Read ALL development_status entries\u003c/action>\n\u003caction>Find the highest epic number with at least one story marked \"done\"\u003c/action>\n\u003caction>Extract epic number from keys like \"epic-X-retrospective\" or story keys like \"X-Y-story-name\"\u003c/action>\n\u003caction>Set {{detected_epic}} = highest epic number found with completed stories\u003c/action>\n\n\u003ccheck if=\"{{detected_epic}} found\">\n  \u003caction>Present finding to user with context\u003c/action>\n\n  \u003coutput>\nAmelia (Developer): \"Based on {sprint_status_file}, it looks like Epic {{detected_epic}} was recently completed. Is that the epic you want to review today, {user_name}?\"\n  \u003c/output>\n\n\u003caction>WAIT for {user_name} to confirm or correct\u003c/action>\n\n  \u003ccheck if=\"{user_name} confirms\">\n    \u003caction>Set {{epic_number}} = {{detected_epic}}\u003c/action>\n  \u003c/check>\n\n  \u003ccheck if=\"{user_name} provides different epic number\">\n    \u003caction>Set {{epic_number}} = user-provided number\u003c/action>\n    \u003coutput>\nAmelia (Developer): \"Got it, we're reviewing Epic {{epic_number}}. Let me gather that information.\"\n    \u003c/output>\n  \u003c/check>\n\u003c/check>\n\n\u003ccheck if=\"{{detected_epic}} NOT found in sprint-status\">\n  \u003caction>PRIORITY 2: Ask user directly\u003c/action>\n\n  \u003coutput>\nAmelia (Developer): \"I'm having trouble detecting the completed epic from {sprint_status_file}. {user_name}, which epic number did you just complete?\"\n  \u003c/output>\n\n\u003caction>WAIT for {user_name} to provide epic number\u003c/action>\n\u003caction>Set {{epic_number}} = user-provided number\u003c/action>\n\u003c/check>\n\n\u003ccheck if=\"{{epic_number}} still not determined\">\n  \u003caction>PRIORITY 3: Fallback to stories folder\u003c/action>\n\n\u003caction>Scan {implementation_artifacts} for highest numbered story files\u003c/action>\n\u003caction>Extract epic numbers from story filenames (pattern: epic-X-Y-story-name.md)\u003c/action>\n\u003caction>Set {{detected_epic}} = highest epic number found\u003c/action>\n\n  \u003coutput>\nAmelia (Developer): \"I found stories for Epic {{detected_epic}} in the stories folder. Is that the epic we're reviewing, {user_name}?\"\n  \u003c/output>\n\n\u003caction>WAIT for {user_name} to confirm or correct\u003c/action>\n\u003caction>Set {{epic_number}} = confirmed number\u003c/action>\n\u003c/check>\n\n\u003caction>Once {{epic_number}} is determined, verify epic completion status\u003c/action>\n\n\u003caction>Find all stories for epic {{epic_number}} in {sprint_status_file}:\n\n- Look for keys starting with \"{{epic_number}}-\" (e.g., \"1-1-\", \"1-2-\", etc.)\n- Exclude epic key itself (\"epic-{{epic_number}}\")\n- Exclude retrospective key (\"epic-{{epic_number}}-retrospective\")\n  \u003c/action>\n\n\u003caction>Count total stories found for this epic\u003c/action>\n\u003caction>Count stories with status = \"done\"\u003c/action>\n\u003caction>Collect list of pending story keys (status != \"done\")\u003c/action>\n\u003caction>Determine if complete: true if all stories are done, false otherwise\u003c/action>\n\n\u003ccheck if=\"epic is not complete\">\n  \u003coutput>\nAlice (Product Owner): \"Wait, Amelia - I'm seeing that Epic {{epic_number}} isn't actually complete yet.\"\n\nAmelia (Developer): \"Let me check... you're right, Alice.\"\n\n**Epic Status:**\n\n- Total Stories: {{total_stories}}\n- Completed (Done): {{done_stories}}\n- Pending: {{pending_count}}\n\n**Pending Stories:**\n{{pending_story_list}}\n\nAmelia (Developer): \"{user_name}, we typically run retrospectives after all stories are done. What would you like to do?\"\n\n**Options:**\n\n1. Complete remaining stories before running retrospective (recommended)\n2. Continue with partial retrospective (not ideal, but possible)\n3. Run sprint-planning to refresh story tracking\n   \u003c/output>\n\n\u003cask if=\"{{non_interactive}} == false\">Continue with incomplete epic? (yes/no)\u003c/ask>\n\n  \u003ccheck if=\"user says no\">\n    \u003coutput>\nAmelia (Developer): \"Smart call, {user_name}. Let's finish those stories first and then have a proper retrospective.\"\n    \u003c/output>\n    \u003caction>HALT\u003c/action>\n  \u003c/check>\n\n\u003caction if=\"user says yes\">Set {{partial_retrospective}} = true\u003c/action>\n\u003coutput>\nCharlie (Senior Dev): \"Just so everyone knows, this partial retro might miss some important lessons from those pending stories.\"\n\nAmelia (Developer): \"Good point, Charlie. {user_name}, we'll document what we can now, but we may want to revisit after everything's done.\"\n\u003c/output>\n\u003c/check>\n\n\u003ccheck if=\"epic is complete\">\n  \u003coutput>\nAlice (Product Owner): \"Excellent! All {{done_stories}} stories are marked done.\"\n\nAmelia (Developer): \"Perfect. Epic {{epic_number}} is complete and ready for retrospective, {user_name}.\"\n\u003c/output>\n\u003c/check>\n\n\u003c/step>\n\n\u003cstep n=\"2\" goal=\"Discover and load project documents\">\n  \u003caction>Load input files according to the Input Files table above. For SELECTIVE_LOAD inputs, load only the epic matching {{epic_number}}. For FULL_LOAD inputs, load the complete document. For INDEX_GUIDED inputs, check the index first and load relevant sections. After discovery, these content variables are available: {epics_content} (selective load for this epic), {architecture_content}, {prd_content}, {document_project_content}\u003c/action>\n  \u003cnote>After discovery, these content variables are available: {epics_content} (selective load for this epic), {architecture_content}, {prd_content}, {document_project_content}\u003c/note>\n\u003c/step>\n\n\u003cstep n=\"3\" goal=\"Deep Story Analysis - Extract Lessons from Implementation\">\n\n\u003coutput>\nAmelia (Developer): \"Before we start the team discussion, let me review all the story records to surface key themes. This'll help us have a richer conversation.\"\n\nCharlie (Senior Dev): \"Good idea - those dev notes always have gold in them.\"\n\u003c/output>\n\n\u003caction>For each story in epic {{epic_number}}, read the complete story file from {implementation_artifacts}/{{epic_number}}-{{story_num}}-*.md\u003c/action>\n\n\u003caction>Extract and analyze from each story:\u003c/action>\n\n**Dev Notes and Struggles:**\n\n- Look for sections like \"## Dev Notes\", \"## Implementation Notes\", \"## Challenges\", \"## Development Log\"\n- Identify where developers struggled or made mistakes\n- Note unexpected complexity or gotchas discovered\n- Record technical decisions that didn't work out as planned\n- Track where estimates were way off (too high or too low)\n\n**Review Feedback Patterns:**\n\n- Look for \"## Review\", \"## Code Review\", \"## Dev Review\" sections\n- Identify recurring feedback themes across stories\n- Note which types of issues came up repeatedly\n- Track quality concerns or architectural misalignments\n- Document praise or exemplary work called out in reviews\n\n**Lessons Learned:**\n\n- Look for \"## Lessons Learned\", \"## Retrospective Notes\", \"## Takeaways\" sections within stories\n- Extract explicit lessons documented during development\n- Identify \"aha moments\" or breakthroughs\n- Note what would be done differently\n- Track successful experiments or approaches\n\n**Technical Debt Incurred:**\n\n- Look for \"## Technical Debt\", \"## TODO\", \"## Known Issues\", \"## Future Work\" sections\n- Document shortcuts taken and why\n- Track debt items that affect next epic\n- Note severity and priority of debt items\n\n**Testing and Quality Insights:**\n\n- Look for \"## Testing\", \"## QA Notes\", \"## Test Results\" sections\n- Note testing challenges or surprises\n- Track bug patterns or regression issues\n- Document test coverage gaps\n\n\u003caction>Synthesize patterns across all stories:\u003c/action>\n\n**Common Struggles:**\n\n- Identify issues that appeared in 2+ stories (e.g., \"3 out of 5 stories had API authentication issues\")\n- Note areas where team consistently struggled\n- Track where complexity was underestimated\n\n**Recurring Review Feedback:**\n\n- Identify feedback themes (e.g., \"Error handling was flagged in every review\")\n- Note quality patterns (positive and negative)\n- Track areas where team improved over the course of epic\n\n**Breakthrough Moments:**\n\n- Document key discoveries (e.g., \"Story 3 discovered the caching pattern we used for rest of epic\")\n- Note when team velocity improved dramatically\n- Track innovative solutions worth repeating\n\n**Velocity Patterns:**\n\n- Calculate average completion time per story\n- Note velocity trends (e.g., \"First 2 stories took 3x longer than estimated\")\n- Identify which types of stories went faster/slower\n\n**Team Collaboration Highlights:**\n\n- Note moments of excellent collaboration mentioned in stories\n- Track where pair programming or mob programming was effective\n- Document effective problem-solving sessions\n\n\u003caction>Store this synthesis - these patterns will drive the retrospective discussion\u003c/action>\n\n\u003coutput>\nAmelia (Developer): \"Okay, I've reviewed all {{total_stories}} story records. I found some really interesting patterns we should discuss.\"\n\nDana (QA Engineer): \"I'm curious what you found, Amelia. I noticed some things in my testing too.\"\n\nAmelia (Developer): \"We'll get to all of it. But first, let me load the previous epic's retro to see if we learned from last time.\"\n\u003c/output>\n\n\u003c/step>\n\n\u003cstep n=\"4\" goal=\"Load and Integrate Previous Epic Retrospective\">\n\n\u003caction>Calculate previous epic number: {{prev_epic_num}} = {{epic_number}} - 1\u003c/action>\n\n\u003ccheck if=\"{{prev_epic_num}} >= 1\">\n  \u003caction>Search for previous retrospectives using pattern: {implementation_artifacts}/epic-{{prev_epic_num}}-retro-*.md\u003c/action>\n\n  \u003ccheck if=\"previous retrospectives found\">\n    \u003coutput>\nAmelia (Developer): \"I found our retrospectives from Epic {{prev_epic_num}}. Let me see what we committed to back then...\"\n    \u003c/output>\n\n    \u003caction>Read the previous retrospectives\u003c/action>\n\n    \u003caction>Extract key elements:\u003c/action>\n    - **Action items committed**: What did the team agree to improve?\n    - **Lessons learned**: What insights were captured?\n    - **Process improvements**: What changes were agreed upon?\n    - **Technical debt flagged**: What debt was documented?\n    - **Team agreements**: What commitments were made?\n    - **Preparation tasks**: What was needed for this epic?\n\n    \u003caction>Cross-reference with current epic execution:\u003c/action>\n\n    **Action Item Follow-Through:**\n    - For each action item from Epic {{prev_epic_num}} retro, check if it was completed\n    - Cross-check the action_items section in {sprint_status_file} (if present) for Epic {{prev_epic_num}} entries and their current status\n    - Look for evidence in current epic's story records\n    - Mark each action item: ✅ Completed, ⏳ In Progress, ❌ Not Addressed\n\n    **Lessons Applied:**\n    - For each lesson from Epic {{prev_epic_num}}, check if team applied it in Epic {{epic_number}}\n    - Look for evidence in dev notes, review feedback, or outcomes\n    - Document successes and missed opportunities\n\n    **Process Improvements Effectiveness:**\n    - For each process change agreed to in Epic {{prev_epic_num}}, assess if it helped\n    - Did the change improve velocity, quality, or team satisfaction?\n    - Should we keep, modify, or abandon the change?\n\n    **Technical Debt Status:**\n    - For each debt item from Epic {{prev_epic_num}}, check if it was addressed\n    - Did unaddressed debt cause problems in Epic {{epic_number}}?\n    - Did the debt grow or shrink?\n\n    \u003caction>Prepare \"continuity insights\" for the retrospective discussion\u003c/action>\n\n    \u003caction>Identify wins where previous lessons were applied successfully:\u003c/action>\n    - Document specific examples of applied learnings\n    - Note positive impact on Epic {{epic_number}} outcomes\n    - Celebrate team growth and improvement\n\n    \u003caction>Identify missed opportunities where previous lessons were ignored:\u003c/action>\n    - Document where team repeated previous mistakes\n    - Note impact of not applying lessons (without blame)\n    - Explore barriers that prevented application\n\n    \u003coutput>\n\nAmelia (Developer): \"Interesting... in Epic {{prev_epic_num}}'s retro, we committed to {{action_count}} action items.\"\n\nAlice (Product Owner): \"How'd we do on those, Amelia?\"\n\nAmelia (Developer): \"We completed {{completed_count}}, made progress on {{in_progress_count}}, but didn't address {{not_addressed_count}}.\"\n\nCharlie (Senior Dev): _looking concerned_ \"Which ones didn't we address?\"\n\nAmelia (Developer): \"We'll discuss that in the retro. Some of them might explain challenges we had this epic.\"\n\nElena (Junior Dev): \"That's... actually pretty insightful.\"\n\nAmelia (Developer): \"That's why we track this stuff. Pattern recognition helps us improve.\"\n\u003c/output>\n\n  \u003c/check>\n\n  \u003ccheck if=\"no previous retro found\">\n    \u003coutput>\nAmelia (Developer): \"I don't see a retrospective for Epic {{prev_epic_num}}. Either we skipped it, or this is your first retro.\"\n\nAlice (Product Owner): \"Probably our first one. Good time to start the habit!\"\n\u003c/output>\n\u003caction>Set {{first_retrospective}} = true\u003c/action>\n\u003c/check>\n\u003c/check>\n\n\u003ccheck if=\"{{prev_epic_num}} \u003c 1\">\n  \u003coutput>\nAmelia (Developer): \"This is Epic 1, so naturally there's no previous retro to reference. We're starting fresh!\"\n\nCharlie (Senior Dev): \"First epic, first retro. Let's make it count.\"\n\u003c/output>\n\u003caction>Set {{first_retrospective}} = true\u003c/action>\n\u003c/check>\n\n\u003c/step>\n\n\u003cstep n=\"5\" goal=\"Preview Next Epic with Change Detection\">\n\n\u003caction>Calculate next epic number: {{next_epic_num}} = {{epic_number}} + 1\u003c/action>\n\n\u003coutput>\nAmelia (Developer): \"Before we dive into the discussion, let me take a quick look at Epic {{next_epic_num}} to understand what's coming.\"\n\nAlice (Product Owner): \"Good thinking - helps us connect what we learned to what we're about to do.\"\n\u003c/output>\n\n\u003caction>Attempt to load next epic using selective loading strategy:\u003c/action>\n\n**Try sharded first (more specific):**\n\u003caction>Check if file exists: {planning_artifacts}/epic*/epic-{{next_epic_num}}.md\u003c/action>\n\n\u003ccheck if=\"sharded epic file found\">\n  \u003caction>Load {planning_artifacts}/*epic*/epic-{{next_epic_num}}.md\u003c/action>\n  \u003caction>Set {{next_epic_source}} = \"sharded\"\u003c/action>\n\u003c/check>\n\n**Fallback to whole document:**\n\u003ccheck if=\"sharded epic not found\">\n\u003caction>Check if file exists: {planning_artifacts}/epic*.md\u003c/action>\n\n  \u003ccheck if=\"whole epic file found\">\n    \u003caction>Load entire epics document\u003c/action>\n    \u003caction>Extract Epic {{next_epic_num}} section\u003c/action>\n    \u003caction>Set {{next_epic_source}} = \"whole\"\u003c/action>\n  \u003c/check>\n\u003c/check>\n\n\u003ccheck if=\"next epic found\">\n  \u003caction>Analyze next epic for:\u003c/action>\n  - Epic title and objectives\n  - Planned stories and complexity estimates\n  - Dependencies on Epic {{epic_number}} work\n  - New technical requirements or capabilities needed\n  - Potential risks or unknowns\n  - Business goals and success criteria\n\n\u003caction>Identify dependencies on completed work:\u003c/action>\n\n- What components from Epic {{epic_number}} does Epic {{next_epic_num}} rely on?\n- Are all prerequisites complete and stable?\n- Any incomplete work that creates blocking dependencies?\n\n\u003caction>Note potential gaps or preparation needed:\u003c/action>\n\n- Technical setup required (infrastructure, tools, libraries)\n- Knowledge gaps to fill (research, training, spikes)\n- Refactoring needed before starting next epic\n- Documentation or specifications to create\n\n\u003caction>Check for technical prerequisites:\u003c/action>\n\n- APIs or integrations that must be ready\n- Data migrations or schema changes needed\n- Testing infrastructure requirements\n- Deployment or environment setup\n\n  \u003coutput>\nAmelia (Developer): \"Alright, I've reviewed Epic {{next_epic_num}}: '{{next_epic_title}}'\"\n\nAlice (Product Owner): \"What are we looking at?\"\n\nAmelia (Developer): \"{{next_epic_num}} stories planned, building on the {{dependency_description}} from Epic {{epic_number}}.\"\n\nCharlie (Senior Dev): \"Dependencies concern me. Did we finish everything we need for that?\"\n\nAmelia (Developer): \"Good question - that's exactly what we need to explore in this retro.\"\n\u003c/output>\n\n\u003caction>Set {{next_epic_exists}} = true\u003c/action>\n\u003c/check>\n\n\u003ccheck if=\"next epic NOT found\">\n  \u003coutput>\nAmelia (Developer): \"Hmm, I don't see Epic {{next_epic_num}} defined yet.\"\n\nAlice (Product Owner): \"We might be at the end of the roadmap, or we haven't planned that far ahead yet.\"\n\nAmelia (Developer): \"No problem. We'll still do a thorough retro on Epic {{epic_number}}. The lessons will be valuable whenever we plan the next work.\"\n\u003c/output>\n\n\u003caction>Set {{next_epic_exists}} = false\u003c/action>\n\u003c/check>\n\n\u003c/step>\n\n\u003cstep n=\"6\" goal=\"Initialize Retrospective with Rich Context\">\n\n\u003caction>Load agent roster from {agent_roster}\u003c/action>\n\u003caction>Identify which agents participated in Epic {{epic_number}} based on story records\u003c/action>\n\u003caction>Ensure key roles present: Product Owner, Developer (facilitating), Testing/QA, Architect\u003c/action>\n\n\u003coutput>\nAmelia (Developer): \"Alright team, everyone's here. Let me set the stage for our retrospective.\"\n\n═══════════════════════════════════════════════════════════\n🔄 TEAM RETROSPECTIVE - Epic {{epic_number}}: {{epic_title}}\n═══════════════════════════════════════════════════════════\n\nAmelia (Developer): \"Here's what we accomplished together.\"\n\n**EPIC {{epic_number}} SUMMARY:**\n\nDelivery Metrics:\n\n- Completed: {{completed_stories}}/{{total_stories}} stories ({{completion_percentage}}%)\n- Velocity: {{actual_points}} story points{{#if planned_points}} (planned: {{planned_points}}){{/if}}\n- Duration: {{actual_sprints}} sprints{{#if planned_sprints}} (planned: {{planned_sprints}}){{/if}}\n- Average velocity: {{points_per_sprint}} points/sprint\n\nQuality and Technical:\n\n- Blockers encountered: {{blocker_count}}\n- Technical debt items: {{debt_count}}\n- Test coverage: {{coverage_info}}\n- Production incidents: {{incident_count}}\n\nBusiness Outcomes:\n\n- Goals achieved: {{goals_met}}/{{total_goals}}\n- Success criteria: {{criteria_status}}\n- Stakeholder feedback: {{feedback_summary}}\n\nAlice (Product Owner): \"Those numbers tell a good story. {{completion_percentage}}% completion is {{#if completion_percentage >= 90}}excellent{{else}}something we should discuss{{/if}}.\"\n\nCharlie (Senior Dev): \"I'm more interested in that technical debt number - {{debt_count}} items is {{#if debt_count > 10}}concerning{{else}}manageable{{/if}}.\"\n\nDana (QA Engineer): \"{{incident_count}} production incidents - {{#if incident_count == 0}}clean epic!{{else}}we should talk about those{{/if}}.\"\n\n{{#if next_epic_exists}}\n═══════════════════════════════════════════════════════════\n**NEXT EPIC PREVIEW:** Epic {{next_epic_num}}: {{next_epic_title}}\n═══════════════════════════════════════════════════════════\n\nDependencies on Epic {{epic_number}}:\n{{list_dependencies}}\n\nPreparation Needed:\n{{list_preparation_gaps}}\n\nTechnical Prerequisites:\n{{list_technical_prereqs}}\n\nAmelia (Developer): \"And here's what's coming next. Epic {{next_epic_num}} builds on what we just finished.\"\n\nElena (Junior Dev): \"Wow, that's a lot of dependencies on our work.\"\n\nCharlie (Senior Dev): \"Which means we better make sure Epic {{epic_number}} is actually solid before moving on.\"\n{{/if}}\n\n═══════════════════════════════════════════════════════════\n\nAmelia (Developer): \"Team assembled for this retrospective:\"\n\n{{list_participating_agents}}\n\nAmelia (Developer): \"{user_name}, you're joining us as Project Lead. Your perspective is crucial here.\"\n\n{user_name} (Project Lead): [Participating in the retrospective]\n\nAmelia (Developer): \"Our focus today:\"\n\n1. Learning from Epic {{epic_number}} execution\n   {{#if next_epic_exists}}2. Preparing for Epic {{next_epic_num}} success{{/if}}\n\nAmelia (Developer): \"Ground rules: psychological safety first. No blame, no judgment. We focus on systems and processes, not individuals. Everyone's voice matters. Specific examples are better than generalizations.\"\n\nAlice (Product Owner): \"And everything shared here stays in this room - unless we decide together to escalate something.\"\n\nAmelia (Developer): \"Exactly. {user_name}, any questions before we dive in?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to respond or indicate readiness\u003c/action>\n\n\u003c/step>\n\n\u003cstep n=\"7\" goal=\"Epic Review Discussion - What Went Well, What Didn't\">\n\n\u003coutput>\nAmelia (Developer): \"Let's start with the good stuff. What went well in Epic {{epic_number}}?\"\n\nAmelia (Developer): _pauses, creating space_\n\nAlice (Product Owner): \"I'll start. The user authentication flow we delivered exceeded my expectations. The UX is smooth, and early user feedback has been really positive.\"\n\nCharlie (Senior Dev): \"I'll add to that - the caching strategy we implemented in Story {{breakthrough_story_num}} was a game-changer. We cut API calls by 60% and it set the pattern for the rest of the epic.\"\n\nDana (QA Engineer): \"From my side, testing went smoother than usual. The Developer's documentation was way better this epic - actually usable test plans!\"\n\nElena (Junior Dev): _smiling_ \"That's because Charlie made me document everything after Story 1's code review!\"\n\nCharlie (Senior Dev): _laughing_ \"Tough love pays off.\"\n\u003c/output>\n\n\u003caction>Amelia (Developer) naturally turns to {user_name} to engage them in the discussion\u003c/action>\n\n\u003coutput>\nAmelia (Developer): \"{user_name}, what stood out to you as going well in this epic?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to respond - this is a KEY USER INTERACTION moment\u003c/action>\n\n\u003caction>After {user_name} responds, have 1-2 team members react to or build on what {user_name} shared\u003c/action>\n\n\u003coutput>\nAlice (Product Owner): [Responds naturally to what {user_name} said, either agreeing, adding context, or offering a different perspective]\n\nCharlie (Senior Dev): [Builds on the discussion, perhaps adding technical details or connecting to specific stories]\n\u003c/output>\n\n\u003caction>Continue facilitating natural dialogue, periodically bringing {user_name} back into the conversation\u003c/action>\n\n\u003caction>After covering successes, guide the transition to challenges with care\u003c/action>\n\n\u003coutput>\nAmelia (Developer): \"Okay, we've celebrated some real wins. Now let's talk about challenges - where did we struggle? What slowed us down?\"\n\nAmelia (Developer): _creates safe space with tone and pacing_\n\nElena (Junior Dev): _hesitates_ \"Well... I really struggled with the database migrations in Story {{difficult_story_num}}. The documentation wasn't clear, and I had to redo it three times. Lost almost a full sprint on that story alone.\"\n\nCharlie (Senior Dev): _defensive_ \"Hold on - I wrote those migration docs, and they were perfectly clear. The issue was that the requirements kept changing mid-story!\"\n\nAlice (Product Owner): _frustrated_ \"That's not fair, Charlie. We only clarified requirements once, and that was because the technical team didn't ask the right questions during planning!\"\n\nCharlie (Senior Dev): _heat rising_ \"We asked plenty of questions! You said the schema was finalized, then two days into development you wanted to add three new fields!\"\n\nAmelia (Developer): _intervening calmly_ \"Let's take a breath here. This is exactly the kind of thing we need to unpack.\"\n\nAmelia (Developer): \"Elena, you spent almost a full sprint on Story {{difficult_story_num}}. Charlie, you're saying requirements changed. Alice, you feel the right questions weren't asked up front.\"\n\nAmelia (Developer): \"{user_name}, you have visibility across the whole project. What's your take on this situation?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to respond and help facilitate the conflict resolution\u003c/action>\n\n\u003caction>Use {user_name}'s response to guide the discussion toward systemic understanding rather than blame\u003c/action>\n\n\u003coutput>\nAmelia (Developer): [Synthesizes {user_name}'s input with what the team shared] \"So it sounds like the core issue was {{root_cause_based_on_discussion}}, not any individual person's fault.\"\n\nElena (Junior Dev): \"That makes sense. If we'd had {{preventive_measure}}, I probably could have avoided those redos.\"\n\nCharlie (Senior Dev): _softening_ \"Yeah, and I could have been clearer about assumptions in the docs. Sorry for getting defensive, Alice.\"\n\nAlice (Product Owner): \"I appreciate that. I could've been more proactive about flagging the schema additions earlier, too.\"\n\nAmelia (Developer): \"This is good. We're identifying systemic improvements, not assigning blame.\"\n\u003c/output>\n\n\u003caction>Continue the discussion, weaving in patterns discovered from the deep story analysis (Step 3)\u003c/action>\n\n\u003coutput>\nAmelia (Developer): \"Speaking of patterns, I noticed something when reviewing all the story records...\"\n\nAmelia (Developer): \"{{pattern_1_description}} - this showed up in {{pattern_1_count}} out of {{total_stories}} stories.\"\n\nDana (QA Engineer): \"Oh wow, I didn't realize it was that widespread.\"\n\nAmelia (Developer): \"Yeah. And there's more - {{pattern_2_description}} came up in almost every code review.\"\n\nCharlie (Senior Dev): \"That's... actually embarrassing. We should've caught that pattern earlier.\"\n\nAmelia (Developer): \"No shame, Charlie. Now we know, and we can improve. {user_name}, did you notice these patterns during the epic?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to share their observations\u003c/action>\n\n\u003caction>Continue the retrospective discussion, creating moments where:\u003c/action>\n\n- Team members ask {user_name} questions directly\n- {user_name}'s input shifts the discussion direction\n- Disagreements arise naturally and get resolved\n- Quieter team members are invited to contribute\n- Specific stories are referenced with real examples\n- Emotions are authentic (frustration, pride, concern, hope)\n\n\u003ccheck if=\"previous retrospective exists\">\n  \u003coutput>\nAmelia (Developer): \"Before we move on, I want to circle back to Epic {{prev_epic_num}}'s retrospective.\"\n\nAmelia (Developer): \"We made some commitments in that retro. Let's see how we did.\"\n\nAmelia (Developer): \"Action item 1: {{prev_action_1}}. Status: {{prev_action_1_status}}\"\n\nAlice (Product Owner): {{#if prev_action_1_status == \"completed\"}}\"We nailed that one!\"{{else}}\"We... didn't do that one.\"{{/if}}\n\nCharlie (Senior Dev): {{#if prev_action_1_status == \"completed\"}}\"And it helped! I noticed {{evidence_of_impact}}\"{{else}}\"Yeah, and I think that's why we had {{consequence_of_not_doing_it}} this epic.\"{{/if}}\n\nAmelia (Developer): \"Action item 2: {{prev_action_2}}. Status: {{prev_action_2_status}}\"\n\nDana (QA Engineer): {{#if prev_action_2_status == \"completed\"}}\"This one made testing so much easier this time.\"{{else}}\"If we'd done this, I think testing would've gone faster.\"{{/if}}\n\nAmelia (Developer): \"{user_name}, looking at what we committed to last time and what we actually did - what's your reaction?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to respond\u003c/action>\n\n\u003caction>Use the previous retro follow-through as a learning moment about commitment and accountability\u003c/action>\n\u003c/check>\n\n\u003coutput>\nAmelia (Developer): \"Alright, we've covered a lot of ground. Let me summarize what I'm hearing...\"\n\nAmelia (Developer): \"**Successes:**\"\n{{list_success_themes}}\n\nAmelia (Developer): \"**Challenges:**\"\n{{list_challenge_themes}}\n\nAmelia (Developer): \"**Key Insights:**\"\n{{list_insight_themes}}\n\nAmelia (Developer): \"Does that capture it? Anyone have something important we missed?\"\n\u003c/output>\n\n\u003caction>Allow team members to add any final thoughts on the epic review\u003c/action>\n\u003caction>Ensure {user_name} has opportunity to add their perspective\u003c/action>\n\n\u003c/step>\n\n\u003cstep n=\"8\" goal=\"Next Epic Preparation Discussion - Interactive and Collaborative\">\n\n\u003ccheck if=\"{{next_epic_exists}} == false\">\n  \u003coutput>\nAmelia (Developer): \"Normally we'd discuss preparing for the next epic, but since Epic {{next_epic_num}} isn't defined yet, let's skip to action items.\"\n  \u003c/output>\n  \u003caction>Skip to Step 9\u003c/action>\n\u003c/check>\n\n\u003coutput>\nAmelia (Developer): \"Now let's shift gears. Epic {{next_epic_num}} is coming up: '{{next_epic_title}}'\"\n\nAmelia (Developer): \"The question is: are we ready? What do we need to prepare?\"\n\nAlice (Product Owner): \"From my perspective, we need to make sure {{dependency_concern_1}} from Epic {{epic_number}} is solid before we start building on it.\"\n\nCharlie (Senior Dev): _concerned_ \"I'm worried about {{technical_concern_1}}. We have {{technical_debt_item}} from this epic that'll blow up if we don't address it before Epic {{next_epic_num}}.\"\n\nDana (QA Engineer): \"And I need {{testing_infrastructure_need}} in place, or we're going to have the same testing bottleneck we had in Story {{bottleneck_story_num}}.\"\n\nElena (Junior Dev): \"I'm less worried about infrastructure and more about knowledge. I don't understand {{knowledge_gap}} well enough to work on Epic {{next_epic_num}}'s stories.\"\n\nAmelia (Developer): \"{user_name}, the team is surfacing some real concerns here. What's your sense of our readiness?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to share their assessment\u003c/action>\n\n\u003caction>Use {user_name}'s input to guide deeper exploration of preparation needs\u003c/action>\n\n\u003coutput>\nAlice (Product Owner): [Reacts to what {user_name} said] \"I agree with {user_name} about {{point_of_agreement}}, but I'm still worried about {{lingering_concern}}.\"\n\nCharlie (Senior Dev): \"Here's what I think we need technically before Epic {{next_epic_num}} can start...\"\n\nCharlie (Senior Dev): \"1. {{tech_prep_item_1}} - estimated {{hours_1}} hours\"\nCharlie (Senior Dev): \"2. {{tech_prep_item_2}} - estimated {{hours_2}} hours\"\nCharlie (Senior Dev): \"3. {{tech_prep_item_3}} - estimated {{hours_3}} hours\"\n\nElena (Junior Dev): \"That's like {{total_hours}} hours! That's a full sprint of prep work!\"\n\nCharlie (Senior Dev): \"Exactly. We can't just jump into Epic {{next_epic_num}} on Monday.\"\n\nAlice (Product Owner): _frustrated_ \"But we have stakeholder pressure to keep shipping features. They're not going to be happy about a 'prep sprint.'\"\n\nAmelia (Developer): \"Let's think about this differently. What happens if we DON'T do this prep work?\"\n\nDana (QA Engineer): \"We'll hit blockers in the middle of Epic {{next_epic_num}}, velocity will tank, and we'll ship late anyway.\"\n\nCharlie (Senior Dev): \"Worse - we'll ship something built on top of {{technical_concern_1}}, and it'll be fragile.\"\n\nAmelia (Developer): \"{user_name}, you're balancing stakeholder pressure against technical reality. How do you want to handle this?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to provide direction on preparation approach\u003c/action>\n\n\u003caction>Create space for debate and disagreement about priorities\u003c/action>\n\n\u003coutput>\nAlice (Product Owner): [Potentially disagrees with {user_name}'s approach] \"I hear what you're saying, {user_name}, but from a business perspective, {{business_concern}}.\"\n\nCharlie (Senior Dev): [Potentially supports or challenges Alice's point] \"The business perspective is valid, but {{technical_counter_argument}}.\"\n\nAmelia (Developer): \"We have healthy tension here between business needs and technical reality. That's good - it means we're being honest.\"\n\nAmelia (Developer): \"Let's explore a middle ground. Charlie, which of your prep items are absolutely critical vs. nice-to-have?\"\n\nCharlie (Senior Dev): \"{{critical_prep_item_1}} and {{critical_prep_item_2}} are non-negotiable. {{nice_to_have_prep_item}} can wait.\"\n\nAlice (Product Owner): \"And can any of the critical prep happen in parallel with starting Epic {{next_epic_num}}?\"\n\nCharlie (Senior Dev): _thinking_ \"Maybe. If we tackle {{first_critical_item}} before the epic starts, we could do {{second_critical_item}} during the first sprint.\"\n\nDana (QA Engineer): \"But that means Story 1 of Epic {{next_epic_num}} can't depend on {{second_critical_item}}.\"\n\nAlice (Product Owner): _looking at epic plan_ \"Actually, Stories 1 and 2 are about {{independent_work}}, so they don't depend on it. We could make that work.\"\n\nAmelia (Developer): \"{user_name}, the team is finding a workable compromise here. Does this approach make sense to you?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to validate or adjust the preparation strategy\u003c/action>\n\n\u003caction>Continue working through preparation needs across all dimensions:\u003c/action>\n\n- Dependencies on Epic {{epic_number}} work\n- Technical setup and infrastructure\n- Knowledge gaps and research needs\n- Documentation or specification work\n- Testing infrastructure\n- Refactoring or debt reduction\n- External dependencies (APIs, integrations, etc.)\n\n\u003caction>For each preparation area, facilitate team discussion that:\u003c/action>\n\n- Identifies specific needs with concrete examples\n- Estimates effort realistically based on Epic {{epic_number}} experience\n- Assigns ownership to specific agents\n- Determines criticality and timing\n- Surfaces risks of NOT doing the preparation\n- Explores parallel work opportunities\n- Brings {user_name} in for key decisions\n\n\u003coutput>\nAmelia (Developer): \"I'm hearing a clear picture of what we need before Epic {{next_epic_num}}. Let me summarize...\"\n\n**CRITICAL PREPARATION (Must complete before epic starts):**\n{{list_critical_prep_items_with_owners_and_estimates}}\n\n**PARALLEL PREPARATION (Can happen during early stories):**\n{{list_parallel_prep_items_with_owners_and_estimates}}\n\n**NICE-TO-HAVE PREPARATION (Would help but not blocking):**\n{{list_nice_to_have_prep_items}}\n\nAmelia (Developer): \"Total critical prep effort: {{critical_hours}} hours ({{critical_days}} days)\"\n\nAlice (Product Owner): \"That's manageable. We can communicate that to stakeholders.\"\n\nAmelia (Developer): \"{user_name}, does this preparation plan work for you?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} final validation of preparation plan\u003c/action>\n\n\u003c/step>\n\n\u003cstep n=\"9\" goal=\"Synthesize Action Items with Significant Change Detection\">\n\n\u003coutput>\nAmelia (Developer): \"Let's capture concrete action items from everything we've discussed.\"\n\nAmelia (Developer): \"I want specific, achievable actions with clear owners. Not vague aspirations.\"\n\u003c/output>\n\n\u003caction>Synthesize themes from Epic {{epic_number}} review discussion into actionable improvements\u003c/action>\n\n\u003caction>Create specific action items with:\u003c/action>\n\n- Clear description of the action\n- Assigned owner (specific agent or role)\n- Timeline or deadline\n- Success criteria (how we'll know it's done)\n- Category (process, technical, documentation, team, etc.)\n\n\u003caction>Ensure action items are SMART:\u003c/action>\n\n- Specific: Clear and unambiguous\n- Measurable: Can verify completion\n- Achievable: Realistic given constraints\n- Relevant: Addresses real issues from retro\n- Time-bound: Has clear deadline\n\n\u003coutput>\nAmelia (Developer): \"Based on our discussion, here are the action items I'm proposing...\"\n\n═══════════════════════════════════════════════════════════\n📝 EPIC {{epic_number}} ACTION ITEMS:\n═══════════════════════════════════════════════════════════\n\n**Process Improvements:**\n\n1. {{action_item_1}}\n   Owner: {{agent_1}}\n   Deadline: {{timeline_1}}\n   Success criteria: {{criteria_1}}\n\n2. {{action_item_2}}\n   Owner: {{agent_2}}\n   Deadline: {{timeline_2}}\n   Success criteria: {{criteria_2}}\n\nCharlie (Senior Dev): \"I can own action item 1, but {{timeline_1}} is tight. Can we push it to {{alternative_timeline}}?\"\n\nAmelia (Developer): \"What do others think? Does that timing still work?\"\n\nAlice (Product Owner): \"{{alternative_timeline}} works for me, as long as it's done before Epic {{next_epic_num}} starts.\"\n\nAmelia (Developer): \"Agreed. Updated to {{alternative_timeline}}.\"\n\n**Technical Debt:**\n\n1. {{debt_item_1}}\n   Owner: {{agent_3}}\n   Priority: {{priority_1}}\n   Estimated effort: {{effort_1}}\n\n2. {{debt_item_2}}\n   Owner: {{agent_4}}\n   Priority: {{priority_2}}\n   Estimated effort: {{effort_2}}\n\nDana (QA Engineer): \"For debt item 1, can we prioritize that as high? It caused testing issues in three different stories.\"\n\nCharlie (Senior Dev): \"I marked it medium because {{reasoning}}, but I hear your point.\"\n\nAmelia (Developer): \"{user_name}, this is a priority call. Testing impact vs. {{reasoning}} - how do you want to prioritize it?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to help resolve priority discussions\u003c/action>\n\n\u003coutput>\n**Documentation:**\n1. {{doc_need_1}}\n   Owner: {{agent_5}}\n   Deadline: {{timeline_3}}\n\n2. {{doc_need_2}}\n   Owner: {{agent_6}}\n   Deadline: {{timeline_4}}\n\n**Team Agreements:**\n\n- {{agreement_1}}\n- {{agreement_2}}\n- {{agreement_3}}\n\nAmelia (Developer): \"These agreements are how we're committing to work differently going forward.\"\n\nElena (Junior Dev): \"I like agreement 2 - that would've saved me on Story {{difficult_story_num}}.\"\n\n═══════════════════════════════════════════════════════════\n🚀 EPIC {{next_epic_num}} PREPARATION TASKS:\n═══════════════════════════════════════════════════════════\n\n**Technical Setup:**\n[ ] {{setup_task_1}}\nOwner: {{owner_1}}\nEstimated: {{est_1}}\n\n[ ] {{setup_task_2}}\nOwner: {{owner_2}}\nEstimated: {{est_2}}\n\n**Knowledge Development:**\n[ ] {{research_task_1}}\nOwner: {{owner_3}}\nEstimated: {{est_3}}\n\n**Cleanup/Refactoring:**\n[ ] {{refactor_task_1}}\nOwner: {{owner_4}}\nEstimated: {{est_4}}\n\n**Total Estimated Effort:** {{total_hours}} hours ({{total_days}} days)\n\n═══════════════════════════════════════════════════════════\n⚠️ CRITICAL PATH:\n═══════════════════════════════════════════════════════════\n\n**Blockers to Resolve Before Epic {{next_epic_num}}:**\n\n1. {{critical_item_1}}\n   Owner: {{critical_owner_1}}\n   Must complete by: {{critical_deadline_1}}\n\n2. {{critical_item_2}}\n   Owner: {{critical_owner_2}}\n   Must complete by: {{critical_deadline_2}}\n   \u003c/output>\n\n\u003caction>CRITICAL ANALYSIS - Detect if discoveries require epic updates\u003c/action>\n\n\u003caction>Check if any of the following are true based on retrospective discussion:\u003c/action>\n\n- Architectural assumptions from planning proven wrong during Epic {{epic_number}}\n- Major scope changes or descoping occurred that affects next epic\n- Technical approach needs fundamental change for Epic {{next_epic_num}}\n- Dependencies discovered that Epic {{next_epic_num}} doesn't account for\n- User needs significantly different than originally understood\n- Performance/scalability concerns that affect Epic {{next_epic_num}} design\n- Security or compliance issues discovered that change approach\n- Integration assumptions proven incorrect\n- Team capacity or skill gaps more severe than planned\n- Technical debt level unsustainable without intervention\n\n\u003ccheck if=\"significant discoveries detected\">\n  \u003coutput>\n\n═══════════════════════════════════════════════════════════\n🚨 SIGNIFICANT DISCOVERY ALERT 🚨\n═══════════════════════════════════════════════════════════\n\nAmelia (Developer): \"{user_name}, we need to flag something important.\"\n\nAmelia (Developer): \"During Epic {{epic_number}}, the team uncovered findings that may require updating the plan for Epic {{next_epic_num}}.\"\n\n**Significant Changes Identified:**\n\n1. {{significant_change_1}}\n   Impact: {{impact_description_1}}\n\n2. {{significant_change_2}}\n   Impact: {{impact_description_2}}\n\n{{#if significant_change_3}} 3. {{significant_change_3}}\nImpact: {{impact_description_3}}\n{{/if}}\n\nCharlie (Senior Dev): \"Yeah, when we discovered {{technical_discovery}}, it fundamentally changed our understanding of {{affected_area}}.\"\n\nAlice (Product Owner): \"And from a product perspective, {{product_discovery}} means Epic {{next_epic_num}}'s stories are based on wrong assumptions.\"\n\nDana (QA Engineer): \"If we start Epic {{next_epic_num}} as-is, we're going to hit walls fast.\"\n\n**Impact on Epic {{next_epic_num}}:**\n\nThe current plan for Epic {{next_epic_num}} assumes:\n\n- {{wrong_assumption_1}}\n- {{wrong_assumption_2}}\n\nBut Epic {{epic_number}} revealed:\n\n- {{actual_reality_1}}\n- {{actual_reality_2}}\n\nThis means Epic {{next_epic_num}} likely needs:\n{{list_likely_changes_needed}}\n\n**RECOMMENDED ACTIONS:**\n\n1. Review and update Epic {{next_epic_num}} definition based on new learnings\n2. Update affected stories in Epic {{next_epic_num}} to reflect reality\n3. Consider updating architecture or technical specifications if applicable\n4. Hold alignment session with Product Owner before starting Epic {{next_epic_num}}\n   {{#if prd_update_needed}}5. Update PRD sections affected by new understanding{{/if}}\n\nAmelia (Developer): \"**Epic Update Required**: YES - Schedule epic planning review session\"\n\nAmelia (Developer): \"{user_name}, this is significant. We need to address this before committing to Epic {{next_epic_num}}'s current plan. How do you want to handle it?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to decide on how to handle the significant changes\u003c/action>\n\n\u003caction>Add epic review session to critical path if user agrees\u003c/action>\n\n  \u003coutput>\nAlice (Product Owner): \"I agree with {user_name}'s approach. Better to adjust the plan now than fail mid-epic.\"\n\nCharlie (Senior Dev): \"This is why retrospectives matter. We caught this before it became a disaster.\"\n\nAmelia (Developer): \"Adding to critical path: Epic {{next_epic_num}} planning review session before epic kickoff.\"\n\u003c/output>\n\u003c/check>\n\n\u003ccheck if=\"no significant discoveries\">\n  \u003coutput>\nAmelia (Developer): \"Good news - nothing from Epic {{epic_number}} fundamentally changes our plan for Epic {{next_epic_num}}. The plan is still sound.\"\n\nAlice (Product Owner): \"We learned a lot, but the direction is right.\"\n\u003c/output>\n\u003c/check>\n\n\u003coutput>\nAmelia (Developer): \"Let me show you the complete action plan...\"\n\nAmelia (Developer): \"That's {{total_action_count}} action items, {{prep_task_count}} preparation tasks, and {{critical_count}} critical path items.\"\n\nAmelia (Developer): \"Everyone clear on what they own?\"\n\u003c/output>\n\n\u003caction>Give each agent with assignments a moment to acknowledge their ownership\u003c/action>\n\n\u003caction>Ensure {user_name} approves the complete action plan\u003c/action>\n\n\u003c/step>\n\n\u003cstep n=\"10\" goal=\"Critical Readiness Exploration - Interactive Deep Dive\">\n\n\u003coutput>\nAmelia (Developer): \"Before we close, I want to do a final readiness check.\"\n\nAmelia (Developer): \"Epic {{epic_number}} is marked complete in sprint-status, but is it REALLY done?\"\n\nAlice (Product Owner): \"What do you mean, Amelia?\"\n\nAmelia (Developer): \"I mean truly production-ready, stakeholders happy, no loose ends that'll bite us later.\"\n\nAmelia (Developer): \"{user_name}, let's walk through this together.\"\n\u003c/output>\n\n\u003caction>Explore testing and quality state through natural conversation\u003c/action>\n\n\u003coutput>\nAmelia (Developer): \"{user_name}, tell me about the testing for Epic {{epic_number}}. What verification has been done?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to describe testing status\u003c/action>\n\n\u003coutput>\nDana (QA Engineer): [Responds to what {user_name} shared] \"I can add to that - {{additional_testing_context}}.\"\n\nDana (QA Engineer): \"But honestly, {{testing_concern_if_any}}.\"\n\nAmelia (Developer): \"{user_name}, are you confident Epic {{epic_number}} is production-ready from a quality perspective?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to assess quality readiness\u003c/action>\n\n\u003ccheck if=\"{user_name} expresses concerns\">\n  \u003coutput>\nAmelia (Developer): \"Okay, let's capture that. What specific testing is still needed?\"\n\nDana (QA Engineer): \"I can handle {{testing_work_needed}}, estimated {{testing_hours}} hours.\"\n\nAmelia (Developer): \"Adding to critical path: Complete {{testing_work_needed}} before Epic {{next_epic_num}}.\"\n\u003c/output>\n\u003caction>Add testing completion to critical path\u003c/action>\n\u003c/check>\n\n\u003caction>Explore deployment and release status\u003c/action>\n\n\u003coutput>\nAmelia (Developer): \"{user_name}, what's the deployment status for Epic {{epic_number}}? Is it live in production, scheduled for deployment, or still pending?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to provide deployment status\u003c/action>\n\n\u003ccheck if=\"not yet deployed\">\n  \u003coutput>\nCharlie (Senior Dev): \"If it's not deployed yet, we need to factor that into Epic {{next_epic_num}} timing.\"\n\nAmelia (Developer): \"{user_name}, when is deployment planned? Does that timing work for starting Epic {{next_epic_num}}?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to clarify deployment timeline\u003c/action>\n\n\u003caction>Add deployment milestone to critical path with agreed timeline\u003c/action>\n\u003c/check>\n\n\u003caction>Explore stakeholder acceptance\u003c/action>\n\n\u003coutput>\nAmelia (Developer): \"{user_name}, have stakeholders seen and accepted the Epic {{epic_number}} deliverables?\"\n\nAlice (Product Owner): \"This is important - I've seen 'done' epics get rejected by stakeholders and force rework.\"\n\nAmelia (Developer): \"{user_name}, any feedback from stakeholders still pending?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to describe stakeholder acceptance status\u003c/action>\n\n\u003ccheck if=\"acceptance incomplete or feedback pending\">\n  \u003coutput>\nAlice (Product Owner): \"We should get formal acceptance before moving on. Otherwise Epic {{next_epic_num}} might get interrupted by rework.\"\n\nAmelia (Developer): \"{user_name}, how do you want to handle stakeholder acceptance? Should we make it a critical path item?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} decision\u003c/action>\n\n\u003caction>Add stakeholder acceptance to critical path if user agrees\u003c/action>\n\u003c/check>\n\n\u003caction>Explore technical health and stability\u003c/action>\n\n\u003coutput>\nAmelia (Developer): \"{user_name}, this is a gut-check question: How does the codebase feel after Epic {{epic_number}}?\"\n\nAmelia (Developer): \"Stable and maintainable? Or are there concerns lurking?\"\n\nCharlie (Senior Dev): \"Be honest, {user_name}. We've all shipped epics that felt... fragile.\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to assess codebase health\u003c/action>\n\n\u003ccheck if=\"{user_name} expresses stability concerns\">\n  \u003coutput>\nCharlie (Senior Dev): \"Okay, let's dig into that. What's causing those concerns?\"\n\nCharlie (Senior Dev): [Helps {user_name} articulate technical concerns]\n\nAmelia (Developer): \"What would it take to address these concerns and feel confident about stability?\"\n\nCharlie (Senior Dev): \"I'd say we need {{stability_work_needed}}, roughly {{stability_hours}} hours.\"\n\nAmelia (Developer): \"{user_name}, is addressing this stability work worth doing before Epic {{next_epic_num}}?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} decision\u003c/action>\n\n\u003caction>Add stability work to preparation sprint if user agrees\u003c/action>\n\u003c/check>\n\n\u003caction>Explore unresolved blockers\u003c/action>\n\n\u003coutput>\nAmelia (Developer): \"{user_name}, are there any unresolved blockers or technical issues from Epic {{epic_number}} that we're carrying forward?\"\n\nDana (QA Engineer): \"Things that might create problems for Epic {{next_epic_num}} if we don't deal with them?\"\n\nAmelia (Developer): \"Nothing is off limits here. If there's a problem, we need to know.\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to surface any blockers\u003c/action>\n\n\u003ccheck if=\"blockers identified\">\n  \u003coutput>\nAmelia (Developer): \"Let's capture those blockers and figure out how they affect Epic {{next_epic_num}}.\"\n\nCharlie (Senior Dev): \"For {{blocker_1}}, if we leave it unresolved, it'll {{impact_description_1}}.\"\n\nAlice (Product Owner): \"That sounds critical. We need to address that before moving forward.\"\n\nAmelia (Developer): \"Agreed. Adding to critical path: Resolve {{blocker_1}} before Epic {{next_epic_num}} kickoff.\"\n\nAmelia (Developer): \"Who owns that work?\"\n\u003c/output>\n\n\u003caction>Assign blocker resolution to appropriate agent\u003c/action>\n\u003caction>Add to critical path with priority and deadline\u003c/action>\n\u003c/check>\n\n\u003caction>Synthesize the readiness assessment\u003c/action>\n\n\u003coutput>\nAmelia (Developer): \"Okay {user_name}, let me synthesize what we just uncovered...\"\n\n**EPIC {{epic_number}} READINESS ASSESSMENT:**\n\nTesting & Quality: {{quality_status}}\n{{#if quality_concerns}}⚠️ Action needed: {{quality_action_needed}}{{/if}}\n\nDeployment: {{deployment_status}}\n{{#if deployment_pending}}⚠️ Scheduled for: {{deployment_date}}{{/if}}\n\nStakeholder Acceptance: {{acceptance_status}}\n{{#if acceptance_incomplete}}⚠️ Action needed: {{acceptance_action_needed}}{{/if}}\n\nTechnical Health: {{stability_status}}\n{{#if stability_concerns}}⚠️ Action needed: {{stability_action_needed}}{{/if}}\n\nUnresolved Blockers: {{blocker_status}}\n{{#if blockers_exist}}⚠️ Must resolve: {{blocker_list}}{{/if}}\n\nAmelia (Developer): \"{user_name}, does this assessment match your understanding?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to confirm or correct the assessment\u003c/action>\n\n\u003coutput>\nAmelia (Developer): \"Based on this assessment, Epic {{epic_number}} is {{#if all_clear}}fully complete and we're clear to proceed{{else}}complete from a story perspective, but we have {{critical_work_count}} critical items before Epic {{next_epic_num}}{{/if}}.\"\n\nAlice (Product Owner): \"This level of thoroughness is why retrospectives are valuable.\"\n\nCharlie (Senior Dev): \"Better to catch this now than three stories into the next epic.\"\n\u003c/output>\n\n\u003c/step>\n\n\u003cstep n=\"11\" goal=\"Retrospective Closure with Celebration and Commitment\">\n\n\u003coutput>\nAmelia (Developer): \"We've covered a lot of ground today. Let me bring this retrospective to a close.\"\n\n═══════════════════════════════════════════════════════════\n✅ RETROSPECTIVE COMPLETE\n═══════════════════════════════════════════════════════════\n\nAmelia (Developer): \"Epic {{epic_number}}: {{epic_title}} - REVIEWED\"\n\n**Key Takeaways:**\n\n1. {{key_lesson_1}}\n2. {{key_lesson_2}}\n3. {{key_lesson_3}}\n   {{#if key_lesson_4}}4. {{key_lesson_4}}{{/if}}\n\nAlice (Product Owner): \"That first takeaway is huge - {{impact_of_lesson_1}}.\"\n\nCharlie (Senior Dev): \"And lesson 2 is something we can apply immediately.\"\n\nAmelia (Developer): \"Commitments made today:\"\n\n- Action Items: {{action_count}}\n- Preparation Tasks: {{prep_task_count}}\n- Critical Path Items: {{critical_count}}\n\nDana (QA Engineer): \"That's a lot of commitments. We need to actually follow through this time.\"\n\nAmelia (Developer): \"Agreed. Which is why we'll review these action items in our next standup.\"\n\n═══════════════════════════════════════════════════════════\n🎯 NEXT STEPS:\n═══════════════════════════════════════════════════════════\n\n1. Execute Preparation Sprint (Est: {{prep_days}} days)\n2. Complete Critical Path items before Epic {{next_epic_num}}\n3. Review action items in next standup\n   {{#if epic_update_needed}}4. Hold Epic {{next_epic_num}} planning review session{{else}}4. Begin Epic {{next_epic_num}} planning when preparation complete{{/if}}\n\nElena (Junior Dev): \"{{prep_days}} days of prep work is significant, but necessary.\"\n\nAlice (Product Owner): \"I'll communicate the timeline to stakeholders. They'll understand if we frame it as 'ensuring Epic {{next_epic_num}} success.'\"\n\n═══════════════════════════════════════════════════════════\n\nAmelia (Developer): \"Before we wrap, I want to take a moment to acknowledge the team.\"\n\nAmelia (Developer): \"Epic {{epic_number}} delivered {{completed_stories}} stories with {{velocity_description}} velocity. We overcame {{blocker_count}} blockers. We learned a lot. That's real work by real people.\"\n\nCharlie (Senior Dev): \"Hear, hear.\"\n\nAlice (Product Owner): \"I'm proud of what we shipped.\"\n\nDana (QA Engineer): \"And I'm excited about Epic {{next_epic_num}} - especially now that we're prepared for it.\"\n\nAmelia (Developer): \"{user_name}, any final thoughts before we close?\"\n\u003c/output>\n\n\u003caction>WAIT for {user_name} to share final reflections\u003c/action>\n\n\u003coutput>\nAmelia (Developer): [Acknowledges what {user_name} shared] \"Thank you for that, {user_name}.\"\n\nAmelia (Developer): \"Alright team - great work today. We learned a lot from Epic {{epic_number}}. Let's use these insights to make Epic {{next_epic_num}} even better.\"\n\nAmelia (Developer): \"See you all when prep work is done. Meeting adjourned!\"\n\n═══════════════════════════════════════════════════════════\n\u003c/output>\n\n\u003caction>Prepare to save retrospective summary document\u003c/action>\n\n\u003c/step>\n\n\u003cstep n=\"12\" goal=\"Save Retrospective and Update Sprint Status\">\n\n\u003caction>Ensure retrospectives folder exists: {implementation_artifacts}\u003c/action>\n\u003caction>Create folder if it doesn't exist\u003c/action>\n\n\u003caction>Generate comprehensive retrospective summary document including:\u003c/action>\n\n- Epic summary and metrics\n- Team participants\n- Successes and strengths identified\n- Challenges and growth areas\n- Key insights and learnings\n- Previous retro follow-through analysis (if applicable)\n- Next epic preview and dependencies\n- Action items with owners and timelines\n- Preparation tasks for next epic\n- Critical path items\n- Significant discoveries and epic update recommendations (if any)\n- Readiness assessment\n- Commitments and next steps\n\n\u003caction>Format retrospective document as readable markdown with clear sections\u003c/action>\n\u003caction>Set filename: {implementation_artifacts}/epic-{{epic_number}}-retro-{date}.md\u003c/action>\n\u003caction>Save retrospective document\u003c/action>\n\n\u003coutput>\n✅ Retrospective document saved: {implementation_artifacts}/epic-{{epic_number}}-retro-{date}.md\n\u003c/output>\n\n\u003caction>Update {sprint_status_file} to mark retrospective as completed\u003c/action>\n\n\u003caction>Load the FULL file: {sprint_status_file}\u003c/action>\n\u003caction>Find development_status key \"epic-{{epic_number}}-retrospective\"\u003c/action>\n\u003caction>Verify current status (typically \"optional\" or \"pending\")\u003c/action>\n\u003caction>Update development_status[\"epic-{{epic_number}}-retrospective\"] = \"done\"\u003c/action>\n\u003caction>Append each Epic {{epic_number}} action item to the action_items section, creating the section after development_status if missing. One entry per item:\u003c/action>\n\n```yaml\naction_items:\n  - epic: {{epic_number}}\n    action: \"{{action_description}}\"\n    owner: \"{{owner}}\"\n    status: open\n```\n\n\u003caction>Quote action and owner values so punctuation (e.g., \"#\") cannot break YAML parsing\u003c/action>\n\n\u003caction>Update Epic {{prev_epic_num}} action_items entries based on Step 4 follow-through: ✅ Completed → done, ⏳ In Progress → in-progress, ❌ Not Addressed → keep existing status (do not modify)\u003c/action>\n\u003caction>Update last_updated field to current date\u003c/action>\n\u003caction>Save file, preserving ALL comments and structure including STATUS DEFINITIONS\u003c/action>\n\n\u003ccheck if=\"update successful\">\n  \u003coutput>\n✅ Retrospective marked as completed in {sprint_status_file}\n\nRetrospective key: epic-{{epic_number}}-retrospective\nStatus: {{previous_status}} → done\nAction items recorded: {{action_count}}\n\u003c/output>\n\u003c/check>\n\n\u003ccheck if=\"retrospective key not found\">\n  \u003coutput>\n⚠️ Could not update retrospective status: epic-{{epic_number}}-retrospective not found in {sprint_status_file}\n\nRetrospective document was saved successfully, but {sprint_status_file} may need manual update.\n\u003c/output>\n\u003c/check>\n\n\u003c/step>\n\n\u003cstep n=\"13\" goal=\"Final Summary and Handoff\">\n\n\u003coutput>\n**✅ Retrospective Complete, {user_name}!**\n\n**Epic Review:**\n\n- Epic {{epic_number}}: {{epic_title}} reviewed\n- Retrospective Status: completed\n- Retrospective saved: {implementation_artifacts}/epic-{{epic_number}}-retro-{date}.md\n\n**Commitments Made:**\n\n- Action Items: {{action_count}}\n- Preparation Tasks: {{prep_task_count}}\n- Critical Path Items: {{critical_count}}\n\n**Next Steps:**\n\n1. **Review retrospective summary**: {implementation_artifacts}/epic-{{epic_number}}-retro-{date}.md\n\n2. **Execute preparation sprint** (Est: {{prep_days}} days)\n   - Complete {{critical_count}} critical path items\n   - Execute {{prep_task_count}} preparation tasks\n   - Verify all action items are in progress\n\n3. **Review action items in next standup**\n   - Ensure ownership is clear\n   - Track progress on commitments\n   - Adjust timelines if needed\n\n{{#if epic_update_needed}} 4. **IMPORTANT: Schedule Epic {{next_epic_num}} planning review session**\n\n- Significant discoveries from Epic {{epic_number}} require epic updates\n- Review and update affected stories\n- Align team on revised approach\n- Do NOT start Epic {{next_epic_num}} until review is complete\n  {{else}}\n\n4. **Begin Epic {{next_epic_num}} when ready**\n   - Start creating stories with Developer agent's `create-story`\n   - Epic will be marked as `in-progress` automatically when first story is created\n   - Ensure all critical path items are done first\n     {{/if}}\n\n**Team Performance:**\nEpic {{epic_number}} delivered {{completed_stories}} stories with {{velocity_summary}}. The retrospective surfaced {{insight_count}} key insights and {{significant_discovery_count}} significant discoveries. The team is well-positioned for Epic {{next_epic_num}} success.\n\n{{#if significant_discovery_count > 0}}\n⚠️ **REMINDER**: Epic update required before starting Epic {{next_epic_num}}\n{{/if}}\n\n---\n\nAmelia (Developer): \"Great session today, {user_name}. The team did excellent work.\"\n\nAlice (Product Owner): \"See you at epic planning!\"\n\nCharlie (Senior Dev): \"Time to knock out that prep work.\"\n\n\u003c/output>\n\u003caction>Run: `python3 {project-root}/_bmad/scripts/resolve_customization.py --skill {skill-root} --key workflow.on_complete` — if the resolved value is non-empty, follow it as the final terminal instruction before exiting.\u003c/action>\n\u003c/step>\n\n\u003c/workflow>\n\n\u003cfacilitation-guidelines>\n\u003cguideline>PARTY MODE REQUIRED: All agent dialogue uses \"Name (Role): dialogue\" format\u003c/guideline>\n\u003cguideline>Amelia (Developer) maintains psychological safety throughout - no blame or judgment\u003c/guideline>\n\u003cguideline>Focus on systems and processes, not individual performance\u003c/guideline>\n\u003cguideline>Create authentic team dynamics: disagreements, diverse perspectives, emotions\u003c/guideline>\n\u003cguideline>User ({user_name}) is active participant, not passive observer\u003c/guideline>\n\u003cguideline>Encourage specific examples over general statements\u003c/guideline>\n\u003cguideline>Balance celebration of wins with honest assessment of challenges\u003c/guideline>\n\u003cguideline>Ensure every voice is heard - all agents contribute\u003c/guideline>\n\u003cguideline>Action items must be specific, achievable, and owned\u003c/guideline>\n\u003cguideline>Forward-looking mindset - how do we improve for next epic?\u003c/guideline>\n\u003cguideline>Intent-based facilitation, not scripted phrases\u003c/guideline>\n\u003cguideline>Deep story analysis provides rich material for discussion\u003c/guideline>\n\u003cguideline>Previous retro integration creates accountability and continuity\u003c/guideline>\n\u003cguideline>Significant change detection prevents epic misalignment\u003c/guideline>\n\u003cguideline>Critical verification prevents starting next epic prematurely\u003c/guideline>\n\u003cguideline>Document everything - retrospective insights are valuable for future reference\u003c/guideline>\n\u003cguideline>Two-part structure ensures both reflection AND preparation\u003c/guideline>\n\u003c/facilitation-guidelines>\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("bmad-retrospective-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

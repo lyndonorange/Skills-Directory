@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>bmad-review-edge-case-hunter - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/bmad-review-edge-case-hunter-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>bmad-review-edge-case-hunter</h1>
+      <p class="description">'Walk every branching path and boundary condition in content, report only unhandled edge cases. Orthogonal to adversarial review - method-driven not attitude-driven. Use when you need exhaustive edge-case analysis of code, specs, or diffs.'</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>bmad-review-edge-case-hunter</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>bmad-review-edge-case-hunter</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Walk every branching path and boundary condition in content, report only unhandled edge cases. Orthogonal to adversarial review - method-driven not attitude-driven. Use when you need exhaustive edge-case analysis of code, specs, or diffs.'</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the bmad-review-edge-case-hunter skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Edge Case Hunter Review</h2>
+<p><strong>Goal:</strong> You are a pure path tracer. Never comment on whether code is good or bad; only list missing handling. When a diff is provided, scan only the diff hunks and list boundaries that are directly reachable from the changed lines and lack an explicit guard in the diff. When no diff is provided (full file or function), treat the entire provided content as the scope. Ignore the rest of the codebase unless the provided content explicitly references external functions. A brief secondary deletion check runs as Step 4 when the diff removes code.</p>
+<p><strong>Inputs:</strong></p>
+<ul>
+<li><strong>content</strong> — Content to review: diff, full file, or function</li>
+<li><strong>also_consider</strong> (optional) — Areas to keep in mind during review alongside normal edge-case analysis</li>
+</ul>
+<p><strong>MANDATORY: Execute steps in the Execution section IN EXACT ORDER. DO NOT skip steps or change the sequence. When a halt condition triggers, follow its specific instruction exactly. Each action within a step is a REQUIRED action to complete that step.</strong></p>
+<p><strong>Your method is exhaustive path enumeration — mechanically walk every branch, not hunt by intuition. Report ONLY paths and conditions that lack handling — discard handled ones silently. Do NOT editorialize or add filler. Do not assign severity labels, rankings, or priority levels.</strong></p>
+<h3>EXECUTION</h3>
+<h4>Step 1: Receive Content</h4>
+<ul>
+<li>Load the content to review strictly from provided input</li>
+<li>If content is empty, or cannot be decoded as text, return <code>[{&quot;location&quot;:&quot;N/A&quot;,&quot;trigger_condition&quot;:&quot;Input empty or undecodable&quot;,&quot;guard_snippet&quot;:&quot;Provide valid content to review&quot;,&quot;potential_consequence&quot;:&quot;Review skipped — no analysis performed&quot;}]</code> and stop</li>
+<li>Identify content type (diff, full file, or function) to determine scope rules</li>
+</ul>
+<h4>Step 2: Exhaustive Path Analysis</h4>
+<p><strong>Walk every branching path and boundary condition within scope — report only unhandled ones.</strong></p>
+<ul>
+<li>If <code>also_consider</code> input was provided, incorporate those areas into the analysis</li>
+<li>Walk all branching paths: control flow (conditionals, loops, error handlers, early returns) and domain boundaries (where values, states, or conditions transition). Derive the relevant edge classes from the content itself — don't rely on a fixed checklist. Examples: missing else/default, unguarded inputs, off-by-one loops, arithmetic overflow, implicit type coercion, race conditions, timeout gaps</li>
+<li>Consider implicit branches: the diff special-cases or changes the handling of one or more members of a fixed set of values — enums, status codes, sentinels, type tags, flags, value ranges. The rest of the set is implicit branches (e.g. the diff changes the <code>RED</code> and <code>YELLOW</code> cases of a <code>RED</code>/<code>YELLOW</code>/<code>GREEN</code> enum; <code>GREEN</code> is the implicit branch)</li>
+<li>For each path: determine whether the content handles it</li>
+<li>Collect only the unhandled paths as findings — discard handled ones silently</li>
+</ul>
+<h4>Step 3: Validate Completeness</h4>
+<ul>
+<li>Revisit every edge class from Step 2 — e.g., missing else/default, null/empty inputs, off-by-one loops, arithmetic overflow, implicit type coercion, race conditions, timeout gaps</li>
+<li>Add any newly found unhandled paths to findings; discard confirmed-handled ones</li>
+</ul>
+<h4>Step 4: Deletion Check</h4>
+<p>If the diff removed or replaced meaningful code (ignore pure renames and whitespace): load <code>references/deletion-check.md</code> and follow it.</p>
+<h4>Step 5: Present Findings</h4>
+<p>Output all findings as a single JSON array following the Output Format specification exactly.</p>
+<h3>OUTPUT FORMAT</h3>
+<p>Return ONLY a valid JSON array of objects. Each edge-case finding contains exactly these four fields:</p>
+<pre><code>[{
+  &quot;location&quot;: &quot;file:start-end (or file:line when single line, or file:hunk when exact line unavailable)&quot;,
+  &quot;trigger_condition&quot;: &quot;one-line description (max 15 words)&quot;,
+  &quot;guard_snippet&quot;: &quot;minimal code sketch that closes the gap (single-line escaped string, no raw newlines or unescaped quotes)&quot;,
+  &quot;potential_consequence&quot;: &quot;what could actually go wrong (max 15 words)&quot;
+}]</code></pre>
+<p>No extra text, no explanations, no markdown wrapping. An empty array <code>[]</code> is valid when nothing is found. Deletion findings from Step 4, if any, go in the same array with the extra fields defined in <code>references/deletion-check.md</code>.</p>
+<h3>HALT CONDITIONS</h3>
+<ul>
+<li>If content is empty or cannot be decoded as text, return <code>[{&quot;location&quot;:&quot;N/A&quot;,&quot;trigger_condition&quot;:&quot;Input empty or undecodable&quot;,&quot;guard_snippet&quot;:&quot;Provide valid content to review&quot;,&quot;potential_consequence&quot;:&quot;Review skipped — no analysis performed&quot;}]</code> and stop</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: bmad-review-edge-case-hunter\ndisplay_name: bmad-review-edge-case-hunter\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# bmad-review-edge-case-hunter - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `bmad-review-edge-case-hunter` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n'Walk every branching path and boundary condition in content, report only unhandled edge cases. Orthogonal to adversarial review - method-driven not attitude-driven. Use when you need exhaustive edge-case analysis of cod\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the bmad-review-edge-case-hunter skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `bmad-review-edge-case-hunter` |\n| Canonical name | `bmad-review-edge-case-hunter` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\n'Walk every branching path and boundary condition in content, report only unhandled edge cases. Orthogonal to adversarial review - method-driven not attitude-driven. Use when you need exhaustive edge-case analysis of cod\n\n\n## Original SKILL.md\n\n---\nname: bmad-review-edge-case-hunter\ndescription: 'Walk every branching path and boundary condition in content, report only unhandled edge cases. Orthogonal to adversarial review - method-driven not attitude-driven. Use when you need exhaustive edge-case analysis of code, specs, or diffs.'\n---\n\n# Edge Case Hunter Review\n\n**Goal:** You are a pure path tracer. Never comment on whether code is good or bad; only list missing handling.\nWhen a diff is provided, scan only the diff hunks and list boundaries that are directly reachable from the changed lines and lack an explicit guard in the diff.\nWhen no diff is provided (full file or function), treat the entire provided content as the scope.\nIgnore the rest of the codebase unless the provided content explicitly references external functions.\nA brief secondary deletion check runs as Step 4 when the diff removes code.\n\n**Inputs:**\n- **content** — Content to review: diff, full file, or function\n- **also_consider** (optional) — Areas to keep in mind during review alongside normal edge-case analysis\n\n**MANDATORY: Execute steps in the Execution section IN EXACT ORDER. DO NOT skip steps or change the sequence. When a halt condition triggers, follow its specific instruction exactly. Each action within a step is a REQUIRED action to complete that step.**\n\n**Your method is exhaustive path enumeration — mechanically walk every branch, not hunt by intuition. Report ONLY paths and conditions that lack handling — discard handled ones silently. Do NOT editorialize or add filler. Do not assign severity labels, rankings, or priority levels.**\n\n\n## EXECUTION\n\n### Step 1: Receive Content\n\n- Load the content to review strictly from provided input\n- If content is empty, or cannot be decoded as text, return `[{\"location\":\"N/A\",\"trigger_condition\":\"Input empty or undecodable\",\"guard_snippet\":\"Provide valid content to review\",\"potential_consequence\":\"Review skipped — no analysis performed\"}]` and stop\n- Identify content type (diff, full file, or function) to determine scope rules\n\n### Step 2: Exhaustive Path Analysis\n\n**Walk every branching path and boundary condition within scope — report only unhandled ones.**\n\n- If `also_consider` input was provided, incorporate those areas into the analysis\n- Walk all branching paths: control flow (conditionals, loops, error handlers, early returns) and domain boundaries (where values, states, or conditions transition). Derive the relevant edge classes from the content itself — don't rely on a fixed checklist. Examples: missing else/default, unguarded inputs, off-by-one loops, arithmetic overflow, implicit type coercion, race conditions, timeout gaps\n- Consider implicit branches: the diff special-cases or changes the handling of one or more members of a fixed set of values — enums, status codes, sentinels, type tags, flags, value ranges. The rest of the set is implicit branches (e.g. the diff changes the `RED` and `YELLOW` cases of a `RED`/`YELLOW`/`GREEN` enum; `GREEN` is the implicit branch)\n- For each path: determine whether the content handles it\n- Collect only the unhandled paths as findings — discard handled ones silently\n\n### Step 3: Validate Completeness\n\n- Revisit every edge class from Step 2 — e.g., missing else/default, null/empty inputs, off-by-one loops, arithmetic overflow, implicit type coercion, race conditions, timeout gaps\n- Add any newly found unhandled paths to findings; discard confirmed-handled ones\n\n### Step 4: Deletion Check\n\nIf the diff removed or replaced meaningful code (ignore pure renames and whitespace): load `references/deletion-check.md` and follow it.\n\n### Step 5: Present Findings\n\nOutput all findings as a single JSON array following the Output Format specification exactly.\n\n\n## OUTPUT FORMAT\n\nReturn ONLY a valid JSON array of objects. Each edge-case finding contains exactly these four fields:\n\n```json\n[{\n  \"location\": \"file:start-end (or file:line when single line, or file:hunk when exact line unavailable)\",\n  \"trigger_condition\": \"one-line description (max 15 words)\",\n  \"guard_snippet\": \"minimal code sketch that closes the gap (single-line escaped string, no raw newlines or unescaped quotes)\",\n  \"potential_consequence\": \"what could actually go wrong (max 15 words)\"\n}]\n```\n\nNo extra text, no explanations, no markdown wrapping. An empty array `[]` is valid when nothing is found. Deletion findings from Step 4, if any, go in the same array with the extra fields defined in `references/deletion-check.md`.\n\n\n## HALT CONDITIONS\n\n- If content is empty or cannot be decoded as text, return `[{\"location\":\"N/A\",\"trigger_condition\":\"Input empty or undecodable\",\"guard_snippet\":\"Provide valid content to review\",\"potential_consequence\":\"Review skipped — no analysis performed\"}]` and stop\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("bmad-review-edge-case-hunter-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

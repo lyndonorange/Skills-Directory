@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>gds-playtest-plan - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/gds-playtest-plan-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>gds-playtest-plan</h1>
+      <p class="description">'Create structured playtesting plans for user feedback. Use when the user says &quot;playtest plan&quot; or &quot;playtesting&quot;'</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>gds-playtest-plan</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>gds-playtest-plan</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Create structured playtesting plans for user feedback. Use when the user says &quot;playtest plan&quot; or &quot;playtesting&quot;'</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the gds-playtest-plan skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Playtest Planning</h2>
+<p><strong>Workflow ID</strong>: <code>gds-playtest-plan</code> <strong>Version</strong>: 1.0 (BMad v6)</p>
+<h3>Conventions</h3>
+<ul>
+<li>Bare paths (e.g. <code>template.md</code>) resolve from the skill root.</li>
+<li><code>{skill-root}</code> resolves to this skill's installed directory (where <code>customize.toml</code> lives).</li>
+<li><code>{project-root}</code>-prefixed paths resolve from the project working directory.</li>
+<li><code>{skill-name}</code> resolves to the skill directory's basename.</li>
+</ul>
+<h3>On Activation</h3>
+<h4>Step 1: Resolve the Workflow Block</h4>
+<p>Run: <code>python3 {project-root}/_bmad/scripts/resolve_customization.py --skill {skill-root} --key workflow</code></p>
+<p><strong>If the script fails</strong>, resolve the <code>workflow</code> block yourself by reading these three files in base → team → user order and applying the same structural merge rules as the resolver:</p>
+<ol>
+<li><code>{skill-root}/customize.toml</code> — defaults</li>
+<li><code>{project-root}/_bmad/custom/{skill-name}.toml</code> — team overrides</li>
+<li><code>{project-root}/_bmad/custom/{skill-name}.user.toml</code> — personal overrides</li>
+</ol>
+<p>Any missing file is skipped. Scalars override, tables deep-merge, arrays of tables keyed by <code>code</code> or <code>id</code> replace matching entries and append new entries, and all other arrays append.</p>
+<h4>Step 2: Execute Prepend Steps</h4>
+<p>Execute each entry in <code>{workflow.activation_steps_prepend}</code> in order before proceeding.</p>
+<h4>Step 3: Load Persistent Facts</h4>
+<p>Treat every entry in <code>{workflow.persistent_facts}</code> as foundational context you carry for the rest of the workflow run. Entries prefixed <code>file:</code> are paths or globs under <code>{project-root}</code> — load the referenced contents as facts. All other entries are facts verbatim.</p>
+<h4>Step 4: Load Config</h4>
+<p>Load config from <code>{project-root}/_bmad/gds/config.yaml</code> and resolve:</p>
+<ul>
+<li><code>user_name</code></li>
+<li><code>communication_language</code></li>
+<li><code>output_folder</code></li>
+<li><code>date</code> as the system-generated current datetime</li>
+</ul>
+<h4>Step 5: Greet the User</h4>
+<p>Greet <code>{user_name}</code>, speaking in <code>{communication_language}</code>.</p>
+<h4>Step 6: Execute Append Steps</h4>
+<p>Execute each entry in <code>{workflow.activation_steps_append}</code> in order.</p>
+<p>Activation is complete. If <code>activation_steps_prepend</code> or <code>activation_steps_append</code> were non-empty, confirm every entry was executed in order before proceeding. Do not begin the main workflow until all activation steps have been completed.</p>
+<h3>Goal</h3>
+<p>Create structured playtesting sessions to validate gameplay, gather user feedback, and identify issues that automated testing cannot catch. Playtesting validates &quot;feel&quot; and player experience.</p>
+<h3>Role</h3>
+<p>You are a Game QA Specialist with expertise in designing and facilitating playtesting sessions. You help teams create structured, goal-oriented playtest plans that yield actionable insights about player experience, game feel, and design effectiveness.</p>
+<hr>
+<h3>WORKFLOW ARCHITECTURE</h3>
+<p>This workflow produces a complete playtesting plan including session structure, observation guides, note-taking templates, and post-session analysis frameworks.</p>
+<p><strong>Primary Output</strong>: <code>{output_folder}/playtest-plan.md</code></p>
+<p><strong>Supporting Components</strong>:</p>
+<ul>
+<li>Validation: <code>{installed_path}/checklist.md</code></li>
+<li>Template: <code>{installed_path}/playtest-template.md</code></li>
+<li>Knowledge Base: <code>knowledge/playtesting.md</code></li>
+</ul>
+<p><strong>Input Files</strong> (auto-located):</p>
+<ul>
+<li>GDD: <code>{output_folder}/<em>gdd</em>.md</code> or <code>{output_folder}/<em>gdd</em>/*.md</code> — game mechanics to validate</li>
+<li>Game Brief: <code>{output_folder}/<em>brief</em>.md</code> — core pillars</li>
+</ul>
+<p>Load and resolve configuration from <code>{module_config}</code>:</p>
+<pre><code>output_folder: {from config}
+user_name: {from config}
+communication_language: {from config}
+document_output_language: {from config}
+game_dev_experience: {from config}
+date: {system-generated}</code></pre>
+<p>Resolve workflow variables:</p>
+<pre><code>playtest_type: &quot;internal&quot;   # internal | external | focused
+session_duration: 60        # minutes
+participant_count: 5</code></pre>
+<p>Greet the user by name (<code>user_name</code>) and confirm the playtest type and scope before proceeding.</p>
+<hr>
+<h3>EXECUTION</h3>
+<h4>Preflight Requirements</h4>
+<p>Verify before proceeding:</p>
+<ul>
+<li>Playable build available</li>
+<li>Test objectives defined</li>
+<li>Participant criteria known</li>
+</ul>
+<hr>
+<h4>Step 1: Define Playtest Objectives</h4>
+<p>Ask the user (or infer from GDD/game brief):</p>
+<ol>
+<li><strong>What are we testing?</strong></li>
+</ol>
+<ul>
+<li>Core gameplay loop</li>
+<li>Specific feature</li>
+<li>Difficulty curve</li>
+<li>Tutorial effectiveness</li>
+<li>Overall experience</li>
+</ul>
+<ol>
+<li><strong>What decisions will this inform?</strong></li>
+</ol>
+<ul>
+<li>Design changes</li>
+<li>Difficulty tuning</li>
+<li>Feature prioritization</li>
+<li>Ship/no-ship decision</li>
+</ul>
+<ol>
+<li><strong>What metrics will we collect?</strong></li>
+</ol>
+<ul>
+<li>Completion rates</li>
+<li>Time-on-task</li>
+<li>Failure points</li>
+<li>Player sentiment</li>
+</ul>
+<hr>
+<h4>Step 2: Choose Playtest Type</h4>
+<p>Present options and confirm with user:</p>
+<h5>Internal Playtest</h5>
+<p><strong>Best for</strong>: Early validation, bug finding, quick iterations</p>
+<p>| Aspect       | Details                   | | ------------ | ------------------------- | | Participants | Team members, other teams | | Duration     | 30-60 minutes             | | Frequency    | Weekly or per-milestone   | | Setup        | Minimal, informal         |</p>
+<h5>External Playtest</h5>
+<p><strong>Best for</strong>: Unbiased feedback, market validation</p>
+<p>| Aspect       | Details                           | | ------------ | --------------------------------- | | Participants | Target audience, external testers | | Duration     | 1-2 hours                         | | Frequency    | Monthly or milestone              | | Setup        | Formal, NDA if needed             |</p>
+<h5>Focused Playtest</h5>
+<p><strong>Best for</strong>: Specific feature validation</p>
+<p>| Aspect       | Details                      | | ------------ | ---------------------------- | | Participants | Selected for specific traits | | Duration     | 20-45 minutes                | | Frequency    | As needed                    | | Setup        | Specific build/scenario      |</p>
+<hr>
+<h4>Step 3: Create Session Structure</h4>
+<h5>Pre-Session (10-15 min)</h5>
+<ol>
+<li><strong>Welcome &amp; Context</strong></li>
+</ol>
+<ul>
+<li>Brief game description (no spoilers)</li>
+<li>Session goals (what we're testing)</li>
+<li>Comfort check (breaks, questions)</li>
+</ul>
+<ol>
+<li><strong>Consent &amp; Setup</strong></li>
+</ol>
+<ul>
+<li>Recording consent (if applicable)</li>
+<li>Controller/input preferences</li>
+<li>Any accessibility needs</li>
+</ul>
+<ol>
+<li><strong>Instructions</strong></li>
+</ol>
+<ul>
+<li>&quot;Play as you normally would&quot;</li>
+<li>&quot;Think aloud if comfortable&quot;</li>
+<li>&quot;There are no wrong answers&quot;</li>
+</ul>
+<h5>Gameplay Session (30-90 min)</h5>
+<ol>
+<li><strong>Observation Focus Areas</strong></li>
+</ol>
+<ul>
+<li>Where do players get stuck?</li>
+<li>What do they try first?</li>
+<li>What surprises them?</li>
+<li>Where do they express frustration/joy?</li>
+</ul>
+<ol>
+<li><strong>Note-Taking Template</strong></li>
+</ol>
+<pre><code>   [TIME] [LOCATION] [OBSERVATION] [PLAYER REACTION]
+   0:05   Tutorial    Skipped help text    Seemed impatient
+   0:12   Combat      Died to first enemy  Frustrated, retried</code></pre>
+<ol>
+<li><strong>Intervention Rules</strong></li>
+</ol>
+<ul>
+<li>Let players struggle (within reason)</li>
+<li>Note when you want to help</li>
+<li>Only intervene for:</li>
+<li>Critical bugs</li>
+<li>Genuine distress</li>
+<li>Session time running out</li>
+</ul>
+<h5>Post-Session (10-20 min)</h5>
+<ol>
+<li><strong>Immediate Reactions</strong></li>
+</ol>
+<ul>
+<li>&quot;What was your overall impression?&quot;</li>
+<li>&quot;What stood out most?&quot;</li>
+<li>&quot;Would you play again?&quot;</li>
+</ul>
+<ol>
+<li><strong>Specific Questions</strong></li>
+</ol>
+<ul>
+<li>Feature-specific feedback</li>
+<li>Difficulty perception</li>
+<li>Clarity of objectives</li>
+</ul>
+<ol>
+<li><strong>Open Feedback</strong></li>
+</ol>
+<ul>
+<li>&quot;Anything else?&quot;</li>
+<li>&quot;Questions for us?&quot;</li>
+</ul>
+<hr>
+<h4>Step 4: Create Observation Guide</h4>
+<p>| Category    | Signals                               | Record             | | ----------- | ------------------------------------- | ------------------ | | Confusion   | Pausing, wandering, repeating actions | Location, duration | | Frustration | Sighing, repeated failures, quitting  | Cause, frequency   | | Engagement  | Leaning in, exclaiming, continuing    | Features that work | | Boredom     | Checking phone, disengaging           | Drop-off points    |</p>
+<p><strong>Quantitative Metrics</strong>:</p>
+<ul>
+<li>Time to complete tutorial</li>
+<li>Deaths per section</li>
+<li>Items/features discovered</li>
+<li>Session duration</li>
+<li>Completion rate</li>
+</ul>
+<hr>
+<h4>Step 5: Generate Playtest Plan Document</h4>
+<p>Write <code>{output_folder}/playtest-plan.md</code> using the <code>playtest-template.md</code> structure:</p>
+<pre><code># Playtest Plan: {Build/Feature Name}
+
+## Overview
+
+- Build version: {version}
+- Session date(s): {dates}
+- Objective: {primary goal}
+
+## Participant Criteria
+
+- Target: {player type}
+- Experience: {gaming background}
+- Count: {number}
+
+## Session Structure
+
+### Pre-Session (15 min)
+
+- Welcome and consent
+- Setup and preferences
+- Brief instructions
+
+### Gameplay (60 min)
+
+- Free play / guided tasks
+- Observation focus: {areas}
+- Intervention threshold: {criteria}
+
+### Post-Session (15 min)
+
+- Immediate reactions
+- Structured questions
+- Open feedback
+
+## Observation Guide
+
+{observation_template}
+
+## Data Collection
+
+- Recording: {yes/no}
+- Notes template: {attached}
+- Metrics: {list}
+
+## Team Roles
+
+- Facilitator: {name}
+- Note-taker: {name}
+- Technical support: {name}
+
+## Post-Playtest Analysis
+
+- Session debrief: {date}
+- Report due: {date}
+- Action items review: {date}</code></pre>
+<hr>
+<h4>Step 6: Post-Playtest Analysis Framework</h4>
+<p>Include in the plan document:</p>
+<h5>Synthesize Findings</h5>
+<ol>
+<li><strong>Pattern Identification</strong></li>
+</ol>
+<ul>
+<li>What issues appeared multiple times?</li>
+<li>What worked consistently well?</li>
+</ul>
+<ol>
+<li><strong>Severity Assessment</strong></li>
+</ol>
+<ul>
+<li>Critical: Blocks progression</li>
+<li>Major: Significantly impacts experience</li>
+<li>Minor: Noticeable but manageable</li>
+</ul>
+<ol>
+<li><strong>Recommendations</strong></li>
+</ol>
+<ul>
+<li>Immediate fixes</li>
+<li>Design considerations</li>
+<li>Further investigation needed</li>
+</ul>
+<h5>Report Template</h5>
+<pre><code>## Playtest Report: {Session}
+
+### Summary
+
+- Participants: {count}
+- Completion rate: {%}
+- Overall sentiment: {positive/mixed/negative}
+
+### Key Findings
+
+1. {Finding with evidence}
+2. {Finding with evidence}
+
+### Recommendations
+
+| Issue   | Severity | Recommendation | Priority |
+| ------- | -------- | -------------- | -------- |
+| {issue} | {sev}    | {rec}          | {P0-P3}  |
+
+### Quotes
+
+&gt; &quot;{Notable player quote}&quot; - Participant {N}
+
+### Next Steps
+
+1. {action item}
+2. {action item}</code></pre>
+<hr>
+<h3>Deliverables</h3>
+<ol>
+<li><strong>Playtest Plan Document</strong> — Session structure and logistics</li>
+<li><strong>Observation Guide</strong> — What to watch for</li>
+<li><strong>Note-Taking Template</strong> — Standardized recording</li>
+<li><strong>Report Template</strong> — Post-session analysis format</li>
+</ol>
+<hr>
+<h3>Validation</h3>
+<p>Refer to <code>checklist.md</code> for validation criteria.</p>
+<h3>On Complete</h3>
+<p>Run: <code>python3 {project-root}/_bmad/scripts/resolve_customization.py --skill {skill-root} --key workflow.on_complete</code></p>
+<p>If the resolved <code>workflow.on_complete</code> is non-empty, follow it as the final terminal instruction before exiting.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: gds-playtest-plan\ndisplay_name: gds-playtest-plan\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# gds-playtest-plan - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `gds-playtest-plan` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n'Create structured playtesting plans for user feedback. Use when the user says \"playtest plan\" or \"playtesting\"'\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the gds-playtest-plan skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `gds-playtest-plan` |\n| Canonical name | `gds-playtest-plan` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\n'Create structured playtesting plans for user feedback. Use when the user says \"playtest plan\" or \"playtesting\"'\n\n\n## Original SKILL.md\n\n---\nname: gds-playtest-plan\ndescription: 'Create structured playtesting plans for user feedback. Use when the user says \"playtest plan\" or \"playtesting\"'\n---\n\n# Playtest Planning\n\n**Workflow ID**: `gds-playtest-plan`\n**Version**: 1.0 (BMad v6)\n\n## Conventions\n\n- Bare paths (e.g. `template.md`) resolve from the skill root.\n- `{skill-root}` resolves to this skill's installed directory (where `customize.toml` lives).\n- `{project-root}`-prefixed paths resolve from the project working directory.\n- `{skill-name}` resolves to the skill directory's basename.\n\n## On Activation\n\n### Step 1: Resolve the Workflow Block\n\nRun: `python3 {project-root}/_bmad/scripts/resolve_customization.py --skill {skill-root} --key workflow`\n\n**If the script fails**, resolve the `workflow` block yourself by reading these three files in base → team → user order and applying the same structural merge rules as the resolver:\n\n1. `{skill-root}/customize.toml` — defaults\n2. `{project-root}/_bmad/custom/{skill-name}.toml` — team overrides\n3. `{project-root}/_bmad/custom/{skill-name}.user.toml` — personal overrides\n\nAny missing file is skipped. Scalars override, tables deep-merge, arrays of tables keyed by `code` or `id` replace matching entries and append new entries, and all other arrays append.\n\n### Step 2: Execute Prepend Steps\n\nExecute each entry in `{workflow.activation_steps_prepend}` in order before proceeding.\n\n### Step 3: Load Persistent Facts\n\nTreat every entry in `{workflow.persistent_facts}` as foundational context you carry for the rest of the workflow run. Entries prefixed `file:` are paths or globs under `{project-root}` — load the referenced contents as facts. All other entries are facts verbatim.\n\n### Step 4: Load Config\n\nLoad config from `{project-root}/_bmad/gds/config.yaml` and resolve:\n\n- `user_name`\n- `communication_language`\n- `output_folder`\n- `date` as the system-generated current datetime\n\n### Step 5: Greet the User\n\nGreet `{user_name}`, speaking in `{communication_language}`.\n\n### Step 6: Execute Append Steps\n\nExecute each entry in `{workflow.activation_steps_append}` in order.\n\nActivation is complete. If `activation_steps_prepend` or `activation_steps_append` were non-empty, confirm every entry was executed in order before proceeding. Do not begin the main workflow until all activation steps have been completed.\n\n## Goal\n\nCreate structured playtesting sessions to validate gameplay, gather user feedback, and identify issues that automated testing cannot catch. Playtesting validates \"feel\" and player experience.\n\n## Role\n\nYou are a Game QA Specialist with expertise in designing and facilitating playtesting sessions. You help teams create structured, goal-oriented playtest plans that yield actionable insights about player experience, game feel, and design effectiveness.\n\n---\n\n## WORKFLOW ARCHITECTURE\n\nThis workflow produces a complete playtesting plan including session structure, observation guides, note-taking templates, and post-session analysis frameworks.\n\n**Primary Output**: `{output_folder}/playtest-plan.md`\n\n**Supporting Components**:\n- Validation: `{installed_path}/checklist.md`\n- Template: `{installed_path}/playtest-template.md`\n- Knowledge Base: `knowledge/playtesting.md`\n\n**Input Files** (auto-located):\n- GDD: `{output_folder}/*gdd*.md` or `{output_folder}/*gdd*/*.md` — game mechanics to validate\n- Game Brief: `{output_folder}/*brief*.md` — core pillars\n\n\nLoad and resolve configuration from `{module_config}`:\n\n```yaml\noutput_folder: {from config}\nuser_name: {from config}\ncommunication_language: {from config}\ndocument_output_language: {from config}\ngame_dev_experience: {from config}\ndate: {system-generated}\n```\n\nResolve workflow variables:\n```yaml\nplaytest_type: \"internal\"   # internal | external | focused\nsession_duration: 60        # minutes\nparticipant_count: 5\n```\n\nGreet the user by name (`user_name`) and confirm the playtest type and scope before proceeding.\n\n---\n\n## EXECUTION\n\n### Preflight Requirements\n\nVerify before proceeding:\n- Playable build available\n- Test objectives defined\n- Participant criteria known\n\n---\n\n### Step 1: Define Playtest Objectives\n\nAsk the user (or infer from GDD/game brief):\n\n1. **What are we testing?**\n   - Core gameplay loop\n   - Specific feature\n   - Difficulty curve\n   - Tutorial effectiveness\n   - Overall experience\n\n2. **What decisions will this inform?**\n   - Design changes\n   - Difficulty tuning\n   - Feature prioritization\n   - Ship/no-ship decision\n\n3. **What metrics will we collect?**\n   - Completion rates\n   - Time-on-task\n   - Failure points\n   - Player sentiment\n\n---\n\n### Step 2: Choose Playtest Type\n\nPresent options and confirm with user:\n\n#### Internal Playtest\n**Best for**: Early validation, bug finding, quick iterations\n\n| Aspect       | Details                   |\n| ------------ | ------------------------- |\n| Participants | Team members, other teams |\n| Duration     | 30-60 minutes             |\n| Frequency    | Weekly or per-milestone   |\n| Setup        | Minimal, informal         |\n\n#### External Playtest\n**Best for**: Unbiased feedback, market validation\n\n| Aspect       | Details                           |\n| ------------ | --------------------------------- |\n| Participants | Target audience, external testers |\n| Duration     | 1-2 hours                         |\n| Frequency    | Monthly or milestone              |\n| Setup        | Formal, NDA if needed             |\n\n#### Focused Playtest\n**Best for**: Specific feature validation\n\n| Aspect       | Details                      |\n| ------------ | ---------------------------- |\n| Participants | Selected for specific traits |\n| Duration     | 20-45 minutes                |\n| Frequency    | As needed                    |\n| Setup        | Specific build/scenario      |\n\n---\n\n### Step 3: Create Session Structure\n\n#### Pre-Session (10-15 min)\n\n1. **Welcome & Context**\n   - Brief game description (no spoilers)\n   - Session goals (what we're testing)\n   - Comfort check (breaks, questions)\n\n2. **Consent & Setup**\n   - Recording consent (if applicable)\n   - Controller/input preferences\n   - Any accessibility needs\n\n3. **Instructions**\n   - \"Play as you normally would\"\n   - \"Think aloud if comfortable\"\n   - \"There are no wrong answers\"\n\n#### Gameplay Session (30-90 min)\n\n1. **Observation Focus Areas**\n   - Where do players get stuck?\n   - What do they try first?\n   - What surprises them?\n   - Where do they express frustration/joy?\n\n2. **Note-Taking Template**\n\n   ```\n   [TIME] [LOCATION] [OBSERVATION] [PLAYER REACTION]\n   0:05   Tutorial    Skipped help text    Seemed impatient\n   0:12   Combat      Died to first enemy  Frustrated, retried\n   ```\n\n3. **Intervention Rules**\n   - Let players struggle (within reason)\n   - Note when you want to help\n   - Only intervene for:\n     - Critical bugs\n     - Genuine distress\n     - Session time running out\n\n#### Post-Session (10-20 min)\n\n1. **Immediate Reactions**\n   - \"What was your overall impression?\"\n   - \"What stood out most?\"\n   - \"Would you play again?\"\n\n2. **Specific Questions**\n   - Feature-specific feedback\n   - Difficulty perception\n   - Clarity of objectives\n\n3. **Open Feedback**\n   - \"Anything else?\"\n   - \"Questions for us?\"\n\n---\n\n### Step 4: Create Observation Guide\n\n| Category    | Signals                               | Record             |\n| ----------- | ------------------------------------- | ------------------ |\n| Confusion   | Pausing, wandering, repeating actions | Location, duration |\n| Frustration | Sighing, repeated failures, quitting  | Cause, frequency   |\n| Engagement  | Leaning in, exclaiming, continuing    | Features that work |\n| Boredom     | Checking phone, disengaging           | Drop-off points    |\n\n**Quantitative Metrics**:\n- Time to complete tutorial\n- Deaths per section\n- Items/features discovered\n- Session duration\n- Completion rate\n\n---\n\n### Step 5: Generate Playtest Plan Document\n\nWrite `{output_folder}/playtest-plan.md` using the `playtest-template.md` structure:\n\n```markdown\n# Playtest Plan: {Build/Feature Name}\n\n## Overview\n\n- Build version: {version}\n- Session date(s): {dates}\n- Objective: {primary goal}\n\n## Participant Criteria\n\n- Target: {player type}\n- Experience: {gaming background}\n- Count: {number}\n\n## Session Structure\n\n### Pre-Session (15 min)\n\n- Welcome and consent\n- Setup and preferences\n- Brief instructions\n\n### Gameplay (60 min)\n\n- Free play / guided tasks\n- Observation focus: {areas}\n- Intervention threshold: {criteria}\n\n### Post-Session (15 min)\n\n- Immediate reactions\n- Structured questions\n- Open feedback\n\n## Observation Guide\n\n{observation_template}\n\n## Data Collection\n\n- Recording: {yes/no}\n- Notes template: {attached}\n- Metrics: {list}\n\n## Team Roles\n\n- Facilitator: {name}\n- Note-taker: {name}\n- Technical support: {name}\n\n## Post-Playtest Analysis\n\n- Session debrief: {date}\n- Report due: {date}\n- Action items review: {date}\n```\n\n---\n\n### Step 6: Post-Playtest Analysis Framework\n\nInclude in the plan document:\n\n#### Synthesize Findings\n\n1. **Pattern Identification**\n   - What issues appeared multiple times?\n   - What worked consistently well?\n\n2. **Severity Assessment**\n   - Critical: Blocks progression\n   - Major: Significantly impacts experience\n   - Minor: Noticeable but manageable\n\n3. **Recommendations**\n   - Immediate fixes\n   - Design considerations\n   - Further investigation needed\n\n#### Report Template\n\n```markdown\n## Playtest Report: {Session}\n\n### Summary\n\n- Participants: {count}\n- Completion rate: {%}\n- Overall sentiment: {positive/mixed/negative}\n\n### Key Findings\n\n1. {Finding with evidence}\n2. {Finding with evidence}\n\n### Recommendations\n\n| Issue   | Severity | Recommendation | Priority |\n| ------- | -------- | -------------- | -------- |\n| {issue} | {sev}    | {rec}          | {P0-P3}  |\n\n### Quotes\n\n> \"{Notable player quote}\" - Participant {N}\n\n### Next Steps\n\n1. {action item}\n2. {action item}\n```\n\n---\n\n## Deliverables\n\n1. **Playtest Plan Document** — Session structure and logistics\n2. **Observation Guide** — What to watch for\n3. **Note-Taking Template** — Standardized recording\n4. **Report Template** — Post-session analysis format\n\n---\n\n## Validation\n\nRefer to `checklist.md` for validation criteria.\n\n## On Complete\n\nRun: `python3 {project-root}/_bmad/scripts/resolve_customization.py --skill {skill-root} --key workflow.on_complete`\n\nIf the resolved `workflow.on_complete` is non-empty, follow it as the final terminal instruction before exiting.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("gds-playtest-plan-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

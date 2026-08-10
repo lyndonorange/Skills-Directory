@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>google-cloud-recipe-foundation-builder - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/google-cloud-recipe-foundation-builder-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>google-cloud-recipe-foundation-builder</h1>
+      <p class="description">Deploys a baseline landing zone foundation for a Google Cloud Organization, establishing security guardrails using Organization Policies, resource hierarchy folders and projects, billing association, and centralized logging and monitoring. Deploys Google Cloud's recommended security controls and architecture. Use when setting up a new Google Cloud Organization or establishing a secure, enterprise-grade landing zone foundation. Don't use for individual project onboarding (use google-cloud-recipe-onboarding or product-specific skills instead).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>google-cloud-recipe-foundation-builder</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>google-cloud-recipe-foundation-builder</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Deploys a baseline landing zone foundation for a Google Cloud Organization, establishing security guardrails using Organization Policies, resource hierarchy folders and projects, billing association, and centralized logging and monitoring. Deploys Google Cloud's recommended security controls and architecture. Use when setting up a new Google Cloud Organization or establishing a secure, enterprise-grade landing zone foundation. Don't use for individual project onboarding (use google-cloud-recipe-onboarding or product-specific skills instead).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the google-cloud-recipe-foundation-builder skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+        <div class="usage-card"><strong>Upstream provenance</strong><p><a href="https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39">Google Agent Skills</a> at 092e210b243601797a0fb939040be2b1288e6d39 (Apache-2.0).</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Universal runtime boundary</h3>
+<ul>
+<li>Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.</li>
+<li>Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.</li>
+<li>Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.</li>
+<li>Read <code>references/upstream.md</code> when provenance, the pinned revision, licensing, or local adaptation details matter.</li>
+</ul>
+<h2>Google Cloud Recipe: Foundation Builder</h2>
+<blockquote>[!WARNING] This skill is currently in a preview state. It will deploy a secure</blockquote>
+<blockquote>foundation, but does not have all advanced features. Users who want more</blockquote>
+<blockquote>options should visit</blockquote>
+<blockquote>[Google Cloud Setup](https://docs.cloud.google.com/docs/enterprise/cloud-setup).</blockquote>
+<p>This skill guides the setup of a secure, enterprise-grade Google Cloud landing zone foundation. It establishes baseline security controls, organizes the initial resource hierarchy, and configures centralized audit logging and cross-environment monitoring.</p>
+<h3>Overview</h3>
+<p>The recipe provisions the following core components at the organization root:</p>
+<ul>
+<li><strong>Security Guardrails</strong>: Enforces 17 baseline Google Cloud Organization</li>
+</ul>
+<p>Policies to secure the environment (13 Boolean, 4 List constraints).</p>
+<ul>
+<li><strong>Resource Hierarchy</strong>: Establishes 4 folders (<code>Common</code>, <code>Production</code>,</li>
+</ul>
+<p><code>Non-Production</code>, <code>Development</code>) and provisions corresponding projects sequentially with globally unique ID prefixes (<code>logging-</code>, <code>prod-</code>, <code>non-prod-</code>, <code>dev-</code> followed by a shared suffix).</p>
+<ul>
+<li><strong>Billing &amp; API Enablement</strong>: Links all projects to your billing account and</li>
+</ul>
+<p>activates critical logging/monitoring services.</p>
+<ul>
+<li><strong>Centralized Logging &amp; Monitoring</strong>: Deploys a global, centralized log</li>
+</ul>
+<p>bucket with 30-day retention, configures an organization-wide audit log sink, and sets up a cross-environment metrics scope.</p>
+<hr>
+<h3>Clarifying Questions</h3>
+<p>Before executing this recipe, the agent <strong>must</strong> gather the following details:</p>
+<ol>
+<li><strong>Organization ID</strong>: Run <code>gcloud organizations list</code> to retrieve the</li>
+</ol>
+<p>available organizations, present them to the user, and ask them to select the target <strong>Organization ID</strong>.</p>
+<ol>
+<li><strong>Billing Account ID</strong>: Run `gcloud billing accounts list</li>
+</ol>
+<p>--filter=open=true` to retrieve only the active (open) billing accounts, present them to the user, and ask them to select the active <strong>Billing Account ID</strong>.</p>
+<ol>
+<li><strong>Project ID Suffix</strong>: Ask if the user has a preferred prefix or target</li>
+</ol>
+<p>suffix for Project IDs (default uses prefix + a shared random 8-character string, e.g., <code>prod-ab12cd34</code>).</p>
+<ol>
+<li><strong>Log Bucket Region</strong>: Ask for the target region for resources if they want</li>
+</ol>
+<p>to override the default <code>global</code> log bucket location.</p>
+<hr>
+<h3>Prerequisites</h3>
+<p>Ensure the following prerequisites are met before beginning the deployment:</p>
+<ul>
+<li><strong>GCP Identity</strong>: You must have a Google Cloud Organization resource set up.</li>
+<li><strong>Administrative IAM Roles</strong>: The identity executing these commands must</li>
+</ul>
+<p>hold the required administrative permissions. If any step fails with a <code>Permission Denied</code> error, the agent will attempt to self-remediate by granting the corresponding recommended role as detailed in <strong>Phase 2: Error Recovery &amp; Lazy Role Remediation Strategy</strong>.</p>
+<ul>
+<li><strong>Tools</strong>: The <code>gcloud</code> CLI must be installed, authorized with the above</li>
+</ul>
+<p>identity, and configured for use.</p>
+<hr>
+<h3>Steps to Complete the Recipe</h3>
+<h4>Phase 1: Pre-flight Confirmation</h4>
+<p>Identify the target organization and obtain explicit user approval before making changes.</p>
+<ol>
+<li><strong>Identify and Discover Organization</strong>: Verify the target organization. If</li>
+</ol>
+<p>only the display name is known, list organizations to find the ID. Then, retrieve the organization metadata to dynamically calculate the <strong>Directory Customer ID</strong> and <strong>Domain Name</strong>:</p>
+<pre><code>    # List to find ID if needed
+    gcloud organizations list
+
+    # Describe the organization to retrieve metadata
+    gcloud organizations describe [ORGANIZATION_ID]</code></pre>
+<p><em>Calculate values:</em></p>
+<ul>
+<li><strong>Domain Name</strong> (<code>[ORG_NAME]</code> / <code>[YOUR_DOMAIN]</code>): Use the <code>displayName</code></li>
+</ul>
+<p>value from the output (e.g., <code>my-business.com</code>).</p>
+<ul>
+<li><strong>Customer ID</strong> (<code>[DIRECTORY_CUSTOMER_ID]</code>): Use the</li>
+</ul>
+<p><code>owner.directoryCustomerId</code> value from the output (e.g., <code>C01234567</code>).</p>
+<ol>
+<li><strong>Present Blueprint Summary</strong>: Present the exact details of the blueprint to</li>
+</ol>
+<p>the user and request confirmation to proceed:</p>
+<blockquote>**Proposed Foundation Deployment Summary for Organization: <code>[ORG_NAME]</code></blockquote>
+<blockquote>(<code>[ORGANIZATION_ID]</code>)**</blockquote>
+<blockquote></blockquote>
+<blockquote>*   <strong>Security:</strong> Enforce 17 baseline Organization Policies (13 Boolean, 4</blockquote>
+<blockquote>    List).</blockquote>
+<blockquote>*   <strong>Folders:</strong> Create 4 folders sequentially (<code>Common</code>, <code>Production</code>,</blockquote>
+<blockquote>    <code>Non-Production</code>, <code>Development</code>).</blockquote>
+<blockquote>*   <strong>Projects:</strong> Create 4 projects sequentially with unique IDs</blockquote>
+<blockquote>    (<code>logging-[SUFFIX]</code>, <code>prod-[SUFFIX]</code>, <code>non-prod-[SUFFIX]</code>,</blockquote>
+<blockquote>    <code>dev-[SUFFIX]</code>).</blockquote>
+<blockquote>*   <strong>Billing:</strong> Link all projects to Billing Account</blockquote>
+<blockquote>    <code>[BILLING_ACCOUNT_ID]</code>.</blockquote>
+<blockquote>*   <strong>APIs:</strong> Enable Logging and Monitoring APIs on the central project.</blockquote>
+<blockquote>*   <strong>Centralized Logging:</strong> Deploy a <code>global</code> log bucket</blockquote>
+<blockquote>    <code>[ORG_NAME]-logging</code> (30-day retention), configure an</blockquote>
+<blockquote>    organization-level sink</blockquote>
+<blockquote>    <code>[ORGANIZATION_ID]-logbucketsink-[RANDOM_HEX]</code>, and establish</blockquote>
+<blockquote>    cross-project metrics scopes.</blockquote>
+<blockquote></blockquote>
+<blockquote>Do you wish to proceed with this deployment? (Yes/No)</blockquote>
+<blockquote>[!IMPORTANT] <strong>Pause execution</strong> and wait for explicit user approval before</blockquote>
+<blockquote>moving to Phase 2. If the user declines, abort the operation.</blockquote>
+<h4>Phase 2: Error Recovery &amp; Lazy Role Remediation Strategy</h4>
+<p>To ensure deployment continues smoothly on clean organizations without requiring complex upfront permission checks (which require a quota project), the agent <strong>must</strong> adopt a &quot;lazy recovery&quot; approach.</p>
+<p>Instead of testing permissions in advance, the agent will attempt to execute each step in the recipe. If a step fails with a <code>Permission Denied</code> error, the agent will attempt to self-remediate by granting the corresponding recommended administrative group of roles to the deployment identity and retrying the operation.</p>
+<blockquote>[!IMPORTANT] When asked about pre-deployment readiness, prerequisites, or</blockquote>
+<blockquote>checks to run, the agent <strong>must</strong> explicitly explain that the landing zone</blockquote>
+<blockquote>deployment adopts a lazy role remediation strategy rather than upfront</blockquote>
+<blockquote>testing, detailing all of the following in its response: 1. Confirm it will</blockquote>
+<blockquote>execute deployment commands directly, catching any Permission Denied</blockquote>
+<blockquote>errors. 2. Confirm it will attempt to self-remediate on failure by running the</blockquote>
+<blockquote>exact commands <code>gcloud organizations add-iam-policy-binding</code> or `gcloud</blockquote>
+<blockquote>billing accounts add-iam-policy-binding` to grant the entire administrative</blockquote>
+<blockquote>group of roles to the active identity, and then retry the failed deployment</blockquote>
+<blockquote>command. 3. List the core administrative groups that it will attempt to grant</blockquote>
+<blockquote>(Organization Admin Group, Billing Admin Group, and Security Admin Group)</blockquote>
+<blockquote>mapped to their key roles. 4. Confirm it will halt execution and request</blockquote>
+<blockquote>manual administrator intervention if the self-remediation grant command fails.</blockquote>
+<h5>Remediation Protocol</h5>
+<p>For any command that fails due to missing permissions:</p>
+<ol>
+<li><strong>Identify Required Admin Group</strong>: Determine which administrative group is</li>
+</ol>
+<p>responsible for the failed action. Refer to the [Administrative IAM Reference](references/admin-iam.md#core-administrative-groups--roles) for details.</p>
+<ol>
+<li><strong>Attempt Self-Remediation</strong>: Grant <strong>all</strong> roles belonging to that</li>
+</ol>
+<p>administrative group to the active authenticated account sequentially. Refer to the [Administrative IAM Reference Remediation Guide](references/admin-iam.md#remediation) for the copy-pasteable script commands:</p>
+<ul>
+<li>**For Organization/Folder level failures (Org Admin Group or Security</li>
+</ul>
+<p>Admin Group)**: Run <code>gcloud organizations add-iam-policy-binding</code> sequentially for each role in the group.</p>
+<ul>
+<li><strong>For Billing level failures (Billing Admin Group)</strong>: Run `gcloud</li>
+</ul>
+<p>billing accounts add-iam-policy-binding` sequentially for each role in the group.</p>
+<ol>
+<li><strong>Halt on Remediation Failure</strong>:</li>
+</ol>
+<ul>
+<li>If the grant commands succeed, immediately retry the failed deployment</li>
+</ul>
+<p>command.</p>
+<ul>
+<li>If any of the grant commands fail (e.g., due to lack of <code>setIamPolicy</code></li>
+</ul>
+<p>admin rights), <strong>halt execution</strong> and instruct the user to ask their Organization/Billing Administrator to manually grant the entire administrative group of roles.</p>
+<h5>Phase-Specific Remediation Mapping</h5>
+<ul>
+<li><strong>Phase 3: Security Guardrails (Org Policies)</strong>:</li>
+<li>If <code>gcloud org-policies set-policy</code> fails: Attempt to grant the entire</li>
+</ul>
+<p><strong>Organization Admin Group</strong> (9 roles) at the organization level.</p>
+<ul>
+<li><strong>Phase 4: Resource Hierarchy (Folders &amp; Projects)</strong>:</li>
+<li>If <code>gcloud resource-manager folders create</code> or <code>gcloud projects create</code></li>
+</ul>
+<p>fails: Attempt to grant the entire <strong>Organization Admin Group</strong> (9 roles) at the organization level.</p>
+<ul>
+<li><strong>Phase 4: Billing Link</strong>:</li>
+<li>If <code>gcloud billing projects link</code> fails: Attempt to grant the entire</li>
+</ul>
+<p><strong>Billing Admin Group</strong> (3 roles) at the billing account level, and ensure the active identity is granted the <strong>Organization Admin Group</strong> (which contains <code>roles/billing.user</code>) at the organization level.</p>
+<ul>
+<li><strong>Phase 5: Centralized Logging &amp; Monitoring</strong>:</li>
+<li>If <code>gcloud logging sinks create</code> fails at org level: Attempt to grant</li>
+</ul>
+<p>the entire <strong>Logging/Monitoring Admin Group</strong> (2 roles: <code>roles/logging.admin</code>, <code>roles/monitoring.admin</code>) and the <strong>Security Admin Group</strong> (9 roles) at the organization level.</p>
+<h4>Phase 3: Security Guardrails (Org Policies)</h4>
+<p>Apply 17 baseline security controls at the organization root.</p>
+<blockquote>[!CAUTION] Applying <code>iam.allowedPolicyMemberDomains</code> first can lock out the</blockquote>
+<blockquote>deployment identity if it resides in an unallowed domain. Ensure the</blockquote>
+<blockquote>deployment identity is safe before enforcing this policy.</blockquote>
+<ol>
+<li>Generate the YAML configuration files for the 17 policies. Refer to the</li>
+</ol>
+<p>[Organization Policies Reference](references/org-policies.md) for the exact YAML templates for both Boolean and List constraints.</p>
+<ol>
+<li>Apply each organization policy sequentially using the <code>gcloud org-policies</code></li>
+</ol>
+<p>tool:</p>
+<pre><code>    gcloud org-policies set-policy [POLICY_FILE_NAME].yaml</code></pre>
+<h4>Phase 4: Resource Hierarchy</h4>
+<h5>1. Folder Creation</h5>
+<p>Check if target folders exist to avoid duplication. The agent must check for all 4 folders: for any folder that already exists (e.g., if <code>Common</code> or <code>Production</code> are already present), the agent must locate and reuse them; for any folder that is missing (e.g., if <code>Non-Production</code> or <code>Development</code> are not present), the agent must proceed to sequentially create them:</p>
+<blockquote>[!IMPORTANT] When explaining how existing resources (folders and projects) are</blockquote>
+<blockquote>handled to prevent duplication, the agent <strong>must</strong> explicitly name the</blockquote>
+<blockquote>remaining missing folders (<code>Non-Production</code> and <code>Development</code>) and confirm</blockquote>
+<blockquote>that it will proceed to sequentially create only these missing folders and</blockquote>
+<blockquote>projects.</blockquote>
+<pre><code># Check and Create &quot;Common&quot; Folder
+gcloud resource-manager folders list --organization=[ORGANIZATION_ID] --filter=&quot;display_name=Common&quot;
+# If not present:
+gcloud resource-manager folders create --display-name=&quot;Common&quot; --organization=[ORGANIZATION_ID]
+
+# Check and Create &quot;Production&quot; Folder
+gcloud resource-manager folders list --organization=[ORGANIZATION_ID] --filter=&quot;display_name=Production&quot;
+# If not present:
+gcloud resource-manager folders create --display-name=&quot;Production&quot; --organization=[ORGANIZATION_ID]
+
+# Check and Create &quot;Non-Production&quot; Folder
+gcloud resource-manager folders list --organization=[ORGANIZATION_ID] --filter=&quot;display_name=Non-Production&quot;
+# If not present:
+gcloud resource-manager folders create --display-name=&quot;Non-Production&quot; --organization=[ORGANIZATION_ID]
+
+# Check and Create &quot;Development&quot; Folder
+gcloud resource-manager folders list --organization=[ORGANIZATION_ID] --filter=&quot;display_name=Development&quot;
+# If not present:
+gcloud resource-manager folders create --display-name=&quot;Development&quot; --organization=[ORGANIZATION_ID]</code></pre>
+<h5>2. Project Creation and Billing Link</h5>
+<p>Check if target projects already exist in the folders by matching their display names. If not present, generate a shared 8-character random suffix (e.g., <code>ab12cd34</code>) and create the projects sequentially, linking billing and enabling APIs immediately:</p>
+<pre><code># Check if &quot;central-logging-monitoring&quot; project exists in Common folder
+gcloud projects list --filter=&quot;parent.id=[COMMON_FOLDER_ID] AND parent.type=folder AND name=central-logging-monitoring&quot;
+
+# If not present: Create, link billing, and enable APIs
+gcloud projects create logging-[SUFFIX] --name=&quot;central-logging-monitoring&quot; --folder=[COMMON_FOLDER_ID]
+gcloud billing projects link logging-[SUFFIX] --billing-account=[BILLING_ACCOUNT_ID]
+gcloud services enable compute.googleapis.com logging.googleapis.com monitoring.googleapis.com --project=logging-[SUFFIX]
+
+# Check if &quot;production&quot; project exists in Production folder
+gcloud projects list --filter=&quot;parent.id=[PRODUCTION_FOLDER_ID] AND parent.type=folder AND name=production&quot;
+
+# If not present: Create, link billing, and enable APIs
+gcloud projects create prod-[SUFFIX] --name=&quot;production&quot; --folder=[PRODUCTION_FOLDER_ID]
+gcloud billing projects link prod-[SUFFIX] --billing-account=[BILLING_ACCOUNT_ID]
+gcloud services enable compute.googleapis.com run.googleapis.com container.googleapis.com artifactregistry.googleapis.com firestore.googleapis.com pubsub.googleapis.com aiplatform.googleapis.com cloudaicompanion.googleapis.com apphub.googleapis.com designcenter.googleapis.com discoveryengine.googleapis.com iam.googleapis.com config.googleapis.com cloudbuild.googleapis.com cloudasset.googleapis.com cloudkms.googleapis.com cloudresourcemanager.googleapis.com --project=prod-[SUFFIX]
+
+# Check if &quot;non-production&quot; project exists in Non-Production folder
+gcloud projects list --filter=&quot;parent.id=[NON_PRODUCTION_FOLDER_ID] AND parent.type=folder AND name=non-production&quot;
+
+# If not present: Create, link billing, and enable APIs
+gcloud projects create non-prod-[SUFFIX] --name=&quot;non-production&quot; --folder=[NON_PRODUCTION_FOLDER_ID]
+gcloud billing projects link non-prod-[SUFFIX] --billing-account=[BILLING_ACCOUNT_ID]
+gcloud services enable compute.googleapis.com run.googleapis.com container.googleapis.com artifactregistry.googleapis.com firestore.googleapis.com pubsub.googleapis.com aiplatform.googleapis.com cloudaicompanion.googleapis.com apphub.googleapis.com designcenter.googleapis.com discoveryengine.googleapis.com iam.googleapis.com config.googleapis.com cloudbuild.googleapis.com cloudasset.googleapis.com cloudkms.googleapis.com cloudresourcemanager.googleapis.com --project=non-prod-[SUFFIX]
+
+# Check if &quot;development&quot; project exists in Development folder
+gcloud projects list --filter=&quot;parent.id=[DEVELOPMENT_FOLDER_ID] AND parent.type=folder AND name=development&quot;
+
+# If not present: Create, link billing, and enable APIs
+gcloud projects create dev-[SUFFIX] --name=&quot;development&quot; --folder=[DEVELOPMENT_FOLDER_ID]
+gcloud billing projects link dev-[SUFFIX] --billing-account=[BILLING_ACCOUNT_ID]
+gcloud services enable compute.googleapis.com run.googleapis.com container.googleapis.com artifactregistry.googleapis.com firestore.googleapis.com pubsub.googleapis.com aiplatform.googleapis.com cloudaicompanion.googleapis.com apphub.googleapis.com designcenter.googleapis.com discoveryengine.googleapis.com iam.googleapis.com config.googleapis.com cloudbuild.googleapis.com cloudasset.googleapis.com cloudkms.googleapis.com cloudresourcemanager.googleapis.com --project=dev-[SUFFIX]</code></pre>
+<blockquote>[!NOTE] <strong>Agentic Parallelism Option</strong>: While the manual runbook enforces</blockquote>
+<blockquote>sequential project execution to avoid terminal race conditions, an AI agent</blockquote>
+<blockquote>with multi-agent orchestration capability may optionally spawn subagents to</blockquote>
+<blockquote>provision the 4 projects in parallel once folder IDs are resolved.</blockquote>
+<h4>Phase 5: Centralized Logging and Monitoring</h4>
+<p>Configure centralized audit logging and cross-project monitoring scope in the <code>logging-[SUFFIX]</code> project.</p>
+<p>Refer to the [Centralized Logging and Monitoring Reference](references/logging-monitoring.md) for the detailed step-by-step commands to:</p>
+<ol>
+<li>Create the central log bucket.</li>
+<li>Create the organization-wide log sink.</li>
+<li>Grant required IAM permissions to the log sink.</li>
+<li>Configure the cross-project monitoring metrics scope.</li>
+</ol>
+<hr>
+<h3>Validation Logic &amp; Checklist</h3>
+<p>Evaluate the deployment against the following verification checks:</p>
+<ul>
+<li>[ ] <strong>Security Policies</strong>: Run `gcloud org-policies list</li>
+</ul>
+<p>--organization=[ORGANIZATION_ID]` and verify all 17 target policies are enforced or correctly configured.</p>
+<ul>
+<li>[ ] <strong>Resource Folders</strong>: Verify folders <code>Common</code>, <code>Production</code>,</li>
+</ul>
+<p><code>Non-Production</code>, and <code>Development</code> exist under the organization root.</p>
+<ul>
+<li>[ ] <strong>Billing Linkage</strong>: Run <code>gcloud billing projects list</code> and assert that</li>
+</ul>
+<p>all 4 newly created projects are linked to your billing account.</p>
+<ul>
+<li>[ ] <strong>Log Bucket &amp; Retention</strong>: Verify the log bucket <code>[ORG_NAME]-logging</code></li>
+</ul>
+<p>exists in project <code>logging-[SUFFIX]</code>, is located in <code>global</code>, and has a retention period of exactly 30 days.</p>
+<ul>
+<li>[ ] <strong>Log Sink Routing</strong>: Run <code>gcloud logging sinks describe</code> at the</li>
+</ul>
+<p>organization level and confirm the sink routes cloud audit logs to the global bucket and holds standard <code>writerIdentity</code> credentials.</p>
+<ul>
+<li>[ ] <strong>Metrics Scope Linkage</strong>: Run `gcloud beta monitoring metrics-scopes</li>
+</ul>
+<p>describe<code> and assert that the </code>dev<code>, </code>non-prod<code>, and </code>prod<code> projects appear in the monitored list of the central </code>logging` project.</p>
+<hr>
+<h3>Links</h3>
+<ul>
+<li>[Google Cloud Resource Hierarchy Documentation](https://cloud.google.com/resource-manager/docs/creating-managing-organization)</li>
+<li>[Google Cloud Organization Policies Overview](https://cloud.google.com/resource-manager/docs/organization-policy/overview)</li>
+<li>[Centralized Audit Logging Best Practices](https://cloud.google.com/architecture/security-foundations/logging-monitoring)</li>
+<li>[Cloud Monitoring Metrics Scopes Configuration](https://cloud.google.com/monitoring/settings/multiple-projects)</li>
+<li>[Gcloud Logging Sinks CLI Reference](https://cloud.google.com/sdk/gcloud/reference/logging/sinks)</li>
+<li>[Google Cloud Landing Zones Guide](https://docs.cloud.google.com/architecture/landing-zones)</li>
+<li>[Google Cloud Security Foundations Blueprint](https://docs.cloud.google.com/architecture/blueprints/security-foundations)</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: google-cloud-recipe-foundation-builder\ndisplay_name: google-cloud-recipe-foundation-builder\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# google-cloud-recipe-foundation-builder - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `google-cloud-recipe-foundation-builder` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nDeploys a baseline landing zone foundation for a Google Cloud Organization, establishing security guardrails using Organization Policies, resource hierarchy folders and projects, billing association, and centralized logg\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the google-cloud-recipe-foundation-builder skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `google-cloud-recipe-foundation-builder` |\n| Canonical name | `google-cloud-recipe-foundation-builder` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\nDeploys a baseline landing zone foundation for a Google Cloud Organization, establishing security guardrails using Organization Policies, resource hierarchy folders and projects, billing association, and centralized logg\n\n## Upstream provenance\n\nThis adapted package derives from [Google Agent Skills](https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39) at commit `092e210b243601797a0fb939040be2b1288e6d39`, licensed under `Apache-2.0`.\n\n\n## Original SKILL.md\n\n---\nname: google-cloud-recipe-foundation-builder\ndescription: \"Deploys a baseline landing zone foundation for a Google Cloud Organization, establishing security guardrails using Organization Policies, resource hierarchy folders and projects, billing association, and centralized logging and monitoring. Deploys Google Cloud's recommended security controls and architecture. Use when setting up a new Google Cloud Organization or establishing a secure, enterprise-grade landing zone foundation. Don't use for individual project onboarding (use google-cloud-recipe-onboarding or product-specific skills instead).\"\nlicense: Apache-2.0\n---\n\n## Universal runtime boundary\n\n- Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.\n- Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.\n- Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.\n- Read `references/upstream.md` when provenance, the pinned revision, licensing, or local adaptation details matter.\n\n# Google Cloud Recipe: Foundation Builder\n\n> [!WARNING] This skill is currently in a preview state. It will deploy a secure\n> foundation, but does not have all advanced features. Users who want more\n> options should visit\n> [Google Cloud Setup](https://docs.cloud.google.com/docs/enterprise/cloud-setup).\n\nThis skill guides the setup of a secure, enterprise-grade Google Cloud landing\nzone foundation. It establishes baseline security controls, organizes the\ninitial resource hierarchy, and configures centralized audit logging and\ncross-environment monitoring.\n\n## Overview\n\nThe recipe provisions the following core components at the organization root:\n\n*   **Security Guardrails**: Enforces 17 baseline Google Cloud Organization\n    Policies to secure the environment (13 Boolean, 4 List constraints).\n*   **Resource Hierarchy**: Establishes 4 folders (`Common`, `Production`,\n    `Non-Production`, `Development`) and provisions corresponding projects\n    sequentially with globally unique ID prefixes (`logging-`, `prod-`,\n    `non-prod-`, `dev-` followed by a shared suffix).\n*   **Billing & API Enablement**: Links all projects to your billing account and\n    activates critical logging/monitoring services.\n*   **Centralized Logging & Monitoring**: Deploys a global, centralized log\n    bucket with 30-day retention, configures an organization-wide audit log\n    sink, and sets up a cross-environment metrics scope.\n\n--------------------------------------------------------------------------------\n\n## Clarifying Questions\n\nBefore executing this recipe, the agent **must** gather the following details:\n\n1.  **Organization ID**: Run `gcloud organizations list` to retrieve the\n    available organizations, present them to the user, and ask them to select\n    the target **Organization ID**.\n2.  **Billing Account ID**: Run `gcloud billing accounts list\n    --filter=open=true` to retrieve only the active (open) billing accounts,\n    present them to the user, and ask them to select the active **Billing\n    Account ID**.\n3.  **Project ID Suffix**: Ask if the user has a preferred prefix or target\n    suffix for Project IDs (default uses prefix + a shared random 8-character\n    string, e.g., `prod-ab12cd34`).\n4.  **Log Bucket Region**: Ask for the target region for resources if they want\n    to override the default `global` log bucket location.\n\n--------------------------------------------------------------------------------\n\n## Prerequisites\n\nEnsure the following prerequisites are met before beginning the deployment:\n\n*   **GCP Identity**: You must have a Google Cloud Organization resource set up.\n*   **Administrative IAM Roles**: The identity executing these commands must\n    hold the required administrative permissions. If any step fails with a\n    `Permission Denied` error, the agent will attempt to self-remediate by\n    granting the corresponding recommended role as detailed in **Phase 2: Error\n    Recovery & Lazy Role Remediation Strategy**.\n*   **Tools**: The `gcloud` CLI must be installed, authorized with the above\n    identity, and configured for use.\n\n--------------------------------------------------------------------------------\n\n## Steps to Complete the Recipe\n\n### Phase 1: Pre-flight Confirmation\n\nIdentify the target organization and obtain explicit user approval before making\nchanges.\n\n1.  **Identify and Discover Organization**: Verify the target organization. If\n    only the display name is known, list organizations to find the ID. Then,\n    retrieve the organization metadata to dynamically calculate the **Directory\n    Customer ID** and **Domain Name**:\n\n    ```bash\n    # List to find ID if needed\n    gcloud organizations list\n\n    # Describe the organization to retrieve metadata\n    gcloud organizations describe [ORGANIZATION_ID]\n    ```\n\n    *Calculate values:*\n\n    *   **Domain Name** (`[ORG_NAME]` / `[YOUR_DOMAIN]`): Use the `displayName`\n        value from the output (e.g., `my-business.com`).\n    *   **Customer ID** (`[DIRECTORY_CUSTOMER_ID]`): Use the\n        `owner.directoryCustomerId` value from the output (e.g., `C01234567`).\n\n2.  **Present Blueprint Summary**: Present the exact details of the blueprint to\n    the user and request confirmation to proceed:\n\n    > **Proposed Foundation Deployment Summary for Organization: `[ORG_NAME]`\n    > (`[ORGANIZATION_ID]`)**\n    >\n    > *   **Security:** Enforce 17 baseline Organization Policies (13 Boolean, 4\n    >     List).\n    > *   **Folders:** Create 4 folders sequentially (`Common`, `Production`,\n    >     `Non-Production`, `Development`).\n    > *   **Projects:** Create 4 projects sequentially with unique IDs\n    >     (`logging-[SUFFIX]`, `prod-[SUFFIX]`, `non-prod-[SUFFIX]`,\n    >     `dev-[SUFFIX]`).\n    > *   **Billing:** Link all projects to Billing Account\n    >     `[BILLING_ACCOUNT_ID]`.\n    > *   **APIs:** Enable Logging and Monitoring APIs on the central project.\n    > *   **Centralized Logging:** Deploy a `global` log bucket\n    >     `[ORG_NAME]-logging` (30-day retention), configure an\n    >     organization-level sink\n    >     `[ORGANIZATION_ID]-logbucketsink-[RANDOM_HEX]`, and establish\n    >     cross-project metrics scopes.\n    >\n    > Do you wish to proceed with this deployment? (Yes/No)\n\n> [!IMPORTANT] **Pause execution** and wait for explicit user approval before\n> moving to Phase 2. If the user declines, abort the operation.\n\n### Phase 2: Error Recovery & Lazy Role Remediation Strategy\n\nTo ensure deployment continues smoothly on clean organizations without requiring\ncomplex upfront permission checks (which require a quota project), the agent\n**must** adopt a \"lazy recovery\" approach.\n\nInstead of testing permissions in advance, the agent will attempt to execute\neach step in the recipe. If a step fails with a `Permission Denied` error, the\nagent will attempt to self-remediate by granting the corresponding recommended\nadministrative group of roles to the deployment identity and retrying the\noperation.\n\n> [!IMPORTANT] When asked about pre-deployment readiness, prerequisites, or\n> checks to run, the agent **must** explicitly explain that the landing zone\n> deployment adopts a lazy role remediation strategy rather than upfront\n> testing, detailing all of the following in its response: 1. Confirm it will\n> execute deployment commands directly, catching any Permission Denied\n> errors. 2. Confirm it will attempt to self-remediate on failure by running the\n> exact commands `gcloud organizations add-iam-policy-binding` or `gcloud\n> billing accounts add-iam-policy-binding` to grant the entire administrative\n> group of roles to the active identity, and then retry the failed deployment\n> command. 3. List the core administrative groups that it will attempt to grant\n> (Organization Admin Group, Billing Admin Group, and Security Admin Group)\n> mapped to their key roles. 4. Confirm it will halt execution and request\n> manual administrator intervention if the self-remediation grant command fails.\n\n#### Remediation Protocol\n\nFor any command that fails due to missing permissions:\n\n1.  **Identify Required Admin Group**: Determine which administrative group is\n    responsible for the failed action. Refer to the\n    [Administrative IAM Reference](references/admin-iam.md#core-administrative-groups--roles)\n    for details.\n2.  **Attempt Self-Remediation**: Grant **all** roles belonging to that\n    administrative group to the active authenticated account sequentially. Refer\n    to the\n    [Administrative IAM Reference Remediation Guide](references/admin-iam.md#remediation)\n    for the copy-pasteable script commands:\n\n    *   **For Organization/Folder level failures (Org Admin Group or Security\n        Admin Group)**: Run `gcloud organizations add-iam-policy-binding`\n        sequentially for each role in the group.\n    *   **For Billing level failures (Billing Admin Group)**: Run `gcloud\n        billing accounts add-iam-policy-binding` sequentially for each role in\n        the group.\n\n3.  **Halt on Remediation Failure**:\n\n    *   If the grant commands succeed, immediately retry the failed deployment\n        command.\n    *   If any of the grant commands fail (e.g., due to lack of `setIamPolicy`\n        admin rights), **halt execution** and instruct the user to ask their\n        Organization/Billing Administrator to manually grant the entire\n        administrative group of roles.\n\n#### Phase-Specific Remediation Mapping\n\n*   **Phase 3: Security Guardrails (Org Policies)**:\n    *   If `gcloud org-policies set-policy` fails: Attempt to grant the entire\n        **Organization Admin Group** (9 roles) at the organization level.\n*   **Phase 4: Resource Hierarchy (Folders & Projects)**:\n    *   If `gcloud resource-manager folders create` or `gcloud projects create`\n        fails: Attempt to grant the entire **Organization Admin Group** (9\n        roles) at the organization level.\n*   **Phase 4: Billing Link**:\n    *   If `gcloud billing projects link` fails: Attempt to grant the entire\n        **Billing Admin Group** (3 roles) at the billing account level, and\n        ensure the active identity is granted the **Organization Admin Group**\n        (which contains `roles/billing.user`) at the organization level.\n*   **Phase 5: Centralized Logging & Monitoring**:\n    *   If `gcloud logging sinks create` fails at org level: Attempt to grant\n        the entire **Logging/Monitoring Admin Group** (2 roles:\n        `roles/logging.admin`, `roles/monitoring.admin`) and the **Security\n        Admin Group** (9 roles) at the organization level.\n\n### Phase 3: Security Guardrails (Org Policies)\n\nApply 17 baseline security controls at the organization root.\n\n> [!CAUTION] Applying `iam.allowedPolicyMemberDomains` first can lock out the\n> deployment identity if it resides in an unallowed domain. Ensure the\n> deployment identity is safe before enforcing this policy.\n\n1.  Generate the YAML configuration files for the 17 policies. Refer to the\n    [Organization Policies Reference](references/org-policies.md) for the exact\n    YAML templates for both Boolean and List constraints.\n2.  Apply each organization policy sequentially using the `gcloud org-policies`\n    tool:\n\n    ```bash\n    gcloud org-policies set-policy [POLICY_FILE_NAME].yaml\n    ```\n\n### Phase 4: Resource Hierarchy\n\n#### 1. Folder Creation\n\nCheck if target folders exist to avoid duplication. The agent must check for all\n4 folders: for any folder that already exists (e.g., if `Common` or `Production`\nare already present), the agent must locate and reuse them; for any folder that\nis missing (e.g., if `Non-Production` or `Development` are not present), the\nagent must proceed to sequentially create them:\n\n> [!IMPORTANT] When explaining how existing resources (folders and projects) are\n> handled to prevent duplication, the agent **must** explicitly name the\n> remaining missing folders (`Non-Production` and `Development`) and confirm\n> that it will proceed to sequentially create only these missing folders and\n> projects.\n\n```bash\n# Check and Create \"Common\" Folder\ngcloud resource-manager folders list --organization=[ORGANIZATION_ID] --filter=\"display_name=Common\"\n# If not present:\ngcloud resource-manager folders create --display-name=\"Common\" --organization=[ORGANIZATION_ID]\n\n# Check and Create \"Production\" Folder\ngcloud resource-manager folders list --organization=[ORGANIZATION_ID] --filter=\"display_name=Production\"\n# If not present:\ngcloud resource-manager folders create --display-name=\"Production\" --organization=[ORGANIZATION_ID]\n\n# Check and Create \"Non-Production\" Folder\ngcloud resource-manager folders list --organization=[ORGANIZATION_ID] --filter=\"display_name=Non-Production\"\n# If not present:\ngcloud resource-manager folders create --display-name=\"Non-Production\" --organization=[ORGANIZATION_ID]\n\n# Check and Create \"Development\" Folder\ngcloud resource-manager folders list --organization=[ORGANIZATION_ID] --filter=\"display_name=Development\"\n# If not present:\ngcloud resource-manager folders create --display-name=\"Development\" --organization=[ORGANIZATION_ID]\n```\n\n#### 2. Project Creation and Billing Link\n\nCheck if target projects already exist in the folders by matching their display\nnames. If not present, generate a shared 8-character random suffix (e.g.,\n`ab12cd34`) and create the projects sequentially, linking billing and enabling\nAPIs immediately:\n\n```bash\n# Check if \"central-logging-monitoring\" project exists in Common folder\ngcloud projects list --filter=\"parent.id=[COMMON_FOLDER_ID] AND parent.type=folder AND name=central-logging-monitoring\"\n\n# If not present: Create, link billing, and enable APIs\ngcloud projects create logging-[SUFFIX] --name=\"central-logging-monitoring\" --folder=[COMMON_FOLDER_ID]\ngcloud billing projects link logging-[SUFFIX] --billing-account=[BILLING_ACCOUNT_ID]\ngcloud services enable compute.googleapis.com logging.googleapis.com monitoring.googleapis.com --project=logging-[SUFFIX]\n\n# Check if \"production\" project exists in Production folder\ngcloud projects list --filter=\"parent.id=[PRODUCTION_FOLDER_ID] AND parent.type=folder AND name=production\"\n\n# If not present: Create, link billing, and enable APIs\ngcloud projects create prod-[SUFFIX] --name=\"production\" --folder=[PRODUCTION_FOLDER_ID]\ngcloud billing projects link prod-[SUFFIX] --billing-account=[BILLING_ACCOUNT_ID]\ngcloud services enable compute.googleapis.com run.googleapis.com container.googleapis.com artifactregistry.googleapis.com firestore.googleapis.com pubsub.googleapis.com aiplatform.googleapis.com cloudaicompanion.googleapis.com apphub.googleapis.com designcenter.googleapis.com discoveryengine.googleapis.com iam.googleapis.com config.googleapis.com cloudbuild.googleapis.com cloudasset.googleapis.com cloudkms.googleapis.com cloudresourcemanager.googleapis.com --project=prod-[SUFFIX]\n\n# Check if \"non-production\" project exists in Non-Production folder\ngcloud projects list --filter=\"parent.id=[NON_PRODUCTION_FOLDER_ID] AND parent.type=folder AND name=non-production\"\n\n# If not present: Create, link billing, and enable APIs\ngcloud projects create non-prod-[SUFFIX] --name=\"non-production\" --folder=[NON_PRODUCTION_FOLDER_ID]\ngcloud billing projects link non-prod-[SUFFIX] --billing-account=[BILLING_ACCOUNT_ID]\ngcloud services enable compute.googleapis.com run.googleapis.com container.googleapis.com artifactregistry.googleapis.com firestore.googleapis.com pubsub.googleapis.com aiplatform.googleapis.com cloudaicompanion.googleapis.com apphub.googleapis.com designcenter.googleapis.com discoveryengine.googleapis.com iam.googleapis.com config.googleapis.com cloudbuild.googleapis.com cloudasset.googleapis.com cloudkms.googleapis.com cloudresourcemanager.googleapis.com --project=non-prod-[SUFFIX]\n\n# Check if \"development\" project exists in Development folder\ngcloud projects list --filter=\"parent.id=[DEVELOPMENT_FOLDER_ID] AND parent.type=folder AND name=development\"\n\n# If not present: Create, link billing, and enable APIs\ngcloud projects create dev-[SUFFIX] --name=\"development\" --folder=[DEVELOPMENT_FOLDER_ID]\ngcloud billing projects link dev-[SUFFIX] --billing-account=[BILLING_ACCOUNT_ID]\ngcloud services enable compute.googleapis.com run.googleapis.com container.googleapis.com artifactregistry.googleapis.com firestore.googleapis.com pubsub.googleapis.com aiplatform.googleapis.com cloudaicompanion.googleapis.com apphub.googleapis.com designcenter.googleapis.com discoveryengine.googleapis.com iam.googleapis.com config.googleapis.com cloudbuild.googleapis.com cloudasset.googleapis.com cloudkms.googleapis.com cloudresourcemanager.googleapis.com --project=dev-[SUFFIX]\n```\n\n> [!NOTE] **Agentic Parallelism Option**: While the manual runbook enforces\n> sequential project execution to avoid terminal race conditions, an AI agent\n> with multi-agent orchestration capability may optionally spawn subagents to\n> provision the 4 projects in parallel once folder IDs are resolved.\n\n### Phase 5: Centralized Logging and Monitoring\n\nConfigure centralized audit logging and cross-project monitoring scope in the\n`logging-[SUFFIX]` project.\n\nRefer to the\n[Centralized Logging and Monitoring Reference](references/logging-monitoring.md)\nfor the detailed step-by-step commands to:\n\n1.  Create the central log bucket.\n2.  Create the organization-wide log sink.\n3.  Grant required IAM permissions to the log sink.\n4.  Configure the cross-project monitoring metrics scope.\n\n--------------------------------------------------------------------------------\n\n## Validation Logic & Checklist\n\nEvaluate the deployment against the following verification checks:\n\n-   [ ] **Security Policies**: Run `gcloud org-policies list\n    --organization=[ORGANIZATION_ID]` and verify all 17 target policies are\n    enforced or correctly configured.\n-   [ ] **Resource Folders**: Verify folders `Common`, `Production`,\n    `Non-Production`, and `Development` exist under the organization root.\n-   [ ] **Billing Linkage**: Run `gcloud billing projects list` and assert that\n    all 4 newly created projects are linked to your billing account.\n-   [ ] **Log Bucket & Retention**: Verify the log bucket `[ORG_NAME]-logging`\n    exists in project `logging-[SUFFIX]`, is located in `global`, and has a\n    retention period of exactly 30 days.\n-   [ ] **Log Sink Routing**: Run `gcloud logging sinks describe` at the\n    organization level and confirm the sink routes cloud audit logs to the\n    global bucket and holds standard `writerIdentity` credentials.\n-   [ ] **Metrics Scope Linkage**: Run `gcloud beta monitoring metrics-scopes\n    describe` and assert that the `dev`, `non-prod`, and `prod` projects appear\n    in the monitored list of the central `logging` project.\n\n--------------------------------------------------------------------------------\n\n## Links\n\n*   [Google Cloud Resource Hierarchy Documentation](https://cloud.google.com/resource-manager/docs/creating-managing-organization)\n*   [Google Cloud Organization Policies Overview](https://cloud.google.com/resource-manager/docs/organization-policy/overview)\n*   [Centralized Audit Logging Best Practices](https://cloud.google.com/architecture/security-foundations/logging-monitoring)\n*   [Cloud Monitoring Metrics Scopes Configuration](https://cloud.google.com/monitoring/settings/multiple-projects)\n*   [Gcloud Logging Sinks CLI Reference](https://cloud.google.com/sdk/gcloud/reference/logging/sinks)\n*   [Google Cloud Landing Zones Guide](https://docs.cloud.google.com/architecture/landing-zones)\n*   [Google Cloud Security Foundations Blueprint](https://docs.cloud.google.com/architecture/blueprints/security-foundations)\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("google-cloud-recipe-foundation-builder-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

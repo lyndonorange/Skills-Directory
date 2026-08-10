@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>gke-basics - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/gke-basics-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>gke-basics</h1>
+      <p class="description">Manages core GKE cluster provisioning, credentials, Autopilot vs Standard selection, and workload deployment. Use when creating GKE clusters, fetching kubectl credentials, configuring Workload Identity, or deciding between Autopilot and Standard modes. Don't use for specialized GKE networking (use gke-networking), advanced security hardening (use gke-platform-security or gke-workload-security), or cluster upgrades (use gke-upgrades).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>gke-basics</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>gke-basics</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Manages core GKE cluster provisioning, credentials, Autopilot vs Standard selection, and workload deployment. Use when creating GKE clusters, fetching kubectl credentials, configuring Workload Identity, or deciding between Autopilot and Standard modes. Don't use for specialized GKE networking (use gke-networking), advanced security hardening (use gke-platform-security or gke-workload-security), or cluster upgrades (use gke-upgrades).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose gke-basics, then write the task. Fallback prompt: Use the gke-basics skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+        <div class="usage-card"><strong>Upstream provenance</strong><p><a href="https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39">Google Agent Skills</a> at 092e210b243601797a0fb939040be2b1288e6d39 (Apache-2.0).</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Universal runtime boundary</h3>
+<ul>
+<li>Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.</li>
+<li>Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.</li>
+<li>Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.</li>
+<li>Read <code>references/upstream.md</code> when provenance, the pinned revision, licensing, or local adaptation details matter.</li>
+</ul>
+<h2>GKE Basics &amp; Critical Gotchas</h2>
+<p>Managed Kubernetes platform on Google Cloud. Defaults to Autopilot mode unless Standard is explicitly required.</p>
+<h3>Key Selection Rules: Autopilot vs. Standard</h3>
+<ul>
+<li><strong>Default to Autopilot</strong> for almost all workloads.</li>
+<li><strong>Use Standard ONLY if:</strong></li>
+<li>Custom node OS kernel parameters (<code>sysctl</code>) are required.</li>
+<li>Custom node taints or specific hardware node pools are required.</li>
+<li>DaemonSets require raw <code>hostPath</code> mounts to the host OS filesystem.</li>
+<li>When explaining why Standard is required over Autopilot, explicitly cite all matching restrictions (e.g., custom sysctls and custom node taints).</li>
+<li><em>For advanced cluster architecture or complex node pool creation planning, refer to <code>gke-cluster-creation</code>.</em></li>
+</ul>
+<h3>Critical Gotchas &amp; Best Practices</h3>
+<ol>
+<li><strong>Private Autopilot Clusters:</strong></li>
+</ol>
+<ul>
+<li>Use <code>--enable-private-nodes</code> for private node IP addresses.</li>
+<li>Use <code>--enable-private-endpoint</code> to disable public IP access to the control plane.</li>
+<li>Restrict control plane access with <code>--enable-master-authorized-networks</code> and <code>--master-authorized-networks=CIDR_BLOCK</code>:</li>
+</ul>
+<pre><code>     gcloud container clusters create-auto CLUSTER_NAME --region=REGION \
+       --enable-private-nodes \
+       --enable-private-endpoint \
+       --enable-master-authorized-networks \
+       --master-authorized-networks=CIDR_BLOCK</code></pre>
+<ol>
+<li><strong>Workload Identity (IAM Binding):</strong></li>
+</ol>
+<ul>
+<li>Never mount raw GCP Service Account JSON keys in Pods.</li>
+<li>Annotate the Kubernetes ServiceAccount (<code>KSA</code>) to bind to the Google Service Account (<code>GSA</code>):</li>
+</ul>
+<pre><code>     metadata:
+       annotations:
+         iam.gke.io/gcp-service-account: GSA_NAME@PROJECT_ID.iam.gserviceaccount.com</code></pre>
+<ol>
+<li><strong>Autopilot Resource Requests:</strong></li>
+</ol>
+<ul>
+<li>In Autopilot, CPU requests must be specified in increments of 250m (0.25 vCPU). If an unaligned CPU request (e.g., 300m) is requested, round up to the nearest 250m increment (500m / 0.5 vCPU).</li>
+<li>Resource requests equal limits automatically. Omit <code>limits</code> to allow Autopilot to set defaults matching <code>requests</code>.</li>
+</ul>
+<ol>
+<li><strong>Cluster Credentials:</strong></li>
+</ol>
+<ul>
+<li>Always explicitly specify <code>--region</code> (for regional clusters) or <code>--zone</code> (for zonal clusters) when fetching credentials:</li>
+</ul>
+<pre><code>     gcloud container clusters get-credentials CLUSTER_NAME --region=REGION --quiet</code></pre>
+<h3>Reference Directory</h3>
+<ul>
+<li>[Core Concepts](references/core-concepts.md): Architecture, cluster modes (Autopilot vs Standard), networking, scaling, and security model.</li>
+</ul>
+<ul>
+<li>[CLI Usage &amp; Tool Reference](references/cli-reference.md): Tool preference hierarchy (MCP vs gcloud vs kubectl), <code>gcloud container</code> commands, and user preference overrides.</li>
+</ul>
+<ul>
+<li>[Client Libraries](references/client-library-usage.md): Official Kubernetes and Google Cloud Container client libraries in Python, Go, Node.js, and Java.</li>
+</ul>
+<ul>
+<li>[MCP Usage](references/mcp-usage.md): Connecting to and using the 23 structured GKE MCP tools for cluster management, K8s resources, and diagnostics.</li>
+</ul>
+<ul>
+<li>[Infrastructure as Code](references/iac-usage.md): Terraform examples for <code>google_container_cluster</code> (Autopilot), Kubernetes provider resources, and YAML samples.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: gke-basics\ndisplay_name: gke-basics\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# gke-basics - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `gke-basics` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nManages core GKE cluster provisioning, credentials, Autopilot vs Standard selection, and workload deployment. Use when creating GKE clusters, fetching kubectl credentials, configuring Workload Identity, or deciding betwe\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose gke-basics, then write the task. Fallback prompt: Use the gke-basics skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `gke-basics` |\n| Canonical name | `gke-basics` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nManages core GKE cluster provisioning, credentials, Autopilot vs Standard selection, and workload deployment. Use when creating GKE clusters, fetching kubectl credentials, configuring Workload Identity, or deciding betwe\n\n## Upstream provenance\n\nThis adapted package derives from [Google Agent Skills](https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39) at commit `092e210b243601797a0fb939040be2b1288e6d39`, licensed under `Apache-2.0`.\n\n\n## Original SKILL.md\n\n---\nname: gke-basics\ndescription: \"Manages core GKE cluster provisioning, credentials, Autopilot vs Standard selection, and workload deployment. Use when creating GKE clusters, fetching kubectl credentials, configuring Workload Identity, or deciding between Autopilot and Standard modes. Don't use for specialized GKE networking (use gke-networking), advanced security hardening (use gke-platform-security or gke-workload-security), or cluster upgrades (use gke-upgrades).\"\nlicense: Apache-2.0\n---\n\n## Universal runtime boundary\n\n- Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.\n- Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.\n- Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.\n- Read `references/upstream.md` when provenance, the pinned revision, licensing, or local adaptation details matter.\n\n# GKE Basics & Critical Gotchas\n\nManaged Kubernetes platform on Google Cloud. Defaults to Autopilot mode unless Standard is explicitly required.\n\n## Key Selection Rules: Autopilot vs. Standard\n\n* **Default to Autopilot** for almost all workloads.\n* **Use Standard ONLY if:**\n  * Custom node OS kernel parameters (`sysctl`) are required.\n  * Custom node taints or specific hardware node pools are required.\n  * DaemonSets require raw `hostPath` mounts to the host OS filesystem.\n* When explaining why Standard is required over Autopilot, explicitly cite all matching restrictions (e.g., custom sysctls and custom node taints).\n* *For advanced cluster architecture or complex node pool creation planning, refer to `gke-cluster-creation`.*\n\n## Critical Gotchas & Best Practices\n\n1. **Private Autopilot Clusters:**\n   * Use `--enable-private-nodes` for private node IP addresses.\n   * Use `--enable-private-endpoint` to disable public IP access to the control plane.\n   * Restrict control plane access with `--enable-master-authorized-networks` and `--master-authorized-networks=CIDR_BLOCK`:\n     ```bash\n     gcloud container clusters create-auto CLUSTER_NAME --region=REGION \\\n       --enable-private-nodes \\\n       --enable-private-endpoint \\\n       --enable-master-authorized-networks \\\n       --master-authorized-networks=CIDR_BLOCK\n     ```\n\n2. **Workload Identity (IAM Binding):**\n   * Never mount raw GCP Service Account JSON keys in Pods.\n   * Annotate the Kubernetes ServiceAccount (`KSA`) to bind to the Google Service Account (`GSA`):\n     ```yaml\n     metadata:\n       annotations:\n         iam.gke.io/gcp-service-account: GSA_NAME@PROJECT_ID.iam.gserviceaccount.com\n     ```\n\n3. **Autopilot Resource Requests:**\n   * In Autopilot, CPU requests must be specified in increments of 250m (0.25 vCPU). If an unaligned CPU request (e.g., 300m) is requested, round up to the nearest 250m increment (500m / 0.5 vCPU).\n   * Resource requests equal limits automatically. Omit `limits` to allow Autopilot to set defaults matching `requests`.\n\n4. **Cluster Credentials:**\n   * Always explicitly specify `--region` (for regional clusters) or `--zone` (for zonal clusters) when fetching credentials:\n     ```bash\n     gcloud container clusters get-credentials CLUSTER_NAME --region=REGION --quiet\n     ```\n\n## Reference Directory\n\n-   [Core Concepts](references/core-concepts.md): Architecture, cluster modes (Autopilot vs Standard), networking, scaling, and security model.\n\n-   [CLI Usage & Tool Reference](references/cli-reference.md): Tool preference hierarchy (MCP vs gcloud vs kubectl), `gcloud container` commands, and user preference overrides.\n\n-   [Client Libraries](references/client-library-usage.md): Official Kubernetes and Google Cloud Container client libraries in Python, Go, Node.js, and Java.\n\n-   [MCP Usage](references/mcp-usage.md): Connecting to and using the 23 structured GKE MCP tools for cluster management, K8s resources, and diagnostics.\n\n-   [Infrastructure as Code](references/iac-usage.md): Terraform examples for `google_container_cluster` (Autopilot), Kubernetes provider resources, and YAML samples.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("gke-basics-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

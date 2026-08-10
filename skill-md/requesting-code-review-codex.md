@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `requesting-code-review` for Codex. It re
 
 Use this skill when your task matches this description:
 
-Dispatch a code reviewer subagent to catch issues before they cascade. The reviewer gets precisely crafted context for evaluation — never your session's history. This keeps the reviewer focused on the work product, not y
+Use when completing tasks, implementing major features, or before merging to verify work meets requirements
 
 ## How To Use It In Codex
 
@@ -32,7 +32,8 @@ In Codex, click the chat box, press /, choose requesting-code-review, then write
 
 ## Description
 
-Dispatch a code reviewer subagent to catch issues before they cascade. The reviewer gets precisely crafted context for evaluation — never your session's history. This keeps the reviewer focused on the work product, not y
+Use when completing tasks, implementing major features, or before merging to verify work meets requirements
+
 
 ## Original SKILL.md
 
@@ -139,4 +140,3 @@ You: [Fix progress indicators]
 - Request clarification
 
 See template at: requesting-code-review/code-reviewer.md
-

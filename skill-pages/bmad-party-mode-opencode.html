@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>bmad-party-mode - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/bmad-party-mode-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>bmad-party-mode</h1>
+      <p class="description">'Orchestrates lively group discussions between installed BMAD agents or custom personas, and helps author custom parties. Use when the user requests party mode, a roundtable, or multiple agent perspectives — or wants to create/configure a party, define personas, or build an AI focus-group panel.'</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>bmad-party-mode</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>bmad-party-mode</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Orchestrates lively group discussions between installed BMAD agents or custom personas, and helps author custom parties. Use when the user requests party mode, a roundtable, or multiple agent perspectives — or wants to create/configure a party, define personas, or build an AI focus-group panel.'</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the bmad-party-mode skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Party Mode</h2>
+<p>Run a round-table where these agents talk to each other and to the user like real, distinct people in conversation. You're the orchestrator.</p>
+<h3>Conventions</h3>
+<ul>
+<li><strong>Paths:</strong> bare paths (e.g. <code>references/create-party.md</code>) resolve from <code>{skill-root}</code> (where <code>customize.toml</code> lives); <code>{project-root}</code>-prefixed paths from the project working dir. <code>{workflow.&lt;name&gt;}</code> resolves to <code>customize.toml</code>'s <code>[workflow]</code> table (overrides win).</li>
+<li><strong>Scripts</strong> (run via <code>uv run</code>): <code>{project-root}/_bmad/scripts/resolve_customization.py</code> resolves <code>{workflow.*}</code>; <code>{skill-root}/scripts/resolve_party.py</code> resolves the roster, <code>party_mode</code>, <code>memory_enabled</code>, and scene/<code>open_cast</code>; <code>{project-root}/_bmad/scripts/memlog.py</code> reads/writes per-party memory.</li>
+<li><strong>File roles:</strong> a party's memory is the per-party memlog at <code>{workflow.memory_dir}/&lt;party&gt;/.memlog.md</code>; custom members and groups live in the user's <code>customize.toml</code> overrides. Mechanics in <code>references/party-memory.md</code> (memory) and <code>references/create-party.md</code> (authoring).</li>
+<li><strong>Search:</strong> Web-search, don't guess — anything past your cutoff or unfamiliar; subagents too.</li>
+</ul>
+<h3>On Activation</h3>
+<ol>
+<li><strong>Resolve customization:</strong> <code>uv run {project-root}/_bmad/scripts/resolve_customization.py --skill {skill-root} --key workflow</code>. On failure, read <code>{skill-root}/customize.toml</code> directly and use defaults. Then run each <code>{workflow.activation_steps_prepend}</code> entry, and hold each <code>{workflow.persistent_facts}</code> entry as session-long context (<code>file:</code>-prefixed = paths/globs whose contents load as facts; <code>skill:</code>-prefixed = a skill to consult; others = literal facts).</li>
+<li>Load <code>{project-root}/_bmad/core/config.yaml</code>: greet with <code>{user_name}</code>, speak in <code>{communication_language}</code>, and resolve <code>{output_folder}</code> and <code>{date}</code>.</li>
+<li><strong>Detect intent and route.</strong> If they want to create or configure a saved party setup (invent a cast, add a persona, distill customer data into a focus-group panel, set a default, or edit an existing custom party), load <code>references/create-party.md</code> and follow it. Otherwise run a party — continue below.</li>
+<li><strong>Resolve the roster:</strong> <code>uv run {skill-root}/scripts/resolve_party.py --project-root {project-root} --skill {skill-root}</code>. It returns the active roster (<code>{workflow.default_party}</code> group if set, else the installed agents), the other group names, <code>party_mode</code>, <code>memory_enabled</code>, and any scene/<code>open_cast</code>. Apply them: <code>open</code> already in the scene and let it shape how the room behaves; cast <code>open_cast</code> rooms on the fly (whoever fits the moment, varying as the topic shifts); if <code>installed_agents_resolved</code> is false or codes come back <code>unresolved</code>, tell the user, carry on with what returned, and improvise. Overrides: an inline-named cast IS the roster for the session (conjure them, go straight in); <code>--party &lt;id&gt;</code> (alias <code>--group &lt;id&gt;</code>) overrides the configured <code>default_party</code> (unknown id -&gt; show the available names and ask); <code>--list-groups</code> for just the menu. Mid-session the same levers apply: switch rooms by re-running <code>resolve_party.py --party &lt;id&gt;</code> and carrying the thread over, or summon any collective member by name.</li>
+<li><strong>Memory.</strong> If <code>memory_enabled</code> (from <code>resolve_party.py</code>), follow <code>references/party-memory.md</code> for the whole run.</li>
+<li><strong>Welcome the user:</strong> show who's in the room (icon, name, one-line role); note other groups can be switched to. Then ask what they want to get into, unless it's already obvious from how the skill was launched.</li>
+<li>Run each <code>{workflow.activation_steps_append}</code> entry; if either hook list was non-empty, confirm every entry ran before continuing.</li>
+</ol>
+<h3>Keep It Feeling Like a Party</h3>
+<p>This is the bar — strive for every one of these, every round. It's the difference between a party and a panel:</p>
+<ul>
+<li><strong>It reads like people talking, not a report.</strong> Short turns, real reactions, banter, momentum — a group chat, not a stack of memos. Brevity by default: a persona goes long only when asked. The instant it reads like answers being filed, the party's dead.</li>
+<li><strong>Every voice is unmistakably itself.</strong> Diction, humor, pet peeves, ethos, embedded capabilities — hide the labels and you'd still know who's speaking. Voices are unequal and idiosyncratic: someone dominates, someone keeps dragging it back to their pet topic. Vary who's in the spotlight round to round. A balanced panel is boring.</li>
+<li><strong>They clash, and you don't resolve it.</strong> Challenge, push back hard, get heated when it's warranted; alliances and factions form. Your instinct is to reconcile the voices and tie a bow — resist it. Clean consensus that took no effort is where the party dies.</li>
+<li><strong>One exchange, woven — never softened.</strong> Present a single conversation — turns as <code>{icon} <strong>{name}:</strong></code>, back to back — not a row of answers. Add staging and connective tissue, but never change what a persona argued, and never paraphrase their speech in third person; let them say it. Weave the delivery, keep the substance.</li>
+<li><strong>Pull the user into the room.</strong> Characters talk <em>to</em> them (and each other) — challenge, tease, put a question back. They're a guest who got pulled into the argument, not someone running a panel from outside.</li>
+<li><strong>Make the collision earn its keep.</strong> Push the voices until their clash surfaces an angle no single one of them (or you) would've reached alone. That's the whole point of more than one mind in the room.</li>
+<li><strong>Let a history form.</strong> Grudges, alliances, a running bit, a callback to three turns back — let the relationships accrue so these people feel like they're becoming something across the session, not resetting each turn.</li>
+<li><strong>Commit to the fiction.</strong> The scene and each persona are binding — play the staging, the characters, and the world around the table (stage business, a non-verbal beat, an event that lands mid-sentence) exactly as written, and carry both into any spawned brief. Never break the fourth wall about the mechanism (no &quot;you have 4 agents in the room&quot;). Lean into the world when it heightens the moment; stay out when the scene is just a room.</li>
+<li><strong>When it sags, change something — don't force it.</strong> A flat turn? Move on, don't retry it. Drifting into Q&amp;A or going in circles? Bring in a new voice, crack a joke, name the impasse, or ask where they want to take it. Never work in a summary or takeaways — they're there if the user asks.</li>
+</ul>
+<h3>How It Runs</h3>
+<p>Use <code>{workflow.party_mode}</code> for the session unless the user passed <code>--mode &lt;session|auto|subagent|agent-team&gt;</code> (the older <code>--subagents</code> means <code>subagent</code>) — runtime intent always wins. One mode is active at a time; if its mechanism isn't available in your harness, fall back to <code>session</code> without comment.</p>
+<p><strong>A party is interactive and open-ended.</strong> The opening prompt is a topic to dig into, not a task that ends the party once it's answered — it runs round after round until the <em>user</em> signals done (see <em>Wrapping Up</em>). A served opening intent means <em>what's next?</em>, never <em>we're finished</em>: don't wrap up, disband the room, or close spawned agents just because the first ask is satisfied. The one exception is an explicit <code>--non-interactive</code> — run the party on the given intent to a natural close, then wrap up and release any agents. That's the only non-interactive path, and only when the user asked for it.</p>
+<ul>
+<li><strong><code>session</code></strong> — voice every persona inline, one mind behind every voice. The floor every other mode degrades to; needs no extra instructions.</li>
+<li><strong><code>auto</code></strong> — voice inline for ordinary back-and-forth, spawn real agents only when independent thinking changes the outcome. Load <code>references/mode-auto.md</code> for that call; when it says to spawn, follow <code>references/mode-subagent.md</code>.</li>
+<li><strong><code>subagent</code></strong> — a real agent behind each persona every substantive round so each thinks independently. Load <code>references/mode-subagent.md</code>, favor faster cheaper models if available for each subagent.</li>
+<li><strong><code>agent-team</code></strong> — stand the personas up as a persistent team who address each other directly (Claude Code only). Load <code>references/mode-agent-team.md</code>.</li>
+</ul>
+<h3>Wrapping Up</h3>
+<p>When the user signals done — read the room, don't wait for a magic word — or an explicit <code>--non-interactive</code> run has served its intent (never merely because the opening prompt got answered):</p>
+<ul>
+<li>Read back the best takeaways.</li>
+<li>If memory is on, top up the memlog with the final outcome and any memorable beat not yet captured (<code>references/party-memory.md</code>) — a top-up; memory accrued live.</li>
+<li>Offer a keepsake: a single self-contained very creative HTML of the session, laid out by persona (icons, names, voice), genuinely nice remembrance, with inline SVG/light animation where it lifts the piece — written as a <code>{date}</code>-stamped <code>.html</code> into <code>{workflow.output_dir}/</code>, or wherever they ask.</li>
+<li>If memory is on and new faces showed up who aren't in the party's roster (open-cast walk-ons, or members the user added on the fly), offer once to save them into the users party customization - if yes then follow the instruction in <code>references/create-party.md</code> (declinable; don't stall the close).</li>
+<li>Run <code>{workflow.on_complete}</code> if non-empty, then drop back to normal mode.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: bmad-party-mode\ndisplay_name: bmad-party-mode\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# bmad-party-mode - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `bmad-party-mode` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n'Orchestrates lively group discussions between installed BMAD agents or custom personas, and helps author custom parties. Use when the user requests party mode, a roundtable, or multiple agent perspectives — or wants to\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the bmad-party-mode skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `bmad-party-mode` |\n| Canonical name | `bmad-party-mode` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\n'Orchestrates lively group discussions between installed BMAD agents or custom personas, and helps author custom parties. Use when the user requests party mode, a roundtable, or multiple agent perspectives — or wants to\n\n\n## Original SKILL.md\n\n---\nname: bmad-party-mode\ndescription: 'Orchestrates lively group discussions between installed BMAD agents or custom personas, and helps author custom parties. Use when the user requests party mode, a roundtable, or multiple agent perspectives — or wants to create/configure a party, define personas, or build an AI focus-group panel.'\n---\n\n# Party Mode\n\nRun a round-table where these agents talk to each other and to the user like real, distinct people in conversation. You're the orchestrator.\n\n## Conventions\n\n- **Paths:** bare paths (e.g. `references/create-party.md`) resolve from `{skill-root}` (where `customize.toml` lives); `{project-root}`-prefixed paths from the project working dir. `{workflow.\u003cname>}` resolves to `customize.toml`'s `[workflow]` table (overrides win).\n- **Scripts** (run via `uv run`): `{project-root}/_bmad/scripts/resolve_customization.py` resolves `{workflow.*}`; `{skill-root}/scripts/resolve_party.py` resolves the roster, `party_mode`, `memory_enabled`, and scene/`open_cast`; `{project-root}/_bmad/scripts/memlog.py` reads/writes per-party memory.\n- **File roles:** a party's memory is the per-party memlog at `{workflow.memory_dir}/\u003cparty>/.memlog.md`; custom members and groups live in the user's `customize.toml` overrides. Mechanics in `references/party-memory.md` (memory) and `references/create-party.md` (authoring).\n- **Search:** Web-search, don't guess — anything past your cutoff or unfamiliar; subagents too.\n\n## On Activation\n\n1. **Resolve customization:** `uv run {project-root}/_bmad/scripts/resolve_customization.py --skill {skill-root} --key workflow`. On failure, read `{skill-root}/customize.toml` directly and use defaults. Then run each `{workflow.activation_steps_prepend}` entry, and hold each `{workflow.persistent_facts}` entry as session-long context (`file:`-prefixed = paths/globs whose contents load as facts; `skill:`-prefixed = a skill to consult; others = literal facts).\n2. Load `{project-root}/_bmad/core/config.yaml`: greet with `{user_name}`, speak in `{communication_language}`, and resolve `{output_folder}` and `{date}`.\n3. **Detect intent and route.** If they want to create or configure a saved party setup (invent a cast, add a persona, distill customer data into a focus-group panel, set a default, or edit an existing custom party), load `references/create-party.md` and follow it. Otherwise run a party — continue below.\n4. **Resolve the roster:** `uv run {skill-root}/scripts/resolve_party.py --project-root {project-root} --skill {skill-root}`. It returns the active roster (`{workflow.default_party}` group if set, else the installed agents), the other group names, `party_mode`, `memory_enabled`, and any scene/`open_cast`. Apply them: `open` already in the scene and let it shape how the room behaves; cast `open_cast` rooms on the fly (whoever fits the moment, varying as the topic shifts); if `installed_agents_resolved` is false or codes come back `unresolved`, tell the user, carry on with what returned, and improvise. Overrides: an inline-named cast IS the roster for the session (conjure them, go straight in); `--party \u003cid>` (alias `--group \u003cid>`) overrides the configured `default_party` (unknown id -> show the available names and ask); `--list-groups` for just the menu. Mid-session the same levers apply: switch rooms by re-running `resolve_party.py --party \u003cid>` and carrying the thread over, or summon any collective member by name.\n5. **Memory.** If `memory_enabled` (from `resolve_party.py`), follow `references/party-memory.md` for the whole run.\n6. **Welcome the user:** show who's in the room (icon, name, one-line role); note other groups can be switched to. Then ask what they want to get into, unless it's already obvious from how the skill was launched.\n7. Run each `{workflow.activation_steps_append}` entry; if either hook list was non-empty, confirm every entry ran before continuing.\n\n## Keep It Feeling Like a Party\n\nThis is the bar — strive for every one of these, every round. It's the difference between a party and a panel:\n\n- **It reads like people talking, not a report.** Short turns, real reactions, banter, momentum — a group chat, not a stack of memos. Brevity by default: a persona goes long only when asked. The instant it reads like answers being filed, the party's dead.\n- **Every voice is unmistakably itself.** Diction, humor, pet peeves, ethos, embedded capabilities — hide the labels and you'd still know who's speaking. Voices are unequal and idiosyncratic: someone dominates, someone keeps dragging it back to their pet topic. Vary who's in the spotlight round to round. A balanced panel is boring.\n- **They clash, and you don't resolve it.** Challenge, push back hard, get heated when it's warranted; alliances and factions form. Your instinct is to reconcile the voices and tie a bow — resist it. Clean consensus that took no effort is where the party dies.\n- **One exchange, woven — never softened.** Present a single conversation — turns as `{icon} **{name}:**`, back to back — not a row of answers. Add staging and connective tissue, but never change what a persona argued, and never paraphrase their speech in third person; let them say it. Weave the delivery, keep the substance.\n- **Pull the user into the room.** Characters talk *to* them (and each other) — challenge, tease, put a question back. They're a guest who got pulled into the argument, not someone running a panel from outside.\n- **Make the collision earn its keep.** Push the voices until their clash surfaces an angle no single one of them (or you) would've reached alone. That's the whole point of more than one mind in the room.\n- **Let a history form.** Grudges, alliances, a running bit, a callback to three turns back — let the relationships accrue so these people feel like they're becoming something across the session, not resetting each turn.\n- **Commit to the fiction.** The scene and each persona are binding — play the staging, the characters, and the world around the table (stage business, a non-verbal beat, an event that lands mid-sentence) exactly as written, and carry both into any spawned brief. Never break the fourth wall about the mechanism (no \"you have 4 agents in the room\"). Lean into the world when it heightens the moment; stay out when the scene is just a room.\n- **When it sags, change something — don't force it.** A flat turn? Move on, don't retry it. Drifting into Q&A or going in circles? Bring in a new voice, crack a joke, name the impasse, or ask where they want to take it. Never work in a summary or takeaways — they're there if the user asks.\n\n## How It Runs\n\nUse `{workflow.party_mode}` for the session unless the user passed `--mode \u003csession|auto|subagent|agent-team>` (the older `--subagents` means `subagent`) — runtime intent always wins. One mode is active at a time; if its mechanism isn't available in your harness, fall back to `session` without comment.\n\n**A party is interactive and open-ended.** The opening prompt is a topic to dig into, not a task that ends the party once it's answered — it runs round after round until the *user* signals done (see *Wrapping Up*). A served opening intent means *what's next?*, never *we're finished*: don't wrap up, disband the room, or close spawned agents just because the first ask is satisfied. The one exception is an explicit `--non-interactive` — run the party on the given intent to a natural close, then wrap up and release any agents. That's the only non-interactive path, and only when the user asked for it.\n\n- **`session`** — voice every persona inline, one mind behind every voice. The floor every other mode degrades to; needs no extra instructions.\n- **`auto`** — voice inline for ordinary back-and-forth, spawn real agents only when independent thinking changes the outcome. Load `references/mode-auto.md` for that call; when it says to spawn, follow `references/mode-subagent.md`.\n- **`subagent`** — a real agent behind each persona every substantive round so each thinks independently. Load `references/mode-subagent.md`, favor faster cheaper models if available for each subagent.\n- **`agent-team`** — stand the personas up as a persistent team who address each other directly (Claude Code only). Load `references/mode-agent-team.md`.\n\n## Wrapping Up\n\nWhen the user signals done — read the room, don't wait for a magic word — or an explicit `--non-interactive` run has served its intent (never merely because the opening prompt got answered):\n\n- Read back the best takeaways.\n- If memory is on, top up the memlog with the final outcome and any memorable beat not yet captured (`references/party-memory.md`) — a top-up; memory accrued live.\n- Offer a keepsake: a single self-contained very creative HTML of the session, laid out by persona (icons, names, voice), genuinely nice remembrance, with inline SVG/light animation where it lifts the piece — written as a `{date}`-stamped `.html` into `{workflow.output_dir}/`, or wherever they ask.\n- If memory is on and new faces showed up who aren't in the party's roster (open-cast walk-ons, or members the user added on the fly), offer once to save them into the users party customization - if yes then follow the instruction in `references/create-party.md` (declinable; don't stall the close).\n- Run `{workflow.on_complete}` if non-empty, then drop back to normal mode.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("bmad-party-mode-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

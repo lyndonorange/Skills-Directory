@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>archify - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/archify-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>archify</h1>
+      <p class="description">Create professional architecture, workflow, sequence, data-flow, and lifecycle/state diagrams as standalone HTML files with SVG graphics, a built-in dark/light theme toggle, and one-click export to PNG / JPEG / WebP / SVG. Accepts plain-language descriptions or pasted Mermaid code (flowchart, sequenceDiagram, stateDiagram) and lays the diagram out from scratch in archify style. Use when the user asks for system architecture diagrams, infrastructure diagrams, cloud architecture visualizations, security diagrams, network topology, technical workflows, approval flows, runbooks, CI/CD flows, process diagrams, API call sequences, request lifecycles, data pipelines, ETL/ELT maps, PII boundaries, data lineage, state machines, lifecycle diagrams, status transitions, or asks to convert/beautify a Mermaid diagram.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>archify</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>archify</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Create professional architecture, workflow, sequence, data-flow, and lifecycle/state diagrams as standalone HTML files with SVG graphics, a built-in dark/light theme toggle, and one-click export to PNG / JPEG / WebP / SVG. Accepts plain-language descriptions or pasted Mermaid code (flowchart, sequenceDiagram, stateDiagram) and lays the diagram out from scratch in archify style. Use when the user asks for system architecture diagrams, infrastructure diagrams, cloud architecture visualizations, security diagrams, network topology, technical workflows, approval flows, runbooks, CI/CD flows, process diagrams, API call sequences, request lifecycles, data pipelines, ETL/ELT maps, PII boundaries, data lineage, state machines, lifecycle diagrams, status transitions, or asks to convert/beautify a Mermaid diagram.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose archify, then write the task. Fallback prompt: Use the archify skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Archify Skill</h2>
+<p>Create professional technical diagrams as self-contained HTML files with inline SVG, a theme toggle, and a built-in image/SVG export menu.</p>
+<p>Every diagram ships with a <strong>dark/light theme toggle</strong> (persists in <code>localStorage</code>, respects <code>prefers-color-scheme</code>), an <strong>export menu</strong> (copy PNG to clipboard; download PNG/JPEG/WebP rasterized natively at up to 4× resolution; download a <strong>dual-theme SVG</strong> that follows the embedding host's <code>prefers-color-scheme</code> — ideal for GitHub READMEs), and a <strong>CSS-variable color system</strong> that keeps both themes consistent.</p>
+<h3>Setup</h3>
+<p>No dependency installation is required. The distributed skill includes standalone validators compiled from all five JSON Schemas, so schema and layout validation work immediately after installation. The generated HTML and the renderer runtime are both dependency-free.</p>
+<p>Run <code>node bin/archify.mjs doctor</code> to verify an installation. Run <code>node bin/archify.mjs demo [output-directory]</code> to generate a ready-to-open example before creating the first custom diagram.</p>
+<p>If you have no shell access at all (e.g. the skill was added as project knowledge), fall back to architecture mode for every request: hand-place SVG into <code>assets/template.html</code> following the Design System below, and run the self-review checklist before delivering.</p>
+<h3>Choosing a Diagram Type</h3>
+<p>| Type | Use for | How | |------|---------|-----| | <code>architecture</code> | System components, cloud resources, services, security boundaries, infrastructure | <code>renderers/architecture/render-architecture.mjs</code> + JSON (or hand-place SVG when renderers can't run) | | <code>workflow</code> | Technical flows, approval gates, tool calls, runbooks, CI/CD, incident response | <code>renderers/workflow/render-workflow.mjs</code> + JSON | | <code>sequence</code> | API call chains, request lifecycles, cache fallback, async traces, return paths | <code>renderers/sequence/render-sequence.mjs</code> + JSON | | <code>dataflow</code> | Pipelines, ETL/ELT, PII isolation, lineage, warehouse sync, consumers | <code>renderers/dataflow/render-dataflow.mjs</code> + JSON | | <code>lifecycle</code> | State machines, status transitions, wait states, retries, terminal states | <code>renderers/lifecycle/render-lifecycle.mjs</code> + JSON |</p>
+<p>Trigger phrases: &quot;architecture/system/cloud diagram&quot; → <code>architecture</code> (unless clearly process-oriented). &quot;workflow/flow/process/runbook/approval/CI-CD/incident&quot; → <code>workflow</code>. &quot;sequence/interaction/call chain/who calls whom&quot; → <code>sequence</code>. &quot;data flow/pipeline/ETL/lineage/PII/governance&quot; → <code>dataflow</code>. &quot;state/status/lifecycle/state machine/retry/terminal&quot; → <code>lifecycle</code>.</p>
+<h3>Mermaid as an Input Dialect</h3>
+<p>When the user pastes Mermaid code, do NOT try to render or parse it mechanically — read it for structure and <strong>lay out from scratch</strong> in the matching archify mode:</p>
+<p>| Mermaid | Archify mode | Mapping | |---------|--------------|---------| | <code>flowchart</code> / <code>graph</code> | <code>workflow</code> (or <code>architecture</code> if it's a component map) | <code>subgraph</code> → lane or region boundary; node shape <code>{}</code> (diamond) → decision/security node; <code>--&gt;</code> labels → edge labels (use sparingly); <code>classDef</code>/<code>style</code> → nearest semantic type | | <code>sequenceDiagram</code> | <code>sequence</code> | <code>participant</code> → participants (pick semantic <code>type</code> from the name); <code>-&gt;&gt;</code> → message, <code>--&gt;&gt;</code> → <code>return</code> variant; <code>Note</code> → message <code>note</code>; <code>rect</code> blocks → segments | | <code>stateDiagram</code> | <code>lifecycle</code> | states → states (pick <code>start</code>/<code>active</code>/<code>waiting</code>/<code>success</code>/<code>failure</code> from names); <code>[*]</code> start/end → <code>start</code> type / <code>terminal</code> lane; transition labels → event-like labels |</p>
+<p>Drop Mermaid styling; keep only the topology and meaning. You choose grouping, lane order, and what deserves emphasis — that judgment is the product.</p>
+<h3>Layout principles (read before placing)</h3>
+<p>Archify's readability comes from <strong>spatial narrative</strong>, not from drawing every dependency as an arrow. Before you write coordinates or edge lists, plan one clear story:</p>
+<ol>
+<li><strong>One main path</strong> — left → right (architecture) or lane → column (workflow). The reader should trace the happy path without crossing lines.</li>
+<li><strong>Few labeled edges</strong> — label only cross-boundary or non-obvious transitions on the main path. Adjacent steps stay unlabeled.</li>
+<li><strong>Short side branches</strong> — permissions, storage, bots, CI: connect <strong>up or down</strong> from the nearest node on the main path. Never route a secondary edge diagonally across unrelated components.</li>
+<li><strong>Cards for detail</strong> — policies, tech stack notes, and &quot;also connects to X&quot; belong in summary cards, not as extra arrows.</li>
+<li><strong>Mode fit</strong> — process / approval / tool-call stories → <code>workflow</code> or <code>sequence</code>. Component maps with ≤12 nodes → <code>architecture</code>. If the diagram needs 20+ edges, remove edges until the main path is obvious.</li>
+</ol>
+<p>Worked examples on this pattern: <code>examples/archify-repo.architecture.json</code> (this repo) and <code>examples/maka-architecture.architecture.json</code> (third-party desktop app).</p>
+<p>When validation fails on label overlap, read the <strong>Suggested fix</strong> lines (coordinates / <code>labelAt</code> / <code>labelDy</code>) and apply them directly — do not guess offsets blindly.</p>
+<h3>Renderer Modes (architecture / workflow / sequence / dataflow / lifecycle)</h3>
+<p>All five modes follow the same loop:</p>
+<ol>
+<li><strong>Read first</strong>: the schema (<code>schemas/&lt;type&gt;.schema.json</code>) and the complete worked example (<code>examples/*.{architecture,workflow,sequence,dataflow,lifecycle}.json</code>) — copy its patterns instead of guessing field shapes.</li>
+<li>Write <code>&lt;name&gt;.&lt;type&gt;.json</code>.</li>
+<li>Render: <code>node bin/archify.mjs render &lt;type&gt; &lt;input&gt;.json &lt;output&gt;.html</code> (paths relative to this skill's folder).</li>
+<li>Validate the generated artifact: <code>node bin/archify.mjs validate &lt;type&gt; &lt;input&gt;.json --json</code>, or check an existing HTML file with <code>node bin/archify.mjs check &lt;output&gt;.html</code>. This catches malformed SVG output, non-finite SVG values, two-point diagonal arrows, and arrows crossing the legend.</li>
+<li>If either step fails, the error names the JSON path or the fix (thresholds, valid ranges, which knob to change). Fix the JSON and re-run; never edit the renderer.</li>
+</ol>
+<p>Schema violations exit non-zero with path-prefixed messages like <code>/nodes/3 (id/label: &quot;router&quot;) must NOT have additional properties</code>. The renderers additionally fail fast on layout problems: node/state overlap (including cross-lane), labels colliding with nodes or other labels, labels wider than their node, out-of-range columns/rows, too-short edges, workflow edges crossing unrelated nodes, and legends outside the viewBox. CJK text is measured at double width automatically.</p>
+<p>Set <code>meta.animation: &quot;trace&quot;</code> only when the user asks for motion or a presentation/demo view. It adds lightweight SVG/CSS trace animation to renderer-marked arrows and nodes, respects <code>prefers-reduced-motion</code>, and leaves the default static output unchanged.</p>
+<h4>Workflow</h4>
+<pre><code>{
+  &quot;schema_version&quot;: 1,
+  &quot;diagram_type&quot;: &quot;workflow&quot;,
+  &quot;meta&quot;: { &quot;title&quot;: &quot;Release Workflow&quot;, &quot;subtitle&quot;: &quot;PR to production&quot;, &quot;output&quot;: &quot;release.html&quot; },
+  &quot;lanes&quot;: [ { &quot;id&quot;: &quot;dev&quot;, &quot;label&quot;: &quot;Developer&quot; }, { &quot;id&quot;: &quot;ci&quot;, &quot;label&quot;: &quot;CI&quot; }, { &quot;id&quot;: &quot;exceptions&quot;, &quot;label&quot;: &quot;Exception Handling&quot;, &quot;variant&quot;: &quot;exception&quot; } ],
+  &quot;phases&quot;: [ { &quot;id&quot;: &quot;intake&quot;, &quot;label&quot;: &quot;Intake&quot;, &quot;fromCol&quot;: 0, &quot;toCol&quot;: 1 } ],
+  &quot;groups&quot;: [ { &quot;id&quot;: &quot;checks&quot;, &quot;label&quot;: &quot;Parallel checks&quot;, &quot;lane&quot;: &quot;ci&quot;, &quot;fromCol&quot;: 1, &quot;toCol&quot;: 3, &quot;variant&quot;: &quot;emphasis&quot; } ],
+  &quot;mainPath&quot;: [&quot;pr&quot;, &quot;build&quot;],
+  &quot;nodes&quot;: [
+    { &quot;id&quot;: &quot;pr&quot;, &quot;lane&quot;: &quot;dev&quot;, &quot;col&quot;: 0, &quot;type&quot;: &quot;frontend&quot;, &quot;label&quot;: &quot;Open PR&quot;, &quot;sublabel&quot;: &quot;feature branch&quot; },
+    { &quot;id&quot;: &quot;build&quot;, &quot;lane&quot;: &quot;ci&quot;, &quot;col&quot;: 1, &quot;type&quot;: &quot;backend&quot;, &quot;label&quot;: &quot;Build&quot;, &quot;sublabel&quot;: &quot;lint + test&quot;, &quot;tag&quot;: &quot;blocking&quot; }
+  ],
+  &quot;edges&quot;: [
+    { &quot;from&quot;: &quot;pr&quot;, &quot;to&quot;: &quot;build&quot;, &quot;label&quot;: &quot;webhook&quot;, &quot;variant&quot;: &quot;emphasis&quot;, &quot;fromSide&quot;: &quot;bottom&quot;, &quot;toSide&quot;: &quot;top&quot;, &quot;route&quot;: &quot;drop&quot; }
+  ],
+  &quot;cards&quot;: []
+}</code></pre>
+<p><strong>Layout budget</strong>: 6 columns (<code>col</code> 0–5) at fixed x positions <code>[88, 220, 300, 430, 500, 625]</code> — columns 1↔2 and 3↔4 are only 70–80px apart, so default-width (92px) nodes in those adjacent columns of the same lane overlap; skip a column or shrink <code>width</code>. Lane content width is 640px. Omit <code>meta.viewBox</code> — the renderer sizes height to the lane count automatically. Use <code>phases</code> for top-of-diagram story beats, <code>groups</code> to frame parallel work or a branch inside one lane, and <code>lane.variant: &quot;exception&quot;</code> for error/retry/fallback lanes. <code>mainPath</code> is optional but recommended: list the happy-path node ids in order so the renderer can catch missing edges or accidental backward movement. Edge routes: <code>straight</code>, <code>drop</code> (bend between lanes; <code>bias</code> 0–1 picks where), <code>outside-right</code>, <code>return-left</code>, <code>bottom-channel</code>, <code>up-channel</code>, or explicit <code>via</code> points. Keep adjacent-step edges unlabeled; reserve labels for cross-lane transitions, approvals, async traces, and returns.</p>
+<h4>Sequence</h4>
+<pre><code>{
+  &quot;schema_version&quot;: 1,
+  &quot;diagram_type&quot;: &quot;sequence&quot;,
+  &quot;meta&quot;: { &quot;title&quot;: &quot;Cache Miss Request&quot;, &quot;subtitle&quot;: &quot;auth and cache fallback&quot;, &quot;output&quot;: &quot;cache-miss.html&quot; },
+  &quot;participants&quot;: [
+    { &quot;id&quot;: &quot;web&quot;, &quot;type&quot;: &quot;frontend&quot;, &quot;label&quot;: &quot;Web App&quot;, &quot;sublabel&quot;: &quot;React UI&quot; },
+    { &quot;id&quot;: &quot;api&quot;, &quot;type&quot;: &quot;backend&quot;, &quot;label&quot;: &quot;API&quot;, &quot;sublabel&quot;: &quot;handler&quot; }
+  ],
+  &quot;segments&quot;: [ { &quot;from&quot;: 160, &quot;to&quot;: 320, &quot;label&quot;: &quot;01 / AUTH&quot; } ],
+  &quot;messages&quot;: [
+    { &quot;from&quot;: &quot;web&quot;, &quot;to&quot;: &quot;api&quot;, &quot;y&quot;: 200, &quot;label&quot;: &quot;GET /data&quot;, &quot;variant&quot;: &quot;emphasis&quot; },
+    { &quot;from&quot;: &quot;api&quot;, &quot;to&quot;: &quot;web&quot;, &quot;y&quot;: 290, &quot;label&quot;: &quot;200 JSON&quot;, &quot;variant&quot;: &quot;return&quot; }
+  ],
+  &quot;activations&quot;: [ { &quot;participant&quot;: &quot;api&quot;, &quot;from&quot;: 190, &quot;to&quot;: 300, &quot;type&quot;: &quot;backend&quot; } ],
+  &quot;cards&quot;: []
+}</code></pre>
+<p><strong>Layout budget</strong>: participants sit at x = 62 + index×108, so a 920-wide viewBox fits at most 8. Message <code>y</code> must stay within <code>[160, viewBox_height − 83]</code>; messages that share horizontal space need ≥28px vertical separation; arrows need ≥60px horizontal span. <code>segments[].from/to</code> and <code>activations[].from/to</code> are <strong>y pixel coordinates</strong>, not participant ids. A taller <code>meta.viewBox</code> (default <code>[920, 760]</code>) buys more timeline room. Keep labels short: &quot;GET /path&quot;, &quot;verify JWT&quot;, &quot;cache miss&quot;, &quot;200 JSON&quot;.</p>
+<h4>Dataflow</h4>
+<pre><code>{
+  &quot;schema_version&quot;: 1,
+  &quot;diagram_type&quot;: &quot;dataflow&quot;,
+  &quot;meta&quot;: { &quot;title&quot;: &quot;Product Analytics&quot;, &quot;subtitle&quot;: &quot;events to consumers&quot;, &quot;output&quot;: &quot;analytics.html&quot; },
+  &quot;stages&quot;: [ { &quot;label&quot;: &quot;Sources&quot; }, { &quot;label&quot;: &quot;Ingest&quot; }, { &quot;label&quot;: &quot;Store&quot; } ],
+  &quot;nodes&quot;: [
+    { &quot;id&quot;: &quot;web&quot;, &quot;type&quot;: &quot;frontend&quot;, &quot;label&quot;: &quot;Web App&quot;, &quot;stage&quot;: 0, &quot;row&quot;: 0, &quot;sublabel&quot;: &quot;clickstream&quot; },
+    { &quot;id&quot;: &quot;kafka&quot;, &quot;type&quot;: &quot;messagebus&quot;, &quot;label&quot;: &quot;Kafka&quot;, &quot;stage&quot;: 1, &quot;row&quot;: 0, &quot;tag&quot;: &quot;accepted events&quot; }
+  ],
+  &quot;flows&quot;: [
+    { &quot;from&quot;: &quot;web&quot;, &quot;to&quot;: &quot;kafka&quot;, &quot;label&quot;: &quot;events&quot;, &quot;classification&quot;: &quot;PII touch&quot;, &quot;variant&quot;: &quot;emphasis&quot; }
+  ],
+  &quot;cards&quot;: []
+}</code></pre>
+<p><strong>Layout budget</strong>: 2–5 stages at x = 100 + stage×215; 5 rows (<code>row</code> 0–4) at y <code>[128, 242, 356, 470, 584]</code>; default node 112×58. Default viewBox <code>[940, 720]</code>. Flow labels are mandatory and asset-like (&quot;clickstream&quot;, &quot;identity map&quot;, &quot;feature vectors&quot;); put sensitivity in <code>classification</code> (&quot;PII touch&quot;, &quot;approved only&quot;, &quot;non-PII&quot;). Variants: <code>emphasis</code> = primary path, <code>security</code> = PII/policy/consent, <code>dashed</code> = async/batch.</p>
+<h4>Lifecycle</h4>
+<pre><code>{
+  &quot;schema_version&quot;: 1,
+  &quot;diagram_type&quot;: &quot;lifecycle&quot;,
+  &quot;meta&quot;: { &quot;title&quot;: &quot;Agent Run Lifecycle&quot;, &quot;subtitle&quot;: &quot;states and terminal outcomes&quot;, &quot;output&quot;: &quot;agent-run.html&quot; },
+  &quot;lanes&quot;: [
+    { &quot;id&quot;: &quot;main&quot;, &quot;label&quot;: &quot;Lifecycle phases&quot; },
+    { &quot;id&quot;: &quot;waiting&quot;, &quot;label&quot;: &quot;Interruptions&quot; },
+    { &quot;id&quot;: &quot;terminal&quot;, &quot;label&quot;: &quot;Terminal exits&quot; }
+  ],
+  &quot;states&quot;: [
+    { &quot;id&quot;: &quot;queued&quot;, &quot;type&quot;: &quot;start&quot;, &quot;label&quot;: &quot;Queued&quot;, &quot;lane&quot;: &quot;main&quot;, &quot;col&quot;: 0, &quot;step&quot;: &quot;01&quot; },
+    { &quot;id&quot;: &quot;running&quot;, &quot;type&quot;: &quot;active&quot;, &quot;label&quot;: &quot;Executing&quot;, &quot;lane&quot;: &quot;main&quot;, &quot;col&quot;: 2, &quot;step&quot;: &quot;02&quot; },
+    { &quot;id&quot;: &quot;approval&quot;, &quot;type&quot;: &quot;waiting&quot;, &quot;label&quot;: &quot;Needs Approval&quot;, &quot;lane&quot;: &quot;waiting&quot;, &quot;col&quot;: 0 },
+    { &quot;id&quot;: &quot;done&quot;, &quot;type&quot;: &quot;success&quot;, &quot;label&quot;: &quot;Completed&quot;, &quot;lane&quot;: &quot;terminal&quot;, &quot;col&quot;: 2 }
+  ],
+  &quot;transitions&quot;: [
+    { &quot;from&quot;: &quot;queued&quot;, &quot;to&quot;: &quot;running&quot;, &quot;variant&quot;: &quot;emphasis&quot; },
+    { &quot;from&quot;: &quot;running&quot;, &quot;to&quot;: &quot;approval&quot;, &quot;label&quot;: &quot;needs approval&quot;, &quot;variant&quot;: &quot;security&quot;, &quot;fromSide&quot;: &quot;bottom&quot;, &quot;toSide&quot;: &quot;right&quot; },
+    { &quot;from&quot;: &quot;running&quot;, &quot;to&quot;: &quot;done&quot;, &quot;label&quot;: &quot;success&quot;, &quot;variant&quot;: &quot;emphasis&quot;, &quot;fromSide&quot;: &quot;bottom&quot;, &quot;toSide&quot;: &quot;top&quot; }
+  ],
+  &quot;cards&quot;: []
+}</code></pre>
+<p><strong>Layout budget — lane ids are semantic and reserved</strong>: <code>main</code> is required and maps to the top phase band (cols 0–4); <code>terminal</code> maps to the bottom outcome band (cols 0–2); <strong>every other lane id shares the single middle event band</strong> (cols 0–2) — separate same-band states with different <code>col</code> or <code>yOffset</code>. Band headers render from your lane labels. Default viewBox <code>[980, 660]</code>. Keep transition labels event-like and sparse (&quot;retry&quot;, &quot;timeout&quot;, &quot;cancel&quot;); prefer state <code>tag</code>s, <code>step</code> numbers, and summary cards over label-heavy arrows. Put terminal states in the <code>terminal</code> lane so endings are unambiguous.</p>
+<h4>Per-mode deep guidance</h4>
+<p>Each renderer has a README with its full design language (route presets, semantic types, story guidance): <code>renderers/workflow/README.md</code>, <code>renderers/sequence/README.md</code>, <code>renderers/dataflow/README.md</code>, <code>renderers/lifecycle/README.md</code>. Read the matching one before your first diagram of that mode in a session.</p>
+<h3>Architecture Mode</h3>
+<p>Architecture has the same read-schema-then-render loop as the other modes — prefer it. Hand-placed SVG is the fallback for when renderers can't run.</p>
+<pre><code>{
+  &quot;schema_version&quot;: 1,
+  &quot;diagram_type&quot;: &quot;architecture&quot;,
+  &quot;meta&quot;: { &quot;title&quot;: &quot;Sample Web App&quot;, &quot;subtitle&quot;: &quot;3-tier SaaS on AWS&quot;, &quot;output&quot;: &quot;web-app.html&quot; },
+  &quot;components&quot;: [
+    { &quot;id&quot;: &quot;users&quot;, &quot;type&quot;: &quot;external&quot;, &quot;label&quot;: &quot;Users&quot;, &quot;sublabel&quot;: &quot;Browser&quot;, &quot;pos&quot;: [40, 300] },
+    { &quot;id&quot;: &quot;api&quot;, &quot;type&quot;: &quot;backend&quot;, &quot;label&quot;: &quot;API Server&quot;, &quot;sublabel&quot;: &quot;FastAPI :8000&quot;, &quot;pos&quot;: [460, 300] },
+    { &quot;id&quot;: &quot;db&quot;, &quot;type&quot;: &quot;database&quot;, &quot;label&quot;: &quot;PostgreSQL&quot;, &quot;sublabel&quot;: &quot;:5432&quot;, &quot;pos&quot;: [680, 300] }
+  ],
+  &quot;boundaries&quot;: [
+    { &quot;kind&quot;: &quot;region&quot;, &quot;label&quot;: &quot;AWS us-west-2&quot;, &quot;wraps&quot;: [&quot;api&quot;, &quot;db&quot;] }
+  ],
+  &quot;connections&quot;: [
+    { &quot;from&quot;: &quot;users&quot;, &quot;to&quot;: &quot;api&quot;, &quot;label&quot;: &quot;HTTPS&quot;, &quot;variant&quot;: &quot;emphasis&quot; },
+    { &quot;from&quot;: &quot;api&quot;, &quot;to&quot;: &quot;db&quot;, &quot;label&quot;: &quot;SQL&quot; }
+  ],
+  &quot;cards&quot;: []
+}</code></pre>
+<p>Render: <code>node bin/archify.mjs render architecture &lt;input&gt;.json &lt;output&gt;.html</code>.</p>
+<p><strong>Free placement</strong> — <code>pos: [x, y]</code> is the component's top-left; <code>size: [w, h]</code> defaults to <code>[120, 60]</code>. Unlike typed modes there is no lane/stage grid — asymmetric placement is yours to choose. <code>meta.viewBox</code> is optional (auto-fitted).</p>
+<p><strong>Grid placement (#8)</strong> — when manual coordinates are painful, set semantic cells instead of doing arithmetic:</p>
+<pre><code>{
+  &quot;layout&quot;: { &quot;mode&quot;: &quot;grid&quot;, &quot;cols&quot;: 7, &quot;origin&quot;: [40, 100], &quot;gapX&quot;: 24, &quot;gapY&quot;: 48, &quot;cellW&quot;: 120, &quot;cellH&quot;: 60 },
+  &quot;components&quot;: [
+    { &quot;id&quot;: &quot;agents&quot;, &quot;type&quot;: &quot;frontend&quot;, &quot;label&quot;: &quot;Agent Hosts&quot;, &quot;row&quot;: 1, &quot;col&quot;: 1 },
+    { &quot;id&quot;: &quot;ir&quot;, &quot;type&quot;: &quot;messagebus&quot;, &quot;label&quot;: &quot;JSON IR&quot;, &quot;row&quot;: 1, &quot;col&quot;: 2 }
+  ]
+}</code></pre>
+<p><code>pos</code> still wins when present (override one cell). This is <strong>not</strong> auto-layout — spacing is fixed cell math. Example: <code>examples/archify-repo-grid.architecture.json</code>.</p>
+<p><strong>Inspect layout (#9)</strong> — after editing JSON, dump computed boxes without opening HTML:</p>
+<pre><code>node bin/archify.mjs inspect architecture my.architecture.json
+# or: node bin/archify.mjs validate architecture my.architecture.json --layout-json</code></pre>
+<p>Output includes component rects, boundaries, connection point paths, and label positions.</p>
+<p><strong>The renderer does the mechanical work that used to be hand-tuned</strong>, so you only choose coordinates and meaning:</p>
+<ul>
+<li><strong>Free coordinates</strong> — <code>pos: [x, y]</code> is the component's top-left; <code>size: [w, h]</code> defaults to <code>[120, 60]</code>. Unlike the typed modes there is no lane/stage grid — asymmetric placement is yours to choose. <code>meta.viewBox</code> is optional (auto-fitted to your components + a legend row).</li>
+<li><strong>Grid placement</strong> — optional <code>layout.mode: &quot;grid&quot;</code> with <code>row</code>/<code>col</code> per component (see above). Not dagre; fixed cell spacing only.</li>
+<li><strong>Boundaries from <code>wraps</code></strong> — list the component ids a <code>region</code> (dashed amber) or <code>security-group</code> (dashed rose) encloses; the renderer computes the box with correct 30/50 padding automatically. Never hand-arithmetic a boundary again.</li>
+<li><strong>Connections</strong> route like edges (<code>variant</code>, <code>fromSide</code>/<code>toSide</code>, <code>route: straight|orthogonal-h|orthogonal-v|auto</code>, <code>via</code>, <code>labelDx/labelDy/labelAt</code>). For a vertical labeled connection, push the label into the gap with <code>labelDy</code> (the validator will tell you if it lands on a box).</li>
+<li>The renderer auto-emits the two-rect <code>c-mask</code> pattern, draws arrows before boxes (z-order), builds the legend from the component types you used, and <strong>fails fast on component overlap, off-canvas components/boundaries, unknown wraps/connection ids, label-vs-component collisions, and non-finite coordinates</strong> — the same reliability the other four modes already had.</li>
+</ul>
+<h4>Hand-placed fallback (no renderer available)</h4>
+<p>When Node/ajv can't run, copy <code>assets/template.html</code> and place SVG by hand. Study the worked diagram inside the template and <code>examples/web-app.html</code> for coordinate idioms, follow the Design System below, and run the self-review checklist before delivering.</p>
+<h4>The Cardinal Rule: CSS classes, not inline colors</h4>
+<p>The theme toggle works by switching CSS custom properties. Hardcoded <code>fill=&quot;rgba(...)&quot;</code> or <code>stroke=&quot;#22d3ee&quot;</code> will NOT update on theme change. Always use the class system:</p>
+<pre><code>&lt;rect x=&quot;X&quot; y=&quot;Y&quot; width=&quot;W&quot; height=&quot;H&quot; rx=&quot;6&quot; class=&quot;c-mask&quot;/&gt;
+&lt;rect x=&quot;X&quot; y=&quot;Y&quot; width=&quot;W&quot; height=&quot;H&quot; rx=&quot;6&quot; class=&quot;c-backend&quot; stroke-width=&quot;1.5&quot;/&gt;
+&lt;text x=&quot;CX&quot; y=&quot;CY&quot; class=&quot;t-primary&quot; font-size=&quot;11&quot; font-weight=&quot;600&quot; text-anchor=&quot;middle&quot;&gt;API Server&lt;/text&gt;
+&lt;text x=&quot;CX&quot; y=&quot;CY+16&quot; class=&quot;t-muted&quot; font-size=&quot;9&quot; text-anchor=&quot;middle&quot;&gt;FastAPI :8000&lt;/text&gt;</code></pre>
+<h4>Design system</h4>
+<p>Component fills <code>c-frontend</code> (clients/UI), <code>c-backend</code> (services/APIs), <code>c-database</code> (stores/caches), <code>c-cloud</code> (managed infra), <code>c-security</code> (auth/secrets), <code>c-messagebus</code> (Kafka/queues), <code>c-external</code> (3rd parties); text accents <code>t-&lt;same&gt;</code> plus neutrals <code>t-primary</code> / <code>t-muted</code> / <code>t-dim</code>. Arrows <code>a-default</code>, <code>a-emphasis</code> (hot path), <code>a-security</code> (dashed), <code>a-dashed</code> (async) — always set <code>stroke-width</code> and pair <code>marker-end=&quot;url(#arrowhead[-variant])&quot;</code> with the matching class. Boundaries: <code>c-security-group</code> (dashed rose), <code>c-region</code> (dashed amber), <code>c-lane</code> (swimlane).</p>
+<p>Typography inherits JetBrains Mono from the SVG root. Sizes: 11–12px component names, 9px sublabels, 8px annotations, 7px tiny labels.</p>
+<h4>Hard layout rules</h4>
+<ul>
+<li><strong>Two-rect pattern everywhere</strong>: opaque <code>c-mask</code> rect first, styled <code>c-&lt;type&gt;</code> rect on top — semi-transparent fills otherwise let arrows bleed through.</li>
+<li><strong>Arrows before components</strong> in document order (SVG paints in order; arrows must sit behind boxes).</li>
+<li><strong>Vertical stacking</strong>: ≥40px gap between components; inline connectors (message buses, 20px tall) live inside the gap, never overlapping boxes.</li>
+<li><strong>Boundary padding</strong>: boundary <code>y</code> = inner <code>y</code> − 30, boundary <code>height</code> = inner <code>height</code> + 50, label baseline 18px below the boundary top.</li>
+<li><strong>Legend placement</strong>: outside ALL boundary boxes, ≥20px below the lowest one; grow the viewBox if needed.</li>
+</ul>
+<h4>Self-review checklist (run before delivering)</h4>
+<ol>
+<li><code>grep -E 'fill=&quot;(#|rgb)|stroke=&quot;(#|rgb)' out.html</code> inside the SVG returns nothing except the template's own defs (Cardinal Rule).</li>
+<li>Every <code>c-&lt;type&gt;</code> rect has an identical-geometry <code>c-mask</code> rect immediately before it.</li>
+<li>All <code>&lt;line&gt;</code>/<code>&lt;path&gt;</code> arrows appear before all component rects in document order.</li>
+<li>Compute max(y + height) over all SVG elements: viewBox height must exceed it by ≥20px; same for x/width.</li>
+<li>Legend y is below every boundary's y + height.</li>
+<li>The <code>.toolbar</code>, <code>&lt;script&gt;</code> blocks, and <code>:root</code> / <code>[data-theme]</code> CSS are untouched — they ARE the theme toggle and export menu.</li>
+</ol>
+<h3>Output</h3>
+<p>A single self-contained <code>.html</code>: embedded CSS (Google Fonts loads async and degrades to system monospace offline), inline SVG, ~19KB embedded JS for theme + export. It renders directly in any modern browser. Raster exports render natively at up to 4× the viewBox (large diagrams step down to 3×/2× to stay under canvas limits); the SVG download is dual-theme self-contained and follows the host's <code>prefers-color-scheme</code> (manual override via <code>svg[data-theme=&quot;...&quot;]</code>).</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: archify\ndisplay_name: archify\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# archify - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `archify` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nCreate professional architecture, workflow, sequence, data-flow, and lifecycle/state diagrams as standalone HTML files with SVG graphics, a built-in dark/light theme toggle, and one-click export to PNG / JPEG / WebP / SV\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose archify, then write the task. Fallback prompt: Use the archify skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `archify` |\n| Canonical name | `archify` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nCreate professional architecture, workflow, sequence, data-flow, and lifecycle/state diagrams as standalone HTML files with SVG graphics, a built-in dark/light theme toggle, and one-click export to PNG / JPEG / WebP / SV\n\n\n## Original SKILL.md\n\n---\nname: archify\ndescription: Create professional architecture, workflow, sequence, data-flow, and lifecycle/state diagrams as standalone HTML files with SVG graphics, a built-in dark/light theme toggle, and one-click export to PNG / JPEG / WebP / SVG. Accepts plain-language descriptions or pasted Mermaid code (flowchart, sequenceDiagram, stateDiagram) and lays the diagram out from scratch in archify style. Use when the user asks for system architecture diagrams, infrastructure diagrams, cloud architecture visualizations, security diagrams, network topology, technical workflows, approval flows, runbooks, CI/CD flows, process diagrams, API call sequences, request lifecycles, data pipelines, ETL/ELT maps, PII boundaries, data lineage, state machines, lifecycle diagrams, status transitions, or asks to convert/beautify a Mermaid diagram.\nlicense: MIT\nmetadata:\n  version: \"2.11\"\n  author: tt-a1i\n  based_on: Cocoon-AI/architecture-diagram-generator (MIT, v1.0)\n---\n\n# Archify Skill\n\nCreate professional technical diagrams as self-contained HTML files with inline SVG, a theme toggle, and a built-in image/SVG export menu.\n\nEvery diagram ships with a **dark/light theme toggle** (persists in `localStorage`, respects `prefers-color-scheme`), an **export menu** (copy PNG to clipboard; download PNG/JPEG/WebP rasterized natively at up to 4× resolution; download a **dual-theme SVG** that follows the embedding host's `prefers-color-scheme` — ideal for GitHub READMEs), and a **CSS-variable color system** that keeps both themes consistent.\n\n## Setup\n\nNo dependency installation is required. The distributed skill includes standalone validators compiled from all five JSON Schemas, so schema and layout validation work immediately after installation. The generated HTML and the renderer runtime are both dependency-free.\n\nRun `node bin/archify.mjs doctor` to verify an installation. Run `node bin/archify.mjs demo [output-directory]` to generate a ready-to-open example before creating the first custom diagram.\n\nIf you have no shell access at all (e.g. the skill was added as project knowledge), fall back to architecture mode for every request: hand-place SVG into `assets/template.html` following the Design System below, and run the self-review checklist before delivering.\n\n## Choosing a Diagram Type\n\n| Type | Use for | How |\n|------|---------|-----|\n| `architecture` | System components, cloud resources, services, security boundaries, infrastructure | `renderers/architecture/render-architecture.mjs` + JSON (or hand-place SVG when renderers can't run) |\n| `workflow` | Technical flows, approval gates, tool calls, runbooks, CI/CD, incident response | `renderers/workflow/render-workflow.mjs` + JSON |\n| `sequence` | API call chains, request lifecycles, cache fallback, async traces, return paths | `renderers/sequence/render-sequence.mjs` + JSON |\n| `dataflow` | Pipelines, ETL/ELT, PII isolation, lineage, warehouse sync, consumers | `renderers/dataflow/render-dataflow.mjs` + JSON |\n| `lifecycle` | State machines, status transitions, wait states, retries, terminal states | `renderers/lifecycle/render-lifecycle.mjs` + JSON |\n\nTrigger phrases: \"architecture/system/cloud diagram\" → `architecture` (unless clearly process-oriented). \"workflow/flow/process/runbook/approval/CI-CD/incident\" → `workflow`. \"sequence/interaction/call chain/who calls whom\" → `sequence`. \"data flow/pipeline/ETL/lineage/PII/governance\" → `dataflow`. \"state/status/lifecycle/state machine/retry/terminal\" → `lifecycle`.\n\n## Mermaid as an Input Dialect\n\nWhen the user pastes Mermaid code, do NOT try to render or parse it mechanically — read it for structure and **lay out from scratch** in the matching archify mode:\n\n| Mermaid | Archify mode | Mapping |\n|---------|--------------|---------|\n| `flowchart` / `graph` | `workflow` (or `architecture` if it's a component map) | `subgraph` → lane or region boundary; node shape `{}` (diamond) → decision/security node; `-->` labels → edge labels (use sparingly); `classDef`/`style` → nearest semantic type |\n| `sequenceDiagram` | `sequence` | `participant` → participants (pick semantic `type` from the name); `->>` → message, `-->>` → `return` variant; `Note` → message `note`; `rect` blocks → segments |\n| `stateDiagram` | `lifecycle` | states → states (pick `start`/`active`/`waiting`/`success`/`failure` from names); `[*]` start/end → `start` type / `terminal` lane; transition labels → event-like labels |\n\nDrop Mermaid styling; keep only the topology and meaning. You choose grouping, lane order, and what deserves emphasis — that judgment is the product.\n\n## Layout principles (read before placing)\n\nArchify's readability comes from **spatial narrative**, not from drawing every dependency as an arrow. Before you write coordinates or edge lists, plan one clear story:\n\n1. **One main path** — left → right (architecture) or lane → column (workflow). The reader should trace the happy path without crossing lines.\n2. **Few labeled edges** — label only cross-boundary or non-obvious transitions on the main path. Adjacent steps stay unlabeled.\n3. **Short side branches** — permissions, storage, bots, CI: connect **up or down** from the nearest node on the main path. Never route a secondary edge diagonally across unrelated components.\n4. **Cards for detail** — policies, tech stack notes, and \"also connects to X\" belong in summary cards, not as extra arrows.\n5. **Mode fit** — process / approval / tool-call stories → `workflow` or `sequence`. Component maps with ≤12 nodes → `architecture`. If the diagram needs 20+ edges, remove edges until the main path is obvious.\n\nWorked examples on this pattern: `examples/archify-repo.architecture.json` (this repo) and `examples/maka-architecture.architecture.json` (third-party desktop app).\n\nWhen validation fails on label overlap, read the **Suggested fix** lines (coordinates / `labelAt` / `labelDy`) and apply them directly — do not guess offsets blindly.\n\n## Renderer Modes (architecture / workflow / sequence / dataflow / lifecycle)\n\nAll five modes follow the same loop:\n\n1. **Read first**: the schema (`schemas/\u003ctype>.schema.json`) and the complete worked example (`examples/*.{architecture,workflow,sequence,dataflow,lifecycle}.json`) — copy its patterns instead of guessing field shapes.\n2. Write `\u003cname>.\u003ctype>.json`.\n3. Render: `node bin/archify.mjs render \u003ctype> \u003cinput>.json \u003coutput>.html` (paths relative to this skill's folder).\n4. Validate the generated artifact: `node bin/archify.mjs validate \u003ctype> \u003cinput>.json --json`, or check an existing HTML file with `node bin/archify.mjs check \u003coutput>.html`. This catches malformed SVG output, non-finite SVG values, two-point diagonal arrows, and arrows crossing the legend.\n5. If either step fails, the error names the JSON path or the fix (thresholds, valid ranges, which knob to change). Fix the JSON and re-run; never edit the renderer.\n\nSchema violations exit non-zero with path-prefixed messages like `/nodes/3 (id/label: \"router\") must NOT have additional properties`. The renderers additionally fail fast on layout problems: node/state overlap (including cross-lane), labels colliding with nodes or other labels, labels wider than their node, out-of-range columns/rows, too-short edges, workflow edges crossing unrelated nodes, and legends outside the viewBox. CJK text is measured at double width automatically.\n\nSet `meta.animation: \"trace\"` only when the user asks for motion or a presentation/demo view. It adds lightweight SVG/CSS trace animation to renderer-marked arrows and nodes, respects `prefers-reduced-motion`, and leaves the default static output unchanged.\n\n### Workflow\n\n```json\n{\n  \"schema_version\": 1,\n  \"diagram_type\": \"workflow\",\n  \"meta\": { \"title\": \"Release Workflow\", \"subtitle\": \"PR to production\", \"output\": \"release.html\" },\n  \"lanes\": [ { \"id\": \"dev\", \"label\": \"Developer\" }, { \"id\": \"ci\", \"label\": \"CI\" }, { \"id\": \"exceptions\", \"label\": \"Exception Handling\", \"variant\": \"exception\" } ],\n  \"phases\": [ { \"id\": \"intake\", \"label\": \"Intake\", \"fromCol\": 0, \"toCol\": 1 } ],\n  \"groups\": [ { \"id\": \"checks\", \"label\": \"Parallel checks\", \"lane\": \"ci\", \"fromCol\": 1, \"toCol\": 3, \"variant\": \"emphasis\" } ],\n  \"mainPath\": [\"pr\", \"build\"],\n  \"nodes\": [\n    { \"id\": \"pr\", \"lane\": \"dev\", \"col\": 0, \"type\": \"frontend\", \"label\": \"Open PR\", \"sublabel\": \"feature branch\" },\n    { \"id\": \"build\", \"lane\": \"ci\", \"col\": 1, \"type\": \"backend\", \"label\": \"Build\", \"sublabel\": \"lint + test\", \"tag\": \"blocking\" }\n  ],\n  \"edges\": [\n    { \"from\": \"pr\", \"to\": \"build\", \"label\": \"webhook\", \"variant\": \"emphasis\", \"fromSide\": \"bottom\", \"toSide\": \"top\", \"route\": \"drop\" }\n  ],\n  \"cards\": []\n}\n```\n\n**Layout budget**: 6 columns (`col` 0–5) at fixed x positions `[88, 220, 300, 430, 500, 625]` — columns 1↔2 and 3↔4 are only 70–80px apart, so default-width (92px) nodes in those adjacent columns of the same lane overlap; skip a column or shrink `width`. Lane content width is 640px. Omit `meta.viewBox` — the renderer sizes height to the lane count automatically. Use `phases` for top-of-diagram story beats, `groups` to frame parallel work or a branch inside one lane, and `lane.variant: \"exception\"` for error/retry/fallback lanes. `mainPath` is optional but recommended: list the happy-path node ids in order so the renderer can catch missing edges or accidental backward movement. Edge routes: `straight`, `drop` (bend between lanes; `bias` 0–1 picks where), `outside-right`, `return-left`, `bottom-channel`, `up-channel`, or explicit `via` points. Keep adjacent-step edges unlabeled; reserve labels for cross-lane transitions, approvals, async traces, and returns.\n\n### Sequence\n\n```json\n{\n  \"schema_version\": 1,\n  \"diagram_type\": \"sequence\",\n  \"meta\": { \"title\": \"Cache Miss Request\", \"subtitle\": \"auth and cache fallback\", \"output\": \"cache-miss.html\" },\n  \"participants\": [\n    { \"id\": \"web\", \"type\": \"frontend\", \"label\": \"Web App\", \"sublabel\": \"React UI\" },\n    { \"id\": \"api\", \"type\": \"backend\", \"label\": \"API\", \"sublabel\": \"handler\" }\n  ],\n  \"segments\": [ { \"from\": 160, \"to\": 320, \"label\": \"01 / AUTH\" } ],\n  \"messages\": [\n    { \"from\": \"web\", \"to\": \"api\", \"y\": 200, \"label\": \"GET /data\", \"variant\": \"emphasis\" },\n    { \"from\": \"api\", \"to\": \"web\", \"y\": 290, \"label\": \"200 JSON\", \"variant\": \"return\" }\n  ],\n  \"activations\": [ { \"participant\": \"api\", \"from\": 190, \"to\": 300, \"type\": \"backend\" } ],\n  \"cards\": []\n}\n```\n\n**Layout budget**: participants sit at x = 62 + index×108, so a 920-wide viewBox fits at most 8. Message `y` must stay within `[160, viewBox_height − 83]`; messages that share horizontal space need ≥28px vertical separation; arrows need ≥60px horizontal span. `segments[].from/to` and `activations[].from/to` are **y pixel coordinates**, not participant ids. A taller `meta.viewBox` (default `[920, 760]`) buys more timeline room. Keep labels short: \"GET /path\", \"verify JWT\", \"cache miss\", \"200 JSON\".\n\n### Dataflow\n\n```json\n{\n  \"schema_version\": 1,\n  \"diagram_type\": \"dataflow\",\n  \"meta\": { \"title\": \"Product Analytics\", \"subtitle\": \"events to consumers\", \"output\": \"analytics.html\" },\n  \"stages\": [ { \"label\": \"Sources\" }, { \"label\": \"Ingest\" }, { \"label\": \"Store\" } ],\n  \"nodes\": [\n    { \"id\": \"web\", \"type\": \"frontend\", \"label\": \"Web App\", \"stage\": 0, \"row\": 0, \"sublabel\": \"clickstream\" },\n    { \"id\": \"kafka\", \"type\": \"messagebus\", \"label\": \"Kafka\", \"stage\": 1, \"row\": 0, \"tag\": \"accepted events\" }\n  ],\n  \"flows\": [\n    { \"from\": \"web\", \"to\": \"kafka\", \"label\": \"events\", \"classification\": \"PII touch\", \"variant\": \"emphasis\" }\n  ],\n  \"cards\": []\n}\n```\n\n**Layout budget**: 2–5 stages at x = 100 + stage×215; 5 rows (`row` 0–4) at y `[128, 242, 356, 470, 584]`; default node 112×58. Default viewBox `[940, 720]`. Flow labels are mandatory and asset-like (\"clickstream\", \"identity map\", \"feature vectors\"); put sensitivity in `classification` (\"PII touch\", \"approved only\", \"non-PII\"). Variants: `emphasis` = primary path, `security` = PII/policy/consent, `dashed` = async/batch.\n\n### Lifecycle\n\n```json\n{\n  \"schema_version\": 1,\n  \"diagram_type\": \"lifecycle\",\n  \"meta\": { \"title\": \"Agent Run Lifecycle\", \"subtitle\": \"states and terminal outcomes\", \"output\": \"agent-run.html\" },\n  \"lanes\": [\n    { \"id\": \"main\", \"label\": \"Lifecycle phases\" },\n    { \"id\": \"waiting\", \"label\": \"Interruptions\" },\n    { \"id\": \"terminal\", \"label\": \"Terminal exits\" }\n  ],\n  \"states\": [\n    { \"id\": \"queued\", \"type\": \"start\", \"label\": \"Queued\", \"lane\": \"main\", \"col\": 0, \"step\": \"01\" },\n    { \"id\": \"running\", \"type\": \"active\", \"label\": \"Executing\", \"lane\": \"main\", \"col\": 2, \"step\": \"02\" },\n    { \"id\": \"approval\", \"type\": \"waiting\", \"label\": \"Needs Approval\", \"lane\": \"waiting\", \"col\": 0 },\n    { \"id\": \"done\", \"type\": \"success\", \"label\": \"Completed\", \"lane\": \"terminal\", \"col\": 2 }\n  ],\n  \"transitions\": [\n    { \"from\": \"queued\", \"to\": \"running\", \"variant\": \"emphasis\" },\n    { \"from\": \"running\", \"to\": \"approval\", \"label\": \"needs approval\", \"variant\": \"security\", \"fromSide\": \"bottom\", \"toSide\": \"right\" },\n    { \"from\": \"running\", \"to\": \"done\", \"label\": \"success\", \"variant\": \"emphasis\", \"fromSide\": \"bottom\", \"toSide\": \"top\" }\n  ],\n  \"cards\": []\n}\n```\n\n**Layout budget — lane ids are semantic and reserved**: `main` is required and maps to the top phase band (cols 0–4); `terminal` maps to the bottom outcome band (cols 0–2); **every other lane id shares the single middle event band** (cols 0–2) — separate same-band states with different `col` or `yOffset`. Band headers render from your lane labels. Default viewBox `[980, 660]`. Keep transition labels event-like and sparse (\"retry\", \"timeout\", \"cancel\"); prefer state `tag`s, `step` numbers, and summary cards over label-heavy arrows. Put terminal states in the `terminal` lane so endings are unambiguous.\n\n### Per-mode deep guidance\n\nEach renderer has a README with its full design language (route presets, semantic types, story guidance): `renderers/workflow/README.md`, `renderers/sequence/README.md`, `renderers/dataflow/README.md`, `renderers/lifecycle/README.md`. Read the matching one before your first diagram of that mode in a session.\n\n## Architecture Mode\n\nArchitecture has the same read-schema-then-render loop as the other modes — prefer it. Hand-placed SVG is the fallback for when renderers can't run.\n\n```json\n{\n  \"schema_version\": 1,\n  \"diagram_type\": \"architecture\",\n  \"meta\": { \"title\": \"Sample Web App\", \"subtitle\": \"3-tier SaaS on AWS\", \"output\": \"web-app.html\" },\n  \"components\": [\n    { \"id\": \"users\", \"type\": \"external\", \"label\": \"Users\", \"sublabel\": \"Browser\", \"pos\": [40, 300] },\n    { \"id\": \"api\", \"type\": \"backend\", \"label\": \"API Server\", \"sublabel\": \"FastAPI :8000\", \"pos\": [460, 300] },\n    { \"id\": \"db\", \"type\": \"database\", \"label\": \"PostgreSQL\", \"sublabel\": \":5432\", \"pos\": [680, 300] }\n  ],\n  \"boundaries\": [\n    { \"kind\": \"region\", \"label\": \"AWS us-west-2\", \"wraps\": [\"api\", \"db\"] }\n  ],\n  \"connections\": [\n    { \"from\": \"users\", \"to\": \"api\", \"label\": \"HTTPS\", \"variant\": \"emphasis\" },\n    { \"from\": \"api\", \"to\": \"db\", \"label\": \"SQL\" }\n  ],\n  \"cards\": []\n}\n```\n\nRender: `node bin/archify.mjs render architecture \u003cinput>.json \u003coutput>.html`.\n\n**Free placement** — `pos: [x, y]` is the component's top-left; `size: [w, h]` defaults to `[120, 60]`. Unlike typed modes there is no lane/stage grid — asymmetric placement is yours to choose. `meta.viewBox` is optional (auto-fitted).\n\n**Grid placement (#8)** — when manual coordinates are painful, set semantic cells instead of doing arithmetic:\n\n```json\n{\n  \"layout\": { \"mode\": \"grid\", \"cols\": 7, \"origin\": [40, 100], \"gapX\": 24, \"gapY\": 48, \"cellW\": 120, \"cellH\": 60 },\n  \"components\": [\n    { \"id\": \"agents\", \"type\": \"frontend\", \"label\": \"Agent Hosts\", \"row\": 1, \"col\": 1 },\n    { \"id\": \"ir\", \"type\": \"messagebus\", \"label\": \"JSON IR\", \"row\": 1, \"col\": 2 }\n  ]\n}\n```\n\n`pos` still wins when present (override one cell). This is **not** auto-layout — spacing is fixed cell math. Example: `examples/archify-repo-grid.architecture.json`.\n\n**Inspect layout (#9)** — after editing JSON, dump computed boxes without opening HTML:\n\n```bash\nnode bin/archify.mjs inspect architecture my.architecture.json\n# or: node bin/archify.mjs validate architecture my.architecture.json --layout-json\n```\n\nOutput includes component rects, boundaries, connection point paths, and label positions.\n\n**The renderer does the mechanical work that used to be hand-tuned**, so you only choose coordinates and meaning:\n\n- **Free coordinates** — `pos: [x, y]` is the component's top-left; `size: [w, h]` defaults to `[120, 60]`. Unlike the typed modes there is no lane/stage grid — asymmetric placement is yours to choose. `meta.viewBox` is optional (auto-fitted to your components + a legend row).\n- **Grid placement** — optional `layout.mode: \"grid\"` with `row`/`col` per component (see above). Not dagre; fixed cell spacing only.\n- **Boundaries from `wraps`** — list the component ids a `region` (dashed amber) or `security-group` (dashed rose) encloses; the renderer computes the box with correct 30/50 padding automatically. Never hand-arithmetic a boundary again.\n- **Connections** route like edges (`variant`, `fromSide`/`toSide`, `route: straight|orthogonal-h|orthogonal-v|auto`, `via`, `labelDx/labelDy/labelAt`). For a vertical labeled connection, push the label into the gap with `labelDy` (the validator will tell you if it lands on a box).\n- The renderer auto-emits the two-rect `c-mask` pattern, draws arrows before boxes (z-order), builds the legend from the component types you used, and **fails fast on component overlap, off-canvas components/boundaries, unknown wraps/connection ids, label-vs-component collisions, and non-finite coordinates** — the same reliability the other four modes already had.\n\n### Hand-placed fallback (no renderer available)\n\nWhen Node/ajv can't run, copy `assets/template.html` and place SVG by hand. Study the worked diagram inside the template and `examples/web-app.html` for coordinate idioms, follow the Design System below, and run the self-review checklist before delivering.\n\n### The Cardinal Rule: CSS classes, not inline colors\n\nThe theme toggle works by switching CSS custom properties. Hardcoded `fill=\"rgba(...)\"` or `stroke=\"#22d3ee\"` will NOT update on theme change. Always use the class system:\n\n```svg\n\u003crect x=\"X\" y=\"Y\" width=\"W\" height=\"H\" rx=\"6\" class=\"c-mask\"/>\n\u003crect x=\"X\" y=\"Y\" width=\"W\" height=\"H\" rx=\"6\" class=\"c-backend\" stroke-width=\"1.5\"/>\n\u003ctext x=\"CX\" y=\"CY\" class=\"t-primary\" font-size=\"11\" font-weight=\"600\" text-anchor=\"middle\">API Server\u003c/text>\n\u003ctext x=\"CX\" y=\"CY+16\" class=\"t-muted\" font-size=\"9\" text-anchor=\"middle\">FastAPI :8000\u003c/text>\n```\n\n### Design system\n\nComponent fills `c-frontend` (clients/UI), `c-backend` (services/APIs), `c-database` (stores/caches), `c-cloud` (managed infra), `c-security` (auth/secrets), `c-messagebus` (Kafka/queues), `c-external` (3rd parties); text accents `t-\u003csame>` plus neutrals `t-primary` / `t-muted` / `t-dim`. Arrows `a-default`, `a-emphasis` (hot path), `a-security` (dashed), `a-dashed` (async) — always set `stroke-width` and pair `marker-end=\"url(#arrowhead[-variant])\"` with the matching class. Boundaries: `c-security-group` (dashed rose), `c-region` (dashed amber), `c-lane` (swimlane).\n\nTypography inherits JetBrains Mono from the SVG root. Sizes: 11–12px component names, 9px sublabels, 8px annotations, 7px tiny labels.\n\n### Hard layout rules\n\n- **Two-rect pattern everywhere**: opaque `c-mask` rect first, styled `c-\u003ctype>` rect on top — semi-transparent fills otherwise let arrows bleed through.\n- **Arrows before components** in document order (SVG paints in order; arrows must sit behind boxes).\n- **Vertical stacking**: ≥40px gap between components; inline connectors (message buses, 20px tall) live inside the gap, never overlapping boxes.\n- **Boundary padding**: boundary `y` = inner `y` − 30, boundary `height` = inner `height` + 50, label baseline 18px below the boundary top.\n- **Legend placement**: outside ALL boundary boxes, ≥20px below the lowest one; grow the viewBox if needed.\n\n### Self-review checklist (run before delivering)\n\n1. `grep -E 'fill=\"(#|rgb)|stroke=\"(#|rgb)' out.html` inside the SVG returns nothing except the template's own defs (Cardinal Rule).\n2. Every `c-\u003ctype>` rect has an identical-geometry `c-mask` rect immediately before it.\n3. All `\u003cline>`/`\u003cpath>` arrows appear before all component rects in document order.\n4. Compute max(y + height) over all SVG elements: viewBox height must exceed it by ≥20px; same for x/width.\n5. Legend y is below every boundary's y + height.\n6. The `.toolbar`, `\u003cscript>` blocks, and `:root` / `[data-theme]` CSS are untouched — they ARE the theme toggle and export menu.\n\n## Output\n\nA single self-contained `.html`: embedded CSS (Google Fonts loads async and degrades to system monospace offline), inline SVG, ~19KB embedded JS for theme + export. It renders directly in any modern browser. Raster exports render natively at up to 4× the viewBox (large diagrams step down to 3×/2× to stay under canvas limits); the SVG download is dual-theme self-contained and follows the host's `prefers-color-scheme` (manual override via `svg[data-theme=\"...\"]`).\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("archify-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

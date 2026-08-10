@@ -2,7 +2,7 @@
 name: teach
 display_name: teach
 platform: Codex
-category: Agent platforms, tools, and automation
+category: Education and tutoring
 ---
 
 # teach - Codex Skill Package
@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `teach` for Codex. It removes local files
 
 Use this skill when your task matches this description:
 
-name: teach
+Teach the user a new skill or concept, within this workspace.
 
 ## How To Use It In Codex
 
@@ -28,19 +28,18 @@ In Codex, click the chat box, press /, choose teach, then write the task. Fallba
 | Display name | `teach` |
 | Canonical name | `teach` |
 | Platform | `Codex` |
-| Category | Agent platforms, tools, and automation |
+| Category | Education and tutoring |
 
 ## Description
 
-name: teach
+Teach the user a new skill or concept, within this workspace.
+
 
 ## Original SKILL.md
 
 ---
 name: teach
 description: Teach the user a new skill or concept, within this workspace.
-disable-model-invocation: true
-argument-hint: "What would you like to learn about?"
 ---
 
 The user has asked you to teach them something. This is a stateful request - they intend to learn the topic over multiple sessions.
@@ -176,4 +175,3 @@ Glossaries, in particular, are an essential reference. Once one is created, it s
 ## `NOTES.md`
 
 The user will sometimes express preferences of how they want to be taught, or things you should keep in mind. This is the place to record those preferences, so you can refer back to them when designing lessons or working with the user.
-

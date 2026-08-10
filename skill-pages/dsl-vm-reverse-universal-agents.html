@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>🔄 DSL 自定义虚拟机逆向（DSL VM Reverse Engineering） - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/dsl-vm-reverse-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>🔄 DSL 自定义虚拟机逆向（DSL VM Reverse Engineering）</h1>
+      <p class="description">&gt; 用于逆向基于 JavaScript 实现的自定义 WASM 虚拟机/风控引擎</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>dsl-vm-reverse</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>dsl-vm-reverse</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>&gt; 用于逆向基于 JavaScript 实现的自定义 WASM 虚拟机/风控引擎</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the dsl-vm-reverse skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>🔄 DSL 自定义虚拟机逆向（DSL VM Reverse Engineering）</h2>
+<blockquote>用于逆向基于 JavaScript 实现的自定义 WASM 虚拟机/风控引擎</blockquote>
+<hr>
+<h3>目录</h3>
+<ul>
+<li>[1. 适用范围](#1-适用范围)</li>
+<li>[2. DSL VM 识别特征](#2-dsl-vm-识别特征)</li>
+<li>[3. 通用逆向工作流](#3-通用逆向工作流)</li>
+<li>[4. Opcode 提取与分类](#4-opcode-提取与分类)</li>
+<li>[5. 运行时捕获方案](#5-运行时捕获方案)</li>
+<li>[6. 常见状态码](#6-常见状态码)</li>
+<li>[7. Skill 自检清单](#7-skill-自检清单)</li>
+</ul>
+<hr>
+<h3>1. 适用范围</h3>
+<p>当目标文件符合以下 <strong>任意特征</strong> 时使用本 skill：</p>
+<p>| # | 特征 | 说明 | |---|------|------| | 1 | IIFE 开头 + 大量单字母变量名 | <code>!function(){var U=void 0,y=parseInt,E0=Function,...}</code> | | 2 | 包含 <code>DG()</code> 或类似函数含 switch-case 循环 | 解释器主循环，<code>d[7]&amp;31</code> 解码 opcode | | 3 | 大文件（500KB+）但零字节占比 &lt; 1% | 非标准 WASM，纯 JS | | 4 | 包含 <code>C[number]</code> 常量表引用 | <code>C[9][xxx]</code> 函数表/字符串表 | | 5 | 单行压缩代码 | 583KB 单行，混淆变量名 |</p>
+<h4>排除规则</h4>
+<p>| 条件 | 非本 skill | 转至 | |------|-----------|------| | 文件以 <code>\x00asm</code> 开头 | 标准 WASM 二进制 | <code>reverse-engineering/languages.md</code> | | 文件以 <code>Uint8Array([0,97,115,109])</code> 含 WASM 魔术字 | WASM 嵌入式 | 提取 .wasm 后转 IDA/Ghidra | | 标准 Webpack 打包（<code>function(e,t,n){...}</code>） | 普通 JS | <code>js-reverse/</code> | | 零字节占比 &gt; 20% | WASM 二进制 | <code>reverse-engineering/languages.md</code> |</p>
+<hr>
+<h3>2. DSL VM 识别特征</h3>
+<h4>代码特征</h4>
+<pre><code>// 特征 1: IIFE 入口，单字母变量映射数字常量
+!function(){
+    var U=void 0, y=parseInt, E0=Function, AN=Uint8Array;
+    var E=15, l=10, m=12, x=16, S=13, $=11;
+    // 数字常量映射为变量名，替代原始数字
+    ...
+}
+
+// 特征 2: 解释器主循环 DG()
+function DG(C, d, ...) {
+    var d = [];  // 数组模拟 WASM stack/locals
+    for (d[7] = x; d[7] !== U;) {
+        var aE = d[7] &amp; 31;         // 低 5 位 = opcode
+        var O = d[7] &gt;&gt; 5 &amp; 31;      // 高 5 位 = sub-operation
+        switch (aE) {
+            case 0: /* ... */ d[7] = 612; break;
+            case 1: /* ... */
+            // ... N 个 case
+        }
+    }
+}
+
+// 特征 3: 常量表 C[9] 存储函数索引和字符串
+// C[9][0] = [&quot;pc&quot;]      → 函数参数描述
+// C[9][667] = &quot;string&quot;  → 字符串常量
+// C[9][x] = number      → 函数索引
+
+// 特征 4: W(C[index], null, ...) 调用模式
+// W = Function.prototype.call.bind(call)
+// 所有内置函数通过 C[index] 索引调用
+
+// 特征 5: 指令编码格式
+// d[7] = opcode(bit 0-4) | subop(bit 5-9) | operand(bit 10+)</code></pre>
+<h4>Opcode 编码格式</h4>
+<p>每条指令编码为 32 位整数：</p>
+<pre><code>bit 0-4:   opcode (0-N)
+bit 5-9:   sub-operation (0-31)
+bit 10-31: operand/立即数
+
+解码:
+  aE = d[7] &amp; 31        → opcode
+  O  = d[7] &gt;&gt; 5 &amp; 31   → sub-operation
+  d[other] = d[7] &gt;&gt; 10  → operand</code></pre>
+<hr>
+<h3>3. 通用逆向工作流</h3>
+<h4>Phase 1: 文件分类（5 分钟）</h4>
+<pre><code># 检查是否为 DSL VM
+python3 &lt;&lt; 'EOF'
+with open('target.js', 'rb') as f:
+    head = f.read(100)
+
+# 1. 检查 WASM 魔术字
+if head[:4] == b'\x00asm':
+    print(&quot;标准 WASM 二进制&quot;)
+    exit()
+
+# 2. 检查零字节占比
+data = open('target.js', 'rb').read()
+zero_pct = data.count(b'\x00') / len(data) * 100
+print(f&quot;零字节占比: {zero_pct:.1f}%&quot;)
+
+if zero_pct &gt; 20:
+    print(&quot;WASM 二进制&quot;)
+elif head[:2] == b'!f':
+    # 检查单字母变量模式
+    if b'var U=void 0' in head or b'U=void 0,y=parseInt' in head:
+        print(&quot;→ DSL VM!&quot;)
+    else:
+        print(&quot;普通 JS IIFE&quot;)
+EOF</code></pre>
+<h4>Phase 2: 变量映射表提取（10 分钟）</h4>
+<pre><code>import re
+
+with open('target.js', 'r', errors='replace') as f:
+    s = f.read()
+
+# 提取开头 2000 字符的 var X=数字 映射
+mappings = re.findall(r'var\s+(\w+)\s*=\s*(\d+)', s[:2000])
+print('常量映射:')
+for name, val in mappings:
+    print(f&quot;  {name:4s} = {val:3d} (0x{int(val):02x})&quot;)</code></pre>
+<h4>Phase 3: Opcode 提取与分类（15 分钟）</h4>
+<pre><code># 1. 提取所有 case
+all_cases = re.findall(r'case\s+(\d+):', s)
+unique = sorted(set(int(c) for c in all_cases))
+
+print(f&quot;总 case: {len(all_cases)} 个&quot;)
+print(f&quot;唯一 opcode: {len(unique)} 个: {unique}&quot;)
+
+# 2. 分类每个 opcode
+for op in unique:
+    idx = s.find(f'case {op}:')
+    snippet = s[idx:idx+200]
+    if 'd[7]=' in snippet:
+        op_type = 'BRANCH'
+    elif 'return' in snippet:
+        op_type = 'RETURN'
+    elif 'W(C[' in snippet:
+        op_type = 'CALL'
+    elif 'new' in snippet:
+        op_type = 'ALLOC'
+    elif 'try' in snippet or 'catch' in snippet:
+        op_type = 'EXCEPTION'
+    else:
+        op_type = 'ARITH/STORE'
+    print(f&quot;  opcode {op:2d}: {op_type}&quot;)</code></pre>
+<h4>Phase 4: 常量表分析（30 分钟）</h4>
+<pre><code>const_refs = re.findall(r'C\[9\]\[(\d+)\]', s)
+unique_refs = sorted(set(int(x) for x in const_refs))
+
+print(f&quot;C[9] 引用: {len(unique_refs)} 个索引&quot;)
+print(f&quot;范围: {min(unique_refs)} - {max(unique_refs)}&quot;)
+
+# 对每个引用分析上下文
+for ref in unique_refs[:20]:
+    idx = s.find(f'C[9][{ref}]')
+    ctx = s[max(0,idx-50):idx+80]
+    clean = ''.join(c if c.isprintable() else ' ' for c in ctx)
+    print(f&quot;  C[9][{ref}] → {clean}&quot;)</code></pre>
+<h4>Phase 5: 导出函数追踪（1-2 小时）</h4>
+<p>导出函数（如 <code>getToken</code>）通过以下路径定位：</p>
+<pre><code>1. 找 AWSCInner.register() 或类似注册调用
+2. 确定注册的模块和工厂函数
+3. 找工厂函数返回的对象 → 导出函数定义位置
+4. 若函数名不在 JS 中 → 在 C[9] 常量表中作字节码存储
+5. 追踪调用链:
+   AWSCInner._modules['fy'].getToken()
+   → W(C[函数索引], null, ...)
+   → DG() 解释器执行编码后的指令序列</code></pre>
+<h4>Phase 6: 运行时注入（若纯静态分析不够）</h4>
+<pre><code>// 注入最小 AWSC 兼容环境
+const fakeEnv = {
+    AWSCInner: {
+        _modules: {},
+        register(name, moduleName, factory) {
+            this._modules[moduleName] = factory();
+        }
+    }
+};
+
+// 执行 DSL VM 代码
+dslVmCode();
+
+// 获取导出
+const token = fakeEnv.AWSCInner._modules['fy'].getToken({});</code></pre>
+<hr>
+<h3>4. Opcode 提取与分类</h3>
+<h4>参考 opcode 对照表（基于已有案例）</h4>
+<p>| Opcode | 操作类型 | 特征 | |--------|---------|------| | 0 | <strong>BRANCH</strong> | <code>d[7]=xxx</code> 无条件跳转 | | 1 | <strong>CALL</strong> | <code>W(C[Y],null,function(){...})</code> 嵌入函数调用 | | 2 | <strong>ARITH</strong> | <code>d[4]=0</code>, <code>d[7]=72</code> 变量赋值 | | 3 | <strong>ARITH</strong> | <code>d[0]=d[1][C[x]]</code>, <code>d[5]=d[0]&lt;d[3]</code> 比较运算 | | 4 | <strong>STORE</strong> | <code>d[8]=d[5]in d[4]</code> 属性访问/存在检查 | | 5 | <strong>ARITH</strong> | <code>d[8]=d[4]-d[8]</code> 算术运算 | | 6 | <strong>RETURN</strong> | <code>return gV</code>, <code>throw</code> 返回/抛出异常 | | 7 | <strong>ALLOC</strong> | <code>d[6]=[]</code>, <code>d[6][C[8]](...)</code> push 操作 | | 8 | <strong>BRANCH</strong> | <code>d[7]=d[k]?512:425</code> 条件跳转 | | 9 | <strong>STRING</strong> | <code>d[6][C[t]]=d[m]</code>, <code>new fh(...)</code> 正则 | | 10 | <strong>ALLOC</strong> | 函数参数准备、调用栈创建 | | 11 | <strong>STRING</strong> | <code>new fh(&quot;\\s&quot;,d[5])</code> 正则匹配 | | 12 | <strong>STORE</strong> | <code>P[d[9]]=d[4][C[H]](d[3])</code> 数据传递 | | 13 | <strong>CALL</strong> | <code>C[9][113]=d[9]</code> 模块初始化 | | 14 | <strong>STRING</strong> | <code>d[8]=d[9]+d[m]</code> 字符串拼接 | | 15 | <strong>RETURN</strong> | <code>return EL;</code> 函数返回 | | 16 | <strong>ALLOC</strong> | <code>var r,P,Z,B...</code> 局部变量声明 | | 17 | <strong>ALLOC</strong> | <code>(Z=[])[C[8]](69,T,445)</code> 静态数组初始化 | | 18 | <strong>TABLE</strong> | 函数表/类型表初始化 | | 19 | <strong>EXCEPTION</strong> | <code>try{for(var RK=x;...</code> try-catch 循环 | | 20 | <strong>DOM</strong> | <code>Is[d[o]]</code> DOM 操作 | | 21 | <strong>STORE</strong> | 安全获取全局/对象属性 | | 22 | <strong>STRING</strong> | <code>new fh(r,v)</code> 字符串/正则处理 | | 23 | <strong>BRANCH</strong> | <code>try...catch</code> 安全获取 + 条件跳转 | | 24 | <strong>CALL</strong> | <code>W(C[2],null,8,z,FL)</code> 多参数函数调用 | | 25 | <strong>EXCEPTION</strong> | <code>try{...}catch(C){...}</code> 异常捕获 + 跳转 |</p>
+<hr>
+<h3>5. 运行时捕获方案</h3>
+<h4>方案 A: Selenium + CDP 原生事件（推荐，成功率最高）</h4>
+<pre><code>from selenium import webdriver
+
+driver = webdriver.Chrome()
+
+# 注入反检测
+driver.execute_cdp_cmd(&quot;Page.addScriptToEvaluateOnNewDocument&quot;, {
+    &quot;source&quot;: r&quot;&quot;&quot;
+        Object.defineProperty(navigator, 'webdriver', {get: () =&gt; false});
+        Object.defineProperty(navigator, 'plugins', {get: () =&gt; [1,2,3,4,5]});
+        Object.defineProperty(navigator, 'languages', {get: () =&gt; ['zh-CN','zh','en']});
+    &quot;&quot;&quot;
+})
+
+# 发送 CDP 原生鼠标事件
+driver.execute_cdp_cmd(&quot;Input.dispatchMouseEvent&quot;, {
+    &quot;type&quot;: &quot;mousePressed&quot;,
+    &quot;x&quot;: 549.5, &quot;y&quot;: 441.2,
+    &quot;button&quot;: &quot;left&quot;, &quot;buttons&quot;: 1,
+    &quot;clickCount&quot;: 1, &quot;pointerType&quot;: &quot;mouse&quot;
+})</code></pre>
+<h4>方案 B: Playwright 无头浏览器</h4>
+<pre><code>const { chromium } = require('playwright');
+
+async function run() {
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
+
+    // 拦截网络请求
+    await page.route('**/api/**', async route =&gt; {
+        await route.continue_();
+    });
+
+    await page.goto('https://target-page.com');
+
+    // 等待 DSL VM 初始化
+    await page.waitForFunction(() =&gt; {
+        return window.AWSCInner &amp;&amp;
+               window.AWSCInner._modules &amp;&amp;
+               window.AWSCInner._modules['fy'];
+    });
+
+    // 执行操作
+    await page.mouse.move(500, 400);
+    await page.mouse.down();
+    // ... 操作序列
+    await page.mouse.up();
+}</code></pre>
+<h4>方案 C: 纯协议验证（成功率极低）</h4>
+<blockquote>DSL VM 生成的 token 通常与浏览器上下文强绑定（TLS JA3 指纹、IP、Cookie、请求头等），脱离浏览器后服务端可检测到上下文不匹配。<strong>不建议使用纯协议方案</strong>。</blockquote>
+<hr>
+<h3>6. 常见状态码</h3>
+<p>| Code | 含义 | 处理 | |------|------|------| | 0 | <strong>验证通过</strong> ✅ | 取出 sessionId + sig | | 300 | <strong>风控拦截</strong> | 被拦截，无法通过 | | 8778 | <strong>验证失败，需重试</strong> | 重试操作 | | 8776 | <strong>操作太快，需重试</strong> | 增加延迟后重试 | | 69634 | <strong>通用失败</strong> | 检查参数是否正确 |</p>
+<hr>
+<h3>7. Skill 自检清单</h3>
+<ul>
+<li>[ ] 我是否完成了 DSL VM 识别（IIFE + 单字母变量 + DG() 解释器）？</li>
+<li>[ ] 我是否提取了变量映射表（<code>var X=数字</code>）？</li>
+<li>[ ] 我是否提取了 opcode 列表并分类？</li>
+<li>[ ] 我是否分析了常量表 C[9] 的引用范围？</li>
+<li>[ ] 我是否定位了导出函数注册点？</li>
+<li>[ ] 纯静态分析不够时，我是否尝试了运行时注入方案？</li>
+<li>[ ] 任务完成后是否回写了 field-journal？</li>
+<li>[ ] 是否发现新工具/新场景 → 更新 routing.md？</li>
+</ul>
+<hr>
+<h3>路由注册</h3>
+<p>| 类型 | 路由 | |------|------| | <strong>目标类型</strong>: WASM / DSL VM / 自定义指令集 | <code>reverse-engineering/dsl-vm-reverse/SKILL.md</code> | | <strong>用户意图</strong>: &quot;DSL VM / 风控引擎逆向&quot; | 本 skill | | <strong>工具链</strong>: Playwright / Selenium CDP | 浏览器注入方案 |</p>
+<h4>路径交叉</h4>
+<pre><code>DSL VM 逆向路径:
+  reverse-engineering/dsl-vm-reverse/ → Phase 1-6 工作流
+  ↓ 若需要捕获运行时数据
+  browser-automation/ → Playwright/Selenium CDP
+  ↓ 若需要分析 API 协议层
+  js-reverse/ → Observe→Capture→Rebuild</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: dsl-vm-reverse\ndisplay_name: dsl-vm-reverse\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# dsl-vm-reverse - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `dsl-vm-reverse` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n> 用于逆向基于 JavaScript 实现的自定义 WASM 虚拟机/风控引擎\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the dsl-vm-reverse skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `dsl-vm-reverse` |\n| Canonical name | `dsl-vm-reverse` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\n> 用于逆向基于 JavaScript 实现的自定义 WASM 虚拟机/风控引擎\n\n\n## Original SKILL.md\n\n# 🔄 DSL 自定义虚拟机逆向（DSL VM Reverse Engineering）\n\n> 用于逆向基于 JavaScript 实现的自定义 WASM 虚拟机/风控引擎\n\n---\n\n## 目录\n\n- [1. 适用范围](#1-适用范围)\n- [2. DSL VM 识别特征](#2-dsl-vm-识别特征)\n- [3. 通用逆向工作流](#3-通用逆向工作流)\n- [4. Opcode 提取与分类](#4-opcode-提取与分类)\n- [5. 运行时捕获方案](#5-运行时捕获方案)\n- [6. 常见状态码](#6-常见状态码)\n- [7. Skill 自检清单](#7-skill-自检清单)\n\n---\n\n## 1. 适用范围\n\n当目标文件符合以下 **任意特征** 时使用本 skill：\n\n| # | 特征 | 说明 |\n|---|------|------|\n| 1 | IIFE 开头 + 大量单字母变量名 | `!function(){var U=void 0,y=parseInt,E0=Function,...}` |\n| 2 | 包含 `DG()` 或类似函数含 switch-case 循环 | 解释器主循环，`d[7]&31` 解码 opcode |\n| 3 | 大文件（500KB+）但零字节占比 \u003c 1% | 非标准 WASM，纯 JS |\n| 4 | 包含 `C[number]` 常量表引用 | `C[9][xxx]` 函数表/字符串表 |\n| 5 | 单行压缩代码 | 583KB 单行，混淆变量名 |\n\n### 排除规则\n\n| 条件 | 非本 skill | 转至 |\n|------|-----------|------|\n| 文件以 `\\x00asm` 开头 | 标准 WASM 二进制 | `reverse-engineering/languages.md` |\n| 文件以 `Uint8Array([0,97,115,109])` 含 WASM 魔术字 | WASM 嵌入式 | 提取 .wasm 后转 IDA/Ghidra |\n| 标准 Webpack 打包（`function(e,t,n){...}`） | 普通 JS | `js-reverse/` |\n| 零字节占比 > 20% | WASM 二进制 | `reverse-engineering/languages.md` |\n\n---\n\n## 2. DSL VM 识别特征\n\n### 代码特征\n\n```javascript\n// 特征 1: IIFE 入口，单字母变量映射数字常量\n!function(){\n    var U=void 0, y=parseInt, E0=Function, AN=Uint8Array;\n    var E=15, l=10, m=12, x=16, S=13, $=11;\n    // 数字常量映射为变量名，替代原始数字\n    ...\n}\n\n// 特征 2: 解释器主循环 DG()\nfunction DG(C, d, ...) {\n    var d = [];  // 数组模拟 WASM stack/locals\n    for (d[7] = x; d[7] !== U;) {\n        var aE = d[7] & 31;         // 低 5 位 = opcode\n        var O = d[7] >> 5 & 31;      // 高 5 位 = sub-operation\n        switch (aE) {\n            case 0: /* ... */ d[7] = 612; break;\n            case 1: /* ... */\n            // ... N 个 case\n        }\n    }\n}\n\n// 特征 3: 常量表 C[9] 存储函数索引和字符串\n// C[9][0] = [\"pc\"]      → 函数参数描述\n// C[9][667] = \"string\"  → 字符串常量\n// C[9][x] = number      → 函数索引\n\n// 特征 4: W(C[index], null, ...) 调用模式\n// W = Function.prototype.call.bind(call)\n// 所有内置函数通过 C[index] 索引调用\n\n// 特征 5: 指令编码格式\n// d[7] = opcode(bit 0-4) | subop(bit 5-9) | operand(bit 10+)\n```\n\n### Opcode 编码格式\n\n每条指令编码为 32 位整数：\n\n```\nbit 0-4:   opcode (0-N)\nbit 5-9:   sub-operation (0-31)\nbit 10-31: operand/立即数\n\n解码:\n  aE = d[7] & 31        → opcode\n  O  = d[7] >> 5 & 31   → sub-operation\n  d[other] = d[7] >> 10  → operand\n```\n\n---\n\n## 3. 通用逆向工作流\n\n### Phase 1: 文件分类（5 分钟）\n\n```bash\n# 检查是否为 DSL VM\npython3 \u003c\u003c 'EOF'\nwith open('target.js', 'rb') as f:\n    head = f.read(100)\n\n# 1. 检查 WASM 魔术字\nif head[:4] == b'\\x00asm':\n    print(\"标准 WASM 二进制\")\n    exit()\n\n# 2. 检查零字节占比\ndata = open('target.js', 'rb').read()\nzero_pct = data.count(b'\\x00') / len(data) * 100\nprint(f\"零字节占比: {zero_pct:.1f}%\")\n\nif zero_pct > 20:\n    print(\"WASM 二进制\")\nelif head[:2] == b'!f':\n    # 检查单字母变量模式\n    if b'var U=void 0' in head or b'U=void 0,y=parseInt' in head:\n        print(\"→ DSL VM!\")\n    else:\n        print(\"普通 JS IIFE\")\nEOF\n```\n\n### Phase 2: 变量映射表提取（10 分钟）\n\n```python\nimport re\n\nwith open('target.js', 'r', errors='replace') as f:\n    s = f.read()\n\n# 提取开头 2000 字符的 var X=数字 映射\nmappings = re.findall(r'var\\s+(\\w+)\\s*=\\s*(\\d+)', s[:2000])\nprint('常量映射:')\nfor name, val in mappings:\n    print(f\"  {name:4s} = {val:3d} (0x{int(val):02x})\")\n```\n\n### Phase 3: Opcode 提取与分类（15 分钟）\n\n```python\n# 1. 提取所有 case\nall_cases = re.findall(r'case\\s+(\\d+):', s)\nunique = sorted(set(int(c) for c in all_cases))\n\nprint(f\"总 case: {len(all_cases)} 个\")\nprint(f\"唯一 opcode: {len(unique)} 个: {unique}\")\n\n# 2. 分类每个 opcode\nfor op in unique:\n    idx = s.find(f'case {op}:')\n    snippet = s[idx:idx+200]\n    if 'd[7]=' in snippet:\n        op_type = 'BRANCH'\n    elif 'return' in snippet:\n        op_type = 'RETURN'\n    elif 'W(C[' in snippet:\n        op_type = 'CALL'\n    elif 'new' in snippet:\n        op_type = 'ALLOC'\n    elif 'try' in snippet or 'catch' in snippet:\n        op_type = 'EXCEPTION'\n    else:\n        op_type = 'ARITH/STORE'\n    print(f\"  opcode {op:2d}: {op_type}\")\n```\n\n### Phase 4: 常量表分析（30 分钟）\n\n```python\nconst_refs = re.findall(r'C\\[9\\]\\[(\\d+)\\]', s)\nunique_refs = sorted(set(int(x) for x in const_refs))\n\nprint(f\"C[9] 引用: {len(unique_refs)} 个索引\")\nprint(f\"范围: {min(unique_refs)} - {max(unique_refs)}\")\n\n# 对每个引用分析上下文\nfor ref in unique_refs[:20]:\n    idx = s.find(f'C[9][{ref}]')\n    ctx = s[max(0,idx-50):idx+80]\n    clean = ''.join(c if c.isprintable() else ' ' for c in ctx)\n    print(f\"  C[9][{ref}] → {clean}\")\n```\n\n### Phase 5: 导出函数追踪（1-2 小时）\n\n导出函数（如 `getToken`）通过以下路径定位：\n\n```\n1. 找 AWSCInner.register() 或类似注册调用\n2. 确定注册的模块和工厂函数\n3. 找工厂函数返回的对象 → 导出函数定义位置\n4. 若函数名不在 JS 中 → 在 C[9] 常量表中作字节码存储\n5. 追踪调用链:\n   AWSCInner._modules['fy'].getToken()\n   → W(C[函数索引], null, ...)\n   → DG() 解释器执行编码后的指令序列\n```\n\n### Phase 6: 运行时注入（若纯静态分析不够）\n\n```javascript\n// 注入最小 AWSC 兼容环境\nconst fakeEnv = {\n    AWSCInner: {\n        _modules: {},\n        register(name, moduleName, factory) {\n            this._modules[moduleName] = factory();\n        }\n    }\n};\n\n// 执行 DSL VM 代码\ndslVmCode();\n\n// 获取导出\nconst token = fakeEnv.AWSCInner._modules['fy'].getToken({});\n```\n\n---\n\n## 4. Opcode 提取与分类\n\n### 参考 opcode 对照表（基于已有案例）\n\n| Opcode | 操作类型 | 特征 |\n|--------|---------|------|\n| 0 | **BRANCH** | `d[7]=xxx` 无条件跳转 |\n| 1 | **CALL** | `W(C[Y],null,function(){...})` 嵌入函数调用 |\n| 2 | **ARITH** | `d[4]=0`, `d[7]=72` 变量赋值 |\n| 3 | **ARITH** | `d[0]=d[1][C[x]]`, `d[5]=d[0]\u003cd[3]` 比较运算 |\n| 4 | **STORE** | `d[8]=d[5]in d[4]` 属性访问/存在检查 |\n| 5 | **ARITH** | `d[8]=d[4]-d[8]` 算术运算 |\n| 6 | **RETURN** | `return gV`, `throw` 返回/抛出异常 |\n| 7 | **ALLOC** | `d[6]=[]`, `d[6][C[8]](...)` push 操作 |\n| 8 | **BRANCH** | `d[7]=d[k]?512:425` 条件跳转 |\n| 9 | **STRING** | `d[6][C[t]]=d[m]`, `new fh(...)` 正则 |\n| 10 | **ALLOC** | 函数参数准备、调用栈创建 |\n| 11 | **STRING** | `new fh(\"\\\\s\",d[5])` 正则匹配 |\n| 12 | **STORE** | `P[d[9]]=d[4][C[H]](d[3])` 数据传递 |\n| 13 | **CALL** | `C[9][113]=d[9]` 模块初始化 |\n| 14 | **STRING** | `d[8]=d[9]+d[m]` 字符串拼接 |\n| 15 | **RETURN** | `return EL;` 函数返回 |\n| 16 | **ALLOC** | `var r,P,Z,B...` 局部变量声明 |\n| 17 | **ALLOC** | `(Z=[])[C[8]](69,T,445)` 静态数组初始化 |\n| 18 | **TABLE** | 函数表/类型表初始化 |\n| 19 | **EXCEPTION** | `try{for(var RK=x;...` try-catch 循环 |\n| 20 | **DOM** | `Is[d[o]]` DOM 操作 |\n| 21 | **STORE** | 安全获取全局/对象属性 |\n| 22 | **STRING** | `new fh(r,v)` 字符串/正则处理 |\n| 23 | **BRANCH** | `try...catch` 安全获取 + 条件跳转 |\n| 24 | **CALL** | `W(C[2],null,8,z,FL)` 多参数函数调用 |\n| 25 | **EXCEPTION** | `try{...}catch(C){...}` 异常捕获 + 跳转 |\n\n---\n\n## 5. 运行时捕获方案\n\n### 方案 A: Selenium + CDP 原生事件（推荐，成功率最高）\n\n```python\nfrom selenium import webdriver\n\ndriver = webdriver.Chrome()\n\n# 注入反检测\ndriver.execute_cdp_cmd(\"Page.addScriptToEvaluateOnNewDocument\", {\n    \"source\": r\"\"\"\n        Object.defineProperty(navigator, 'webdriver', {get: () => false});\n        Object.defineProperty(navigator, 'plugins', {get: () => [1,2,3,4,5]});\n        Object.defineProperty(navigator, 'languages', {get: () => ['zh-CN','zh','en']});\n    \"\"\"\n})\n\n# 发送 CDP 原生鼠标事件\ndriver.execute_cdp_cmd(\"Input.dispatchMouseEvent\", {\n    \"type\": \"mousePressed\",\n    \"x\": 549.5, \"y\": 441.2,\n    \"button\": \"left\", \"buttons\": 1,\n    \"clickCount\": 1, \"pointerType\": \"mouse\"\n})\n```\n\n### 方案 B: Playwright 无头浏览器\n\n```javascript\nconst { chromium } = require('playwright');\n\nasync function run() {\n    const browser = await chromium.launch();\n    const page = await browser.newPage();\n\n    // 拦截网络请求\n    await page.route('**/api/**', async route => {\n        await route.continue_();\n    });\n\n    await page.goto('https://target-page.com');\n\n    // 等待 DSL VM 初始化\n    await page.waitForFunction(() => {\n        return window.AWSCInner &&\n               window.AWSCInner._modules &&\n               window.AWSCInner._modules['fy'];\n    });\n\n    // 执行操作\n    await page.mouse.move(500, 400);\n    await page.mouse.down();\n    // ... 操作序列\n    await page.mouse.up();\n}\n```\n\n### 方案 C: 纯协议验证（成功率极低）\n\n> DSL VM 生成的 token 通常与浏览器上下文强绑定（TLS JA3 指纹、IP、Cookie、请求头等），脱离浏览器后服务端可检测到上下文不匹配。**不建议使用纯协议方案**。\n\n---\n\n## 6. 常见状态码\n\n| Code | 含义 | 处理 |\n|------|------|------|\n| 0 | **验证通过** ✅ | 取出 sessionId + sig |\n| 300 | **风控拦截** | 被拦截，无法通过 |\n| 8778 | **验证失败，需重试** | 重试操作 |\n| 8776 | **操作太快，需重试** | 增加延迟后重试 |\n| 69634 | **通用失败** | 检查参数是否正确 |\n\n---\n\n## 7. Skill 自检清单\n\n- [ ] 我是否完成了 DSL VM 识别（IIFE + 单字母变量 + DG() 解释器）？\n- [ ] 我是否提取了变量映射表（`var X=数字`）？\n- [ ] 我是否提取了 opcode 列表并分类？\n- [ ] 我是否分析了常量表 C[9] 的引用范围？\n- [ ] 我是否定位了导出函数注册点？\n- [ ] 纯静态分析不够时，我是否尝试了运行时注入方案？\n- [ ] 任务完成后是否回写了 field-journal？\n- [ ] 是否发现新工具/新场景 → 更新 routing.md？\n\n---\n\n## 路由注册\n\n| 类型 | 路由 |\n|------|------|\n| **目标类型**: WASM / DSL VM / 自定义指令集 | `reverse-engineering/dsl-vm-reverse/SKILL.md` |\n| **用户意图**: \"DSL VM / 风控引擎逆向\" | 本 skill |\n| **工具链**: Playwright / Selenium CDP | 浏览器注入方案 |\n\n### 路径交叉\n\n```\nDSL VM 逆向路径:\n  reverse-engineering/dsl-vm-reverse/ → Phase 1-6 工作流\n  ↓ 若需要捕获运行时数据\n  browser-automation/ → Playwright/Selenium CDP\n  ↓ 若需要分析 API 协议层\n  js-reverse/ → Observe→Capture→Rebuild\n```\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("dsl-vm-reverse-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

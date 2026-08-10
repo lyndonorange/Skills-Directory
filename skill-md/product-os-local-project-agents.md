@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `product-os` for Local Project Agents. It
 
 Use this skill when your task matches this description:
 
-Product OS is the umbrella workflow for turning a product idea into a buildable, verifiable product plan and then into shipped software.
+End-to-end product-building workflow from rough idea to launch-ready implementation plan. Use when the user wants to build a product, app, SaaS, agent tool, marketplace, internal tool, MVP, prototype, or feature and need
 
 ## How To Use It In Local Project Agents
 
@@ -32,7 +32,8 @@ From this workspace, type: Use the product-os skill to...
 
 ## Description
 
-Product OS is the umbrella workflow for turning a product idea into a buildable, verifiable product plan and then into shipped software.
+End-to-end product-building workflow from rough idea to launch-ready implementation plan. Use when the user wants to build a product, app, SaaS, agent tool, marketplace, internal tool, MVP, prototype, or feature and need
+
 
 ## Original SKILL.md
 
@@ -212,4 +213,3 @@ Use existing project conventions when they differ. For this workspace, follow DO
 ## References
 
 Read `references/phase-skill-map.md` when choosing among similar downstream skills or explaining the workflow to the user.
-

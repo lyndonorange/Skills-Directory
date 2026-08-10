@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Browser - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/browser-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>Browser</h1>
+      <p class="description">Headless browser automation via agent-browser — Rust CLI daemon with persistent auth profiles for fast, scriptable, parallel browser work. Batch commands, network interception, device emulation, per-site profile auth (one-time headed login, headless forever after), parallel isolated sessions via --session. Workflows: ReviewStories (fan out YAML user stories to parallel reviewer agents), Automate (parameterized recipe templates), Update. Delegates background parallel scraping to general-purpose agents; falls back to Interceptor if a site has bot detection. USE WHEN headless browser, batch scrape, fast screenshot, dev server test, parallel browser, background automation, extract data, review stories, automate recipe, batch screenshots, scrape multiple pages in parallel. NOT FOR deploy verification or UI confirmation with real Chrome (use Interceptor), simple single-URL fetching (use WebFetch), CAPTCHA or bot-detection bypass (use BrightData or Interceptor), or social platform actor-based scraping (use Apify).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>Browser</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>Browser</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Headless browser automation via agent-browser — Rust CLI daemon with persistent auth profiles for fast, scriptable, parallel browser work. Batch commands, network interception, device emulation, per-site profile auth (one-time headed login, headless forever after), parallel isolated sessions via --session. Workflows: ReviewStories (fan out YAML user stories to parallel reviewer agents), Automate (parameterized recipe templates), Update. Delegates background parallel scraping to general-purpose agents; falls back to Interceptor if a site has bot detection. USE WHEN headless browser, batch scrape, fast screenshot, dev server test, parallel browser, background automation, extract data, review stories, automate recipe, batch screenshots, scrape multiple pages in parallel. NOT FOR deploy verification or UI confirmation with real Chrome (use Interceptor), simple single-URL fetching (use WebFetch), CAPTCHA or bot-detection bypass (use BrightData or Interceptor), or social platform actor-based scraping (use Apify).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the Browser skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Customization</h3>
+<p><strong>Before executing, check for user customizations at:</strong> <code>~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/Browser/</code></p>
+<p>If this directory exists, load and apply any PREFERENCES.md, configurations, or resources found there. These override default behavior. If the directory does not exist, proceed with skill defaults.</p>
+<h3>MANDATORY: Voice Notification (REQUIRED BEFORE ANY ACTION)</h3>
+<p><strong>You MUST send this notification BEFORE doing anything else when this skill is invoked.</strong></p>
+<ol>
+<li><strong>Send voice notification</strong>:</li>
+</ol>
+<pre><code>   curl -s -X POST http://localhost:31337/notify \
+     -H &quot;Content-Type: application/json&quot; \
+     -d '{&quot;message&quot;: &quot;Running the WORKFLOWNAME workflow in the Browser skill to ACTION&quot;}' \
+     &gt; /dev/null 2&gt;&amp;1 &amp;</code></pre>
+<ol>
+<li><strong>Output text notification</strong>:</li>
+</ol>
+<pre><code>   Running the **WorkflowName** workflow in the **Browser** skill to ACTION...</code></pre>
+<p><strong>This is not optional. Execute this curl command immediately upon skill invocation.</strong></p>
+<h2>Browser v10.0.0 — Browser Automation</h2>
+<h3>What It Does</h3>
+<p>Drives a headless browser from the command line through <code>agent-browser</code>, a Rust CLI daemon. Opens pages, clicks, fills forms, takes screenshots, runs JS, intercepts network, and emulates devices. Holds per-site auth profiles so you log in once and stay logged in for headless runs after that. Batches commands, runs sessions in parallel, and hands browser work to background agents.</p>
+<h3>The Problem</h3>
+<p>Most browser automation is slow to script, leaks state between runs, and forces a fresh login every time. You either babysit a headed browser or fight a framework that re-authenticates on every call. When you need to screenshot ten pages, scrape a logged-in site, or run several scrapes at once, the per-run startup and auth cost dominates. This skill keeps a daemon warm, persists auth per site, and lets you fan work out to parallel sessions and agents.</p>
+<h3>How It Works</h3>
+<p><strong>Tool:</strong> <code>agent-browser</code> — headless Rust CLI daemon with persistent auth profiles.</p>
+<p><strong>If agent-browser isn't working or a site has bot detection, use the Interceptor skill instead.</strong> Interceptor is a Chrome extension with zero CDP fingerprint — passes all major bot detection checks.</p>
+<h4>Does the site need auth?</h4>
+<p>Use <code>--profile ~/.agent-browser/profiles/&lt;site&gt;</code>. If profile exists, auth is automatic. If not, run <code>--headed</code> once for login, then headless forever.</p>
+<hr>
+<h3>agent-browser</h3>
+<p>Native Rust daemon. Persistent profiles for auth. Headless by default.</p>
+<h4>Quick One-Shot Commands</h4>
+<pre><code>agent-browser open https://example.com &amp;&amp; agent-browser screenshot /tmp/shot.png
+agent-browser open https://example.com &amp;&amp; agent-browser screenshot --full /tmp/full.png
+agent-browser open https://example.com &amp;&amp; agent-browser pdf /tmp/page.pdf</code></pre>
+<h4>Session-Based Interaction</h4>
+<pre><code># 1. OPEN
+agent-browser open https://example.com
+
+# 2. WORK
+agent-browser snapshot                    # a11y tree with @eN refs (for AI)
+agent-browser click @e12                  # click by ref
+agent-browser fill @e15 &quot;hello&quot;           # fill input by ref
+agent-browser screenshot /tmp/shot.png    # screenshot
+agent-browser eval &quot;document.title&quot;       # run JS
+
+# 3. CLOSE — when done
+agent-browser close</code></pre>
+<h4>Authenticated Browsing (Per-Site Profiles)</h4>
+<p><strong>First-time setup (headed, one-time):</strong></p>
+<pre><code># Close any running daemon first
+agent-browser close --all
+
+# Launch headed with persistent profile — log in manually
+agent-browser --headed --profile ~/.agent-browser/profiles/&lt;site&gt; open https://example.com
+
+# After login completes, all future runs reuse the profile headlessly</code></pre>
+<p><strong>Subsequent runs (headless, automatic):</strong></p>
+<pre><code>agent-browser --profile ~/.agent-browser/profiles/&lt;site&gt; open https://example.com
+# Auth is automatic — cookies, IndexedDB, cache all persist</code></pre>
+<p><strong>To add a new site:</strong> Close daemon, run <code>--headed --profile ~/.agent-browser/profiles/&lt;name&gt;</code> once, log in, done.</p>
+<h4>Auth Vault (Alternative)</h4>
+<pre><code>agent-browser auth save mysite --url https://example.com --username user --password-stdin
+agent-browser auth login mysite    # auto-fills login form
+agent-browser auth list            # show saved profiles</code></pre>
+<h4>Batch Execution</h4>
+<pre><code># Send multiple commands in one shot (fewer tool calls = fewer tokens)
+echo '[[&quot;open&quot;,&quot;https://example.com&quot;],[&quot;snapshot&quot;],[&quot;click&quot;,&quot;@e12&quot;]]' | agent-browser batch</code></pre>
+<h4>Advanced Features</h4>
+<pre><code># Connect to already-running Chrome
+agent-browser --auto-connect snapshot
+
+# Network interception
+agent-browser route &quot;**/*.{png,jpg}&quot; abort     # block images
+agent-browser route &quot;https://api.com/*&quot; mock '{&quot;data&quot;:&quot;test&quot;}'
+
+# Device emulation
+agent-browser --device &quot;iPhone 15&quot; open https://example.com
+
+# Session persistence (cookies + localStorage by name)
+agent-browser --session-name myapp open https://example.com</code></pre>
+<h4>agent-browser Rules</h4>
+<ul>
+<li><strong>Daemon model</strong> — first command starts daemon, subsequent commands connect instantly.</li>
+<li><strong>Refs use @eN syntax</strong> — <code>@e12</code> not <code>e12</code>.</li>
+<li><strong>Profiles persist everything</strong> — cookies, IndexedDB, cache, localStorage.</li>
+<li><strong>Close with <code>agent-browser close</code></strong> or <code>close --all</code> to kill daemon.</li>
+</ul>
+<hr>
+<h4>Delegating Browser Work to Agents</h4>
+<p>When you need parallel or background browser work (scraping multiple pages, monitoring), spawn <strong>general-purpose agents</strong> with browser instructions. No dedicated browser agent type needed — this skill IS the expertise.</p>
+<pre><code>Agent(subagent_type=&quot;general-purpose&quot;, prompt=&quot;
+  Use agent-browser CLI for all browser work.
+  Commands: open &lt;url&gt;, snapshot, click @eN, fill @eN 'text', screenshot /path.
+  For authenticated sites: --profile ~/.agent-browser/profiles/&lt;site&gt;
+  Refs use @eN syntax from snapshots.
+  [your specific task instructions here]
+&quot;)</code></pre>
+<p>For parallel isolation, each agent uses <code>--session &lt;name&gt;</code>:</p>
+<pre><code>Agent 1: agent-browser --session scrape1 open https://site-a.com
+Agent 2: agent-browser --session scrape2 open https://site-b.com</code></pre>
+<p><strong>Fallback:</strong> If agent-browser fails or the site has bot detection, use the <strong>Interceptor</strong> skill instead.</p>
+<p><strong>Legacy built-in agents — REMOVED 2026-06-10.</strong> BrowserAgent and UIReviewer were Claude Code built-ins whose internals cannot be modified; they run browser automation that LifeOS no longer uses. Route all browser work through the <strong>Interceptor</strong> skill (verification, authenticated flows) or <strong>agent-browser</strong> (headless scraping).</p>
+<hr>
+<h3>Workflow Routing</h3>
+<p>| Workflow | Trigger | File | |----------|---------|------| | ReviewStories | &quot;review stories&quot;, &quot;run stories&quot;, &quot;ui review&quot;, &quot;validate stories&quot; — fan out YAML stories to parallel reviewer agents | <code>Workflows/ReviewStories.md</code> | | Automate | &quot;automate&quot;, &quot;recipe&quot;, &quot;template&quot;, or a recipe name — load and execute a parameterized recipe template | <code>Workflows/Automate.md</code> | | Update | &quot;update&quot;, &quot;check version&quot; — verify browser tools are current and working | <code>Workflows/Update.md</code> |</p>
+<hr>
+<h3>Gotchas</h3>
+<ul>
+<li><strong>SKIP-gate (check before anything else): task is deploy-verification or UI confirmation → STOP, route to Interceptor.</strong> Machine-checkable precheck: scan the request for <code>deploy|verify|verification|confirm.<em>UI|UI.</em>confirm</code> — if the task is verifying a deploy or confirming a UI change, the LIFEOS_SYSTEM_PROMPT mandates Interceptor (real Chrome), not headless Browser. When this gate fires, announce the skip and why in the response (&quot;Skipping Browser — deploy/UI verification routes to Interceptor per system-prompt mandate&quot;) — a silent skip is a failure.</li>
+</ul>
+<hr>
+<h3>Stories — YAML User Story Validation</h3>
+<p>Define user stories in YAML and validate them in parallel with general-purpose reviewer agents.</p>
+<p><strong>Directory:</strong> <code>skills/Browser/Stories/</code></p>
+<pre><code>name: App Name
+url: https://example.com
+stories:
+  - name: Story name
+    steps:
+      - action: click
+        target: &quot;LLM-readable description&quot;
+    assertions:
+      - type: snapshot_contains
+        text: &quot;expected text&quot;</code></pre>
+<p>Run with: <code>&quot;review stories&quot;</code> or <code>&quot;run stories in HackerNews.yaml&quot;</code></p>
+<hr>
+<h3>Recipes — Parameterized Templates</h3>
+<p>Reusable Markdown templates with <code>{PROMPT}</code> injection.</p>
+<p><strong>Directory:</strong> <code>skills/Browser/Recipes/</code></p>
+<p>| Recipe | Description | Tool | |--------|-------------|------| | <code>SummarizePage.md</code> | Extract content summary | ai-agent | | <code>ScreenshotCompare.md</code> | Before/after comparison | agent-browser | | <code>FormFill.md</code> | Fill form fields | agent-browser |</p>
+<p>Run with: <code>&quot;automate SummarizePage for https://example.com&quot;</code></p>
+<hr>
+<h3>Examples</h3>
+<p><strong>Example 1: Batch screenshots of a dev server</strong></p>
+<pre><code>User: &quot;screenshot the five main pages of the dev server&quot;
+→ agent-browser open + screenshot per page (batch mode, one daemon)
+→ Saves PNGs, returns paths</code></pre>
+<p><strong>Example 2: Authenticated scrape</strong></p>
+<pre><code>User: &quot;extract the data table from my dashboard&quot;
+→ Opens with --profile ~/.agent-browser/profiles/&lt;site&gt; (auth persists from one-time headed login)
+→ snapshot + eval to pull the table, returns structured text</code></pre>
+<p><strong>Example 3: Story validation</strong></p>
+<pre><code>User: &quot;review stories in HackerNews.yaml&quot;
+→ ReviewStories workflow: fans YAML stories out to parallel reviewer agents
+→ Each agent runs steps + assertions, results aggregated</code></pre>
+<hr>
+<h3>Execution Log</h3>
+<p>After completing any workflow, append a single JSONL entry:</p>
+<pre><code>echo '{&quot;ts&quot;:&quot;'$(date -u +%Y-%m-%dT%H:%M:%SZ)'&quot;,&quot;skill&quot;:&quot;Browser&quot;,&quot;workflow&quot;:&quot;WORKFLOW_USED&quot;,&quot;input&quot;:&quot;8_WORD_SUMMARY&quot;,&quot;status&quot;:&quot;ok|error&quot;,&quot;duration_s&quot;:SECONDS}' &gt;&gt; ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: Browser\ndisplay_name: Browser\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# Browser - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `Browser` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nHeadless browser automation via agent-browser — Rust CLI daemon with persistent auth profiles for fast, scriptable, parallel browser work. Batch commands, network interception, device emulation, per-site profile auth (on\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the Browser skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `Browser` |\n| Canonical name | `Browser` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\nHeadless browser automation via agent-browser — Rust CLI daemon with persistent auth profiles for fast, scriptable, parallel browser work. Batch commands, network interception, device emulation, per-site profile auth (on\n\n\n## Original SKILL.md\n\n---\nname: Browser\ndescription: \"Headless browser automation via agent-browser — Rust CLI daemon with persistent auth profiles for fast, scriptable, parallel browser work. Batch commands, network interception, device emulation, per-site profile auth (one-time headed login, headless forever after), parallel isolated sessions via --session. Workflows: ReviewStories (fan out YAML user stories to parallel reviewer agents), Automate (parameterized recipe templates), Update. Delegates background parallel scraping to general-purpose agents; falls back to Interceptor if a site has bot detection. USE WHEN headless browser, batch scrape, fast screenshot, dev server test, parallel browser, background automation, extract data, review stories, automate recipe, batch screenshots, scrape multiple pages in parallel. NOT FOR deploy verification or UI confirmation with real Chrome (use Interceptor), simple single-URL fetching (use WebFetch), CAPTCHA or bot-detection bypass (use BrightData or Interceptor), or social platform actor-based scraping (use Apify).\"\nversion: 10.0.0\neffort: medium\n---\n\n## Customization\n\n**Before executing, check for user customizations at:**\n`~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/Browser/`\n\nIf this directory exists, load and apply any PREFERENCES.md, configurations, or resources found there. These override default behavior. If the directory does not exist, proceed with skill defaults.\n\n\n## MANDATORY: Voice Notification (REQUIRED BEFORE ANY ACTION)\n\n**You MUST send this notification BEFORE doing anything else when this skill is invoked.**\n\n1. **Send voice notification**:\n   ```bash\n   curl -s -X POST http://localhost:31337/notify \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\"message\": \"Running the WORKFLOWNAME workflow in the Browser skill to ACTION\"}' \\\n     > /dev/null 2>&1 &\n   ```\n\n2. **Output text notification**:\n   ```\n   Running the **WorkflowName** workflow in the **Browser** skill to ACTION...\n   ```\n\n**This is not optional. Execute this curl command immediately upon skill invocation.**\n\n# Browser v10.0.0 — Browser Automation\n\n## What It Does\n\nDrives a headless browser from the command line through `agent-browser`, a Rust CLI daemon. Opens pages, clicks, fills forms, takes screenshots, runs JS, intercepts network, and emulates devices. Holds per-site auth profiles so you log in once and stay logged in for headless runs after that. Batches commands, runs sessions in parallel, and hands browser work to background agents.\n\n## The Problem\n\nMost browser automation is slow to script, leaks state between runs, and forces a fresh login every time. You either babysit a headed browser or fight a framework that re-authenticates on every call. When you need to screenshot ten pages, scrape a logged-in site, or run several scrapes at once, the per-run startup and auth cost dominates. This skill keeps a daemon warm, persists auth per site, and lets you fan work out to parallel sessions and agents.\n\n## How It Works\n\n**Tool:** `agent-browser` — headless Rust CLI daemon with persistent auth profiles.\n\n**If agent-browser isn't working or a site has bot detection, use the Interceptor skill instead.** Interceptor is a Chrome extension with zero CDP fingerprint — passes all major bot detection checks.\n\n### Does the site need auth?\n\nUse `--profile ~/.agent-browser/profiles/\u003csite>`. If profile exists, auth is automatic. If not, run `--headed` once for login, then headless forever.\n\n---\n\n## agent-browser\n\nNative Rust daemon. Persistent profiles for auth. Headless by default.\n\n### Quick One-Shot Commands\n\n```bash\nagent-browser open https://example.com && agent-browser screenshot /tmp/shot.png\nagent-browser open https://example.com && agent-browser screenshot --full /tmp/full.png\nagent-browser open https://example.com && agent-browser pdf /tmp/page.pdf\n```\n\n### Session-Based Interaction\n\n```bash\n# 1. OPEN\nagent-browser open https://example.com\n\n# 2. WORK\nagent-browser snapshot                    # a11y tree with @eN refs (for AI)\nagent-browser click @e12                  # click by ref\nagent-browser fill @e15 \"hello\"           # fill input by ref\nagent-browser screenshot /tmp/shot.png    # screenshot\nagent-browser eval \"document.title\"       # run JS\n\n# 3. CLOSE — when done\nagent-browser close\n```\n\n### Authenticated Browsing (Per-Site Profiles)\n\n**First-time setup (headed, one-time):**\n```bash\n# Close any running daemon first\nagent-browser close --all\n\n# Launch headed with persistent profile — log in manually\nagent-browser --headed --profile ~/.agent-browser/profiles/\u003csite> open https://example.com\n\n# After login completes, all future runs reuse the profile headlessly\n```\n\n**Subsequent runs (headless, automatic):**\n```bash\nagent-browser --profile ~/.agent-browser/profiles/\u003csite> open https://example.com\n# Auth is automatic — cookies, IndexedDB, cache all persist\n```\n\n**To add a new site:** Close daemon, run `--headed --profile ~/.agent-browser/profiles/\u003cname>` once, log in, done.\n\n### Auth Vault (Alternative)\n\n```bash\nagent-browser auth save mysite --url https://example.com --username user --password-stdin\nagent-browser auth login mysite    # auto-fills login form\nagent-browser auth list            # show saved profiles\n```\n\n### Batch Execution\n\n```bash\n# Send multiple commands in one shot (fewer tool calls = fewer tokens)\necho '[[\"open\",\"https://example.com\"],[\"snapshot\"],[\"click\",\"@e12\"]]' | agent-browser batch\n```\n\n### Advanced Features\n\n```bash\n# Connect to already-running Chrome\nagent-browser --auto-connect snapshot\n\n# Network interception\nagent-browser route \"**/*.{png,jpg}\" abort     # block images\nagent-browser route \"https://api.com/*\" mock '{\"data\":\"test\"}'\n\n# Device emulation\nagent-browser --device \"iPhone 15\" open https://example.com\n\n# Session persistence (cookies + localStorage by name)\nagent-browser --session-name myapp open https://example.com\n```\n\n### agent-browser Rules\n\n- **Daemon model** — first command starts daemon, subsequent commands connect instantly.\n- **Refs use @eN syntax** — `@e12` not `e12`.\n- **Profiles persist everything** — cookies, IndexedDB, cache, localStorage.\n- **Close with `agent-browser close`** or `close --all` to kill daemon.\n\n---\n\n### Delegating Browser Work to Agents\n\nWhen you need parallel or background browser work (scraping multiple pages, monitoring), spawn **general-purpose agents** with browser instructions. No dedicated browser agent type needed — this skill IS the expertise.\n\n```\nAgent(subagent_type=\"general-purpose\", prompt=\"\n  Use agent-browser CLI for all browser work.\n  Commands: open \u003curl>, snapshot, click @eN, fill @eN 'text', screenshot /path.\n  For authenticated sites: --profile ~/.agent-browser/profiles/\u003csite>\n  Refs use @eN syntax from snapshots.\n  [your specific task instructions here]\n\")\n```\n\nFor parallel isolation, each agent uses `--session \u003cname>`:\n```\nAgent 1: agent-browser --session scrape1 open https://site-a.com\nAgent 2: agent-browser --session scrape2 open https://site-b.com\n```\n\n**Fallback:** If agent-browser fails or the site has bot detection, use the **Interceptor** skill instead.\n\n**Legacy built-in agents — REMOVED 2026-06-10.** BrowserAgent and UIReviewer were Claude Code built-ins whose internals cannot be modified; they run browser automation that LifeOS no longer uses. Route all browser work through the **Interceptor** skill (verification, authenticated flows) or **agent-browser** (headless scraping).\n\n---\n\n## Workflow Routing\n\n| Workflow | Trigger | File |\n|----------|---------|------|\n| ReviewStories | \"review stories\", \"run stories\", \"ui review\", \"validate stories\" — fan out YAML stories to parallel reviewer agents | `Workflows/ReviewStories.md` |\n| Automate | \"automate\", \"recipe\", \"template\", or a recipe name — load and execute a parameterized recipe template | `Workflows/Automate.md` |\n| Update | \"update\", \"check version\" — verify browser tools are current and working | `Workflows/Update.md` |\n\n---\n\n## Gotchas\n\n- **SKIP-gate (check before anything else): task is deploy-verification or UI confirmation → STOP, route to Interceptor.** Machine-checkable precheck: scan the request for `deploy|verify|verification|confirm.*UI|UI.*confirm` — if the task is verifying a deploy or confirming a UI change, the LIFEOS_SYSTEM_PROMPT mandates Interceptor (real Chrome), not headless Browser. When this gate fires, announce the skip and why in the response (\"Skipping Browser — deploy/UI verification routes to Interceptor per system-prompt mandate\") — a silent skip is a failure.\n\n---\n\n## Stories — YAML User Story Validation\n\nDefine user stories in YAML and validate them in parallel with general-purpose reviewer agents.\n\n**Directory:** `skills/Browser/Stories/`\n\n```yaml\nname: App Name\nurl: https://example.com\nstories:\n  - name: Story name\n    steps:\n      - action: click\n        target: \"LLM-readable description\"\n    assertions:\n      - type: snapshot_contains\n        text: \"expected text\"\n```\n\nRun with: `\"review stories\"` or `\"run stories in HackerNews.yaml\"`\n\n---\n\n## Recipes — Parameterized Templates\n\nReusable Markdown templates with `{PROMPT}` injection.\n\n**Directory:** `skills/Browser/Recipes/`\n\n| Recipe | Description | Tool |\n|--------|-------------|------|\n| `SummarizePage.md` | Extract content summary | ai-agent |\n| `ScreenshotCompare.md` | Before/after comparison | agent-browser |\n| `FormFill.md` | Fill form fields | agent-browser |\n\nRun with: `\"automate SummarizePage for https://example.com\"`\n\n---\n\n## Examples\n\n**Example 1: Batch screenshots of a dev server**\n```\nUser: \"screenshot the five main pages of the dev server\"\n→ agent-browser open + screenshot per page (batch mode, one daemon)\n→ Saves PNGs, returns paths\n```\n\n**Example 2: Authenticated scrape**\n```\nUser: \"extract the data table from my dashboard\"\n→ Opens with --profile ~/.agent-browser/profiles/\u003csite> (auth persists from one-time headed login)\n→ snapshot + eval to pull the table, returns structured text\n```\n\n**Example 3: Story validation**\n```\nUser: \"review stories in HackerNews.yaml\"\n→ ReviewStories workflow: fans YAML stories out to parallel reviewer agents\n→ Each agent runs steps + assertions, results aggregated\n```\n\n---\n\n## Execution Log\n\nAfter completing any workflow, append a single JSONL entry:\n\n```bash\necho '{\"ts\":\"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'\",\"skill\":\"Browser\",\"workflow\":\"WORKFLOW_USED\",\"input\":\"8_WORD_SUMMARY\",\"status\":\"ok|error\",\"duration_s\":SECONDS}' >> ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl\n```\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("browser-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

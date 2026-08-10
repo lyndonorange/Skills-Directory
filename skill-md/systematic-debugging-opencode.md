@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `systematic-debugging` for OpenCode. It r
 
 Use this skill when your task matches this description:
 
-Random fixes waste time and create new bugs. Quick patches mask underlying issues.
+Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes
 
 ## How To Use It In OpenCode
 
@@ -32,7 +32,8 @@ In OpenCode, open the project and type: Use the systematic-debugging skill to...
 
 ## Description
 
-Random fixes waste time and create new bugs. Quick patches mask underlying issues.
+Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes
+
 
 ## Original SKILL.md
 
@@ -332,4 +333,3 @@ From debugging sessions:
 - Random fixes approach: 2-3 hours of thrashing
 - First-time fix rate: 95% vs 40%
 - New bugs introduced: Near zero vs common
-

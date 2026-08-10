@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `test-scenarios` for OpenCode. It removes
 
 Use this skill when your task matches this description:
 
-Create comprehensive test scenarios from user stories with test objectives, starting conditions, user roles, step-by-step test actions, and expected outcomes.
+Create comprehensive test scenarios from user stories with test objectives, starting conditions, user roles, step-by-step actions, and expected outcomes. Use when writing QA test cases, creating test plans, defining acce
 
 ## How To Use It In OpenCode
 
@@ -32,7 +32,8 @@ In OpenCode, open the project and type: Use the test-scenarios skill to...
 
 ## Description
 
-Create comprehensive test scenarios from user stories with test objectives, starting conditions, user roles, step-by-step test actions, and expected outcomes.
+Create comprehensive test scenarios from user stories with test objectives, starting conditions, user roles, step-by-step actions, and expected outcomes. Use when writing QA test cases, creating test plans, defining acce
+
 
 ## Original SKILL.md
 
@@ -122,4 +123,3 @@ Create comprehensive test scenarios from user stories with test objectives, star
 - Observable expected outcomes after each step
 - Edge case and error scenario coverage
 - Ready for QA team execution and documentation
-

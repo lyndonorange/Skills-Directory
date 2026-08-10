@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `context7-mcp` for OpenCode. It removes l
 
 Use this skill when your task matches this description:
 
-name: context7-mcp
+This skill should be used when the user asks about libraries, frameworks, API references, or needs code examples. Activates for setup questions, code generation involving libraries, or mentions of specific frameworks lik
 
 ## How To Use It In OpenCode
 
@@ -32,7 +32,8 @@ In OpenCode, open the project and type: Use the context7-mcp skill to...
 
 ## Description
 
-name: context7-mcp
+This skill should be used when the user asks about libraries, frameworks, API references, or needs code examples. Activates for setup questions, code generation involving libraries, or mentions of specific frameworks lik
+
 
 ## Original SKILL.md
 
@@ -89,4 +90,3 @@ Incorporate the fetched documentation into your response:
 - **Be specific**: Pass the user's full question as the query for better results
 - **Version awareness**: When users mention versions ("Next.js 15", "React 19"), use version-specific library IDs if available from the resolution step
 - **Prefer official sources**: When multiple matches exist, prefer official/primary packages over community forks
-

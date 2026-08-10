@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `receiving-code-review` for OpenCode. It 
 
 Use this skill when your task matches this description:
 
-Code review requires technical evaluation, not emotional performance.
+Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind
 
 ## How To Use It In OpenCode
 
@@ -32,7 +32,8 @@ In OpenCode, open the project and type: Use the receiving-code-review skill to..
 
 ## Description
 
-Code review requires technical evaluation, not emotional performance.
+Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind
+
 
 ## Original SKILL.md
 
@@ -249,4 +250,3 @@ When replying to inline review comments on GitHub, reply in the comment thread (
 Verify. Question. Then implement.
 
 No performative agreement. Technical rigor always.
-

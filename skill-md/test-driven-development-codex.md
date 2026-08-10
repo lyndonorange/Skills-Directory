@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `test-driven-development` for Codex. It r
 
 Use this skill when your task matches this description:
 
-Write a failing test before writing the code that makes it pass. For bug fixes, reproduce the bug with a test before attempting a fix. Tests are proof — "seems right" is not done. A codebase with good tests is an AI agen
+Drives development with tests. Use when implementing any logic, fixing any bug, or changing any behavior. Use when you need to prove that code works, when a bug report arrives, or when you're about to modify existing fun
 
 ## How To Use It In Codex
 
@@ -32,7 +32,8 @@ In Codex, click the chat box, press /, choose test-driven-development, then writ
 
 ## Description
 
-Write a failing test before writing the code that makes it pass. For bug fixes, reproduce the bug with a test before attempting a fix. Tests are proof — "seems right" is not done. A codebase with good tests is an AI agen
+Drives development with tests. Use when implementing any logic, fixing any bug, or changing any behavior. Use when you need to prove that code works, when a bug report arrives, or when you're about to modify existing fun
+
 
 ## Original SKILL.md
 
@@ -419,4 +420,3 @@ After completing any implementation:
 - [ ] Coverage hasn't decreased (if tracked)
 
 **Note:** Run each test command after a change that could affect the result. After a clean run, don't repeat the same command unless the code has changed since — re-running on unchanged code adds no confidence.
-

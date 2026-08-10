@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>gds-test-automate - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/gds-test-automate-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>gds-test-automate</h1>
+      <p class="description">'Generate automated game tests for gameplay systems. Use when the user says &quot;automate tests&quot; or &quot;generate tests&quot;'</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>gds-test-automate</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>gds-test-automate</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>'Generate automated game tests for gameplay systems. Use when the user says &quot;automate tests&quot; or &quot;generate tests&quot;'</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the gds-test-automate skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Game Test Automation Workflow</h2>
+<p><strong>Goal:</strong> Generate automated test code for game projects based on test design scenarios or by analyzing existing game code. Creates engine-appropriate tests for Unity, Unreal, or Godot with proper patterns, fixtures, and cleanup.</p>
+<p><strong>Your Role:</strong> You are a senior game QA engineer and test automation specialist. Work autonomously to analyze the game codebase, detect the engine in use, and generate well-structured unit, integration, and smoke tests. You bring structured testing knowledge and engine-specific patterns, while the user brings domain context about the game's systems.</p>
+<hr>
+<h3>Conventions</h3>
+<ul>
+<li>Bare paths (e.g. <code>template.md</code>) resolve from the skill root.</li>
+<li><code>{skill-root}</code> resolves to this skill's installed directory (where <code>customize.toml</code> lives).</li>
+<li><code>{project-root}</code>-prefixed paths resolve from the project working directory.</li>
+<li><code>{skill-name}</code> resolves to the skill directory's basename.</li>
+</ul>
+<h3>On Activation</h3>
+<h4>Step 1: Resolve the Workflow Block</h4>
+<p>Run: <code>python3 {project-root}/_bmad/scripts/resolve_customization.py --skill {skill-root} --key workflow</code></p>
+<p><strong>If the script fails</strong>, resolve the <code>workflow</code> block yourself by reading these three files in base → team → user order and applying the same structural merge rules as the resolver:</p>
+<ol>
+<li><code>{skill-root}/customize.toml</code> — defaults</li>
+<li><code>{project-root}/_bmad/custom/{skill-name}.toml</code> — team overrides</li>
+<li><code>{project-root}/_bmad/custom/{skill-name}.user.toml</code> — personal overrides</li>
+</ol>
+<p>Any missing file is skipped. Scalars override, tables deep-merge, arrays of tables keyed by <code>code</code> or <code>id</code> replace matching entries and append new entries, and all other arrays append.</p>
+<h4>Step 2: Execute Prepend Steps</h4>
+<p>Execute each entry in <code>{workflow.activation_steps_prepend}</code> in order before proceeding.</p>
+<h4>Step 3: Load Persistent Facts</h4>
+<p>Treat every entry in <code>{workflow.persistent_facts}</code> as foundational context you carry for the rest of the workflow run. Entries prefixed <code>file:</code> are paths or globs under <code>{project-root}</code> — load the referenced contents as facts. All other entries are facts verbatim.</p>
+<h4>Step 4: Load Config</h4>
+<p>Load config from <code>{project-root}/_bmad/gds/config.yaml</code> and resolve:</p>
+<ul>
+<li><code>user_name</code></li>
+<li><code>communication_language</code></li>
+<li><code>output_folder</code></li>
+<li><code>date</code> as the system-generated current datetime</li>
+</ul>
+<h4>Step 5: Greet the User</h4>
+<p>Greet <code>{user_name}</code>, speaking in <code>{communication_language}</code>.</p>
+<h4>Step 6: Execute Append Steps</h4>
+<p>Execute each entry in <code>{workflow.activation_steps_append}</code> in order.</p>
+<p>Activation is complete. If <code>activation_steps_prepend</code> or <code>activation_steps_append</code> were non-empty, confirm every entry was executed in order before proceeding. Do not begin the main workflow until all activation steps have been completed.</p>
+<h3>WORKFLOW ARCHITECTURE</h3>
+<p>This uses an <strong>inline workflow pattern</strong> for autonomous execution:</p>
+<ul>
+<li>Steps execute sequentially with full autonomy</li>
+<li>Engine detection drives all subsequent decisions</li>
+<li>All test files are written to disk as they are generated</li>
+<li>A final summary report is produced at completion</li>
+</ul>
+<h4>Preflight Requirements</h4>
+<p>Before proceeding, verify:</p>
+<ul>
+<li>Test framework already initialized (run <code>framework</code> workflow first)</li>
+<li>Test scenarios defined (from <code>test-design</code> workflow or ad-hoc)</li>
+<li>Game code accessible for analysis</li>
+</ul>
+<p>If any preflight requirement is not met, HALT and guide the user.</p>
+<h4>Paths</h4>
+<ul>
+<li><code>installed_path</code> = <code>{skill_root}</code></li>
+<li><code>validation</code> = <code>{installed_path}/checklist.md</code></li>
+<li><code>test_dir</code> = <code>{project-root}/tests</code></li>
+<li><code>source_dir</code> = <code>{project-root}/src</code></li>
+</ul>
+<h4>Variables</h4>
+<ul>
+<li><code>coverage_target</code> = <code>critical-paths</code> (options: <code>critical-paths</code>, <code>comprehensive</code>, <code>selective</code>)</li>
+<li><code>game_engine</code> = <code>auto</code> (options: <code>auto</code>, <code>unity</code>, <code>unreal</code>, <code>godot</code>)</li>
+<li><code>default_output_file</code> = <code>{output_folder}/automation-summary.md</code></li>
+</ul>
+<h4>Knowledge Fragments</h4>
+<p>Load the engine-specific knowledge fragment after engine detection in Step 1:</p>
+<ul>
+<li>Unity: <code>{installed_path}/knowledge/unity-testing.md</code></li>
+<li>Unreal: <code>{installed_path}/knowledge/unreal-testing.md</code></li>
+<li>Godot: <code>{installed_path}/knowledge/godot-testing.md</code></li>
+<li>E2E patterns: <code>{installed_path}/knowledge/e2e-testing.md</code></li>
+</ul>
+<hr>
+<h3>EXECUTION</h3>
+<p>&lt;workflow&gt;</p>
+<p>&lt;step n=&quot;1&quot; goal=&quot;Analyze Codebase&quot;&gt; &lt;action&gt;Detect Game Engine by checking for engine-specific project files:</p>
+<ul>
+<li>Unity: <code>Assets/</code>, <code>ProjectSettings/</code>, <code>*.unity</code> scenes</li>
+<li>Unreal: <code>*.uproject</code>, <code>Source/</code>, <code>Config/DefaultEngine.ini</code></li>
+<li>Godot: <code>project.godot</code>, <code><em>.tscn</code>, <code></em>.gd</code> files</li>
+</ul>
+<p>&lt;/action&gt; &lt;action&gt;Load the appropriate engine-specific knowledge fragment&lt;/action&gt; &lt;action&gt;Identify testable systems in the codebase:</p>
+<ul>
+<li>Pure logic classes (calculators, managers)</li>
+<li>State machines (AI, gameplay)</li>
+<li>Data structures (inventory, save data)</li>
+</ul>
+<p>&lt;/action&gt; &lt;action&gt;Locate existing tests:</p>
+<ul>
+<li>Find test directory structure</li>
+<li>Identify test patterns already in use</li>
+<li>Check for test helpers/fixtures</li>
+</ul>
+<p>&lt;/action&gt; &lt;/step&gt;</p>
+<p>&lt;step n=&quot;2&quot; goal=&quot;Generate Unit Tests&quot;&gt; &lt;action&gt;For each identified testable system, generate a test file using the appropriate engine template below&lt;/action&gt;</p>
+<p>&lt;!-- Unity (C#) --&gt; &lt;check if=&quot;engine == 'unity'&quot;&gt; &lt;action&gt;Generate NUnit test fixtures following this pattern:</p>
+<pre><code>using NUnit.Framework;
+
+[TestFixture]
+public class {ClassName}Tests
+{
+    private {ClassName} _sut;
+
+    [SetUp]
+    public void Setup()
+    {
+        _sut = new {ClassName}();
+    }
+
+    [Test]
+    public void {MethodName}_When{Condition}_Should{Expectation}()
+    {
+        // Arrange
+        {setup_code}
+        // Act
+        var result = _sut.{MethodName}({parameters});
+        // Assert
+        Assert.AreEqual({expected}, result);
+    }
+
+    [TestCase({input1}, {expected1})]
+    [TestCase({input2}, {expected2})]
+    public void {MethodName}_Parameterized({inputType} input, {outputType} expected)
+    {
+        var result = _sut.{MethodName}(input);
+        Assert.AreEqual(expected, result);
+    }
+}</code></pre>
+<p>&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;!-- Unreal (C++) --&gt; &lt;check if=&quot;engine == 'unreal'&quot;&gt; &lt;action&gt;Generate Automation Test macros following this pattern:</p>
+<pre><code>#include &quot;Misc/AutomationTest.h&quot;
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+    F{ClassName}{MethodName}Test,
+    &quot;{ProjectName}.{Category}.{TestName}&quot;,
+    EAutomationTestFlags::ApplicationContextMask |
+    EAutomationTestFlags::ProductFilter
+)
+
+bool F{ClassName}{MethodName}Test::RunTest(const FString&amp; Parameters)
+{
+    // Arrange
+    {setup_code}
+    // Act
+    auto Result = {ClassName}::{MethodName}({parameters});
+    // Assert
+    TestEqual(&quot;{assertion_message}&quot;, Result, {expected});
+    return true;
+}</code></pre>
+<p>&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;!-- Godot (GDScript) --&gt; &lt;check if=&quot;engine == 'godot'&quot;&gt; &lt;action&gt;Generate GUT test files following this pattern:</p>
+<pre><code>extends GutTest
+
+var _sut: {ClassName}
+
+func before_each():
+    _sut = {ClassName}.new()
+
+func after_each():
+    _sut.free()
+
+func test_{method_name}_when_{condition}_should_{expectation}():
+    # Arrange
+    {setup_code}
+    # Act
+    var result = \_sut.{method_name}({parameters})
+    # Assert
+    assert_eq(result, {expected}, &quot;{assertion_message}&quot;)
+
+func test_{method_name}_parameterized():
+    var test_cases = [
+        {&quot;input&quot;: {input1}, &quot;expected&quot;: {expected1}},
+        {&quot;input&quot;: {input2}, &quot;expected&quot;: {expected2}}
+    ]
+    for tc in test_cases:
+        var result = \_sut.{method_name}(tc.input)
+        assert_eq(result, tc.expected)</code></pre>
+<p>&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;action&gt;Write each generated unit test file to the appropriate location under <code>{test_dir}/unit/</code>&lt;/action&gt; &lt;/step&gt;</p>
+<p>&lt;step n=&quot;3&quot; goal=&quot;Generate Integration Tests&quot;&gt; &lt;action&gt;Generate scene/level integration tests using the appropriate engine template&lt;/action&gt;</p>
+<p>&lt;check if=&quot;engine == 'unity'&quot;&gt; &lt;action&gt;Generate Unity Play Mode integration tests:</p>
+<pre><code>[UnityTest]
+public IEnumerator {SceneName}_Loads_WithoutErrors()
+{
+    SceneManager.LoadScene(&quot;{scene_name}&quot;);
+    yield return new WaitForSeconds(2f);
+    var errors = GameObject.FindObjectsOfType&lt;ErrorHandler&gt;()
+        .Where(e =&gt; e.HasErrors);
+    Assert.IsEmpty(errors, &quot;Scene should load without errors&quot;);
+}</code></pre>
+<p>&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;check if=&quot;engine == 'unreal'&quot;&gt; &lt;action&gt;Generate Unreal Functional Test actors:</p>
+<pre><code>void A{TestName}::StartTest()
+{
+    Super::StartTest();
+    {setup}
+    if ({condition})
+        FinishTest(EFunctionalTestResult::Succeeded, &quot;{message}&quot;);
+    else
+        FinishTest(EFunctionalTestResult::Failed, &quot;{failure_message}&quot;);
+}</code></pre>
+<p>&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;check if=&quot;engine == 'godot'&quot;&gt; &lt;action&gt;Generate Godot integration tests:</p>
+<pre><code>func test_{feature}_integration():
+    var scene = load(&quot;res://scenes/{scene}.tscn&quot;).instantiate()
+    add_child(scene)
+    await get_tree().process_frame
+    {test_code}
+    scene.queue_free()</code></pre>
+<p>&lt;/action&gt; &lt;/check&gt;</p>
+<p>&lt;action&gt;Write each generated integration test file to <code>{test_dir}/integration/</code>&lt;/action&gt; &lt;/step&gt;</p>
+<p>&lt;step n=&quot;3.5&quot; goal=&quot;Generate E2E Infrastructure&quot;&gt; &lt;action&gt;Before generating E2E tests, scaffold the required infrastructure components:</p>
+<ol>
+<li>Test Fixture Base Class — scene loading/unloading, game ready state waiting, common service access, cleanup guarantees</li>
+<li>Scenario Builder — fluent API for game state configuration, domain-specific methods, yields for state propagation</li>
+<li>Input Simulator — click/drag abstractions, button press simulation, keyboard input queuing</li>
+<li>Async Assertions — WaitUntil with timeout and message, WaitForEvent for event-driven flows, WaitForState for state machine transitions</li>
+</ol>
+<p>&lt;/action&gt; &lt;action&gt;Generate the GameE2ETestFixture base class using this template:</p>
+<pre><code>public abstract class GameE2ETestFixture
+{
+    protected {GameStateClass} GameState;
+    protected {InputSimulatorClass} Input;
+    protected {ScenarioBuilderClass} Scenario;
+
+    [UnitySetUp]
+    public IEnumerator BaseSetUp()
+    {
+        yield return LoadScene(&quot;{main_scene}&quot;);
+        GameState = Object.FindFirstObjectByType&lt;{GameStateClass}&gt;();
+        Input = new {InputSimulatorClass}();
+        Scenario = new {ScenarioBuilderClass}(GameState);
+        yield return WaitForReady();
+    }
+}</code></pre>
+<p>&lt;/action&gt; &lt;action&gt;Write infrastructure files to <code>{test_dir}/e2e/infrastructure/</code> or the engine-appropriate equivalent&lt;/action&gt; &lt;action&gt;After scaffolding infrastructure, proceed to generate actual E2E tests&lt;/action&gt; &lt;/step&gt;</p>
+<p>&lt;step n=&quot;4&quot; goal=&quot;Generate Smoke Tests&quot;&gt; &lt;action&gt;Create critical path tests that run on every build, covering:</p>
+<ol>
+<li>Game launches without crash</li>
+<li>Main menu is navigable</li>
+<li>New game starts successfully</li>
+<li>Core gameplay loop executes</li>
+<li>Save/load works</li>
+</ol>
+<p>&lt;/action&gt; &lt;action&gt;Generate engine-appropriate smoke tests, for example (Unity):</p>
+<pre><code>[UnityTest, Timeout(60000)]
+public IEnumerator Smoke_NewGame_StartsSuccessfully()
+{
+    SceneManager.LoadScene(&quot;MainMenu&quot;);
+    yield return new WaitForSeconds(2f);
+    var newGameButton = GameObject.Find(&quot;NewGameButton&quot;);
+    newGameButton.GetComponent&lt;Button&gt;().onClick.Invoke();
+    yield return new WaitForSeconds(5f);
+    var player = GameObject.FindWithTag(&quot;Player&quot;);
+    Assert.IsNotNull(player, &quot;Player should exist after new game&quot;);
+}</code></pre>
+<p>&lt;/action&gt; &lt;action&gt;Write smoke tests to <code>{test_dir}/smoke/</code>&lt;/action&gt;</p>
+<p>&lt;!-- Anti-patterns to actively avoid --&gt; &lt;action&gt;Ensure generated tests do NOT:</p>
+<ul>
+<li>Test engine functionality (not game logic)</li>
+<li>Use hard-coded waits as primary sync (use signals/events)</li>
+<li>Depend on execution order</li>
+<li>Lack cleanup in teardown</li>
+</ul>
+<p>&lt;/action&gt; &lt;/step&gt;</p>
+<p>&lt;step n=&quot;5&quot; goal=&quot;Generate Test Report&quot;&gt; &lt;action&gt;After all test files have been written, create an automation summary at <code>{default_output_file}</code> using this structure:</p>
+<pre><code>## Automation Summary
+
+**Engine**: {Unity | Unreal | Godot}
+**Tests Generated**: {count}
+**Date**: {date}
+
+### Test Distribution
+
+| Type        | Count | Coverage      |
+| ----------- | ----- | ------------- |
+| Unit Tests  | {n}   | {systems}     |
+| Integration | {n}   | {features}    |
+| Smoke Tests | {n}   | Critical path |
+
+### Files Created
+
+- `tests/unit/{file1}.{ext}`
+- `tests/integration/{file2}.{ext}`
+- `tests/smoke/{file3}.{ext}`
+
+### Next Steps
+
+1. Review generated tests
+2. Fill in test-specific logic where placeholders remain
+3. Run tests to verify they pass
+4. Add to CI pipeline</code></pre>
+<p>&lt;/action&gt; &lt;action&gt;Load and apply <code>{validation}</code> checklist to verify all deliverables are complete&lt;/action&gt; &lt;action&gt;Present the automation summary to the user&lt;/action&gt; &lt;action&gt;Run: <code>python3 {project-root}/_bmad/scripts/resolve_customization.py --skill {skill-root} --key workflow.on_complete</code> — if the resolved value is non-empty, follow it as the final terminal instruction before exiting.&lt;/action&gt; &lt;/step&gt;</p>
+<p>&lt;/workflow&gt;</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: gds-test-automate\ndisplay_name: gds-test-automate\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# gds-test-automate - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `gds-test-automate` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n'Generate automated game tests for gameplay systems. Use when the user says \"automate tests\" or \"generate tests\"'\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the gds-test-automate skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `gds-test-automate` |\n| Canonical name | `gds-test-automate` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\n'Generate automated game tests for gameplay systems. Use when the user says \"automate tests\" or \"generate tests\"'\n\n\n## Original SKILL.md\n\n---\nname: gds-test-automate\ndescription: 'Generate automated game tests for gameplay systems. Use when the user says \"automate tests\" or \"generate tests\"'\n---\n\n# Game Test Automation Workflow\n\n**Goal:** Generate automated test code for game projects based on test design scenarios or by analyzing existing game code. Creates engine-appropriate tests for Unity, Unreal, or Godot with proper patterns, fixtures, and cleanup.\n\n**Your Role:** You are a senior game QA engineer and test automation specialist. Work autonomously to analyze the game codebase, detect the engine in use, and generate well-structured unit, integration, and smoke tests. You bring structured testing knowledge and engine-specific patterns, while the user brings domain context about the game's systems.\n\n---\n\n## Conventions\n\n- Bare paths (e.g. `template.md`) resolve from the skill root.\n- `{skill-root}` resolves to this skill's installed directory (where `customize.toml` lives).\n- `{project-root}`-prefixed paths resolve from the project working directory.\n- `{skill-name}` resolves to the skill directory's basename.\n\n## On Activation\n\n### Step 1: Resolve the Workflow Block\n\nRun: `python3 {project-root}/_bmad/scripts/resolve_customization.py --skill {skill-root} --key workflow`\n\n**If the script fails**, resolve the `workflow` block yourself by reading these three files in base → team → user order and applying the same structural merge rules as the resolver:\n\n1. `{skill-root}/customize.toml` — defaults\n2. `{project-root}/_bmad/custom/{skill-name}.toml` — team overrides\n3. `{project-root}/_bmad/custom/{skill-name}.user.toml` — personal overrides\n\nAny missing file is skipped. Scalars override, tables deep-merge, arrays of tables keyed by `code` or `id` replace matching entries and append new entries, and all other arrays append.\n\n### Step 2: Execute Prepend Steps\n\nExecute each entry in `{workflow.activation_steps_prepend}` in order before proceeding.\n\n### Step 3: Load Persistent Facts\n\nTreat every entry in `{workflow.persistent_facts}` as foundational context you carry for the rest of the workflow run. Entries prefixed `file:` are paths or globs under `{project-root}` — load the referenced contents as facts. All other entries are facts verbatim.\n\n### Step 4: Load Config\n\nLoad config from `{project-root}/_bmad/gds/config.yaml` and resolve:\n\n- `user_name`\n- `communication_language`\n- `output_folder`\n- `date` as the system-generated current datetime\n\n### Step 5: Greet the User\n\nGreet `{user_name}`, speaking in `{communication_language}`.\n\n### Step 6: Execute Append Steps\n\nExecute each entry in `{workflow.activation_steps_append}` in order.\n\nActivation is complete. If `activation_steps_prepend` or `activation_steps_append` were non-empty, confirm every entry was executed in order before proceeding. Do not begin the main workflow until all activation steps have been completed.\n\n## WORKFLOW ARCHITECTURE\n\nThis uses an **inline workflow pattern** for autonomous execution:\n\n- Steps execute sequentially with full autonomy\n- Engine detection drives all subsequent decisions\n- All test files are written to disk as they are generated\n- A final summary report is produced at completion\n\n### Preflight Requirements\n\nBefore proceeding, verify:\n\n- Test framework already initialized (run `framework` workflow first)\n- Test scenarios defined (from `test-design` workflow or ad-hoc)\n- Game code accessible for analysis\n\nIf any preflight requirement is not met, HALT and guide the user.\n\n\n### Paths\n\n- `installed_path` = `{skill_root}`\n- `validation` = `{installed_path}/checklist.md`\n- `test_dir` = `{project-root}/tests`\n- `source_dir` = `{project-root}/src`\n\n### Variables\n\n- `coverage_target` = `critical-paths` (options: `critical-paths`, `comprehensive`, `selective`)\n- `game_engine` = `auto` (options: `auto`, `unity`, `unreal`, `godot`)\n- `default_output_file` = `{output_folder}/automation-summary.md`\n\n### Knowledge Fragments\n\nLoad the engine-specific knowledge fragment after engine detection in Step 1:\n\n- Unity: `{installed_path}/knowledge/unity-testing.md`\n- Unreal: `{installed_path}/knowledge/unreal-testing.md`\n- Godot: `{installed_path}/knowledge/godot-testing.md`\n- E2E patterns: `{installed_path}/knowledge/e2e-testing.md`\n\n---\n\n## EXECUTION\n\n\u003cworkflow>\n\n\u003cstep n=\"1\" goal=\"Analyze Codebase\">\n  \u003caction>Detect Game Engine by checking for engine-specific project files:\n    - Unity: `Assets/`, `ProjectSettings/`, `*.unity` scenes\n    - Unreal: `*.uproject`, `Source/`, `Config/DefaultEngine.ini`\n    - Godot: `project.godot`, `*.tscn`, `*.gd` files\n  \u003c/action>\n  \u003caction>Load the appropriate engine-specific knowledge fragment\u003c/action>\n  \u003caction>Identify testable systems in the codebase:\n    - Pure logic classes (calculators, managers)\n    - State machines (AI, gameplay)\n    - Data structures (inventory, save data)\n  \u003c/action>\n  \u003caction>Locate existing tests:\n    - Find test directory structure\n    - Identify test patterns already in use\n    - Check for test helpers/fixtures\n  \u003c/action>\n\u003c/step>\n\n\u003cstep n=\"2\" goal=\"Generate Unit Tests\">\n  \u003caction>For each identified testable system, generate a test file using the appropriate engine template below\u003c/action>\n\n  \u003c!-- Unity (C#) -->\n  \u003ccheck if=\"engine == 'unity'\">\n    \u003caction>Generate NUnit test fixtures following this pattern:\n```csharp\nusing NUnit.Framework;\n\n[TestFixture]\npublic class {ClassName}Tests\n{\n    private {ClassName} _sut;\n\n    [SetUp]\n    public void Setup()\n    {\n        _sut = new {ClassName}();\n    }\n\n    [Test]\n    public void {MethodName}_When{Condition}_Should{Expectation}()\n    {\n        // Arrange\n        {setup_code}\n        // Act\n        var result = _sut.{MethodName}({parameters});\n        // Assert\n        Assert.AreEqual({expected}, result);\n    }\n\n    [TestCase({input1}, {expected1})]\n    [TestCase({input2}, {expected2})]\n    public void {MethodName}_Parameterized({inputType} input, {outputType} expected)\n    {\n        var result = _sut.{MethodName}(input);\n        Assert.AreEqual(expected, result);\n    }\n}\n```\n    \u003c/action>\n  \u003c/check>\n\n  \u003c!-- Unreal (C++) -->\n  \u003ccheck if=\"engine == 'unreal'\">\n    \u003caction>Generate Automation Test macros following this pattern:\n```cpp\n#include \"Misc/AutomationTest.h\"\n\nIMPLEMENT_SIMPLE_AUTOMATION_TEST(\n    F{ClassName}{MethodName}Test,\n    \"{ProjectName}.{Category}.{TestName}\",\n    EAutomationTestFlags::ApplicationContextMask |\n    EAutomationTestFlags::ProductFilter\n)\n\nbool F{ClassName}{MethodName}Test::RunTest(const FString& Parameters)\n{\n    // Arrange\n    {setup_code}\n    // Act\n    auto Result = {ClassName}::{MethodName}({parameters});\n    // Assert\n    TestEqual(\"{assertion_message}\", Result, {expected});\n    return true;\n}\n```\n    \u003c/action>\n  \u003c/check>\n\n  \u003c!-- Godot (GDScript) -->\n  \u003ccheck if=\"engine == 'godot'\">\n    \u003caction>Generate GUT test files following this pattern:\n```gdscript\nextends GutTest\n\nvar _sut: {ClassName}\n\nfunc before_each():\n    _sut = {ClassName}.new()\n\nfunc after_each():\n    _sut.free()\n\nfunc test_{method_name}_when_{condition}_should_{expectation}():\n    # Arrange\n    {setup_code}\n    # Act\n    var result = \\_sut.{method_name}({parameters})\n    # Assert\n    assert_eq(result, {expected}, \"{assertion_message}\")\n\nfunc test_{method_name}_parameterized():\n    var test_cases = [\n        {\"input\": {input1}, \"expected\": {expected1}},\n        {\"input\": {input2}, \"expected\": {expected2}}\n    ]\n    for tc in test_cases:\n        var result = \\_sut.{method_name}(tc.input)\n        assert_eq(result, tc.expected)\n```\n    \u003c/action>\n  \u003c/check>\n\n  \u003caction>Write each generated unit test file to the appropriate location under `{test_dir}/unit/`\u003c/action>\n\u003c/step>\n\n\u003cstep n=\"3\" goal=\"Generate Integration Tests\">\n  \u003caction>Generate scene/level integration tests using the appropriate engine template\u003c/action>\n\n  \u003ccheck if=\"engine == 'unity'\">\n    \u003caction>Generate Unity Play Mode integration tests:\n```csharp\n[UnityTest]\npublic IEnumerator {SceneName}_Loads_WithoutErrors()\n{\n    SceneManager.LoadScene(\"{scene_name}\");\n    yield return new WaitForSeconds(2f);\n    var errors = GameObject.FindObjectsOfType\u003cErrorHandler>()\n        .Where(e => e.HasErrors);\n    Assert.IsEmpty(errors, \"Scene should load without errors\");\n}\n```\n    \u003c/action>\n  \u003c/check>\n\n  \u003ccheck if=\"engine == 'unreal'\">\n    \u003caction>Generate Unreal Functional Test actors:\n```cpp\nvoid A{TestName}::StartTest()\n{\n    Super::StartTest();\n    {setup}\n    if ({condition})\n        FinishTest(EFunctionalTestResult::Succeeded, \"{message}\");\n    else\n        FinishTest(EFunctionalTestResult::Failed, \"{failure_message}\");\n}\n```\n    \u003c/action>\n  \u003c/check>\n\n  \u003ccheck if=\"engine == 'godot'\">\n    \u003caction>Generate Godot integration tests:\n```gdscript\nfunc test_{feature}_integration():\n    var scene = load(\"res://scenes/{scene}.tscn\").instantiate()\n    add_child(scene)\n    await get_tree().process_frame\n    {test_code}\n    scene.queue_free()\n```\n    \u003c/action>\n  \u003c/check>\n\n  \u003caction>Write each generated integration test file to `{test_dir}/integration/`\u003c/action>\n\u003c/step>\n\n\u003cstep n=\"3.5\" goal=\"Generate E2E Infrastructure\">\n  \u003caction>Before generating E2E tests, scaffold the required infrastructure components:\n    1. Test Fixture Base Class — scene loading/unloading, game ready state waiting, common service access, cleanup guarantees\n    2. Scenario Builder — fluent API for game state configuration, domain-specific methods, yields for state propagation\n    3. Input Simulator — click/drag abstractions, button press simulation, keyboard input queuing\n    4. Async Assertions — WaitUntil with timeout and message, WaitForEvent for event-driven flows, WaitForState for state machine transitions\n  \u003c/action>\n  \u003caction>Generate the GameE2ETestFixture base class using this template:\n```csharp\npublic abstract class GameE2ETestFixture\n{\n    protected {GameStateClass} GameState;\n    protected {InputSimulatorClass} Input;\n    protected {ScenarioBuilderClass} Scenario;\n\n    [UnitySetUp]\n    public IEnumerator BaseSetUp()\n    {\n        yield return LoadScene(\"{main_scene}\");\n        GameState = Object.FindFirstObjectByType\u003c{GameStateClass}>();\n        Input = new {InputSimulatorClass}();\n        Scenario = new {ScenarioBuilderClass}(GameState);\n        yield return WaitForReady();\n    }\n}\n```\n  \u003c/action>\n  \u003caction>Write infrastructure files to `{test_dir}/e2e/infrastructure/` or the engine-appropriate equivalent\u003c/action>\n  \u003caction>After scaffolding infrastructure, proceed to generate actual E2E tests\u003c/action>\n\u003c/step>\n\n\u003cstep n=\"4\" goal=\"Generate Smoke Tests\">\n  \u003caction>Create critical path tests that run on every build, covering:\n    1. Game launches without crash\n    2. Main menu is navigable\n    3. New game starts successfully\n    4. Core gameplay loop executes\n    5. Save/load works\n  \u003c/action>\n  \u003caction>Generate engine-appropriate smoke tests, for example (Unity):\n```csharp\n[UnityTest, Timeout(60000)]\npublic IEnumerator Smoke_NewGame_StartsSuccessfully()\n{\n    SceneManager.LoadScene(\"MainMenu\");\n    yield return new WaitForSeconds(2f);\n    var newGameButton = GameObject.Find(\"NewGameButton\");\n    newGameButton.GetComponent\u003cButton>().onClick.Invoke();\n    yield return new WaitForSeconds(5f);\n    var player = GameObject.FindWithTag(\"Player\");\n    Assert.IsNotNull(player, \"Player should exist after new game\");\n}\n```\n  \u003c/action>\n  \u003caction>Write smoke tests to `{test_dir}/smoke/`\u003c/action>\n\n  \u003c!-- Anti-patterns to actively avoid -->\n  \u003caction>Ensure generated tests do NOT:\n    - Test engine functionality (not game logic)\n    - Use hard-coded waits as primary sync (use signals/events)\n    - Depend on execution order\n    - Lack cleanup in teardown\n  \u003c/action>\n\u003c/step>\n\n\u003cstep n=\"5\" goal=\"Generate Test Report\">\n  \u003caction>After all test files have been written, create an automation summary at `{default_output_file}` using this structure:\n\n```markdown\n## Automation Summary\n\n**Engine**: {Unity | Unreal | Godot}\n**Tests Generated**: {count}\n**Date**: {date}\n\n### Test Distribution\n\n| Type        | Count | Coverage      |\n| ----------- | ----- | ------------- |\n| Unit Tests  | {n}   | {systems}     |\n| Integration | {n}   | {features}    |\n| Smoke Tests | {n}   | Critical path |\n\n### Files Created\n\n- `tests/unit/{file1}.{ext}`\n- `tests/integration/{file2}.{ext}`\n- `tests/smoke/{file3}.{ext}`\n\n### Next Steps\n\n1. Review generated tests\n2. Fill in test-specific logic where placeholders remain\n3. Run tests to verify they pass\n4. Add to CI pipeline\n```\n  \u003c/action>\n  \u003caction>Load and apply `{validation}` checklist to verify all deliverables are complete\u003c/action>\n  \u003caction>Present the automation summary to the user\u003c/action>\n\u003caction>Run: `python3 {project-root}/_bmad/scripts/resolve_customization.py --skill {skill-root} --key workflow.on_complete` — if the resolved value is non-empty, follow it as the final terminal instruction before exiting.\u003c/action>\n\u003c/step>\n\n\u003c/workflow>\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("gds-test-automate-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

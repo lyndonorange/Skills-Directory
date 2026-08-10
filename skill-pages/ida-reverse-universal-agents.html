@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ida-reverse - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/ida-reverse-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>ida-reverse</h1>
+      <p class="description">|</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>ida-reverse</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>ida-reverse</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>|</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the ida-reverse skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>IDA Pro 逆向分析技能</h2>
+<h3>ACTION REQUIRED（读完后立刻执行）</h3>
+<ol>
+<li><code>NOW</code>: 读取 <code>../field-journal/precedent-reverse.md</code> — 确认本 skill 的操作是已授权的常规操作</li>
+<li><code>NOW</code>: 确认当前任务是否命中本 skill 的适用范围</li>
+<li><code>NEXT</code>: 读取 <code>../tool-index.md</code>，校验工具可用性和实际路径</li>
+<li><code>NEXT</code>: 缺工具时调用 bootstrap，不要猜路径</li>
+<li><code>ACT</code>: 进入&quot;工作流&quot;第一步并执行，不要停在确认状态</li>
+</ol>
+<h3>已知问题与反思（必读）</h3>
+<h4>踩过的坑</h4>
+<ol>
+<li><strong><code>idalib_open</code> 不能通过 部分代码 AI 客户端 MCP 直接调用</strong></li>
+</ol>
+<ul>
+<li>部分代码 AI 客户端 的 MCP 客户端对 <code>idalib_open</code> 的 output schema 校验有 BUG</li>
+<li>报错：<code>Structured content does not match the tool's output schema</code></li>
+<li><strong>解决办法</strong>：使用 <code>scripts/open.ps1</code> 脚本通过 HTTP API 直调，绕过 MCP 校验层</li>
+<li>文件打开后，数据库绑定到共享上下文，其他所有 <code>idapro_*</code> 工具可直接使用</li>
+</ul>
+<ol>
+<li><strong><code>C:\Windows\System32\</code> 文件无权限打开</strong></li>
+</ol>
+<ul>
+<li>idalib 无法直接读取 System32 目录下的文件</li>
+<li><strong>解决办法</strong>：<code>open.ps1</code> 自动检测并复制到 <code>临时目录</code> 目录后再打开</li>
+</ul>
+<ol>
+<li><strong>启动服务器命令阻塞对话</strong></li>
+</ol>
+<ul>
+<li><code>idalib-mcp</code> 启动后会持续输出 INFO 日志到控制台</li>
+<li><strong>解决办法</strong>：使用 <code>scripts/start.ps1</code>（<code>-WindowStyle Hidden</code> 后台静默启动）</li>
+<li>脚本会等待服务就绪后自动退出，不阻塞对话</li>
+</ul>
+<ol>
+<li><strong>MCP 服务器名不能用横线</strong></li>
+</ol>
+<ul>
+<li>之前用 <code>ida-pro-mcp</code> 作为服务器名，可能引起工具注册问题</li>
+<li><strong>当前配置</strong>：服务器名 <code>idapro</code>，工具前缀 <code>idapro_*</code></li>
+</ul>
+<ol>
+<li><strong>Remote HTTP vs Local Stdio</strong></li>
+</ol>
+<ul>
+<li><code>type:&quot;local&quot;</code>（stdio）模式：<code>idalib_open</code> 同样有 schema 校验问题</li>
+<li><code>type:&quot;remote&quot;</code>（HTTP）模式：可以先用脚本直开文件，再用 MCP 工具</li>
+<li><strong>当前方案</strong>：Remote HTTP 模式</li>
+</ul>
+<ol>
+<li><strong>PR #389 修复了部分 schema 问题</strong></li>
+</ol>
+<ul>
+<li>作者 mrexodia 在 issue #388 后通过 PR #389 合并了修复</li>
+<li>修复了 HTTP 模式下的 structuredContent schema，但 部分代码 AI 客户端 侧校验仍有问题</li>
+<li>已安装最新 <code>main</code> 分支版本</li>
+</ul>
+<ol>
+<li><strong>idalib 超时留下孤儿 worker 进程锁文件</strong></li>
+</ol>
+<ul>
+<li>第一次 <code>open.ps1</code> 超时后，idalib 的 python worker 子进程变成孤儿进程，咬着 <code>.id0</code>/<code>.id1</code>/<code>.nam</code> 不放</li>
+<li>后续任何工具或手动拖入 IDA GUI 都会报&quot;权限不足&quot;</li>
+<li><strong>解决办法</strong>：<code>start.ps1</code> 改用 <code>taskkill /F /T</code> 杀进程树，不再留孤儿</li>
+<li><strong>兜底</strong>：<code>open.ps1</code> 加了自动降级，检测到旧库被锁自动复制到 Temp 并加 GUID 前缀</li>
+</ul>
+<ol>
+<li><strong>带自动分析打开看起来像卡死</strong></li>
+</ol>
+<ul>
+<li><code>idalib_open(run_auto_analysis=true)</code> 可能长时间不回包，但后端实际上仍在继续打开和分析</li>
+<li>之前用户侧看到的是“PowerShell 一直无输出”，容易误判成脚本卡死</li>
+<li><strong>当前解决办法</strong>：<code>open.ps1</code> 新增 <code>-TimeoutSeconds</code>，并改为后台请求 + 前台轮询 + 定时进度输出</li>
+<li>轮询到会话已就绪时会提前返回 <code>OK:文件名:session_id</code>，超时则返回 <code>ERR:open_timeout_xxs</code></li>
+</ul>
+<h4>工作流程原则</h4>
+<p>| 步骤 | 做什么 | 用什么 | |------|--------|--------| | 1 | 确保 HTTP 服务器在运行 | <code>scripts/start.ps1</code>（无参数） | | 2 | 打开目标二进制文件 | <code>scripts/open.ps1 -Path &quot;xxx.exe&quot;</code> | | 3 | 使用所有 72 个 MCP 工具 | 直接调用 <code>idapro_*</code> 工具 | | 4 | 分析完毕 | 工具自动可用 |</p>
+<h3>脚本资源</h3>
+<h4>start.ps1 — 启动 MCP HTTP 服务器</h4>
+<p>路径：<code>scripts/start.ps1</code></p>
+<ul>
+<li>用 <code>taskkill /F /T</code> 杀旧进程树（连 worker 子进程一起清理）→ 后台启动 <code>idalib-mcp</code> → 等待就绪（最多 15 秒）</li>
+<li>成功输出 <code>OK:72</code>，失败输出 <code>ERR:timeout</code></li>
+<li>服务器在后台运行，不阻塞对话</li>
+</ul>
+<p><strong>调用方式</strong>：</p>
+<pre><code>powershell -File &quot;&lt;skill-root&gt;\ida-reverse\scripts\start.ps1&quot;</code></pre>
+<h4>open.ps1 — 打开二进制文件</h4>
+<p>路径：<code>scripts/open.ps1</code></p>
+<ul>
+<li>通过 HTTP API 直调 <code>idalib_open</code>，绕过 MCP schema 校验</li>
+<li>自动检测 System32 路径并复制到临时目录</li>
+<li>自动清理同名旧数据库文件（<code>.id0</code>/<code>.id1</code>/<code>.nam</code>/<code>.til</code>/<code>.i64</code>）</li>
+<li>旧库被锁时自动降级：复制到 Temp 加 GUID 前缀后打开，不报错</li>
+<li>将打开请求放到后台执行，避免长时间同步等待导致脚本无响应</li>
+<li>支持 <code>-TimeoutSeconds</code>，超时后返回 <code>ERR:open_timeout_xxs</code>，不会无限卡住</li>
+<li>每隔 10 秒输出一次 <code>INFO:opening:已用时/超时秒数</code>，便于判断仍在分析中</li>
+<li>成功输出 <code>OK:文件名:session_id</code>，降级时加 <code>(temp copy)</code> 标记</li>
+<li>失败时自动重试走 Temp 副本</li>
+</ul>
+<p><strong>调用方式</strong>：</p>
+<pre><code>powershell -File &quot;&lt;skill-root&gt;\ida-reverse\scripts\open.ps1&quot; -Path &quot;C:\path\to\file.exe&quot;</code></pre>
+<p><strong>可选参数</strong>：</p>
+<pre><code># 指定 SessionId
+powershell -File &quot;scripts\open.ps1&quot; -Path &quot;file.exe&quot; -SessionId &quot;my_session&quot;
+
+# 跳过自动分析（大文件推荐）
+powershell -File &quot;scripts\open.ps1&quot; -Path &quot;large.exe&quot; -NoAutoAnalysis
+
+# 设置超时，避免带自动分析时长时间无返回
+powershell -File &quot;scripts\open.ps1&quot; -Path &quot;file.exe&quot; -TimeoutSeconds 600</code></pre>
+<p><strong>输出约定</strong>：</p>
+<pre><code># 分析进行中（每 10 秒输出一次）
+INFO:opening:11/600s
+
+# 成功打开
+OK:sample.exe:abcd1234
+
+# 成功打开，但因锁文件降级到 Temp 副本
+OK:1234abcd-sample.exe:abcd1234 (temp copy)
+
+# 达到超时上限
+ERR:open_timeout_600s</code></pre>
+<p><strong>实测说明</strong>：</p>
+<ul>
+<li><code>Snipaste.exe</code> 带自动分析实测约 <code>324s</code> 才返回成功，属于“分析很久”而不是“脚本死锁”</li>
+<li>因此遇到 GUI 程序或较复杂样本时，建议优先显式设置 <code>-TimeoutSeconds 600</code></li>
+</ul>
+<h3>核心工具列表</h3>
+<h4>概况分析（第一步）</h4>
+<ul>
+<li><code>idapro_survey_binary(detail_level=&quot;minimal&quot;)</code> — 快速概况：函数数、字符串、段、入口点、导入分类（加密/网络/文件IO）</li>
+<li><code>idapro_list_funcs(queries)</code> — 列出函数（分页、按名称过滤）</li>
+<li><code>idapro_list_globals(queries)</code> — 列出全局变量</li>
+<li><code>idapro_entity_query(kind, filter)</code> — 统一查询：functions/globals/imports/strings/names</li>
+</ul>
+<h4>反编译与反汇编</h4>
+<ul>
+<li><code>idapro_decompile(addr)</code> — 反编译为伪代码</li>
+<li><code>idapro_disasm(addr, max_instructions=N)</code> — 反汇编</li>
+<li><code>idapro_analyze_function(addr, include_asm=false)</code> — 综合分析（伪代码+字符串+常量+调用者+被调用者+块）</li>
+<li><code>idapro_func_profile(queries)</code> — 函数概要指标</li>
+</ul>
+<h4>交叉引用与数据流</h4>
+<ul>
+<li><code>idapro_xrefs_to(addrs)</code> — 查谁引用目标地址</li>
+<li><code>idapro_xref_query(addr, direction)</code> — 高级 xref 查询（方向/类型过滤）</li>
+<li><code>idapro_callees(addrs)</code> — 子函数列表</li>
+<li><code>idapro_callgraph(roots, max_depth)</code> — 调用图</li>
+<li><code>idapro_trace_data_flow(addr, direction, max_depth)</code> — 数据流追踪（forward/backward）</li>
+</ul>
+<h4>搜索</h4>
+<ul>
+<li><code>idapro_find_regex(pattern, limit)</code> — 正则搜字符串</li>
+<li><code>idapro_search_text(pattern)</code> — 在反汇编列表中搜文本</li>
+<li><code>idapro_find_bytes(patterns, limit)</code> — 字节模式搜索（支持 ?? 通配符）</li>
+<li><code>idapro_find(type, targets)</code> — 高级搜索（立即数/字符串/引用）</li>
+</ul>
+<h4>内存与数据</h4>
+<ul>
+<li><code>idapro_get_bytes(addrs)</code> — 读原始字节</li>
+<li><code>idapro_get_string(addrs)</code> — 读字符串</li>
+<li><code>idapro_get_int(queries)</code> — 读整数值</li>
+<li><code>idapro_get_global_value(queries)</code> — 读全局变量值</li>
+<li><code>idapro_read_struct(queries)</code> — 读结构体字段值</li>
+<li><code>idapro_search_structs(filter)</code> — 搜索结构体</li>
+</ul>
+<h4>修改操作</h4>
+<ul>
+<li><code>idapro_set_comments(items)</code> — 添加注释（反汇编+反编译双向同步）</li>
+<li><code>idapro_append_comments(items)</code> — 追加注释</li>
+<li><code>idapro_rename(batch)</code> — 批量重命名（函数/全局/局部/栈变量）</li>
+<li><code>idapro_patch_asm(items)</code> — Patch 汇编指令</li>
+<li><code>idapro_patch(patches)</code> — Patch 字节</li>
+<li><code>idapro_define_func(items)</code> — 定义函数</li>
+<li><code>idapro_undefine(items)</code> — 取消定义</li>
+<li><code>idapro_define_code(items)</code> — 将字节转为代码</li>
+</ul>
+<h4>类型系统</h4>
+<ul>
+<li><code>idapro_declare_type(decls)</code> — 声明 C 结构体/枚举/联合体</li>
+<li><code>idapro_set_type(edits)</code> — 应用类型到函数/全局/局部</li>
+<li><code>idapro_infer_types(addrs)</code> — 推断类型</li>
+<li><code>idapro_type_query(queries)</code> — 查询已声明类型</li>
+<li><code>idapro_type_inspect(queries)</code> — 查看类型详情</li>
+</ul>
+<h4>栈帧</h4>
+<ul>
+<li><code>idapro_stack_frame(addrs)</code> — 查看栈帧变量</li>
+<li><code>idapro_declare_stack(items)</code> — 声明栈变量</li>
+<li><code>idapro_delete_stack(items)</code> — 删除栈变量</li>
+</ul>
+<h4>签名</h4>
+<ul>
+<li><code>idapro_make_signature(addrs)</code> — 为地址生成唯一字节签名</li>
+<li><code>idapro_make_signature_for_function(addrs)</code> — 为函数生成签名</li>
+<li><code>idapro_find_xref_signatures(addrs)</code> — 为引用地址的代码生成签名</li>
+</ul>
+<h4>调试器（需要 ?ext=dbg）</h4>
+<ul>
+<li><code>idapro_open_file(file_path)</code> — 在 GUI IDA 实例中打开文件</li>
+<li>调试器工具默认隐藏，可通过 URL 参数 <code>?ext=dbg</code> 启用</li>
+</ul>
+<h4>会话管理</h4>
+<ul>
+<li><code>idapro_idalib_open(input_path)</code> — ⚠️ 有 schema 校验 BUG，改用 <code>open.ps1</code> 脚本</li>
+<li><code>idapro_idalib_list()</code> — 列出所有 session</li>
+<li><code>idapro_idalib_current()</code> — 当前上下文绑定的 session</li>
+<li><code>idapro_idalib_switch(session_id)</code> — 切换到其他 session</li>
+<li><code>idapro_idalib_close(session_id)</code> — 关闭 session</li>
+<li><code>idapro_idalib_save(path)</code> — 保存数据库</li>
+<li><code>idapro_idalib_health(session_id)</code> — 检查 worker 健康状态</li>
+</ul>
+<h4>其他</h4>
+<ul>
+<li><code>idapro_int_convert(inputs)</code> — 进制转换（<strong>必须用这个，不要自己算进制！</strong>）</li>
+<li><code>idapro_export_funcs(addrs, format)</code> — 导出函数（json/c_header/prototypes）</li>
+<li><code>idapro_py_eval(code)</code> — 在 IDA 上下文执行 Python</li>
+<li><code>idapro_server_health()</code> — 服务器健康检查</li>
+<li><code>idapro_server_warmup()</code> — 预热子系统（字符串缓存、Hex-Rays 等）</li>
+</ul>
+<h3>逆向分析完整工作流</h3>
+<h4>Step 1: 启动服务器</h4>
+<p>确保 HTTP 服务在后台运行。</p>
+<pre><code>powershell -File &quot;scripts/start.ps1&quot;</code></pre>
+<p>输出 <code>OK:72</code> 表示就绪。</p>
+<h4>Step 2: 打开文件</h4>
+<pre><code>powershell -File &quot;scripts/open.ps1&quot; -Path &quot;C:\目标.exe&quot; -TimeoutSeconds 600</code></pre>
+<p>输出 <code>OK:文件名:session_id</code> 表示成功（后带 <code>(temp copy)</code> 表示自动降级到临时副本）。 若分析时间较长，会周期性输出 <code>INFO:opening:...</code>；若达到超时则输出 <code>ERR:open_timeout_xxs</code>。</p>
+<h4>Step 3: 全局概览</h4>
+<pre><code>idapro_survey_binary(detail_level=&quot;minimal&quot;)</code></pre>
+<p>关注：</p>
+<ul>
+<li>架构（x86/x64/ARM）</li>
+<li>入口点（main/WinMain/DllMain）</li>
+<li>有趣的字符串（URL、路径、错误消息）</li>
+<li>导入分类（加密函数？网络 API？文件操作？）</li>
+<li>热门函数（高 xref 计数的函数通常是关键逻辑）</li>
+</ul>
+<h4>Step 4: 深入关键函数</h4>
+<pre><code>idapro_analyze_function(addr=&quot;关键函数名&quot;)</code></pre>
+<p>或：</p>
+<pre><code>idapro_decompile(addr=&quot;函数名&quot;)
+idapro_disasm(addr=&quot;函数名&quot;, max_instructions=50)</code></pre>
+<h4>Step 5: 数据流和交叉引用</h4>
+<pre><code>idapro_xrefs_to(addrs=&quot;关键地址/字符串&quot;)
+idapro_callgraph(roots=[&quot;关键函数&quot;], max_depth=3)
+idapro_trace_data_flow(addr=&quot;关键地址&quot;, direction=&quot;backward&quot;, max_depth=5)</code></pre>
+<h4>Step 6: 记录和优化</h4>
+<pre><code>idapro_set_comments(items=[{&quot;addr&quot;: &quot;0x140001000&quot;, &quot;comment&quot;: &quot;你的理解&quot;}])
+idapro_rename(batch={&quot;func&quot;: [{&quot;addr&quot;: &quot;函数地址&quot;, &quot;name&quot;: &quot;有意义的名字&quot;}]})</code></pre>
+<h4>Step 7: 输出报告</h4>
+<p>分析完成后，生成 <code>report.md</code> 记录发现和步骤。</p>
+<h3>Prompt 工程准则</h3>
+<ol>
+<li><strong>不要手动算进制</strong> — 任何时候需要转换数字，用 <code>idapro_int_convert</code></li>
+<li><strong>先 survey 后深入</strong> — 先看概况再针对性分析</li>
+<li><strong>持续加注释和重命名</strong> — 分析过程中不断更新函数名和变量名，提升后续分析的准确性</li>
+<li><strong>跟踪交叉引用</strong> — 发现有趣的数据/字符串，用 <code>xrefs_to</code> 看谁引用了它</li>
+<li><strong>遇到混淆代码</strong> — 先做字符串解密、导入哈希去除、控制流平坦化去除等预处理</li>
+<li><strong>C++ STL 代码</strong> — 用 FLIRT/Lumina 识别库函数后，再分析业务逻辑</li>
+<li><strong>不要暴力破解</strong> — 分析应从反汇编中推导解决方案，用简单 Python 辅助计算</li>
+<li><strong>遇到 &quot;No database bound&quot;</strong> — 还没有打开任何二进制文件，先执行 <code>open.ps1</code></li>
+<li><strong>遇到 &quot;Failed to open database&quot;</strong> — 可能是旧数据库文件被锁，<code>open.ps1</code> 会自动降级到 Temp 副本（输出含 <code>(temp copy)</code> 标记）</li>
+<li><strong>带自动分析打开 GUI/复杂样本时</strong> — 默认加 <code>-TimeoutSeconds 600</code>，不要把长时间 <code>INFO:opening:...</code> 误判成脚本卡死</li>
+</ol>
+<hr>
+<h3>路由上下文</h3>
+<p><strong>上游入口</strong>: <code>skills/SKILL.md</code>（总控）、<code>routing.md</code> <strong>上游备选</strong>: <code>radare2/</code>（如果不想开 IDA，可以先 r2 快速侦察） <strong>下游出口</strong>:</p>
+<ul>
+<li>需 Frida 动态验证 → <code>reverse-engineering/tools-dynamic.md</code></li>
+<li>需符号执行/angr → <code>reverse-engineering/tools-dynamic.md</code></li>
+<li>需通用逆向方法论 → <code>reverse-engineering/SKILL.md</code></li>
+</ul>
+<p><strong>同级关联模块</strong>: <code>radare2/</code>（IDA 不可用时替代方案）</p>
+<hr>
+<h3>按需自举（On-Demand Bootstrap）</h3>
+<p>本 skill 的入口脚本已接入统一自举系统。</p>
+<h4>自动化能力边界</h4>
+<p>| 工具 | 可自动安装 | 安装方式 | 说明 | |------|-----------|---------|------| | idalib-mcp | ✓ | pip install (from GitHub) | <code>start.ps1</code> 缺失时自动安装 | | IDA Pro 本体 | ✗ | 商业软件，需手动安装 | 设置 <code>IDADIR</code> 环境变量指向安装目录 |</p>
+<h4>安装步骤（已验证）</h4>
+<pre><code># 1. 设置 IDA 路径（替换为你的实际 IDA 安装目录）
+setx IDADIR &quot;&lt;你的IDA安装目录&gt;&quot;
+
+# 2. 从 GitHub 安装 ida-pro-mcp（PyPI 上的 ida-mcp 是另一个项目，不要装错！）
+pip install git+https://github.com/mrexodia/ida-pro-mcp.git
+
+# 3. 安装 IDA 插件（选择 Streamable HTTP + Global + 全选客户端）
+ida-pro-mcp --install
+
+# 4. 重启 IDA Pro，打开目标文件
+# 插件自动监听 127.0.0.1:13337
+
+# 5. 验证
+ida-pro-mcp --config</code></pre>
+<blockquote>⚠️ <strong>注意</strong>：PyPI 上的 <code>ida-mcp</code> 包（作者 jtsylve）是另一个项目，不是我们需要的。</blockquote>
+<blockquote>必须从 GitHub 安装 <code>mrexodia/ida-pro-mcp</code>。</blockquote>
+<h4>自举触发点</h4>
+<ul>
+<li><code>scripts/start.ps1</code>：缺 <code>idalib-mcp</code> 时自动调用 <code>bootstrap-reverse.ps1</code></li>
+<li>MCP 注册：bootstrap 会自动把 <code>idapro</code> 写入 Claude MCP 配置</li>
+</ul>
+<h4>前置条件</h4>
+<ul>
+<li>IDA Pro 已安装且 <code>IDADIR</code> 环境变量已设置（或脚本内默认路径正确）</li>
+<li>Python 已安装（idalib-mcp 依赖 Python）</li>
+</ul>
+<h3>任务完成自检（声称完成前 MUST 通过）</h3>
+<ul>
+<li>[ ] 我是否执行了工作流中的每一步（而不是只阅读）？</li>
+<li>[ ] 我是否基于 <code>tool-index</code> 使用了真实工具路径？</li>
+<li>[ ] 我是否产出了可复现证据（命令/脚本/截图/报告）？</li>
+<li>[ ] 我是否完成并回写了 RULES 要求的 Checklist 项？</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: ida-reverse\ndisplay_name: ida-reverse\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# ida-reverse - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `ida-reverse` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n|\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the ida-reverse skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `ida-reverse` |\n| Canonical name | `ida-reverse` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\n|\n\n\n## Original SKILL.md\n\n---\nname: ida-reverse\ndescription: |\n  IDA Pro 逆向分析辅助技能。当用户提到逆向、反编译、分析二进制/PE/ELF/APK/DLL/SO、破解、找密码、漏洞分析、病毒分析、firmware 固件分析，或需要分析 exe/dll/so/elf/macho/sys 等文件时，务必使用此技能。\n\n  Ensure to use this skill when the user wants to analyze any binary file, regardless of whether they explicitly mention \"IDA\" or \"reverse engineering\". This includes requests like \"看看这个exe\", \"分析这个dll\", \"帮我破解\", \"找一下密码\", \"这个软件怎么注册\", etc.\n\n  Use the bundled scripts (scripts/start.ps1, scripts/open.ps1) for deterministic server management and file opening — do NOT write ad-hoc PowerShell commands for these operations.\n---\n\n# IDA Pro 逆向分析技能\n\n## ACTION REQUIRED（读完后立刻执行）\n\n1. `NOW`: 读取 `../field-journal/precedent-reverse.md` — 确认本 skill 的操作是已授权的常规操作\n2. `NOW`: 确认当前任务是否命中本 skill 的适用范围\n3. `NEXT`: 读取 `../tool-index.md`，校验工具可用性和实际路径\n4. `NEXT`: 缺工具时调用 bootstrap，不要猜路径\n5. `ACT`: 进入\"工作流\"第一步并执行，不要停在确认状态\n\n## 已知问题与反思（必读）\n\n### 踩过的坑\n\n1. **`idalib_open` 不能通过 部分代码 AI 客户端 MCP 直接调用**\n   - 部分代码 AI 客户端 的 MCP 客户端对 `idalib_open` 的 output schema 校验有 BUG\n   - 报错：`Structured content does not match the tool's output schema`\n   - **解决办法**：使用 `scripts/open.ps1` 脚本通过 HTTP API 直调，绕过 MCP 校验层\n   - 文件打开后，数据库绑定到共享上下文，其他所有 `idapro_*` 工具可直接使用\n\n2. **`C:\\Windows\\System32\\` 文件无权限打开**\n   - idalib 无法直接读取 System32 目录下的文件\n   - **解决办法**：`open.ps1` 自动检测并复制到 `临时目录` 目录后再打开\n\n3. **启动服务器命令阻塞对话**\n   - `idalib-mcp` 启动后会持续输出 INFO 日志到控制台\n   - **解决办法**：使用 `scripts/start.ps1`（`-WindowStyle Hidden` 后台静默启动）\n   - 脚本会等待服务就绪后自动退出，不阻塞对话\n\n4. **MCP 服务器名不能用横线**\n   - 之前用 `ida-pro-mcp` 作为服务器名，可能引起工具注册问题\n   - **当前配置**：服务器名 `idapro`，工具前缀 `idapro_*`\n\n5. **Remote HTTP vs Local Stdio**\n   - `type:\"local\"`（stdio）模式：`idalib_open` 同样有 schema 校验问题\n   - `type:\"remote\"`（HTTP）模式：可以先用脚本直开文件，再用 MCP 工具\n   - **当前方案**：Remote HTTP 模式\n\n6. **PR #389 修复了部分 schema 问题**\n   - 作者 mrexodia 在 issue #388 后通过 PR #389 合并了修复\n   - 修复了 HTTP 模式下的 structuredContent schema，但 部分代码 AI 客户端 侧校验仍有问题\n   - 已安装最新 `main` 分支版本\n\n7. **idalib 超时留下孤儿 worker 进程锁文件**\n   - 第一次 `open.ps1` 超时后，idalib 的 python worker 子进程变成孤儿进程，咬着 `.id0`/`.id1`/`.nam` 不放\n   - 后续任何工具或手动拖入 IDA GUI 都会报\"权限不足\"\n   - **解决办法**：`start.ps1` 改用 `taskkill /F /T` 杀进程树，不再留孤儿\n   - **兜底**：`open.ps1` 加了自动降级，检测到旧库被锁自动复制到 Temp 并加 GUID 前缀\n\n8. **带自动分析打开看起来像卡死**\n   - `idalib_open(run_auto_analysis=true)` 可能长时间不回包，但后端实际上仍在继续打开和分析\n   - 之前用户侧看到的是“PowerShell 一直无输出”，容易误判成脚本卡死\n   - **当前解决办法**：`open.ps1` 新增 `-TimeoutSeconds`，并改为后台请求 + 前台轮询 + 定时进度输出\n   - 轮询到会话已就绪时会提前返回 `OK:文件名:session_id`，超时则返回 `ERR:open_timeout_xxs`\n\n### 工作流程原则\n\n| 步骤 | 做什么 | 用什么 |\n|------|--------|--------|\n| 1 | 确保 HTTP 服务器在运行 | `scripts/start.ps1`（无参数） |\n| 2 | 打开目标二进制文件 | `scripts/open.ps1 -Path \"xxx.exe\"` |\n| 3 | 使用所有 72 个 MCP 工具 | 直接调用 `idapro_*` 工具 |\n| 4 | 分析完毕 | 工具自动可用 |\n\n## 脚本资源\n\n### start.ps1 — 启动 MCP HTTP 服务器\n\n路径：`scripts/start.ps1`\n\n- 用 `taskkill /F /T` 杀旧进程树（连 worker 子进程一起清理）→ 后台启动 `idalib-mcp` → 等待就绪（最多 15 秒）\n- 成功输出 `OK:72`，失败输出 `ERR:timeout`\n- 服务器在后台运行，不阻塞对话\n\n**调用方式**：\n```\npowershell -File \"\u003cskill-root>\\ida-reverse\\scripts\\start.ps1\"\n```\n\n### open.ps1 — 打开二进制文件\n\n路径：`scripts/open.ps1`\n\n- 通过 HTTP API 直调 `idalib_open`，绕过 MCP schema 校验\n- 自动检测 System32 路径并复制到临时目录\n- 自动清理同名旧数据库文件（`.id0`/`.id1`/`.nam`/`.til`/`.i64`）\n- 旧库被锁时自动降级：复制到 Temp 加 GUID 前缀后打开，不报错\n- 将打开请求放到后台执行，避免长时间同步等待导致脚本无响应\n- 支持 `-TimeoutSeconds`，超时后返回 `ERR:open_timeout_xxs`，不会无限卡住\n- 每隔 10 秒输出一次 `INFO:opening:已用时/超时秒数`，便于判断仍在分析中\n- 成功输出 `OK:文件名:session_id`，降级时加 `(temp copy)` 标记\n- 失败时自动重试走 Temp 副本\n\n**调用方式**：\n```\npowershell -File \"\u003cskill-root>\\ida-reverse\\scripts\\open.ps1\" -Path \"C:\\path\\to\\file.exe\"\n```\n\n**可选参数**：\n```\n# 指定 SessionId\npowershell -File \"scripts\\open.ps1\" -Path \"file.exe\" -SessionId \"my_session\"\n\n# 跳过自动分析（大文件推荐）\npowershell -File \"scripts\\open.ps1\" -Path \"large.exe\" -NoAutoAnalysis\n\n# 设置超时，避免带自动分析时长时间无返回\npowershell -File \"scripts\\open.ps1\" -Path \"file.exe\" -TimeoutSeconds 600\n```\n\n**输出约定**：\n```\n# 分析进行中（每 10 秒输出一次）\nINFO:opening:11/600s\n\n# 成功打开\nOK:sample.exe:abcd1234\n\n# 成功打开，但因锁文件降级到 Temp 副本\nOK:1234abcd-sample.exe:abcd1234 (temp copy)\n\n# 达到超时上限\nERR:open_timeout_600s\n```\n\n**实测说明**：\n- `Snipaste.exe` 带自动分析实测约 `324s` 才返回成功，属于“分析很久”而不是“脚本死锁”\n- 因此遇到 GUI 程序或较复杂样本时，建议优先显式设置 `-TimeoutSeconds 600`\n\n## 核心工具列表\n\n### 概况分析（第一步）\n- `idapro_survey_binary(detail_level=\"minimal\")` — 快速概况：函数数、字符串、段、入口点、导入分类（加密/网络/文件IO）\n- `idapro_list_funcs(queries)` — 列出函数（分页、按名称过滤）\n- `idapro_list_globals(queries)` — 列出全局变量\n- `idapro_entity_query(kind, filter)` — 统一查询：functions/globals/imports/strings/names\n\n### 反编译与反汇编\n- `idapro_decompile(addr)` — 反编译为伪代码\n- `idapro_disasm(addr, max_instructions=N)` — 反汇编\n- `idapro_analyze_function(addr, include_asm=false)` — 综合分析（伪代码+字符串+常量+调用者+被调用者+块）\n- `idapro_func_profile(queries)` — 函数概要指标\n\n### 交叉引用与数据流\n- `idapro_xrefs_to(addrs)` — 查谁引用目标地址\n- `idapro_xref_query(addr, direction)` — 高级 xref 查询（方向/类型过滤）\n- `idapro_callees(addrs)` — 子函数列表\n- `idapro_callgraph(roots, max_depth)` — 调用图\n- `idapro_trace_data_flow(addr, direction, max_depth)` — 数据流追踪（forward/backward）\n\n### 搜索\n- `idapro_find_regex(pattern, limit)` — 正则搜字符串\n- `idapro_search_text(pattern)` — 在反汇编列表中搜文本\n- `idapro_find_bytes(patterns, limit)` — 字节模式搜索（支持 ?? 通配符）\n- `idapro_find(type, targets)` — 高级搜索（立即数/字符串/引用）\n\n### 内存与数据\n- `idapro_get_bytes(addrs)` — 读原始字节\n- `idapro_get_string(addrs)` — 读字符串\n- `idapro_get_int(queries)` — 读整数值\n- `idapro_get_global_value(queries)` — 读全局变量值\n- `idapro_read_struct(queries)` — 读结构体字段值\n- `idapro_search_structs(filter)` — 搜索结构体\n\n### 修改操作\n- `idapro_set_comments(items)` — 添加注释（反汇编+反编译双向同步）\n- `idapro_append_comments(items)` — 追加注释\n- `idapro_rename(batch)` — 批量重命名（函数/全局/局部/栈变量）\n- `idapro_patch_asm(items)` — Patch 汇编指令\n- `idapro_patch(patches)` — Patch 字节\n- `idapro_define_func(items)` — 定义函数\n- `idapro_undefine(items)` — 取消定义\n- `idapro_define_code(items)` — 将字节转为代码\n\n### 类型系统\n- `idapro_declare_type(decls)` — 声明 C 结构体/枚举/联合体\n- `idapro_set_type(edits)` — 应用类型到函数/全局/局部\n- `idapro_infer_types(addrs)` — 推断类型\n- `idapro_type_query(queries)` — 查询已声明类型\n- `idapro_type_inspect(queries)` — 查看类型详情\n\n### 栈帧\n- `idapro_stack_frame(addrs)` — 查看栈帧变量\n- `idapro_declare_stack(items)` — 声明栈变量\n- `idapro_delete_stack(items)` — 删除栈变量\n\n### 签名\n- `idapro_make_signature(addrs)` — 为地址生成唯一字节签名\n- `idapro_make_signature_for_function(addrs)` — 为函数生成签名\n- `idapro_find_xref_signatures(addrs)` — 为引用地址的代码生成签名\n\n### 调试器（需要 ?ext=dbg）\n- `idapro_open_file(file_path)` — 在 GUI IDA 实例中打开文件\n- 调试器工具默认隐藏，可通过 URL 参数 `?ext=dbg` 启用\n\n### 会话管理\n- `idapro_idalib_open(input_path)` — ⚠️ 有 schema 校验 BUG，改用 `open.ps1` 脚本\n- `idapro_idalib_list()` — 列出所有 session\n- `idapro_idalib_current()` — 当前上下文绑定的 session\n- `idapro_idalib_switch(session_id)` — 切换到其他 session\n- `idapro_idalib_close(session_id)` — 关闭 session\n- `idapro_idalib_save(path)` — 保存数据库\n- `idapro_idalib_health(session_id)` — 检查 worker 健康状态\n\n### 其他\n- `idapro_int_convert(inputs)` — 进制转换（**必须用这个，不要自己算进制！**）\n- `idapro_export_funcs(addrs, format)` — 导出函数（json/c_header/prototypes）\n- `idapro_py_eval(code)` — 在 IDA 上下文执行 Python\n- `idapro_server_health()` — 服务器健康检查\n- `idapro_server_warmup()` — 预热子系统（字符串缓存、Hex-Rays 等）\n\n## 逆向分析完整工作流\n\n### Step 1: 启动服务器\n确保 HTTP 服务在后台运行。\n```\npowershell -File \"scripts/start.ps1\"\n```\n输出 `OK:72` 表示就绪。\n\n### Step 2: 打开文件\n```\npowershell -File \"scripts/open.ps1\" -Path \"C:\\目标.exe\" -TimeoutSeconds 600\n```\n输出 `OK:文件名:session_id` 表示成功（后带 `(temp copy)` 表示自动降级到临时副本）。\n若分析时间较长，会周期性输出 `INFO:opening:...`；若达到超时则输出 `ERR:open_timeout_xxs`。\n\n### Step 3: 全局概览\n```\nidapro_survey_binary(detail_level=\"minimal\")\n```\n关注：\n- 架构（x86/x64/ARM）\n- 入口点（main/WinMain/DllMain）\n- 有趣的字符串（URL、路径、错误消息）\n- 导入分类（加密函数？网络 API？文件操作？）\n- 热门函数（高 xref 计数的函数通常是关键逻辑）\n\n### Step 4: 深入关键函数\n```\nidapro_analyze_function(addr=\"关键函数名\")\n```\n或：\n```\nidapro_decompile(addr=\"函数名\")\nidapro_disasm(addr=\"函数名\", max_instructions=50)\n```\n\n### Step 5: 数据流和交叉引用\n```\nidapro_xrefs_to(addrs=\"关键地址/字符串\")\nidapro_callgraph(roots=[\"关键函数\"], max_depth=3)\nidapro_trace_data_flow(addr=\"关键地址\", direction=\"backward\", max_depth=5)\n```\n\n### Step 6: 记录和优化\n```\nidapro_set_comments(items=[{\"addr\": \"0x140001000\", \"comment\": \"你的理解\"}])\nidapro_rename(batch={\"func\": [{\"addr\": \"函数地址\", \"name\": \"有意义的名字\"}]})\n```\n\n### Step 7: 输出报告\n分析完成后，生成 `report.md` 记录发现和步骤。\n\n## Prompt 工程准则\n\n1. **不要手动算进制** — 任何时候需要转换数字，用 `idapro_int_convert`\n2. **先 survey 后深入** — 先看概况再针对性分析\n3. **持续加注释和重命名** — 分析过程中不断更新函数名和变量名，提升后续分析的准确性\n4. **跟踪交叉引用** — 发现有趣的数据/字符串，用 `xrefs_to` 看谁引用了它\n5. **遇到混淆代码** — 先做字符串解密、导入哈希去除、控制流平坦化去除等预处理\n6. **C++ STL 代码** — 用 FLIRT/Lumina 识别库函数后，再分析业务逻辑\n7. **不要暴力破解** — 分析应从反汇编中推导解决方案，用简单 Python 辅助计算\n8. **遇到 \"No database bound\"** — 还没有打开任何二进制文件，先执行 `open.ps1`\n9. **遇到 \"Failed to open database\"** — 可能是旧数据库文件被锁，`open.ps1` 会自动降级到 Temp 副本（输出含 `(temp copy)` 标记）\n10. **带自动分析打开 GUI/复杂样本时** — 默认加 `-TimeoutSeconds 600`，不要把长时间 `INFO:opening:...` 误判成脚本卡死\n\n---\n\n## 路由上下文\n\n**上游入口**: `skills/SKILL.md`（总控）、`routing.md`\n**上游备选**: `radare2/`（如果不想开 IDA，可以先 r2 快速侦察）\n**下游出口**:\n- 需 Frida 动态验证 → `reverse-engineering/tools-dynamic.md`\n- 需符号执行/angr → `reverse-engineering/tools-dynamic.md`\n- 需通用逆向方法论 → `reverse-engineering/SKILL.md`\n\n**同级关联模块**: `radare2/`（IDA 不可用时替代方案）\n\n---\n\n## 按需自举（On-Demand Bootstrap）\n\n本 skill 的入口脚本已接入统一自举系统。\n\n### 自动化能力边界\n\n| 工具 | 可自动安装 | 安装方式 | 说明 |\n|------|-----------|---------|------|\n| idalib-mcp | ✓ | pip install (from GitHub) | `start.ps1` 缺失时自动安装 |\n| IDA Pro 本体 | ✗ | 商业软件，需手动安装 | 设置 `IDADIR` 环境变量指向安装目录 |\n\n### 安装步骤（已验证）\n\n```cmd\n# 1. 设置 IDA 路径（替换为你的实际 IDA 安装目录）\nsetx IDADIR \"\u003c你的IDA安装目录>\"\n\n# 2. 从 GitHub 安装 ida-pro-mcp（PyPI 上的 ida-mcp 是另一个项目，不要装错！）\npip install git+https://github.com/mrexodia/ida-pro-mcp.git\n\n# 3. 安装 IDA 插件（选择 Streamable HTTP + Global + 全选客户端）\nida-pro-mcp --install\n\n# 4. 重启 IDA Pro，打开目标文件\n# 插件自动监听 127.0.0.1:13337\n\n# 5. 验证\nida-pro-mcp --config\n```\n\n> ⚠️ **注意**：PyPI 上的 `ida-mcp` 包（作者 jtsylve）是另一个项目，不是我们需要的。\n> 必须从 GitHub 安装 `mrexodia/ida-pro-mcp`。\n\n### 自举触发点\n\n- `scripts/start.ps1`：缺 `idalib-mcp` 时自动调用 `bootstrap-reverse.ps1`\n- MCP 注册：bootstrap 会自动把 `idapro` 写入 Claude MCP 配置\n\n### 前置条件\n\n- IDA Pro 已安装且 `IDADIR` 环境变量已设置（或脚本内默认路径正确）\n- Python 已安装（idalib-mcp 依赖 Python）\n\n\n## 任务完成自检（声称完成前 MUST 通过）\n\n- [ ] 我是否执行了工作流中的每一步（而不是只阅读）？\n- [ ] 我是否基于 `tool-index` 使用了真实工具路径？\n- [ ] 我是否产出了可复现证据（命令/脚本/截图/报告）？\n- [ ] 我是否完成并回写了 RULES 要求的 Checklist 项？\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("ida-reverse-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

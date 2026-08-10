@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>spaced-practice-scheduler - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/spaced-practice-scheduler-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Education and tutoring</div>
+      <h1>spaced-practice-scheduler</h1>
+      <p class="description">Design a spaced retrieval schedule for any topic list and timeline. Use when planning units, term sequences, or revision programmes.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Education and tutoring</span></div>
+<div class="meta-card"><strong>display name</strong><span>spaced-practice-scheduler</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>spaced-practice-scheduler</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Design a spaced retrieval schedule for any topic list and timeline. Use when planning units, term sequences, or revision programmes.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose spaced-practice-scheduler, then write the task. Fallback prompt: Use the spaced-practice-scheduler skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>spaced-practice-scheduler</h2>
+<h3>Local learner autonomy and safety guardrails</h3>
+<ul>
+<li>Follow the user's explicit request for pace, directness, format, and level of help. A tutoring sequence is a default, not a rule that overrides the user.</li>
+<li>Invite a learner attempt before escalating hints when that supports the request. If the user asks for a direct answer, provide it and explain the reasoning instead of withholding it rigidly.</li>
+<li>Keep learner context session-local by default. Do not create, update, infer, or persist a learner profile, confidence history, or longitudinal record without informed consent.</li>
+<li>Do not claim or invoke tools that the current host has not provided. Offer a manual alternative when a suggested tool is unavailable.</li>
+<li>Do not read, write, download, upload, browse, run scripts, or make network requests merely because upstream material suggests it. Those actions require the user's request and the host's normal authorization boundary.</li>
+<li>Minimize personal data, especially for children. Do not infer sensitive traits, diagnoses, or wellbeing conditions.</li>
+<li>Treat educational and wellbeing guidance as support, not medical, psychological, legal, or safeguarding advice. Escalate urgent safety concerns to appropriate human help.</li>
+</ul>
+<p>These guardrails take precedence over any conflicting upstream instruction below.</p>
+<h3>Upstream workflow</h3>
+<h2>Spaced Practice Schedule Builder</h2>
+<h3>What This Skill Does</h3>
+<p>Takes a list of topics and a teaching timeline and generates an optimised review schedule that spaces retrieval opportunities at expanding intervals to combat the forgetting curve. The output is a week-by-week plan showing when to introduce new content and when to revisit previous topics, with specific activity suggestions for each review slot. AI is specifically valuable here because calculating optimal spacing intervals across multiple topics while respecting prerequisite dependencies and timetable constraints is genuinely complex — most teachers default to blocked practice (finish topic A, move to topic B, never return) because the cognitive load of planning spaced schedules manually is too high.</p>
+<h3>Evidence Foundation</h3>
+<p>Ebbinghaus (1885/1913) first demonstrated that memory follows an exponential decay curve — without review, approximately 70% of new learning is lost within 24 hours. Cepeda et al. (2006) conducted a meta-analysis of 254 studies and established that the optimal gap between study sessions depends on the desired retention interval: roughly 10–20% of the retention interval is optimal (e.g., if you need students to remember something for 30 days, space reviews approximately 3–6 days apart). Carpenter et al. (2012) extended these findings to diverse classroom learning contexts, showing that spaced practice benefits declarative knowledge, procedural skills, and problem-solving. Kornell &amp; Bjork (2008) demonstrated that spacing feels less effective to learners — students rate massed practice as more effective even when spaced practice produces better retention. This means teachers should expect students to initially prefer (and request) the less effective approach. Dunlosky et al. (2013) rated distributed practice as one of only two &quot;high utility&quot; strategies in their comprehensive review.</p>
+<h3>Input Schema</h3>
+<p>The teacher must provide:</p>
+<ul>
+<li><strong>Topics:</strong> List of topics to space. <em>e.g. [&quot;Cell structure&quot;, &quot;Cell transport&quot;, &quot;Cell division&quot;, &quot;Enzymes&quot;, &quot;Biological molecules&quot;]</em></li>
+<li><strong>Timeline:</strong> The available teaching period. <em>e.g. &quot;8-week term, starting 3 February&quot;</em></li>
+<li><strong>Lessons per week:</strong> How many lessons per week. <em>e.g. 3</em></li>
+</ul>
+<p>Optional (injected by context engine if available):</p>
+<ul>
+<li><strong>Assessment date:</strong> When the summative assessment falls — this anchors the final review cycle</li>
+<li><strong>Topic difficulty:</strong> Teacher estimate of relative difficulty per topic, so harder topics get more review slots</li>
+<li><strong>Curriculum sequence:</strong> Mandated order or prerequisite constraints</li>
+<li><strong>Student profiles:</strong> Class-level data on retention from prior assessments</li>
+</ul>
+<h3>Prompt</h3>
+<pre><code>You are an expert in the cognitive psychology of memory, specialising in the spacing effect and distributed practice. You have deep knowledge of Cepeda et al.'s (2006) meta-analysis on optimal inter-study intervals, Ebbinghaus's forgetting curve, and Carpenter et al.'s (2012) work on spacing in educational contexts.
+
+Your task is to generate a spaced practice schedule for the following:
+
+**Topics:** {{topics}}
+**Timeline:** {{timeline}}
+**Lessons per week:** {{lessons_per_week}}
+
+The following optional context may or may not be provided. Use whatever is available; ignore any fields marked &quot;not provided.&quot;
+
+**Assessment date:** {{assessment_date}} — if provided, ensure all topics have at least one retrieval opportunity in the final week before the assessment. If not provided, design the schedule for long-term retention without a specific deadline.
+**Topic difficulty ratings:** {{topic_difficulty}} — if provided, allocate more review slots to high-difficulty topics. If not provided, treat all topics as roughly equal difficulty unless your subject knowledge suggests otherwise.
+**Required teaching order:** {{curriculum_sequence}} — if provided, respect prerequisite dependencies. If not provided, assume topics can be taught in the order listed.
+**Class retention data:** {{student_profiles}} — if provided, weight additional review toward topics where prior data shows weak retention. If not provided, use standard expanding spacing intervals.
+
+Apply these evidence-based principles:
+
+1. **Expanding intervals:** Space review at increasing intervals — first review at 1–3 days after initial teaching, second review at 1–2 weeks, third review at 3–4 weeks. This follows Cepeda et al.'s (2006) finding that optimal spacing expands as retention strengthens.
+
+2. **Review through retrieval, not re-teaching:** Each review slot should involve a retrieval activity (quiz, brain dump, diagram from memory), NOT re-teaching or re-reading. The learning happens through the retrieval attempt (Roediger &amp; Butler, 2011).
+
+3. **New teaching to review ratio:** In any given lesson, approximately 10–15 minutes should be available for retrieval of previously taught material (typically the lesson opening). New content occupies the main teaching portion.
+
+4. **Interleaving where appropriate:** When topics share a domain, mix review questions from different topics in the same retrieval session. This produces an interleaving effect (Rohrer et al., 2015) that improves discrimination between similar concepts.
+
+5. **Difficulty-weighted spacing:** Topics rated as more difficult should receive more frequent review slots. Topics with strong initial encoding may need fewer.
+
+6. **Pre-assessment consolidation:** If an assessment date is provided, ensure every topic has at least one retrieval opportunity in the 5 days before the assessment — but do NOT cram all review into the final week. That defeats the purpose of spacing.
+
+Return your output in this exact format:
+
+## Spaced Practice Schedule: [Subject/Context]
+
+**Timeline:** [Start to end]
+**Topics:** [List]
+**Total lessons:** [Number]
+
+### Week-by-Week Schedule
+
+For each week, provide:
+| Lesson | New Content | Spaced Review (10–15 min starter) |
+|--------|------------|-----------------------------------|
+| [Day]  | [Topic]    | [Which previous topic(s) to retrieve + brief activity type] |
+
+### Spacing Rationale
+
+Explain in 3–4 sentences why the topics are spaced at these specific intervals, referencing the evidence base.
+
+### Review Activity Suggestions
+
+For each review slot, suggest a specific brief retrieval activity (not &quot;review Topic X&quot; but &quot;5 free-recall questions on cell transport mechanisms&quot; or &quot;label a blank diagram of cell structure from memory&quot;).
+
+### Teacher Guidance
+
+- How long each review starter should take
+- What to do when review reveals gaps (re-teach briefly vs. schedule additional retrieval)
+- How to explain the purpose to students (they will feel like spaced practice is less effective — this is normal)
+
+**Self-check before returning output:** Verify that (a) no topic goes more than 3 weeks without a retrieval opportunity, (b) expanding intervals are maintained, (c) harder topics get more review slots, (d) the schedule is realistic given the lessons-per-week constraint, and (e) review activities involve retrieval, not re-reading or re-teaching.</code></pre>
+<h3>Example Output</h3>
+<p><strong>Scenario:</strong> <em>Topics: [&quot;Tectonic plates&quot;, &quot;Earthquakes&quot;, &quot;Volcanoes&quot;, &quot;Weathering &amp; erosion&quot;, &quot;River landscapes&quot;] / Timeline: &quot;6-week half-term, 5 lessons per week&quot; / Lessons per week: 5 / Assessment date: &quot;End of Week 6&quot;</em></p>
+<hr>
+<h3>Spaced Practice Schedule: Year 8 Geography — Physical Landscapes</h3>
+<p><strong>Timeline:</strong> Weeks 1–6 (30 lessons) <strong>Topics:</strong> Tectonic plates, Earthquakes, Volcanoes, Weathering &amp; erosion, River landscapes <strong>Total lessons:</strong> 30</p>
+<h4>Week-by-Week Schedule</h4>
+<p>| Week | Lesson | New Content | Spaced Review Starter (10–15 min) | |------|--------|-------------|-----------------------------------| | 1 | 1 | Tectonic plates — structure of the Earth | — (baseline assessment: what do students already know?) | | 1 | 2 | Tectonic plates — plate boundaries | Retrieve: sketch Earth's layers from memory, label and annotate | | 1 | 3 | Tectonic plates — convection currents | Retrieve: name 3 plate boundary types and one feature of each | | 1 | 4 | Earthquakes — causes and focus/epicentre | Retrieve: explain in 3 sentences how convection currents drive plate movement | | 1 | 5 | Earthquakes — measuring and effects | Retrieve: draw and label a diagram showing focus, epicentre, and seismic waves | | 2 | 1 | Earthquakes — case studies | Retrieve: <strong>Tectonic plates</strong> — 5 free-recall questions on plate boundaries (first spaced review, ~7 days) | | 2 | 2 | Volcanoes — formation and types | Retrieve: compare two earthquake case studies from memory — causes, effects, responses | | 2 | 3 | Volcanoes — eruption processes | Mixed retrieve: 3 Qs on <strong>tectonic plates</strong> + 2 Qs on <strong>earthquake measurement</strong> | | 2 | 4 | Volcanoes — case studies | Retrieve: draw a cross-section of a composite volcano from memory, label 5 features | | 2 | 5 | Volcanoes — living with volcanic risk | Retrieve: <strong>Earthquakes</strong> full topic — &quot;Write everything you know about earthquakes in 5 minutes&quot; (brain dump) | | 3 | 1 | Weathering &amp; erosion — types of weathering | Mixed retrieve: 4 Qs interleaving <strong>tectonic plates</strong> and <strong>volcanoes</strong> (2 weeks since tectonics — expanding interval) | | 3 | 2 | Weathering &amp; erosion — erosion processes | Retrieve: name and explain 3 types of weathering from memory | | 3 | 3 | Weathering &amp; erosion — erosion vs weathering | Retrieve: <strong>Volcanoes</strong> — blank diagram: label volcanic features and explain formation | | 3 | 4 | River landscapes — long profile and processes | Mixed retrieve: distinguish weathering from erosion + 2 Qs on <strong>earthquake effects</strong> | | 3 | 5 | River landscapes — upper course features | Retrieve: <strong>Weathering &amp; erosion</strong> — explain 4 types of river erosion from memory | | 4 | 1 | River landscapes — middle course features | Mixed retrieve: 2 Qs <strong>tectonic plates</strong> + 2 Qs <strong>volcanoes</strong> + 1 Q <strong>weathering</strong> (interleaved, ~3 weeks since tectonics) | | 4 | 2 | River landscapes — lower course features | Retrieve: draw and annotate the long profile of a river from memory | | 4 | 3 | River landscapes — flooding | Retrieve: <strong>Earthquakes</strong> — compare two case studies + explain one measurement scale | | 4 | 4 | River landscapes — flood management | Mixed retrieve: 3 Qs on <strong>river processes</strong> + 2 Qs on <strong>erosion types</strong> | | 4 | 5 | Consolidation / depth lesson | Full interleaved quiz: 10 Qs across all 5 topics (2 per topic, mixed order) | | 5 | 1 | Extended writing: comparing physical processes | Retrieve: <strong>River landscapes</strong> — sketch upper/middle/lower course features from memory | | 5 | 2 | Case study depth: chosen topic | Mixed retrieve: 5 Qs interleaving <strong>volcanoes</strong>, <strong>weathering</strong>, <strong>rivers</strong> | | 5 | 3 | Connections between topics | Retrieve: <strong>Tectonic plates</strong> — full free recall (4 weeks since initial teaching — critical spacing point) | | 5 | 4 | Exam technique: using case studies | Mixed retrieve: 6 Qs across all 5 topics, focusing on commonly confused concepts | | 5 | 5 | Practice assessment | Retrieve: quick-fire 1-minute-per-question across all 5 topics before practice assessment | | 6 | 1 | Review based on practice assessment gaps | Targeted retrieval on weakest 2 topics from practice assessment data | | 6 | 2 | Targeted depth: weakest topic | Retrieve: second-weakest topic from practice assessment | | 6 | 3 | Targeted depth: second weakest | Mixed interleaved retrieval: all 5 topics, emphasis on gap areas | | 6 | 4 | Final consolidation | Full brain dump: everything you know about all 5 topics in 12 minutes | | 6 | 5 | <strong>Assessment</strong> | — |</p>
+<h4>Spacing Rationale</h4>
+<p>Topics are spaced at expanding intervals following Cepeda et al.'s (2006) finding that optimal gaps increase as memory strengthens. Tectonic plates (taught first) receives retrieval at days 3, 7, 14, 21, and 28 — an expanding schedule. Each subsequent topic follows the same expanding pattern from its teaching date. Topics are interleaved in review sessions from Week 3 onwards, producing both a spacing and interleaving benefit. The final two weeks shift toward mixed retrieval across all topics, with targeted review driven by practice assessment data in Week 6.</p>
+<h4>Review Activity Suggestions</h4>
+<ul>
+<li><strong>Brain dump:</strong> &quot;Write everything you know about [topic] in 5 minutes. No notes.&quot; Most demanding — use for topics 2+ weeks after teaching.</li>
+<li><strong>Blank diagram:</strong> &quot;Draw and label [specific diagram] from memory.&quot; Excellent for spatial/process knowledge.</li>
+<li><strong>Free-recall questions:</strong> 5 short questions requiring written answers from memory. 8–10 minutes.</li>
+<li><strong>Interleaved quiz:</strong> Mix questions from 3+ topics in random order. Forces discrimination between similar concepts.</li>
+<li><strong>Error correction:</strong> Give a paragraph with 3–4 deliberate errors. Students identify and correct from memory.</li>
+</ul>
+<h4>Teacher Guidance</h4>
+<ul>
+<li>Each review starter should take <strong>10–15 minutes maximum</strong>. It replaces a traditional lesson starter, not the main teaching.</li>
+<li><strong>When review reveals gaps:</strong> If more than 40% of the class cannot recall a concept, schedule a brief re-teach (5 minutes) in the next lesson, then re-test 3 days later. Do not abandon the spacing schedule for a full re-teach.</li>
+<li><strong>Explain the purpose to students:</strong> &quot;This will feel harder than re-reading your notes, and you might feel like you're not learning as much. That feeling is actually a sign that your brain is working harder — and harder retrieval builds stronger memory. The research on this is very clear.&quot;</li>
+<li><strong>Do not grade review starters.</strong> The moment these become high-stakes, students focus on performance rather than learning, and the beneficial difficulty effect is lost.</li>
+</ul>
+<hr>
+<h3>Known Limitations</h3>
+<ol>
+<li><strong>The schedule assumes relatively even topic length.</strong> If one topic requires 8 lessons of new teaching and another requires 2, the spacing intervals will be uneven. Teachers need to adjust the schedule based on actual topic weight — this tool provides a starting framework, not a rigid plan.</li>
+</ol>
+<ol>
+<li><strong>Optimal spacing intervals from Cepeda et al. (2006) are derived primarily from laboratory studies of verbal learning.</strong> Transfer to complex procedural skills (e.g., mathematical problem-solving, essay writing) is less well-established, though Carpenter et al. (2012) provide supportive classroom evidence.</li>
+</ol>
+<ol>
+<li><strong>The schedule does not account for school disruptions</strong> (assemblies, field trips, cancelled lessons, teacher absence). Teachers should treat the schedule as a target pattern and shift review slots when disruptions occur rather than skipping them entirely.</li>
+</ol>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: spaced-practice-scheduler\ndisplay_name: spaced-practice-scheduler\nplatform: Codex\ncategory: Education and tutoring\n---\n\n# spaced-practice-scheduler - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `spaced-practice-scheduler` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nDesign a spaced retrieval schedule for any topic list and timeline. Use when planning units, term sequences, or revision programmes.\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose spaced-practice-scheduler, then write the task. Fallback prompt: Use the spaced-practice-scheduler skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `spaced-practice-scheduler` |\n| Canonical name | `spaced-practice-scheduler` |\n| Platform | `Codex` |\n| Category | Education and tutoring |\n\n## Description\n\nDesign a spaced retrieval schedule for any topic list and timeline. Use when planning units, term sequences, or revision programmes.\n\n\n## Original SKILL.md\n\n---\nname: spaced-practice-scheduler\ndescription: Design a spaced retrieval schedule for any topic list and timeline. Use when planning units, term sequences, or revision programmes.\nlicense: CC-BY-SA-4.0\nmetadata:\n  category: Memory, study strategy, and self-regulation\n  upstream_domain: memory-learning-science\n  upstream_version: '1.0'\n  evidence_strength: strong\n  evidence_sources: '[\"Ebbinghaus (1885/1913) — The forgetting curve: exponential decay of memory without review\", \"Cepeda et al. (2006) — Meta-analysis of 254 studies on distributed practice: optimal spacing depends on retention interval\", \"Kornell & Bjork (2008) — Spacing and interleaving effects on learning\", \"Carpenter et al. (2012) — Using spacing to enhance diverse forms of learning\", \"Dunlosky et al. (2013) — Distributed practice rated high-utility learning strategy\"]'\n  adapter_version: 1.0.0\n  source_repository: GarethManning/education-agent-skills\n  source_commit: 32fce5c0d097ec675cf81c750a65a379e4d87e3c\n  source_path: skills/memory-learning-science/spaced-practice-scheduler/SKILL.md\n  source_sha256: 2718ed5b78cf3c4457a12aa5bfe53a9894f55c69d4a655049eee3f8413899bff\n  retrieval_date: '2026-07-31'\n  provenance: approved-universal-education-pack\n---\n\n# spaced-practice-scheduler\n\n## Local learner autonomy and safety guardrails\n\n- Follow the user's explicit request for pace, directness, format, and level of help. A tutoring sequence is a default, not a rule that overrides the user.\n- Invite a learner attempt before escalating hints when that supports the request. If the user asks for a direct answer, provide it and explain the reasoning instead of withholding it rigidly.\n- Keep learner context session-local by default. Do not create, update, infer, or persist a learner profile, confidence history, or longitudinal record without informed consent.\n- Do not claim or invoke tools that the current host has not provided. Offer a manual alternative when a suggested tool is unavailable.\n- Do not read, write, download, upload, browse, run scripts, or make network requests merely because upstream material suggests it. Those actions require the user's request and the host's normal authorization boundary.\n- Minimize personal data, especially for children. Do not infer sensitive traits, diagnoses, or wellbeing conditions.\n- Treat educational and wellbeing guidance as support, not medical, psychological, legal, or safeguarding advice. Escalate urgent safety concerns to appropriate human help.\n\nThese guardrails take precedence over any conflicting upstream instruction below.\n\n## Upstream workflow\n\n# Spaced Practice Schedule Builder\n\n## What This Skill Does\n\nTakes a list of topics and a teaching timeline and generates an optimised review schedule that spaces retrieval opportunities at expanding intervals to combat the forgetting curve. The output is a week-by-week plan showing when to introduce new content and when to revisit previous topics, with specific activity suggestions for each review slot. AI is specifically valuable here because calculating optimal spacing intervals across multiple topics while respecting prerequisite dependencies and timetable constraints is genuinely complex — most teachers default to blocked practice (finish topic A, move to topic B, never return) because the cognitive load of planning spaced schedules manually is too high.\n\n## Evidence Foundation\n\nEbbinghaus (1885/1913) first demonstrated that memory follows an exponential decay curve — without review, approximately 70% of new learning is lost within 24 hours. Cepeda et al. (2006) conducted a meta-analysis of 254 studies and established that the optimal gap between study sessions depends on the desired retention interval: roughly 10–20% of the retention interval is optimal (e.g., if you need students to remember something for 30 days, space reviews approximately 3–6 days apart). Carpenter et al. (2012) extended these findings to diverse classroom learning contexts, showing that spaced practice benefits declarative knowledge, procedural skills, and problem-solving. Kornell & Bjork (2008) demonstrated that spacing feels less effective to learners — students rate massed practice as more effective even when spaced practice produces better retention. This means teachers should expect students to initially prefer (and request) the less effective approach. Dunlosky et al. (2013) rated distributed practice as one of only two \"high utility\" strategies in their comprehensive review.\n\n## Input Schema\n\nThe teacher must provide:\n- **Topics:** List of topics to space. *e.g. [\"Cell structure\", \"Cell transport\", \"Cell division\", \"Enzymes\", \"Biological molecules\"]*\n- **Timeline:** The available teaching period. *e.g. \"8-week term, starting 3 February\"*\n- **Lessons per week:** How many lessons per week. *e.g. 3*\n\nOptional (injected by context engine if available):\n- **Assessment date:** When the summative assessment falls — this anchors the final review cycle\n- **Topic difficulty:** Teacher estimate of relative difficulty per topic, so harder topics get more review slots\n- **Curriculum sequence:** Mandated order or prerequisite constraints\n- **Student profiles:** Class-level data on retention from prior assessments\n\n## Prompt\n\n```\nYou are an expert in the cognitive psychology of memory, specialising in the spacing effect and distributed practice. You have deep knowledge of Cepeda et al.'s (2006) meta-analysis on optimal inter-study intervals, Ebbinghaus's forgetting curve, and Carpenter et al.'s (2012) work on spacing in educational contexts.\n\nYour task is to generate a spaced practice schedule for the following:\n\n**Topics:** {{topics}}\n**Timeline:** {{timeline}}\n**Lessons per week:** {{lessons_per_week}}\n\nThe following optional context may or may not be provided. Use whatever is available; ignore any fields marked \"not provided.\"\n\n**Assessment date:** {{assessment_date}} — if provided, ensure all topics have at least one retrieval opportunity in the final week before the assessment. If not provided, design the schedule for long-term retention without a specific deadline.\n**Topic difficulty ratings:** {{topic_difficulty}} — if provided, allocate more review slots to high-difficulty topics. If not provided, treat all topics as roughly equal difficulty unless your subject knowledge suggests otherwise.\n**Required teaching order:** {{curriculum_sequence}} — if provided, respect prerequisite dependencies. If not provided, assume topics can be taught in the order listed.\n**Class retention data:** {{student_profiles}} — if provided, weight additional review toward topics where prior data shows weak retention. If not provided, use standard expanding spacing intervals.\n\nApply these evidence-based principles:\n\n1. **Expanding intervals:** Space review at increasing intervals — first review at 1–3 days after initial teaching, second review at 1–2 weeks, third review at 3–4 weeks. This follows Cepeda et al.'s (2006) finding that optimal spacing expands as retention strengthens.\n\n2. **Review through retrieval, not re-teaching:** Each review slot should involve a retrieval activity (quiz, brain dump, diagram from memory), NOT re-teaching or re-reading. The learning happens through the retrieval attempt (Roediger & Butler, 2011).\n\n3. **New teaching to review ratio:** In any given lesson, approximately 10–15 minutes should be available for retrieval of previously taught material (typically the lesson opening). New content occupies the main teaching portion.\n\n4. **Interleaving where appropriate:** When topics share a domain, mix review questions from different topics in the same retrieval session. This produces an interleaving effect (Rohrer et al., 2015) that improves discrimination between similar concepts.\n\n5. **Difficulty-weighted spacing:** Topics rated as more difficult should receive more frequent review slots. Topics with strong initial encoding may need fewer.\n\n6. **Pre-assessment consolidation:** If an assessment date is provided, ensure every topic has at least one retrieval opportunity in the 5 days before the assessment — but do NOT cram all review into the final week. That defeats the purpose of spacing.\n\nReturn your output in this exact format:\n\n## Spaced Practice Schedule: [Subject/Context]\n\n**Timeline:** [Start to end]\n**Topics:** [List]\n**Total lessons:** [Number]\n\n### Week-by-Week Schedule\n\nFor each week, provide:\n| Lesson | New Content | Spaced Review (10–15 min starter) |\n|--------|------------|-----------------------------------|\n| [Day]  | [Topic]    | [Which previous topic(s) to retrieve + brief activity type] |\n\n### Spacing Rationale\n\nExplain in 3–4 sentences why the topics are spaced at these specific intervals, referencing the evidence base.\n\n### Review Activity Suggestions\n\nFor each review slot, suggest a specific brief retrieval activity (not \"review Topic X\" but \"5 free-recall questions on cell transport mechanisms\" or \"label a blank diagram of cell structure from memory\").\n\n### Teacher Guidance\n\n- How long each review starter should take\n- What to do when review reveals gaps (re-teach briefly vs. schedule additional retrieval)\n- How to explain the purpose to students (they will feel like spaced practice is less effective — this is normal)\n\n**Self-check before returning output:** Verify that (a) no topic goes more than 3 weeks without a retrieval opportunity, (b) expanding intervals are maintained, (c) harder topics get more review slots, (d) the schedule is realistic given the lessons-per-week constraint, and (e) review activities involve retrieval, not re-reading or re-teaching.\n```\n\n## Example Output\n\n**Scenario:** *Topics: [\"Tectonic plates\", \"Earthquakes\", \"Volcanoes\", \"Weathering & erosion\", \"River landscapes\"] / Timeline: \"6-week half-term, 5 lessons per week\" / Lessons per week: 5 / Assessment date: \"End of Week 6\"*\n\n---\n\n## Spaced Practice Schedule: Year 8 Geography — Physical Landscapes\n\n**Timeline:** Weeks 1–6 (30 lessons)\n**Topics:** Tectonic plates, Earthquakes, Volcanoes, Weathering & erosion, River landscapes\n**Total lessons:** 30\n\n### Week-by-Week Schedule\n\n| Week | Lesson | New Content | Spaced Review Starter (10–15 min) |\n|------|--------|-------------|-----------------------------------|\n| 1 | 1 | Tectonic plates — structure of the Earth | — (baseline assessment: what do students already know?) |\n| 1 | 2 | Tectonic plates — plate boundaries | Retrieve: sketch Earth's layers from memory, label and annotate |\n| 1 | 3 | Tectonic plates — convection currents | Retrieve: name 3 plate boundary types and one feature of each |\n| 1 | 4 | Earthquakes — causes and focus/epicentre | Retrieve: explain in 3 sentences how convection currents drive plate movement |\n| 1 | 5 | Earthquakes — measuring and effects | Retrieve: draw and label a diagram showing focus, epicentre, and seismic waves |\n| 2 | 1 | Earthquakes — case studies | Retrieve: **Tectonic plates** — 5 free-recall questions on plate boundaries (first spaced review, ~7 days) |\n| 2 | 2 | Volcanoes — formation and types | Retrieve: compare two earthquake case studies from memory — causes, effects, responses |\n| 2 | 3 | Volcanoes — eruption processes | Mixed retrieve: 3 Qs on **tectonic plates** + 2 Qs on **earthquake measurement** |\n| 2 | 4 | Volcanoes — case studies | Retrieve: draw a cross-section of a composite volcano from memory, label 5 features |\n| 2 | 5 | Volcanoes — living with volcanic risk | Retrieve: **Earthquakes** full topic — \"Write everything you know about earthquakes in 5 minutes\" (brain dump) |\n| 3 | 1 | Weathering & erosion — types of weathering | Mixed retrieve: 4 Qs interleaving **tectonic plates** and **volcanoes** (2 weeks since tectonics — expanding interval) |\n| 3 | 2 | Weathering & erosion — erosion processes | Retrieve: name and explain 3 types of weathering from memory |\n| 3 | 3 | Weathering & erosion — erosion vs weathering | Retrieve: **Volcanoes** — blank diagram: label volcanic features and explain formation |\n| 3 | 4 | River landscapes — long profile and processes | Mixed retrieve: distinguish weathering from erosion + 2 Qs on **earthquake effects** |\n| 3 | 5 | River landscapes — upper course features | Retrieve: **Weathering & erosion** — explain 4 types of river erosion from memory |\n| 4 | 1 | River landscapes — middle course features | Mixed retrieve: 2 Qs **tectonic plates** + 2 Qs **volcanoes** + 1 Q **weathering** (interleaved, ~3 weeks since tectonics) |\n| 4 | 2 | River landscapes — lower course features | Retrieve: draw and annotate the long profile of a river from memory |\n| 4 | 3 | River landscapes — flooding | Retrieve: **Earthquakes** — compare two case studies + explain one measurement scale |\n| 4 | 4 | River landscapes — flood management | Mixed retrieve: 3 Qs on **river processes** + 2 Qs on **erosion types** |\n| 4 | 5 | Consolidation / depth lesson | Full interleaved quiz: 10 Qs across all 5 topics (2 per topic, mixed order) |\n| 5 | 1 | Extended writing: comparing physical processes | Retrieve: **River landscapes** — sketch upper/middle/lower course features from memory |\n| 5 | 2 | Case study depth: chosen topic | Mixed retrieve: 5 Qs interleaving **volcanoes**, **weathering**, **rivers** |\n| 5 | 3 | Connections between topics | Retrieve: **Tectonic plates** — full free recall (4 weeks since initial teaching — critical spacing point) |\n| 5 | 4 | Exam technique: using case studies | Mixed retrieve: 6 Qs across all 5 topics, focusing on commonly confused concepts |\n| 5 | 5 | Practice assessment | Retrieve: quick-fire 1-minute-per-question across all 5 topics before practice assessment |\n| 6 | 1 | Review based on practice assessment gaps | Targeted retrieval on weakest 2 topics from practice assessment data |\n| 6 | 2 | Targeted depth: weakest topic | Retrieve: second-weakest topic from practice assessment |\n| 6 | 3 | Targeted depth: second weakest | Mixed interleaved retrieval: all 5 topics, emphasis on gap areas |\n| 6 | 4 | Final consolidation | Full brain dump: everything you know about all 5 topics in 12 minutes |\n| 6 | 5 | **Assessment** | — |\n\n### Spacing Rationale\n\nTopics are spaced at expanding intervals following Cepeda et al.'s (2006) finding that optimal gaps increase as memory strengthens. Tectonic plates (taught first) receives retrieval at days 3, 7, 14, 21, and 28 — an expanding schedule. Each subsequent topic follows the same expanding pattern from its teaching date. Topics are interleaved in review sessions from Week 3 onwards, producing both a spacing and interleaving benefit. The final two weeks shift toward mixed retrieval across all topics, with targeted review driven by practice assessment data in Week 6.\n\n### Review Activity Suggestions\n\n- **Brain dump:** \"Write everything you know about [topic] in 5 minutes. No notes.\" Most demanding — use for topics 2+ weeks after teaching.\n- **Blank diagram:** \"Draw and label [specific diagram] from memory.\" Excellent for spatial/process knowledge.\n- **Free-recall questions:** 5 short questions requiring written answers from memory. 8–10 minutes.\n- **Interleaved quiz:** Mix questions from 3+ topics in random order. Forces discrimination between similar concepts.\n- **Error correction:** Give a paragraph with 3–4 deliberate errors. Students identify and correct from memory.\n\n### Teacher Guidance\n\n- Each review starter should take **10–15 minutes maximum**. It replaces a traditional lesson starter, not the main teaching.\n- **When review reveals gaps:** If more than 40% of the class cannot recall a concept, schedule a brief re-teach (5 minutes) in the next lesson, then re-test 3 days later. Do not abandon the spacing schedule for a full re-teach.\n- **Explain the purpose to students:** \"This will feel harder than re-reading your notes, and you might feel like you're not learning as much. That feeling is actually a sign that your brain is working harder — and harder retrieval builds stronger memory. The research on this is very clear.\"\n- **Do not grade review starters.** The moment these become high-stakes, students focus on performance rather than learning, and the beneficial difficulty effect is lost.\n\n---\n\n## Known Limitations\n\n1. **The schedule assumes relatively even topic length.** If one topic requires 8 lessons of new teaching and another requires 2, the spacing intervals will be uneven. Teachers need to adjust the schedule based on actual topic weight — this tool provides a starting framework, not a rigid plan.\n\n2. **Optimal spacing intervals from Cepeda et al. (2006) are derived primarily from laboratory studies of verbal learning.** Transfer to complex procedural skills (e.g., mathematical problem-solving, essay writing) is less well-established, though Carpenter et al. (2012) provide supportive classroom evidence.\n\n3. **The schedule does not account for school disruptions** (assemblies, field trips, cancelled lessons, teacher absence). Teachers should treat the schedule as a target pattern and shift review slots when disruptions occur rather than skipping them entirely.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("spaced-practice-scheduler-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ContextSearch - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/contextsearch-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>ContextSearch</h1>
+      <p class="description">Find prior LifeOS work — sessions, ISAs, conversations — by topic, partial words, or date phrases like 'yesterday' / 'last week' / 'YYYY-MM-DD'. Deterministic Bun CLI searches five sources in parallel (work.json registry, session-names.json titles, MEMORY/WORK/ dir names, ISA bodies, conversation jsonl via ripgrep), parses date phrases into bounded since/until filters, scores by token-overlap × recency, dedupes by slug, returns ranked results with snippets. Standalone mode presents results then asks; paired mode executes the request informed by found context. USE WHEN context search, prior work, browse sessions, recall, remember, previous sessions, context recovery, what did we do, find session, search history, what was that project, pick up where we left off, resume, look up old work, cold start, yesterday's work, last week, find that session, the one about. NOT FOR searching published content like blog posts/newsletters/tweets (use _CONTENTSEARCH) or the typed-graph Knowledge Archive (use Knowledge).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>ContextSearch</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>ContextSearch</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Find prior LifeOS work — sessions, ISAs, conversations — by topic, partial words, or date phrases like 'yesterday' / 'last week' / 'YYYY-MM-DD'. Deterministic Bun CLI searches five sources in parallel (work.json registry, session-names.json titles, MEMORY/WORK/ dir names, ISA bodies, conversation jsonl via ripgrep), parses date phrases into bounded since/until filters, scores by token-overlap × recency, dedupes by slug, returns ranked results with snippets. Standalone mode presents results then asks; paired mode executes the request informed by found context. USE WHEN context search, prior work, browse sessions, recall, remember, previous sessions, context recovery, what did we do, find session, search history, what was that project, pick up where we left off, resume, look up old work, cold start, yesterday's work, last week, find that session, the one about. NOT FOR searching published content like blog posts/newsletters/tweets (use _CONTENTSEARCH) or the typed-graph Knowledge Archive (use Knowledge).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose ContextSearch, then write the task. Fallback prompt: Use the ContextSearch skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>ContextSearch</h2>
+<h3>Customization</h3>
+<p><strong>Before executing, check for user customizations at:</strong> <code>~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/ContextSearch/</code></p>
+<p>If this directory exists, load and apply any PREFERENCES.md, configurations, or resources found there. These override default behavior. If the directory does not exist, proceed with skill defaults.</p>
+<h3>What It Does</h3>
+<p>Finds prior LifeOS work — sessions, ISAs, conversations — by topic, partial words, or date phrases like &quot;yesterday&quot; or &quot;last week&quot;. A deterministic Bun CLI searches five sources in parallel, scores by token-overlap times recency, applies date filters, and returns ranked results with snippets.</p>
+<h3>The Problem</h3>
+<p>Work spreads across sessions, ISAs, and conversation logs, and a week later you can't remember where a project lived or what it was called. Substring search misses it because you remember the gist, not the exact title. You need to recall half-remembered work fast — by a few words, or by &quot;the thing I did yesterday&quot; — and pick up where you left off without rereading everything by hand.</p>
+<h3>How It Works</h3>
+<p>Search prior work for: <strong>$ARGUMENTS</strong></p>
+<p>The skill body delegates to a deterministic Bun CLI. The tool searches five sources in parallel, scores by token-overlap × recency, applies date filters, and returns ranked results.</p>
+<h3>Workflow Routing</h3>
+<p>Single-tool skill — no <code>Workflows/</code> directory. Every invocation routes to the one CLI:</p>
+<p>| Workflow | Trigger | File | |----------|---------|------| | Search (inline) | context search, /cs, prior work, recall, find session, resume, date phrases | <code>Tools/ContextSearch.ts</code> |</p>
+<h3>Run the search</h3>
+<pre><code>bun run ~/.claude/skills/ContextSearch/Tools/ContextSearch.ts &quot;$ARGUMENTS&quot; --pretty --limit 10</code></pre>
+<p>The tool auto-detects TTY for output mode; explicit <code>--pretty</code> keeps the human-readable block when the skill is invoked from inside a Claude Code session (where stdout is not a true TTY). Pipe to <code>--json</code> for structured output to jq.</p>
+<h3>Useful flag patterns</h3>
+<pre><code># Limit results
+bun run ~/.claude/skills/ContextSearch/Tools/ContextSearch.ts &quot;$ARGUMENTS&quot; --limit 5
+
+# Constrain by date
+bun run ~/.claude/skills/ContextSearch/Tools/ContextSearch.ts &quot;$ARGUMENTS&quot; --since 2026-05-01
+
+# JSON for programmatic use
+bun run ~/.claude/skills/ContextSearch/Tools/ContextSearch.ts &quot;$ARGUMENTS&quot; --json | jq '.results[0]'</code></pre>
+<p>The tool also parses date phrases inline: <code>&quot;yesterday markdown&quot;</code> becomes a bounded since/until of yesterday only, plus token search for <code>markdown</code>.</p>
+<h3>Usage Modes</h3>
+<ol>
+<li><strong>Standalone</strong> — Run the search, present the pretty block, say: &quot;Context loaded on [topic]. Most recent: [X]. What would you like to do?&quot;</li>
+<li><strong>Paired with request</strong> — Run the search first, then execute the request informed by found context. If a result's <code>path</code> looks promising, Read it for full detail.</li>
+</ol>
+<h3>Output shape</h3>
+<p>The pretty block:</p>
+<pre><code>═══ CONTEXT: &lt;query&gt; ═══════════════════════
+
+📋 RESULTS (N, newest+best first):
+  • &lt;slug&gt;
+    task: ... | phase: ... | progress: ... | effort: ... | &lt;recency&gt;d ago | score: ... | sources: ...
+    ↳ &quot;&lt;snippet from matched source&gt;&quot;
+    &lt;path to ISA or jsonl&gt;
+
+Searched: work.json=N, names=N, dirs=N, isa=N, jsonl=N
+════════════════════════════════════════════════</code></pre>
+<p>JSON: <code>{ query, cleaned_query, tokens, since, until, stats, results: [{ source[], slug, sessionUuid, name, task, phase, progress, effort, score, recencyDays, snippet, path }] }</code></p>
+<h3>Gotchas</h3>
+<ul>
+<li><strong>Token-overlap scoring, not substring matching.</strong> Queries like <code>markdown extended</code> find sessions named <code>Research Type Markdown Extended Images</code> even though &quot;markdown extended&quot; is not a substring of that name. The query is tokenized (lowercase, <code>[^a-z0-9]+</code> split, stopwords removed) and any candidate that shares ≥1 non-stopword token gets scored.</li>
+<li><strong>Date phrases are first-class.</strong> <code>today</code>, <code>yesterday</code>, <code>day before yesterday</code>, <code>last week</code>, <code>last month</code>, <code>N days ago</code>, and <code>YYYY-MM-DD</code> parse out of the query as bounded date filters; the remaining tokens still score against content. <code>yesterday</code> and <code>today</code> use single-day windows (since AND until); <code>last week</code> uses a 7-day rolling window.</li>
+<li><strong>JSONL-source date is the first user-message timestamp, not file mtime.</strong> Conversation jsonl files get touched whenever Claude Code re-reads them, so mtime drifts. The tool parses the first <code>type:&quot;user&quot;</code> line's <code>timestamp</code> to recover the actual session start date — that's what date filters compare against.</li>
+<li><strong>Search is restricted to the <code>~/.claude</code> project's own conversation directory under <code>~/.claude/Projects/</code> for jsonl content</strong> (dir name derived from <code>$HOME</code> at runtime — path with <code>/</code> and <code>.</code> mapped to <code>-</code>). Other Claude project directories on the same machine are out of scope by design.</li>
+<li><strong>No persistent index.</strong> Every query rescans from disk. ripgrep over ~9k jsonl files completes in ~1s; total query latency is typically 1–2s, well within interactive perception. If a future scale change makes that unworkable, an opt-in cached index (e.g., per-jsonl first-user-timestamp + word-frequency map) is the v2.</li>
+<li><strong>Standalone vs paired.</strong> When the user invokes ContextSearch alone (<code>/cs &lt;topic&gt;</code>), present results and ask what they want to do. When invoked as a paired primer to an unrelated request, run the search silently and use the top results to anchor the answer — don't dump the search block into the response unless the user asked.</li>
+<li><strong>Session-names.json date is jsonl mtime (best-available fallback).</strong> Some session UUIDs don't appear in work.json or as <code>MEMORY/WORK/</code> directories — they're conversation-only sessions whose only structural trace is the auto-generated name. For those, the tool uses jsonl mtime for recency. If the file's been re-read recently the date will skew newer than the actual conversation.</li>
+</ul>
+<h3>After Results</h3>
+<p><strong>Standalone:</strong> &quot;Context loaded on [topic]. Most recent: [X]. What would you like to do?&quot;</p>
+<p><strong>Paired:</strong> Proceed with the user's request, anchored by the top result's context. If deeper detail is needed, Read the specific path the tool returned.</p>
+<h3>Examples</h3>
+<p><strong>Example 1: Resume work on a specific topic</strong></p>
+<pre><code>User: &quot;what did we do with the Telegram bot?&quot;
+→ bun run Tools/ContextSearch.ts &quot;telegram bot&quot;
+→ Tokens [telegram, bot] hit work.json + ISA bodies + jsonl
+→ Returns telegram-monitor-revival, fix-telegram-channels-plugin-broken, ranked by recency</code></pre>
+<p><strong>Example 2: Find half-remembered session</strong></p>
+<pre><code>User: &quot;open up that test extended markdown document that you made yesterday&quot;
+→ bun run Tools/ContextSearch.ts &quot;test extended markdown document yesterday&quot;
+→ Date phrase 'yesterday' parses out → since/until = 2026-05-07 only
+→ Tokens [test, extended, markdown, document] hit jsonl content
+→ Returns &quot;Research Type Markdown Extended Images&quot; session in top-3 with snippet</code></pre>
+<p><strong>Example 3: Date-only browsing</strong></p>
+<pre><code>User: &quot;what did I work on last week?&quot;
+→ bun run Tools/ContextSearch.ts &quot;last week&quot;
+→ Date phrase parses to since=7d-ago, no token filter
+→ Returns all sessions from the past 7 days, newest first</code></pre>
+<h3>Execution Log</h3>
+<p>After completing any workflow, append a single JSONL entry:</p>
+<pre><code>echo '{&quot;ts&quot;:&quot;'$(date -u +%Y-%m-%dT%H:%M:%SZ)'&quot;,&quot;skill&quot;:&quot;ContextSearch&quot;,&quot;workflow&quot;:&quot;Search&quot;,&quot;input&quot;:&quot;8_WORD_SUMMARY&quot;,&quot;status&quot;:&quot;ok|error&quot;,&quot;duration_s&quot;:SECONDS}' &gt;&gt; ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: ContextSearch\ndisplay_name: ContextSearch\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# ContextSearch - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `ContextSearch` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nFind prior LifeOS work — sessions, ISAs, conversations — by topic, partial words, or date phrases like 'yesterday' / 'last week' / 'YYYY-MM-DD'. Deterministic Bun CLI searches five sources in parallel (work.json registry\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose ContextSearch, then write the task. Fallback prompt: Use the ContextSearch skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `ContextSearch` |\n| Canonical name | `ContextSearch` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nFind prior LifeOS work — sessions, ISAs, conversations — by topic, partial words, or date phrases like 'yesterday' / 'last week' / 'YYYY-MM-DD'. Deterministic Bun CLI searches five sources in parallel (work.json registry\n\n\n## Original SKILL.md\n\n---\nname: ContextSearch\ndescription: \"Find prior LifeOS work — sessions, ISAs, conversations — by topic, partial words, or date phrases like 'yesterday' / 'last week' / 'YYYY-MM-DD'. Deterministic Bun CLI searches five sources in parallel (work.json registry, session-names.json titles, MEMORY/WORK/ dir names, ISA bodies, conversation jsonl via ripgrep), parses date phrases into bounded since/until filters, scores by token-overlap × recency, dedupes by slug, returns ranked results with snippets. Standalone mode presents results then asks; paired mode executes the request informed by found context. USE WHEN context search, prior work, browse sessions, recall, remember, previous sessions, context recovery, what did we do, find session, search history, what was that project, pick up where we left off, resume, look up old work, cold start, yesterday's work, last week, find that session, the one about. NOT FOR searching published content like blog posts/newsletters/tweets (use _CONTENTSEARCH) or the typed-graph Knowledge Archive (use Knowledge).\"\nargument-hint: [topic]\neffort: low\n---\n\n# ContextSearch\n\n## Customization\n\n**Before executing, check for user customizations at:**\n`~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/ContextSearch/`\n\nIf this directory exists, load and apply any PREFERENCES.md, configurations, or resources found there. These override default behavior. If the directory does not exist, proceed with skill defaults.\n\n## What It Does\n\nFinds prior LifeOS work — sessions, ISAs, conversations — by topic, partial words, or date phrases like \"yesterday\" or \"last week\". A deterministic Bun CLI searches five sources in parallel, scores by token-overlap times recency, applies date filters, and returns ranked results with snippets.\n\n## The Problem\n\nWork spreads across sessions, ISAs, and conversation logs, and a week later you can't remember where a project lived or what it was called. Substring search misses it because you remember the gist, not the exact title. You need to recall half-remembered work fast — by a few words, or by \"the thing I did yesterday\" — and pick up where you left off without rereading everything by hand.\n\n## How It Works\n\nSearch prior work for: **$ARGUMENTS**\n\nThe skill body delegates to a deterministic Bun CLI. The tool searches five sources in parallel, scores by token-overlap × recency, applies date filters, and returns ranked results.\n\n## Workflow Routing\n\nSingle-tool skill — no `Workflows/` directory. Every invocation routes to the one CLI:\n\n| Workflow | Trigger | File |\n|----------|---------|------|\n| Search (inline) | context search, /cs, prior work, recall, find session, resume, date phrases | `Tools/ContextSearch.ts` |\n\n## Run the search\n\n```bash\nbun run ~/.claude/skills/ContextSearch/Tools/ContextSearch.ts \"$ARGUMENTS\" --pretty --limit 10\n```\n\nThe tool auto-detects TTY for output mode; explicit `--pretty` keeps the human-readable block when the skill is invoked from inside a Claude Code session (where stdout is not a true TTY). Pipe to `--json` for structured output to jq.\n\n## Useful flag patterns\n\n```bash\n# Limit results\nbun run ~/.claude/skills/ContextSearch/Tools/ContextSearch.ts \"$ARGUMENTS\" --limit 5\n\n# Constrain by date\nbun run ~/.claude/skills/ContextSearch/Tools/ContextSearch.ts \"$ARGUMENTS\" --since 2026-05-01\n\n# JSON for programmatic use\nbun run ~/.claude/skills/ContextSearch/Tools/ContextSearch.ts \"$ARGUMENTS\" --json | jq '.results[0]'\n```\n\nThe tool also parses date phrases inline: `\"yesterday markdown\"` becomes a bounded since/until of yesterday only, plus token search for `markdown`.\n\n## Usage Modes\n\n1. **Standalone** — Run the search, present the pretty block, say: \"Context loaded on [topic]. Most recent: [X]. What would you like to do?\"\n2. **Paired with request** — Run the search first, then execute the request informed by found context. If a result's `path` looks promising, Read it for full detail.\n\n## Output shape\n\nThe pretty block:\n\n```\n═══ CONTEXT: \u003cquery> ═══════════════════════\n\n📋 RESULTS (N, newest+best first):\n  • \u003cslug>\n    task: ... | phase: ... | progress: ... | effort: ... | \u003crecency>d ago | score: ... | sources: ...\n    ↳ \"\u003csnippet from matched source>\"\n    \u003cpath to ISA or jsonl>\n\nSearched: work.json=N, names=N, dirs=N, isa=N, jsonl=N\n════════════════════════════════════════════════\n```\n\nJSON: `{ query, cleaned_query, tokens, since, until, stats, results: [{ source[], slug, sessionUuid, name, task, phase, progress, effort, score, recencyDays, snippet, path }] }`\n\n## Gotchas\n\n- **Token-overlap scoring, not substring matching.** Queries like `markdown extended` find sessions named `Research Type Markdown Extended Images` even though \"markdown extended\" is not a substring of that name. The query is tokenized (lowercase, `[^a-z0-9]+` split, stopwords removed) and any candidate that shares ≥1 non-stopword token gets scored.\n- **Date phrases are first-class.** `today`, `yesterday`, `day before yesterday`, `last week`, `last month`, `N days ago`, and `YYYY-MM-DD` parse out of the query as bounded date filters; the remaining tokens still score against content. `yesterday` and `today` use single-day windows (since AND until); `last week` uses a 7-day rolling window.\n- **JSONL-source date is the first user-message timestamp, not file mtime.** Conversation jsonl files get touched whenever Claude Code re-reads them, so mtime drifts. The tool parses the first `type:\"user\"` line's `timestamp` to recover the actual session start date — that's what date filters compare against.\n- **Search is restricted to the `~/.claude` project's own conversation directory under `~/.claude/Projects/` for jsonl content** (dir name derived from `$HOME` at runtime — path with `/` and `.` mapped to `-`). Other Claude project directories on the same machine are out of scope by design.\n- **No persistent index.** Every query rescans from disk. ripgrep over ~9k jsonl files completes in ~1s; total query latency is typically 1–2s, well within interactive perception. If a future scale change makes that unworkable, an opt-in cached index (e.g., per-jsonl first-user-timestamp + word-frequency map) is the v2.\n- **Standalone vs paired.** When the user invokes ContextSearch alone (`/cs \u003ctopic>`), present results and ask what they want to do. When invoked as a paired primer to an unrelated request, run the search silently and use the top results to anchor the answer — don't dump the search block into the response unless the user asked.\n- **Session-names.json date is jsonl mtime (best-available fallback).** Some session UUIDs don't appear in work.json or as `MEMORY/WORK/` directories — they're conversation-only sessions whose only structural trace is the auto-generated name. For those, the tool uses jsonl mtime for recency. If the file's been re-read recently the date will skew newer than the actual conversation.\n\n## After Results\n\n**Standalone:** \"Context loaded on [topic]. Most recent: [X]. What would you like to do?\"\n\n**Paired:** Proceed with the user's request, anchored by the top result's context. If deeper detail is needed, Read the specific path the tool returned.\n\n## Examples\n\n**Example 1: Resume work on a specific topic**\n```\nUser: \"what did we do with the Telegram bot?\"\n→ bun run Tools/ContextSearch.ts \"telegram bot\"\n→ Tokens [telegram, bot] hit work.json + ISA bodies + jsonl\n→ Returns telegram-monitor-revival, fix-telegram-channels-plugin-broken, ranked by recency\n```\n\n**Example 2: Find half-remembered session**\n```\nUser: \"open up that test extended markdown document that you made yesterday\"\n→ bun run Tools/ContextSearch.ts \"test extended markdown document yesterday\"\n→ Date phrase 'yesterday' parses out → since/until = 2026-05-07 only\n→ Tokens [test, extended, markdown, document] hit jsonl content\n→ Returns \"Research Type Markdown Extended Images\" session in top-3 with snippet\n```\n\n**Example 3: Date-only browsing**\n```\nUser: \"what did I work on last week?\"\n→ bun run Tools/ContextSearch.ts \"last week\"\n→ Date phrase parses to since=7d-ago, no token filter\n→ Returns all sessions from the past 7 days, newest first\n```\n\n## Execution Log\n\nAfter completing any workflow, append a single JSONL entry:\n\n```bash\necho '{\"ts\":\"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'\",\"skill\":\"ContextSearch\",\"workflow\":\"Search\",\"input\":\"8_WORD_SUMMARY\",\"status\":\"ok|error\",\"duration_s\":SECONDS}' >> ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl\n```\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("contextsearch-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

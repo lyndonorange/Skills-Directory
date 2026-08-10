@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `verification-before-completion` for Open
 
 Use this skill when your task matches this description:
 
-Claiming work is complete without verification is dishonesty, not efficiency.
+Hard verification gate for coding agents. Use before any claim that work is complete, code works, tests pass, lint is clean, a build succeeds, a bug is fixed, requirements are met, a delegated agent succeeded, or before
 
 ## How To Use It In OpenCode
 
@@ -32,13 +32,14 @@ In OpenCode, open the project and type: Use the verification-before-completion s
 
 ## Description
 
-Claiming work is complete without verification is dishonesty, not efficiency.
+Hard verification gate for coding agents. Use before any claim that work is complete, code works, tests pass, lint is clean, a build succeeds, a bug is fixed, requirements are met, a delegated agent succeeded, or before
+
 
 ## Original SKILL.md
 
 ---
 name: verification-before-completion
-description: Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always
+description: Hard verification gate for coding agents. Use before any claim that work is complete, code works, tests pass, lint is clean, a build succeeds, a bug is fixed, requirements are met, a delegated agent succeeded, or before committing, pushing, opening a PR, or moving to the next task. Requires fresh execution of the relevant test, lint, build, regression, diff, or checklist verification command in the current turn and reporting actual output/exit status before making success claims.
 ---
 
 # Verification Before Completion
@@ -58,6 +59,8 @@ NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE
 ```
 
 If you haven't run the verification command in this message, you cannot claim it passes.
+
+Fresh means executed in the current turn after the relevant change. Previous runs, partial logs, inferred success, and agent reports do not count.
 
 ## The Gate Function
 
@@ -172,7 +175,6 @@ From 24 failure memories:
 
 **No shortcuts for verification.**
 
-Run the command. Read the output. THEN claim the result.
+Run the command. Read the output. Report the evidence. THEN claim the result.
 
 This is non-negotiable.
-

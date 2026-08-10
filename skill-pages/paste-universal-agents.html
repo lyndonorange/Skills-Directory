@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>paste - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/paste-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>paste</h1>
+      <p class="description">When you want to clean and reformat content (usually from your terminal) for pasting into Slack, Notion, Twitter/X, LinkedIn, email, GitHub, or plain text. Strips ANSI codes, box-drawing chars, terminal prompt artifacts, and applies destination-specific formatting. Default input is the clipboard (read via `pbpaste`); default output is both the clipboard (`pbcopy`) and a chat preview. Triggers on &quot;/paste&quot;, &quot;/paste [destination]&quot;, &quot;clean this for X,&quot; &quot;format for slack/notion/twitter/linkedin/email/github,&quot; &quot;render as markdown,&quot; &quot;paste-ready,&quot; &quot;strip formatting,&quot; &quot;make this copy-pastable.&quot; Default destination is plain. Also scans for secrets (API keys, tokens, .env values) and warns before copying anything sensitive.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>paste</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>paste</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>When you want to clean and reformat content (usually from your terminal) for pasting into Slack, Notion, Twitter/X, LinkedIn, email, GitHub, or plain text. Strips ANSI codes, box-drawing chars, terminal prompt artifacts, and applies destination-specific formatting. Default input is the clipboard (read via `pbpaste`); default output is both the clipboard (`pbcopy`) and a chat preview. Triggers on &quot;/paste&quot;, &quot;/paste [destination]&quot;, &quot;clean this for X,&quot; &quot;format for slack/notion/twitter/linkedin/email/github,&quot; &quot;render as markdown,&quot; &quot;paste-ready,&quot; &quot;strip formatting,&quot; &quot;make this copy-pastable.&quot; Default destination is plain. Also scans for secrets (API keys, tokens, .env values) and warns before copying anything sensitive.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the paste skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>/paste — Clean content for any destination</h2>
+<p>Cleans terminal output (ANSI, box-drawing, prompt artifacts, etc.) and reformats per destination rules. Reads clipboard by default, writes back to clipboard + previews in chat.</p>
+<h3>Step 1 — Get the content</h3>
+<p>In order:</p>
+<ol>
+<li>If the user included content in the prompt (pasted, or referenced from earlier in the conversation), use that.</li>
+<li>Else, read clipboard: <code>pbpaste</code></li>
+<li>If both empty, ask the user what to paste.</li>
+</ol>
+<h3>Step 2 — Parse destination</h3>
+<p>| Invocation | Destination | |---|---| | <code>/paste</code> | <strong>plain</strong> (default) | | <code>/paste plain</code> | plain | | <code>/paste slack</code> | slack | | <code>/paste notion</code> | notion | | <code>/paste twitter</code> or <code>/paste x</code> | twitter | | <code>/paste linkedin</code> or <code>/paste li</code> | linkedin | | <code>/paste email</code> | email (plain) | | <code>/paste email rich</code> or <code>/paste email html</code> | email (rich/HTML) | | <code>/paste github</code> or <code>/paste gh</code> | github | | <code>/paste markdown</code> or <code>/paste md</code> | markdown render | | <code>/paste html</code> | render to HTML file + open in browser |</p>
+<p>If ambiguous, ask. Per-destination rules live in <code>references/destinations.md</code>.</p>
+<h3>Step 3 — Scan for secrets</h3>
+<p>Before any cleaning or copying, scan against patterns in <code>references/secret-patterns.md</code>.</p>
+<p>If any match:</p>
+<ol>
+<li><strong>Stop.</strong> Don't copy yet.</li>
+<li>Report what was detected with the value <strong>masked</strong> (first 4 + last 4 chars only — e.g. <code>sk-12...wxyz</code>).</li>
+<li>Ask: <em>&quot;Spotted [type] in the content. Continue, redact (replace with <code>[REDACTED]</code>), or abort?&quot;</em></li>
+<li>Default to <strong>abort</strong> if no clear answer.</li>
+</ol>
+<h3>Step 4 — Universal cleaning</h3>
+<p>Strip from the content:</p>
+<ul>
+<li><strong>ANSI escape codes</strong> — <code>\x1b\[[0-9;]*[a-zA-Z]</code> and related (color codes, cursor movement, screen control)</li>
+<li><strong>Box-drawing chars</strong> — <code>╭ ─ ╮ │ ╰ ╯ ╞ ╡ ╤ ╧ ┌ ┐ └ ┘ ├ ┤ ┬ ┴ ┼ ━ ┃ ┏ ┓ ┗ ┛</code> etc. Replace with simpler equivalents (<code>-</code>, <code>|</code>) or remove entirely depending on context.</li>
+<li><strong>Terminal prompt artifacts</strong> — leading <code>$ </code>, <code>&gt; </code>, <code>❯ </code>, <code>% </code>, <code># </code> (when first non-whitespace on a line that looks like a shell prompt)</li>
+<li><strong>Carriage returns</strong> (<code>\r</code>) — replace with <code>\n</code> or delete</li>
+<li><strong>Trailing whitespace</strong> per line</li>
+<li><strong>Excess blank lines</strong> — collapse 3+ consecutive blank lines to 2</li>
+</ul>
+<h3>Step 5 — Apply destination rules</h3>
+<p>Read <code>references/destinations.md</code> and apply the relevant transform.</p>
+<h3>Step 6 — Output</h3>
+<p>| Destination | Output behavior | |---|---| | plain / slack / notion / twitter / linkedin / email / github | (a) Show preview in a code fence in chat. (b) Copy clean version to clipboard via <code>pbcopy</code>. | | email rich | Render to HTML, write to <code>/tmp/paste-&lt;timestamp&gt;.html</code>, <code>open</code> it in browser. Skip clipboard (the user copies from browser to preserve rich text). | | markdown | Render the cleaned markdown directly in chat (Claude Code renders it). Also copy raw markdown to clipboard. Offer: <em>&quot;Open as HTML too?&quot;</em> — if yes, write and open. | | html | Render to HTML, write to <code>/tmp/paste-&lt;timestamp&gt;.html</code>, <code>open</code> it. Skip clipboard. |</p>
+<p>After output, report a one-line summary of what was cleaned (e.g., <em>&quot;Stripped 12 ANSI codes, 4 box-drawing chars, 1 prompt artifact. Character count: 248 / 280 (X).&quot;</em>).</p>
+<h3>Length warnings</h3>
+<p>Twitter and LinkedIn have practical limits. the user said &quot;let me trim&quot; — don't refuse or auto-truncate.</p>
+<ul>
+<li><strong>Twitter/X</strong>: warn if &gt;280 chars. Note the overage.</li>
+<li><strong>LinkedIn</strong>: warn if &gt;400 chars (comfort line, not hard limit).</li>
+<li>Other destinations: no length warning.</li>
+</ul>
+<h3>URL handling for social destinations</h3>
+<p>If the content has URLs and destination is <strong>twitter</strong> or <strong>linkedin</strong>:</p>
+<ul>
+<li>Surface the URLs separately (don't include them in the body)</li>
+<li>Remind the user: links go in a first comment (LinkedIn) or reply (X), not the body</li>
+<li>See <code>makerskills:jab-hook</code> and <code>~/.claude/memory/feedback_social_link_placement.md</code></li>
+</ul>
+<h3>Examples</h3>
+<pre><code>/paste slack</code></pre>
+<p>→ Reads clipboard, strips ANSI, converts <code><strong>bold</strong></code> to <code><em>bold</em></code>, copies to clipboard, shows preview.</p>
+<pre><code>/paste twitter
+[pasted error log]</code></pre>
+<p>→ Uses pasted content (ignores clipboard), strips everything, warns at 412/280 chars, copies, asks if the user wants to trim or pick a different destination.</p>
+<pre><code>/paste html
+[pasted markdown table]</code></pre>
+<p>→ Renders table as HTML, opens in browser. the user selects + copies into Notion/email with formatting preserved.</p>
+<pre><code>/paste
+[pasted output with sk-anthropic-key in it]</code></pre>
+<p>→ Stops. <em>&quot;Spotted what looks like an Anthropic API key: <code>sk-an...3kf9</code>. Continue, redact, or abort?&quot;</em></p>
+<h3>Composes with</h3>
+<ul>
+<li><code>jab-hook</code> — clean output for pasting into Typefully drafts when the MCP path doesn't fit; also enforces the link-placement rule for X/LinkedIn destinations</li>
+<li><code>social-fetch</code> — clean a fetched post before quoting it in a draft or newsletter</li>
+<li><code>second-brain</code> — <code>paste</code> output can be captured cleanly into <code>raw/note-&lt;slug&gt;.md</code> for future compilation</li>
+<li><code>watch-video</code> — transcript / summary output often flows through <code>paste</code> for platform-specific reformatting</li>
+</ul>
+<h3>Notes on quality</h3>
+<ul>
+<li><strong>Secret detection runs first, always.</strong> Before any formatting or destination logic, <code>paste</code> scans for <code>sk-<em></code>, <code>AKIA</em></code>, <code>xoxb-*</code>, JWT-shaped strings, and long-hex tokens. Prompts before proceeding on any hit. Better to false-positive occasionally than to leak a real key.</li>
+<li><strong>Destination-aware transforms, not one-size-fits-all.</strong> Slack wants <code><em>bold</em></code>; LinkedIn wants unicode-styled bold; email wants HTML. Same input, 9 different valid outputs. The destination flag is not optional.</li>
+<li><strong>ANSI codes get stripped for every destination.</strong> Terminal escapes (<code>\033[31m</code> etc.) render as garbage everywhere except the source terminal.</li>
+<li><strong>Character limits are enforced, not warnings.</strong> X at 280, LinkedIn at 3000, Twitter at 25000 — paste refuses to copy over-limit output and offers a trim strategy.</li>
+<li><strong>Links go in first comments for social destinations</strong> — not the body. Enforced when destination is <code>twitter</code> or <code>linkedin</code>. Documented in <code>~/.claude/memory/feedback_social_link_placement.md</code>.</li>
+<li><strong>HTML destination opens in a browser tab, not the clipboard.</strong> Formatted tables + code blocks need a rendered surface to select-and-copy from with formatting preserved. Copying raw HTML to the clipboard produces garbage in Notion/email.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: paste\ndisplay_name: paste\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# paste - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `paste` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nWhen you want to clean and reformat content (usually from your terminal) for pasting into Slack, Notion, Twitter/X, LinkedIn, email, GitHub, or plain text. Strips ANSI codes, box-drawing chars, terminal prompt artifacts,\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the paste skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `paste` |\n| Canonical name | `paste` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\nWhen you want to clean and reformat content (usually from your terminal) for pasting into Slack, Notion, Twitter/X, LinkedIn, email, GitHub, or plain text. Strips ANSI codes, box-drawing chars, terminal prompt artifacts,\n\n\n## Original SKILL.md\n\n---\nname: paste\ndescription: When you want to clean and reformat content (usually from your terminal) for pasting into Slack, Notion, Twitter/X, LinkedIn, email, GitHub, or plain text. Strips ANSI codes, box-drawing chars, terminal prompt artifacts, and applies destination-specific formatting. Default input is the clipboard (read via `pbpaste`); default output is both the clipboard (`pbcopy`) and a chat preview. Triggers on \"/paste\", \"/paste [destination]\", \"clean this for X,\" \"format for slack/notion/twitter/linkedin/email/github,\" \"render as markdown,\" \"paste-ready,\" \"strip formatting,\" \"make this copy-pastable.\" Default destination is plain. Also scans for secrets (API keys, tokens, .env values) and warns before copying anything sensitive.\nmetadata:\n  version: 0.1.1\n---\n\n# /paste — Clean content for any destination\n\nCleans terminal output (ANSI, box-drawing, prompt artifacts, etc.) and reformats per destination rules. Reads clipboard by default, writes back to clipboard + previews in chat.\n\n## Step 1 — Get the content\n\nIn order:\n1. If the user included content in the prompt (pasted, or referenced from earlier in the conversation), use that.\n2. Else, read clipboard: `pbpaste`\n3. If both empty, ask the user what to paste.\n\n## Step 2 — Parse destination\n\n| Invocation | Destination |\n|---|---|\n| `/paste` | **plain** (default) |\n| `/paste plain` | plain |\n| `/paste slack` | slack |\n| `/paste notion` | notion |\n| `/paste twitter` or `/paste x` | twitter |\n| `/paste linkedin` or `/paste li` | linkedin |\n| `/paste email` | email (plain) |\n| `/paste email rich` or `/paste email html` | email (rich/HTML) |\n| `/paste github` or `/paste gh` | github |\n| `/paste markdown` or `/paste md` | markdown render |\n| `/paste html` | render to HTML file + open in browser |\n\nIf ambiguous, ask. Per-destination rules live in `references/destinations.md`.\n\n## Step 3 — Scan for secrets\n\nBefore any cleaning or copying, scan against patterns in `references/secret-patterns.md`.\n\nIf any match:\n1. **Stop.** Don't copy yet.\n2. Report what was detected with the value **masked** (first 4 + last 4 chars only — e.g. `sk-12...wxyz`).\n3. Ask: *\"Spotted [type] in the content. Continue, redact (replace with `[REDACTED]`), or abort?\"*\n4. Default to **abort** if no clear answer.\n\n## Step 4 — Universal cleaning\n\nStrip from the content:\n\n- **ANSI escape codes** — `\\x1b\\[[0-9;]*[a-zA-Z]` and related (color codes, cursor movement, screen control)\n- **Box-drawing chars** — `╭ ─ ╮ │ ╰ ╯ ╞ ╡ ╤ ╧ ┌ ┐ └ ┘ ├ ┤ ┬ ┴ ┼ ━ ┃ ┏ ┓ ┗ ┛` etc. Replace with simpler equivalents (`-`, `|`) or remove entirely depending on context.\n- **Terminal prompt artifacts** — leading `$ `, `> `, `❯ `, `% `, `# ` (when first non-whitespace on a line that looks like a shell prompt)\n- **Carriage returns** (`\\r`) — replace with `\\n` or delete\n- **Trailing whitespace** per line\n- **Excess blank lines** — collapse 3+ consecutive blank lines to 2\n\n## Step 5 — Apply destination rules\n\nRead `references/destinations.md` and apply the relevant transform.\n\n## Step 6 — Output\n\n| Destination | Output behavior |\n|---|---|\n| plain / slack / notion / twitter / linkedin / email / github | (a) Show preview in a code fence in chat. (b) Copy clean version to clipboard via `pbcopy`. |\n| email rich | Render to HTML, write to `/tmp/paste-\u003ctimestamp>.html`, `open` it in browser. Skip clipboard (the user copies from browser to preserve rich text). |\n| markdown | Render the cleaned markdown directly in chat (Claude Code renders it). Also copy raw markdown to clipboard. Offer: *\"Open as HTML too?\"* — if yes, write and open. |\n| html | Render to HTML, write to `/tmp/paste-\u003ctimestamp>.html`, `open` it. Skip clipboard. |\n\nAfter output, report a one-line summary of what was cleaned (e.g., *\"Stripped 12 ANSI codes, 4 box-drawing chars, 1 prompt artifact. Character count: 248 / 280 (X).\"*).\n\n## Length warnings\n\nTwitter and LinkedIn have practical limits. the user said \"let me trim\" — don't refuse or auto-truncate.\n\n- **Twitter/X**: warn if >280 chars. Note the overage.\n- **LinkedIn**: warn if >400 chars (comfort line, not hard limit).\n- Other destinations: no length warning.\n\n## URL handling for social destinations\n\nIf the content has URLs and destination is **twitter** or **linkedin**:\n- Surface the URLs separately (don't include them in the body)\n- Remind the user: links go in a first comment (LinkedIn) or reply (X), not the body\n- See `makerskills:jab-hook` and `~/.claude/memory/feedback_social_link_placement.md`\n\n## Examples\n\n```\n/paste slack\n```\n→ Reads clipboard, strips ANSI, converts `**bold**` to `*bold*`, copies to clipboard, shows preview.\n\n```\n/paste twitter\n[pasted error log]\n```\n→ Uses pasted content (ignores clipboard), strips everything, warns at 412/280 chars, copies, asks if the user wants to trim or pick a different destination.\n\n```\n/paste html\n[pasted markdown table]\n```\n→ Renders table as HTML, opens in browser. the user selects + copies into Notion/email with formatting preserved.\n\n```\n/paste\n[pasted output with sk-anthropic-key in it]\n```\n→ Stops. *\"Spotted what looks like an Anthropic API key: `sk-an...3kf9`. Continue, redact, or abort?\"*\n\n## Composes with\n\n- `jab-hook` — clean output for pasting into Typefully drafts when the MCP path doesn't fit; also enforces the link-placement rule for X/LinkedIn destinations\n- `social-fetch` — clean a fetched post before quoting it in a draft or newsletter\n- `second-brain` — `paste` output can be captured cleanly into `raw/note-\u003cslug>.md` for future compilation\n- `watch-video` — transcript / summary output often flows through `paste` for platform-specific reformatting\n\n## Notes on quality\n\n- **Secret detection runs first, always.** Before any formatting or destination logic, `paste` scans for `sk-*`, `AKIA*`, `xoxb-*`, JWT-shaped strings, and long-hex tokens. Prompts before proceeding on any hit. Better to false-positive occasionally than to leak a real key.\n- **Destination-aware transforms, not one-size-fits-all.** Slack wants `*bold*`; LinkedIn wants unicode-styled bold; email wants HTML. Same input, 9 different valid outputs. The destination flag is not optional.\n- **ANSI codes get stripped for every destination.** Terminal escapes (`\\033[31m` etc.) render as garbage everywhere except the source terminal.\n- **Character limits are enforced, not warnings.** X at 280, LinkedIn at 3000, Twitter at 25000 — paste refuses to copy over-limit output and offers a trim strategy.\n- **Links go in first comments for social destinations** — not the body. Enforced when destination is `twitter` or `linkedin`. Documented in `~/.claude/memory/feedback_social_link_placement.md`.\n- **HTML destination opens in a browser tab, not the clipboard.** Formatted tables + code blocks need a rendered surface to select-and-copy from with formatting preserved. Copying raw HTML to the clipboard produces garbage in Notion/email.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("paste-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

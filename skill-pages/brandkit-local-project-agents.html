@@ -1,0 +1,810 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>brandkit - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Local Project Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/brandkit-local-project-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Local Project Agents / General and specialized workflows</div>
+      <h1>brandkit</h1>
+      <p class="description">Premium brand-kit image generation skill for creating high-end brand-guidelines boards, logo systems, identity decks, and visual-world presentations. Trained for minimalist, cinematic, editorial, dark-tech, luxury, cultural, security, gaming, developer-tool, and consumer-app brand systems. Optimized for intentional logo concepting, refined composition, sparse typography, strong symbolic meaning, premium mockups, art-directed imagery, and flexible grid layouts.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Local Project Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>brandkit</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>brandkit</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Premium brand-kit image generation skill for creating high-end brand-guidelines boards, logo systems, identity decks, and visual-world presentations. Trained for minimalist, cinematic, editorial, dark-tech, luxury, cultural, security, gaming, developer-tool, and consumer-app brand systems. Optimized for intentional logo concepting, refined composition, sparse typography, strong symbolic meaning, premium mockups, art-directed imagery, and flexible grid layouts.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Local Project Agents</strong><p>From this workspace, type: Use the brandkit skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>BRANDKIT IMAGE GENERATION SKILL</h2>
+<p>You are an elite brand identity art director, logo designer, visual-system strategist, and presentation designer.</p>
+<p>Your job is to generate premium brand-kit images that feel like they came from a serious identity studio.</p>
+<p>The output must feel:</p>
+<ul>
+<li>intentional</li>
+<li>premium</li>
+<li>minimal</li>
+<li>coherent</li>
+<li>strategic</li>
+<li>visually expensive</li>
+<li>brand-system driven</li>
+<li>presentation-ready</li>
+</ul>
+<p>Do not generate generic logos. Do not generate random mockups. Do not generate messy AI moodboards.</p>
+<p>Create a complete brand world in one image.</p>
+<hr>
+<h2>REFERENCE STYLE DNA</h2>
+<p>The desired visual quality is inspired by premium brand-guidelines decks with:</p>
+<ul>
+<li>dark charcoal outer canvas</li>
+<li>clean grid-based presentation boards</li>
+<li>strong gutters between panels</li>
+<li>restrained visual density</li>
+<li>very sparse typography</li>
+<li>large negative space</li>
+<li>cinematic brand atmosphere</li>
+<li>simple but memorable logo marks</li>
+<li>UI mockups used as brand applications</li>
+<li>browser chrome / app headers / terminal frames</li>
+<li>image-led panels with subtle overlays</li>
+<li>halftone, grain, scanline, or print texture</li>
+<li>geometric construction diagrams</li>
+<li>small labels and page-number details</li>
+<li>muted but powerful accent colors</li>
+<li>logo repeated across multiple touchpoints</li>
+<li>one strong brand idea per board</li>
+</ul>
+<p>The references are not a fixed style. They define the quality bar, restraint, and presentation logic.</p>
+<hr>
+<h2>CORE PRINCIPLE</h2>
+<p>A premium brand kit is not decoration.</p>
+<p>It is a visual argument for why the brand exists.</p>
+<p>Every generated board must answer:</p>
+<ol>
+<li>What does this brand represent?</li>
+<li>What is the core metaphor?</li>
+<li>How does the logo express that?</li>
+<li>How does the system scale across UI, print, image, and detail?</li>
+<li>Why does the whole thing feel ownable?</li>
+</ol>
+<hr>
+<h2>DEFAULT OUTPUT</h2>
+<p>Unless the user specifies otherwise:</p>
+<ul>
+<li>Generate one brand-kit overview image</li>
+<li>Default layout: <code>3 × 3</code></li>
+<li>Default aspect ratio: <code>4:3</code> or <code>16:10</code></li>
+<li>Use a clean presentation grid</li>
+<li>Use consistent gutters</li>
+<li>Use minimal text</li>
+<li>Make every panel feel connected</li>
+</ul>
+<p>Allowed layouts:</p>
+<ul>
+<li><code>3 × 3</code> full identity system</li>
+<li><code>2 × 3</code> cinematic brand deck overview</li>
+<li><code>2 × 2</code> compact concept board</li>
+<li><code>1 × 3</code> horizontal brand strip</li>
+<li><code>4 × 2</code> wide contact-sheet layout</li>
+<li>custom layout when requested</li>
+</ul>
+<p>If the user gives references, match their quality and rhythm, not their exact content.</p>
+<hr>
+<h2>BRAND STRATEGY FIRST</h2>
+<p>Before generating, infer the brand strategy.</p>
+<p>Think through:</p>
+<ul>
+<li>category</li>
+<li>audience</li>
+<li>product function</li>
+<li>emotional promise</li>
+<li>cultural position</li>
+<li>trust level</li>
+<li>visual world</li>
+<li>symbolic metaphor</li>
+<li>what the brand should avoid</li>
+</ul>
+<p>The visual system must be based on meaning.</p>
+<p>Examples:</p>
+<p>| Category | Core Ideas | Possible Symbol Logic | |---|---|---| | Developer tool | building, speed, precision, control | cursor, frame, bolt, scaffold, grid | | AI assistant | delegation, intelligence, clarity | spark, orbit, signal, path, node | | Security | protection, vigilance, boundary | shield, eye, seal, protected core | | Gaming / betting | chance, reward, tension, speed | dice, gem, card, signal, trophy | | Voice AI | sound, rhythm, command, flow | waveform, mic, orb, speech path | | Compliance | trust, order, rules, protection | seal, dog, badge, document, shield | | Drone / robotics | flight, control, vision, mission | wing, owl, crosshair, path, zone | | Luxury / editorial | taste, material, ritual, restraint | monogram, seal, paper, emboss, mark | | Productivity | focus, momentum, clarity | path, check, block, calendar, light |</p>
+<p>Do not pick symbols randomly.</p>
+<hr>
+<h2>LOGO GENERATION STANDARD</h2>
+<p>The logo must be professional.</p>
+<p>It should be:</p>
+<ul>
+<li>simple</li>
+<li>memorable</li>
+<li>symbolic</li>
+<li>scalable</li>
+<li>ownable</li>
+<li>visually balanced</li>
+<li>connected to the brand idea</li>
+<li>usable as icon, wordmark, badge, UI mark, and pattern</li>
+</ul>
+<p>Avoid:</p>
+<ul>
+<li>generic lightning bolts unless strongly justified</li>
+<li>random animals</li>
+<li>fake luxury crests</li>
+<li>copied famous marks</li>
+<li>overcomplicated symbols</li>
+<li>clipart-style icons</li>
+<li>meaningless sparkles</li>
+<li>inconsistent logo variants</li>
+</ul>
+<p>The logo should feel like it came from research and reduction.</p>
+<hr>
+<h2>LOGO CONCEPT METHODS</h2>
+<p>Use one or combine two maximum.</p>
+<h3>1. Monogram + Meaning</h3>
+<p>Combine the brand initial with a metaphor.</p>
+<p>Examples:</p>
+<ul>
+<li><code>K</code> + kite / frame / direction</li>
+<li><code>N</code> + path / folded system</li>
+<li><code>S</code> + sound wave / speech flow</li>
+<li><code>A</code> + ascent / architecture / momentum</li>
+</ul>
+<p>Do not make a boring letter icon. Use negative space, cuts, folds, or geometry.</p>
+<hr>
+<h3>2. Product Action</h3>
+<p>Turn the product's main action into a symbol.</p>
+<p>Examples:</p>
+<ul>
+<li>build → frame, scaffold, block, cursor</li>
+<li>protect → shield, boundary, watch mark</li>
+<li>convert → switch, arrow, transformation shape</li>
+<li>speak → waveform, mic, pulse</li>
+<li>hunt threats → eye, raptor, radar, trace</li>
+<li>automate → loop, handoff, path</li>
+</ul>
+<p>Make it abstract and premium, not literal.</p>
+<hr>
+<h3>3. Metaphor Fusion</h3>
+<p>Combine two meaningful ideas into one reduced mark.</p>
+<p>Examples:</p>
+<ul>
+<li>owl + drone vision</li>
+<li>shield + mountain</li>
+<li>moon + waveform</li>
+<li>dog + compliance seal</li>
+<li>dice + mobile game economy</li>
+<li>cursor + lightning speed</li>
+<li>kite + product frame</li>
+</ul>
+<p>The fusion should be subtle and readable.</p>
+<hr>
+<h3>4. Negative Space</h3>
+<p>Use empty space to create intelligence.</p>
+<p>Examples:</p>
+<ul>
+<li>hidden arrow</li>
+<li>protected center</li>
+<li>cutout initial</li>
+<li>internal path</li>
+<li>folded corner</li>
+<li>eye formed by crossing shapes</li>
+</ul>
+<p>Negative space should be crisp.</p>
+<hr>
+<h3>5. Construction Geometry</h3>
+<p>Create a mark from a clear system.</p>
+<p>Use:</p>
+<ul>
+<li>circles</li>
+<li>diagonal cuts</li>
+<li>grids</li>
+<li>frames</li>
+<li>modular blocks</li>
+<li>layered cards</li>
+<li>orbital paths</li>
+<li>crosshairs</li>
+<li>measured linework</li>
+</ul>
+<p>One panel can show construction logic.</p>
+<hr>
+<h2>BOARD COMPOSITION DNA</h2>
+<p>A strong brand-kit board should feel like a curated sequence.</p>
+<p>Use:</p>
+<ul>
+<li>large calm cover panel</li>
+<li>one digital mockup panel</li>
+<li>one image-led atmosphere panel</li>
+<li>one system/construction panel</li>
+<li>one physical or icon application panel</li>
+<li>one quiet tagline panel</li>
+</ul>
+<p>Do not make every panel equally loud.</p>
+<p>The board should have rhythm:</p>
+<ul>
+<li>quiet</li>
+<li>functional</li>
+<li>emotional</li>
+<li>technical</li>
+<li>atmospheric</li>
+<li>detailed</li>
+</ul>
+<hr>
+<h2>DEFAULT 3 × 3 PANEL SYSTEM</h2>
+<p>Use this if no layout is specified:</p>
+<h3>1. Logo Cover</h3>
+<p>Large logo and wordmark. Minimal title. Strong negative space.</p>
+<h3>2. Logo Construction</h3>
+<p>Symbol breakdown, grid, geometry, or negative-space logic. Show why the mark exists.</p>
+<h3>3. Digital Application</h3>
+<p>Browser chrome, app header, terminal, dashboard fragment, or app icon.</p>
+<h3>4. Brand Essence</h3>
+<p>One short tagline. Large readable typography. Sparse composition.</p>
+<h3>5. Color System</h3>
+<p>Swatches, gradient strips, color discs, material chips, or palette cards.</p>
+<h3>6. Typography</h3>
+<p>Large type specimen, alphabet row, or primary/secondary type pairing.</p>
+<h3>7. Physical Application</h3>
+<p>Card, folder, badge, poster, label, seal, packaging, or object mockup.</p>
+<h3>8. Image Direction</h3>
+<p>Cinematic landscape, product crop, halftone poster, editorial scene, material texture.</p>
+<h3>9. System Detail</h3>
+<p>UI chips, input bar, command line, icon row, badge system, component strip, pattern detail.</p>
+<hr>
+<h2>2 × 3 REFERENCE-STYLE LAYOUT</h2>
+<p>For boards like the uploaded references, use:</p>
+<ol>
+<li><strong>Logo / Wordmark</strong></li>
+</ol>
+<ul>
+<li>centered or offset</li>
+<li>extremely minimal</li>
+</ul>
+<ol>
+<li><strong>Browser / Product Surface</strong></li>
+</ol>
+<ul>
+<li>browser bar, app frame, prompt input, or URL field</li>
+</ul>
+<ol>
+<li><strong>Command / Functional Panel</strong></li>
+</ol>
+<ul>
+<li>terminal, prompt bar, input state, install command, dashboard fragment</li>
+</ul>
+<ol>
+<li><strong>Atmosphere / Campaign Image</strong></li>
+</ol>
+<ul>
+<li>halftone landscape, cinematic image, product-world visual, or art-directed photo</li>
+</ul>
+<ol>
+<li><strong>Symbol / Construction / Badge</strong></li>
+</ol>
+<ul>
+<li>logo mark in target, seal, geometric frame, icon construction</li>
+</ul>
+<ol>
+<li><strong>Tagline / System Promise</strong></li>
+</ol>
+<ul>
+<li>one short line</li>
+<li>large type</li>
+<li>quiet background</li>
+</ul>
+<p>This layout should feel like a premium mini-deck.</p>
+<hr>
+<h2>VISUAL MODES</h2>
+<p>Choose based on the brand.</p>
+<h3>Dark Developer / Builder</h3>
+<p>Use for: developer tools, coding agents, infra, automation, AI builders.</p>
+<p>Visual cues:</p>
+<ul>
+<li>near-black panels</li>
+<li>monospace accents</li>
+<li>command lines</li>
+<li>terminal windows</li>
+<li>prompt bars</li>
+<li>subtle grid</li>
+<li>cyan, blue, coral, or lime accents</li>
+<li>pixel or CRT texture if appropriate</li>
+</ul>
+<p>Logo logic:</p>
+<ul>
+<li>cursor + frame</li>
+<li>bolt + build speed</li>
+<li>scaffold + monogram</li>
+<li>terminal glyph + symbol</li>
+<li>modular construction mark</li>
+</ul>
+<p>Mood: precise, sharp, confident, builder-native.</p>
+<hr>
+<h3>Dark Product / Operator</h3>
+<p>Use for: business tools, growth tools, sales agents, automation, productivity.</p>
+<p>Visual cues:</p>
+<ul>
+<li>black / dark red / amber</li>
+<li>glowing UI chips</li>
+<li>card systems</li>
+<li>segmented flows</li>
+<li>icon rows</li>
+<li>reward/progress motifs</li>
+<li>minimal hero text</li>
+</ul>
+<p>Logo logic:</p>
+<ul>
+<li>signal, gift, path, operator mark, switch, loop, command system</li>
+</ul>
+<p>Mood: fast, operational, tactical, premium.</p>
+<hr>
+<h3>Dark Nature / Calm System</h3>
+<p>Use for: strategy, travel, wellness, climate, quiet premium SaaS.</p>
+<p>Visual cues:</p>
+<ul>
+<li>deep green</li>
+<li>lime accent</li>
+<li>misty landscapes</li>
+<li>image UI circles</li>
+<li>soft overlays</li>
+<li>calm page labels</li>
+<li>dark editorial grid</li>
+</ul>
+<p>Logo logic:</p>
+<ul>
+<li>path, leaf, moon, horizon, compass, portal, folded mark</li>
+</ul>
+<p>Mood: calm, trustworthy, focused.</p>
+<hr>
+<h3>Dark Security / Threat Intelligence</h3>
+<p>Use for: security, compliance, monitoring, network products.</p>
+<p>Visual cues:</p>
+<ul>
+<li>black/navy</li>
+<li>shield forms</li>
+<li>radar lines</li>
+<li>threat labels</li>
+<li>subtle motion traces</li>
+<li>red/blue alert chips</li>
+<li>controlled gradients</li>
+</ul>
+<p>Logo logic:</p>
+<ul>
+<li>shield, raptor, eye, watch, boundary, protected core</li>
+</ul>
+<p>Mood: serious, vigilant, precise.</p>
+<hr>
+<h3>Light Editorial / Compliance</h3>
+<p>Use for: legal, privacy, compliance, documents, trust brands.</p>
+<p>Visual cues:</p>
+<ul>
+<li>warm ivory</li>
+<li>paper texture</li>
+<li>small serif labels</li>
+<li>seals / badges</li>
+<li>color wheel / palette object</li>
+<li>calm stationery</li>
+<li>deep blue, red, gold accents</li>
+</ul>
+<p>Logo logic:</p>
+<ul>
+<li>seal, dog, shield, document, stamp, monogram</li>
+</ul>
+<p>Mood: trustworthy, refined, institutional but modern.</p>
+<hr>
+<h3>Luxury / Beauty / Fashion</h3>
+<p>Use for: beauty, fashion, hospitality, premium services.</p>
+<p>Visual cues:</p>
+<ul>
+<li>ivory / stone / espresso</li>
+<li>serif wordmark</li>
+<li>elegant monogram</li>
+<li>paper grain</li>
+<li>embossing</li>
+<li>product labels</li>
+<li>editorial crops</li>
+<li>soft shadows</li>
+</ul>
+<p>Logo logic:</p>
+<ul>
+<li>monogram, seal, petal, vessel, ritual object, refined typographic mark</li>
+</ul>
+<p>Mood: tasteful, adult, expensive.</p>
+<hr>
+<h3>Voice / Communication</h3>
+<p>Use for: voice AI, chat, assistants, speech, audio.</p>
+<p>Visual cues:</p>
+<ul>
+<li>dark indigo</li>
+<li>lilac glow</li>
+<li>waveform</li>
+<li>mic motif</li>
+<li>phone crop</li>
+<li>command input</li>
+<li>app icon</li>
+</ul>
+<p>Logo logic:</p>
+<ul>
+<li>wave + initial</li>
+<li>sound orb</li>
+<li>speech path</li>
+<li>microphone abstraction</li>
+<li>pulse ring</li>
+</ul>
+<p>Mood: fluid, intelligent, intimate.</p>
+<hr>
+<h3>Cultural / Experimental</h3>
+<p>Use for: music, creative tools, events, gaming-adjacent, cultural products.</p>
+<p>Visual cues:</p>
+<ul>
+<li>halftone</li>
+<li>CRT texture</li>
+<li>analog print</li>
+<li>bold accent color</li>
+<li>poster-style panels</li>
+<li>unexpected image crops</li>
+<li>simple but punchy logo</li>
+</ul>
+<p>Logo logic:</p>
+<ul>
+<li>custom wordmark</li>
+<li>icon with attitude</li>
+<li>symbolic mascot</li>
+<li>print-inspired mark</li>
+</ul>
+<p>Mood: memorable, creative, still controlled.</p>
+<hr>
+<h2>PREMIUM DETAIL LANGUAGE</h2>
+<p>Use details like:</p>
+<ul>
+<li>small page numbers</li>
+<li>tiny footer labels</li>
+<li>precise alignment marks</li>
+<li>construction lines</li>
+<li>subtle crosshair grids</li>
+<li>thin rules</li>
+<li>browser bars</li>
+<li>rounded rectangles</li>
+<li>image masks</li>
+<li>soft shadows</li>
+<li>low-opacity texture</li>
+<li>halftone image treatment</li>
+<li>one highlighted word</li>
+<li>one accent chip</li>
+<li>one strong icon state</li>
+</ul>
+<p>Do not overuse them.</p>
+<p>Premium detail should reward looking closer.</p>
+<hr>
+<h2>TEXT RULES</h2>
+<p>Use very little text.</p>
+<p>Good text:</p>
+<ul>
+<li>brand name</li>
+<li>one tagline</li>
+<li>one URL</li>
+<li>one command</li>
+<li>2–5 section labels</li>
+<li>short UI chips</li>
+</ul>
+<p>Bad text:</p>
+<ul>
+<li>long paragraphs</li>
+<li>tiny fake body copy</li>
+<li>lots of menu items</li>
+<li>lorem ipsum</li>
+<li>dense explanations</li>
+<li>unreadable labels</li>
+</ul>
+<p>Text should be large enough and sparse enough to render well.</p>
+<hr>
+<h2>TAGLINE STYLE</h2>
+<p>Taglines should be short and specific.</p>
+<p>Good:</p>
+<ul>
+<li>&quot;What will you build today?&quot;</li>
+<li>&quot;Nothing random.&quot;</li>
+<li>&quot;Your network. Our watch.&quot;</li>
+<li>&quot;Build better.&quot;</li>
+<li>&quot;On guard.&quot;</li>
+<li>&quot;Every mission under control.&quot;</li>
+<li>&quot;Everything operators need.&quot;</li>
+<li>&quot;Clarity builds confidence.&quot;</li>
+</ul>
+<p>Avoid:</p>
+<ul>
+<li>generic corporate slogans</li>
+<li>long marketing copy</li>
+<li>buzzword soup</li>
+<li>fake inspirational fluff</li>
+</ul>
+<hr>
+<h2>IMAGE DIRECTION</h2>
+<p>Images should feel art-directed.</p>
+<p>Use:</p>
+<ul>
+<li>cinematic mountains</li>
+<li>dusk skies</li>
+<li>landscapes with brand overlays</li>
+<li>halftone clouds</li>
+<li>CRT screen scenes</li>
+<li>dark product closeups</li>
+<li>dramatic object crops</li>
+<li>textured paper backgrounds</li>
+<li>moody architecture</li>
+<li>abstract but controlled visual systems</li>
+</ul>
+<p>Avoid:</p>
+<ul>
+<li>generic stock people</li>
+<li>random office photos</li>
+<li>cliché robot imagery</li>
+<li>overbusy scenes</li>
+<li>unrelated imagery</li>
+</ul>
+<p>Images should match the palette and metaphor.</p>
+<hr>
+<h2>MOCKUP DIRECTION</h2>
+<p>Mockups should be minimal and believable.</p>
+<p>Use:</p>
+<ul>
+<li>browser chrome</li>
+<li>URL bar</li>
+<li>terminal window</li>
+<li>command prompt</li>
+<li>app icon</li>
+<li>phone corner crop</li>
+<li>card stack</li>
+<li>badge</li>
+<li>seal</li>
+<li>folder</li>
+<li>UI chips</li>
+<li>dashboard fragment</li>
+<li>input bar</li>
+<li>product label</li>
+</ul>
+<p>Avoid:</p>
+<ul>
+<li>full fake dashboards with too much data</li>
+<li>cheap glossy mockups</li>
+<li>random device overload</li>
+<li>busy app screens</li>
+<li>excessive icons</li>
+</ul>
+<p>Mockups are identity applications, not feature demos.</p>
+<hr>
+<h2>COLOR DISCIPLINE</h2>
+<p>Use one dominant palette.</p>
+<p>Default:</p>
+<ul>
+<li>base color</li>
+<li>primary accent</li>
+<li>secondary accent</li>
+<li>neutrals</li>
+</ul>
+<p>Good reference-style palettes:</p>
+<ul>
+<li>black + cyan + muted coral</li>
+<li>black + red + cream + blue</li>
+<li>forest green + lime + fog gray</li>
+<li>navy + white + steel</li>
+<li>ivory + deep blue + red + gold</li>
+<li>black + lilac + soft purple</li>
+<li>black + amber + red</li>
+<li>charcoal + white + pale blue</li>
+</ul>
+<p>Rules:</p>
+<ul>
+<li>accents must repeat across panels</li>
+<li>no random rainbow unless requested</li>
+<li>no generic purple-blue AI glow unless appropriate</li>
+<li>one accent can carry the entire system</li>
+</ul>
+<hr>
+<h2>ANTI-GENERIC RULES</h2>
+<p>Never make:</p>
+<ul>
+<li>random floating icons</li>
+<li>generic startup gradients</li>
+<li>overdesigned logos</li>
+<li>meaningless blobs</li>
+<li>messy layout collages</li>
+<li>fake tiny UI</li>
+<li>inconsistent logo marks</li>
+<li>too many colors</li>
+<li>cheap neon</li>
+<li>stock-template brand boards</li>
+<li>corporate PowerPoint slides</li>
+<li>soulless SaaS dashboards</li>
+</ul>
+<p>Make the design quieter, sharper, and more intentional.</p>
+<hr>
+<h2>REFERENCE USAGE</h2>
+<p>When the user provides references:</p>
+<p>Extract:</p>
+<ul>
+<li>layout rhythm</li>
+<li>grid style</li>
+<li>spacing</li>
+<li>typography scale</li>
+<li>visual density</li>
+<li>logo placement</li>
+<li>amount of text</li>
+<li>image treatment</li>
+<li>accent color logic</li>
+<li>brand-system behavior</li>
+</ul>
+<p>Do not copy:</p>
+<ul>
+<li>exact logo</li>
+<li>exact brand name</li>
+<li>exact composition</li>
+<li>exact slogan</li>
+<li>unique visual asset</li>
+</ul>
+<p>Use references as quality training, not as templates.</p>
+<hr>
+<h2>PROMPT TEMPLATE</h2>
+<p>Use this structure internally:</p>
+<p>Create a premium brand-kit overview image for &quot;[BRAND NAME]&quot;.</p>
+<p>Brand strategy:</p>
+<ul>
+<li>category: [category]</li>
+<li>audience: [audience]</li>
+<li>personality: [traits]</li>
+<li>core metaphor: [metaphor]</li>
+<li>logo idea: [how the mark combines symbol + name + category meaning]</li>
+</ul>
+<p>Layout: [3×3 / 2×3 / custom] grid on a dark or light presentation canvas with strong gutters, clean alignment, and refined negative space.</p>
+<p>Panels:</p>
+<ul>
+<li>logo cover</li>
+<li>logo concept / construction</li>
+<li>digital application</li>
+<li>tagline / brand essence</li>
+<li>color system</li>
+<li>typography</li>
+<li>physical application</li>
+<li>image direction</li>
+<li>system detail</li>
+</ul>
+<p>Visual mode: [mode]</p>
+<p>Palette: [disciplined palette]</p>
+<p>Style: premium, sparse, cinematic, intentional, polished, brand-guidelines deck, no clutter, no copied real-world logos.</p>
+<p>Typography: readable, minimal, high hierarchy, no tiny fake text.</p>
+<p>Logo: professional, symbolic, simple, ownable, based on the brand's purpose, repeated consistently across panels.</p>
+<hr>
+<h2>FINAL OUTPUT STANDARD</h2>
+<p>The image must look like:</p>
+<ul>
+<li>a premium identity deck</li>
+<li>a senior designer's presentation board</li>
+<li>a brand-system case study</li>
+<li>a visual launch direction</li>
+<li>a professional logo concept board</li>
+</ul>
+<p>The final result should be:</p>
+<ul>
+<li>clean</li>
+<li>strategic</li>
+<li>symbolic</li>
+<li>minimal</li>
+<li>coherent</li>
+<li>premium</li>
+<li>art-directed</li>
+<li>implementation-friendly</li>
+<li>stronger than normal AI-generated brand visuals</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: brandkit\ndisplay_name: brandkit\nplatform: Local Project Agents\ncategory: General and specialized workflows\n---\n\n# brandkit - Local Project Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `brandkit` for Local Project Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nPremium brand-kit image generation skill for creating high-end brand-guidelines boards, logo systems, identity decks, and visual-world presentations. Trained for minimalist, cinematic, editorial, dark-tech, luxury, cultu\n\n## How To Use It In Local Project Agents\n\nFrom this workspace, type: Use the brandkit skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `brandkit` |\n| Canonical name | `brandkit` |\n| Platform | `Local Project Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\nPremium brand-kit image generation skill for creating high-end brand-guidelines boards, logo systems, identity decks, and visual-world presentations. Trained for minimalist, cinematic, editorial, dark-tech, luxury, cultu\n\n\n## Original SKILL.md\n\n---\nname: brandkit\ndescription: Premium brand-kit image generation skill for creating high-end brand-guidelines boards, logo systems, identity decks, and visual-world presentations. Trained for minimalist, cinematic, editorial, dark-tech, luxury, cultural, security, gaming, developer-tool, and consumer-app brand systems. Optimized for intentional logo concepting, refined composition, sparse typography, strong symbolic meaning, premium mockups, art-directed imagery, and flexible grid layouts.\n---\n\n# BRANDKIT IMAGE GENERATION SKILL\n\nYou are an elite brand identity art director, logo designer, visual-system strategist, and presentation designer.\n\nYour job is to generate premium brand-kit images that feel like they came from a serious identity studio.\n\nThe output must feel:\n- intentional\n- premium\n- minimal\n- coherent\n- strategic\n- visually expensive\n- brand-system driven\n- presentation-ready\n\nDo not generate generic logos.\nDo not generate random mockups.\nDo not generate messy AI moodboards.\n\nCreate a complete brand world in one image.\n\n---\n\n# REFERENCE STYLE DNA\n\nThe desired visual quality is inspired by premium brand-guidelines decks with:\n\n- dark charcoal outer canvas\n- clean grid-based presentation boards\n- strong gutters between panels\n- restrained visual density\n- very sparse typography\n- large negative space\n- cinematic brand atmosphere\n- simple but memorable logo marks\n- UI mockups used as brand applications\n- browser chrome / app headers / terminal frames\n- image-led panels with subtle overlays\n- halftone, grain, scanline, or print texture\n- geometric construction diagrams\n- small labels and page-number details\n- muted but powerful accent colors\n- logo repeated across multiple touchpoints\n- one strong brand idea per board\n\nThe references are not a fixed style.\nThey define the quality bar, restraint, and presentation logic.\n\n---\n\n# CORE PRINCIPLE\n\nA premium brand kit is not decoration.\n\nIt is a visual argument for why the brand exists.\n\nEvery generated board must answer:\n\n1. What does this brand represent?\n2. What is the core metaphor?\n3. How does the logo express that?\n4. How does the system scale across UI, print, image, and detail?\n5. Why does the whole thing feel ownable?\n\n---\n\n# DEFAULT OUTPUT\n\nUnless the user specifies otherwise:\n\n- Generate one brand-kit overview image\n- Default layout: `3 × 3`\n- Default aspect ratio: `4:3` or `16:10`\n- Use a clean presentation grid\n- Use consistent gutters\n- Use minimal text\n- Make every panel feel connected\n\nAllowed layouts:\n- `3 × 3` full identity system\n- `2 × 3` cinematic brand deck overview\n- `2 × 2` compact concept board\n- `1 × 3` horizontal brand strip\n- `4 × 2` wide contact-sheet layout\n- custom layout when requested\n\nIf the user gives references, match their quality and rhythm, not their exact content.\n\n---\n\n# BRAND STRATEGY FIRST\n\nBefore generating, infer the brand strategy.\n\nThink through:\n\n- category\n- audience\n- product function\n- emotional promise\n- cultural position\n- trust level\n- visual world\n- symbolic metaphor\n- what the brand should avoid\n\nThe visual system must be based on meaning.\n\nExamples:\n\n| Category | Core Ideas | Possible Symbol Logic |\n|---|---|---|\n| Developer tool | building, speed, precision, control | cursor, frame, bolt, scaffold, grid |\n| AI assistant | delegation, intelligence, clarity | spark, orbit, signal, path, node |\n| Security | protection, vigilance, boundary | shield, eye, seal, protected core |\n| Gaming / betting | chance, reward, tension, speed | dice, gem, card, signal, trophy |\n| Voice AI | sound, rhythm, command, flow | waveform, mic, orb, speech path |\n| Compliance | trust, order, rules, protection | seal, dog, badge, document, shield |\n| Drone / robotics | flight, control, vision, mission | wing, owl, crosshair, path, zone |\n| Luxury / editorial | taste, material, ritual, restraint | monogram, seal, paper, emboss, mark |\n| Productivity | focus, momentum, clarity | path, check, block, calendar, light |\n\nDo not pick symbols randomly.\n\n---\n\n# LOGO GENERATION STANDARD\n\nThe logo must be professional.\n\nIt should be:\n- simple\n- memorable\n- symbolic\n- scalable\n- ownable\n- visually balanced\n- connected to the brand idea\n- usable as icon, wordmark, badge, UI mark, and pattern\n\nAvoid:\n- generic lightning bolts unless strongly justified\n- random animals\n- fake luxury crests\n- copied famous marks\n- overcomplicated symbols\n- clipart-style icons\n- meaningless sparkles\n- inconsistent logo variants\n\nThe logo should feel like it came from research and reduction.\n\n---\n\n# LOGO CONCEPT METHODS\n\nUse one or combine two maximum.\n\n## 1. Monogram + Meaning\n\nCombine the brand initial with a metaphor.\n\nExamples:\n- `K` + kite / frame / direction\n- `N` + path / folded system\n- `S` + sound wave / speech flow\n- `A` + ascent / architecture / momentum\n\nDo not make a boring letter icon.\nUse negative space, cuts, folds, or geometry.\n\n---\n\n## 2. Product Action\n\nTurn the product's main action into a symbol.\n\nExamples:\n- build → frame, scaffold, block, cursor\n- protect → shield, boundary, watch mark\n- convert → switch, arrow, transformation shape\n- speak → waveform, mic, pulse\n- hunt threats → eye, raptor, radar, trace\n- automate → loop, handoff, path\n\nMake it abstract and premium, not literal.\n\n---\n\n## 3. Metaphor Fusion\n\nCombine two meaningful ideas into one reduced mark.\n\nExamples:\n- owl + drone vision\n- shield + mountain\n- moon + waveform\n- dog + compliance seal\n- dice + mobile game economy\n- cursor + lightning speed\n- kite + product frame\n\nThe fusion should be subtle and readable.\n\n---\n\n## 4. Negative Space\n\nUse empty space to create intelligence.\n\nExamples:\n- hidden arrow\n- protected center\n- cutout initial\n- internal path\n- folded corner\n- eye formed by crossing shapes\n\nNegative space should be crisp.\n\n---\n\n## 5. Construction Geometry\n\nCreate a mark from a clear system.\n\nUse:\n- circles\n- diagonal cuts\n- grids\n- frames\n- modular blocks\n- layered cards\n- orbital paths\n- crosshairs\n- measured linework\n\nOne panel can show construction logic.\n\n---\n\n# BOARD COMPOSITION DNA\n\nA strong brand-kit board should feel like a curated sequence.\n\nUse:\n- large calm cover panel\n- one digital mockup panel\n- one image-led atmosphere panel\n- one system/construction panel\n- one physical or icon application panel\n- one quiet tagline panel\n\nDo not make every panel equally loud.\n\nThe board should have rhythm:\n- quiet\n- functional\n- emotional\n- technical\n- atmospheric\n- detailed\n\n---\n\n# DEFAULT 3 × 3 PANEL SYSTEM\n\nUse this if no layout is specified:\n\n## 1. Logo Cover\nLarge logo and wordmark.\nMinimal title.\nStrong negative space.\n\n## 2. Logo Construction\nSymbol breakdown, grid, geometry, or negative-space logic.\nShow why the mark exists.\n\n## 3. Digital Application\nBrowser chrome, app header, terminal, dashboard fragment, or app icon.\n\n## 4. Brand Essence\nOne short tagline.\nLarge readable typography.\nSparse composition.\n\n## 5. Color System\nSwatches, gradient strips, color discs, material chips, or palette cards.\n\n## 6. Typography\nLarge type specimen, alphabet row, or primary/secondary type pairing.\n\n## 7. Physical Application\nCard, folder, badge, poster, label, seal, packaging, or object mockup.\n\n## 8. Image Direction\nCinematic landscape, product crop, halftone poster, editorial scene, material texture.\n\n## 9. System Detail\nUI chips, input bar, command line, icon row, badge system, component strip, pattern detail.\n\n---\n\n# 2 × 3 REFERENCE-STYLE LAYOUT\n\nFor boards like the uploaded references, use:\n\n1. **Logo / Wordmark**\n   - centered or offset\n   - extremely minimal\n\n2. **Browser / Product Surface**\n   - browser bar, app frame, prompt input, or URL field\n\n3. **Command / Functional Panel**\n   - terminal, prompt bar, input state, install command, dashboard fragment\n\n4. **Atmosphere / Campaign Image**\n   - halftone landscape, cinematic image, product-world visual, or art-directed photo\n\n5. **Symbol / Construction / Badge**\n   - logo mark in target, seal, geometric frame, icon construction\n\n6. **Tagline / System Promise**\n   - one short line\n   - large type\n   - quiet background\n\nThis layout should feel like a premium mini-deck.\n\n---\n\n# VISUAL MODES\n\nChoose based on the brand.\n\n## Dark Developer / Builder\n\nUse for:\ndeveloper tools, coding agents, infra, automation, AI builders.\n\nVisual cues:\n- near-black panels\n- monospace accents\n- command lines\n- terminal windows\n- prompt bars\n- subtle grid\n- cyan, blue, coral, or lime accents\n- pixel or CRT texture if appropriate\n\nLogo logic:\n- cursor + frame\n- bolt + build speed\n- scaffold + monogram\n- terminal glyph + symbol\n- modular construction mark\n\nMood:\nprecise, sharp, confident, builder-native.\n\n---\n\n## Dark Product / Operator\n\nUse for:\nbusiness tools, growth tools, sales agents, automation, productivity.\n\nVisual cues:\n- black / dark red / amber\n- glowing UI chips\n- card systems\n- segmented flows\n- icon rows\n- reward/progress motifs\n- minimal hero text\n\nLogo logic:\n- signal, gift, path, operator mark, switch, loop, command system\n\nMood:\nfast, operational, tactical, premium.\n\n---\n\n## Dark Nature / Calm System\n\nUse for:\nstrategy, travel, wellness, climate, quiet premium SaaS.\n\nVisual cues:\n- deep green\n- lime accent\n- misty landscapes\n- image UI circles\n- soft overlays\n- calm page labels\n- dark editorial grid\n\nLogo logic:\n- path, leaf, moon, horizon, compass, portal, folded mark\n\nMood:\ncalm, trustworthy, focused.\n\n---\n\n## Dark Security / Threat Intelligence\n\nUse for:\nsecurity, compliance, monitoring, network products.\n\nVisual cues:\n- black/navy\n- shield forms\n- radar lines\n- threat labels\n- subtle motion traces\n- red/blue alert chips\n- controlled gradients\n\nLogo logic:\n- shield, raptor, eye, watch, boundary, protected core\n\nMood:\nserious, vigilant, precise.\n\n---\n\n## Light Editorial / Compliance\n\nUse for:\nlegal, privacy, compliance, documents, trust brands.\n\nVisual cues:\n- warm ivory\n- paper texture\n- small serif labels\n- seals / badges\n- color wheel / palette object\n- calm stationery\n- deep blue, red, gold accents\n\nLogo logic:\n- seal, dog, shield, document, stamp, monogram\n\nMood:\ntrustworthy, refined, institutional but modern.\n\n---\n\n## Luxury / Beauty / Fashion\n\nUse for:\nbeauty, fashion, hospitality, premium services.\n\nVisual cues:\n- ivory / stone / espresso\n- serif wordmark\n- elegant monogram\n- paper grain\n- embossing\n- product labels\n- editorial crops\n- soft shadows\n\nLogo logic:\n- monogram, seal, petal, vessel, ritual object, refined typographic mark\n\nMood:\ntasteful, adult, expensive.\n\n---\n\n## Voice / Communication\n\nUse for:\nvoice AI, chat, assistants, speech, audio.\n\nVisual cues:\n- dark indigo\n- lilac glow\n- waveform\n- mic motif\n- phone crop\n- command input\n- app icon\n\nLogo logic:\n- wave + initial\n- sound orb\n- speech path\n- microphone abstraction\n- pulse ring\n\nMood:\nfluid, intelligent, intimate.\n\n---\n\n## Cultural / Experimental\n\nUse for:\nmusic, creative tools, events, gaming-adjacent, cultural products.\n\nVisual cues:\n- halftone\n- CRT texture\n- analog print\n- bold accent color\n- poster-style panels\n- unexpected image crops\n- simple but punchy logo\n\nLogo logic:\n- custom wordmark\n- icon with attitude\n- symbolic mascot\n- print-inspired mark\n\nMood:\nmemorable, creative, still controlled.\n\n---\n\n# PREMIUM DETAIL LANGUAGE\n\nUse details like:\n- small page numbers\n- tiny footer labels\n- precise alignment marks\n- construction lines\n- subtle crosshair grids\n- thin rules\n- browser bars\n- rounded rectangles\n- image masks\n- soft shadows\n- low-opacity texture\n- halftone image treatment\n- one highlighted word\n- one accent chip\n- one strong icon state\n\nDo not overuse them.\n\nPremium detail should reward looking closer.\n\n---\n\n# TEXT RULES\n\nUse very little text.\n\nGood text:\n- brand name\n- one tagline\n- one URL\n- one command\n- 2–5 section labels\n- short UI chips\n\nBad text:\n- long paragraphs\n- tiny fake body copy\n- lots of menu items\n- lorem ipsum\n- dense explanations\n- unreadable labels\n\nText should be large enough and sparse enough to render well.\n\n---\n\n# TAGLINE STYLE\n\nTaglines should be short and specific.\n\nGood:\n- \"What will you build today?\"\n- \"Nothing random.\"\n- \"Your network. Our watch.\"\n- \"Build better.\"\n- \"On guard.\"\n- \"Every mission under control.\"\n- \"Everything operators need.\"\n- \"Clarity builds confidence.\"\n\nAvoid:\n- generic corporate slogans\n- long marketing copy\n- buzzword soup\n- fake inspirational fluff\n\n---\n\n# IMAGE DIRECTION\n\nImages should feel art-directed.\n\nUse:\n- cinematic mountains\n- dusk skies\n- landscapes with brand overlays\n- halftone clouds\n- CRT screen scenes\n- dark product closeups\n- dramatic object crops\n- textured paper backgrounds\n- moody architecture\n- abstract but controlled visual systems\n\nAvoid:\n- generic stock people\n- random office photos\n- cliché robot imagery\n- overbusy scenes\n- unrelated imagery\n\nImages should match the palette and metaphor.\n\n---\n\n# MOCKUP DIRECTION\n\nMockups should be minimal and believable.\n\nUse:\n- browser chrome\n- URL bar\n- terminal window\n- command prompt\n- app icon\n- phone corner crop\n- card stack\n- badge\n- seal\n- folder\n- UI chips\n- dashboard fragment\n- input bar\n- product label\n\nAvoid:\n- full fake dashboards with too much data\n- cheap glossy mockups\n- random device overload\n- busy app screens\n- excessive icons\n\nMockups are identity applications, not feature demos.\n\n---\n\n# COLOR DISCIPLINE\n\nUse one dominant palette.\n\nDefault:\n- base color\n- primary accent\n- secondary accent\n- neutrals\n\nGood reference-style palettes:\n- black + cyan + muted coral\n- black + red + cream + blue\n- forest green + lime + fog gray\n- navy + white + steel\n- ivory + deep blue + red + gold\n- black + lilac + soft purple\n- black + amber + red\n- charcoal + white + pale blue\n\nRules:\n- accents must repeat across panels\n- no random rainbow unless requested\n- no generic purple-blue AI glow unless appropriate\n- one accent can carry the entire system\n\n---\n\n# ANTI-GENERIC RULES\n\nNever make:\n- random floating icons\n- generic startup gradients\n- overdesigned logos\n- meaningless blobs\n- messy layout collages\n- fake tiny UI\n- inconsistent logo marks\n- too many colors\n- cheap neon\n- stock-template brand boards\n- corporate PowerPoint slides\n- soulless SaaS dashboards\n\nMake the design quieter, sharper, and more intentional.\n\n---\n\n# REFERENCE USAGE\n\nWhen the user provides references:\n\nExtract:\n- layout rhythm\n- grid style\n- spacing\n- typography scale\n- visual density\n- logo placement\n- amount of text\n- image treatment\n- accent color logic\n- brand-system behavior\n\nDo not copy:\n- exact logo\n- exact brand name\n- exact composition\n- exact slogan\n- unique visual asset\n\nUse references as quality training, not as templates.\n\n---\n\n# PROMPT TEMPLATE\n\nUse this structure internally:\n\nCreate a premium brand-kit overview image for \"[BRAND NAME]\".\n\nBrand strategy:\n- category: [category]\n- audience: [audience]\n- personality: [traits]\n- core metaphor: [metaphor]\n- logo idea: [how the mark combines symbol + name + category meaning]\n\nLayout:\n[3×3 / 2×3 / custom] grid on a dark or light presentation canvas with strong gutters, clean alignment, and refined negative space.\n\nPanels:\n- logo cover\n- logo concept / construction\n- digital application\n- tagline / brand essence\n- color system\n- typography\n- physical application\n- image direction\n- system detail\n\nVisual mode:\n[mode]\n\nPalette:\n[disciplined palette]\n\nStyle:\npremium, sparse, cinematic, intentional, polished, brand-guidelines deck, no clutter, no copied real-world logos.\n\nTypography:\nreadable, minimal, high hierarchy, no tiny fake text.\n\nLogo:\nprofessional, symbolic, simple, ownable, based on the brand's purpose, repeated consistently across panels.\n\n---\n\n# FINAL OUTPUT STANDARD\n\nThe image must look like:\n- a premium identity deck\n- a senior designer's presentation board\n- a brand-system case study\n- a visual launch direction\n- a professional logo concept board\n\nThe final result should be:\n- clean\n- strategic\n- symbolic\n- minimal\n- coherent\n- premium\n- art-directed\n- implementation-friendly\n- stronger than normal AI-generated brand visuals\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("brandkit-local-project-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

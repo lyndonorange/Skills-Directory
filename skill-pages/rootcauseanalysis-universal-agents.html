@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RootCauseAnalysis - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/rootcauseanalysis-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>RootCauseAnalysis</h1>
+      <p class="description">Structured incident investigation grounded in Toyota TPS, Ishikawa, Reason's Swiss Cheese, Gano's Apollo, Google SRE blameless culture. Five workflows: FiveWhys (linear/branching causal chain), Fishbone (6 M's or 4 P's mapping), Postmortem (blameless timeline + contributing factors + actions), FaultTree (AND/OR gate logic for safety-critical multi-path failures), KepnerTregoe IS/IS-NOT. Core axiom: proximate cause is where analysis starts, not ends. Humans are never root causes — if a human could make the mistake, the system allowed it. Also FMEA pre-launch risk inversion. USE WHEN root cause, RCA, 5 whys, fishbone, postmortem, incident analysis, fault tree, why does this keep failing, blameless, recurring bug. NOT FOR systemic loops (use SystemsThinking).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>RootCauseAnalysis</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>RootCauseAnalysis</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Structured incident investigation grounded in Toyota TPS, Ishikawa, Reason's Swiss Cheese, Gano's Apollo, Google SRE blameless culture. Five workflows: FiveWhys (linear/branching causal chain), Fishbone (6 M's or 4 P's mapping), Postmortem (blameless timeline + contributing factors + actions), FaultTree (AND/OR gate logic for safety-critical multi-path failures), KepnerTregoe IS/IS-NOT. Core axiom: proximate cause is where analysis starts, not ends. Humans are never root causes — if a human could make the mistake, the system allowed it. Also FMEA pre-launch risk inversion. USE WHEN root cause, RCA, 5 whys, fishbone, postmortem, incident analysis, fault tree, why does this keep failing, blameless, recurring bug. NOT FOR systemic loops (use SystemsThinking).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the RootCauseAnalysis skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Customization</h3>
+<p><strong>Before executing, check for user customizations at:</strong> <code>~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/RootCauseAnalysis/</code></p>
+<p>If this directory exists, load and apply any <code>PREFERENCES.md</code>, configurations, or resources found there. These override default behavior. If the directory does not exist, proceed with skill defaults.</p>
+<h3>MANDATORY: Voice Notification (REQUIRED BEFORE ANY ACTION)</h3>
+<p><strong>You MUST send this notification BEFORE doing anything else when this skill is invoked.</strong></p>
+<ol>
+<li><strong>Send voice notification:</strong></li>
+</ol>
+<pre><code>   curl -s -X POST http://localhost:31337/notify \
+     -H &quot;Content-Type: application/json&quot; \
+     -d '{&quot;message&quot;: &quot;Running the WORKFLOWNAME workflow in the RootCauseAnalysis skill to ACTION&quot;}' \
+     &gt; /dev/null 2&gt;&amp;1 &amp;</code></pre>
+<ol>
+<li><strong>Output text notification:</strong></li>
+</ol>
+<pre><code>   Running the **WorkflowName** workflow in the **RootCauseAnalysis** skill to ACTION...</code></pre>
+<p><strong>This is not optional. Execute this curl command immediately upon skill invocation.</strong></p>
+<hr>
+<h2>RootCauseAnalysis Skill</h2>
+<h3>What It Does</h3>
+<p>Investigates why something failed — past the proximate cause, down to the contributing factors and latent conditions that actually made the failure possible. It offers five structured methods (5 Whys, Fishbone, Postmortem, Fault Tree, Kepner-Tregoe) and ends with actionable changes that prevent a whole class of failure, not just the one incident. Grounded in Toyota Production System, Ishikawa, Reason's Swiss Cheese model, Gano's Apollo method, and Google SRE / Etsy blameless culture.</p>
+<h3>The Problem</h3>
+<p>When something breaks, the natural move is to find the one thing that caused it, fix that, and move on. That's triage, not analysis — and it's why the same failure keeps coming back. Real incidents have several contributing factors at once, the human &quot;cause&quot; usually sits on top of a system that allowed the mistake, and the first plausible story is almost never the whole one. Hindsight, confirmation, single-cause, and outcome bias all corrupt the investigation if nothing pushes back. This skill is the structure that pushes back: it forces the analysis past the first answer, past blame, and stops only at causes you can actually change.</p>
+<h3>How It Works</h3>
+<p>The goal is not to find &quot;the&quot; root cause — that framing is almost always wrong. The goal is to identify <strong>contributing factors</strong> that are <strong>actionable</strong>. A good RCA ends with changes that prevent a class of failure, not just the specific incident.</p>
+<h3>Core Concept</h3>
+<p>Five axioms this skill operates on:</p>
+<ol>
+<li><strong>Proximate cause ≠ root cause.</strong> &quot;The deploy failed because X crashed&quot; is usually where real analysis <em>starts</em>, not where it ends.</li>
+<li><strong>There is rarely one cause.</strong> Incidents typically have multiple contributing factors — active failures (what a human did) and latent conditions (what the system allowed). James Reason's Swiss Cheese model.</li>
+<li><strong>Humans are not root causes.</strong> &quot;Operator error&quot; is a stop sign for analysis, not a conclusion. If a human could make the mistake, the system allowed it. Go deeper.</li>
+<li><strong>Actionability is the stop condition.</strong> A cause is &quot;root enough&quot; when it points to a change you can actually make. Go too shallow and you miss the fix; go too deep (&quot;physics&quot;) and you can't act on it.</li>
+<li><strong>RCA is a bias-fight.</strong> Hindsight bias, confirmation bias, single-cause bias, and outcome bias all actively corrupt investigations. Structure exists to resist them.</li>
+</ol>
+<h3>Use / Win</h3>
+<p><strong>When to use:</strong></p>
+<ul>
+<li><strong>Any incident or outage</strong> — production failure, security event, deploy gone bad.</li>
+<li><strong>Recurring defects</strong> — bugs of the same shape keep appearing despite fixes.</li>
+<li><strong>Quality problems</strong> — metrics drifting, users reporting the same class of issue.</li>
+<li><strong>Postmortems</strong> — structured, blameless review of an incident's causal chain.</li>
+<li><strong>Pre-launch risk analysis</strong> — inverting RCA with FMEA to catch failure modes before they happen.</li>
+<li><strong>Security investigations</strong> — chain of events, contributing controls, latent conditions.</li>
+<li><strong>Process failures</strong> — a person or team consistently missing a mark. Structure is probably the cause.</li>
+</ul>
+<p><strong>What you win:</strong></p>
+<ul>
+<li><strong>Actionable contributing factors</strong> (plural) rather than a single blame target.</li>
+<li><strong>Latent conditions surfaced</strong> — the Swiss cheese holes lining up that nobody knew were there.</li>
+<li><strong>Durable fixes</strong> — structural changes, not patches to the specific failure.</li>
+<li><strong>Blame-free analysis</strong> — the team can be honest about what happened without self-protective omissions.</li>
+<li><strong>Cross-incident pattern recognition</strong> — after a few RCAs, the repeated latent conditions become visible.</li>
+<li><strong>Discipline against bias</strong> — structured methods force you past the first plausible story.</li>
+</ul>
+<p><strong>Default mental model:</strong> If the same failure class could happen again tomorrow, you haven't done RCA — you've done triage.</p>
+<h3>Workflow Routing</h3>
+<p>Route to the appropriate workflow based on the request.</p>
+<p>| Workflow | Trigger | File | |----------|---------|------| | <strong>FiveWhys</strong> | &quot;5 whys&quot;, &quot;five whys&quot;, quick causal chain, ask why until root | <code>Workflows/FiveWhys.md</code> | | <strong>Fishbone</strong> | &quot;fishbone&quot;, &quot;ishikawa&quot;, categorized cause map, 6 M's / 4 P's / 8 M's | <code>Workflows/Fishbone.md</code> | | <strong>Postmortem</strong> | &quot;postmortem&quot;, &quot;incident review&quot;, &quot;blameless postmortem&quot;, production incident | <code>Workflows/Postmortem.md</code> | | <strong>FaultTree</strong> | &quot;fault tree&quot;, &quot;fta&quot;, top-down deductive, safety-critical, AND/OR logic | <code>Workflows/FaultTree.md</code> | | <strong>KepnerTregoe</strong> | &quot;kepner tregoe&quot;, &quot;is/is-not&quot;, &quot;what changed&quot;, distinction analysis, subtle defects | <code>Workflows/KepnerTregoe.md</code> |</p>
+<h3>Quick Reference</h3>
+<ul>
+<li><strong>5 workflows</strong> — FiveWhys, Fishbone, Postmortem, FaultTree, KepnerTregoe</li>
+<li><strong>5 Whys:</strong> Linear/branching causal chain. Best for simple, single-thread incidents.</li>
+<li><strong>Fishbone:</strong> 6 M's (Manpower, Machine, Method, Material, Measurement, Mother-Nature) for manufacturing; 4 P's (People, Process, Policies, Procedures) for service. Use when multiple category causes are suspected.</li>
+<li><strong>Postmortem:</strong> Timeline + contributing factors + action items. Blameless framing mandatory.</li>
+<li><strong>Fault Tree:</strong> AND/OR gate logic, deductive, top-down. Best for safety-critical and complex multi-path failures.</li>
+<li><strong>Kepner-Tregoe IS/IS-NOT:</strong> Identify distinctions between where the problem occurred and where it did not. Best for subtle, hard-to-reproduce defects.</li>
+</ul>
+<p><strong>Context files (loaded on demand):</strong></p>
+<ul>
+<li><code>Foundation.md</code> — Toyoda, Ishikawa, Reason, Gano, Google SRE; canonical methods</li>
+<li><code>MethodSelection.md</code> — decision flow for which workflow to use</li>
+</ul>
+<h3>Method Selection Guide</h3>
+<p>| Situation | Preferred workflow | |-----------|---------------------| | Single-thread incident, one clear failure point | <strong>FiveWhys</strong> | | Multiple suspected categories (people, process, tools) | <strong>Fishbone</strong> | | Production outage or security incident, needs formal review | <strong>Postmortem</strong> | | Complex multi-path failure, safety-critical, need Boolean logic | <strong>FaultTree</strong> | | Subtle defect, hard to reproduce, &quot;why here and not there?&quot; | <strong>KepnerTregoe</strong> |</p>
+<p>For non-trivial incidents: <strong>Postmortem wraps the others.</strong> Start with a Postmortem structure, use 5 Whys / Fishbone / FTA inside it as investigation tools.</p>
+<h3>Integration</h3>
+<p><strong>Depends on:</strong> nothing — standalone analytical skill.</p>
+<p><strong>Works well with:</strong></p>
+<ul>
+<li><strong>SystemsThinking</strong> — RCA stops at contributing factors; SystemsThinking continues down to structure and mental models. Pair them when patterns repeat across incidents.</li>
+<li><strong>FirstPrinciples</strong> — decompose a contributing factor to its fundamental truths before fixing.</li>
+<li><strong>RedTeam</strong> — &quot;how would we cause this again?&quot; is adversarial RCA. Use RedTeam to stress-test remediations.</li>
+<li><strong>Science</strong> — RCA <em>is</em> the scientific method applied to failures. Use Science for hypothesis generation during investigation.</li>
+</ul>
+<h3>Examples</h3>
+<p><strong>Example 1: Production outage</strong></p>
+<pre><code>User: &quot;the payments service went down for 14 minutes last night&quot;
+→ Postmortem workflow
+→ Timeline: deploy at 23:47 → health check passed → traffic shift 23:49 → p99 latency spike 23:51 → auto-rollback 00:01
+→ 5 Whys inside: Why did p99 spike? Cold cache. Why cold? New pod group. Why no warm? No warm-up in deploy script. Why? Not in checklist. Why? Template predates the caching layer.
+→ Contributing factors: deploy template stale (latent); no warm-up step (active); no cache-cold canary (latent)
+→ Remediation: update deploy template, add warm-up step, add cold-cache canary gate</code></pre>
+<p><strong>Example 2: Recurring defect</strong></p>
+<pre><code>User: &quot;users keep reporting the same kind of auth failure, we've fixed it 3 times&quot;
+→ Fishbone workflow
+→ 6 M's expansion: People (ops auth rotates keys without notifying infra), Method (no key-rotation runbook), Machine (secret cache TTL exceeds rotation window), Material (shared key instead of per-service), Measurement (no key-expiry dashboard), Mother-Nature (none)
+→ Root causes (multiple): Method + Material + Measurement all contribute. Single-point fix won't hold.</code></pre>
+<p><strong>Example 3: Subtle defect</strong></p>
+<pre><code>User: &quot;this flaky test only fails in CI, not locally&quot;
+→ KepnerTregoe workflow
+→ IS/IS-NOT table: fails on CI / passes locally; fails Tuesdays / not other days; fails on shared runners / not dedicated; fails with parallel test workers / not serial
+→ Distinctions point to: time-zone + concurrency + shared file system
+→ Hypothesis: test relies on local timezone assumption + race condition on shared /tmp — both only triggered in CI's environment.</code></pre>
+<h3>Best Practices</h3>
+<ol>
+<li><strong>Always blameless.</strong> The framing is &quot;what system allowed this&quot; not &quot;who screwed up.&quot; Non-negotiable; corrupts the analysis otherwise.</li>
+<li><strong>Multiple causes, always.</strong> Single-root-cause conclusions are almost always wrong. Name at least three contributing factors before stopping.</li>
+<li><strong>Actionability test every cause.</strong> Can you change it? If no — go shallower. If yes — go one level deeper to make sure you've found the lever.</li>
+<li><strong>Timelines before theories.</strong> Reconstruct what happened before hypothesizing why. Hindsight bias compresses the timeline.</li>
+<li><strong>Ask &quot;who else could make this mistake?&quot;</strong> If the answer is &quot;anyone on the team,&quot; it's a systemic cause, not individual error.</li>
+<li><strong>Separate investigation from judgment.</strong> Never let the incident review drift into performance conversations. Separate meeting.</li>
+</ol>
+<h3>Gotchas</h3>
+<ul>
+<li><strong>&quot;Human error&quot; is a starting point, not a root cause.</strong> It's where the investigation begins. Every human error sits on top of a system that made the error possible or probable.</li>
+<li><strong>The first plausible cause is almost never the only one.</strong> Confirmation bias loves RCA. Keep going after you find one.</li>
+<li><strong>Stopping at proximate cause is failure.</strong> &quot;X crashed because Y returned null.&quot; Why did Y return null? Why wasn't null handled? Why wasn't that tested? Go down.</li>
+<li><strong>Going too deep ≠ good RCA.</strong> &quot;The fundamental cause is the second law of thermodynamics&quot; is not actionable. Stop at the deepest actionable level.</li>
+<li><strong>Asking &quot;why&quot; more than ~5 times often means you switched causal chains.</strong> Re-draw as a tree, not a line.</li>
+<li><strong>Don't confuse correlation with cause.</strong> Two things happening together is a hypothesis to test, not a conclusion.</li>
+<li><strong>Outcome bias is sneaky.</strong> Decisions that turn out badly get judged harshly even if they were right given the information at the time. Separate process quality from outcome.</li>
+</ul>
+<hr>
+<p><strong>Attribution:</strong> Frameworks drawn from Sakichi Toyoda (5 Whys, Toyota Production System), Kaoru Ishikawa (<em>Guide to Quality Control</em>, 1968; Fishbone diagram), James Reason (<em>Human Error</em>, 1990; Swiss Cheese model), Dean Gano (<em>Apollo Root Cause Analysis</em>, 2008), Charles Kepner &amp; Benjamin Tregoe (<em>The Rational Manager</em>, 1965), Google SRE book, Etsy blameless postmortem culture (John Allspaw).</p>
+<h3>Execution Log</h3>
+<p>After completing any workflow, append a single JSONL entry:</p>
+<pre><code>echo '{&quot;ts&quot;:&quot;'$(date -u +%Y-%m-%dT%H:%M:%SZ)'&quot;,&quot;skill&quot;:&quot;RootCauseAnalysis&quot;,&quot;workflow&quot;:&quot;WORKFLOW_USED&quot;,&quot;input&quot;:&quot;8_WORD_SUMMARY&quot;,&quot;status&quot;:&quot;ok|error&quot;,&quot;duration_s&quot;:SECONDS}' &gt;&gt; ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: RootCauseAnalysis\ndisplay_name: RootCauseAnalysis\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# RootCauseAnalysis - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `RootCauseAnalysis` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nStructured incident investigation grounded in Toyota TPS, Ishikawa, Reason's Swiss Cheese, Gano's Apollo, Google SRE blameless culture. Five workflows: FiveWhys (linear/branching causal chain), Fishbone (6 M's or 4 P's m\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the RootCauseAnalysis skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `RootCauseAnalysis` |\n| Canonical name | `RootCauseAnalysis` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\nStructured incident investigation grounded in Toyota TPS, Ishikawa, Reason's Swiss Cheese, Gano's Apollo, Google SRE blameless culture. Five workflows: FiveWhys (linear/branching causal chain), Fishbone (6 M's or 4 P's m\n\n\n## Original SKILL.md\n\n---\nname: RootCauseAnalysis\ndescription: \"Structured incident investigation grounded in Toyota TPS, Ishikawa, Reason's Swiss Cheese, Gano's Apollo, Google SRE blameless culture. Five workflows: FiveWhys (linear/branching causal chain), Fishbone (6 M's or 4 P's mapping), Postmortem (blameless timeline + contributing factors + actions), FaultTree (AND/OR gate logic for safety-critical multi-path failures), KepnerTregoe IS/IS-NOT. Core axiom: proximate cause is where analysis starts, not ends. Humans are never root causes — if a human could make the mistake, the system allowed it. Also FMEA pre-launch risk inversion. USE WHEN root cause, RCA, 5 whys, fishbone, postmortem, incident analysis, fault tree, why does this keep failing, blameless, recurring bug. NOT FOR systemic loops (use SystemsThinking).\"\neffort: high\ncontext: fork\n---\n\n## Customization\n\n**Before executing, check for user customizations at:**\n`~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/RootCauseAnalysis/`\n\nIf this directory exists, load and apply any `PREFERENCES.md`, configurations, or resources found there. These override default behavior. If the directory does not exist, proceed with skill defaults.\n\n\n## MANDATORY: Voice Notification (REQUIRED BEFORE ANY ACTION)\n\n**You MUST send this notification BEFORE doing anything else when this skill is invoked.**\n\n1. **Send voice notification:**\n   ```bash\n   curl -s -X POST http://localhost:31337/notify \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\"message\": \"Running the WORKFLOWNAME workflow in the RootCauseAnalysis skill to ACTION\"}' \\\n     > /dev/null 2>&1 &\n   ```\n\n2. **Output text notification:**\n   ```\n   Running the **WorkflowName** workflow in the **RootCauseAnalysis** skill to ACTION...\n   ```\n\n**This is not optional. Execute this curl command immediately upon skill invocation.**\n\n---\n\n# RootCauseAnalysis Skill\n\n## What It Does\n\nInvestigates why something failed — past the proximate cause, down to the contributing factors and latent conditions that actually made the failure possible. It offers five structured methods (5 Whys, Fishbone, Postmortem, Fault Tree, Kepner-Tregoe) and ends with actionable changes that prevent a whole class of failure, not just the one incident. Grounded in Toyota Production System, Ishikawa, Reason's Swiss Cheese model, Gano's Apollo method, and Google SRE / Etsy blameless culture.\n\n## The Problem\n\nWhen something breaks, the natural move is to find the one thing that caused it, fix that, and move on. That's triage, not analysis — and it's why the same failure keeps coming back. Real incidents have several contributing factors at once, the human \"cause\" usually sits on top of a system that allowed the mistake, and the first plausible story is almost never the whole one. Hindsight, confirmation, single-cause, and outcome bias all corrupt the investigation if nothing pushes back. This skill is the structure that pushes back: it forces the analysis past the first answer, past blame, and stops only at causes you can actually change.\n\n## How It Works\n\nThe goal is not to find \"the\" root cause — that framing is almost always wrong. The goal is to identify **contributing factors** that are **actionable**. A good RCA ends with changes that prevent a class of failure, not just the specific incident.\n\n## Core Concept\n\nFive axioms this skill operates on:\n\n1. **Proximate cause ≠ root cause.** \"The deploy failed because X crashed\" is usually where real analysis *starts*, not where it ends.\n2. **There is rarely one cause.** Incidents typically have multiple contributing factors — active failures (what a human did) and latent conditions (what the system allowed). James Reason's Swiss Cheese model.\n3. **Humans are not root causes.** \"Operator error\" is a stop sign for analysis, not a conclusion. If a human could make the mistake, the system allowed it. Go deeper.\n4. **Actionability is the stop condition.** A cause is \"root enough\" when it points to a change you can actually make. Go too shallow and you miss the fix; go too deep (\"physics\") and you can't act on it.\n5. **RCA is a bias-fight.** Hindsight bias, confirmation bias, single-cause bias, and outcome bias all actively corrupt investigations. Structure exists to resist them.\n\n## Use / Win\n\n**When to use:**\n\n- **Any incident or outage** — production failure, security event, deploy gone bad.\n- **Recurring defects** — bugs of the same shape keep appearing despite fixes.\n- **Quality problems** — metrics drifting, users reporting the same class of issue.\n- **Postmortems** — structured, blameless review of an incident's causal chain.\n- **Pre-launch risk analysis** — inverting RCA with FMEA to catch failure modes before they happen.\n- **Security investigations** — chain of events, contributing controls, latent conditions.\n- **Process failures** — a person or team consistently missing a mark. Structure is probably the cause.\n\n**What you win:**\n\n- **Actionable contributing factors** (plural) rather than a single blame target.\n- **Latent conditions surfaced** — the Swiss cheese holes lining up that nobody knew were there.\n- **Durable fixes** — structural changes, not patches to the specific failure.\n- **Blame-free analysis** — the team can be honest about what happened without self-protective omissions.\n- **Cross-incident pattern recognition** — after a few RCAs, the repeated latent conditions become visible.\n- **Discipline against bias** — structured methods force you past the first plausible story.\n\n**Default mental model:** If the same failure class could happen again tomorrow, you haven't done RCA — you've done triage.\n\n## Workflow Routing\n\nRoute to the appropriate workflow based on the request.\n\n| Workflow | Trigger | File |\n|----------|---------|------|\n| **FiveWhys** | \"5 whys\", \"five whys\", quick causal chain, ask why until root | `Workflows/FiveWhys.md` |\n| **Fishbone** | \"fishbone\", \"ishikawa\", categorized cause map, 6 M's / 4 P's / 8 M's | `Workflows/Fishbone.md` |\n| **Postmortem** | \"postmortem\", \"incident review\", \"blameless postmortem\", production incident | `Workflows/Postmortem.md` |\n| **FaultTree** | \"fault tree\", \"fta\", top-down deductive, safety-critical, AND/OR logic | `Workflows/FaultTree.md` |\n| **KepnerTregoe** | \"kepner tregoe\", \"is/is-not\", \"what changed\", distinction analysis, subtle defects | `Workflows/KepnerTregoe.md` |\n\n## Quick Reference\n\n- **5 workflows** — FiveWhys, Fishbone, Postmortem, FaultTree, KepnerTregoe\n- **5 Whys:** Linear/branching causal chain. Best for simple, single-thread incidents.\n- **Fishbone:** 6 M's (Manpower, Machine, Method, Material, Measurement, Mother-Nature) for manufacturing; 4 P's (People, Process, Policies, Procedures) for service. Use when multiple category causes are suspected.\n- **Postmortem:** Timeline + contributing factors + action items. Blameless framing mandatory.\n- **Fault Tree:** AND/OR gate logic, deductive, top-down. Best for safety-critical and complex multi-path failures.\n- **Kepner-Tregoe IS/IS-NOT:** Identify distinctions between where the problem occurred and where it did not. Best for subtle, hard-to-reproduce defects.\n\n**Context files (loaded on demand):**\n- `Foundation.md` — Toyoda, Ishikawa, Reason, Gano, Google SRE; canonical methods\n- `MethodSelection.md` — decision flow for which workflow to use\n\n## Method Selection Guide\n\n| Situation | Preferred workflow |\n|-----------|---------------------|\n| Single-thread incident, one clear failure point | **FiveWhys** |\n| Multiple suspected categories (people, process, tools) | **Fishbone** |\n| Production outage or security incident, needs formal review | **Postmortem** |\n| Complex multi-path failure, safety-critical, need Boolean logic | **FaultTree** |\n| Subtle defect, hard to reproduce, \"why here and not there?\" | **KepnerTregoe** |\n\nFor non-trivial incidents: **Postmortem wraps the others.** Start with a Postmortem structure, use 5 Whys / Fishbone / FTA inside it as investigation tools.\n\n## Integration\n\n**Depends on:** nothing — standalone analytical skill.\n\n**Works well with:**\n- **SystemsThinking** — RCA stops at contributing factors; SystemsThinking continues down to structure and mental models. Pair them when patterns repeat across incidents.\n- **FirstPrinciples** — decompose a contributing factor to its fundamental truths before fixing.\n- **RedTeam** — \"how would we cause this again?\" is adversarial RCA. Use RedTeam to stress-test remediations.\n- **Science** — RCA *is* the scientific method applied to failures. Use Science for hypothesis generation during investigation.\n\n## Examples\n\n**Example 1: Production outage**\n```\nUser: \"the payments service went down for 14 minutes last night\"\n→ Postmortem workflow\n→ Timeline: deploy at 23:47 → health check passed → traffic shift 23:49 → p99 latency spike 23:51 → auto-rollback 00:01\n→ 5 Whys inside: Why did p99 spike? Cold cache. Why cold? New pod group. Why no warm? No warm-up in deploy script. Why? Not in checklist. Why? Template predates the caching layer.\n→ Contributing factors: deploy template stale (latent); no warm-up step (active); no cache-cold canary (latent)\n→ Remediation: update deploy template, add warm-up step, add cold-cache canary gate\n```\n\n**Example 2: Recurring defect**\n```\nUser: \"users keep reporting the same kind of auth failure, we've fixed it 3 times\"\n→ Fishbone workflow\n→ 6 M's expansion: People (ops auth rotates keys without notifying infra), Method (no key-rotation runbook), Machine (secret cache TTL exceeds rotation window), Material (shared key instead of per-service), Measurement (no key-expiry dashboard), Mother-Nature (none)\n→ Root causes (multiple): Method + Material + Measurement all contribute. Single-point fix won't hold.\n```\n\n**Example 3: Subtle defect**\n```\nUser: \"this flaky test only fails in CI, not locally\"\n→ KepnerTregoe workflow\n→ IS/IS-NOT table: fails on CI / passes locally; fails Tuesdays / not other days; fails on shared runners / not dedicated; fails with parallel test workers / not serial\n→ Distinctions point to: time-zone + concurrency + shared file system\n→ Hypothesis: test relies on local timezone assumption + race condition on shared /tmp — both only triggered in CI's environment.\n```\n\n## Best Practices\n\n1. **Always blameless.** The framing is \"what system allowed this\" not \"who screwed up.\" Non-negotiable; corrupts the analysis otherwise.\n2. **Multiple causes, always.** Single-root-cause conclusions are almost always wrong. Name at least three contributing factors before stopping.\n3. **Actionability test every cause.** Can you change it? If no — go shallower. If yes — go one level deeper to make sure you've found the lever.\n4. **Timelines before theories.** Reconstruct what happened before hypothesizing why. Hindsight bias compresses the timeline.\n5. **Ask \"who else could make this mistake?\"** If the answer is \"anyone on the team,\" it's a systemic cause, not individual error.\n6. **Separate investigation from judgment.** Never let the incident review drift into performance conversations. Separate meeting.\n\n## Gotchas\n\n- **\"Human error\" is a starting point, not a root cause.** It's where the investigation begins. Every human error sits on top of a system that made the error possible or probable.\n- **The first plausible cause is almost never the only one.** Confirmation bias loves RCA. Keep going after you find one.\n- **Stopping at proximate cause is failure.** \"X crashed because Y returned null.\" Why did Y return null? Why wasn't null handled? Why wasn't that tested? Go down.\n- **Going too deep ≠ good RCA.** \"The fundamental cause is the second law of thermodynamics\" is not actionable. Stop at the deepest actionable level.\n- **Asking \"why\" more than ~5 times often means you switched causal chains.** Re-draw as a tree, not a line.\n- **Don't confuse correlation with cause.** Two things happening together is a hypothesis to test, not a conclusion.\n- **Outcome bias is sneaky.** Decisions that turn out badly get judged harshly even if they were right given the information at the time. Separate process quality from outcome.\n\n---\n\n**Attribution:** Frameworks drawn from Sakichi Toyoda (5 Whys, Toyota Production System), Kaoru Ishikawa (*Guide to Quality Control*, 1968; Fishbone diagram), James Reason (*Human Error*, 1990; Swiss Cheese model), Dean Gano (*Apollo Root Cause Analysis*, 2008), Charles Kepner & Benjamin Tregoe (*The Rational Manager*, 1965), Google SRE book, Etsy blameless postmortem culture (John Allspaw).\n\n## Execution Log\n\nAfter completing any workflow, append a single JSONL entry:\n\n```bash\necho '{\"ts\":\"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'\",\"skill\":\"RootCauseAnalysis\",\"workflow\":\"WORKFLOW_USED\",\"input\":\"8_WORD_SUMMARY\",\"status\":\"ok|error\",\"duration_s\":SECONDS}' >> ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl\n```\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("rootcauseanalysis-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

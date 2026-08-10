@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `debugging-and-error-recovery` for Codex.
 
 Use this skill when your task matches this description:
 
-Systematic debugging with structured triage. When something breaks, stop adding features, preserve evidence, and follow a structured process to find and fix the root cause. Guessing wastes time. The triage checklist work
+Guides systematic root-cause debugging. Use when tests fail, builds break, behavior doesn't match expectations, or you encounter any unexpected error. Use when you need a systematic approach to finding and fixing the roo
 
 ## How To Use It In Codex
 
@@ -32,7 +32,8 @@ In Codex, click the chat box, press /, choose debugging-and-error-recovery, then
 
 ## Description
 
-Systematic debugging with structured triage. When something breaks, stop adding features, preserve evidence, and follow a structured process to find and fix the root cause. Guessing wastes time. The triage checklist work
+Guides systematic root-cause debugging. Use when tests fail, builds break, behavior doesn't match expectations, or you encounter any unexpected error. Use when you need a systematic approach to finding and fixing the roo
+
 
 ## Original SKILL.md
 
@@ -336,4 +337,3 @@ After fixing a bug:
 - [ ] All existing tests pass
 - [ ] Build succeeds
 - [ ] The original bug scenario is verified end-to-end
-

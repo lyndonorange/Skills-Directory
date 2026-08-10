@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>aegis - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/aegis-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>aegis</h1>
+      <p class="description">Universal, host-neutral adaptation of Christopher Kahler's AEGIS for evidence-led codebase diagnosis, adversarial review, risk synthesis, and controlled remediation planning. Use when the user invokes AEGIS; asks for a comprehensive audit across architecture, data, correctness, security, privacy, testing, reliability, performance, maintainability, operability, change risk, team risk, or runtime reality; or wants audit findings converted into PAUL-ready work without assuming Claude Code or automatic multi-agent execution.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>aegis</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>aegis</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Universal, host-neutral adaptation of Christopher Kahler's AEGIS for evidence-led codebase diagnosis, adversarial review, risk synthesis, and controlled remediation planning. Use when the user invokes AEGIS; asks for a comprehensive audit across architecture, data, correctness, security, privacy, testing, reliability, performance, maintainability, operability, change risk, team risk, or runtime reality; or wants audit findings converted into PAUL-ready work without assuming Claude Code or automatic multi-agent execution.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the aegis skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>AEGIS</h2>
+<p>Audit a codebase with disciplined doubt: separate evidence from interpretation, challenge confident conclusions, and turn verified risks into bounded work.</p>
+<h3>Universal Contract</h3>
+<ul>
+<li>Follow applicable repository instructions and authorization boundaries first.</li>
+<li>Treat audit and review requests as read-only. Do not remediate unless the user also requests fixes.</li>
+<li>Run as one agent by default. Use specialist subagents only when the user explicitly requests delegation and the host permits it.</li>
+<li>Do not install scanners, start services, upload code, or send source to remote tools without explicit authorization.</li>
+<li>Use available local tools as evidence sources; missing tools reduce coverage and must be disclosed.</li>
+<li>Never claim a clean domain from absence of evidence. Report <code>covered</code>, <code>partially covered</code>, <code>not covered</code>, or <code>not applicable</code>.</li>
+</ul>
+<h3>Route the Request</h3>
+<p>| Request | Route | |---|---| | Broad codebase assessment | Diagnostic phases 0-5 | | One risk domain | Focused audit with the same evidence schema | | Challenge an existing review | Devil's Advocate pass | | Compare docs/config/runtime behavior | Reality Gap pass | | Prioritize findings | Risk synthesis | | Create remediation guidance | Transform phases 6-8 | | Implement fixes | Hand approved work to PAUL |</p>
+<p>Read [framework.md](references/framework.md) before a comprehensive audit.</p>
+<h3>Diagnostic Workflow</h3>
+<ol>
+<li><strong>Context and threat model:</strong> establish purpose, users, critical data, constraints, deployment reality, success/failure criteria, and explicit non-goals.</li>
+<li><strong>Signal gathering:</strong> inspect code, tests, manifests, dependencies, configuration, history, CI/CD, deployment files, and available runtime evidence. Record facts before opinions.</li>
+<li><strong>Domain review:</strong> cover all 14 domains or explicitly record why a domain is not applicable or not covered.</li>
+<li><strong>Reality and change-risk review:</strong> test whether documentation matches configuration and behavior; identify blast radius, ownership concentration, and fragile boundaries.</li>
+<li><strong>Adversarial review:</strong> attack the strongest claims, seek ignored evidence, and state an alternate narrative that could fit the facts.</li>
+<li><strong>Synthesis:</strong> deduplicate findings, resolve disagreements, rank by likelihood and impact, and identify what is likely to fail first.</li>
+</ol>
+<p>For each claim, label:</p>
+<ul>
+<li><code>observation</code>: directly seen in files, commands, logs, or runtime behavior;</li>
+<li><code>interpretation</code>: what the observation probably means;</li>
+<li><code>judgment</code>: severity or action recommendation;</li>
+<li><code>unknown</code>: material evidence that is missing.</li>
+</ul>
+<h3>Finding Contract</h3>
+<p>Each actionable finding must include:</p>
+<ul>
+<li>stable ID and domain;</li>
+<li>title and severity;</li>
+<li>confidence and evidence quality;</li>
+<li>exact evidence with file/line, command, or artifact provenance;</li>
+<li>observed behavior and expected behavior;</li>
+<li>impact, likelihood, and blast radius;</li>
+<li>assumptions and counterevidence;</li>
+<li>recommended intervention level;</li>
+<li>verification needed to close it.</li>
+</ul>
+<p>Do not inflate finding counts with style preferences, duplicate symptoms, or speculative vulnerabilities.</p>
+<h3>Transform and PAUL Handoff</h3>
+<p>Transform remains non-mutating until the user requests fixes.</p>
+<ol>
+<li>Group confirmed findings into coherent remediation themes.</li>
+<li>Choose the smallest safe intervention: configuration, local fix, bounded refactor, architectural change, or explicit risk acceptance.</li>
+<li>Model coupling, regression probability, rollback, and verification.</li>
+<li>Convert approved remediation into PAUL phases and plans with Given/When/Then acceptance criteria.</li>
+<li>Let PAUL own approval, APPLY, fresh verification, and UNIFY. AEGIS does not bypass PAUL gates.</li>
+</ol>
+<h3>Outputs</h3>
+<p>Default to a concise report in chat. Save audit state or reports only when requested. A useful final report contains scope, coverage matrix, prioritized findings, Devil's Advocate challenges, unresolved unknowns, and a remediation sequence.</p>
+<h3>References</h3>
+<ul>
+<li>Read [framework.md](references/framework.md) for domains, phases, coverage, and severity rules.</li>
+<li>Read [upstream.md](references/upstream.md) for pinned source provenance and compatibility limits.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: aegis\ndisplay_name: aegis\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# aegis - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `aegis` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nUniversal, host-neutral adaptation of Christopher Kahler's AEGIS for evidence-led codebase diagnosis, adversarial review, risk synthesis, and controlled remediation planning. Use when the user invokes AEGIS; asks for a c\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the aegis skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `aegis` |\n| Canonical name | `aegis` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\nUniversal, host-neutral adaptation of Christopher Kahler's AEGIS for evidence-led codebase diagnosis, adversarial review, risk synthesis, and controlled remediation planning. Use when the user invokes AEGIS; asks for a c\n\n\n## Original SKILL.md\n\n---\nname: aegis\ndescription: Universal, host-neutral adaptation of Christopher Kahler's AEGIS for evidence-led codebase diagnosis, adversarial review, risk synthesis, and controlled remediation planning. Use when the user invokes AEGIS; asks for a comprehensive audit across architecture, data, correctness, security, privacy, testing, reliability, performance, maintainability, operability, change risk, team risk, or runtime reality; or wants audit findings converted into PAUL-ready work without assuming Claude Code or automatic multi-agent execution.\n---\n\n# AEGIS\n\nAudit a codebase with disciplined doubt: separate evidence from interpretation, challenge confident conclusions, and turn verified risks into bounded work.\n\n## Universal Contract\n\n- Follow applicable repository instructions and authorization boundaries first.\n- Treat audit and review requests as read-only. Do not remediate unless the user also requests fixes.\n- Run as one agent by default. Use specialist subagents only when the user explicitly requests delegation and the host permits it.\n- Do not install scanners, start services, upload code, or send source to remote tools without explicit authorization.\n- Use available local tools as evidence sources; missing tools reduce coverage and must be disclosed.\n- Never claim a clean domain from absence of evidence. Report `covered`, `partially covered`, `not covered`, or `not applicable`.\n\n## Route the Request\n\n| Request | Route |\n|---|---|\n| Broad codebase assessment | Diagnostic phases 0-5 |\n| One risk domain | Focused audit with the same evidence schema |\n| Challenge an existing review | Devil's Advocate pass |\n| Compare docs/config/runtime behavior | Reality Gap pass |\n| Prioritize findings | Risk synthesis |\n| Create remediation guidance | Transform phases 6-8 |\n| Implement fixes | Hand approved work to PAUL |\n\nRead [framework.md](references/framework.md) before a comprehensive audit.\n\n## Diagnostic Workflow\n\n1. **Context and threat model:** establish purpose, users, critical data, constraints, deployment reality, success/failure criteria, and explicit non-goals.\n2. **Signal gathering:** inspect code, tests, manifests, dependencies, configuration, history, CI/CD, deployment files, and available runtime evidence. Record facts before opinions.\n3. **Domain review:** cover all 14 domains or explicitly record why a domain is not applicable or not covered.\n4. **Reality and change-risk review:** test whether documentation matches configuration and behavior; identify blast radius, ownership concentration, and fragile boundaries.\n5. **Adversarial review:** attack the strongest claims, seek ignored evidence, and state an alternate narrative that could fit the facts.\n6. **Synthesis:** deduplicate findings, resolve disagreements, rank by likelihood and impact, and identify what is likely to fail first.\n\nFor each claim, label:\n\n- `observation`: directly seen in files, commands, logs, or runtime behavior;\n- `interpretation`: what the observation probably means;\n- `judgment`: severity or action recommendation;\n- `unknown`: material evidence that is missing.\n\n## Finding Contract\n\nEach actionable finding must include:\n\n- stable ID and domain;\n- title and severity;\n- confidence and evidence quality;\n- exact evidence with file/line, command, or artifact provenance;\n- observed behavior and expected behavior;\n- impact, likelihood, and blast radius;\n- assumptions and counterevidence;\n- recommended intervention level;\n- verification needed to close it.\n\nDo not inflate finding counts with style preferences, duplicate symptoms, or speculative vulnerabilities.\n\n## Transform and PAUL Handoff\n\nTransform remains non-mutating until the user requests fixes.\n\n1. Group confirmed findings into coherent remediation themes.\n2. Choose the smallest safe intervention: configuration, local fix, bounded refactor, architectural change, or explicit risk acceptance.\n3. Model coupling, regression probability, rollback, and verification.\n4. Convert approved remediation into PAUL phases and plans with Given/When/Then acceptance criteria.\n5. Let PAUL own approval, APPLY, fresh verification, and UNIFY. AEGIS does not bypass PAUL gates.\n\n## Outputs\n\nDefault to a concise report in chat. Save audit state or reports only when requested. A useful final report contains scope, coverage matrix, prioritized findings, Devil's Advocate challenges, unresolved unknowns, and a remediation sequence.\n\n## References\n\n- Read [framework.md](references/framework.md) for domains, phases, coverage, and severity rules.\n- Read [upstream.md](references/upstream.md) for pinned source provenance and compatibility limits.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("aegis-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

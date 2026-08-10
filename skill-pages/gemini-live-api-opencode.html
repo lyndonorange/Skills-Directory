@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>gemini-live-api - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/gemini-live-api-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>gemini-live-api</h1>
+      <p class="description">Generates a Gemini LiveAPI client service class in the user's chosen programming language. Use when the user wants to build, scaffold, or integrate a client that connects to the Gemini Enterprise LiveAPI websocket endpoint, handles session setup/resumption, bearer token refresh, and sending/receiving `ClientMessage`/`ServerMessage` protos. Don't use for general (non-live, non-bidirectional) Gemini API usage such as one-shot `generateContent`, embeddings, image/video generation, or fine-tuning \u2014 use the `gemini-api` skill for those.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>gemini-live-api</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>gemini-live-api</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Generates a Gemini LiveAPI client service class in the user's chosen programming language. Use when the user wants to build, scaffold, or integrate a client that connects to the Gemini Enterprise LiveAPI websocket endpoint, handles session setup/resumption, bearer token refresh, and sending/receiving `ClientMessage`/`ServerMessage` protos. Don't use for general (non-live, non-bidirectional) Gemini API usage such as one-shot `generateContent`, embeddings, image/video generation, or fine-tuning \u2014 use the `gemini-api` skill for those.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the gemini-live-api skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+        <div class="usage-card"><strong>Upstream provenance</strong><p><a href="https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39">Google Agent Skills</a> at 092e210b243601797a0fb939040be2b1288e6d39 (Apache-2.0).</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Universal runtime boundary</h3>
+<ul>
+<li>Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.</li>
+<li>Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.</li>
+<li>Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.</li>
+<li>Read <code>references/upstream.md</code> when provenance, the pinned revision, licensing, or local adaptation details matter.</li>
+</ul>
+<h2>LiveAPI Service Skill</h2>
+<p>This skill provides instructions for generating a <strong>LiveAPI client service class</strong> that connects to the Gemini Enterprise Live API over WebSockets. The generated client handles bidirectional streaming, bearer-token authentication via Application Default Credentials (ADC), transparent session resumption, and <code>ClientMessage</code> / <code>ServerMessage</code> proto exchange.</p>
+<p>The skill also produces a demo frontend + backend service so the user can interactively validate the generated client (text, audio, video, transcription, and interrupt handling).</p>
+<h3>Prerequisites</h3>
+<p>Before running the generation flow, ensure the following are available on the host:</p>
+<ul>
+<li>A Google Cloud project with the Vertex AI / Gemini Enterprise Agent Platform</li>
+</ul>
+<p>APIs enabled.</p>
+<ul>
+<li>Application Default Credentials configured on the host running the generated</li>
+</ul>
+<p>client:</p>
+<pre><code>    gcloud auth application-default login</code></pre>
+<ul>
+<li>A destination output folder supplied by the user (e.g. <code>/tmp/liveapi_out</code>)</li>
+</ul>
+<p>where the generated code, environment, and demo will be written. <strong>Never</strong> mutate the host's system Python environment.</p>
+<ul>
+<li>The user's chosen implementation language (Python is the default and</li>
+</ul>
+<p>reference language for this skill).</p>
+<h3>Reference Files</h3>
+<p>Provided files in <code>references/</code> (do <strong>not</strong> treat these as standalone skills — they are loaded on demand):</p>
+<ul>
+<li><code>client_server_messages.md</code>: Public reference for the <code>ClientMessage</code> /</li>
+</ul>
+<p><code>ServerMessage</code> schemas used by the Live API.</p>
+<ul>
+<li><code>client_server_messages.proto</code>: The proto definition generated from</li>
+</ul>
+<p><code>client_server_messages.md</code>.</p>
+<ul>
+<li><code>session_manager.md</code>: Describes how to correctly handle sessions, buffering,</li>
+</ul>
+<p>and resumption on disconnection.</p>
+<h3>Steps</h3>
+<h4>Step 1: Copy the reference files</h4>
+<p>Copy <code>client_server_messages.md</code>, <code>client_server_messages.proto</code>, and <code>session_manager.md</code> from this skill's <code>references/</code> folder into the user's destination output folder. These files become the source of truth for the generated client.</p>
+<h4>Step 2: Reconcile with the public documentation</h4>
+<p>Examine the public documents linked from <code>client_server_messages.md</code>. If there are any discrepancies between the public documents and the copied <code>client_server_messages.md</code> / <code>client_server_messages.proto</code>, update the copies in the destination folder so the generated client compiles and runs against the current server contract.</p>
+<h4>Step 3: Implement the client class</h4>
+<p>Implement a class in the user's chosen language that:</p>
+<ul>
+<li>Imports the local <code>client_server_messages.proto</code> types (<code>ClientMessage</code>,</li>
+</ul>
+<p><code>ServerMessage</code>).</p>
+<ul>
+<li>Opens a WebSocket connection to the Live API endpoint.</li>
+<li>Exposes async methods so the user can send and receive data to/from the</li>
+</ul>
+<p>model.</p>
+<p>For languages that require an isolated runtime (e.g. Python), create an isolated environment (e.g. <code>venv</code>) <strong>inside the destination folder</strong> and generate a bash script (e.g. <code>setup.sh</code>) that recreates the environment and installs dependencies. <strong>Never</strong> install into the system interpreter or the user's global site-packages, and never instruct the user to run <code>sudo pip install</code>.</p>
+<h5>Initialization parameters</h5>
+<p>The user provides the following at construction time:</p>
+<ul>
+<li><code>project_id</code></li>
+<li><code>location</code></li>
+<li><code>model_id</code></li>
+<li><code>config</code>: a <code>ClientMessage</code> with the <code>setup</code> field populated.</li>
+</ul>
+<h5>Authentication</h5>
+<p>Obtain a bearer token via Application Default Credentials, attach it to the WebSocket connect request as <code>Authorization: Bearer &lt;token&gt;</code>, refresh the token before or upon expiry, and reuse the refreshed token on every reconnection (including <code>go_away</code> and unexpected disconnects). <strong>Do not</strong> hard-code a long-lived API key as the only auth mechanism.</p>
+<h5>Public async API</h5>
+<p>The class MUST expose the following async methods, gated on receipt of a <code>setup_complete</code> <code>ServerMessage</code> before sending:</p>
+<ul>
+<li><code>send_realtime_data(data)</code>: send realtime input. <code>data</code> is a <code>ClientMessage</code></li>
+</ul>
+<p>carrying a <code>realtime_input</code> field.</p>
+<ul>
+<li><code>send_client_content(data)</code>: send non-realtime, turn-based content that</li>
+</ul>
+<p>contributes to history. <code>data</code> is a <code>ClientMessage</code> carrying a <code>client_content</code> field.</p>
+<ul>
+<li><code>receive()</code>: yield <code>ServerMessage</code> instances parsed from the WebSocket</li>
+</ul>
+<p>stream.</p>
+<p>Do not expose synchronous blocking variants as the primary API surface.</p>
+<h4>Step 4: Write a test file</h4>
+<p>Once the client is implemented, generate a test file that initializes the connection and exercises sending <code>text</code>, <code>audio</code>, and <code>video</code> data and receiving the responses. Ask the user for any information required to run the test (project, model, media samples).</p>
+<h4>Step 5: Generate <code>how_to_run.md</code></h4>
+<p>Provide a <code>how_to_run.md</code> in the destination folder that documents the generated class. Include full examples showing how to build <code>ClientMessage</code> payloads for every supported modality, how to send them, and how to receive data from the model.</p>
+<h4>Step 6: Generate a demo frontend + backend service</h4>
+<p>Create scripts that deploy the implementation as a service with both a frontend UI and a backend service (any language). The service MUST reuse the <code>ClientMessage</code> / <code>ServerMessage</code> protos from Step 1 for wire traffic. Through the UI the user should be able to:</p>
+<ul>
+<li>Start a new connection / close the current connection.</li>
+<li>Select the model to use.</li>
+<li>Select input sources (audio and/or video from camera or screenshot) and</li>
+</ul>
+<p>stream them to the model.</p>
+<ul>
+<li>Send a text message to the model.</li>
+<li>Hear model audio and see the interleaved model and user transcription /</li>
+</ul>
+<p>conversation history.</p>
+<p>While implementing audio and transcription playback, follow the guidance in [Live API best practices](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/best-practices).</p>
+<h5>Handling the <code>interrupt</code> signal</h5>
+<p>When a <code>ServerMessage</code>'s <code>server_content</code> arrives with <code>interrupted: true</code>, the UI MUST:</p>
+<ul>
+<li>Ensure played audio and its corresponding transcription remain time-aligned.</li>
+<li>Immediately stop the currently playing model audio and stop appending to the</li>
+</ul>
+<p>in-progress transcription bubble.</p>
+<ul>
+<li>Clear the unplayed audio buffer and any pending unrendered transcription so</li>
+</ul>
+<p>stale content does not bleed into the next turn.</p>
+<ul>
+<li>Start new chat bubbles for the next user and model turns.</li>
+</ul>
+<h5>Handling the transcription <code>finished</code> signal</h5>
+<p>For streamed <code>input_transcription</code> / <code>output_transcription</code> chunks, append to the currently active bubble while <code>finished</code> is unset, and close that bubble and start a fresh one when <code>finished</code> is observed. Route <code>input_transcription</code> text to user-role bubbles and <code>output_transcription</code> text to model-role bubbles.</p>
+<h4>Step 7: Generate <code>how_to_test_with_ui.md</code></h4>
+<p>Write <code>how_to_test_with_ui.md</code> describing how to launch and use the demo service. It MUST include:</p>
+<ul>
+<li>The exact shell command(s) or script invocation(s) to start the backend</li>
+</ul>
+<p>service.</p>
+<ul>
+<li>The exact shell command(s) or script invocation(s) to start the frontend UI.</li>
+<li>The host and port (e.g. <code>http://localhost:PORT</code>) the user should open in</li>
+</ul>
+<p>their browser.</p>
+<ul>
+<li>How to start a session, select a model, choose input sources (mic, camera,</li>
+</ul>
+<p>screen), send a text message, and observe model audio and transcription in the UI.</p>
+<h3>Validation Checklist</h3>
+<p>Before considering the generation complete, verify each item:</p>
+<ul>
+<li>[ ] <code>client_server_messages.md</code>, <code>client_server_messages.proto</code>, and</li>
+</ul>
+<p><code>session_manager.md</code> were copied into the destination folder.</p>
+<ul>
+<li>[ ] The generated client imports the local proto-generated <code>ClientMessage</code></li>
+</ul>
+<p>and <code>ServerMessage</code> types.</p>
+<ul>
+<li>[ ] The client connects to the Live API WebSocket at</li>
+</ul>
+<p><code>wss://{location}-aiplatform.googleapis.com/ws/google.cloud.aiplatform.v1beta1.LlmBidiService/BidiGenerateContent</code> (or the <code>wss://aiplatform.googleapis.com/...</code> global variant), and formats the setup <code>model</code> field as <code>projects/{project_id}/locations/{location}/publishers/google/models/{model_id}</code>.</p>
+<ul>
+<li>[ ] Authentication uses ADC-provided bearer tokens sent as `Authorization:</li>
+</ul>
+<p>Bearer &lt;token&gt;`, is refreshed before expiry, and reattached on every reconnect.</p>
+<ul>
+<li>[ ] Public async methods <code>send_realtime_data</code>, <code>send_client_content</code>, and</li>
+</ul>
+<p><code>receive</code> are present, correctly typed, and gated on <code>setup_complete</code>.</p>
+<ul>
+<li>[ ] Transparent session resumption is enabled</li>
+</ul>
+<p>(<code>session_resumption.transparent = true</code>), the latest <code>new_handle</code> is tracked, sent-message indexing starts at 1, the buffer is pruned via <code>last_consumed_client_message_index</code>, and buffered messages are replayed on reconnect (including on <code>go_away</code> and WebSocket close codes 1000 / 1006).</p>
+<ul>
+<li>[ ] If using python, an isolated environment (e.g. <code>venv</code>) plus a <code>setup.sh</code></li>
+</ul>
+<p>and <code>requirements.txt</code> (or equivalent) exist inside the destination folder; no changes were made to system or user-global Python.</p>
+<ul>
+<li>[ ] <code>how_to_run.md</code> and <code>how_to_test_with_ui.md</code> are present, and the demo</li>
+</ul>
+<p>UI reuses the same <code>ClientMessage</code> / <code>ServerMessage</code> protos.</p>
+<ul>
+<li>[ ] Interrupt handling and transcription <code>finished</code> handling behave as</li>
+</ul>
+<p>described above.</p>
+<ul>
+<li>[ ] The client does <strong>not</strong> target <code>generativelanguage.googleapis.com</code> and</li>
+</ul>
+<p>does <strong>not</strong> authenticate via API key in a query string.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: gemini-live-api\ndisplay_name: gemini-live-api\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# gemini-live-api - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `gemini-live-api` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nGenerates a Gemini LiveAPI client service class in the user's chosen programming language. Use when the user wants to build, scaffold, or integrate a client that connects to the Gemini Enterprise LiveAPI websocket endpoi\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the gemini-live-api skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `gemini-live-api` |\n| Canonical name | `gemini-live-api` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\nGenerates a Gemini LiveAPI client service class in the user's chosen programming language. Use when the user wants to build, scaffold, or integrate a client that connects to the Gemini Enterprise LiveAPI websocket endpoi\n\n## Upstream provenance\n\nThis adapted package derives from [Google Agent Skills](https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39) at commit `092e210b243601797a0fb939040be2b1288e6d39`, licensed under `Apache-2.0`.\n\n\n## Original SKILL.md\n\n---\nname: gemini-live-api\ndescription: \"Generates a Gemini LiveAPI client service class in the user's chosen programming language. Use when the user wants to build, scaffold, or integrate a client that connects to the Gemini Enterprise LiveAPI websocket endpoint, handles session setup/resumption, bearer token refresh, and sending/receiving `ClientMessage`/`ServerMessage` protos. Don't use for general (non-live, non-bidirectional) Gemini API usage such as one-shot `generateContent`, embeddings, image/video generation, or fine-tuning \\u2014 use the `gemini-api` skill for those.\"\nlicense: Apache-2.0\n---\n\n## Universal runtime boundary\n\n- Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.\n- Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.\n- Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.\n- Read `references/upstream.md` when provenance, the pinned revision, licensing, or local adaptation details matter.\n\n# LiveAPI Service Skill\n\nThis skill provides instructions for generating a **LiveAPI client service\nclass** that connects to the Gemini Enterprise Live API over WebSockets. The\ngenerated client handles bidirectional streaming, bearer-token authentication\nvia Application Default Credentials (ADC), transparent session resumption, and\n`ClientMessage` / `ServerMessage` proto exchange.\n\nThe skill also produces a demo frontend + backend service so the user can\ninteractively validate the generated client (text, audio, video, transcription,\nand interrupt handling).\n\n## Prerequisites\n\nBefore running the generation flow, ensure the following are available on the\nhost:\n\n-   A Google Cloud project with the Vertex AI / Gemini Enterprise Agent Platform\n    APIs enabled.\n-   Application Default Credentials configured on the host running the generated\n    client:\n\n    ```bash\n    gcloud auth application-default login\n    ```\n\n-   A destination output folder supplied by the user (e.g. `/tmp/liveapi_out`)\n    where the generated code, environment, and demo will be written. **Never**\n    mutate the host's system Python environment.\n\n-   The user's chosen implementation language (Python is the default and\n    reference language for this skill).\n\n## Reference Files\n\nProvided files in `references/` (do **not** treat these as standalone skills —\nthey are loaded on demand):\n\n-   `client_server_messages.md`: Public reference for the `ClientMessage` /\n    `ServerMessage` schemas used by the Live API.\n-   `client_server_messages.proto`: The proto definition generated from\n    `client_server_messages.md`.\n-   `session_manager.md`: Describes how to correctly handle sessions, buffering,\n    and resumption on disconnection.\n\n## Steps\n\n### Step 1: Copy the reference files\n\nCopy `client_server_messages.md`, `client_server_messages.proto`, and\n`session_manager.md` from this skill's `references/` folder into the user's\ndestination output folder. These files become the source of truth for the\ngenerated client.\n\n### Step 2: Reconcile with the public documentation\n\nExamine the public documents linked from `client_server_messages.md`. If there\nare any discrepancies between the public documents and the copied\n`client_server_messages.md` / `client_server_messages.proto`, update the copies\nin the destination folder so the generated client compiles and runs against the\ncurrent server contract.\n\n### Step 3: Implement the client class\n\nImplement a class in the user's chosen language that:\n\n-   Imports the local `client_server_messages.proto` types (`ClientMessage`,\n    `ServerMessage`).\n-   Opens a WebSocket connection to the Live API endpoint.\n-   Exposes async methods so the user can send and receive data to/from the\n    model.\n\nFor languages that require an isolated runtime (e.g. Python), create an isolated\nenvironment (e.g. `venv`) **inside the destination folder** and generate a bash\nscript (e.g. `setup.sh`) that recreates the environment and installs\ndependencies. **Never** install into the system interpreter or the user's global\nsite-packages, and never instruct the user to run `sudo pip install`.\n\n#### Initialization parameters\n\nThe user provides the following at construction time:\n\n-   `project_id`\n-   `location`\n-   `model_id`\n-   `config`: a `ClientMessage` with the `setup` field populated.\n\n#### Authentication\n\nObtain a bearer token via Application Default Credentials, attach it to the\nWebSocket connect request as `Authorization: Bearer \u003ctoken>`, refresh the token\nbefore or upon expiry, and reuse the refreshed token on every reconnection\n(including `go_away` and unexpected disconnects). **Do not** hard-code a\nlong-lived API key as the only auth mechanism.\n\n#### Public async API\n\nThe class MUST expose the following async methods, gated on receipt of a\n`setup_complete` `ServerMessage` before sending:\n\n-   `send_realtime_data(data)`: send realtime input. `data` is a `ClientMessage`\n    carrying a `realtime_input` field.\n-   `send_client_content(data)`: send non-realtime, turn-based content that\n    contributes to history. `data` is a `ClientMessage` carrying a\n    `client_content` field.\n-   `receive()`: yield `ServerMessage` instances parsed from the WebSocket\n    stream.\n\nDo not expose synchronous blocking variants as the primary API surface.\n\n### Step 4: Write a test file\n\nOnce the client is implemented, generate a test file that initializes the\nconnection and exercises sending `text`, `audio`, and `video` data and receiving\nthe responses. Ask the user for any information required to run the test\n(project, model, media samples).\n\n### Step 5: Generate `how_to_run.md`\n\nProvide a `how_to_run.md` in the destination folder that documents the generated\nclass. Include full examples showing how to build `ClientMessage` payloads for\nevery supported modality, how to send them, and how to receive data from the\nmodel.\n\n### Step 6: Generate a demo frontend + backend service\n\nCreate scripts that deploy the implementation as a service with both a frontend\nUI and a backend service (any language). The service MUST reuse the\n`ClientMessage` / `ServerMessage` protos from Step 1 for wire traffic. Through\nthe UI the user should be able to:\n\n-   Start a new connection / close the current connection.\n-   Select the model to use.\n-   Select input sources (audio and/or video from camera or screenshot) and\n    stream them to the model.\n-   Send a text message to the model.\n-   Hear model audio and see the interleaved model and user transcription /\n    conversation history.\n\nWhile implementing audio and transcription playback, follow the guidance in\n[Live API best practices](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/live-api/best-practices).\n\n#### Handling the `interrupt` signal\n\nWhen a `ServerMessage`'s `server_content` arrives with `interrupted: true`, the\nUI MUST:\n\n-   Ensure played audio and its corresponding transcription remain time-aligned.\n-   Immediately stop the currently playing model audio and stop appending to the\n    in-progress transcription bubble.\n-   Clear the unplayed audio buffer and any pending unrendered transcription so\n    stale content does not bleed into the next turn.\n-   Start new chat bubbles for the next user and model turns.\n\n#### Handling the transcription `finished` signal\n\nFor streamed `input_transcription` / `output_transcription` chunks, append to\nthe currently active bubble while `finished` is unset, and close that bubble and\nstart a fresh one when `finished` is observed. Route `input_transcription` text\nto user-role bubbles and `output_transcription` text to model-role bubbles.\n\n### Step 7: Generate `how_to_test_with_ui.md`\n\nWrite `how_to_test_with_ui.md` describing how to launch and use the demo\nservice. It MUST include:\n\n-   The exact shell command(s) or script invocation(s) to start the backend\n    service.\n-   The exact shell command(s) or script invocation(s) to start the frontend UI.\n-   The host and port (e.g. `http://localhost:PORT`) the user should open in\n    their browser.\n-   How to start a session, select a model, choose input sources (mic, camera,\n    screen), send a text message, and observe model audio and transcription in\n    the UI.\n\n## Validation Checklist\n\nBefore considering the generation complete, verify each item:\n\n-   [ ] `client_server_messages.md`, `client_server_messages.proto`, and\n    `session_manager.md` were copied into the destination folder.\n-   [ ] The generated client imports the local proto-generated `ClientMessage`\n    and `ServerMessage` types.\n-   [ ] The client connects to the Live API WebSocket at\n    `wss://{location}-aiplatform.googleapis.com/ws/google.cloud.aiplatform.v1beta1.LlmBidiService/BidiGenerateContent`\n    (or the `wss://aiplatform.googleapis.com/...` global variant), and formats\n    the setup `model` field as\n    `projects/{project_id}/locations/{location}/publishers/google/models/{model_id}`.\n-   [ ] Authentication uses ADC-provided bearer tokens sent as `Authorization:\n    Bearer \u003ctoken>`, is refreshed before expiry, and reattached on every\n    reconnect.\n-   [ ] Public async methods `send_realtime_data`, `send_client_content`, and\n    `receive` are present, correctly typed, and gated on `setup_complete`.\n-   [ ] Transparent session resumption is enabled\n    (`session_resumption.transparent = true`), the latest `new_handle` is\n    tracked, sent-message indexing starts at 1, the buffer is pruned via\n    `last_consumed_client_message_index`, and buffered messages are replayed on\n    reconnect (including on `go_away` and WebSocket close codes 1000 / 1006).\n-   [ ] If using python, an isolated environment (e.g. `venv`) plus a `setup.sh`\n    and `requirements.txt` (or equivalent) exist inside the destination folder;\n    no changes were made to system or user-global Python.\n-   [ ] `how_to_run.md` and `how_to_test_with_ui.md` are present, and the demo\n    UI reuses the same `ClientMessage` / `ServerMessage` protos.\n-   [ ] Interrupt handling and transcription `finished` handling behave as\n    described above.\n-   [ ] The client does **not** target `generativelanguage.googleapis.com` and\n    does **not** authenticate via API key in a query string.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("gemini-live-api-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

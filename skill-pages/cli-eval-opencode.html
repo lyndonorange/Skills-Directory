@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>cli-eval - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/cli-eval-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>cli-eval</h1>
+      <p class="description">Create and run evaluation suites, watch live benchmark progress, view scorecards, compare model performance, and integrate eval runs with CI workflows from the CLI.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>cli-eval</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>cli-eval</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Create and run evaluation suites, watch live benchmark progress, view scorecards, compare model performance, and integrate eval runs with CI workflows from the CLI.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the cli-eval skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <p>&lt;!-- generated by src/lib/agentSkills/generator.ts; manual edits will be overwritten --&gt;</p>
+<h3>Overview</h3>
+<p>Create and run evaluation suites, watch live benchmark progress, view scorecards, compare model performance, and integrate eval runs with CI workflows from the CLI.</p>
+<h3>Quick install</h3>
+<pre><code>npm install -g omniroute   # or: npx omniroute
+omniroute --version</code></pre>
+<h3>Subcommands</h3>
+<h4><code>eval</code></h4>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute eval</code></pre>
+<h4><code>eval suites</code></h4>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute eval suites</code></pre>
+<h4><code>eval list</code></h4>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute eval list</code></pre>
+<h4><code>eval get &lt;suiteId&gt;</code></h4>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute eval get &lt;suiteId&gt;</code></pre>
+<h4><code>eval create</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--file &lt;path&gt;</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute eval create</code></pre>
+<h4><code>eval run &lt;suiteId&gt;</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>-m, --model &lt;id&gt;</code></li>
+<li><code>--combo &lt;name&gt;</code></li>
+<li><code>--concurrency &lt;n&gt;</code></li>
+<li><code>--tag &lt;tag&gt;</code></li>
+<li><code>--watch</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute eval run &lt;suiteId&gt;</code></pre>
+<h4><code>eval list</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--suite &lt;id&gt;</code></li>
+<li><code>--status &lt;s&gt;</code></li>
+<li><code>--since &lt;ts&gt;</code></li>
+<li><code>--limit &lt;n&gt;</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute eval list</code></pre>
+<h4><code>eval get &lt;runId&gt;</code></h4>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute eval get &lt;runId&gt;</code></pre>
+<h4><code>eval results &lt;runId&gt;</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--failed</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute eval results &lt;runId&gt;</code></pre>
+<h4><code>eval cancel &lt;runId&gt;</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--yes</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute eval cancel &lt;runId&gt;</code></pre>
+<h4><code>eval scorecard &lt;runId&gt;</code></h4>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute eval scorecard &lt;runId&gt;</code></pre>
+<h4><code>simulate [prompt]</code></h4>
+<p><strong>Flags:</strong></p>
+<ul>
+<li><code>--file &lt;path&gt;</code></li>
+<li><code>-m, --model &lt;id&gt;</code></li>
+<li><code>--combo &lt;name&gt;</code></li>
+<li><code>--reasoning-effort &lt;level&gt;</code></li>
+<li><code>--thinking-budget &lt;n&gt;</code></li>
+<li><code>--explain</code></li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre><code>omniroute simulate [prompt]</code></pre>
+<p>&lt;!-- skill:custom-start --&gt; &lt;!-- Migrated from skills/omniroute-cli-eval/SKILL.md (preserved curated content) --&gt;</p>
+<h2>OmniRoute — CLI Evals</h2>
+<p>Requires the <code>omniroute</code> CLI. See [CLI entry-point skill](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omniroute-cli/SKILL.md) for install + global flags.</p>
+<h3>What are evals?</h3>
+<p>Evals are automated test suites that score LLM outputs against expected answers or rubrics. OmniRoute stores suites and run results in its local database.</p>
+<h3>Eval suites</h3>
+<pre><code>omniroute eval suites list                       # List all eval suites
+omniroute eval suites list --json                # JSON output
+
+omniroute eval suites get &lt;suiteId&gt;              # Full suite definition</code></pre>
+<h4>Create a suite</h4>
+<pre><code>omniroute eval suites create \
+  --name &quot;code-quality&quot; \
+  --rubric &quot;exact-match&quot; \
+  --samples-file ./samples.jsonl                 # JSONL: {input, expected_output}</code></pre>
+<p>Rubric options: <code>exact-match</code>, <code>contains</code>, <code>llm-judge</code>, <code>regex</code>.</p>
+<p><code>--samples-file</code> format (one JSON object per line):</p>
+<pre><code>{&quot;input&quot;: &quot;What is 2+2?&quot;, &quot;expected_output&quot;: &quot;4&quot;}
+{&quot;input&quot;: &quot;Translate 'hello' to Spanish&quot;, &quot;expected_output&quot;: &quot;hola&quot;}</code></pre>
+<h3>Run an eval</h3>
+<pre><code>omniroute eval suites run &lt;suiteId&gt; \
+  --model claude-sonnet-4-6                      # Run suite against a specific model
+
+omniroute eval suites run &lt;suiteId&gt; \
+  --model gpt-4o \
+  --watch                                        # Live TUI progress (EvalWatch)</code></pre>
+<p>The run is asynchronous. Use <code>--watch</code> for a live terminal dashboard or poll manually:</p>
+<pre><code>RUN_ID=$(omniroute eval suites run &lt;suiteId&gt; --model claude-sonnet-4-6 --output json | jq -r '.id')
+omniroute eval get $RUN_ID</code></pre>
+<h3>Manage runs</h3>
+<pre><code>omniroute eval list                              # List all eval runs
+omniroute eval list --json
+
+omniroute eval get &lt;runId&gt;                       # Run details (status, model, score)
+omniroute eval results &lt;runId&gt;                   # Per-sample results
+omniroute eval scorecard &lt;runId&gt;                 # Full scorecard with pass/fail per sample
+omniroute eval cancel &lt;runId&gt;                    # Cancel a running eval</code></pre>
+<h3>Scorecard output</h3>
+<pre><code>omniroute eval scorecard &lt;runId&gt; --output json</code></pre>
+<p>Response fields per sample:</p>
+<pre><code>{
+  &quot;id&quot;: &quot;sample-1&quot;,
+  &quot;score&quot;: 0.95,
+  &quot;passed&quot;: true,
+  &quot;input&quot;: &quot;What is 2+2?&quot;,
+  &quot;output&quot;: &quot;4&quot;,
+  &quot;expected&quot;: &quot;4&quot;
+}</code></pre>
+<h3>Comparing models</h3>
+<p>Run the same suite against multiple models and compare:</p>
+<pre><code>for MODEL in claude-sonnet-4-6 gpt-4o gemini-2.0-flash; do
+  omniroute eval suites run $SUITE_ID --model $MODEL --output json | jq '{model: .model, score: .score}'
+done</code></pre>
+<h3>CI integration</h3>
+<pre><code># Run and fail CI if score drops below threshold
+SCORE=$(omniroute eval suites run $SUITE_ID --model claude-sonnet-4-6 --output json | jq -r '.score')
+python3 -c &quot;import sys; score=float('$SCORE'); sys.exit(0 if score &gt;= 0.90 else 1)&quot;</code></pre>
+<h3>Errors</h3>
+<ul>
+<li><code>suites create</code> fails with <code>invalid rubric</code> → use one of: <code>exact-match</code>, <code>contains</code>, <code>llm-judge</code>, <code>regex</code></li>
+<li><code>suites run</code> returns <code>model not found</code> → verify model ID with <code>omniroute models --search &lt;name&gt;</code></li>
+<li><code>eval get</code> shows <code>status: failed</code> → check <code>omniroute logs --search eval</code> for error details</li>
+<li><code>scorecard</code> returns empty results → the run may still be <code>running</code>; poll <code>omniroute eval get &lt;runId&gt;</code> until <code>status</code> is <code>completed</code></li>
+</ul>
+<p>&lt;!-- skill:custom-end --&gt;</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: cli-eval\ndisplay_name: cli-eval\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# cli-eval - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `cli-eval` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nCreate and run evaluation suites, watch live benchmark progress, view scorecards, compare model performance, and integrate eval runs with CI workflows from the CLI.\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the cli-eval skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `cli-eval` |\n| Canonical name | `cli-eval` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\nCreate and run evaluation suites, watch live benchmark progress, view scorecards, compare model performance, and integrate eval runs with CI workflows from the CLI.\n\n\n## Original SKILL.md\n\n---\nname: cli-eval\ndescription: Create and run evaluation suites, watch live benchmark progress, view scorecards, compare model performance, and integrate eval runs with CI workflows from the CLI.\n---\n\u003c!-- generated by src/lib/agentSkills/generator.ts; manual edits will be overwritten -->\n\n## Overview\n\nCreate and run evaluation suites, watch live benchmark progress, view scorecards, compare model performance, and integrate eval runs with CI workflows from the CLI.\n\n## Quick install\n\n```bash\nnpm install -g omniroute   # or: npx omniroute\nomniroute --version\n```\n\n## Subcommands\n\n### `eval`\n\n**Example:**\n\n```bash\nomniroute eval\n```\n\n### `eval suites`\n\n**Example:**\n\n```bash\nomniroute eval suites\n```\n\n### `eval list`\n\n**Example:**\n\n```bash\nomniroute eval list\n```\n\n### `eval get \u003csuiteId>`\n\n**Example:**\n\n```bash\nomniroute eval get \u003csuiteId>\n```\n\n### `eval create`\n\n**Flags:**\n\n- `--file \u003cpath>`\n\n**Example:**\n\n```bash\nomniroute eval create\n```\n\n### `eval run \u003csuiteId>`\n\n**Flags:**\n\n- `-m, --model \u003cid>`\n- `--combo \u003cname>`\n- `--concurrency \u003cn>`\n- `--tag \u003ctag>`\n- `--watch`\n\n**Example:**\n\n```bash\nomniroute eval run \u003csuiteId>\n```\n\n### `eval list`\n\n**Flags:**\n\n- `--suite \u003cid>`\n- `--status \u003cs>`\n- `--since \u003cts>`\n- `--limit \u003cn>`\n\n**Example:**\n\n```bash\nomniroute eval list\n```\n\n### `eval get \u003crunId>`\n\n**Example:**\n\n```bash\nomniroute eval get \u003crunId>\n```\n\n### `eval results \u003crunId>`\n\n**Flags:**\n\n- `--failed`\n\n**Example:**\n\n```bash\nomniroute eval results \u003crunId>\n```\n\n### `eval cancel \u003crunId>`\n\n**Flags:**\n\n- `--yes`\n\n**Example:**\n\n```bash\nomniroute eval cancel \u003crunId>\n```\n\n### `eval scorecard \u003crunId>`\n\n**Example:**\n\n```bash\nomniroute eval scorecard \u003crunId>\n```\n\n### `simulate [prompt]`\n\n**Flags:**\n\n- `--file \u003cpath>`\n- `-m, --model \u003cid>`\n- `--combo \u003cname>`\n- `--reasoning-effort \u003clevel>`\n- `--thinking-budget \u003cn>`\n- `--explain`\n\n**Example:**\n\n```bash\nomniroute simulate [prompt]\n```\n\n\u003c!-- skill:custom-start -->\n\u003c!-- Migrated from skills/omniroute-cli-eval/SKILL.md (preserved curated content) -->\n\n# OmniRoute — CLI Evals\n\nRequires the `omniroute` CLI. See [CLI entry-point skill](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omniroute-cli/SKILL.md) for install + global flags.\n\n## What are evals?\n\nEvals are automated test suites that score LLM outputs against expected answers or rubrics. OmniRoute stores suites and run results in its local database.\n\n## Eval suites\n\n```bash\nomniroute eval suites list                       # List all eval suites\nomniroute eval suites list --json                # JSON output\n\nomniroute eval suites get \u003csuiteId>              # Full suite definition\n```\n\n### Create a suite\n\n```bash\nomniroute eval suites create \\\n  --name \"code-quality\" \\\n  --rubric \"exact-match\" \\\n  --samples-file ./samples.jsonl                 # JSONL: {input, expected_output}\n```\n\nRubric options: `exact-match`, `contains`, `llm-judge`, `regex`.\n\n`--samples-file` format (one JSON object per line):\n\n```jsonl\n{\"input\": \"What is 2+2?\", \"expected_output\": \"4\"}\n{\"input\": \"Translate 'hello' to Spanish\", \"expected_output\": \"hola\"}\n```\n\n## Run an eval\n\n```bash\nomniroute eval suites run \u003csuiteId> \\\n  --model claude-sonnet-4-6                      # Run suite against a specific model\n\nomniroute eval suites run \u003csuiteId> \\\n  --model gpt-4o \\\n  --watch                                        # Live TUI progress (EvalWatch)\n```\n\nThe run is asynchronous. Use `--watch` for a live terminal dashboard or poll manually:\n\n```bash\nRUN_ID=$(omniroute eval suites run \u003csuiteId> --model claude-sonnet-4-6 --output json | jq -r '.id')\nomniroute eval get $RUN_ID\n```\n\n## Manage runs\n\n```bash\nomniroute eval list                              # List all eval runs\nomniroute eval list --json\n\nomniroute eval get \u003crunId>                       # Run details (status, model, score)\nomniroute eval results \u003crunId>                   # Per-sample results\nomniroute eval scorecard \u003crunId>                 # Full scorecard with pass/fail per sample\nomniroute eval cancel \u003crunId>                    # Cancel a running eval\n```\n\n## Scorecard output\n\n```bash\nomniroute eval scorecard \u003crunId> --output json\n```\n\nResponse fields per sample:\n\n```json\n{\n  \"id\": \"sample-1\",\n  \"score\": 0.95,\n  \"passed\": true,\n  \"input\": \"What is 2+2?\",\n  \"output\": \"4\",\n  \"expected\": \"4\"\n}\n```\n\n## Comparing models\n\nRun the same suite against multiple models and compare:\n\n```bash\nfor MODEL in claude-sonnet-4-6 gpt-4o gemini-2.0-flash; do\n  omniroute eval suites run $SUITE_ID --model $MODEL --output json | jq '{model: .model, score: .score}'\ndone\n```\n\n## CI integration\n\n```bash\n# Run and fail CI if score drops below threshold\nSCORE=$(omniroute eval suites run $SUITE_ID --model claude-sonnet-4-6 --output json | jq -r '.score')\npython3 -c \"import sys; score=float('$SCORE'); sys.exit(0 if score >= 0.90 else 1)\"\n```\n\n## Errors\n\n- `suites create` fails with `invalid rubric` → use one of: `exact-match`, `contains`, `llm-judge`, `regex`\n- `suites run` returns `model not found` → verify model ID with `omniroute models --search \u003cname>`\n- `eval get` shows `status: failed` → check `omniroute logs --search eval` for error details\n- `scorecard` returns empty results → the run may still be `running`; poll `omniroute eval get \u003crunId>` until `status` is `completed`\n\u003c!-- skill:custom-end -->\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("cli-eval-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

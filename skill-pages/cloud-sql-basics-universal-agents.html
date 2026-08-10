@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>cloud-sql-basics - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/cloud-sql-basics-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>cloud-sql-basics</h1>
+      <p class="description">This file generates or explains Cloud SQL resources. Use this file when the user asks to create a Cloud SQL instance or database for MySQL, PostgreSQL, or SQL Server. Cloud SQL manages third-party MySQL, PostgreSQL, and SQL Server instances as resources in Cloud SQL. For example, when Cloud SQL creates an open-source MySQL instance, the resulting resource is a Cloud SQL for MySQL instance that Google Cloud manages. Cloud SQL handles backups, high availability, and secure connectivity for relational database workloads.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>cloud-sql-basics</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>cloud-sql-basics</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>This file generates or explains Cloud SQL resources. Use this file when the user asks to create a Cloud SQL instance or database for MySQL, PostgreSQL, or SQL Server. Cloud SQL manages third-party MySQL, PostgreSQL, and SQL Server instances as resources in Cloud SQL. For example, when Cloud SQL creates an open-source MySQL instance, the resulting resource is a Cloud SQL for MySQL instance that Google Cloud manages. Cloud SQL handles backups, high availability, and secure connectivity for relational database workloads.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the cloud-sql-basics skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+        <div class="usage-card"><strong>Upstream provenance</strong><p><a href="https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39">Google Agent Skills</a> at 092e210b243601797a0fb939040be2b1288e6d39 (Apache-2.0).</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Universal runtime boundary</h3>
+<ul>
+<li>Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.</li>
+<li>Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.</li>
+<li>Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.</li>
+<li>Read <code>references/upstream.md</code> when provenance, the pinned revision, licensing, or local adaptation details matter.</li>
+</ul>
+<h2>Cloud SQL Basics</h2>
+<p>Cloud SQL is a fully managed relational database service for MySQL, PostgreSQL, and SQL Server. It automates time-consuming tasks like patches, updates, backups, and replicas, while providing high performance and availability for your applications.</p>
+<h3>Prerequisites</h3>
+<p>Ensure you have the necessary IAM permissions to create and manage Cloud SQL instances. The <strong>Cloud SQL Admin</strong> (<code>roles/cloudsql.admin</code>) role provides full access to Cloud SQL resources.</p>
+<h3>Quick Start (PostgreSQL)</h3>
+<ol>
+<li><strong>Enable the API:</strong></li>
+</ol>
+<pre><code>    gcloud services enable sqladmin.googleapis.com --quiet</code></pre>
+<ol>
+<li><strong>Create an Instance:</strong></li>
+</ol>
+<pre><code>    gcloud sql instances create INSTANCE_NAME \
+      --database-version=POSTGRES_18 \
+      --cpu=2 \
+      --memory=7680MiB \
+      --region=REGION \
+      --quiet</code></pre>
+<ol>
+<li><strong>Set a password for the default user:</strong></li>
+</ol>
+<p>Because this is a Cloud SQL for PostgreSQL instance, the default admin user is <code>postgres</code>:</p>
+<pre><code>    gcloud sql users set-password postgres \
+      --instance=INSTANCE_NAME --password=PASSWORD \
+      --quiet</code></pre>
+<ol>
+<li><strong>Create a database:</strong></li>
+</ol>
+<pre><code>    gcloud sql databases create DATABASE_NAME \
+      --instance=INSTANCE_NAME \
+      --quiet</code></pre>
+<ol>
+<li><strong>Get the instance connection name:</strong></li>
+</ol>
+<p>You need the instance connection name (which is formatted as <code>PROJECT_ID:REGION:INSTANCE_NAME</code>) to connect using the Cloud SQL Auth Proxy. Retrieve it with the following command:</p>
+<pre><code>    gcloud sql instances describe INSTANCE_NAME \
+      --format=&quot;value(connectionName)&quot; \
+      --quiet</code></pre>
+<ol>
+<li><strong>Connect to the instance:</strong></li>
+</ol>
+<p>The Cloud SQL Auth Proxy must be running to be able to connect to the instance. In a separate terminal, start the proxy using the connection name:</p>
+<pre><code>    ./cloud-sql-proxy INSTANCE_CONNECTION_NAME</code></pre>
+<p>With the proxy running, connect using <code>psql</code> in another terminal:</p>
+<pre><code>    psql &quot;host=127.0.0.1 port=5432 user=postgres dbname=DATABASE_NAME password=PASSWORD sslmode=disable&quot;</code></pre>
+<h3>Reference Directory</h3>
+<ul>
+<li>[Core Concepts](references/core-concepts.md): Cloud SQL editions (Enterprise</li>
+</ul>
+<p>&amp; Enterprise Plus), instance architecture, read pools, high availability (HA), and supported database engines.</p>
+<ul>
+<li>[CLI Usage](references/cli-usage.md): Essential <code>gcloud sql</code> commands for</li>
+</ul>
+<p>instance, database, and user management.</p>
+<ul>
+<li>[Client Libraries &amp; Connectors](references/client-library-usage.md):</li>
+</ul>
+<p>Connecting to Cloud SQL using Python, Java, Node.js, and Go.</p>
+<ul>
+<li>[MCP Usage](references/mcp-usage.md): Using the Cloud SQL remote MCP</li>
+</ul>
+<p>server and Gemini CLI extension.</p>
+<ul>
+<li>[Infrastructure as Code](references/iac-usage.md): Terraform</li>
+</ul>
+<p>configuration for instances, databases, and users.</p>
+<ul>
+<li>[IAM &amp; Security](references/iam-security.md): Predefined roles, SSL/TLS</li>
+</ul>
+<p>certificates, and Auth Proxy configuration.</p>
+<ul>
+<li>[Disaster Recovery &amp; Backups](references/dr-backups.md): Backup types,</li>
+</ul>
+<p>Point-in-Time Recovery (PITR), replicas, read pools comparison, and Enterprise Plus Advanced DR.</p>
+<p><em>If you need product information not found in these references, use the Developer Knowledge MCP server <code>search_documents</code> tool.</em></p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: cloud-sql-basics\ndisplay_name: cloud-sql-basics\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# cloud-sql-basics - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `cloud-sql-basics` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nThis file generates or explains Cloud SQL resources. Use this file when the user asks to create a Cloud SQL instance or database for MySQL, PostgreSQL, or SQL Server. Cloud SQL manages third-party MySQL, PostgreSQL, and\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the cloud-sql-basics skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `cloud-sql-basics` |\n| Canonical name | `cloud-sql-basics` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\nThis file generates or explains Cloud SQL resources. Use this file when the user asks to create a Cloud SQL instance or database for MySQL, PostgreSQL, or SQL Server. Cloud SQL manages third-party MySQL, PostgreSQL, and\n\n## Upstream provenance\n\nThis adapted package derives from [Google Agent Skills](https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39) at commit `092e210b243601797a0fb939040be2b1288e6d39`, licensed under `Apache-2.0`.\n\n\n## Original SKILL.md\n\n---\nname: cloud-sql-basics\ndescription: \"This file generates or explains Cloud SQL resources. Use this file when the user asks to create a Cloud SQL instance or database for MySQL, PostgreSQL, or SQL Server. Cloud SQL manages third-party MySQL, PostgreSQL, and SQL Server instances as resources in Cloud SQL. For example, when Cloud SQL creates an open-source MySQL instance, the resulting resource is a Cloud SQL for MySQL instance that Google Cloud manages. Cloud SQL handles backups, high availability, and secure connectivity for relational database workloads.\"\nlicense: Apache-2.0\n---\n\n## Universal runtime boundary\n\n- Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.\n- Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.\n- Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.\n- Read `references/upstream.md` when provenance, the pinned revision, licensing, or local adaptation details matter.\n\n# Cloud SQL Basics\n\nCloud SQL is a fully managed relational database service for MySQL, PostgreSQL,\nand SQL Server. It automates time-consuming tasks like patches, updates,\nbackups, and replicas, while providing high performance and availability for\nyour applications.\n\n## Prerequisites\n\nEnsure you have the necessary IAM permissions to create and manage Cloud SQL\ninstances. The **Cloud SQL Admin** (`roles/cloudsql.admin`) role provides full\naccess to Cloud SQL resources.\n\n## Quick Start (PostgreSQL)\n\n1.  **Enable the API:**\n\n    ```bash\n    gcloud services enable sqladmin.googleapis.com --quiet\n    ```\n\n2.  **Create an Instance:**\n\n    ```bash\n    gcloud sql instances create INSTANCE_NAME \\\n      --database-version=POSTGRES_18 \\\n      --cpu=2 \\\n      --memory=7680MiB \\\n      --region=REGION \\\n      --quiet\n    ```\n\n3.  **Set a password for the default user:**\n\n    Because this is a Cloud SQL for PostgreSQL instance, the default admin user\n    is `postgres`:\n\n    ```bash\n    gcloud sql users set-password postgres \\\n      --instance=INSTANCE_NAME --password=PASSWORD \\\n      --quiet\n    ```\n\n4.  **Create a database:**\n\n    ```bash\n    gcloud sql databases create DATABASE_NAME \\\n      --instance=INSTANCE_NAME \\\n      --quiet\n    ```\n\n5.  **Get the instance connection name:**\n\n    You need the instance connection name (which is formatted as\n    `PROJECT_ID:REGION:INSTANCE_NAME`) to connect using the Cloud SQL Auth\n    Proxy. Retrieve it with the following command:\n\n    ```bash\n    gcloud sql instances describe INSTANCE_NAME \\\n      --format=\"value(connectionName)\" \\\n      --quiet\n    ```\n\n6.  **Connect to the instance:**\n\n    The Cloud SQL Auth Proxy must be running to be able to connect to the\n    instance. In a separate terminal, start the proxy using the connection name:\n\n    ```bash\n    ./cloud-sql-proxy INSTANCE_CONNECTION_NAME\n    ```\n\n    With the proxy running, connect using `psql` in another terminal:\n\n    ```bash\n    psql \"host=127.0.0.1 port=5432 user=postgres dbname=DATABASE_NAME password=PASSWORD sslmode=disable\"\n    ```\n\n## Reference Directory\n\n-   [Core Concepts](references/core-concepts.md): Cloud SQL editions (Enterprise\n    & Enterprise Plus), instance architecture, read pools, high availability (HA),\n    and supported database engines.\n\n-   [CLI Usage](references/cli-usage.md): Essential `gcloud sql` commands for\n    instance, database, and user management.\n\n-   [Client Libraries & Connectors](references/client-library-usage.md):\n    Connecting to Cloud SQL using Python, Java, Node.js, and Go.\n\n-   [MCP Usage](references/mcp-usage.md): Using the Cloud SQL remote MCP\n    server and Gemini CLI extension.\n\n-   [Infrastructure as Code](references/iac-usage.md): Terraform\n    configuration for instances, databases, and users.\n\n-   [IAM & Security](references/iam-security.md): Predefined roles, SSL/TLS\n    certificates, and Auth Proxy configuration.\n\n-   [Disaster Recovery & Backups](references/dr-backups.md): Backup types,\n    Point-in-Time Recovery (PITR), replicas, read pools comparison, and Enterprise Plus Advanced DR.\n\n*If you need product information not found in these references, use the\n    Developer Knowledge MCP server `search_documents` tool.*\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("cloud-sql-basics-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

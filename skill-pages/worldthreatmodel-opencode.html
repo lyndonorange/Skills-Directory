@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WorldThreatModel - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/worldthreatmodel-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>WorldThreatModel</h1>
+      <p class="description">Persistent world-model harness that stress-tests ideas, strategies, and investments against 11 time horizons from 6 months to 50 years. Each horizon model is a deep (~10 page) analysis of geopolitics, technology, economics, society, environment, security, wildcards. Three tiers: Fast (~2 min, single synthesizer), Standard (~10 min, 11 parallel agents + RedTeam + FirstPrinciples), Deep (~1hr, adds Research + Council). Three workflows: TestIdea (probability-weighted scenario matrix across 11 horizons), UpdateModels, ViewModels. Orchestrates RedTeam, FirstPrinciples, Council, Research. USE WHEN threat model, world model, test idea, future analysis, time horizon, stress test against future, long-term risk. NOT FOR single-shot idea attack (use RedTeam).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>WorldThreatModel</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>WorldThreatModel</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Persistent world-model harness that stress-tests ideas, strategies, and investments against 11 time horizons from 6 months to 50 years. Each horizon model is a deep (~10 page) analysis of geopolitics, technology, economics, society, environment, security, wildcards. Three tiers: Fast (~2 min, single synthesizer), Standard (~10 min, 11 parallel agents + RedTeam + FirstPrinciples), Deep (~1hr, adds Research + Council). Three workflows: TestIdea (probability-weighted scenario matrix across 11 horizons), UpdateModels, ViewModels. Orchestrates RedTeam, FirstPrinciples, Council, Research. USE WHEN threat model, world model, test idea, future analysis, time horizon, stress test against future, long-term risk. NOT FOR single-shot idea attack (use RedTeam).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the WorldThreatModel skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>World Threat Model Harness</h2>
+<h3>What It Does</h3>
+<p>Stress-tests an idea, strategy, or investment against 11 time horizons from 6 months to 50 years. Each horizon is a deep (~10 page) world model covering geopolitics, technology, economics, society, environment, security, and wildcards. Three speed tiers: Fast (~2 min, single synthesizer), Standard (~10 min, 11 parallel agents plus RedTeam and FirstPrinciples), Deep (~1 hr, adds Research and Council). Three workflows: TestIdea returns a probability-weighted scenario matrix across all 11 horizons; UpdateModels and ViewModels handle the rest. (A dedicated TestScenario workflow for named alternative-future scenarios is planned, not yet built — scenario files under <code>Scenarios/</code> are consumed by TestIdea today.)</p>
+<h3>The Problem</h3>
+<p>Most plans get tested against the present, or against the next year or two at most — so they break the moment the world shifts on a timeline you never modeled. A strategy that looks great at the 1-year horizon can be fatal at 10 years, and a 50-year bet can ignore the near-term cascade that kills it first. Holding all those horizons in your head at once, with real geopolitical, economic, and technological reasoning behind each, is more than any single pass can do. This harness keeps 11 persistent world models warm and runs your idea against all of them at the same time, with adversarial analysis on top.</p>
+<h3>How It Works</h3>
+<p>A system of 11 persistent world models spanning 6 months to 50 years. Each model is a deep (~10 page) analysis of geopolitics, technology, economics, society, environment, security, and wildcards for that time horizon. Ideas, strategies, and investments are tested against ALL horizons simultaneously using adversarial analysis (RedTeam, FirstPrinciples, Council).</p>
+<h3>Workflow Routing</h3>
+<p>| Workflow | Trigger | File | |----------|---------|------| | <strong>TestIdea</strong> | &quot;test idea&quot;, &quot;test strategy&quot;, &quot;test investment&quot;, &quot;how will this hold up&quot;, &quot;stress test&quot;, &quot;test against future&quot; — test any input against all 11 world models | <code>Workflows/TestIdea.md</code> | | <strong>UpdateModels</strong> | &quot;update world model&quot;, &quot;update models&quot;, &quot;refresh models&quot;, &quot;new analysis&quot; — refresh world model content with new research/analysis | <code>Workflows/UpdateModels.md</code> | | <strong>ViewModels</strong> | &quot;view world model&quot;, &quot;show models&quot;, &quot;current models&quot;, &quot;model status&quot; — read and summarize current world model state | <code>Workflows/ViewModels.md</code> |</p>
+<h3>Tier System</h3>
+<p>All workflows support three execution tiers:</p>
+<p>| Tier | Target Time | Strategy | When to Use | |------|-------------|----------|-------------| | <strong>Fast</strong> | ~2 min | Single agent synthesizes across all models | Quick gut-check, casual exploration | | <strong>Standard</strong> | ~10 min | 11 parallel agents + RedTeam + FirstPrinciples | Most use cases, good depth/speed balance | | <strong>Deep</strong> | Up to 1 hr | 11 parallel agents + per-horizon Research + RedTeam + Council + FirstPrinciples | High-stakes decisions, major investments |</p>
+<p><strong>Default tier:</strong> Standard. User specifies with &quot;fast&quot;, &quot;deep&quot;, or tier defaults to Standard.</p>
+<h3>World Model Storage</h3>
+<p>Models are stored at: <code>$LIFEOS_DIR/MEMORY/RESEARCH/WorldModels/</code></p>
+<h4>Horizon Models (base views)</h4>
+<p>| File | Horizon | |------|---------| | <code>INDEX.md</code> | Summary of all models with last-updated dates | | <code>6-month.md</code> | 6-month outlook | | <code>1-year.md</code> | 1-year outlook | | <code>2-year.md</code> | 2-year outlook | | <code>3-year.md</code> | 3-year outlook | | <code>5-year.md</code> | 5-year outlook | | <code>7-year.md</code> | 7-year outlook | | <code>10-year.md</code> | 10-year outlook | | <code>15-year.md</code> | 15-year outlook | | <code>20-year.md</code> | 20-year outlook | | <code>30-year.md</code> | 30-year outlook | | <code>50-year.md</code> | 50-year outlook |</p>
+<h4>Scenario Models (alternative futures)</h4>
+<p>Stored at: <code>$LIFEOS_DIR/MEMORY/RESEARCH/WorldModels/Scenarios/</code></p>
+<p>| File | Scenario | |------|----------| | <code>great-correction-2027.md</code> | Severe US crash (2027 ± 12mo) — AI capex burst + housing + credit cascade |</p>
+<h3>Context Files</h3>
+<p>| File | Purpose | |------|---------| | <code>ModelTemplate.md</code> | Template structure for world model documents | | <code>OutputFormat.md</code> | Template for TestIdea results output |</p>
+<h3>Skill Integrations</h3>
+<p>This skill orchestrates multiple LifeOS capabilities:</p>
+<ul>
+<li><strong>RedTeam</strong> — Adversarial stress testing of ideas against each horizon</li>
+<li><strong>FirstPrinciples</strong> — Decompose idea assumptions into hard/soft/assumption constraints</li>
+<li><strong>Council</strong> — Multi-perspective debate on idea viability across horizons</li>
+<li><strong>Research</strong> — Deep research for model creation and updates</li>
+</ul>
+<h3>Voice Notification</h3>
+<p>Before any workflow execution:</p>
+<pre><code>curl -s -X POST http://localhost:31337/notify \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;message&quot;: &quot;Running the WORKFLOWNAME workflow in the WorldThreatModel skill to ACTION&quot;}' \
+  &gt; /dev/null 2&gt;&amp;1 &amp;</code></pre>
+<p>Then output: <code>Running the <strong>WorkflowName</strong> workflow in the <strong>WorldThreatModel</strong> skill to ACTION...</code></p>
+<h3>Customization Check</h3>
+<p>Before execution, check for user customizations at: <code>~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/WorldThreatModel/</code></p>
+<h3>Gotchas</h3>
+<ul>
+<li><strong>11 time horizons (6mo-50yr).</strong> Don't over-index on short-term predictions — the value is in long-term structural analysis.</li>
+<li><strong>Threat models are hypothetical.</strong> Present as scenarios with probability ranges, not predictions.</li>
+<li><strong>Update models when major world events occur.</strong> Static threat models decay in accuracy.</li>
+</ul>
+<h3>Examples</h3>
+<p><strong>Example 1: Test an investment thesis</strong></p>
+<pre><code>User: &quot;threat model my bet on AI-first content creation&quot;
+→ Analyzes across 11 time horizons (6mo to 50yr)
+→ Identifies structural risks at each horizon
+→ Returns probability-weighted scenario matrix</code></pre>
+<p><strong>Example 2: Stress test a strategy</strong></p>
+<pre><code>User: &quot;what could go wrong with our newsletter business model?&quot;
+→ Maps threat vectors: market, technology, regulatory, competitive
+→ Returns prioritized risk register with mitigations</code></pre>
+<h3>Execution Log</h3>
+<p>After completing any workflow, append a single JSONL entry:</p>
+<pre><code>echo '{&quot;ts&quot;:&quot;'$(date -u +%Y-%m-%dT%H:%M:%SZ)'&quot;,&quot;skill&quot;:&quot;WorldThreatModel&quot;,&quot;workflow&quot;:&quot;WORKFLOW_USED&quot;,&quot;input&quot;:&quot;8_WORD_SUMMARY&quot;,&quot;status&quot;:&quot;ok|error&quot;,&quot;duration_s&quot;:SECONDS}' &gt;&gt; ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl</code></pre>
+<p>Replace <code>WORKFLOW_USED</code> with the workflow executed, <code>8_WORD_SUMMARY</code> with a brief input description, and <code>SECONDS</code> with approximate wall-clock time. Log <code>status: &quot;error&quot;</code> if the workflow failed.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: WorldThreatModel\ndisplay_name: WorldThreatModel\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# WorldThreatModel - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `WorldThreatModel` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nPersistent world-model harness that stress-tests ideas, strategies, and investments against 11 time horizons from 6 months to 50 years. Each horizon model is a deep (~10 page) analysis of geopolitics, technology, economi\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the WorldThreatModel skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `WorldThreatModel` |\n| Canonical name | `WorldThreatModel` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\nPersistent world-model harness that stress-tests ideas, strategies, and investments against 11 time horizons from 6 months to 50 years. Each horizon model is a deep (~10 page) analysis of geopolitics, technology, economi\n\n\n## Original SKILL.md\n\n---\nname: WorldThreatModel\ndescription: \"Persistent world-model harness that stress-tests ideas, strategies, and investments against 11 time horizons from 6 months to 50 years. Each horizon model is a deep (~10 page) analysis of geopolitics, technology, economics, society, environment, security, wildcards. Three tiers: Fast (~2 min, single synthesizer), Standard (~10 min, 11 parallel agents + RedTeam + FirstPrinciples), Deep (~1hr, adds Research + Council). Three workflows: TestIdea (probability-weighted scenario matrix across 11 horizons), UpdateModels, ViewModels. Orchestrates RedTeam, FirstPrinciples, Council, Research. USE WHEN threat model, world model, test idea, future analysis, time horizon, stress test against future, long-term risk. NOT FOR single-shot idea attack (use RedTeam).\"\neffort: high\n---\n\n# World Threat Model Harness\n\n## What It Does\n\nStress-tests an idea, strategy, or investment against 11 time horizons from 6 months to 50 years. Each horizon is a deep (~10 page) world model covering geopolitics, technology, economics, society, environment, security, and wildcards. Three speed tiers: Fast (~2 min, single synthesizer), Standard (~10 min, 11 parallel agents plus RedTeam and FirstPrinciples), Deep (~1 hr, adds Research and Council). Three workflows: TestIdea returns a probability-weighted scenario matrix across all 11 horizons; UpdateModels and ViewModels handle the rest. (A dedicated TestScenario workflow for named alternative-future scenarios is planned, not yet built — scenario files under `Scenarios/` are consumed by TestIdea today.)\n\n## The Problem\n\nMost plans get tested against the present, or against the next year or two at most — so they break the moment the world shifts on a timeline you never modeled. A strategy that looks great at the 1-year horizon can be fatal at 10 years, and a 50-year bet can ignore the near-term cascade that kills it first. Holding all those horizons in your head at once, with real geopolitical, economic, and technological reasoning behind each, is more than any single pass can do. This harness keeps 11 persistent world models warm and runs your idea against all of them at the same time, with adversarial analysis on top.\n\n## How It Works\n\nA system of 11 persistent world models spanning 6 months to 50 years. Each model is a deep (~10 page)\nanalysis of geopolitics, technology, economics, society, environment, security, and wildcards for that\ntime horizon. Ideas, strategies, and investments are tested against ALL horizons simultaneously using\nadversarial analysis (RedTeam, FirstPrinciples, Council).\n\n## Workflow Routing\n\n| Workflow | Trigger | File |\n|----------|---------|------|\n| **TestIdea** | \"test idea\", \"test strategy\", \"test investment\", \"how will this hold up\", \"stress test\", \"test against future\" — test any input against all 11 world models | `Workflows/TestIdea.md` |\n| **UpdateModels** | \"update world model\", \"update models\", \"refresh models\", \"new analysis\" — refresh world model content with new research/analysis | `Workflows/UpdateModels.md` |\n| **ViewModels** | \"view world model\", \"show models\", \"current models\", \"model status\" — read and summarize current world model state | `Workflows/ViewModels.md` |\n\n## Tier System\n\nAll workflows support three execution tiers:\n\n| Tier | Target Time | Strategy | When to Use |\n|------|-------------|----------|-------------|\n| **Fast** | ~2 min | Single agent synthesizes across all models | Quick gut-check, casual exploration |\n| **Standard** | ~10 min | 11 parallel agents + RedTeam + FirstPrinciples | Most use cases, good depth/speed balance |\n| **Deep** | Up to 1 hr | 11 parallel agents + per-horizon Research + RedTeam + Council + FirstPrinciples | High-stakes decisions, major investments |\n\n**Default tier:** Standard. User specifies with \"fast\", \"deep\", or tier defaults to Standard.\n\n## World Model Storage\n\nModels are stored at: `$LIFEOS_DIR/MEMORY/RESEARCH/WorldModels/`\n\n### Horizon Models (base views)\n\n| File | Horizon |\n|------|---------|\n| `INDEX.md` | Summary of all models with last-updated dates |\n| `6-month.md` | 6-month outlook |\n| `1-year.md` | 1-year outlook |\n| `2-year.md` | 2-year outlook |\n| `3-year.md` | 3-year outlook |\n| `5-year.md` | 5-year outlook |\n| `7-year.md` | 7-year outlook |\n| `10-year.md` | 10-year outlook |\n| `15-year.md` | 15-year outlook |\n| `20-year.md` | 20-year outlook |\n| `30-year.md` | 30-year outlook |\n| `50-year.md` | 50-year outlook |\n\n### Scenario Models (alternative futures)\n\nStored at: `$LIFEOS_DIR/MEMORY/RESEARCH/WorldModels/Scenarios/`\n\n| File | Scenario |\n|------|----------|\n| `great-correction-2027.md` | Severe US crash (2027 ± 12mo) — AI capex burst + housing + credit cascade |\n\n## Context Files\n\n| File | Purpose |\n|------|---------|\n| `ModelTemplate.md` | Template structure for world model documents |\n| `OutputFormat.md` | Template for TestIdea results output |\n\n## Skill Integrations\n\nThis skill orchestrates multiple LifeOS capabilities:\n\n- **RedTeam** — Adversarial stress testing of ideas against each horizon\n- **FirstPrinciples** — Decompose idea assumptions into hard/soft/assumption constraints\n- **Council** — Multi-perspective debate on idea viability across horizons\n- **Research** — Deep research for model creation and updates\n\n## Voice Notification\n\nBefore any workflow execution:\n```bash\ncurl -s -X POST http://localhost:31337/notify \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"message\": \"Running the WORKFLOWNAME workflow in the WorldThreatModel skill to ACTION\"}' \\\n  > /dev/null 2>&1 &\n```\n\nThen output: `Running the **WorkflowName** workflow in the **WorldThreatModel** skill to ACTION...`\n\n## Customization Check\n\nBefore execution, check for user customizations at:\n`~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/WorldThreatModel/`\n\n## Gotchas\n\n- **11 time horizons (6mo-50yr).** Don't over-index on short-term predictions — the value is in long-term structural analysis.\n- **Threat models are hypothetical.** Present as scenarios with probability ranges, not predictions.\n- **Update models when major world events occur.** Static threat models decay in accuracy.\n\n## Examples\n\n**Example 1: Test an investment thesis**\n```\nUser: \"threat model my bet on AI-first content creation\"\n→ Analyzes across 11 time horizons (6mo to 50yr)\n→ Identifies structural risks at each horizon\n→ Returns probability-weighted scenario matrix\n```\n\n**Example 2: Stress test a strategy**\n```\nUser: \"what could go wrong with our newsletter business model?\"\n→ Maps threat vectors: market, technology, regulatory, competitive\n→ Returns prioritized risk register with mitigations\n```\n\n## Execution Log\n\nAfter completing any workflow, append a single JSONL entry:\n\n```bash\necho '{\"ts\":\"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'\",\"skill\":\"WorldThreatModel\",\"workflow\":\"WORKFLOW_USED\",\"input\":\"8_WORD_SUMMARY\",\"status\":\"ok|error\",\"duration_s\":SECONDS}' >> ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl\n```\n\nReplace `WORKFLOW_USED` with the workflow executed, `8_WORD_SUMMARY` with a brief input description, and `SECONDS` with approximate wall-clock time. Log `status: \"error\"` if the workflow failed.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("worldthreatmodel-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>gke-manifest-generation - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/gke-manifest-generation-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>gke-manifest-generation</h1>
+      <p class="description">Generates and updates secure, production-ready Kubernetes YAML manifests optimized for GKE Autopilot and GKE Standard clusters. Use when creating or modifying GKE deployment manifests, configuring container security contexts, setting CPU/memory resource limits, defining readiness/liveness/startup probes, mounting secrets and volumes, configuring GKE Gateway API routes, targeting Spot VMs, or deploying AI model inference workloads (vLLM, TGI, Gemma). Don't use for live cluster operations, pod troubleshooting (use gke-workload-troubleshooting), or cluster infrastructure provisioning (use gke-cluster-creation).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>gke-manifest-generation</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>gke-manifest-generation</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Generates and updates secure, production-ready Kubernetes YAML manifests optimized for GKE Autopilot and GKE Standard clusters. Use when creating or modifying GKE deployment manifests, configuring container security contexts, setting CPU/memory resource limits, defining readiness/liveness/startup probes, mounting secrets and volumes, configuring GKE Gateway API routes, targeting Spot VMs, or deploying AI model inference workloads (vLLM, TGI, Gemma). Don't use for live cluster operations, pod troubleshooting (use gke-workload-troubleshooting), or cluster infrastructure provisioning (use gke-cluster-creation).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose gke-manifest-generation, then write the task. Fallback prompt: Use the gke-manifest-generation skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+        <div class="usage-card"><strong>Upstream provenance</strong><p><a href="https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39">Google Agent Skills</a> at 092e210b243601797a0fb939040be2b1288e6d39 (Apache-2.0).</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Universal runtime boundary</h3>
+<ul>
+<li>Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.</li>
+<li>Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.</li>
+<li>Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.</li>
+<li>Read <code>references/upstream.md</code> when provenance, the pinned revision, licensing, or local adaptation details matter.</li>
+</ul>
+<h2>GKE Manifest Generation Skill</h2>
+<p>This skill provides guidelines, tooling integration, and templates to translate natural language descriptions or application code changes into secure, compliant, and cost-effective Kubernetes YAML manifests optimized for both GKE Autopilot and GKE Standard clusters.</p>
+<h3>Core Rules &amp; Verification</h3>
+<p>When generating or updating YAML manifests, you <strong>must</strong> strictly adhere to the following rules:</p>
+<h4>1. Namespace &amp; Resource Isolation</h4>
+<ul>
+<li><strong>Explicit Namespace</strong>: Always declare <code>namespace: {namespace}</code> explicitly</li>
+</ul>
+<p>in the metadata of every resource (Deployments, Services, ConfigMaps, Secrets, PVCs, Roles, bindings). Map it to the namespace configured in your active <code>SETTINGS.md</code>. Never omit the namespace.</p>
+<ul>
+<li><strong>Dedicated ServiceAccount</strong>: Avoid using the namespace's <code>default</code></li>
+</ul>
+<p>ServiceAccount. Always create and reference a dedicated <code>ServiceAccount</code> (e.g., <code>devteam-agent-sa</code>) for each microservice.</p>
+<h4>2. GKE Resource Tuning (Autopilot &amp; Standard)</h4>
+<ul>
+<li><strong>Resources Requests &amp; Limits</strong>: Always specify CPU and Memory requests and</li>
+</ul>
+<p>limits for all containers.</p>
+<ul>
+<li><em>GKE Autopilot</em>: Requests determine pod billing directly; requests and</li>
+</ul>
+<p>limits must be equal. If they differ, Autopilot will automatically scale requests up to match limits, which can significantly increase costs.</p>
+<ul>
+<li><em>GKE Standard</em>: Requests ensure stable scheduling and bin-packing;</li>
+</ul>
+<p>limits prevent resource starvation/noisy-neighbor issues.</p>
+<ul>
+<li><strong>Density Defaults</strong>: For stateless apps or sidecars on GKE Standard,</li>
+</ul>
+<p>default to conservative requests (e.g., <code>requests.cpu: &quot;100m&quot;</code> or <code>&quot;200m&quot;</code>, <code>requests.memory: &quot;256Mi&quot;</code> or <code>&quot;512Mi&quot;</code>) with burstable limits. Use a reasonable overcommit ratio for limits (e.g., 2x to 4x requests, like <code>limits.cpu: &quot;400m&quot;</code> to <code>&quot;800m&quot;</code>, and <code>limits.memory: &quot;512Mi&quot;</code> to <code>&quot;1Gi&quot;</code>). Avoid excessive overcommit limits (like <code>limits.cpu: &quot;4&quot;</code> for a <code>100m</code> request) to prevent severe CPU throttling and latency degradation under heavy scheduling load, particularly in environments without guaranteed node shares.</p>
+<ul>
+<li><strong>Spot VMs for Staging/Dev</strong>: For non-production workloads (e.g., namespaces</li>
+</ul>
+<p>containing <code>-test</code>, <code>-dev</code>, or <code>-staging</code>), or if the user requests cost optimization, automatically target GKE Spot VMs. This requires injecting both the <code>nodeSelector</code> targeting Spot VMs AND the corresponding toleration to tolerate the Spot VM taint:</p>
+<pre><code>    nodeSelector:
+      cloud.google.com/gke-spot: &quot;true&quot;
+    tolerations:
+      - key: &quot;cloud.google.com/gke-spot&quot;
+        operator: &quot;Equal&quot;
+        value: &quot;true&quot;
+        effect: &quot;NoSchedule&quot;</code></pre>
+<p>(On GKE Standard, this assumes a Spot node pool is configured).</p>
+<h4>3. Container Security Hardening (Pod Security Standards)</h4>
+<ul>
+<li><strong>Non-Root Execution</strong>: Always configure <code>securityContext</code> at the Pod level</li>
+</ul>
+<p>(and container level if overriding) to run as a non-root user (e.g., <code>runAsNonRoot: true</code>, <code>runAsUser: 10000</code>, <code>runAsGroup: 10000</code>, <code>fsGroup: 10000</code>). This is strictly enforced on GKE Autopilot and is a critical security baseline for GKE Standard.</p>
+<ul>
+<li><strong>Minimal Privileges</strong>: Always set <code>allowPrivilegeEscalation: false</code> and</li>
+</ul>
+<p><code>seccompProfile: {type: RuntimeDefault}</code>.</p>
+<ul>
+<li><strong>Read-Only Root Filesystem</strong>: Set <code>readOnlyRootFilesystem: true</code> to prevent</li>
+</ul>
+<p>modifications to the container image filesystem.</p>
+<ul>
+<li><em>Writable Directory Fallback</em>: If <code>readOnlyRootFilesystem</code> is enabled,</li>
+</ul>
+<p>mount a local <code>emptyDir</code> volume to <code>/tmp</code> or <code>/var/run/</code> to allow applications (like Java/Nginx) to write temp files without crashing.</p>
+<ul>
+<li><strong>Secret Volume Mounting</strong>: Prefer mounting Secrets as read-only files</li>
+</ul>
+<p>(configured in the <code>volumes</code> spec with <code>defaultMode: 0400</code>) instead of mapping them as environment variables, unless the application framework exclusively supports env-var based configuration. This prevents secrets leaking into application logs.</p>
+<h4>4. Health Checking (Mandatory Probes)</h4>
+<ul>
+<li><strong>Liveness &amp; Readiness Probes</strong>: Every Deployment container must define both</li>
+</ul>
+<p><code>livenessProbe</code> and <code>readinessProbe</code>.</p>
+<ul>
+<li><strong>Web/API</strong>: Use <code>httpGet</code> probes.</li>
+<li><strong>TCP Services</strong>: Use <code>tcpSocket</code> probes.</li>
+<li><strong>Databases/Caches</strong>: Use command-based <code>exec</code> probes (e.g.,</li>
+</ul>
+<p><code>exec.command: [&quot;redis-cli&quot;, &quot;ping&quot;]</code>).</p>
+<ul>
+<li><strong>Startup Probes for Slow-Starting Apps</strong>: For applications with slow boot</li>
+</ul>
+<p>times (e.g., Java spring boot, complex Python scripts, LLM model servers), you <strong>must</strong> also define a <code>startupProbe</code>. When a <code>startupProbe</code> is defined, the liveness and readiness probes are disabled until it succeeds, preventing Kubernetes from prematurely killing the pod during startup:</p>
+<pre><code>    startupProbe:
+      httpGet:
+        path: /healthz
+        port: 8080
+      failureThreshold: 30
+      periodSeconds: 10</code></pre>
+<ul>
+<li><strong>Sensible Defaults</strong>: Set <code>initialDelaySeconds: 5</code> to <code>15</code> depending on</li>
+</ul>
+<p>startup time (e.g., Java requires a longer delay than Go/Nginx).</p>
+<h4>5. Services &amp; Ingress Routing</h4>
+<ul>
+<li><strong>Internal ClusterIP</strong>: Default all internal microservices to `type:</li>
+</ul>
+<p>ClusterIP<code>. Never use </code>type: LoadBalancer<code> or </code>NodePort` unless the workload is explicitly intended to be publicly accessible from the internet.</p>
+<ul>
+<li><strong>Port Naming</strong>: Always assign clear, standard names to service and</li>
+</ul>
+<p>container ports (e.g., <code>name: http-web</code> or <code>name: grpc-api</code>) to enable automatic protocol discovery, tracing, and Web App routing.</p>
+<ul>
+<li><strong>Prefer Gateway API</strong>: When exposing APIs externally, prioritize using GKE</li>
+</ul>
+<p>Gateway API (<code>Gateway</code> and <code>HTTPRoute</code> resources) over legacy <code>Ingress</code> objects to enable advanced L7 routing and security features (e.g., Cloud Armor).</p>
+<h4>6. Volume Mounts, StorageClasses &amp; subPath Safety</h4>
+<ul>
+<li><strong>Avoid Directory Overwrites</strong>: When mounting a <code>ConfigMap</code> or <code>Secret</code> to</li>
+</ul>
+<p>an application directory containing other files (like Nginx public directories), always use <code>subPath</code> to overlay only the specific file. <em>Caveat</em>: Note that containers using <code>subPath</code> volume mounts do not receive automatic configuration updates if the underlying ConfigMap or Secret is modified; pods must be restarted manually to pick up changes.</p>
+<ul>
+<li><strong>StorageClass Selection</strong>: Use the correct GKE storage class in</li>
+</ul>
+<p>PersistentVolumeClaims:</p>
+<ul>
+<li><em>CSI Driver Clusters (Autopilot &amp; Modern Standard)</em>: Use <code>standard-rwo</code></li>
+</ul>
+<p>(default balanced PD) or <code>premium-rwo</code> (SSD PD).</p>
+<ul>
+<li><em>Legacy Standard Clusters</em>: Use <code>standard</code> (default PD) or <code>premium</code></li>
+</ul>
+<p>(SSD PD) if <code>standard-rwo</code>/<code>premium-rwo</code> are not configured.</p>
+<ul>
+<li><em>Database rule</em>: Use SSD storage classes (<code>premium-rwo</code> or <code>premium</code>)</li>
+</ul>
+<p>only when the prompt explicitly requests high IOPS, low latency, or database storage.</p>
+<h4>7. High Availability on GKE</h4>
+<ul>
+<li><strong>Topology Spread</strong>: For deployments with &gt;1 replica, use <code>podAntiAffinity</code></li>
+</ul>
+<p>or <code>topologySpreadConstraints</code> with <code>topologyKey: &quot;kubernetes.io/hostname&quot;</code> to distribute pods across GKE nodes and availability zones.</p>
+<ul>
+<li><strong>PodDisruptionBudget</strong>: For deployments with &gt;1 replica, declare a</li>
+</ul>
+<p><code>PodDisruptionBudget</code> to guarantee minimum replica availability during voluntary GKE node upgrades and maintenance cycles.</p>
+<h4>8. Updates &amp; Server-Side Apply Reconciliations</h4>
+<ul>
+<li><strong>Stable List Keys</strong>: Under Kubernetes Server-Side Apply (SSA), elements in</li>
+</ul>
+<p>associative lists (like volumes, volume mounts, ports, and container definitions) are matched and merged by their unique identifier keys (typically <code>name</code>). You <strong>must</strong> keep the <code>name</code> key stable when modifying properties of an existing list item. Renaming the <code>name</code> key will cause SSA to create a brand new entry and leave the old entry intact (orphaned) rather than modifying it.</p>
+<ul>
+<li><strong>Minimal Diff</strong>: Make only the changes requested. Adhere closely to</li>
+</ul>
+<p>existing labels, annotations, and conventions.</p>
+<hr>
+<h3>Specialty Workloads: GKE AI/Inference Serving (vLLM, TGI, etc.)</h3>
+<p>For model serving workloads, prioritize using optimized tooling like GKE Inference Quickstart if available. If generating manually:</p>
+<ol>
+<li><strong>GPU Request &amp; Allocation</strong>:</li>
+</ol>
+<ul>
+<li>Always request <code>nvidia.com/gpu</code> in both <code>requests</code> and <code>limits</code>.</li>
+<li>Add a <code>nodeSelector</code> or node affinity targeting the desired GKE</li>
+</ul>
+<p>accelerator tag (e.g., <code>cloud.google.com/gke-accelerator: nvidia-l4</code>).</p>
+<ol>
+<li><strong>Shared Memory Boost</strong>:</li>
+</ol>
+<ul>
+<li>Model servers require high shared memory (<code>/dev/shm</code>) for inter-process</li>
+</ul>
+<p>communications. Always declare and mount an <code>emptyDir</code> volume with <code>medium: Memory</code> to <code>/dev/shm</code>.</p>
+<ol>
+<li><strong>Weight Loading Optimization</strong>:</li>
+</ol>
+<ul>
+<li>Mount model weight directories (like GCS buckets) using the GKE GCS Fuse</li>
+</ul>
+<p>CSI driver (<code>csi.storage.gke.io</code>) as <code>readOnly: true</code> for efficient cold-starts.</p>
+<hr>
+<h3>Tooling &amp; Grounding Guidelines</h3>
+<p>When generating manifests, you should leverage the following tooling to reduce hallucinations and optimize configurations:</p>
+<ol>
+<li><strong>Inference Workloads (GKE Inference Quickstart CLI)</strong>:</li>
+</ol>
+<ul>
+<li>Make sure you have the</li>
+</ul>
+<p>[Google Cloud SDK](https://cloud.google.com/sdk/docs/install) installed.</p>
+<ul>
+<li>For all AI/LLM inference workloads (e.g. model serving), you <strong>must</strong></li>
+</ul>
+<p>prioritize using the <code>gcloud</code> CLI GKE Inference Quickstart command to generate the optimized manifests instead of writing them manually:</p>
+<pre><code>        gcloud container ai profiles manifests create \
+          --model={model_name} \
+          --model-server={server_name} \
+          --accelerator-type={accelerator_type} \
+          --output=manifest \
+          --output-path={output_file_path}</code></pre>
+<ul>
+<li><em>Constraint</em>: You must include all resources returned by this command</li>
+</ul>
+<p>(Deployments, Services, PodMonitoring, etc.) without filtering.</p>
+<ol>
+<li><strong>Grounding in Official Documentation (Developer Knowledge API)</strong>:</li>
+</ol>
+<ul>
+<li>For GKE-specific features, API defaults, manifest examples, or security</li>
+</ul>
+<p>contexts, you <strong>must</strong> query Google's developer knowledge base to retrieve official GKE documentation:</p>
+<ul>
+<li><strong><code>answer_query</code></strong>: Use this to ask direct questions (e.g., *&quot;How to</li>
+</ul>
+<p>configure GCS Fuse CSI driver in GKE&quot;*). This is the preferred tool for general queries.</p>
+<ul>
+<li><strong><code>search_documents</code></strong>: Use this to search for relevant GKE guides</li>
+</ul>
+<p>or examples when you don't have a specific question.</p>
+<ul>
+<li><strong><code>get_document</code></strong>: Use this to fetch full document contents when</li>
+</ul>
+<p>you have a specific document ID.</p>
+<hr>
+<h3>Reference Examples</h3>
+<p>For detailed, production-ready manifest templates, consult the following reference guides:</p>
+<ul>
+<li><strong>[Basic Hardened Nginx Workload](references/basic-workload.md)</strong>:</li>
+</ul>
+<p>Production-ready deployment with dedicated service account, security contexts, probes, anti-affinity, and PodDisruptionBudget.</p>
+<ul>
+<li><strong>[Network Policy](references/network-policy.md)</strong>: Default-deny ingress</li>
+</ul>
+<p>network policy and selective ingress allowance for specific apps.</p>
+<ul>
+<li><strong>[AI/LLM Inference Workload](references/ai-inference.md)</strong>: GPU resource</li>
+</ul>
+<p>allocation, Workload Identity, GCS FUSE CSI driver mounting, <code>/dev/shm</code> shared memory boost, and startup probes.</p>
+<ul>
+<li><strong>[GKE Gateway API Routing](references/gateway-api.md)</strong>: Exposing workloads</li>
+</ul>
+<p>using GKE L7 Gateway API (<code>Gateway</code> and <code>HTTPRoute</code> resources).</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: gke-manifest-generation\ndisplay_name: gke-manifest-generation\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# gke-manifest-generation - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `gke-manifest-generation` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nGenerates and updates secure, production-ready Kubernetes YAML manifests optimized for GKE Autopilot and GKE Standard clusters. Use when creating or modifying GKE deployment manifests, configuring container security cont\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose gke-manifest-generation, then write the task. Fallback prompt: Use the gke-manifest-generation skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `gke-manifest-generation` |\n| Canonical name | `gke-manifest-generation` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nGenerates and updates secure, production-ready Kubernetes YAML manifests optimized for GKE Autopilot and GKE Standard clusters. Use when creating or modifying GKE deployment manifests, configuring container security cont\n\n## Upstream provenance\n\nThis adapted package derives from [Google Agent Skills](https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39) at commit `092e210b243601797a0fb939040be2b1288e6d39`, licensed under `Apache-2.0`.\n\n\n## Original SKILL.md\n\n---\nname: gke-manifest-generation\ndescription: \"Generates and updates secure, production-ready Kubernetes YAML manifests optimized for GKE Autopilot and GKE Standard clusters. Use when creating or modifying GKE deployment manifests, configuring container security contexts, setting CPU/memory resource limits, defining readiness/liveness/startup probes, mounting secrets and volumes, configuring GKE Gateway API routes, targeting Spot VMs, or deploying AI model inference workloads (vLLM, TGI, Gemma). Don't use for live cluster operations, pod troubleshooting (use gke-workload-troubleshooting), or cluster infrastructure provisioning (use gke-cluster-creation).\"\nlicense: Apache-2.0\n---\n\n## Universal runtime boundary\n\n- Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.\n- Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.\n- Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.\n- Read `references/upstream.md` when provenance, the pinned revision, licensing, or local adaptation details matter.\n\n# GKE Manifest Generation Skill\n\nThis skill provides guidelines, tooling integration, and templates to translate\nnatural language descriptions or application code changes into secure,\ncompliant, and cost-effective Kubernetes YAML manifests optimized for both GKE\nAutopilot and GKE Standard clusters.\n\n## Core Rules & Verification\n\nWhen generating or updating YAML manifests, you **must** strictly adhere to the\nfollowing rules:\n\n### 1. Namespace & Resource Isolation\n\n-   **Explicit Namespace**: Always declare `namespace: {namespace}` explicitly\n    in the metadata of every resource (Deployments, Services, ConfigMaps,\n    Secrets, PVCs, Roles, bindings). Map it to the namespace configured in your\n    active `SETTINGS.md`. Never omit the namespace.\n-   **Dedicated ServiceAccount**: Avoid using the namespace's `default`\n    ServiceAccount. Always create and reference a dedicated `ServiceAccount`\n    (e.g., `devteam-agent-sa`) for each microservice.\n\n### 2. GKE Resource Tuning (Autopilot & Standard)\n\n-   **Resources Requests & Limits**: Always specify CPU and Memory requests and\n    limits for all containers.\n    -   *GKE Autopilot*: Requests determine pod billing directly; requests and\n        limits must be equal. If they differ, Autopilot will automatically scale\n        requests up to match limits, which can significantly increase costs.\n    -   *GKE Standard*: Requests ensure stable scheduling and bin-packing;\n        limits prevent resource starvation/noisy-neighbor issues.\n-   **Density Defaults**: For stateless apps or sidecars on GKE Standard,\n    default to conservative requests (e.g., `requests.cpu: \"100m\"` or `\"200m\"`,\n    `requests.memory: \"256Mi\"` or `\"512Mi\"`) with burstable limits. Use a\n    reasonable overcommit ratio for limits (e.g., 2x to 4x requests, like\n    `limits.cpu: \"400m\"` to `\"800m\"`, and `limits.memory: \"512Mi\"` to `\"1Gi\"`).\n    Avoid excessive overcommit limits (like `limits.cpu: \"4\"` for a `100m`\n    request) to prevent severe CPU throttling and latency degradation under\n    heavy scheduling load, particularly in environments without guaranteed node\n    shares.\n-   **Spot VMs for Staging/Dev**: For non-production workloads (e.g., namespaces\n    containing `-test`, `-dev`, or `-staging`), or if the user requests cost\n    optimization, automatically target GKE Spot VMs. This requires injecting\n    both the `nodeSelector` targeting Spot VMs AND the corresponding toleration\n    to tolerate the Spot VM taint:\n\n    ```yaml\n    nodeSelector:\n      cloud.google.com/gke-spot: \"true\"\n    tolerations:\n      - key: \"cloud.google.com/gke-spot\"\n        operator: \"Equal\"\n        value: \"true\"\n        effect: \"NoSchedule\"\n    ```\n\n    (On GKE Standard, this assumes a Spot node pool is configured).\n\n### 3. Container Security Hardening (Pod Security Standards)\n\n-   **Non-Root Execution**: Always configure `securityContext` at the Pod level\n    (and container level if overriding) to run as a non-root user (e.g.,\n    `runAsNonRoot: true`, `runAsUser: 10000`, `runAsGroup: 10000`, `fsGroup:\n    10000`). This is strictly enforced on GKE Autopilot and is a critical\n    security baseline for GKE Standard.\n-   **Minimal Privileges**: Always set `allowPrivilegeEscalation: false` and\n    `seccompProfile: {type: RuntimeDefault}`.\n-   **Read-Only Root Filesystem**: Set `readOnlyRootFilesystem: true` to prevent\n    modifications to the container image filesystem.\n    -   *Writable Directory Fallback*: If `readOnlyRootFilesystem` is enabled,\n        mount a local `emptyDir` volume to `/tmp` or `/var/run/` to allow\n        applications (like Java/Nginx) to write temp files without crashing.\n-   **Secret Volume Mounting**: Prefer mounting Secrets as read-only files\n    (configured in the `volumes` spec with `defaultMode: 0400`) instead of\n    mapping them as environment variables, unless the application framework\n    exclusively supports env-var based configuration. This prevents secrets\n    leaking into application logs.\n\n### 4. Health Checking (Mandatory Probes)\n\n-   **Liveness & Readiness Probes**: Every Deployment container must define both\n    `livenessProbe` and `readinessProbe`.\n    -   **Web/API**: Use `httpGet` probes.\n    -   **TCP Services**: Use `tcpSocket` probes.\n    -   **Databases/Caches**: Use command-based `exec` probes (e.g.,\n        `exec.command: [\"redis-cli\", \"ping\"]`).\n-   **Startup Probes for Slow-Starting Apps**: For applications with slow boot\n    times (e.g., Java spring boot, complex Python scripts, LLM model servers),\n    you **must** also define a `startupProbe`. When a `startupProbe` is defined,\n    the liveness and readiness probes are disabled until it succeeds, preventing\n    Kubernetes from prematurely killing the pod during startup:\n\n    ```yaml\n    startupProbe:\n      httpGet:\n        path: /healthz\n        port: 8080\n      failureThreshold: 30\n      periodSeconds: 10\n    ```\n\n-   **Sensible Defaults**: Set `initialDelaySeconds: 5` to `15` depending on\n    startup time (e.g., Java requires a longer delay than Go/Nginx).\n\n### 5. Services & Ingress Routing\n\n-   **Internal ClusterIP**: Default all internal microservices to `type:\n    ClusterIP`. Never use `type: LoadBalancer` or `NodePort` unless the workload\n    is explicitly intended to be publicly accessible from the internet.\n-   **Port Naming**: Always assign clear, standard names to service and\n    container ports (e.g., `name: http-web` or `name: grpc-api`) to enable\n    automatic protocol discovery, tracing, and Web App routing.\n-   **Prefer Gateway API**: When exposing APIs externally, prioritize using GKE\n    Gateway API (`Gateway` and `HTTPRoute` resources) over legacy `Ingress`\n    objects to enable advanced L7 routing and security features (e.g., Cloud\n    Armor).\n\n### 6. Volume Mounts, StorageClasses & subPath Safety\n\n-   **Avoid Directory Overwrites**: When mounting a `ConfigMap` or `Secret` to\n    an application directory containing other files (like Nginx public\n    directories), always use `subPath` to overlay only the specific file.\n    *Caveat*: Note that containers using `subPath` volume mounts do not receive\n    automatic configuration updates if the underlying ConfigMap or Secret is\n    modified; pods must be restarted manually to pick up changes.\n-   **StorageClass Selection**: Use the correct GKE storage class in\n    PersistentVolumeClaims:\n    -   *CSI Driver Clusters (Autopilot & Modern Standard)*: Use `standard-rwo`\n        (default balanced PD) or `premium-rwo` (SSD PD).\n    -   *Legacy Standard Clusters*: Use `standard` (default PD) or `premium`\n        (SSD PD) if `standard-rwo`/`premium-rwo` are not configured.\n    -   *Database rule*: Use SSD storage classes (`premium-rwo` or `premium`)\n        only when the prompt explicitly requests high IOPS, low latency, or\n        database storage.\n\n### 7. High Availability on GKE\n\n-   **Topology Spread**: For deployments with >1 replica, use `podAntiAffinity`\n    or `topologySpreadConstraints` with `topologyKey: \"kubernetes.io/hostname\"`\n    to distribute pods across GKE nodes and availability zones.\n-   **PodDisruptionBudget**: For deployments with >1 replica, declare a\n    `PodDisruptionBudget` to guarantee minimum replica availability during\n    voluntary GKE node upgrades and maintenance cycles.\n\n### 8. Updates & Server-Side Apply Reconciliations\n\n-   **Stable List Keys**: Under Kubernetes Server-Side Apply (SSA), elements in\n    associative lists (like volumes, volume mounts, ports, and container\n    definitions) are matched and merged by their unique identifier keys\n    (typically `name`). You **must** keep the `name` key stable when modifying\n    properties of an existing list item. Renaming the `name` key will cause SSA\n    to create a brand new entry and leave the old entry intact (orphaned) rather\n    than modifying it.\n-   **Minimal Diff**: Make only the changes requested. Adhere closely to\n    existing labels, annotations, and conventions.\n\n--------------------------------------------------------------------------------\n\n## Specialty Workloads: GKE AI/Inference Serving (vLLM, TGI, etc.)\n\nFor model serving workloads, prioritize using optimized tooling like GKE\nInference Quickstart if available. If generating manually:\n\n1.  **GPU Request & Allocation**:\n    -   Always request `nvidia.com/gpu` in both `requests` and `limits`.\n    -   Add a `nodeSelector` or node affinity targeting the desired GKE\n        accelerator tag (e.g., `cloud.google.com/gke-accelerator: nvidia-l4`).\n2.  **Shared Memory Boost**:\n    -   Model servers require high shared memory (`/dev/shm`) for inter-process\n        communications. Always declare and mount an `emptyDir` volume with\n        `medium: Memory` to `/dev/shm`.\n3.  **Weight Loading Optimization**:\n    -   Mount model weight directories (like GCS buckets) using the GKE GCS Fuse\n        CSI driver (`csi.storage.gke.io`) as `readOnly: true` for efficient\n        cold-starts.\n\n--------------------------------------------------------------------------------\n\n## Tooling & Grounding Guidelines\n\nWhen generating manifests, you should leverage the following tooling to reduce\nhallucinations and optimize configurations:\n\n1.  **Inference Workloads (GKE Inference Quickstart CLI)**:\n\n    -   Make sure you have the\n        [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) installed.\n    -   For all AI/LLM inference workloads (e.g. model serving), you **must**\n        prioritize using the `gcloud` CLI GKE Inference Quickstart command to\n        generate the optimized manifests instead of writing them manually:\n\n        ```bash\n        gcloud container ai profiles manifests create \\\n          --model={model_name} \\\n          --model-server={server_name} \\\n          --accelerator-type={accelerator_type} \\\n          --output=manifest \\\n          --output-path={output_file_path}\n        ```\n\n    -   *Constraint*: You must include all resources returned by this command\n        (Deployments, Services, PodMonitoring, etc.) without filtering.\n\n2.  **Grounding in Official Documentation (Developer Knowledge API)**:\n\n    -   For GKE-specific features, API defaults, manifest examples, or security\n        contexts, you **must** query Google's developer knowledge base to\n        retrieve official GKE documentation:\n        -   **`answer_query`**: Use this to ask direct questions (e.g., *\"How to\n            configure GCS Fuse CSI driver in GKE\"*). This is the preferred tool\n            for general queries.\n        -   **`search_documents`**: Use this to search for relevant GKE guides\n            or examples when you don't have a specific question.\n        -   **`get_document`**: Use this to fetch full document contents when\n            you have a specific document ID.\n\n--------------------------------------------------------------------------------\n\n## Reference Examples\n\nFor detailed, production-ready manifest templates, consult the following\nreference guides:\n\n-   **[Basic Hardened Nginx Workload](references/basic-workload.md)**:\n    Production-ready deployment with dedicated service account, security\n    contexts, probes, anti-affinity, and PodDisruptionBudget.\n-   **[Network Policy](references/network-policy.md)**: Default-deny ingress\n    network policy and selective ingress allowance for specific apps.\n-   **[AI/LLM Inference Workload](references/ai-inference.md)**: GPU resource\n    allocation, Workload Identity, GCS FUSE CSI driver mounting, `/dev/shm`\n    shared memory boost, and startup probes.\n-   **[GKE Gateway API Routing](references/gateway-api.md)**: Exposing workloads\n    using GKE L7 Gateway API (`Gateway` and `HTTPRoute` resources).\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("gke-manifest-generation-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

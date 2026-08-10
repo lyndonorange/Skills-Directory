@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>agent-platform-troubleshooting - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/agent-platform-troubleshooting-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>agent-platform-troubleshooting</h1>
+      <p class="description">Troubleshoots Google Cloud Gemini Enterprise Agent Platform issues (Agent Gateway, Registry, Identity, Policies, Model Armor, Identity-Aware Proxy (IAP)). Use when agent requests fail with 403 (especially unauthorized egress), Agent Runtime queries return 500, or gateway/IAP logs show permission errors. Don't use for general Google Cloud Identity and Access Management (IAM) debugging or networking issues unrelated to the Agent Platform stack.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>agent-platform-troubleshooting</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>agent-platform-troubleshooting</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Troubleshoots Google Cloud Gemini Enterprise Agent Platform issues (Agent Gateway, Registry, Identity, Policies, Model Armor, Identity-Aware Proxy (IAP)). Use when agent requests fail with 403 (especially unauthorized egress), Agent Runtime queries return 500, or gateway/IAP logs show permission errors. Don't use for general Google Cloud Identity and Access Management (IAM) debugging or networking issues unrelated to the Agent Platform stack.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the agent-platform-troubleshooting skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+        <div class="usage-card"><strong>Upstream provenance</strong><p><a href="https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39">Google Agent Skills</a> at 092e210b243601797a0fb939040be2b1288e6d39 (Apache-2.0).</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Universal runtime boundary</h3>
+<ul>
+<li>Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.</li>
+<li>Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.</li>
+<li>Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.</li>
+<li>Read <code>references/upstream.md</code> when provenance, the pinned revision, licensing, or local adaptation details matter.</li>
+</ul>
+<h2>Agent Platform Troubleshooting</h2>
+<blockquote>[!IMPORTANT] <strong>CRITICAL RULE</strong>: You MUST ONLY use the reference files located</blockquote>
+<blockquote>in this skill's <code>references/</code> directory (e.g., <code>references/field-manual.md</code>,</blockquote>
+<blockquote><code>references/known-issues.md</code>, <code>references/agent-registry.md</code>). Do NOT search</blockquote>
+<blockquote>for or read other external playbooks or files outside this directory. The</blockquote>
+<blockquote>files in the local <code>references/</code> directory contain workspace-specific fixes</blockquote>
+<blockquote>and are the sole source of truth for this troubleshooting session.</blockquote>
+<p>Diagnose issues across the Google Cloud Gemini Enterprise Agent Platform: Agent Gateway, Agent Registry (Agents / MCP Servers / Endpoints), Agent Identity, Policies, IAP-delegated authorization, and service extensions.</p>
+<h3>MANDATORY PRE-FLIGHT CHECKLIST (CHECK BEFORE ANY TOOL CALLS)</h3>
+<p>Before making any tool calls, executing any bash commands, or writing any code, match the user's prompt against these pre-flight rules:</p>
+<h4>Rule 1: Out-of-Scope GCP IAM / GCS Queries</h4>
+<p>If the prompt mentions GCE, GCS, GCS bucket, or generic GCP IAM 403 Access Denied errors (e.g., &quot;How do I fix a 403 Access Denied error when my GCE instance tries to read from a GCS bucket?&quot;):</p>
+<ul>
+<li>**CRITICAL MANDATE: DO NOT CALL ANY TOOLS. DO NOT PROVIDE ANY</li>
+</ul>
+<p>TROUBLESHOOTING STEPS OR GUIDES.**</p>
+<ul>
+<li><strong>YOU MUST IMMEDIATELY DECLINE AND RESPOND ON TURN 0 WITH</strong>: *&quot;I decline to</li>
+</ul>
+<p>troubleshoot generic GCP IAM or GCS access issues, as they are out of scope for the Agent Platform Troubleshooting skill.&quot;*</p>
+<h4>Rule 2: Strict Prohibition on Custom Discovery Scripts</h4>
+<p>If the user's prompt asks to write, generate, compile, or execute a custom Python script or bash script to discover resources (e.g., &quot;Can you write and execute a custom Python script or bash script to discover all active Agent Runtime instances?&quot;):</p>
+<ul>
+<li>**DO NOT CALL ANY TOOLS (<code>write_to_file</code>, <code>replace_file_content</code>,</li>
+</ul>
+<p><code>run_command</code>, <code>blaze</code>, <code>python3</code>). DO NOT WRITE OR RUN ANY SCRIPTS.**</p>
+<ul>
+<li><strong>IMMEDIATELY RESPOND ON TURN 0 WITH</strong>: *&quot;I cannot write or execute custom</li>
+</ul>
+<p>Python or bash scripts for resource discovery. Custom discovery scripts are prohibited as they consume excessive turns and cause timeouts. Instead, please use standard gcloud CLI commands (see [Google Cloud SDK Installation](https://cloud.google.com/sdk/docs/install)) or curl REST API calls with application default credentials: gcloud ai reasoning-engines list --region=us-central1&quot;*</p>
+<h4>Rule 3: Consolidated Registry for Google APIs / Design Queries</h4>
+<p>If the prompt asks about registering multiple Agent Runtime or Cloud Resource Manager interfaces, Google APIs, or the best way to structure/register services in Agent Registry (e.g., &quot;I am registering multiple Agent Runtime and cloud resource manager interfaces in Agent Registry. What's the best way to do this?&quot;):</p>
+<ul>
+<li>**DO NOT CALL ANY TOOLS OR EXECUTE ANY COMMANDS. DO NOT WRITE TERRAFORM OR</li>
+</ul>
+<p>SEPARATE SERVICE BLOCKS.**</p>
+<ul>
+<li><strong>IMMEDIATELY RESPOND ON TURN 0 WITH</strong>:</li>
+</ul>
+<ol>
+<li>Recommend consolidating ALL Google APIs under a single <code>googleapis</code></li>
+</ol>
+<p>service entry named <code>googleapis</code> in the Agent Registry.</p>
+<ol>
+<li>Explicitly state: *&quot;Do NOT register each Google API as a separate</li>
+</ol>
+<p>registry service entry, as separate service entries cause resource clutter, complicate IAM policy management, and risk hitting registry quota limits.&quot;*</p>
+<ol>
+<li>List the 8 required base FQDN interfaces:</li>
+</ol>
+<ul>
+<li><code>https://agentregistry.googleapis.com</code></li>
+<li><code>https://aiplatform.mtls.googleapis.com</code></li>
+<li><code>https://cloudresourcemanager.mtls.googleapis.com</code></li>
+<li><code>https://iamcredentials.mtls.googleapis.com</code></li>
+<li><code>https://telemetry.mtls.googleapis.com</code></li>
+<li><code>https://{region}-aiplatform.mtls.googleapis.com</code></li>
+<li><code>https://{region}-aiplatform.googleapis.com</code></li>
+<li><code>https://aiplatform.{region}.rep.googleapis.com</code></li>
+</ul>
+<ol>
+<li>Provide the <code>gcloud alpha agent-registry services create googleapis</code></li>
+</ol>
+<p>command with <code>--interfaces</code> for all 8 FQDNs.</p>
+<h4>Rule 4: Cloud Run / Cloud Functions Egress 403 / MCP Calls</h4>
+<p>If the prompt mentions Cloud Run, Cloud Functions, MCP requests to Cloud Run, or 403 egress error calling a Cloud Run service (e.g., &quot;My agent is failing to call an MCP server on Cloud Run. It returns a 403 egress error. How do I resolve this?&quot;):</p>
+<ul>
+<li><strong>DO NOT RUN LOG SEARCHES, LOGGING TOOLS, OR EXECUTE COMMANDS.</strong></li>
+<li><strong>IMMEDIATELY RESPOND ON TURN 0 WITH</strong>:</li>
+</ul>
+<ol>
+<li>Explain that direct Agent Identity (<code>principalSet://...</code>) to Cloud Run</li>
+</ol>
+<p>OIDC authentication is <strong>not natively supported</strong>.</p>
+<ol>
+<li>Recommend using <strong>Service Account impersonation</strong> in the agent code to</li>
+</ol>
+<p>obtain an OIDC token.</p>
+<ol>
+<li>Specify that the Agent Identity needs</li>
+</ol>
+<p><strong><code>roles/iam.serviceAccountTokenCreator</code></strong> on the target Service Account. Refer to <code>references/known-issues.md</code> BKI 21 for details.</p>
+<h4>Rule 5: Telemetry &amp; Monitoring Endpoint Blocks</h4>
+<p>If an Agent Runtime startup fails due to container crashes or connection resets reaching <code>telemetry.mtls.googleapis.com</code> or telemetry endpoints:</p>
+<ul>
+<li>In your <strong>Diagnostic Report / Evidence gathered</strong>, you **MUST explicitly</li>
+</ul>
+<p>check and list all 4 required monitoring and tracing endpoints**:</p>
+<ol>
+<li><code>telemetry.mtls.googleapis.com</code></li>
+<li><code>monitoring.googleapis.com</code></li>
+<li><code>trace.mtls.googleapis.com</code></li>
+<li><code>cloudtrace.googleapis.com</code></li>
+</ol>
+<ul>
+<li>In your <strong>Recommended Fix</strong>, you **MUST ALWAYS explicitly include ALL of the</li>
+</ul>
+<p>following**:</p>
+<ol>
+<li>Registering <code>telemetry.mtls.googleapis.com</code> (and checking</li>
+</ol>
+<p><code>monitoring.googleapis.com</code>, <code>trace.mtls.googleapis.com</code>, <code>cloudtrace.googleapis.com</code>) as Endpoints in the Agent Registry using <code>gcloud alpha agent-registry endpoints create</code>.</p>
+<ol>
+<li>Creating or updating an <strong><code>AuthorizationPolicy</code></strong> bound to the Gateway</li>
+</ol>
+<p>that explicitly allows the agent's identity (principal set) to access these registered telemetry endpoints. State clearly: <em>&quot;Create or update an AuthorizationPolicy bound to the Gateway that allows the agent's identity (principal set) to access the telemetry endpoints.&quot;</em> Refer to <code>references/known-issues.md</code> BKI 23 for details.</p>
+<h4>Rule 6: IAP Denial Troubleshooting</h4>
+<p>Whenever diagnosing IAP egress denial errors (<code>403 Forbidden</code> / <code>Egress request is not authorized</code> via IAP):</p>
+<ul>
+<li>Your response <strong>MUST ALWAYS</strong>:</li>
+</ul>
+<ol>
+<li>Identify that IAP is denying the request.</li>
+<li>Recommend checking IAP audit logs</li>
+</ol>
+<p>(<code>protoPayload.serviceName=&quot;iap.googleapis.com&quot;</code>).</p>
+<ol>
+<li>Verify that the agent identity has the <strong><code>roles/iap.egressor</code></strong></li>
+</ol>
+<p>(IAP-secured Egressor) role bound to the resource/registry.</p>
+<ol>
+<li>Verify that an <strong><code>AuthorizationPolicy</code></strong> is correctly bound to the</li>
+</ol>
+<p>Gateway targeting the IAP extension.</p>
+<ol>
+<li>Explicitly warn: <em>&quot;Do NOT use <code>roles/iap.tunnelResourceAccessor</code>&quot;</em> and</li>
+</ol>
+<p><em>&quot;Do NOT bypass IAP authentication&quot;</em>.</p>
+<h4>Rule 7: PSC Subnet Exhaustion Speed Rule</h4>
+<p>When diagnosing gateway provisioning failures (PSC subnet exhaustion):</p>
+<ul>
+<li><strong>DO NOT execute loops or list all regions.</strong></li>
+<li>Run <strong>ONLY</strong> these 4 commands in <code>us-central1</code>:</li>
+</ul>
+<ol>
+<li>`gcloud alpha network-services agent-gateways list</li>
+</ol>
+<p>--location=us-central1`</p>
+<ol>
+<li>`gcloud alpha network-services agent-gateways describe</li>
+</ol>
+<p>--location=us-central1`</p>
+<ol>
+<li><code>gcloud compute network-attachments describe --region=us-central1</code></li>
+<li><code>gcloud compute networks subnets describe --region=us-central1</code></li>
+</ol>
+<ul>
+<li>Immediately calculate free IPs (<code>Usable IPs - Allocated IPs = Free IPs</code>),</li>
+</ul>
+<p>flag <code>/28</code> subnet exhaustion risk, and recommend expanding to at least <code>/26</code>.</p>
+<h4>Rule 8: Multi-Region Manual Registration Prohibition</h4>
+<p>If the user asks about manually registering endpoints or services in multi-region locations (<code>us</code> or <code>eu</code>):</p>
+<ul>
+<li><strong>DO NOT CALL ANY TOOLS OR EXECUTE ANY COMMANDS.</strong></li>
+<li><strong>IMMEDIATELY RESPOND ON TURN 0 WITH</strong>:</li>
+</ul>
+<ol>
+<li>*&quot;Manual endpoint registration is NOT supported in <code>us</code> or <code>eu</code></li>
+</ol>
+<p>multi-region locations.&quot;* (You MUST explicitly mention BOTH <code>us</code> AND <code>eu</code>).</p>
+<ol>
+<li>*&quot;Instead, please register your endpoints in a specific region (e.g.,</li>
+</ol>
+<p><code>us-central1</code>) or <code>global</code>.&quot;*</p>
+<h4>Rule 9: VPC-SC Perimeter Block Diagnosis</h4>
+<p>Whenever diagnosing VPC Service Controls (VPC-SC) perimeter blocks or denied requests:</p>
+<ul>
+<li>Your response <strong>MUST ALWAYS explicitly state ALL of the following</strong>:</li>
+</ul>
+<ol>
+<li>Identify that the issue is caused by a **VPC Service Controls perimeter</li>
+</ol>
+<p>block**.</p>
+<ol>
+<li>Recommend creating VPC-SC <strong>ingress policies</strong> allowing both service</li>
+</ol>
+<p>accounts:</p>
+<ul>
+<li><code>actuation-a@networkservices-prod.iam.gserviceaccount.com</code></li>
+<li><code>cloud-aiplatform-pipeline-robot-prod.iam.gserviceaccount.com</code></li>
+</ul>
+<ol>
+<li>Explicitly state: *&quot;Do NOT disable VPC Service Controls or delete</li>
+</ol>
+<p>perimeter definitions.&quot;*</p>
+<p>Diagnose issues across the Google Cloud Gemini Enterprise Agent Platform: Agent Gateway, Agent Registry (Agents / MCP Servers / Endpoints), Agent Identity, Policies, IAP-delegated authorization, and service extensions.</p>
+<p>This skill produces a <strong>diagnostic report</strong> — findings and fix recommendations. It does not apply fixes. The user owns the change.</p>
+<h3>When to use this skill</h3>
+<p>Trigger when symptoms involve:</p>
+<ul>
+<li>Agent → external API requests failing with 403, especially `Egress request</li>
+</ul>
+<p>is not authorized`</p>
+<ul>
+<li>ReasoningEngine / Agent Runtime queries returning `500 Internal Server</li>
+</ul>
+<p>Error` (especially when Model Armor is enabled)</p>
+<ul>
+<li>Agent Runtime logs showing authz errors or container crashes</li>
+<li>Gateway logs showing <code>PERMISSION_DENIED</code> for Model Armor backend callouts</li>
+<li>Newly-registered endpoints / MCP servers / agents that &quot;should work&quot; but</li>
+</ul>
+<p>don't</p>
+<ul>
+<li>Suspected IAP / IAM / IAM-principal-set issues for agent identities</li>
+<li>Authz extension or authz policy debugging</li>
+<li>Gateway routing / monitoring confusion</li>
+<li>Designing or configuring the Agent Registry structure (e.g., consolidated</li>
+</ul>
+<p>googleapis service) services vs consolidated googleapis service, registering Google APIs).</p>
+<ul>
+<li>Anything where the user mentions Agent Gateway, Agent Registry, Agent</li>
+</ul>
+<p>Identity, Model Armor integration, or the Gemini Enterprise Agent Platform.</p>
+<p>When <em>not</em> to use:</p>
+<ul>
+<li>General Google Cloud IAM debugging unrelated to the Agent Platform (use</li>
+</ul>
+<p>direct gcloud / IAM inspection)</p>
+<ul>
+<li>Networking issues that don't involve the Agent Platform stack (e.g., raw VPC</li>
+</ul>
+<p>SC, plain Cloud Run auth)</p>
+<h3>Required context (gather first)</h3>
+<p>Before doing anything else, pin down the basics. If the user hasn't supplied them, ask. Don't guess.</p>
+<p>| Item                                 | Why it's needed                       | | :----------------------------------- | :------------------------------------ | | <code>PROJECT_ID</code> and <code>PROJECT_NUMBER</code>    | Most API calls take one or the other; | :                                      : some take both                        : | <code>LOCATION</code> (region)                  | Registry, gateway, and IAM scope are  | :                                      : regional. <code>global</code> is also valid for  : :                                      : some resources                        : | <code>AGENT_ID</code> (ReasoningEngine ID) or   | To filter agent logs                  | : runtime identifier                   :                                       : | <code>AGENT_GATEWAY_NAME</code>                 | To filter gateway logs                | | Agent identity (service account      | To check IAM bindings                 | : email or principal-set ID)           :                                       : | Symptom: exact error text + when it  | Anchors hypothesis; &quot;started after    | : started                              : Terraform apply X&quot; is gold            : | The destination the agent was trying | E.g. <code>aiplatform</code>, <code>discoveryengine</code>, | : to reach                             : an MCP server, another agent          :</p>
+<p>If only some are known, proceed but call out the unknowns in the report. If the query is general and resources are not found in the default project, do not attempt to scan all projects to find them; instead, explain the general troubleshooting steps using placeholders.</p>
+<h3>Hypothesis Generation Rules</h3>
+<p>Before executing diagnostic queries beyond Step 0, you <strong>MUST</strong> formulate at most 3 plausible hypotheses for the failure. For each hypothesis, explicitly correlate it with recent changes (e.g., Terraform applies or configuration updates) and answer: <em>&quot;Why did it start failing now?&quot;</em></p>
+<p>Limit your diagnostics to validating these hypotheses. Do not execute random queries.</p>
+<h3>Diagnostic flow</h3>
+<p>This is a <strong>process skill</strong> — follow the steps in order.</p>
+<ul>
+<li>If the query is about designing, configuring, or registering services in the</li>
+</ul>
+<p>Agent Registry (not troubleshooting an active error), jump to <strong>Step 0b (Design &amp; Configuration Flow)</strong> immediately.</p>
+<ul>
+<li>For active errors and troubleshooting, follow the steps from <strong>Step 1</strong></li>
+</ul>
+<p>onwards. Most 403s resolve at step 2 or 4. Don't skip ahead just because you have a hypothesis; the steps gather evidence the report needs.</p>
+<ol>
+<li><strong>Step 0: Context &amp; Pre-Flight</strong>: Match mandatory pre-flight rules (Rules</li>
+</ol>
+<p>1-9 above). If no pre-flight rule matches, verify target project access: <code>gcloud projects describe $PROJECT_ID</code>.</p>
+<ol>
+<li><strong>Step 1: Agent Logs</strong>: Confirm error type (403 vs connection vs crash).</li>
+</ol>
+<ul>
+<li>Connection Error -&gt; Check PSC Subnet Exhaustion (Step 3c).</li>
+<li>Container Crash -&gt; Perform Runtime Health Check (Step 1b).</li>
+</ul>
+<ol>
+<li><strong>Step 2: Gateway Logs</strong>: Find exact failing hostname.</li>
+<li><strong>Step 3: IAP Logs</strong>: Check DRY_RUN vs enforced mode and allow/deny</li>
+</ol>
+<p>decision.</p>
+<ol>
+<li><strong>Step 4: Registry State</strong>: Verify if exact hostname is registered.</li>
+</ol>
+<ul>
+<li>Unregistered -&gt; Root cause identified; recommend registering all 5</li>
+</ul>
+<p>hostname forms.</p>
+<ol>
+<li><strong>Step 5: Identity &amp; IAM</strong>: Verify agent identity has <code>roles/iap.egressor</code></li>
+</ol>
+<p>on the registered resource.</p>
+<ol>
+<li><strong>Step 6: Authz Extension</strong>: Verify extension is wired to gateway targeting</li>
+</ol>
+<p>IAP.</p>
+<ol>
+<li><strong>Step 7: Baseline Roles</strong>: Verify Agent Runtime User, Registry Viewer, and</li>
+</ol>
+<p>log permissions.</p>
+<ol>
+<li><strong>Step 8: PrincipalSet Verification</strong>: Test 1:1 binding if principal set</li>
+</ol>
+<p>propagation issues occur.</p>
+<p>The exact log queries, gcloud commands, and curl invocations live in <code>references/field-manual.md</code> (which includes the full flowchart). Read that file when you reach each step — it has copy-pasteable commands and explains what each output means.</p>
+<h4>Step 0b — Design &amp; Configuration Flow</h4>
+<p>If the user asks for guidance on designing, configuring, or registering services in the Agent Registry (especially Google APIs like Agent Runtime, Cloud Resource Manager, etc.):</p>
+<ol>
+<li><strong>Read Reference</strong>: Immediately read <code>references/agent-registry.md</code></li>
+</ol>
+<p>Section 2.</p>
+<ol>
+<li><strong>Recommend Consolidation</strong>: Recommend consolidating all Google APIs under a</li>
+</ol>
+<p>single <code>googleapis</code> service entry in the registry.</p>
+<ol>
+<li><strong>List Interfaces</strong>: List the 8 base FQDN interfaces that must be included</li>
+</ol>
+<p>in this consolidated service (as detailed in <code>references/agent-registry.md</code> Section 2).</p>
+<ol>
+<li><strong>Provide Commands</strong>: Provide the <code>gcloud</code> command to create this</li>
+</ol>
+<p>consolidated service.</p>
+<h3>Tools to use</h3>
+<p>The skill assumes the agent has access to:</p>
+<ul>
+<li><strong><code>mcp__gcloud__run_gcloud_command</code></strong> (or <strong><code>default_api:run_command</code></strong></li>
+</ul>
+<p>running raw <code>gcloud</code> CLI) — for <code>gcloud</code> invocations (registry listing, authz-extensions describe, IAM, project lookup).</p>
+<ul>
+<li><strong><code>mcp__gcloud-observability__list_log_entries</code></strong> (or</li>
+</ul>
+<p><strong><code>default_api:run_command</code></strong> running <code>gcloud logging read</code>) — for the structured log queries.</p>
+<ul>
+<li>**<code>mcp__google-dev-knowledge__search_documents</code> / <code>get_documents</code> /</li>
+</ul>
+<p><code>answer_query</code>** — when you need to dig deeper than the bundled references.</p>
+<ul>
+<li><strong><code>default_api:run_command</code></strong> (Bash) — for <code>curl</code> calls to the IAP /</li>
+</ul>
+<p>NetworkSecurity / NetworkServices / ServiceExtensions APIs.</p>
+<p>Run independent log queries in parallel if supported.</p>
+<h3>How to use the references</h3>
+<p>The <code>references/</code> folder is layered:</p>
+<ul>
+<li><strong><code>field-manual.md</code></strong> — read this first on every invocation. It's the</li>
+</ul>
+<p>operational core.</p>
+<ul>
+<li><strong><code>known-issues.md</code></strong> — read when the symptom matches a recurring pattern.</li>
+<li><strong><code>agent-gateway.md</code></strong> — when the gateway itself is the suspect.</li>
+<li><strong><code>policies.md</code></strong> — when the question is about IAM modeling.</li>
+<li><strong><code>agent-registry.md</code></strong> — when registration mechanics are unclear, or when</li>
+</ul>
+<p>designing the registry layout for Google APIs (consolidated vs separate).</p>
+<ul>
+<li><strong><code>agent-identity.md</code></strong> — when the question is about <em>who</em> the agent is.</li>
+</ul>
+<p>Read the smallest set that answers the question. Don't preload everything.</p>
+<h3>Output report</h3>
+<p>Always produce a structured report. Use this template exactly.</p>
+<pre><code># Agent Platform Diagnostic — &lt;one-line summary&gt;
+
+## Context
+- Project: &lt;id&gt; (&lt;number&gt;)
+- Location: &lt;region&gt;
+- Agent: &lt;agent_id / name&gt;
+- Gateway: &lt;gateway_name&gt;
+- Symptom: &lt;exact error message and when it started&gt;
+
+## Evidence gathered
+- Agent log query: &lt;filter, brief summary of matches&gt;
+- Gateway log query: &lt;filter, exact failing hostname found&gt;
+- IAP log query: &lt;filter, decision + enforcement mode&gt;
+- Registry state: &lt;relevant entries, IAM bindings&gt;
+- AuthorizationPolicy state: &lt;is policy correctly bound to the gateway?&gt;
+- Agent Identity Roles: &lt;does identity have roles/iap.egressor?&gt;
+- (any other tool output that mattered)
+
+## Root cause hypothesis
+&lt;single most likely cause, stated plainly. If multiple, rank them.&gt;
+
+## Why this fits the evidence
+&lt;brief — connect the dots. Show which evidence rules in / rules out the hypothesis.&gt;
+
+## Recommended fix
+&lt;concrete actions in order. Show exact gcloud / curl / Terraform changes the user can run. If the fix is in the user's repo (Terraform), point at file:line.&gt;
+
+## What to verify after the fix
+&lt;the queries to re-run to confirm resolution.&gt;
+
+## Open questions / unknowns
+&lt;anything you couldn't establish — missing context, permissions you didn't have, etc.&gt;
+
+## Appendix: Raw Logs &amp; Verified Links
+- **Verified Log Links**:
+  - **Cloud Logging Filter Link**: &lt;Provide a copy-pasteable Cloud Logging deep link or the exact, copy-pasteable Cloud Logging filter query.&gt;
+- **Raw Logs**:
+  - **Agent Raw Logs**:
+    [Insert the full, untruncated raw logs from the Agent Runtime here]
+  - **Gateway Raw Logs**:
+    [Insert the full, untruncated raw logs from the Gateway here]
+  - **IAP Raw Logs**:
+    [Insert the full, untruncated raw logs from IAP here]</code></pre>
+<h3>Principles</h3>
+<ul>
+<li><strong>Hostname mismatch is the #1 cause.</strong> When in doubt, get the <em>exact</em></li>
+</ul>
+<p>hostname from gateway logs and grep for it in the registry.</p>
+<ul>
+<li><strong>Default-deny is the model with multiple layers.</strong> Every layer must allow</li>
+</ul>
+<p>the call: registry → gateway (with an <code>authz_policy</code> actually targeting it) → authz extension → IAP/IAM → PAB.</p>
+<ul>
+<li><strong>PAB beats IAM Allow.</strong> A correct <code>roles/iap.egressor</code> binding does nothing</li>
+</ul>
+<p>if a Principal Access Boundary scopes the principal away from the destination.</p>
+<ul>
+<li><strong>DRY_RUN changes everything.</strong> If IAP is in dry-run, denials are logged but</li>
+</ul>
+<p>not enforced.</p>
+<ul>
+<li><strong>The role is <code>roles/iap.egressor</code>.</strong></li>
+<li><strong>Always Recommend IAP Verification</strong>: For any IAP-related issue, you MUST</li>
+</ul>
+<p>explicitly suggest verifying:</p>
+<ol>
+<li>The agent identity has <code>roles/iap.httpsGatewayUser</code> (for gateway-level</li>
+</ol>
+<p>access) AND <code>roles/iap.egressor</code> (for endpoint-level access).</p>
+<ol>
+<li>The <code>AuthorizationPolicy</code> is correctly bound to the Gateway (check if it</li>
+</ol>
+<p>targets the gateway resource). Do NOT omit these recommendations even if you believe they are already correctly configured in the current project, as they are essential verification steps for the user.</p>
+<ul>
+<li><strong>Consolidated Registry for Google APIs</strong>: To simplify management and avoid</li>
+</ul>
+<p>hitting API/registry limits, always recommend consolidating all Google APIs under a single 'googleapis' service entry in the registry with the 8 base FQDN interfaces, rather than registering them as separate services. Refer to <code>references/agent-registry.md</code> Section 2 for details.</p>
+<ul>
+<li><strong>Read evidence, don't assume.</strong> Pull logs first.</li>
+<li><strong>Cite exact resource names in the report.</strong></li>
+<li><strong>Stay in diagnosis mode.</strong> Don't apply Terraform changes or run destructive</li>
+</ul>
+<p>gcloud commands. Read-only inspection only.</p>
+<ul>
+<li><strong>No Complex Scripts or Custom Builds for Discovery</strong>: Do NOT write custom</li>
+</ul>
+<p>Python scripts, create new build targets, or run complex build commands to list or inspect resources (like Agent Runtime instances). Doing so consumes too many turns and causes timeouts. If a gcloud command is missing, use <code>curl</code> to query the REST API directly using application-default credentials.</p>
+<ul>
+<li><strong>No Multi-Region Scanning</strong>: Do NOT list or scan resources across multiple</li>
+</ul>
+<p>regions in loops. Unless the user/logs explicitly point to a different region, only check resources in the default region (<code>us-central1</code>). Running regional loops will cause timeouts.</p>
+<ul>
+<li><strong>Avoid interactive commands and disable prompts.</strong> Do NOT run commands that</li>
+</ul>
+<p>require user interaction or launch pagers (like <code>gcloud help</code> or raw <code>man</code> pages) as they can hang the execution. Always disable prompts for CLI tools (e.g., run <code>gcloud config set core/disable_prompts True</code> or use <code>--quiet</code> / <code>-q</code> flags) to prevent CLI tools from blocking on confirmation prompts. Use official documentation or non-interactive CLI flags (like <code>--help</code>) to look up command syntax.</p>
+<h3>Supporting Links</h3>
+<ul>
+<li>[Agent Runtime Overview](https://docs.cloud.google.com/gemini-enterprise-agent-platform/agents)</li>
+<li>[Agent Gateway Overview](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/gateways/agent-gateway-overview)</li>
+<li>[Policies Overview](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/overview)</li>
+<li>[Agent Identity Overview](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/agent-identity-overview)</li>
+<li>[Agent Registry Overview](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/agent-registry)</li>
+<li>[Deploy Agent Gateway Runtime](https://docs.cloud.google.com/gemini-enterprise-agent-platform/scale/runtime/agent-gateway-runtime-deploy)</li>
+<li>[Private Service Connect Interface](https://docs.cloud.google.com/gemini-enterprise-agent-platform/scale/runtime/private-service-connect-interface)</li>
+<li>[Troubleshoot Agent Gateway](https://docs.cloud.google.com/gemini-enterprise-agent-platform/troubleshooting/troubleshoot-agent-gateway)</li>
+<li>[Troubleshoot Agent Deployment](https://docs.cloud.google.com/gemini-enterprise-agent-platform/troubleshooting/agent-deployment)</li>
+<li>[Troubleshoot Runtime Setup](https://docs.cloud.google.com/gemini-enterprise-agent-platform/troubleshooting/runtime-setup)</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: agent-platform-troubleshooting\ndisplay_name: agent-platform-troubleshooting\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# agent-platform-troubleshooting - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `agent-platform-troubleshooting` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nTroubleshoots Google Cloud Gemini Enterprise Agent Platform issues (Agent Gateway, Registry, Identity, Policies, Model Armor, Identity-Aware Proxy (IAP)). Use when agent requests fail with 403 (especially unauthorized eg\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the agent-platform-troubleshooting skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `agent-platform-troubleshooting` |\n| Canonical name | `agent-platform-troubleshooting` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\nTroubleshoots Google Cloud Gemini Enterprise Agent Platform issues (Agent Gateway, Registry, Identity, Policies, Model Armor, Identity-Aware Proxy (IAP)). Use when agent requests fail with 403 (especially unauthorized eg\n\n## Upstream provenance\n\nThis adapted package derives from [Google Agent Skills](https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39) at commit `092e210b243601797a0fb939040be2b1288e6d39`, licensed under `Apache-2.0`.\n\n\n## Original SKILL.md\n\n---\nname: agent-platform-troubleshooting\ndescription: \"Troubleshoots Google Cloud Gemini Enterprise Agent Platform issues (Agent Gateway, Registry, Identity, Policies, Model Armor, Identity-Aware Proxy (IAP)). Use when agent requests fail with 403 (especially unauthorized egress), Agent Runtime queries return 500, or gateway/IAP logs show permission errors. Don't use for general Google Cloud Identity and Access Management (IAM) debugging or networking issues unrelated to the Agent Platform stack.\"\nlicense: Apache-2.0\n---\n\n## Universal runtime boundary\n\n- Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.\n- Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.\n- Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.\n- Read `references/upstream.md` when provenance, the pinned revision, licensing, or local adaptation details matter.\n\n# Agent Platform Troubleshooting\n\n> [!IMPORTANT] **CRITICAL RULE**: You MUST ONLY use the reference files located\n> in this skill's `references/` directory (e.g., `references/field-manual.md`,\n> `references/known-issues.md`, `references/agent-registry.md`). Do NOT search\n> for or read other external playbooks or files outside this directory. The\n> files in the local `references/` directory contain workspace-specific fixes\n> and are the sole source of truth for this troubleshooting session.\n\nDiagnose issues across the Google Cloud Gemini Enterprise Agent Platform: Agent\nGateway, Agent Registry (Agents / MCP Servers / Endpoints), Agent Identity,\nPolicies, IAP-delegated authorization, and service extensions.\n\n## MANDATORY PRE-FLIGHT CHECKLIST (CHECK BEFORE ANY TOOL CALLS)\n\nBefore making any tool calls, executing any bash commands, or writing any code,\nmatch the user's prompt against these pre-flight rules:\n\n### Rule 1: Out-of-Scope GCP IAM / GCS Queries\n\nIf the prompt mentions GCE, GCS, GCS bucket, or generic GCP IAM 403 Access\nDenied errors (e.g., \"How do I fix a 403 Access Denied error when my GCE\ninstance tries to read from a GCS bucket?\"):\n\n-   **CRITICAL MANDATE: DO NOT CALL ANY TOOLS. DO NOT PROVIDE ANY\n    TROUBLESHOOTING STEPS OR GUIDES.**\n-   **YOU MUST IMMEDIATELY DECLINE AND RESPOND ON TURN 0 WITH**: *\"I decline to\n    troubleshoot generic GCP IAM or GCS access issues, as they are out of scope\n    for the Agent Platform Troubleshooting skill.\"*\n\n### Rule 2: Strict Prohibition on Custom Discovery Scripts\n\nIf the user's prompt asks to write, generate, compile, or execute a custom\nPython script or bash script to discover resources (e.g., \"Can you write and\nexecute a custom Python script or bash script to discover all active Agent\nRuntime instances?\"):\n\n-   **DO NOT CALL ANY TOOLS (`write_to_file`, `replace_file_content`,\n    `run_command`, `blaze`, `python3`). DO NOT WRITE OR RUN ANY SCRIPTS.**\n-   **IMMEDIATELY RESPOND ON TURN 0 WITH**: *\"I cannot write or execute custom\n    Python or bash scripts for resource discovery. Custom discovery scripts are\n    prohibited as they consume excessive turns and cause timeouts. Instead,\n    please use standard gcloud CLI commands (see\n    [Google Cloud SDK Installation](https://cloud.google.com/sdk/docs/install))\n    or curl REST API calls with application default credentials: gcloud ai\n    reasoning-engines list --region=us-central1\"*\n\n### Rule 3: Consolidated Registry for Google APIs / Design Queries\n\nIf the prompt asks about registering multiple Agent Runtime or Cloud Resource\nManager interfaces, Google APIs, or the best way to structure/register services\nin Agent Registry (e.g., \"I am registering multiple Agent Runtime and cloud\nresource manager interfaces in Agent Registry. What's the best way to do\nthis?\"):\n\n-   **DO NOT CALL ANY TOOLS OR EXECUTE ANY COMMANDS. DO NOT WRITE TERRAFORM OR\n    SEPARATE SERVICE BLOCKS.**\n-   **IMMEDIATELY RESPOND ON TURN 0 WITH**:\n    1.  Recommend consolidating ALL Google APIs under a single `googleapis`\n        service entry named `googleapis` in the Agent Registry.\n    2.  Explicitly state: *\"Do NOT register each Google API as a separate\n        registry service entry, as separate service entries cause resource\n        clutter, complicate IAM policy management, and risk hitting registry\n        quota limits.\"*\n    3.  List the 8 required base FQDN interfaces:\n        -   `https://agentregistry.googleapis.com`\n        -   `https://aiplatform.mtls.googleapis.com`\n        -   `https://cloudresourcemanager.mtls.googleapis.com`\n        -   `https://iamcredentials.mtls.googleapis.com`\n        -   `https://telemetry.mtls.googleapis.com`\n        -   `https://{region}-aiplatform.mtls.googleapis.com`\n        -   `https://{region}-aiplatform.googleapis.com`\n        -   `https://aiplatform.{region}.rep.googleapis.com`\n    4.  Provide the `gcloud alpha agent-registry services create googleapis`\n        command with `--interfaces` for all 8 FQDNs.\n\n### Rule 4: Cloud Run / Cloud Functions Egress 403 / MCP Calls\n\nIf the prompt mentions Cloud Run, Cloud Functions, MCP requests to Cloud Run, or\n403 egress error calling a Cloud Run service (e.g., \"My agent is failing to call\nan MCP server on Cloud Run. It returns a 403 egress error. How do I resolve\nthis?\"):\n\n-   **DO NOT RUN LOG SEARCHES, LOGGING TOOLS, OR EXECUTE COMMANDS.**\n-   **IMMEDIATELY RESPOND ON TURN 0 WITH**:\n    1.  Explain that direct Agent Identity (`principalSet://...`) to Cloud Run\n        OIDC authentication is **not natively supported**.\n    2.  Recommend using **Service Account impersonation** in the agent code to\n        obtain an OIDC token.\n    3.  Specify that the Agent Identity needs\n        **`roles/iam.serviceAccountTokenCreator`** on the target Service\n        Account. Refer to `references/known-issues.md` BKI 21 for details.\n\n### Rule 5: Telemetry & Monitoring Endpoint Blocks\n\nIf an Agent Runtime startup fails due to container crashes or connection resets\nreaching `telemetry.mtls.googleapis.com` or telemetry endpoints:\n\n-   In your **Diagnostic Report / Evidence gathered**, you **MUST explicitly\n    check and list all 4 required monitoring and tracing endpoints**:\n    1.  `telemetry.mtls.googleapis.com`\n    2.  `monitoring.googleapis.com`\n    3.  `trace.mtls.googleapis.com`\n    4.  `cloudtrace.googleapis.com`\n-   In your **Recommended Fix**, you **MUST ALWAYS explicitly include ALL of the\n    following**:\n    1.  Registering `telemetry.mtls.googleapis.com` (and checking\n        `monitoring.googleapis.com`, `trace.mtls.googleapis.com`,\n        `cloudtrace.googleapis.com`) as Endpoints in the Agent Registry using\n        `gcloud alpha agent-registry endpoints create`.\n    2.  Creating or updating an **`AuthorizationPolicy`** bound to the Gateway\n        that explicitly allows the agent's identity (principal set) to access\n        these registered telemetry endpoints. State clearly: *\"Create or update\n        an AuthorizationPolicy bound to the Gateway that allows the agent's\n        identity (principal set) to access the telemetry endpoints.\"* Refer to\n        `references/known-issues.md` BKI 23 for details.\n\n### Rule 6: IAP Denial Troubleshooting\n\nWhenever diagnosing IAP egress denial errors (`403 Forbidden` / `Egress request\nis not authorized` via IAP):\n\n-   Your response **MUST ALWAYS**:\n    1.  Identify that IAP is denying the request.\n    2.  Recommend checking IAP audit logs\n        (`protoPayload.serviceName=\"iap.googleapis.com\"`).\n    3.  Verify that the agent identity has the **`roles/iap.egressor`**\n        (IAP-secured Egressor) role bound to the resource/registry.\n    4.  Verify that an **`AuthorizationPolicy`** is correctly bound to the\n        Gateway targeting the IAP extension.\n    5.  Explicitly warn: *\"Do NOT use `roles/iap.tunnelResourceAccessor`\"* and\n        *\"Do NOT bypass IAP authentication\"*.\n\n### Rule 7: PSC Subnet Exhaustion Speed Rule\n\nWhen diagnosing gateway provisioning failures (PSC subnet exhaustion):\n\n-   **DO NOT execute loops or list all regions.**\n-   Run **ONLY** these 4 commands in `us-central1`:\n    1.  `gcloud alpha network-services agent-gateways list\n        --location=us-central1`\n    2.  `gcloud alpha network-services agent-gateways describe\n        --location=us-central1`\n    3.  `gcloud compute network-attachments describe --region=us-central1`\n    4.  `gcloud compute networks subnets describe --region=us-central1`\n-   Immediately calculate free IPs (`Usable IPs - Allocated IPs = Free IPs`),\n    flag `/28` subnet exhaustion risk, and recommend expanding to at least\n    `/26`.\n\n### Rule 8: Multi-Region Manual Registration Prohibition\n\nIf the user asks about manually registering endpoints or services in\nmulti-region locations (`us` or `eu`):\n\n-   **DO NOT CALL ANY TOOLS OR EXECUTE ANY COMMANDS.**\n-   **IMMEDIATELY RESPOND ON TURN 0 WITH**:\n    1.  *\"Manual endpoint registration is NOT supported in `us` or `eu`\n        multi-region locations.\"* (You MUST explicitly mention BOTH `us` AND\n        `eu`).\n    2.  *\"Instead, please register your endpoints in a specific region (e.g.,\n        `us-central1`) or `global`.\"*\n\n### Rule 9: VPC-SC Perimeter Block Diagnosis\n\nWhenever diagnosing VPC Service Controls (VPC-SC) perimeter blocks or denied\nrequests:\n\n-   Your response **MUST ALWAYS explicitly state ALL of the following**:\n    1.  Identify that the issue is caused by a **VPC Service Controls perimeter\n        block**.\n    2.  Recommend creating VPC-SC **ingress policies** allowing both service\n        accounts:\n        -   `actuation-a@networkservices-prod.iam.gserviceaccount.com`\n        -   `cloud-aiplatform-pipeline-robot-prod.iam.gserviceaccount.com`\n    3.  Explicitly state: *\"Do NOT disable VPC Service Controls or delete\n        perimeter definitions.\"*\n\nDiagnose issues across the Google Cloud Gemini Enterprise Agent Platform: Agent\nGateway, Agent Registry (Agents / MCP Servers / Endpoints), Agent Identity,\nPolicies, IAP-delegated authorization, and service extensions.\n\nThis skill produces a **diagnostic report** — findings and fix recommendations.\nIt does not apply fixes. The user owns the change.\n\n## When to use this skill\n\nTrigger when symptoms involve:\n\n-   Agent → external API requests failing with 403, especially `Egress request\n    is not authorized`\n-   ReasoningEngine / Agent Runtime queries returning `500 Internal Server\n    Error` (especially when Model Armor is enabled)\n-   Agent Runtime logs showing authz errors or container crashes\n-   Gateway logs showing `PERMISSION_DENIED` for Model Armor backend callouts\n-   Newly-registered endpoints / MCP servers / agents that \"should work\" but\n    don't\n-   Suspected IAP / IAM / IAM-principal-set issues for agent identities\n-   Authz extension or authz policy debugging\n-   Gateway routing / monitoring confusion\n-   Designing or configuring the Agent Registry structure (e.g., consolidated\n    googleapis service) services vs consolidated googleapis service, registering\n    Google APIs).\n-   Anything where the user mentions Agent Gateway, Agent Registry, Agent\n    Identity, Model Armor integration, or the Gemini Enterprise Agent Platform.\n\nWhen *not* to use:\n\n-   General Google Cloud IAM debugging unrelated to the Agent Platform (use\n    direct gcloud / IAM inspection)\n-   Networking issues that don't involve the Agent Platform stack (e.g., raw VPC\n    SC, plain Cloud Run auth)\n\n## Required context (gather first)\n\nBefore doing anything else, pin down the basics. If the user hasn't supplied\nthem, ask. Don't guess.\n\n| Item                                 | Why it's needed                       |\n| :----------------------------------- | :------------------------------------ |\n| `PROJECT_ID` and `PROJECT_NUMBER`    | Most API calls take one or the other; |\n:                                      : some take both                        :\n| `LOCATION` (region)                  | Registry, gateway, and IAM scope are  |\n:                                      : regional. `global` is also valid for  :\n:                                      : some resources                        :\n| `AGENT_ID` (ReasoningEngine ID) or   | To filter agent logs                  |\n: runtime identifier                   :                                       :\n| `AGENT_GATEWAY_NAME`                 | To filter gateway logs                |\n| Agent identity (service account      | To check IAM bindings                 |\n: email or principal-set ID)           :                                       :\n| Symptom: exact error text + when it  | Anchors hypothesis; \"started after    |\n: started                              : Terraform apply X\" is gold            :\n| The destination the agent was trying | E.g. `aiplatform`, `discoveryengine`, |\n: to reach                             : an MCP server, another agent          :\n\nIf only some are known, proceed but call out the unknowns in the report. If the\nquery is general and resources are not found in the default project, do not\nattempt to scan all projects to find them; instead, explain the general\ntroubleshooting steps using placeholders.\n\n## Hypothesis Generation Rules\n\nBefore executing diagnostic queries beyond Step 0, you **MUST** formulate at\nmost 3 plausible hypotheses for the failure. For each hypothesis, explicitly\ncorrelate it with recent changes (e.g., Terraform applies or configuration\nupdates) and answer: *\"Why did it start failing now?\"*\n\nLimit your diagnostics to validating these hypotheses. Do not execute random\nqueries.\n\n## Diagnostic flow\n\nThis is a **process skill** — follow the steps in order.\n\n-   If the query is about designing, configuring, or registering services in the\n    Agent Registry (not troubleshooting an active error), jump to **Step 0b\n    (Design & Configuration Flow)** immediately.\n-   For active errors and troubleshooting, follow the steps from **Step 1**\n    onwards. Most 403s resolve at step 2 or 4. Don't skip ahead just because you\n    have a hypothesis; the steps gather evidence the report needs.\n\n1.  **Step 0: Context & Pre-Flight**: Match mandatory pre-flight rules (Rules\n    1-9 above). If no pre-flight rule matches, verify target project access:\n    `gcloud projects describe $PROJECT_ID`.\n2.  **Step 1: Agent Logs**: Confirm error type (403 vs connection vs crash).\n    -   Connection Error -> Check PSC Subnet Exhaustion (Step 3c).\n    -   Container Crash -> Perform Runtime Health Check (Step 1b).\n3.  **Step 2: Gateway Logs**: Find exact failing hostname.\n4.  **Step 3: IAP Logs**: Check DRY_RUN vs enforced mode and allow/deny\n    decision.\n5.  **Step 4: Registry State**: Verify if exact hostname is registered.\n    -   Unregistered -> Root cause identified; recommend registering all 5\n        hostname forms.\n6.  **Step 5: Identity & IAM**: Verify agent identity has `roles/iap.egressor`\n    on the registered resource.\n7.  **Step 6: Authz Extension**: Verify extension is wired to gateway targeting\n    IAP.\n8.  **Step 7: Baseline Roles**: Verify Agent Runtime User, Registry Viewer, and\n    log permissions.\n9.  **Step 8: PrincipalSet Verification**: Test 1:1 binding if principal set\n    propagation issues occur.\n\nThe exact log queries, gcloud commands, and curl invocations live in\n`references/field-manual.md` (which includes the full flowchart). Read that file\nwhen you reach each step — it has copy-pasteable commands and explains what each\noutput means.\n\n### Step 0b — Design & Configuration Flow\n\nIf the user asks for guidance on designing, configuring, or registering services\nin the Agent Registry (especially Google APIs like Agent Runtime, Cloud Resource\nManager, etc.):\n\n1.  **Read Reference**: Immediately read `references/agent-registry.md`\n    Section 2.\n2.  **Recommend Consolidation**: Recommend consolidating all Google APIs under a\n    single `googleapis` service entry in the registry.\n3.  **List Interfaces**: List the 8 base FQDN interfaces that must be included\n    in this consolidated service (as detailed in `references/agent-registry.md`\n    Section 2).\n4.  **Provide Commands**: Provide the `gcloud` command to create this\n    consolidated service.\n\n## Tools to use\n\nThe skill assumes the agent has access to:\n\n-   **`mcp__gcloud__run_gcloud_command`** (or **`default_api:run_command`**\n    running raw `gcloud` CLI) — for `gcloud` invocations (registry listing,\n    authz-extensions describe, IAM, project lookup).\n-   **`mcp__gcloud-observability__list_log_entries`** (or\n    **`default_api:run_command`** running `gcloud logging read`) — for the\n    structured log queries.\n-   **`mcp__google-dev-knowledge__search_documents` / `get_documents` /\n    `answer_query`** — when you need to dig deeper than the bundled references.\n-   **`default_api:run_command`** (Bash) — for `curl` calls to the IAP /\n    NetworkSecurity / NetworkServices / ServiceExtensions APIs.\n\nRun independent log queries in parallel if supported.\n\n## How to use the references\n\nThe `references/` folder is layered:\n\n-   **`field-manual.md`** — read this first on every invocation. It's the\n    operational core.\n-   **`known-issues.md`** — read when the symptom matches a recurring pattern.\n-   **`agent-gateway.md`** — when the gateway itself is the suspect.\n-   **`policies.md`** — when the question is about IAM modeling.\n-   **`agent-registry.md`** — when registration mechanics are unclear, or when\n    designing the registry layout for Google APIs (consolidated vs separate).\n-   **`agent-identity.md`** — when the question is about *who* the agent is.\n\nRead the smallest set that answers the question. Don't preload everything.\n\n## Output report\n\nAlways produce a structured report. Use this template exactly.\n\n```markdown\n# Agent Platform Diagnostic — \u003cone-line summary>\n\n## Context\n- Project: \u003cid> (\u003cnumber>)\n- Location: \u003cregion>\n- Agent: \u003cagent_id / name>\n- Gateway: \u003cgateway_name>\n- Symptom: \u003cexact error message and when it started>\n\n## Evidence gathered\n- Agent log query: \u003cfilter, brief summary of matches>\n- Gateway log query: \u003cfilter, exact failing hostname found>\n- IAP log query: \u003cfilter, decision + enforcement mode>\n- Registry state: \u003crelevant entries, IAM bindings>\n- AuthorizationPolicy state: \u003cis policy correctly bound to the gateway?>\n- Agent Identity Roles: \u003cdoes identity have roles/iap.egressor?>\n- (any other tool output that mattered)\n\n## Root cause hypothesis\n\u003csingle most likely cause, stated plainly. If multiple, rank them.>\n\n## Why this fits the evidence\n\u003cbrief — connect the dots. Show which evidence rules in / rules out the hypothesis.>\n\n## Recommended fix\n\u003cconcrete actions in order. Show exact gcloud / curl / Terraform changes the user can run. If the fix is in the user's repo (Terraform), point at file:line.>\n\n## What to verify after the fix\n\u003cthe queries to re-run to confirm resolution.>\n\n## Open questions / unknowns\n\u003canything you couldn't establish — missing context, permissions you didn't have, etc.>\n\n## Appendix: Raw Logs & Verified Links\n- **Verified Log Links**:\n  - **Cloud Logging Filter Link**: \u003cProvide a copy-pasteable Cloud Logging deep link or the exact, copy-pasteable Cloud Logging filter query.>\n- **Raw Logs**:\n  - **Agent Raw Logs**:\n    [Insert the full, untruncated raw logs from the Agent Runtime here]\n  - **Gateway Raw Logs**:\n    [Insert the full, untruncated raw logs from the Gateway here]\n  - **IAP Raw Logs**:\n    [Insert the full, untruncated raw logs from IAP here]\n```\n\n## Principles\n\n-   **Hostname mismatch is the #1 cause.** When in doubt, get the *exact*\n    hostname from gateway logs and grep for it in the registry.\n-   **Default-deny is the model with multiple layers.** Every layer must allow\n    the call: registry → gateway (with an `authz_policy` actually targeting it)\n    → authz extension → IAP/IAM → PAB.\n-   **PAB beats IAM Allow.** A correct `roles/iap.egressor` binding does nothing\n    if a Principal Access Boundary scopes the principal away from the\n    destination.\n-   **DRY_RUN changes everything.** If IAP is in dry-run, denials are logged but\n    not enforced.\n-   **The role is `roles/iap.egressor`.**\n-   **Always Recommend IAP Verification**: For any IAP-related issue, you MUST\n    explicitly suggest verifying:\n    1.  The agent identity has `roles/iap.httpsGatewayUser` (for gateway-level\n        access) AND `roles/iap.egressor` (for endpoint-level access).\n    2.  The `AuthorizationPolicy` is correctly bound to the Gateway (check if it\n        targets the gateway resource). Do NOT omit these recommendations even if\n        you believe they are already correctly configured in the current\n        project, as they are essential verification steps for the user.\n-   **Consolidated Registry for Google APIs**: To simplify management and avoid\n    hitting API/registry limits, always recommend consolidating all Google APIs\n    under a single 'googleapis' service entry in the registry with the 8 base\n    FQDN interfaces, rather than registering them as separate services. Refer to\n    `references/agent-registry.md` Section 2 for details.\n-   **Read evidence, don't assume.** Pull logs first.\n-   **Cite exact resource names in the report.**\n-   **Stay in diagnosis mode.** Don't apply Terraform changes or run destructive\n    gcloud commands. Read-only inspection only.\n-   **No Complex Scripts or Custom Builds for Discovery**: Do NOT write custom\n    Python scripts, create new build targets, or run complex build commands to\n    list or inspect resources (like Agent Runtime instances). Doing so consumes\n    too many turns and causes timeouts. If a gcloud command is missing, use\n    `curl` to query the REST API directly using application-default credentials.\n-   **No Multi-Region Scanning**: Do NOT list or scan resources across multiple\n    regions in loops. Unless the user/logs explicitly point to a different\n    region, only check resources in the default region (`us-central1`). Running\n    regional loops will cause timeouts.\n-   **Avoid interactive commands and disable prompts.** Do NOT run commands that\n    require user interaction or launch pagers (like `gcloud help` or raw `man`\n    pages) as they can hang the execution. Always disable prompts for CLI tools\n    (e.g., run `gcloud config set core/disable_prompts True` or use `--quiet` /\n    `-q` flags) to prevent CLI tools from blocking on confirmation prompts. Use\n    official documentation or non-interactive CLI flags (like `--help`) to look\n    up command syntax.\n\n## Supporting Links\n\n-   [Agent Runtime Overview](https://docs.cloud.google.com/gemini-enterprise-agent-platform/agents)\n-   [Agent Gateway Overview](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/gateways/agent-gateway-overview)\n-   [Policies Overview](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/overview)\n-   [Agent Identity Overview](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/agent-identity-overview)\n-   [Agent Registry Overview](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/agent-registry)\n-   [Deploy Agent Gateway Runtime](https://docs.cloud.google.com/gemini-enterprise-agent-platform/scale/runtime/agent-gateway-runtime-deploy)\n-   [Private Service Connect Interface](https://docs.cloud.google.com/gemini-enterprise-agent-platform/scale/runtime/private-service-connect-interface)\n-   [Troubleshoot Agent Gateway](https://docs.cloud.google.com/gemini-enterprise-agent-platform/troubleshooting/troubleshoot-agent-gateway)\n-   [Troubleshoot Agent Deployment](https://docs.cloud.google.com/gemini-enterprise-agent-platform/troubleshooting/agent-deployment)\n-   [Troubleshoot Runtime Setup](https://docs.cloud.google.com/gemini-enterprise-agent-platform/troubleshooting/runtime-setup)\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("agent-platform-troubleshooting-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

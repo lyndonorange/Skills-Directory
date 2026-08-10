@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BiasCheck - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/biascheck-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>BiasCheck</h1>
+      <p class="description">Three-layer bias analysis on any source — URL, file path, or raw text. Auto-fetches the content plus any underlying study cited, then audits (1) data-level biases (funding, sampling, question design, self-report, causal inflation, publication), (2) source-organization conflicts of interest, (3) journalism-added distortions (headline-vs-source swap, frame escalation, echo-chain). Output separates what the data actually supports from what's editorialized. USE WHEN bias analysis, analyze bias, bias check, check this study, who funded this, is this source biased, fact-check article, methodological flaws, source credibility, what's wrong with this claim. NOT FOR psychological author analysis (use _CRITICAL_ANALYSIS), research synthesis (use Research), entity due diligence (use _OSINT).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>BiasCheck</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>BiasCheck</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Three-layer bias analysis on any source — URL, file path, or raw text. Auto-fetches the content plus any underlying study cited, then audits (1) data-level biases (funding, sampling, question design, self-report, causal inflation, publication), (2) source-organization conflicts of interest, (3) journalism-added distortions (headline-vs-source swap, frame escalation, echo-chain). Output separates what the data actually supports from what's editorialized. USE WHEN bias analysis, analyze bias, bias check, check this study, who funded this, is this source biased, fact-check article, methodological flaws, source credibility, what's wrong with this claim. NOT FOR psychological author analysis (use _CRITICAL_ANALYSIS), research synthesis (use Research), entity due diligence (use _OSINT).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the BiasCheck skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Customization</h3>
+<p><strong>Before executing, check for user customizations at:</strong> <code>~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/BiasCheck/</code></p>
+<p>If this directory exists, load and apply any <code>PREFERENCES.md</code> or additional reference files found there. These override default behavior. If the directory does not exist, proceed with skill defaults.</p>
+<h2>BiasCheck</h2>
+<h3>Voice Notification</h3>
+<p><strong>When executing a workflow, do BOTH:</strong></p>
+<ol>
+<li><strong>Send voice notification</strong>:</li>
+</ol>
+<pre><code>   curl -s -X POST http://localhost:31337/notify \
+     -H &quot;Content-Type: application/json&quot; \
+     -d '{&quot;message&quot;: &quot;Running the Check workflow in the BiasCheck skill to audit the source&quot;}' \
+     &gt; /dev/null 2&gt;&amp;1 &amp;</code></pre>
+<ol>
+<li><strong>Output text notification</strong>:</li>
+</ol>
+<pre><code>   Running the **Check** workflow in the **BiasCheck** skill to audit the source...</code></pre>
+<h3>What It Does</h3>
+<p>Runs a three-layer bias audit on any source — a URL, a file path, or raw text. It fetches the content plus any study it cites, then checks (1) biases inside the data, (2) conflicts of interest in the source organization, and (3) distortions the journalism added on top. The output separates what the data actually supports from what got editorialized.</p>
+<h3>The Problem</h3>
+<p>Most &quot;this is biased&quot; arguments are vibes — a feeling about a source, with nothing concrete underneath. They're not repeatable and they don't tell you where the distortion lives. The other failure is analyzing an article without ever reaching the study it cites, so you critique the headline and never see that the underlying data was fine (or that it was junk). A fixed taxonomy and a fixed output shape fix both: the analysis is repeatable, the gaps are visible, and every claim ties to a specific tell.</p>
+<h3>How It Works</h3>
+<p>The skill operates on three layers:</p>
+<ol>
+<li><strong>The data itself</strong> — biases inside the underlying study, paper, or dataset (funding, sampling, instrument design, demand characteristics, self-report distance from behavior, causal inflation, missing benchmark, publication availability)</li>
+<li><strong>The source organization</strong> — who paid for or produced the work, what they sell, what conclusion would be inconvenient</li>
+<li><strong>The journalism on top</strong> — what the reporter/commentator added: headline-to-source distortion, frame escalation, echo-chain amplification, causal claims layered over correlational data</li>
+</ol>
+<p>Output cleanly separates <strong>what the data actually supports</strong> from <strong>what was editorialized on top</strong>. Confidence is anchored to specifics — no vibes-based &quot;this seems biased.&quot;</p>
+<h3>Workflow Routing</h3>
+<p>| Workflow | Trigger | File | |----------|---------|------| | <strong>Check</strong> | &quot;bias check&quot;, &quot;analyze bias on&quot;, &quot;check this study/source/article&quot; | <code>Workflows/Check.md</code> |</p>
+<h3>Quick Reference</h3>
+<ul>
+<li><strong>Input:</strong> one argument — URL, file path, raw text, or any combination.</li>
+<li><strong>Always tries to find the primary source.</strong> If the input is journalism citing a study, the skill fetches the study itself, not just the article. If the primary source can't be located, that's a finding.</li>
+<li><strong>Three-layer output</strong> — never collapse layers; the distortion usually lives in the layer the source is least transparent about.</li>
+<li><strong>Hard separation between supported and editorialized</strong> — this is the deliverable shape.</li>
+<li><strong>Bias taxonomy reference:</strong> <code>BiasTaxonomy.md</code> (load on demand for the full category catalog with definitions and tells).</li>
+</ul>
+<h3>Examples</h3>
+<p><strong>Example 1: Article citing a vendor study</strong></p>
+<pre><code>User: &quot;bias check https://futurism.com/some-article-citing-a-mercer-survey&quot;
+→ Invokes Check workflow
+→ Fetches the article, identifies the cited Mercer study, fetches Mercer's source
+→ Runs three-layer audit: vendor conflict-of-interest, sample/question-design biases, journalism's headline-vs-source swap
+→ Returns structured bias report + supported-vs-editorialized split</code></pre>
+<p><strong>Example 2: Raw paste of a study abstract</strong></p>
+<pre><code>User: &quot;bias check this abstract: [pastes 4 paragraphs from a paper]&quot;
+→ Invokes Check workflow
+→ Skips Layer 3 (no journalism on top — input IS the primary source)
+→ Audits Layers 1 + 2 only: funding disclosure, sample, methodology, conflict-of-interest
+→ Notes if abstract is insufficient to assess methodology (publication availability bias)</code></pre>
+<p><strong>Example 3: File path</strong></p>
+<pre><code>User: &quot;bias check ~/Downloads/some-report.pdf&quot;
+→ Invokes Check workflow
+→ Reads file
+→ Identifies if report cites further upstream sources; fetches what it can
+→ Three-layer audit with specifics</code></pre>
+<h3>Output Requirements</h3>
+<ul>
+<li><strong>Format:</strong> Markdown with the fixed section structure defined in <code>Workflows/Check.md</code>.</li>
+<li><strong>Length:</strong> Scales with source complexity. A single-claim tweet gets ~200 words; a vendor-funded study + viral article gets 800–1500.</li>
+<li><strong>Tone:</strong> Plain. Specific. No vibes. Every bias claim ties to a concrete tell — a quoted phrase, a sample-frame fact, a missing disclosure.</li>
+<li><strong>Must Include:</strong> Methodology line (sample, dates, instrument availability), the three layers, the supported-vs-editorialized split, a one-paragraph bottom line, sources list with URLs.</li>
+<li><strong>Must Avoid:</strong> Hedging (&quot;could potentially be biased&quot;). Diagnose or don't. The reader gets to disagree — but they should know what the analyst actually thinks.</li>
+</ul>
+<h3>Gotchas</h3>
+<ul>
+<li><strong>Always try to find the primary source.</strong> The single biggest failure mode is analyzing an article without ever reaching the underlying study. If the input cites a study/report/paper/dataset, the skill MUST attempt to fetch it. Inability to locate the primary source is itself a finding (publication availability bias) and goes in the output.</li>
+<li><strong>An impossibly high consensus number is a tell about the question.</strong> When a survey claims 95%+ agreement on a substantive question, that almost always means the question was a low-bar yes/no. Note it explicitly even when the instrument is hidden.</li>
+<li><strong>Vendor research is research; treat it that way.</strong> Don't dismiss a Mercer/McKinsey/PwC/Gartner report because they sell consulting. Their funding bias is a multiplier on the analysis, not an automatic disqualifier. Specific finding &gt; generic &quot;vendor bias.&quot;</li>
+<li><strong>Don't conflate Layer 1 and Layer 3.</strong> A bad headline doesn't make the underlying data bad. A flawed study doesn't make the journalism dishonest. Keep them separate even when both have problems.</li>
+<li><strong>Headlines travel; bodies don't.</strong> Most readers see only the headline. A headline-to-source mismatch is the most consequential journalism bias and should always be flagged when present.</li>
+<li><strong>&quot;Charitable reading&quot; is required.</strong> Before concluding the source is misleading, articulate what the data DOES support. This anchors the critique in specifics.</li>
+<li><strong>Don't go beyond the source you fetched.</strong> No drive-by claims about Mercer's other reports if you only read one. No &quot;they always do X&quot; — stick to what's in the artifact.</li>
+<li><strong>Pure opinion piece with no data?</strong> This skill is the wrong tool — redirect to <code>_CRITICAL_ANALYSIS</code> for psychological author read. BiasCheck needs claims with empirical scaffolding.</li>
+<li><strong>Author background is out of scope.</strong> This skill audits the source artifact, not the author's biography. If you need &quot;who is this writer and what's their track record,&quot; use Research or _OSINT.</li>
+</ul>
+<h3>Execution Log</h3>
+<pre><code>echo '{&quot;ts&quot;:&quot;'$(date -u +%Y-%m-%dT%H:%M:%SZ)'&quot;,&quot;skill&quot;:&quot;BiasCheck&quot;,&quot;workflow&quot;:&quot;Check&quot;,&quot;input&quot;:&quot;8_WORD_SUMMARY&quot;,&quot;status&quot;:&quot;ok|error&quot;,&quot;duration_s&quot;:SECONDS}' &gt;&gt; ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl</code></pre>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: BiasCheck\ndisplay_name: BiasCheck\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# BiasCheck - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `BiasCheck` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nThree-layer bias analysis on any source — URL, file path, or raw text. Auto-fetches the content plus any underlying study cited, then audits (1) data-level biases (funding, sampling, question design, self-report, causal\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the BiasCheck skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `BiasCheck` |\n| Canonical name | `BiasCheck` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\nThree-layer bias analysis on any source — URL, file path, or raw text. Auto-fetches the content plus any underlying study cited, then audits (1) data-level biases (funding, sampling, question design, self-report, causal\n\n\n## Original SKILL.md\n\n---\nname: BiasCheck\ndescription: Three-layer bias analysis on any source — URL, file path, or raw text. Auto-fetches the content plus any underlying study cited, then audits (1) data-level biases (funding, sampling, question design, self-report, causal inflation, publication), (2) source-organization conflicts of interest, (3) journalism-added distortions (headline-vs-source swap, frame escalation, echo-chain). Output separates what the data actually supports from what's editorialized. USE WHEN bias analysis, analyze bias, bias check, check this study, who funded this, is this source biased, fact-check article, methodological flaws, source credibility, what's wrong with this claim. NOT FOR psychological author analysis (use _CRITICAL_ANALYSIS), research synthesis (use Research), entity due diligence (use _OSINT).\ndisallowed-tools: Edit, Write, NotebookEdit\n---\n\n## Customization\n\n**Before executing, check for user customizations at:**\n`~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/BiasCheck/`\n\nIf this directory exists, load and apply any `PREFERENCES.md` or additional reference files found there. These override default behavior. If the directory does not exist, proceed with skill defaults.\n\n# BiasCheck\n\n## Voice Notification\n\n**When executing a workflow, do BOTH:**\n\n1. **Send voice notification**:\n   ```bash\n   curl -s -X POST http://localhost:31337/notify \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\"message\": \"Running the Check workflow in the BiasCheck skill to audit the source\"}' \\\n     > /dev/null 2>&1 &\n   ```\n\n2. **Output text notification**:\n   ```\n   Running the **Check** workflow in the **BiasCheck** skill to audit the source...\n   ```\n\n## What It Does\n\nRuns a three-layer bias audit on any source — a URL, a file path, or raw text. It fetches the content plus any study it cites, then checks (1) biases inside the data, (2) conflicts of interest in the source organization, and (3) distortions the journalism added on top. The output separates what the data actually supports from what got editorialized.\n\n## The Problem\n\nMost \"this is biased\" arguments are vibes — a feeling about a source, with nothing concrete underneath. They're not repeatable and they don't tell you where the distortion lives. The other failure is analyzing an article without ever reaching the study it cites, so you critique the headline and never see that the underlying data was fine (or that it was junk). A fixed taxonomy and a fixed output shape fix both: the analysis is repeatable, the gaps are visible, and every claim ties to a specific tell.\n\n## How It Works\n\nThe skill operates on three layers:\n\n1. **The data itself** — biases inside the underlying study, paper, or dataset (funding, sampling, instrument design, demand characteristics, self-report distance from behavior, causal inflation, missing benchmark, publication availability)\n2. **The source organization** — who paid for or produced the work, what they sell, what conclusion would be inconvenient\n3. **The journalism on top** — what the reporter/commentator added: headline-to-source distortion, frame escalation, echo-chain amplification, causal claims layered over correlational data\n\nOutput cleanly separates **what the data actually supports** from **what was editorialized on top**. Confidence is anchored to specifics — no vibes-based \"this seems biased.\"\n\n## Workflow Routing\n\n| Workflow | Trigger | File |\n|----------|---------|------|\n| **Check** | \"bias check\", \"analyze bias on\", \"check this study/source/article\" | `Workflows/Check.md` |\n\n## Quick Reference\n\n- **Input:** one argument — URL, file path, raw text, or any combination.\n- **Always tries to find the primary source.** If the input is journalism citing a study, the skill fetches the study itself, not just the article. If the primary source can't be located, that's a finding.\n- **Three-layer output** — never collapse layers; the distortion usually lives in the layer the source is least transparent about.\n- **Hard separation between supported and editorialized** — this is the deliverable shape.\n- **Bias taxonomy reference:** `BiasTaxonomy.md` (load on demand for the full category catalog with definitions and tells).\n\n## Examples\n\n**Example 1: Article citing a vendor study**\n```\nUser: \"bias check https://futurism.com/some-article-citing-a-mercer-survey\"\n→ Invokes Check workflow\n→ Fetches the article, identifies the cited Mercer study, fetches Mercer's source\n→ Runs three-layer audit: vendor conflict-of-interest, sample/question-design biases, journalism's headline-vs-source swap\n→ Returns structured bias report + supported-vs-editorialized split\n```\n\n**Example 2: Raw paste of a study abstract**\n```\nUser: \"bias check this abstract: [pastes 4 paragraphs from a paper]\"\n→ Invokes Check workflow\n→ Skips Layer 3 (no journalism on top — input IS the primary source)\n→ Audits Layers 1 + 2 only: funding disclosure, sample, methodology, conflict-of-interest\n→ Notes if abstract is insufficient to assess methodology (publication availability bias)\n```\n\n**Example 3: File path**\n```\nUser: \"bias check ~/Downloads/some-report.pdf\"\n→ Invokes Check workflow\n→ Reads file\n→ Identifies if report cites further upstream sources; fetches what it can\n→ Three-layer audit with specifics\n```\n\n## Output Requirements\n\n- **Format:** Markdown with the fixed section structure defined in `Workflows/Check.md`.\n- **Length:** Scales with source complexity. A single-claim tweet gets ~200 words; a vendor-funded study + viral article gets 800–1500.\n- **Tone:** Plain. Specific. No vibes. Every bias claim ties to a concrete tell — a quoted phrase, a sample-frame fact, a missing disclosure.\n- **Must Include:** Methodology line (sample, dates, instrument availability), the three layers, the supported-vs-editorialized split, a one-paragraph bottom line, sources list with URLs.\n- **Must Avoid:** Hedging (\"could potentially be biased\"). Diagnose or don't. The reader gets to disagree — but they should know what the analyst actually thinks.\n\n## Gotchas\n\n- **Always try to find the primary source.** The single biggest failure mode is analyzing an article without ever reaching the underlying study. If the input cites a study/report/paper/dataset, the skill MUST attempt to fetch it. Inability to locate the primary source is itself a finding (publication availability bias) and goes in the output.\n- **An impossibly high consensus number is a tell about the question.** When a survey claims 95%+ agreement on a substantive question, that almost always means the question was a low-bar yes/no. Note it explicitly even when the instrument is hidden.\n- **Vendor research is research; treat it that way.** Don't dismiss a Mercer/McKinsey/PwC/Gartner report because they sell consulting. Their funding bias is a multiplier on the analysis, not an automatic disqualifier. Specific finding > generic \"vendor bias.\"\n- **Don't conflate Layer 1 and Layer 3.** A bad headline doesn't make the underlying data bad. A flawed study doesn't make the journalism dishonest. Keep them separate even when both have problems.\n- **Headlines travel; bodies don't.** Most readers see only the headline. A headline-to-source mismatch is the most consequential journalism bias and should always be flagged when present.\n- **\"Charitable reading\" is required.** Before concluding the source is misleading, articulate what the data DOES support. This anchors the critique in specifics.\n- **Don't go beyond the source you fetched.** No drive-by claims about Mercer's other reports if you only read one. No \"they always do X\" — stick to what's in the artifact.\n- **Pure opinion piece with no data?** This skill is the wrong tool — redirect to `_CRITICAL_ANALYSIS` for psychological author read. BiasCheck needs claims with empirical scaffolding.\n- **Author background is out of scope.** This skill audits the source artifact, not the author's biography. If you need \"who is this writer and what's their track record,\" use Research or _OSINT.\n\n## Execution Log\n\n```bash\necho '{\"ts\":\"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'\",\"skill\":\"BiasCheck\",\"workflow\":\"Check\",\"input\":\"8_WORD_SUMMARY\",\"status\":\"ok|error\",\"duration_s\":SECONDS}' >> ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl\n```\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("biascheck-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `skill-installer` for Codex. It removes l
 
 Use this skill when your task matches this description:
 
-Helps install skills. By default these are from https://github.com/openai/skills/tree/main/skills/.curated, but users can also provide other locations. Experimental skills live in https://github.com/openai/skills/tree/ma
+Install Codex skills into $CODEX_HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private re
 
 ## How To Use It In Codex
 
@@ -32,7 +32,8 @@ In Codex, click the chat box, press /, choose skill-installer, then write the ta
 
 ## Description
 
-Helps install skills. By default these are from https://github.com/openai/skills/tree/main/skills/.curated, but users can also provide other locations. Experimental skills live in https://github.com/openai/skills/tree/ma
+Install Codex skills into $CODEX_HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private re
+
 
 ## Original SKILL.md
 
@@ -65,7 +66,7 @@ Skills from {repo}:
 Which ones would you like installed?
 """
 
-After installing a skill, tell the user: "Restart Codex to pick up new skills."
+After installing a skill, tell the user it will be available on their next turn.
 
 ## Scripts
 
@@ -94,4 +95,3 @@ All of these scripts use network, so when running in the sandbox, request escala
 - Git fallback tries HTTPS first, then SSH.
 - The skills at https://github.com/openai/skills/tree/main/skills/.system are preinstalled, so no need to help users install those. If they ask, just explain this. If they insist, you can download and overwrite.
 - Installed annotations come from `$CODEX_HOME/skills`.
-

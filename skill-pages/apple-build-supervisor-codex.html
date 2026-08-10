@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>apple-build-supervisor - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/apple-build-supervisor-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>apple-build-supervisor</h1>
+      <p class="description">Enforce a ten-stage Apple app approval ledger for iOS, iPadOS, and macOS with worker evidence, a different independent agent reviewer, explicit human approval, downstream invalidation, bounded revisions, stall detection, and fresh final release review. Use before starting or advancing any governed app stage, when recording PASS/REVISE/BLOCKED verdicts, when requirements or artifacts change, or when proving that no agent self-approved and no human gate was inferred. The supervisor may update only its ledger; it must never edit or repair app code.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>apple-build-supervisor</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>apple-build-supervisor</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Enforce a ten-stage Apple app approval ledger for iOS, iPadOS, and macOS with worker evidence, a different independent agent reviewer, explicit human approval, downstream invalidation, bounded revisions, stall detection, and fresh final release review. Use before starting or advancing any governed app stage, when recording PASS/REVISE/BLOCKED verdicts, when requirements or artifacts change, or when proving that no agent self-approved and no human gate was inferred. The supervisor may update only its ledger; it must never edit or repair app code.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose apple-build-supervisor, then write the task. Fallback prompt: Use the apple-build-supervisor skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Apple Build Supervisor</h2>
+<p>Enforce separation of duties. The supervisor may write only the approval ledger and administrative receipts. It must not implement, refactor, debug, or repair the app it governs.</p>
+<h3>Initialize</h3>
+<pre><code>python3 scripts/supervise.py init \
+  --ledger &lt;project&gt;/docs/apple-build-approval.json \
+  --project '&lt;name&gt;' --platform ios --platform ipados --platform macos</code></pre>
+<p>Read <code>references/ledger-workflow.md</code> before operating a ledger. Use <code>status</code> before every transition.</p>
+<h3>Required Transition</h3>
+<p>For each stage:</p>
+<ol>
+<li><code>start</code></li>
+<li>Worker produces artifacts and evidence.</li>
+<li><code>worker-ready --worker &lt;identity&gt; --evidence &lt;file&gt; ...</code></li>
+<li>A different, cold, non-editing reviewer returns the format in <code>references/reviewer-contract.md</code>.</li>
+<li><code>agent-review --reviewer &lt;identity&gt; --verdict PASS|REVISE|BLOCKED --report &lt;file&gt;</code></li>
+<li>On <code>PASS</code>, stop and request explicit human review.</li>
+<li><code>human-review --human &lt;identity&gt; --decision APPROVE|REVISE|BLOCK --note '&lt;reason&gt;'</code></li>
+</ol>
+<p>Only <code>PASS</code> followed by <code>APPROVE</code> produces <code>HUMAN_APPROVED</code>. Human silence, an agent's prediction of human intent, or a prior approval never counts.</p>
+<h3>Invalidation and Release</h3>
+<ul>
+<li>Run <code>invalidate</code> when approved requirements, design, architecture, implementation, or evidence materially changes. The command invalidates that stage and all downstream stages.</li>
+<li>After stages 1–10 are human-approved, use <code>final-agent-review --verdict PASS|BLOCKED</code> with a reviewer who was neither a worker nor prior reviewer, then use <code>final-human-review</code> only after <code>PASS</code>.</li>
+<li>Never hand-edit ledger state. If the ledger and artifacts disagree, invalidate and re-review.</li>
+</ul>
+<h3>Rules</h3>
+<ul>
+<li>Reviewer identity must differ from worker identity.</li>
+<li>Maximum three worker-review iterations per stage.</li>
+<li>Two consecutive matching failure fingerprints block the stage as stalled.</li>
+<li><code>REVISE</code> returns the stage to <code>IN_PROGRESS</code>; <code>BLOCKED</code> stops it.</li>
+<li>Waivers must be visible in the human note with owner, reason, risk, and follow-up. A waiver is not evidence.</li>
+<li>Evidence files are hashed when recorded. Changed files invalidate the trustworthiness of the recorded receipt even before the ledger is formally invalidated.</li>
+<li>Report command output and screenshots as files; do not enter secrets in the ledger.</li>
+</ul>
+<h3>Completion Output</h3>
+<p>Return ledger path, release status, stage states, current blockers, invalidations, evidence hashes, reviewer identities, human decisions, and the exact human decision required next.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: apple-build-supervisor\ndisplay_name: apple-build-supervisor\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# apple-build-supervisor - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `apple-build-supervisor` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nEnforce a ten-stage Apple app approval ledger for iOS, iPadOS, and macOS with worker evidence, a different independent agent reviewer, explicit human approval, downstream invalidation, bounded revisions, stall detection,\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose apple-build-supervisor, then write the task. Fallback prompt: Use the apple-build-supervisor skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `apple-build-supervisor` |\n| Canonical name | `apple-build-supervisor` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nEnforce a ten-stage Apple app approval ledger for iOS, iPadOS, and macOS with worker evidence, a different independent agent reviewer, explicit human approval, downstream invalidation, bounded revisions, stall detection,\n\n\n## Original SKILL.md\n\n---\nname: apple-build-supervisor\ndescription: Enforce a ten-stage Apple app approval ledger for iOS, iPadOS, and macOS with worker evidence, a different independent agent reviewer, explicit human approval, downstream invalidation, bounded revisions, stall detection, and fresh final release review. Use before starting or advancing any governed app stage, when recording PASS/REVISE/BLOCKED verdicts, when requirements or artifacts change, or when proving that no agent self-approved and no human gate was inferred. The supervisor may update only its ledger; it must never edit or repair app code.\n---\n\n# Apple Build Supervisor\n\nEnforce separation of duties. The supervisor may write only the approval ledger and administrative receipts. It must not implement, refactor, debug, or repair the app it governs.\n\n## Initialize\n\n```bash\npython3 scripts/supervise.py init \\\n  --ledger \u003cproject>/docs/apple-build-approval.json \\\n  --project '\u003cname>' --platform ios --platform ipados --platform macos\n```\n\nRead `references/ledger-workflow.md` before operating a ledger. Use `status` before every transition.\n\n## Required Transition\n\nFor each stage:\n\n1. `start`\n2. Worker produces artifacts and evidence.\n3. `worker-ready --worker \u003cidentity> --evidence \u003cfile> ...`\n4. A different, cold, non-editing reviewer returns the format in `references/reviewer-contract.md`.\n5. `agent-review --reviewer \u003cidentity> --verdict PASS|REVISE|BLOCKED --report \u003cfile>`\n6. On `PASS`, stop and request explicit human review.\n7. `human-review --human \u003cidentity> --decision APPROVE|REVISE|BLOCK --note '\u003creason>'`\n\nOnly `PASS` followed by `APPROVE` produces `HUMAN_APPROVED`. Human silence, an agent's prediction of human intent, or a prior approval never counts.\n\n## Invalidation and Release\n\n- Run `invalidate` when approved requirements, design, architecture, implementation, or evidence materially changes. The command invalidates that stage and all downstream stages.\n- After stages 1–10 are human-approved, use `final-agent-review --verdict PASS|BLOCKED` with a reviewer who was neither a worker nor prior reviewer, then use `final-human-review` only after `PASS`.\n- Never hand-edit ledger state. If the ledger and artifacts disagree, invalidate and re-review.\n\n## Rules\n\n- Reviewer identity must differ from worker identity.\n- Maximum three worker-review iterations per stage.\n- Two consecutive matching failure fingerprints block the stage as stalled.\n- `REVISE` returns the stage to `IN_PROGRESS`; `BLOCKED` stops it.\n- Waivers must be visible in the human note with owner, reason, risk, and follow-up. A waiver is not evidence.\n- Evidence files are hashed when recorded. Changed files invalidate the trustworthiness of the recorded receipt even before the ledger is formally invalidated.\n- Report command output and screenshots as files; do not enter secrets in the ledger.\n\n## Completion Output\n\nReturn ledger path, release status, stage states, current blockers, invalidations, evidence hashes, reviewer identities, human decisions, and the exact human decision required next.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("apple-build-supervisor-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

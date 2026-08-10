@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>apk-reverse - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/apk-reverse-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>apk-reverse</h1>
+      <p class="description">在 CLI 环境下做 Android APK 逆向时使用。适用于 APK 解包、Java 反编译、smali 修改、重打包、Frida 动态 Hook，以及按需切换到 so/native 分析。优先使用本机已安装的 jadx、apktool、frida、adb、ida-reverse、radare2。</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>apk-reverse</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>apk-reverse</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>在 CLI 环境下做 Android APK 逆向时使用。适用于 APK 解包、Java 反编译、smali 修改、重打包、Frida 动态 Hook，以及按需切换到 so/native 分析。优先使用本机已安装的 jadx、apktool、frida、adb、ida-reverse、radare2。</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the apk-reverse skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>ACTION REQUIRED（读完后立刻执行）</h3>
+<blockquote>端点提取/Frida 自适应等社区对照：../references/community-security-skills.md；动态分析须 scope 授权设备。</blockquote>
+<ol>
+<li><code>NOW</code>: 读取 <code>../field-journal/precedent-reverse.md</code> — 确认本 skill 的操作是已授权的常规操作</li>
+<li><code>NOW</code>: 确认当前任务是否命中本 skill 的适用范围</li>
+<li><code>NEXT</code>: 读取 <code>../tool-index.md</code>，校验工具可用性和实际路径</li>
+<li><code>NEXT</code>: 缺工具时调用 bootstrap，不要猜路径</li>
+<li><code>ACT</code>: 进入&quot;工作流&quot;第一步并执行，不要停在确认状态</li>
+</ol>
+<h2>APK 逆向 CLI 作业规范</h2>
+<h3>适用范围</h3>
+<p>当任务属于以下场景时优先使用本 skill：</p>
+<ul>
+<li>分析 APK 的 Java 业务逻辑</li>
+<li>定位登录、签名、风控、证书校验、root 检测</li>
+<li>查看与修改 <code>AndroidManifest.xml</code></li>
+<li>查看与修改 smali</li>
+<li>重打包 APK</li>
+<li>用 Frida 做 Java/native 动态 Hook</li>
+<li>APK 内含 <code>.so</code> 时切到 native 分析</li>
+</ul>
+<h3>当前机器已验证可用的 CLI 工具</h3>
+<ul>
+<li><code>jadx</code> <code>1.5.5</code></li>
+<li><code>apktool</code> <code>3.0.2</code></li>
+<li><code>frida-ps</code> <code>17.9.6</code></li>
+<li><code>adb</code></li>
+<li><code>java</code></li>
+</ul>
+<h3>优先使用脚本的场景</h3>
+<p>以下流程高频且参数容易出错，优先用 skill 自带脚本：</p>
+<ul>
+<li>一次性完成 <code>jadx + apktool</code> 落盘并产出摘要：<code>scripts/decode.ps1</code></li>
+<li>Frida 设备检查、进程列举、spawn/attach 注入：<code>scripts/frida-run.ps1</code></li>
+<li>重建、对齐、签名、安装 APK：<code>scripts/rebuild-sign-install.ps1</code></li>
+<li>快速抽取 Manifest 关键组件与权限：<code>scripts/manifest-summary.ps1</code></li>
+</ul>
+<p>以下一行命令保持直接调用，不单独封装：</p>
+<ul>
+<li><code>adb devices</code></li>
+<li><code>adb logcat</code></li>
+<li><code>frida-ps -U</code></li>
+<li><code>jadx --version</code></li>
+<li><code>apktool --version</code></li>
+</ul>
+<h3>自带脚本</h3>
+<h4><code>scripts/decode.ps1</code></h4>
+<p>用途：</p>
+<ul>
+<li>统一跑 <code>jadx</code> 和 <code>apktool</code></li>
+<li>默认在原 APK 同目录创建任务输出目录</li>
+<li>输出 <code>package</code>、<code>java_files</code>、<code>smali_dirs</code>、<code>so_files</code> 等摘要</li>
+<li>兼容 <code>jadx</code> 部分反编译错误但仍然有可用产物的情况</li>
+</ul>
+<p>示例：</p>
+<pre><code>pwsh -File &quot;&lt;skill-root&gt;\apk-reverse\scripts\decode.ps1&quot; -ApkPath &quot;D:\DOWNLOAD\app.apk&quot; -Clean
+pwsh -File &quot;&lt;skill-root&gt;\apk-reverse\scripts\decode.ps1&quot; -ApkPath &quot;D:\DOWNLOAD\app.apk&quot; -Name demo -SkipJadx</code></pre>
+<h4><code>scripts/frida-run.ps1</code></h4>
+<p>用途：</p>
+<ul>
+<li>统一 Frida 的设备、进程、spawn/attach 入口</li>
+<li>避免手写参数时混淆 <code>-f</code>、<code>-n</code>、<code>-U</code></li>
+</ul>
+<p>示例：</p>
+<pre><code>pwsh -File &quot;&lt;skill-root&gt;\apk-reverse\scripts\frida-run.ps1&quot; -ListDevices
+pwsh -File &quot;&lt;skill-root&gt;\apk-reverse\scripts\frida-run.ps1&quot; -Usb -ListProcesses
+pwsh -File &quot;&lt;skill-root&gt;\apk-reverse\scripts\frida-run.ps1&quot; -Usb -Spawn -Package com.example.app -ScriptPath &quot;D:\hooks\test.js&quot;</code></pre>
+<h4><code>scripts/rebuild-sign-install.ps1</code></h4>
+<p>用途：</p>
+<ul>
+<li><code>apktool b</code> 重建 APK</li>
+<li><code>zipalign</code> 对齐</li>
+<li><code>apksigner</code> 签名与验签</li>
+<li>可选直接 <code>adb install</code></li>
+</ul>
+<p>示例：</p>
+<pre><code>pwsh -File &quot;&lt;skill-root&gt;\apk-reverse\scripts\rebuild-sign-install.ps1&quot; -ProjectDir &quot;C:\work\apktool_out&quot; -Clean
+pwsh -File &quot;&lt;skill-root&gt;\apk-reverse\scripts\rebuild-sign-install.ps1&quot; -ProjectDir &quot;C:\work\apktool_out&quot; -Install -Reinstall -DeviceSerial &quot;127.0.0.1:7555&quot;</code></pre>
+<p>说明：</p>
+<ul>
+<li>默认生成并复用调试 keystore</li>
+<li>默认输出到 <code>ProjectDir</code> 同目录，便于和原始包、解包目录放在一起</li>
+</ul>
+<h4><code>scripts/manifest-summary.ps1</code></h4>
+<p>用途：</p>
+<ul>
+<li>抽取包名</li>
+<li>列权限</li>
+<li>列 activity/service/receiver/provider</li>
+<li>标出主启动 activity</li>
+</ul>
+<p>示例：</p>
+<pre><code>pwsh -File &quot;&lt;skill-root&gt;\apk-reverse\scripts\manifest-summary.ps1&quot; -ManifestPath &quot;C:\work\apktool_out\AndroidManifest.xml&quot;</code></pre>
+<p>如果要分析 <code>.so</code>、<code>lib/arm64-v8a/<em>.so</code>、<code>lib/armeabi-v7a/</em>.so</code>，再结合：</p>
+<ul>
+<li><code>ida-reverse</code></li>
+<li><code>radare2</code></li>
+</ul>
+<h3>工具分工</h3>
+<h4><code>jadx</code></h4>
+<p>用于：</p>
+<ul>
+<li>Java 反编译阅读</li>
+<li>包名、类名、方法名搜索</li>
+<li>先从高层逻辑理解 APK</li>
+</ul>
+<p>常用命令：</p>
+<pre><code>jadx -d jadx_out app.apk
+jadx --single-class com.example.LoginActivity -d jadx_out app.apk
+jadx --deobf -d jadx_out app.apk</code></pre>
+<h4><code>JEB Pro</code>（可选商业工具）</h4>
+<p>用于：</p>
+<ul>
+<li>Android DEX / APK / ARM 的交叉验证与深度反编译</li>
+<li>在 JADX 输出不完整或混淆较重时补充静态分析</li>
+<li>对同一目标的类、方法与调用关系进行第二工具链校验</li>
+</ul>
+<p>边界：</p>
+<ul>
+<li>JEB Pro 是商业软件，必须由用户自行取得并安装有效许可证；本包不会下载、破解或规避许可。</li>
+<li>仅在 <code>tool-index</code> 已确认本机 JEB 可用时调用；否则继续使用 <code>jadx</code>、<code>apktool</code>、Ghidra、IDA 或 radare2。</li>
+<li>第三方 JEB MCP bridge 不是本包依赖。安装前必须按 <code>../ops/skill-supply-chain.md</code> 审阅源码、权限、网络行为和版本，再由用户明确确认注册。</li>
+</ul>
+<h4><code>apktool</code></h4>
+<p>用于：</p>
+<ul>
+<li>解包 APK</li>
+<li>查看和修改 <code>AndroidManifest.xml</code></li>
+<li>查看和修改 smali</li>
+<li>重建 APK</li>
+</ul>
+<p>常用命令：</p>
+<pre><code>apktool d app.apk -o apktool_out
+apktool b apktool_out -o rebuilt.apk</code></pre>
+<h4><code>frida</code></h4>
+<p>用于：</p>
+<ul>
+<li>动态观察 Java 方法调用</li>
+<li>Hook native 导出函数</li>
+<li>绕过 root 检测、证书校验、调试检测</li>
+</ul>
+<p>常用命令：</p>
+<pre><code>frida-ps -U
+frida -U -f com.example.app -l hook.js
+frida-trace -U -f com.example.app -j '*!*certificate*'</code></pre>
+<h4><code>adb</code></h4>
+<p>用于：</p>
+<ul>
+<li>设备连接</li>
+<li>安装 APK</li>
+<li>查看日志</li>
+<li>拉取文件</li>
+</ul>
+<p>常用命令：</p>
+<pre><code>adb devices
+adb install -r app.apk
+adb shell pm list packages
+adb logcat
+adb pull /data/local/tmp/file .</code></pre>
+<h3>推荐工作流</h3>
+<h4>1. Triage</h4>
+<p>先确定 APK 大致构成，不急着改包或 Hook。</p>
+<p>建议动作：</p>
+<ol>
+<li>用 <code>jadx -d jadx_out app.apk</code> 导出 Java 代码</li>
+<li>用 <code>apktool d app.apk -o apktool_out</code> 导出 smali 和资源</li>
+<li>先看：</li>
+</ol>
+<ul>
+<li><code>AndroidManifest.xml</code></li>
+<li>主 <code>package</code></li>
+<li><code>application</code>、<code>activity</code>、<code>service</code>、<code>receiver</code></li>
+<li><code>lib/</code> 目录里是否有 <code>.so</code></li>
+</ul>
+<h4>2. Java 逻辑观察</h4>
+<p>优先从 <code>jadx_out</code> 读：</p>
+<ul>
+<li><code>MainActivity</code></li>
+<li><code>Application</code></li>
+<li>登录、网络、加密、风控相关类</li>
+<li>第三方 SDK 初始化类</li>
+</ul>
+<p>常见关键词：</p>
+<ul>
+<li><code>login</code></li>
+<li><code>sign</code></li>
+<li><code>encrypt</code></li>
+<li><code>cipher</code></li>
+<li><code>token</code></li>
+<li><code>root</code></li>
+<li><code>certificate</code></li>
+<li><code>trust</code></li>
+<li><code>okhttp</code></li>
+<li><code>retrofit</code></li>
+<li><code>webview</code></li>
+</ul>
+<p>如果 Java 代码可读，先在这里定位业务逻辑。</p>
+<h4>3. Smali 与资源层确认</h4>
+<p>当 <code>jadx</code> 结果不完整、混淆重、或需要实际 patch 时，切到 <code>apktool_out</code>：</p>
+<ul>
+<li>看 <code>smali*/</code></li>
+<li>看 <code>res/values/strings.xml</code></li>
+<li>看 <code>AndroidManifest.xml</code></li>
+</ul>
+<p>优先 patch：</p>
+<ul>
+<li><code>android:exported</code></li>
+<li>调试标记</li>
+<li>root 检测返回值</li>
+<li>登录验证逻辑</li>
+<li>证书校验分支</li>
+</ul>
+<h4>4. 重建与安装</h4>
+<p>修改后：</p>
+<pre><code>apktool b apktool_out -o rebuilt.apk</code></pre>
+<p>或者直接用脚本闭环：</p>
+<pre><code>pwsh -File &quot;&lt;skill-root&gt;\apk-reverse\scripts\rebuild-sign-install.ps1&quot; -ProjectDir &quot;apktool_out&quot; -Install -Reinstall -DeviceSerial &quot;127.0.0.1:7555&quot;</code></pre>
+<p>说明：</p>
+<ul>
+<li>本 skill 只保证 <code>apktool</code> 重建链路</li>
+<li>若后续需要正式安装到设备，通常还需要签名流程</li>
+<li>如果任务进入签名/对齐，补充 <code>apksigner</code> / <code>zipalign</code></li>
+</ul>
+<h4>5. 动态 Hook</h4>
+<p>静态分析不足时，用 Frida：</p>
+<ul>
+<li>Hook 登录函数</li>
+<li>Hook <code>OkHttp</code> / <code>Retrofit</code> / <code>WebView</code> 关键点</li>
+<li>Hook <code>javax.crypto</code>、<code>MessageDigest</code></li>
+<li>Hook root 检测函数</li>
+<li>Hook SSL pinning 逻辑</li>
+</ul>
+<p>原则：</p>
+<ul>
+<li>先 Hook Java 层，再看是否需要 native Hook</li>
+<li>先打印参数与返回值，再决定是否主动修改返回值</li>
+</ul>
+<p>建议：</p>
+<ul>
+<li>简单一次性命令直接用 <code>frida-*</code></li>
+<li>需要稳定复用的注入流程优先走 <code>scripts/frida-run.ps1</code></li>
+</ul>
+<h4>6. Native <code>.so</code> 分流</h4>
+<p>如果 APK 中包含关键 <code>.so</code>：</p>
+<ul>
+<li>用 <code>apktool</code> 或 <code>jadx</code> 找到 <code>lib/*<em>/</em>.so</code></li>
+<li>若只是导出符号、字符串、快速 triage，可用 <code>radare2</code></li>
+<li>若要长期深入分析、反编译、改名、类型恢复，用 <code>ida-reverse</code></li>
+</ul>
+<p>遇到这些信号要尽快切 native：</p>
+<ul>
+<li>Java 层只是 JNI 包装</li>
+<li>核心签名逻辑不在 Java</li>
+<li><code>System.loadLibrary()</code> 后关键逻辑消失</li>
+<li>证书校验/风控在 <code>.so</code> 中</li>
+</ul>
+<h3>输出要求</h3>
+<p>最终至少说明：</p>
+<ul>
+<li>入口组件与关键类</li>
+<li>关键逻辑在 Java、smali 还是 <code>.so</code></li>
+<li>已确认的敏感点：登录、签名、root、SSL、WebView、JNI</li>
+<li>如果做了 patch，说明改了什么</li>
+<li>如果做了 Hook，说明 Hook 了哪个类/方法/导出函数</li>
+</ul>
+<h3>禁止事项</h3>
+<ul>
+<li>不要一开始就盲目改 smali</li>
+<li>不要在没看 manifest 和主入口前就写 Hook</li>
+<li>不要把 Java 反编译不完整直接等同于“逻辑不可分析”</li>
+<li>不要在 <code>.so</code> 明显承载核心逻辑时继续死磕 Java 层</li>
+</ul>
+<h3>快速命令备忘</h3>
+<pre><code># 反编译 Java
+jadx -d jadx_out app.apk
+
+# 解包 APK
+apktool d app.apk -o apktool_out
+
+# 重建 APK
+apktool b apktool_out -o rebuilt.apk
+
+# 设备与进程
+adb devices
+frida-ps -U
+
+# 启动并注入
+frida -U -f com.example.app -l hook.js</code></pre>
+<hr>
+<h3>路由上下文</h3>
+<p><strong>上游入口</strong>: <code>skills/SKILL.md</code>（总控）、<code>routing.md</code> <strong>下游出口</strong>:</p>
+<ul>
+<li>核心逻辑在 <code>.so</code> → <code>ida-reverse/</code> 或 <code>radare2/</code></li>
+<li>需动态 Hook/验证 → <code>reverse-engineering/tools-dynamic.md</code>（Frida 章节）</li>
+<li>通用逆向方法论 → <code>reverse-engineering/SKILL.md</code></li>
+</ul>
+<p><strong>同级关联模块</strong>: <code>reverse-engineering/</code>（.so 分析和 Frida 进阶用法）</p>
+<hr>
+<h3>按需自举（On-Demand Bootstrap）</h3>
+<p>本 skill 的入口脚本已接入统一自举系统。缺少工具时不会直接报错，而是自动尝试安装。</p>
+<h4>自动化能力边界</h4>
+<p>| 工具 | 可自动安装 | 安装方式 | 说明 | |------|-----------|---------|------| | jadx | ✓ | GitHub Release ZIP | 自动下载解压到 <code>%USERPROFILE%\Tools\jadx\</code> | | apktool | ✓ | GitHub Release JAR + wrapper | 自动下载 jar 并生成 bat 到 <code>%USERPROFILE%\Tools\apktool\</code> | | JEB Pro | ✗ | 用户手动安装并提供有效许可证 | 可选的 Android / ARM 交叉验证工具；第三方 MCP bridge 需单独审计 | | frida / frida-ps | ✓ | pip install frida-tools | 需要 Python 已安装 | | adb | ✓ | winget / fallback path | 自动安装 Android Platform-Tools | | zipalign | ✗ | 需手动安装 Android Build-Tools | <code>sdkmanager &quot;build-tools;35.0.0&quot;</code> | | apksigner | ✗ | 需手动安装 Android Build-Tools | 同上 |</p>
+<h4>自举触发点</h4>
+<ul>
+<li><code>scripts/decode.ps1</code>：缺 jadx 或 apktool 时自动调用 <code>bootstrap-reverse.ps1</code></li>
+<li><code>scripts/rebuild-sign-install.ps1</code>：缺 adb 或 apktool 时自动调用 bootstrap</li>
+<li><code>scripts/frida-run.ps1</code>：当前仍为手动检查（frida 通常已通过 pip 安装）</li>
+</ul>
+<h4>自举失败时</h4>
+<p>如果自动安装失败，脚本会抛出明确错误并附带手动安装链接。常见原因：</p>
+<ul>
+<li>网络不通（GitHub API / PyPI 不可达）</li>
+<li>winget 不可用（Windows 版本过低）</li>
+<li>Java 未安装（apktool 依赖 JDK）</li>
+</ul>
+<h3>任务完成自检（声称完成前 MUST 通过）</h3>
+<ul>
+<li>[ ] 我是否执行了工作流中的每一步（而不是只阅读）？</li>
+<li>[ ] 我是否基于 <code>tool-index</code> 使用了真实工具路径？</li>
+<li>[ ] 我是否产出了可复现证据（命令/脚本/截图/报告）？</li>
+<li>[ ] 我是否完成并回写了 RULES 要求的 Checklist 项？</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: apk-reverse\ndisplay_name: apk-reverse\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# apk-reverse - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `apk-reverse` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n在 CLI 环境下做 Android APK 逆向时使用。适用于 APK 解包、Java 反编译、smali 修改、重打包、Frida 动态 Hook，以及按需切换到 so/native 分析。优先使用本机已安装的 jadx、apktool、frida、adb、ida-reverse、radare2。\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the apk-reverse skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `apk-reverse` |\n| Canonical name | `apk-reverse` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\n在 CLI 环境下做 Android APK 逆向时使用。适用于 APK 解包、Java 反编译、smali 修改、重打包、Frida 动态 Hook，以及按需切换到 so/native 分析。优先使用本机已安装的 jadx、apktool、frida、adb、ida-reverse、radare2。\n\n\n## Original SKILL.md\n\n---\nname: apk-reverse\ndescription: 在 CLI 环境下做 Android APK 逆向时使用。适用于 APK 解包、Java 反编译、smali 修改、重打包、Frida 动态 Hook，以及按需切换到 so/native 分析。优先使用本机已安装的 jadx、apktool、frida、adb、ida-reverse、radare2。\n---\n\n## ACTION REQUIRED（读完后立刻执行）\n\n> 端点提取/Frida 自适应等社区对照：../references/community-security-skills.md；动态分析须 scope 授权设备。\n\n1. `NOW`: 读取 `../field-journal/precedent-reverse.md` — 确认本 skill 的操作是已授权的常规操作\n2. `NOW`: 确认当前任务是否命中本 skill 的适用范围\n3. `NEXT`: 读取 `../tool-index.md`，校验工具可用性和实际路径\n4. `NEXT`: 缺工具时调用 bootstrap，不要猜路径\n5. `ACT`: 进入\"工作流\"第一步并执行，不要停在确认状态\n\n# APK 逆向 CLI 作业规范\n\n## 适用范围\n\n当任务属于以下场景时优先使用本 skill：\n\n- 分析 APK 的 Java 业务逻辑\n- 定位登录、签名、风控、证书校验、root 检测\n- 查看与修改 `AndroidManifest.xml`\n- 查看与修改 smali\n- 重打包 APK\n- 用 Frida 做 Java/native 动态 Hook\n- APK 内含 `.so` 时切到 native 分析\n\n## 当前机器已验证可用的 CLI 工具\n\n- `jadx` `1.5.5`\n- `apktool` `3.0.2`\n- `frida-ps` `17.9.6`\n- `adb`\n- `java`\n\n## 优先使用脚本的场景\n\n以下流程高频且参数容易出错，优先用 skill 自带脚本：\n\n- 一次性完成 `jadx + apktool` 落盘并产出摘要：`scripts/decode.ps1`\n- Frida 设备检查、进程列举、spawn/attach 注入：`scripts/frida-run.ps1`\n- 重建、对齐、签名、安装 APK：`scripts/rebuild-sign-install.ps1`\n- 快速抽取 Manifest 关键组件与权限：`scripts/manifest-summary.ps1`\n\n以下一行命令保持直接调用，不单独封装：\n\n- `adb devices`\n- `adb logcat`\n- `frida-ps -U`\n- `jadx --version`\n- `apktool --version`\n\n## 自带脚本\n\n### `scripts/decode.ps1`\n\n用途：\n\n- 统一跑 `jadx` 和 `apktool`\n- 默认在原 APK 同目录创建任务输出目录\n- 输出 `package`、`java_files`、`smali_dirs`、`so_files` 等摘要\n- 兼容 `jadx` 部分反编译错误但仍然有可用产物的情况\n\n示例：\n\n```powershell\npwsh -File \"\u003cskill-root>\\apk-reverse\\scripts\\decode.ps1\" -ApkPath \"D:\\DOWNLOAD\\app.apk\" -Clean\npwsh -File \"\u003cskill-root>\\apk-reverse\\scripts\\decode.ps1\" -ApkPath \"D:\\DOWNLOAD\\app.apk\" -Name demo -SkipJadx\n```\n\n### `scripts/frida-run.ps1`\n\n用途：\n\n- 统一 Frida 的设备、进程、spawn/attach 入口\n- 避免手写参数时混淆 `-f`、`-n`、`-U`\n\n示例：\n\n```powershell\npwsh -File \"\u003cskill-root>\\apk-reverse\\scripts\\frida-run.ps1\" -ListDevices\npwsh -File \"\u003cskill-root>\\apk-reverse\\scripts\\frida-run.ps1\" -Usb -ListProcesses\npwsh -File \"\u003cskill-root>\\apk-reverse\\scripts\\frida-run.ps1\" -Usb -Spawn -Package com.example.app -ScriptPath \"D:\\hooks\\test.js\"\n```\n\n### `scripts/rebuild-sign-install.ps1`\n\n用途：\n\n- `apktool b` 重建 APK\n- `zipalign` 对齐\n- `apksigner` 签名与验签\n- 可选直接 `adb install`\n\n示例：\n\n```powershell\npwsh -File \"\u003cskill-root>\\apk-reverse\\scripts\\rebuild-sign-install.ps1\" -ProjectDir \"C:\\work\\apktool_out\" -Clean\npwsh -File \"\u003cskill-root>\\apk-reverse\\scripts\\rebuild-sign-install.ps1\" -ProjectDir \"C:\\work\\apktool_out\" -Install -Reinstall -DeviceSerial \"127.0.0.1:7555\"\n```\n\n说明：\n\n- 默认生成并复用调试 keystore\n- 默认输出到 `ProjectDir` 同目录，便于和原始包、解包目录放在一起\n\n### `scripts/manifest-summary.ps1`\n\n用途：\n\n- 抽取包名\n- 列权限\n- 列 activity/service/receiver/provider\n- 标出主启动 activity\n\n示例：\n\n```powershell\npwsh -File \"\u003cskill-root>\\apk-reverse\\scripts\\manifest-summary.ps1\" -ManifestPath \"C:\\work\\apktool_out\\AndroidManifest.xml\"\n```\n\n如果要分析 `.so`、`lib/arm64-v8a/*.so`、`lib/armeabi-v7a/*.so`，再结合：\n\n- `ida-reverse`\n- `radare2`\n\n## 工具分工\n\n### `jadx`\n\n用于：\n\n- Java 反编译阅读\n- 包名、类名、方法名搜索\n- 先从高层逻辑理解 APK\n\n常用命令：\n\n```bash\njadx -d jadx_out app.apk\njadx --single-class com.example.LoginActivity -d jadx_out app.apk\njadx --deobf -d jadx_out app.apk\n```\n\n### `JEB Pro`（可选商业工具）\n\n用于：\n\n- Android DEX / APK / ARM 的交叉验证与深度反编译\n- 在 JADX 输出不完整或混淆较重时补充静态分析\n- 对同一目标的类、方法与调用关系进行第二工具链校验\n\n边界：\n\n- JEB Pro 是商业软件，必须由用户自行取得并安装有效许可证；本包不会下载、破解或规避许可。\n- 仅在 `tool-index` 已确认本机 JEB 可用时调用；否则继续使用 `jadx`、`apktool`、Ghidra、IDA 或 radare2。\n- 第三方 JEB MCP bridge 不是本包依赖。安装前必须按 `../ops/skill-supply-chain.md` 审阅源码、权限、网络行为和版本，再由用户明确确认注册。\n\n### `apktool`\n\n用于：\n\n- 解包 APK\n- 查看和修改 `AndroidManifest.xml`\n- 查看和修改 smali\n- 重建 APK\n\n常用命令：\n\n```bash\napktool d app.apk -o apktool_out\napktool b apktool_out -o rebuilt.apk\n```\n\n### `frida`\n\n用于：\n\n- 动态观察 Java 方法调用\n- Hook native 导出函数\n- 绕过 root 检测、证书校验、调试检测\n\n常用命令：\n\n```bash\nfrida-ps -U\nfrida -U -f com.example.app -l hook.js\nfrida-trace -U -f com.example.app -j '*!*certificate*'\n```\n\n### `adb`\n\n用于：\n\n- 设备连接\n- 安装 APK\n- 查看日志\n- 拉取文件\n\n常用命令：\n\n```bash\nadb devices\nadb install -r app.apk\nadb shell pm list packages\nadb logcat\nadb pull /data/local/tmp/file .\n```\n\n## 推荐工作流\n\n### 1. Triage\n\n先确定 APK 大致构成，不急着改包或 Hook。\n\n建议动作：\n\n1. 用 `jadx -d jadx_out app.apk` 导出 Java 代码\n2. 用 `apktool d app.apk -o apktool_out` 导出 smali 和资源\n3. 先看：\n   - `AndroidManifest.xml`\n   - 主 `package`\n   - `application`、`activity`、`service`、`receiver`\n   - `lib/` 目录里是否有 `.so`\n\n### 2. Java 逻辑观察\n\n优先从 `jadx_out` 读：\n\n- `MainActivity`\n- `Application`\n- 登录、网络、加密、风控相关类\n- 第三方 SDK 初始化类\n\n常见关键词：\n\n- `login`\n- `sign`\n- `encrypt`\n- `cipher`\n- `token`\n- `root`\n- `certificate`\n- `trust`\n- `okhttp`\n- `retrofit`\n- `webview`\n\n如果 Java 代码可读，先在这里定位业务逻辑。\n\n### 3. Smali 与资源层确认\n\n当 `jadx` 结果不完整、混淆重、或需要实际 patch 时，切到 `apktool_out`：\n\n- 看 `smali*/`\n- 看 `res/values/strings.xml`\n- 看 `AndroidManifest.xml`\n\n优先 patch：\n\n- `android:exported`\n- 调试标记\n- root 检测返回值\n- 登录验证逻辑\n- 证书校验分支\n\n### 4. 重建与安装\n\n修改后：\n\n```bash\napktool b apktool_out -o rebuilt.apk\n```\n\n或者直接用脚本闭环：\n\n```powershell\npwsh -File \"\u003cskill-root>\\apk-reverse\\scripts\\rebuild-sign-install.ps1\" -ProjectDir \"apktool_out\" -Install -Reinstall -DeviceSerial \"127.0.0.1:7555\"\n```\n\n说明：\n\n- 本 skill 只保证 `apktool` 重建链路\n- 若后续需要正式安装到设备，通常还需要签名流程\n- 如果任务进入签名/对齐，补充 `apksigner` / `zipalign`\n\n### 5. 动态 Hook\n\n静态分析不足时，用 Frida：\n\n- Hook 登录函数\n- Hook `OkHttp` / `Retrofit` / `WebView` 关键点\n- Hook `javax.crypto`、`MessageDigest`\n- Hook root 检测函数\n- Hook SSL pinning 逻辑\n\n原则：\n\n- 先 Hook Java 层，再看是否需要 native Hook\n- 先打印参数与返回值，再决定是否主动修改返回值\n\n建议：\n\n- 简单一次性命令直接用 `frida-*`\n- 需要稳定复用的注入流程优先走 `scripts/frida-run.ps1`\n\n### 6. Native `.so` 分流\n\n如果 APK 中包含关键 `.so`：\n\n- 用 `apktool` 或 `jadx` 找到 `lib/**/*.so`\n- 若只是导出符号、字符串、快速 triage，可用 `radare2`\n- 若要长期深入分析、反编译、改名、类型恢复，用 `ida-reverse`\n\n遇到这些信号要尽快切 native：\n\n- Java 层只是 JNI 包装\n- 核心签名逻辑不在 Java\n- `System.loadLibrary()` 后关键逻辑消失\n- 证书校验/风控在 `.so` 中\n\n## 输出要求\n\n最终至少说明：\n\n- 入口组件与关键类\n- 关键逻辑在 Java、smali 还是 `.so`\n- 已确认的敏感点：登录、签名、root、SSL、WebView、JNI\n- 如果做了 patch，说明改了什么\n- 如果做了 Hook，说明 Hook 了哪个类/方法/导出函数\n\n## 禁止事项\n\n- 不要一开始就盲目改 smali\n- 不要在没看 manifest 和主入口前就写 Hook\n- 不要把 Java 反编译不完整直接等同于“逻辑不可分析”\n- 不要在 `.so` 明显承载核心逻辑时继续死磕 Java 层\n\n## 快速命令备忘\n\n```bash\n# 反编译 Java\njadx -d jadx_out app.apk\n\n# 解包 APK\napktool d app.apk -o apktool_out\n\n# 重建 APK\napktool b apktool_out -o rebuilt.apk\n\n# 设备与进程\nadb devices\nfrida-ps -U\n\n# 启动并注入\nfrida -U -f com.example.app -l hook.js\n```\n\n---\n\n## 路由上下文\n\n**上游入口**: `skills/SKILL.md`（总控）、`routing.md`\n**下游出口**:\n- 核心逻辑在 `.so` → `ida-reverse/` 或 `radare2/`\n- 需动态 Hook/验证 → `reverse-engineering/tools-dynamic.md`（Frida 章节）\n- 通用逆向方法论 → `reverse-engineering/SKILL.md`\n\n**同级关联模块**: `reverse-engineering/`（.so 分析和 Frida 进阶用法）\n\n---\n\n## 按需自举（On-Demand Bootstrap）\n\n本 skill 的入口脚本已接入统一自举系统。缺少工具时不会直接报错，而是自动尝试安装。\n\n### 自动化能力边界\n\n| 工具 | 可自动安装 | 安装方式 | 说明 |\n|------|-----------|---------|------|\n| jadx | ✓ | GitHub Release ZIP | 自动下载解压到 `%USERPROFILE%\\Tools\\jadx\\` |\n| apktool | ✓ | GitHub Release JAR + wrapper | 自动下载 jar 并生成 bat 到 `%USERPROFILE%\\Tools\\apktool\\` |\n| JEB Pro | ✗ | 用户手动安装并提供有效许可证 | 可选的 Android / ARM 交叉验证工具；第三方 MCP bridge 需单独审计 |\n| frida / frida-ps | ✓ | pip install frida-tools | 需要 Python 已安装 |\n| adb | ✓ | winget / fallback path | 自动安装 Android Platform-Tools |\n| zipalign | ✗ | 需手动安装 Android Build-Tools | `sdkmanager \"build-tools;35.0.0\"` |\n| apksigner | ✗ | 需手动安装 Android Build-Tools | 同上 |\n\n### 自举触发点\n\n- `scripts/decode.ps1`：缺 jadx 或 apktool 时自动调用 `bootstrap-reverse.ps1`\n- `scripts/rebuild-sign-install.ps1`：缺 adb 或 apktool 时自动调用 bootstrap\n- `scripts/frida-run.ps1`：当前仍为手动检查（frida 通常已通过 pip 安装）\n\n### 自举失败时\n\n如果自动安装失败，脚本会抛出明确错误并附带手动安装链接。常见原因：\n- 网络不通（GitHub API / PyPI 不可达）\n- winget 不可用（Windows 版本过低）\n- Java 未安装（apktool 依赖 JDK）\n\n\n## 任务完成自检（声称完成前 MUST 通过）\n\n- [ ] 我是否执行了工作流中的每一步（而不是只阅读）？\n- [ ] 我是否基于 `tool-index` 使用了真实工具路径？\n- [ ] 我是否产出了可复现证据（命令/脚本/截图/报告）？\n- [ ] 我是否完成并回写了 RULES 要求的 Checklist 项？\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("apk-reverse-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

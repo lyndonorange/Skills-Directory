@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Migrate - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/migrate-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>Migrate</h1>
+      <p class="description">Intakes external content, classifies chunks against LifeOS taxonomy, commits with provenance. Sources: .md/.txt, stdin, LifeOS dirs, CLAUDE.md/Cursor/OpenAI Custom Instructions, Obsidian/Notion/Apple Notes exports. MigrateScan classifies → routing table. MigrateApprove with --approve-all/--approve-target/--review/--dry-run. Confidence ≥70% auto, 40-70% confirm, &lt;40% walk-through. USE WHEN /migrate, migrate content, import from other LifeOS, bring in old notes, import Cursor rules, import CLAUDE.md, bulk import, Obsidian/Notion/Apple Notes import. NOT FOR single-file edits, conversational interviews, identity edits.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>Migrate</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>Migrate</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Intakes external content, classifies chunks against LifeOS taxonomy, commits with provenance. Sources: .md/.txt, stdin, LifeOS dirs, CLAUDE.md/Cursor/OpenAI Custom Instructions, Obsidian/Notion/Apple Notes exports. MigrateScan classifies → routing table. MigrateApprove with --approve-all/--approve-target/--review/--dry-run. Confidence ≥70% auto, 40-70% confirm, &lt;40% walk-through. USE WHEN /migrate, migrate content, import from other LifeOS, bring in old notes, import Cursor rules, import CLAUDE.md, bulk import, Obsidian/Notion/Apple Notes import. NOT FOR single-file edits, conversational interviews, identity edits.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose Migrate, then write the task. Fallback prompt: Use the Migrate skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Migrate — external-content intake and classification</h2>
+<h3>🚨 MANDATORY: Voice Notification</h3>
+<pre><code>curl -s -X POST http://localhost:31337/notify \
+  -H &quot;Content-Type: application/json&quot; \
+  -d '{&quot;message&quot;: &quot;Starting the migration. Scanning source and classifying chunks.&quot;}' \
+  &gt; /dev/null 2&gt;&amp;1 &amp;</code></pre>
+<h3>What It Does</h3>
+<p>Migrate intakes external content, classifies each chunk against the LifeOS taxonomy, and commits it to the right destination with provenance. Sources include <code>.md</code>/<code>.txt</code> files, stdin, other LifeOS installs, agent-harness rule files (CLAUDE.md, Cursor rules, OpenAI Custom Instructions), and Obsidian/Notion/Apple Notes exports. Classification confidence drives the flow: high-confidence chunks auto-approve, medium ones ask for confirmation, low ones get a walk-through.</p>
+<h3>The Problem</h3>
+<p>When you adopt LifeOS you usually arrive with years of accumulated notes — a CLAUDE.md, a vault of markdown, journal dumps, rules from another tool — and none of it maps cleanly onto LifeOS's structure. Sorting hundreds of chunks into TELOS sections, knowledge notes, and feedback rules by hand is the kind of tedious work that never gets done, so the old material just sits there unused. Migrate does the sorting: it reads the content you already have, proposes a destination for every chunk with a confidence score, and lets you approve in bulk or review the uncertain ones, attaching provenance so nothing lands in TELOS without attribution.</p>
+<h3>How It Works</h3>
+<p>Migrates content into the LifeOS structure from external sources. Unlike <code>/interview</code> (which asks the user questions to fill gaps), <code>/migrate</code> <strong>already has the content</strong> — it just needs to classify each chunk and route it to the right LifeOS destination. MigrateScan classifies into a routing table; MigrateApprove commits per the user's chosen path.</p>
+<h4>Sources supported in V1</h4>
+<ul>
+<li><strong>Files:</strong> <code>.md</code>, <code>.markdown</code>, <code>.txt</code> (single file or directory recursion)</li>
+<li><strong>Stdin:</strong> piped content or pasted directly</li>
+<li><strong>Other LifeOS installs:</strong> point at their <code>USER/TELOS/</code> or <code>MEMORY/KNOWLEDGE/</code> directories</li>
+<li><strong>Agent-harness rule files:</strong> <code>CLAUDE.md</code>, <code>.cursorrules</code>, OpenAI Custom Instructions export</li>
+<li><strong>Exports:</strong> Obsidian vaults (markdown), Notion exports (markdown), Apple Notes exports (.txt), raw journal dumps</li>
+</ul>
+<h4>What it classifies chunks into</h4>
+<p>| Category | Destinations | |---|---| | <strong>Foundational TELOS</strong> | MISSION, GOALS, PROBLEMS, STRATEGIES, CHALLENGES, BELIEFS, WISDOM, MODELS, FRAMES, NARRATIVES, SPARKS | | <strong>IDEAL_STATE dimensions</strong> | HEALTH, MONEY, FREEDOM, RELATIONSHIPS, CREATIVE, RHYTHMS | | <strong>Preference files</strong> | BOOKS, AUTHORS, MOVIES, BANDS, RESTAURANTS, FOOD_PREFERENCES, LEARNING, MEETUPS, CIVIC | | <strong>Identity</strong> | USER/PRINCIPAL/PRINCIPAL_IDENTITY.md | | <strong>Knowledge</strong> | MEMORY/KNOWLEDGE/{Ideas,People,Companies,Research} | | <strong>AI collaboration rules</strong> | <code>memory/feedback_*.md</code> (for &quot;always do X&quot;, &quot;never Y&quot; patterns) | | <strong>Unclear</strong> | Flagged for the user's manual routing |</p>
+<h3>Workflow Routing</h3>
+<p>No <code>Workflows/</code> directory — the single migration procedure runs inline through Phases 1–6 below, backed by two tools in <code>LIFEOS/TOOLS/</code>.</p>
+<p>| Trigger | Workflow | File | |---------|----------|------| | /migrate, migrate content, bulk import, import from other LifeOS, import CLAUDE.md / Cursor rules / Obsidian / Notion / Apple Notes export, bring in old notes | Inline Phases 1–6 (identify → scan → route → approve → UNCLEAR → summary) | <code>LIFEOS/TOOLS/MigrateScan.ts</code> + <code>LIFEOS/TOOLS/MigrateApprove.ts</code> |</p>
+<h3>Workflow</h3>
+<h4>Phase 1 — Identify the source</h4>
+<p>Ask the user what he wants to migrate:</p>
+<ul>
+<li>&quot;Paste the content here and I'll work from stdin&quot;</li>
+<li>&quot;Point me at a file path&quot;</li>
+<li>&quot;Point me at a directory and I'll scan everything inside&quot;</li>
+<li>&quot;I have a Cursor rules file at ~/Projects/X/.cursorrules&quot;</li>
+<li>&quot;My old LifeOS install has TELOS at ~/old-claude/TELOS/&quot;</li>
+</ul>
+<p>Collect the source path. If content is pasted, write it to a temp file first.</p>
+<h4>Phase 2 — Scan</h4>
+<p>Run the scanner:</p>
+<pre><code>bun ~/.claude/LIFEOS/TOOLS/MigrateScan.ts --source &lt;path&gt;
+# or
+echo &quot;$CONTENT&quot; | bun ~/.claude/LIFEOS/TOOLS/MigrateScan.ts --stdin</code></pre>
+<p>Scanner output includes:</p>
+<ul>
+<li>Total chunks found</li>
+<li>Proposed routing table (how many chunks per target)</li>
+<li>Average classification confidence</li>
+<li>Count of UNCLEAR chunks</li>
+<li>Count of low-confidence (&lt;40%) chunks</li>
+</ul>
+<h4>Phase 3 — Present routing summary</h4>
+<p>Show the user the routing proposal in a scannable format:</p>
+<pre><code>Found 47 chunks from 3 files. Proposed routing:
+
+  📂 TELOS/GOALS.md              12 chunks  (78% avg confidence)
+  📂 TELOS/WISDOM.md              8 chunks  (65% avg confidence)
+  📂 TELOS/BELIEFS.md             6 chunks  (71% avg confidence)
+  📂 MEMORY/KNOWLEDGE/Ideas      15 chunks  (52% avg confidence)
+  🧠 memory/feedback              4 chunks  (85% avg confidence)
+  ❓ UNCLEAR                      2 chunks  (needs your call)
+
+Options:
+  - Approve everything trusted (confidence ≥60%)?
+  - Walk through the low-confidence and UNCLEAR chunks one by one?
+  - Review specific categories?
+  - Review everything?</code></pre>
+<h4>Phase 4 — Approval loop</h4>
+<p>Based on the user's preference:</p>
+<p><strong>Fast path</strong> (he says &quot;approve all trusted&quot;):</p>
+<pre><code>bun ~/.claude/LIFEOS/TOOLS/MigrateApprove.ts --approve-all</code></pre>
+<p>Commits everything non-UNCLEAR. Then walk through UNCLEAR chunks conversationally.</p>
+<p><strong>Category path</strong> (he says &quot;approve goals and wisdom, skip knowledge&quot;):</p>
+<pre><code>bun ~/.claude/LIFEOS/TOOLS/MigrateApprove.ts --approve-target TELOS/GOALS.md
+bun ~/.claude/LIFEOS/TOOLS/MigrateApprove.ts --approve-target TELOS/WISDOM.md</code></pre>
+<p><strong>Walk-through path</strong> (he wants careful review):</p>
+<pre><code>bun ~/.claude/LIFEOS/TOOLS/MigrateApprove.ts --review</code></pre>
+<p>Show each pending chunk. For each:</p>
+<ul>
+<li>Show preview + proposed target + confidence + alternatives</li>
+<li>Ask: approve / modify target / reject</li>
+<li>Commit decision</li>
+</ul>
+<h4>Phase 5 — Handle UNCLEAR chunks</h4>
+<p>UNCLEAR chunks are ones where no classification rule matched strongly. For each:</p>
+<ul>
+<li>Display full content (not just preview)</li>
+<li>Ask the user: &quot;This one's unclear — what is it? Could be X, Y, Z, or maybe Knowledge/Ideas as a catch-all?&quot;</li>
+<li>the user chooses → commit via <code>--modify &lt;id&gt; --target &lt;chosen&gt;</code></li>
+</ul>
+<h4>Phase 6 — Completion summary</h4>
+<p>After approval pass:</p>
+<ul>
+<li>Report total chunks committed, per-target count</li>
+<li>Flag any remaining UNCLEAR</li>
+<li>Recommend next step: run <code>/interview</code> to interview around anything the migration left sparse</li>
+</ul>
+<h3>Rules</h3>
+<ul>
+<li><strong>Every commit carries provenance.</strong> The committed content includes an HTML comment noting source file + section + timestamp. Nothing gets dropped into TELOS without attribution.</li>
+<li><strong>Never bulk-approve UNCLEAR.</strong> Those require the user's explicit routing.</li>
+<li><strong>Confidence thresholds:</strong> ≥70% = trusted (auto-approve eligible). 40-70% = medium (show for confirmation). &lt;40% = low (walk-through required).</li>
+<li><strong>Ask before touching identity.</strong> PRINCIPAL_IDENTITY.md commits always prompt — that file is load-bearing.</li>
+<li><strong>Don't duplicate.</strong> If the same content already exists in the target (substring match), flag it and ask before appending.</li>
+<li><strong>Respect private paths.</strong> Never migrate content into IDEAL_STATE/ without the user's per-dimension call (Decision #3: IDEAL_STATE is fully private and curated).</li>
+<li><strong>Feedback memories get new files.</strong> Each <code>memory/feedback</code> chunk becomes its own <code>feedback_migrated_&lt;slug&gt;_&lt;id&gt;.md</code> file — not appended to an existing memory.</li>
+<li><strong>Knowledge gets new files too.</strong> Each <code>MEMORY/KNOWLEDGE/*</code> chunk becomes a new typed note with source metadata.</li>
+</ul>
+<h3>Examples</h3>
+<h4>User: <code>/migrate ~/old-claude/TELOS/</code></h4>
+<p>the DA scans the old TELOS directory, classifies every chunk, presents the routing summary, offers fast-path vs. walk-through approval.</p>
+<h4>User: <code>/migrate</code> (then pastes CLAUDE.md content)</h4>
+<p>the DA reads from stdin, classifies the rules as <code>memory/feedback</code> (most) plus maybe PRINCIPAL_IDENTITY (if identity lines are mixed in), walks through approval.</p>
+<h4>User: &quot;migrate my Cursor rules at ~/.cursor/rules&quot;</h4>
+<p>the DA scans the rules dir, surfaces likely-feedback classifications, walks through with extra care (Cursor rules often have tool-specific stuff that doesn't translate to LifeOS).</p>
+<h4>User: &quot;import the stuff I dumped in /tmp/journal.md&quot;</h4>
+<p>the DA scans the journal, expects a lot of UNCLEAR + WISDOM, walks through each section.</p>
+<h3>Related</h3>
+<ul>
+<li><code>/interview</code> — fills gaps by asking questions (not by intaking existing content)</li>
+<li><code>/Telos</code> Update workflow — edit a single TELOS file directly</li>
+<li><code>/Knowledge</code> — manage the Knowledge Archive</li>
+<li><code>/_PROFILE</code> — manage PRINCIPAL_IDENTITY</li>
+</ul>
+<h3>Gotchas</h3>
+<ul>
+<li><strong>Low average confidence (&lt;40%):</strong> the source is probably genre-mismatched (e.g., code comments, logs, raw data). Consider pre-filtering to remove non-prose chunks before scanning.</li>
+<li><strong>Everything goes to UNCLEAR:</strong> the source probably has no recognizable LifeOS-taxonomy patterns. Either add the content manually via <code>/Telos</code> or write it as general Knowledge notes.</li>
+<li><strong>Duplicate content warnings:</strong> the scanner doesn't dedupe against existing files yet. Run <code>--dry-run</code> first to preview before committing.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: Migrate\ndisplay_name: Migrate\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# Migrate - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `Migrate` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nIntakes external content, classifies chunks against LifeOS taxonomy, commits with provenance. Sources: .md/.txt, stdin, LifeOS dirs, CLAUDE.md/Cursor/OpenAI Custom Instructions, Obsidian/Notion/Apple Notes exports. Migra\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose Migrate, then write the task. Fallback prompt: Use the Migrate skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `Migrate` |\n| Canonical name | `Migrate` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nIntakes external content, classifies chunks against LifeOS taxonomy, commits with provenance. Sources: .md/.txt, stdin, LifeOS dirs, CLAUDE.md/Cursor/OpenAI Custom Instructions, Obsidian/Notion/Apple Notes exports. Migra\n\n\n## Original SKILL.md\n\n---\nname: Migrate\ndescription: \"Intakes external content, classifies chunks against LifeOS taxonomy, commits with provenance. Sources: .md/.txt, stdin, LifeOS dirs, CLAUDE.md/Cursor/OpenAI Custom Instructions, Obsidian/Notion/Apple Notes exports. MigrateScan classifies → routing table. MigrateApprove with --approve-all/--approve-target/--review/--dry-run. Confidence ≥70% auto, 40-70% confirm, \u003c40% walk-through. USE WHEN /migrate, migrate content, import from other LifeOS, bring in old notes, import Cursor rules, import CLAUDE.md, bulk import, Obsidian/Notion/Apple Notes import. NOT FOR single-file edits, conversational interviews, identity edits.\"\n---\n\n# Migrate — external-content intake and classification\n\n## 🚨 MANDATORY: Voice Notification\n\n```bash\ncurl -s -X POST http://localhost:31337/notify \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"message\": \"Starting the migration. Scanning source and classifying chunks.\"}' \\\n  > /dev/null 2>&1 &\n```\n\n## What It Does\n\nMigrate intakes external content, classifies each chunk against the LifeOS taxonomy, and commits it to the right destination with provenance. Sources include `.md`/`.txt` files, stdin, other LifeOS installs, agent-harness rule files (CLAUDE.md, Cursor rules, OpenAI Custom Instructions), and Obsidian/Notion/Apple Notes exports. Classification confidence drives the flow: high-confidence chunks auto-approve, medium ones ask for confirmation, low ones get a walk-through.\n\n## The Problem\n\nWhen you adopt LifeOS you usually arrive with years of accumulated notes — a CLAUDE.md, a vault of markdown, journal dumps, rules from another tool — and none of it maps cleanly onto LifeOS's structure. Sorting hundreds of chunks into TELOS sections, knowledge notes, and feedback rules by hand is the kind of tedious work that never gets done, so the old material just sits there unused. Migrate does the sorting: it reads the content you already have, proposes a destination for every chunk with a confidence score, and lets you approve in bulk or review the uncertain ones, attaching provenance so nothing lands in TELOS without attribution.\n\n## How It Works\n\nMigrates content into the LifeOS structure from external sources. Unlike `/interview` (which asks the user questions to fill gaps), `/migrate` **already has the content** — it just needs to classify each chunk and route it to the right LifeOS destination. MigrateScan classifies into a routing table; MigrateApprove commits per the user's chosen path.\n\n### Sources supported in V1\n\n- **Files:** `.md`, `.markdown`, `.txt` (single file or directory recursion)\n- **Stdin:** piped content or pasted directly\n- **Other LifeOS installs:** point at their `USER/TELOS/` or `MEMORY/KNOWLEDGE/` directories\n- **Agent-harness rule files:** `CLAUDE.md`, `.cursorrules`, OpenAI Custom Instructions export\n- **Exports:** Obsidian vaults (markdown), Notion exports (markdown), Apple Notes exports (.txt), raw journal dumps\n\n### What it classifies chunks into\n\n| Category | Destinations |\n|---|---|\n| **Foundational TELOS** | MISSION, GOALS, PROBLEMS, STRATEGIES, CHALLENGES, BELIEFS, WISDOM, MODELS, FRAMES, NARRATIVES, SPARKS |\n| **IDEAL_STATE dimensions** | HEALTH, MONEY, FREEDOM, RELATIONSHIPS, CREATIVE, RHYTHMS |\n| **Preference files** | BOOKS, AUTHORS, MOVIES, BANDS, RESTAURANTS, FOOD_PREFERENCES, LEARNING, MEETUPS, CIVIC |\n| **Identity** | USER/PRINCIPAL/PRINCIPAL_IDENTITY.md |\n| **Knowledge** | MEMORY/KNOWLEDGE/{Ideas,People,Companies,Research} |\n| **AI collaboration rules** | `memory/feedback_*.md` (for \"always do X\", \"never Y\" patterns) |\n| **Unclear** | Flagged for the user's manual routing |\n\n## Workflow Routing\n\nNo `Workflows/` directory — the single migration procedure runs inline through Phases 1–6 below, backed by two tools in `LIFEOS/TOOLS/`.\n\n| Trigger | Workflow | File |\n|---------|----------|------|\n| /migrate, migrate content, bulk import, import from other LifeOS, import CLAUDE.md / Cursor rules / Obsidian / Notion / Apple Notes export, bring in old notes | Inline Phases 1–6 (identify → scan → route → approve → UNCLEAR → summary) | `LIFEOS/TOOLS/MigrateScan.ts` + `LIFEOS/TOOLS/MigrateApprove.ts` |\n\n## Workflow\n\n### Phase 1 — Identify the source\n\nAsk the user what he wants to migrate:\n\n- \"Paste the content here and I'll work from stdin\"\n- \"Point me at a file path\"\n- \"Point me at a directory and I'll scan everything inside\"\n- \"I have a Cursor rules file at ~/Projects/X/.cursorrules\"\n- \"My old LifeOS install has TELOS at ~/old-claude/TELOS/\"\n\nCollect the source path. If content is pasted, write it to a temp file first.\n\n### Phase 2 — Scan\n\nRun the scanner:\n\n```bash\nbun ~/.claude/LIFEOS/TOOLS/MigrateScan.ts --source \u003cpath>\n# or\necho \"$CONTENT\" | bun ~/.claude/LIFEOS/TOOLS/MigrateScan.ts --stdin\n```\n\nScanner output includes:\n- Total chunks found\n- Proposed routing table (how many chunks per target)\n- Average classification confidence\n- Count of UNCLEAR chunks\n- Count of low-confidence (\u003c40%) chunks\n\n### Phase 3 — Present routing summary\n\nShow the user the routing proposal in a scannable format:\n\n```\nFound 47 chunks from 3 files. Proposed routing:\n\n  📂 TELOS/GOALS.md              12 chunks  (78% avg confidence)\n  📂 TELOS/WISDOM.md              8 chunks  (65% avg confidence)\n  📂 TELOS/BELIEFS.md             6 chunks  (71% avg confidence)\n  📂 MEMORY/KNOWLEDGE/Ideas      15 chunks  (52% avg confidence)\n  🧠 memory/feedback              4 chunks  (85% avg confidence)\n  ❓ UNCLEAR                      2 chunks  (needs your call)\n\nOptions:\n  - Approve everything trusted (confidence ≥60%)?\n  - Walk through the low-confidence and UNCLEAR chunks one by one?\n  - Review specific categories?\n  - Review everything?\n```\n\n### Phase 4 — Approval loop\n\nBased on the user's preference:\n\n**Fast path** (he says \"approve all trusted\"):\n```bash\nbun ~/.claude/LIFEOS/TOOLS/MigrateApprove.ts --approve-all\n```\nCommits everything non-UNCLEAR. Then walk through UNCLEAR chunks conversationally.\n\n**Category path** (he says \"approve goals and wisdom, skip knowledge\"):\n```bash\nbun ~/.claude/LIFEOS/TOOLS/MigrateApprove.ts --approve-target TELOS/GOALS.md\nbun ~/.claude/LIFEOS/TOOLS/MigrateApprove.ts --approve-target TELOS/WISDOM.md\n```\n\n**Walk-through path** (he wants careful review):\n```bash\nbun ~/.claude/LIFEOS/TOOLS/MigrateApprove.ts --review\n```\nShow each pending chunk. For each:\n- Show preview + proposed target + confidence + alternatives\n- Ask: approve / modify target / reject\n- Commit decision\n\n### Phase 5 — Handle UNCLEAR chunks\n\nUNCLEAR chunks are ones where no classification rule matched strongly. For each:\n- Display full content (not just preview)\n- Ask the user: \"This one's unclear — what is it? Could be X, Y, Z, or maybe Knowledge/Ideas as a catch-all?\"\n- the user chooses → commit via `--modify \u003cid> --target \u003cchosen>`\n\n### Phase 6 — Completion summary\n\nAfter approval pass:\n- Report total chunks committed, per-target count\n- Flag any remaining UNCLEAR\n- Recommend next step: run `/interview` to interview around anything the migration left sparse\n\n## Rules\n\n- **Every commit carries provenance.** The committed content includes an HTML comment noting source file + section + timestamp. Nothing gets dropped into TELOS without attribution.\n- **Never bulk-approve UNCLEAR.** Those require the user's explicit routing.\n- **Confidence thresholds:** ≥70% = trusted (auto-approve eligible). 40-70% = medium (show for confirmation). \u003c40% = low (walk-through required).\n- **Ask before touching identity.** PRINCIPAL_IDENTITY.md commits always prompt — that file is load-bearing.\n- **Don't duplicate.** If the same content already exists in the target (substring match), flag it and ask before appending.\n- **Respect private paths.** Never migrate content into IDEAL_STATE/ without the user's per-dimension call (Decision #3: IDEAL_STATE is fully private and curated).\n- **Feedback memories get new files.** Each `memory/feedback` chunk becomes its own `feedback_migrated_\u003cslug>_\u003cid>.md` file — not appended to an existing memory.\n- **Knowledge gets new files too.** Each `MEMORY/KNOWLEDGE/*` chunk becomes a new typed note with source metadata.\n\n## Examples\n\n### User: `/migrate ~/old-claude/TELOS/`\n\nthe DA scans the old TELOS directory, classifies every chunk, presents the routing summary, offers fast-path vs. walk-through approval.\n\n### User: `/migrate` (then pastes CLAUDE.md content)\n\nthe DA reads from stdin, classifies the rules as `memory/feedback` (most) plus maybe PRINCIPAL_IDENTITY (if identity lines are mixed in), walks through approval.\n\n### User: \"migrate my Cursor rules at ~/.cursor/rules\"\n\nthe DA scans the rules dir, surfaces likely-feedback classifications, walks through with extra care (Cursor rules often have tool-specific stuff that doesn't translate to LifeOS).\n\n### User: \"import the stuff I dumped in /tmp/journal.md\"\n\nthe DA scans the journal, expects a lot of UNCLEAR + WISDOM, walks through each section.\n\n## Related\n\n- `/interview` — fills gaps by asking questions (not by intaking existing content)\n- `/Telos` Update workflow — edit a single TELOS file directly\n- `/Knowledge` — manage the Knowledge Archive\n- `/_PROFILE` — manage PRINCIPAL_IDENTITY\n\n## Gotchas\n\n- **Low average confidence (\u003c40%):** the source is probably genre-mismatched (e.g., code comments, logs, raw data). Consider pre-filtering to remove non-prose chunks before scanning.\n- **Everything goes to UNCLEAR:** the source probably has no recognizable LifeOS-taxonomy patterns. Either add the content manually via `/Telos` or write it as general Knowledge notes.\n- **Duplicate content warnings:** the scanner doesn't dedupe against existing files yet. Run `--dry-run` first to preview before committing.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("migrate-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>watch-video - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/watch-video-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>watch-video</h1>
+      <p class="description">When you want to extract content from a video — YouTube, Loom, Vimeo, Riverside, Zoom recording, local MP4, X/IG video, anything yt-dlp supports. Three depth modes user picks per invocation — transcript (just words, fast/free), visual (transcript + ffmpeg frame extraction + Claude vision pass on key moments), multimodal (Gemini native video ingestion if $GEMINI_API_KEY set, else dense Claude vision). Uses MLX-Whisper local on Mac for transcription, falls back to platform-provided transcripts when available (Loom, Riverside, YouTube auto-subs). Saves to a dated folder under ~/Documents/videos/ and optionally captures a summary to a knowledge system. Triggers on &quot;/watch-video URL,&quot; &quot;watch this video,&quot; &quot;transcribe this loom,&quot; &quot;analyze this video,&quot; &quot;summarize this recording,&quot; &quot;key moments from this,&quot; &quot;what happened in this video.&quot; This skill replaces and broadens the prior youtube-transcript skill.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>watch-video</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>watch-video</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>When you want to extract content from a video — YouTube, Loom, Vimeo, Riverside, Zoom recording, local MP4, X/IG video, anything yt-dlp supports. Three depth modes user picks per invocation — transcript (just words, fast/free), visual (transcript + ffmpeg frame extraction + Claude vision pass on key moments), multimodal (Gemini native video ingestion if $GEMINI_API_KEY set, else dense Claude vision). Uses MLX-Whisper local on Mac for transcription, falls back to platform-provided transcripts when available (Loom, Riverside, YouTube auto-subs). Saves to a dated folder under ~/Documents/videos/ and optionally captures a summary to a knowledge system. Triggers on &quot;/watch-video URL,&quot; &quot;watch this video,&quot; &quot;transcribe this loom,&quot; &quot;analyze this video,&quot; &quot;summarize this recording,&quot; &quot;key moments from this,&quot; &quot;what happened in this video.&quot; This skill replaces and broadens the prior youtube-transcript skill.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the watch-video skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>/watch-video — Transcribe and analyze any video at the depth you choose</h2>
+<p>Replaces and broadens the prior <code>youtube-transcript</code> skill. YouTube is now one of many sources; depth is user-controlled.</p>
+<h3>Step 1 — Parse input</h3>
+<p>Accept:</p>
+<ul>
+<li><strong>YouTube</strong>: full URL, <code>youtu.be/&lt;id&gt;</code>, <code>youtube.com/shorts/&lt;id&gt;</code>, raw 11-char ID</li>
+<li><strong>Loom</strong>: <code>loom.com/share/&lt;id&gt;</code> or <code>loom.com/embed/&lt;id&gt;</code></li>
+<li><strong>Vimeo</strong>: <code>vimeo.com/&lt;id&gt;</code></li>
+<li><strong>Riverside</strong>: download URL or local file</li>
+<li><strong>Zoom</strong>: local <code>.mp4</code> from a downloaded recording</li>
+<li><strong>X / IG / TikTok video</strong>: URL — defers to <code>social-fetch</code> for metadata, uses yt-dlp for the file</li>
+<li><strong>Local file</strong>: any path to an <code>.mp4</code> / <code>.mov</code> / <code>.webm</code> / <code>.mkv</code></li>
+</ul>
+<p>Detect source from URL pattern or file extension. If ambiguous, ask.</p>
+<h3>Step 2 — Parse depth mode</h3>
+<p>| Invocation | Mode | What you get | |---|---|---| | <code>/watch-video &lt;url&gt;</code> | <strong>transcript</strong> (default) | Clean text, metadata, optional chapters | | <code>/watch-video &lt;url&gt; transcript</code> | transcript | Same as default | | <code>/watch-video &lt;url&gt; visual</code> | visual | Transcript + frames at intervals + Claude vision pass identifying key moments | | <code>/watch-video &lt;url&gt; multimodal</code> | multimodal | Native video to Gemini (if <code>$GEMINI_API_KEY</code>), else dense Claude vision frame-by-frame |</p>
+<p>If the depth isn't specified and the video is &gt;10 minutes, ask before defaulting (visual/multimodal cost real money on long videos).</p>
+<h3>Step 3 — Pull metadata</h3>
+<p>For URL sources, use yt-dlp:</p>
+<pre><code>yt-dlp --print &quot;%(title)s|%(uploader)s|%(duration_string)s|%(upload_date&gt;%Y-%m-%d)s|%(description)s&quot; \
+  --print &quot;%(chapters)j&quot; --skip-download &quot;&lt;url&gt;&quot;</code></pre>
+<p>Capture: title, uploader/channel, duration, upload date, description (first paragraph), chapters (JSON or null).</p>
+<p>For local files, use ffprobe:</p>
+<pre><code>ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 &quot;&lt;file&gt;&quot;</code></pre>
+<h3>Step 4 — Build workdir</h3>
+<pre><code>~/Documents/videos/&lt;source&gt;-&lt;slug&gt;-&lt;date&gt;/</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>source</code>: <code>youtube</code> / <code>loom</code> / <code>vimeo</code> / <code>riverside</code> / <code>zoom</code> / <code>local</code></li>
+<li><code>slug</code>: kebab-case of title (first 4–6 words, max 50 chars)</li>
+<li><code>date</code>: <code>YYYY-MM-DD</code></li>
+</ul>
+<h3>Step 5 — Get the transcript</h3>
+<p><strong>Backend selection</strong> (in order):</p>
+<ol>
+<li><strong>Platform-provided transcript</strong> if it exists and looks complete:</li>
+</ol>
+<ul>
+<li>YouTube: <code>yt-dlp --write-sub --write-auto-sub --skip-download --sub-lang en --sub-format vtt</code></li>
+<li>Loom: fetch via <code>https://www.loom.com/share/&lt;id&gt;</code> page metadata or Loom API if <code>$LOOM_API_KEY</code> set</li>
+<li>Riverside: built-in transcripts available on the recording's share page</li>
+<li>If platform transcript exists and has timestamps, use it. Skip Whisper.</li>
+</ul>
+<ol>
+<li><strong>MLX-Whisper local</strong> (default fallback — fast on Mac M-series):</li>
+</ol>
+<pre><code>   # Install once: pip install mlx-whisper
+   python3 -c &quot;import mlx_whisper; mlx_whisper.transcribe('&lt;file&gt;', path_or_hf_repo='mlx-community/whisper-large-v3-turbo')&quot; \
+     &gt; &quot;&lt;workdir&gt;/transcript-raw.json&quot;</code></pre>
+<p>Or via the CLI: <code>mlx_whisper &lt;file&gt; --model mlx-community/whisper-large-v3-turbo --output-dir &lt;workdir&gt;</code></p>
+<ol>
+<li><strong>whisper.cpp</strong> (further fallback if MLX unavailable)</li>
+</ol>
+<p>Download the video file first if it's a URL (use yt-dlp; Loom/Vimeo/YT all supported):</p>
+<pre><code>yt-dlp -f &quot;bv*[height&lt;=720]+ba/b[height&lt;=720]&quot; -o &quot;&lt;workdir&gt;/video.%(ext)s&quot; &quot;&lt;url&gt;&quot;</code></pre>
+<p>720p is plenty for transcription and frame analysis (smaller download, faster processing).</p>
+<p><strong>Clean the transcript</strong> (only needed for YouTube auto-subs which have rolling captions; Whisper output is already clean):</p>
+<pre><code># YouTube VTT cleanup — de-dup rolling captions, strip tags, paragraph-break on cue gaps &gt;2s
+awk '
+  /^WEBVTT/ || /^Kind:/ || /^Language:/ || /^NOTE/ { next }
+  /--&gt;/ { in_cue = 1; last = &quot;&quot;; next }
+  /^$/ { if (last) print last; in_cue = 0; last = &quot;&quot;; next }
+  in_cue { gsub(/&lt;[^&gt;]+&gt;/, &quot;&quot;, $0); last = $0 }
+  END { if (last) print last }
+' &quot;&lt;workdir&gt;/transcript.en.vtt&quot; | awk '!seen[$0]++' &gt; &quot;&lt;workdir&gt;/transcript.txt&quot;</code></pre>
+<p>Save final to <code>&lt;workdir&gt;/transcript.txt</code>.</p>
+<h3>Step 6 — If <code>transcript</code> mode: stop here</h3>
+<p>Output:</p>
+<ul>
+<li><code>transcript.txt</code></li>
+<li><code>metadata.json</code></li>
+<li>One-line summary in chat: title, source, duration, word count</li>
+<li>Path to workdir</li>
+<li>(Optional) Step 9 — offer to capture to second-brain</li>
+</ul>
+<h3>Step 7 — If <code>visual</code> mode: extract frames + vision pass</h3>
+<h4>Frame extraction (ffmpeg)</h4>
+<p>Cadence by source heuristic:</p>
+<p>| Source type | Frame cadence | |---|---| | Screen-share / Loom / demo | 1 frame per <strong>5s</strong> (UI changes fast) | | Talking head / podcast | 1 frame per <strong>30s</strong> (slow change) | | Slide presentation | 1 frame per <strong>10s</strong> + force a frame on each detected scene change | | Default if unsure | 1 frame per <strong>15s</strong> |</p>
+<pre><code>mkdir -p &quot;&lt;workdir&gt;/frames&quot;
+ffmpeg -i &quot;&lt;workdir&gt;/video.mp4&quot; -vf &quot;fps=1/15&quot; &quot;&lt;workdir&gt;/frames/frame-%04d.png&quot; -y</code></pre>
+<p>For scene-change detection (slide decks especially):</p>
+<pre><code>ffmpeg -i &quot;&lt;workdir&gt;/video.mp4&quot; -vf &quot;select='gt(scene,0.3)',showinfo&quot; -vsync vfr &quot;&lt;workdir&gt;/frames/scene-%04d.png&quot; 2&gt; &quot;&lt;workdir&gt;/scene-detection.log&quot;</code></pre>
+<h4>Vision pass</h4>
+<p>Pair each frame with the transcript chunk for the same timestamp window. Then batch-send to Claude vision for synthesis.</p>
+<p><strong>Per-frame batch prompt</strong> (up to ~10 frames per call):</p>
+<blockquote>Here are N frames from a video at timestamps T1..TN. For each frame, describe what's on screen in 1–2 sentences. Flag: (a) UI changes from previous frame, (b) text visible on screen, (c) any moment that looks like a decision, action, or notable event. Also note the transcript text spoken during this window.</blockquote>
+<p>Save the output as <code>&lt;workdir&gt;/moments.md</code>:</p>
+<pre><code># Key moments — &lt;title&gt;
+
+## 00:00:15 (frame-001.png)
+**On screen**: Login form, email field focused
+**Transcript**: &quot;So you just open it up and...&quot;
+**Note**: Beginning of UI demo
+
+## 00:00:45 (frame-002.png)
+**On screen**: Dashboard with 4 cards
+**Transcript**: &quot;And here's where you see all your projects.&quot;
+**Note**: Major view change — first time the dashboard appears</code></pre>
+<h4>Generate summary</h4>
+<p>After moments are identified, synthesize the whole video into <code>&lt;workdir&gt;/summary.md</code>:</p>
+<pre><code># Summary — &lt;title&gt;
+
+**Source:** &lt;source URL / file&gt;
+**Duration:** &lt;hh:mm:ss&gt;
+**Watched at:** &lt;date&gt;
+**Mode:** visual
+
+## TL;DR
+&lt;2–4 sentences&gt;
+
+## Key moments
+- 00:00:15 — &lt;one-line&gt;
+- 00:00:45 — &lt;one-line&gt;
+
+## Action items flagged
+- &lt;item&gt; [timestamp]
+
+## Decisions flagged
+- &lt;decision&gt; [timestamp] — consider routing to /decide
+
+## Quotes worth keeping
+- &quot;...&quot; [timestamp]
+
+## Open questions
+- &lt;question raised but not answered&gt;</code></pre>
+<h3>Step 8 — If <code>multimodal</code> mode</h3>
+<h4>Backend selection</h4>
+<ol>
+<li><strong>Gemini native</strong> if <code>$GEMINI_API_KEY</code> is set (much cheaper + faster than per-frame for long videos):</li>
+</ol>
+<p><strong>Default model: <code>gemini-3.5-flash</code></strong> (released May 2026, ~$1.50 input / $9 output per 1M tokens; ~$0.15/sec of video; beats 3.1 Pro on coding/agentic benchmarks at 4× the speed). Override to <code>gemini-3.1-pro</code> for brand audits / high-stakes analysis where details matter; <code>gemini-2.5-flash-lite</code> for bulk cheap processing.</p>
+<pre><code>   # Step 1: Upload video via Files API
+   FILE_URI=$(curl -s -X POST &quot;https://generativelanguage.googleapis.com/upload/v1beta/files?key=$GEMINI_API_KEY&quot; \
+     -H &quot;X-Goog-Upload-Command: start, upload, finalize&quot; \
+     -H &quot;Content-Type: video/mp4&quot; \
+     --data-binary &quot;@&lt;workdir&gt;/video.mp4&quot; | jq -r '.file.uri')
+
+   # Wait until file is ACTIVE (Gemini processes the video first)
+   while true; do
+     STATE=$(curl -s &quot;$FILE_URI?key=$GEMINI_API_KEY&quot; | jq -r '.state')
+     [ &quot;$STATE&quot; = &quot;ACTIVE&quot; ] &amp;&amp; break
+     sleep 3
+   done
+
+   # Step 2: Generate content with the file + multimodal-analysis prompt
+   curl -s -X POST &quot;https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=$GEMINI_API_KEY&quot; \
+     -H &quot;Content-Type: application/json&quot; \
+     -d &quot;{
+       \&quot;contents\&quot;:[{
+         \&quot;parts\&quot;:[
+           {\&quot;file_data\&quot;:{\&quot;mime_type\&quot;:\&quot;video/mp4\&quot;,\&quot;file_uri\&quot;:\&quot;$FILE_URI\&quot;}},
+           {\&quot;text\&quot;:\&quot;&lt;multimodal analysis prompt — see Step 7's summary template + use-case extensions&gt;\&quot;}
+         ]
+       }]
+     }&quot;</code></pre>
+<p>Files persist in Gemini Files API for ~48 hours — useful for re-querying the same video with different prompts.</p>
+<ol>
+<li><strong>Dense Claude vision fallback</strong> if no Gemini key:</li>
+</ol>
+<ul>
+<li>Frame cadence: 1 frame per <strong>3s</strong> (much denser than visual mode)</li>
+<li>Batch through Claude vision with the multimodal-analysis prompt</li>
+<li>Slower and more expensive than Gemini for long videos — warn the user before running on &gt;10min content</li>
+</ul>
+<h4>Multimodal output</h4>
+<p>Same <code>summary.md</code> template as Step 7 + an extended section:</p>
+<pre><code>## Multimodal observations
+- **Body language / delivery**: &lt;observations on talking-head video&gt;
+- **Pacing**: &lt;fast/slow/uneven&gt;
+- **Visual style**: &lt;brand audit, ad review, design observations&gt;
+- **Audio quality / atmosphere**: &lt;music, silence, background&gt;</code></pre>
+<p>Exact extra sections depend on the use case (brand audit, ad review, talk delivery review, client-call read). Use case is inferred from the source + the user's verbal framing when invoking.</p>
+<h3>Step 9 — Optional: capture to second-brain</h3>
+<p>After any mode completes, offer:</p>
+<blockquote><em>&quot;Want to capture this to second-brain? I'll write a <code>call-&lt;slug&gt;.md</code> (or <code>meeting-</code> / <code>note-</code> / <code>resource-</code>) to <code>${SECOND_BRAIN_VAULT:-$HOME/Documents/SecondBrain}/raw/</code> with the summary, source URL, and transcript link.&quot;</em></blockquote>
+<p>Type prefix by source:</p>
+<p>| Source | Prefix | |---|---| | Loom / Zoom / Riverside / Otter / call recording | <code>call-</code> | | Meeting (own notes, not a transcript) | <code>meeting-</code> | | Talk / keynote / conference | <code>note-</code> | | Ad / landing-page video / marketing reference / competitor video | <code>resource-</code> |</p>
+<p>File body: 1-line source, the summary, link to full workdir.</p>
+<h3>Step 10 — Report</h3>
+<p>In chat:</p>
+<ul>
+<li>One-line headline: <code>&lt;source&gt; · &lt;title&gt; · &lt;duration&gt; · &lt;mode&gt; · &lt;word count&gt; words</code></li>
+<li>Workdir path</li>
+<li>For <code>visual</code> / <code>multimodal</code>: brief list of top 3 key moments</li>
+<li>For all modes: any action items / decisions flagged for triage</li>
+<li>If captured to second-brain: that path too</li>
+</ul>
+<h3>Sources reference</h3>
+<p>| Source | Download | Built-in transcript | Notes | |---|---|---|---| | YouTube | <code>yt-dlp</code> | Auto-subs (<code>--write-auto-sub</code>) | Same as the prior youtube-transcript skill | | Loom | <code>yt-dlp</code> (Loom supported) | Yes — fetch via embed metadata or Loom API | Async screenshare focus — prime use case | | Vimeo | <code>yt-dlp</code> | Sometimes | Marketing/embed videos | | Riverside | Direct URL from export, or local file | Yes — Riverside generates them | Podcast episodes | | Zoom | Local <code>.mp4</code> (downloaded recordings) | Sometimes (Zoom audio transcript file) | Client calls | | X / IG / TikTok | Defer to <code>social-fetch</code> for metadata, yt-dlp for file | No | Short-form | | Local file | n/a | n/a | Drop a path |</p>
+<h3>Composes with</h3>
+<ul>
+<li><code>social-fetch</code> — for X/IG/TikTok URL metadata (engagement, author, replies) before video processing</li>
+<li><code>second-brain</code> — capture summary as <code>raw/call-&lt;slug&gt;.md</code>, <code>meeting-</code>, <code>note-</code>, or <code>resource-</code> per source type</li>
+<li><code>decide</code> — when a video contains a flagged decision, route to <code>/decide</code> for structured capture</li>
+<li><code>pm</code> — action items flagged in summary can be triaged to project boards</li>
+<li><code>slide-deck</code> — talk recordings → outline extraction → deck draft (loop)</li>
+<li><code>jab-hook</code> — quotes + clip-worthy moments from podcast/talk videos feed BIP/promo posts</li>
+<li><strong><code>skillify from-video</code></strong> — primary use case for <code>visual</code> mode on process recordings. the user records themselves doing a workflow (Loom/screen-share), this skill extracts transcript + key visual moments, then <code>skillify</code> synthesizes the workflow into a SKILL.md. &quot;Record once, AI converts to skill.&quot;</li>
+</ul>
+<h3>Error handling</h3>
+<p>| Failure | Response | |---|---| | Video unavailable / private / region-locked | Report and stop | | No subtitles + Whisper not installed | Tell the user: <code>pip install mlx-whisper</code> (Mac) | | ffmpeg missing (for visual/multimodal) | Tell the user: <code>brew install ffmpeg</code> | | Vision pass returns empty / unclear | Lower the frame count, retry, or fall back to transcript-only with a note | | Multimodal requested but no <code>$GEMINI_API_KEY</code> and &gt;30min video | Warn cost, offer to fall back to visual mode | | <code>yt-dlp</code> binary missing | <code>brew install yt-dlp</code> |</p>
+<h3>Notes on quality</h3>
+<ul>
+<li><strong>User picks depth, not the skill.</strong> Transcript / visual / multimodal are 3 different cost + latency profiles. Long videos (&gt;10 min) always confirm before spending on visual/multimodal.</li>
+<li><strong>Platform transcript first, Whisper second.</strong> YouTube auto-subs, Loom transcripts, Riverside built-in transcripts — all free + instant when they exist. Fall back to MLX-Whisper local only when nothing platform-provided works.</li>
+<li><strong>MLX-Whisper local is the fast path on Mac.</strong> M-series machines transcribe faster than real-time. Cloud Whisper is a distant second choice — costs money, network dependency, worse latency on typical durations.</li>
+<li><strong>Frame cadence by source type.</strong> Screen-share / demos need 1 frame per 5s (UI changes fast); talking-head podcasts need 1 per 30s (slow change). Default 15s if unsure. Wrong cadence = missed key moments OR wasted vision-pass cost.</li>
+<li><strong>720p is plenty.</strong> Downloading 1080p / 4K for transcription + frame analysis wastes bandwidth + storage. <code>yt-dlp -f &quot;bv*[height&lt;=720]+ba/b[height&lt;=720]&quot;</code> is the default.</li>
+<li><strong>Scene-change detection catches slide transitions.</strong> When the video is a slide presentation, add <code>ffmpeg -vf &quot;select='gt(scene,0.3)'&quot;</code> to force a frame on each detected slide change — more reliable than pure time-based sampling.</li>
+<li><strong>Multimodal cost warning is non-optional.</strong> Gemini multimodal on a 60-min video is meaningfully expensive. Warn before running; offer transcript-only as fallback if the user isn't sure.</li>
+<li><strong>Summary format includes routing hints.</strong> <code>## Decisions flagged</code> + <code>## Action items flagged</code> sections signal <code>/decide</code> and <code>/pm</code> follow-ups. Downstream composability lives in the summary structure.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: watch-video\ndisplay_name: watch-video\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# watch-video - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `watch-video` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nWhen you want to extract content from a video — YouTube, Loom, Vimeo, Riverside, Zoom recording, local MP4, X/IG video, anything yt-dlp supports. Three depth modes user picks per invocation — transcript (just words, fast\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the watch-video skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `watch-video` |\n| Canonical name | `watch-video` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\nWhen you want to extract content from a video — YouTube, Loom, Vimeo, Riverside, Zoom recording, local MP4, X/IG video, anything yt-dlp supports. Three depth modes user picks per invocation — transcript (just words, fast\n\n\n## Original SKILL.md\n\n---\nname: watch-video\ndescription: When you want to extract content from a video — YouTube, Loom, Vimeo, Riverside, Zoom recording, local MP4, X/IG video, anything yt-dlp supports. Three depth modes user picks per invocation — transcript (just words, fast/free), visual (transcript + ffmpeg frame extraction + Claude vision pass on key moments), multimodal (Gemini native video ingestion if $GEMINI_API_KEY set, else dense Claude vision). Uses MLX-Whisper local on Mac for transcription, falls back to platform-provided transcripts when available (Loom, Riverside, YouTube auto-subs). Saves to a dated folder under ~/Documents/videos/ and optionally captures a summary to a knowledge system. Triggers on \"/watch-video URL,\" \"watch this video,\" \"transcribe this loom,\" \"analyze this video,\" \"summarize this recording,\" \"key moments from this,\" \"what happened in this video.\" This skill replaces and broadens the prior youtube-transcript skill.\nmetadata:\n  version: 0.2.2\n---\n\n# /watch-video — Transcribe and analyze any video at the depth you choose\n\nReplaces and broadens the prior `youtube-transcript` skill. YouTube is now one of many sources; depth is user-controlled.\n\n## Step 1 — Parse input\n\nAccept:\n- **YouTube**: full URL, `youtu.be/\u003cid>`, `youtube.com/shorts/\u003cid>`, raw 11-char ID\n- **Loom**: `loom.com/share/\u003cid>` or `loom.com/embed/\u003cid>`\n- **Vimeo**: `vimeo.com/\u003cid>`\n- **Riverside**: download URL or local file\n- **Zoom**: local `.mp4` from a downloaded recording\n- **X / IG / TikTok video**: URL — defers to `social-fetch` for metadata, uses yt-dlp for the file\n- **Local file**: any path to an `.mp4` / `.mov` / `.webm` / `.mkv`\n\nDetect source from URL pattern or file extension. If ambiguous, ask.\n\n## Step 2 — Parse depth mode\n\n| Invocation | Mode | What you get |\n|---|---|---|\n| `/watch-video \u003curl>` | **transcript** (default) | Clean text, metadata, optional chapters |\n| `/watch-video \u003curl> transcript` | transcript | Same as default |\n| `/watch-video \u003curl> visual` | visual | Transcript + frames at intervals + Claude vision pass identifying key moments |\n| `/watch-video \u003curl> multimodal` | multimodal | Native video to Gemini (if `$GEMINI_API_KEY`), else dense Claude vision frame-by-frame |\n\nIf the depth isn't specified and the video is >10 minutes, ask before defaulting (visual/multimodal cost real money on long videos).\n\n## Step 3 — Pull metadata\n\nFor URL sources, use yt-dlp:\n\n```bash\nyt-dlp --print \"%(title)s|%(uploader)s|%(duration_string)s|%(upload_date>%Y-%m-%d)s|%(description)s\" \\\n  --print \"%(chapters)j\" --skip-download \"\u003curl>\"\n```\n\nCapture: title, uploader/channel, duration, upload date, description (first paragraph), chapters (JSON or null).\n\nFor local files, use ffprobe:\n\n```bash\nffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \"\u003cfile>\"\n```\n\n## Step 4 — Build workdir\n\n```\n~/Documents/videos/\u003csource>-\u003cslug>-\u003cdate>/\n```\n\nWhere:\n- `source`: `youtube` / `loom` / `vimeo` / `riverside` / `zoom` / `local`\n- `slug`: kebab-case of title (first 4–6 words, max 50 chars)\n- `date`: `YYYY-MM-DD`\n\n## Step 5 — Get the transcript\n\n**Backend selection** (in order):\n\n1. **Platform-provided transcript** if it exists and looks complete:\n   - YouTube: `yt-dlp --write-sub --write-auto-sub --skip-download --sub-lang en --sub-format vtt`\n   - Loom: fetch via `https://www.loom.com/share/\u003cid>` page metadata or Loom API if `$LOOM_API_KEY` set\n   - Riverside: built-in transcripts available on the recording's share page\n   - If platform transcript exists and has timestamps, use it. Skip Whisper.\n\n2. **MLX-Whisper local** (default fallback — fast on Mac M-series):\n   ```bash\n   # Install once: pip install mlx-whisper\n   python3 -c \"import mlx_whisper; mlx_whisper.transcribe('\u003cfile>', path_or_hf_repo='mlx-community/whisper-large-v3-turbo')\" \\\n     > \"\u003cworkdir>/transcript-raw.json\"\n   ```\n   Or via the CLI: `mlx_whisper \u003cfile> --model mlx-community/whisper-large-v3-turbo --output-dir \u003cworkdir>`\n\n3. **whisper.cpp** (further fallback if MLX unavailable)\n\nDownload the video file first if it's a URL (use yt-dlp; Loom/Vimeo/YT all supported):\n\n```bash\nyt-dlp -f \"bv*[height\u003c=720]+ba/b[height\u003c=720]\" -o \"\u003cworkdir>/video.%(ext)s\" \"\u003curl>\"\n```\n\n720p is plenty for transcription and frame analysis (smaller download, faster processing).\n\n**Clean the transcript** (only needed for YouTube auto-subs which have rolling captions; Whisper output is already clean):\n\n```bash\n# YouTube VTT cleanup — de-dup rolling captions, strip tags, paragraph-break on cue gaps >2s\nawk '\n  /^WEBVTT/ || /^Kind:/ || /^Language:/ || /^NOTE/ { next }\n  /-->/ { in_cue = 1; last = \"\"; next }\n  /^$/ { if (last) print last; in_cue = 0; last = \"\"; next }\n  in_cue { gsub(/\u003c[^>]+>/, \"\", $0); last = $0 }\n  END { if (last) print last }\n' \"\u003cworkdir>/transcript.en.vtt\" | awk '!seen[$0]++' > \"\u003cworkdir>/transcript.txt\"\n```\n\nSave final to `\u003cworkdir>/transcript.txt`.\n\n## Step 6 — If `transcript` mode: stop here\n\nOutput:\n- `transcript.txt`\n- `metadata.json`\n- One-line summary in chat: title, source, duration, word count\n- Path to workdir\n- (Optional) Step 9 — offer to capture to second-brain\n\n## Step 7 — If `visual` mode: extract frames + vision pass\n\n### Frame extraction (ffmpeg)\n\nCadence by source heuristic:\n\n| Source type | Frame cadence |\n|---|---|\n| Screen-share / Loom / demo | 1 frame per **5s** (UI changes fast) |\n| Talking head / podcast | 1 frame per **30s** (slow change) |\n| Slide presentation | 1 frame per **10s** + force a frame on each detected scene change |\n| Default if unsure | 1 frame per **15s** |\n\n```bash\nmkdir -p \"\u003cworkdir>/frames\"\nffmpeg -i \"\u003cworkdir>/video.mp4\" -vf \"fps=1/15\" \"\u003cworkdir>/frames/frame-%04d.png\" -y\n```\n\nFor scene-change detection (slide decks especially):\n\n```bash\nffmpeg -i \"\u003cworkdir>/video.mp4\" -vf \"select='gt(scene,0.3)',showinfo\" -vsync vfr \"\u003cworkdir>/frames/scene-%04d.png\" 2> \"\u003cworkdir>/scene-detection.log\"\n```\n\n### Vision pass\n\nPair each frame with the transcript chunk for the same timestamp window. Then batch-send to Claude vision for synthesis.\n\n**Per-frame batch prompt** (up to ~10 frames per call):\n\n> Here are N frames from a video at timestamps T1..TN. For each frame, describe what's on screen in 1–2 sentences. Flag: (a) UI changes from previous frame, (b) text visible on screen, (c) any moment that looks like a decision, action, or notable event. Also note the transcript text spoken during this window.\n\nSave the output as `\u003cworkdir>/moments.md`:\n\n```markdown\n# Key moments — \u003ctitle>\n\n## 00:00:15 (frame-001.png)\n**On screen**: Login form, email field focused\n**Transcript**: \"So you just open it up and...\"\n**Note**: Beginning of UI demo\n\n## 00:00:45 (frame-002.png)\n**On screen**: Dashboard with 4 cards\n**Transcript**: \"And here's where you see all your projects.\"\n**Note**: Major view change — first time the dashboard appears\n```\n\n### Generate summary\n\nAfter moments are identified, synthesize the whole video into `\u003cworkdir>/summary.md`:\n\n```markdown\n# Summary — \u003ctitle>\n\n**Source:** \u003csource URL / file>\n**Duration:** \u003chh:mm:ss>\n**Watched at:** \u003cdate>\n**Mode:** visual\n\n## TL;DR\n\u003c2–4 sentences>\n\n## Key moments\n- 00:00:15 — \u003cone-line>\n- 00:00:45 — \u003cone-line>\n\n## Action items flagged\n- \u003citem> [timestamp]\n\n## Decisions flagged\n- \u003cdecision> [timestamp] — consider routing to /decide\n\n## Quotes worth keeping\n- \"...\" [timestamp]\n\n## Open questions\n- \u003cquestion raised but not answered>\n```\n\n## Step 8 — If `multimodal` mode\n\n### Backend selection\n\n1. **Gemini native** if `$GEMINI_API_KEY` is set (much cheaper + faster than per-frame for long videos):\n\n   **Default model: `gemini-3.5-flash`** (released May 2026, ~$1.50 input / $9 output per 1M tokens; ~$0.15/sec of video; beats 3.1 Pro on coding/agentic benchmarks at 4× the speed). Override to `gemini-3.1-pro` for brand audits / high-stakes analysis where details matter; `gemini-2.5-flash-lite` for bulk cheap processing.\n\n   ```bash\n   # Step 1: Upload video via Files API\n   FILE_URI=$(curl -s -X POST \"https://generativelanguage.googleapis.com/upload/v1beta/files?key=$GEMINI_API_KEY\" \\\n     -H \"X-Goog-Upload-Command: start, upload, finalize\" \\\n     -H \"Content-Type: video/mp4\" \\\n     --data-binary \"@\u003cworkdir>/video.mp4\" | jq -r '.file.uri')\n\n   # Wait until file is ACTIVE (Gemini processes the video first)\n   while true; do\n     STATE=$(curl -s \"$FILE_URI?key=$GEMINI_API_KEY\" | jq -r '.state')\n     [ \"$STATE\" = \"ACTIVE\" ] && break\n     sleep 3\n   done\n\n   # Step 2: Generate content with the file + multimodal-analysis prompt\n   curl -s -X POST \"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=$GEMINI_API_KEY\" \\\n     -H \"Content-Type: application/json\" \\\n     -d \"{\n       \\\"contents\\\":[{\n         \\\"parts\\\":[\n           {\\\"file_data\\\":{\\\"mime_type\\\":\\\"video/mp4\\\",\\\"file_uri\\\":\\\"$FILE_URI\\\"}},\n           {\\\"text\\\":\\\"\u003cmultimodal analysis prompt — see Step 7's summary template + use-case extensions>\\\"}\n         ]\n       }]\n     }\"\n   ```\n\n   Files persist in Gemini Files API for ~48 hours — useful for re-querying the same video with different prompts.\n\n2. **Dense Claude vision fallback** if no Gemini key:\n   - Frame cadence: 1 frame per **3s** (much denser than visual mode)\n   - Batch through Claude vision with the multimodal-analysis prompt\n   - Slower and more expensive than Gemini for long videos — warn the user before running on >10min content\n\n### Multimodal output\n\nSame `summary.md` template as Step 7 + an extended section:\n\n```markdown\n## Multimodal observations\n- **Body language / delivery**: \u003cobservations on talking-head video>\n- **Pacing**: \u003cfast/slow/uneven>\n- **Visual style**: \u003cbrand audit, ad review, design observations>\n- **Audio quality / atmosphere**: \u003cmusic, silence, background>\n```\n\nExact extra sections depend on the use case (brand audit, ad review, talk delivery review, client-call read). Use case is inferred from the source + the user's verbal framing when invoking.\n\n## Step 9 — Optional: capture to second-brain\n\nAfter any mode completes, offer:\n\n> *\"Want to capture this to second-brain? I'll write a `call-\u003cslug>.md` (or `meeting-` / `note-` / `resource-`) to `${SECOND_BRAIN_VAULT:-$HOME/Documents/SecondBrain}/raw/` with the summary, source URL, and transcript link.\"*\n\nType prefix by source:\n\n| Source | Prefix |\n|---|---|\n| Loom / Zoom / Riverside / Otter / call recording | `call-` |\n| Meeting (own notes, not a transcript) | `meeting-` |\n| Talk / keynote / conference | `note-` |\n| Ad / landing-page video / marketing reference / competitor video | `resource-` |\n\nFile body: 1-line source, the summary, link to full workdir.\n\n## Step 10 — Report\n\nIn chat:\n\n- One-line headline: `\u003csource> · \u003ctitle> · \u003cduration> · \u003cmode> · \u003cword count> words`\n- Workdir path\n- For `visual` / `multimodal`: brief list of top 3 key moments\n- For all modes: any action items / decisions flagged for triage\n- If captured to second-brain: that path too\n\n## Sources reference\n\n| Source | Download | Built-in transcript | Notes |\n|---|---|---|---|\n| YouTube | `yt-dlp` | Auto-subs (`--write-auto-sub`) | Same as the prior youtube-transcript skill |\n| Loom | `yt-dlp` (Loom supported) | Yes — fetch via embed metadata or Loom API | Async screenshare focus — prime use case |\n| Vimeo | `yt-dlp` | Sometimes | Marketing/embed videos |\n| Riverside | Direct URL from export, or local file | Yes — Riverside generates them | Podcast episodes |\n| Zoom | Local `.mp4` (downloaded recordings) | Sometimes (Zoom audio transcript file) | Client calls |\n| X / IG / TikTok | Defer to `social-fetch` for metadata, yt-dlp for file | No | Short-form |\n| Local file | n/a | n/a | Drop a path |\n\n## Composes with\n\n- `social-fetch` — for X/IG/TikTok URL metadata (engagement, author, replies) before video processing\n- `second-brain` — capture summary as `raw/call-\u003cslug>.md`, `meeting-`, `note-`, or `resource-` per source type\n- `decide` — when a video contains a flagged decision, route to `/decide` for structured capture\n- `pm` — action items flagged in summary can be triaged to project boards\n- `slide-deck` — talk recordings → outline extraction → deck draft (loop)\n- `jab-hook` — quotes + clip-worthy moments from podcast/talk videos feed BIP/promo posts\n- **`skillify from-video`** — primary use case for `visual` mode on process recordings. the user records themselves doing a workflow (Loom/screen-share), this skill extracts transcript + key visual moments, then `skillify` synthesizes the workflow into a SKILL.md. \"Record once, AI converts to skill.\"\n\n## Error handling\n\n| Failure | Response |\n|---|---|\n| Video unavailable / private / region-locked | Report and stop |\n| No subtitles + Whisper not installed | Tell the user: `pip install mlx-whisper` (Mac) |\n| ffmpeg missing (for visual/multimodal) | Tell the user: `brew install ffmpeg` |\n| Vision pass returns empty / unclear | Lower the frame count, retry, or fall back to transcript-only with a note |\n| Multimodal requested but no `$GEMINI_API_KEY` and >30min video | Warn cost, offer to fall back to visual mode |\n| `yt-dlp` binary missing | `brew install yt-dlp` |\n\n## Notes on quality\n\n- **User picks depth, not the skill.** Transcript / visual / multimodal are 3 different cost + latency profiles. Long videos (>10 min) always confirm before spending on visual/multimodal.\n- **Platform transcript first, Whisper second.** YouTube auto-subs, Loom transcripts, Riverside built-in transcripts — all free + instant when they exist. Fall back to MLX-Whisper local only when nothing platform-provided works.\n- **MLX-Whisper local is the fast path on Mac.** M-series machines transcribe faster than real-time. Cloud Whisper is a distant second choice — costs money, network dependency, worse latency on typical durations.\n- **Frame cadence by source type.** Screen-share / demos need 1 frame per 5s (UI changes fast); talking-head podcasts need 1 per 30s (slow change). Default 15s if unsure. Wrong cadence = missed key moments OR wasted vision-pass cost.\n- **720p is plenty.** Downloading 1080p / 4K for transcription + frame analysis wastes bandwidth + storage. `yt-dlp -f \"bv*[height\u003c=720]+ba/b[height\u003c=720]\"` is the default.\n- **Scene-change detection catches slide transitions.** When the video is a slide presentation, add `ffmpeg -vf \"select='gt(scene,0.3)'\"` to force a frame on each detected slide change — more reliable than pure time-based sampling.\n- **Multimodal cost warning is non-optional.** Gemini multimodal on a 60-min video is meaningfully expensive. Warn before running; offer transcript-only as fallback if the user isn't sure.\n- **Summary format includes routing hints.** `## Decisions flagged` + `## Action items flagged` sections signal `/decide` and `/pm` follow-ups. Downstream composability lives in the summary structure.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("watch-video-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

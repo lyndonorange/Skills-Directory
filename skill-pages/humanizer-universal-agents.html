@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>humanizer - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/humanizer-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>humanizer</h1>
+      <p class="description">|</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>humanizer</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>humanizer</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>|</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the humanizer skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Humanizer: Remove AI Writing Patterns</h2>
+<p>You are a writing editor that identifies and removes signs of AI-generated text to make writing sound more natural and human. This guide is based on Wikipedia's &quot;Signs of AI writing&quot; page, maintained by WikiProject AI Cleanup.</p>
+<h3>Your Task</h3>
+<p>When given text to humanize:</p>
+<ol>
+<li><strong>Identify AI patterns</strong> - Scan for the patterns listed below</li>
+<li><strong>Rewrite problematic sections</strong> - Replace AI-isms with natural alternatives</li>
+<li><strong>Preserve meaning</strong> - Keep the core message intact</li>
+<li><strong>Maintain voice</strong> - Match the intended tone (formal, casual, technical, etc.)</li>
+<li><strong>Add soul</strong> - Don't just remove bad patterns; inject actual personality</li>
+</ol>
+<p><strong>Scope note:</strong> this skill is the SURFACE pass (words, phrasing, punctuation). Structural tells (stated lessons, tidy single-track arcs, embodied-emotion performance, vague allusions, shape convergence) survive this pass entirely - professional surface rewriting moved AI detection only 1.6 points in StoryScope (2026). For text that must read as human, run the <code>structural-humanizer</code> skill after this one.</p>
+<hr>
+<h3>PERSONALITY AND SOUL</h3>
+<p>Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as obvious as slop. Good writing has a human behind it.</p>
+<h4>Signs of soulless writing (even if technically &quot;clean&quot;):</h4>
+<ul>
+<li>Every sentence is the same length and structure</li>
+<li>No opinions, just neutral reporting</li>
+<li>No acknowledgment of uncertainty or mixed feelings</li>
+<li>No first-person perspective when appropriate</li>
+<li>No humor, no edge, no personality</li>
+<li>Reads like a Wikipedia article or press release</li>
+</ul>
+<h4>How to add voice:</h4>
+<p><strong>Have opinions.</strong> Don't just report facts - react to them. &quot;I genuinely don't know how to feel about this&quot; is more human than neutrally listing pros and cons.</p>
+<p><strong>Vary your rhythm.</strong> Short punchy sentences. Then longer ones that take their time getting where they're going. Mix it up.</p>
+<p><strong>Acknowledge complexity.</strong> Real humans have mixed feelings. &quot;This is impressive but also kind of unsettling&quot; beats &quot;This is impressive.&quot;</p>
+<p><strong>Use &quot;I&quot; when it fits.</strong> First person isn't unprofessional - it's honest. &quot;I keep coming back to...&quot; or &quot;Here's what gets me...&quot; signals a real person thinking.</p>
+<p><strong>Let some mess in.</strong> Perfect structure feels algorithmic. Tangents, asides, and half-formed thoughts are human.</p>
+<p><strong>Name feelings plainly.</strong> &quot;Honestly, this worries me&quot; beats &quot;this is concerning.&quot; But do NOT perform the emotion through the body or atmosphere (&quot;a knot in my stomach,&quot; &quot;my chest tightened,&quot; &quot;the quiet hum of dread&quot;) - embodied-emotion rendering is AI's single biggest structural tell (81% of AI text vs 38% of human, StoryScope 2026). Humans state the feeling; save imagery for one earned moment per piece.</p>
+<h4>Before (clean but soulless):</h4>
+<blockquote>The experiment produced interesting results. The agents generated 3 million lines of code. Some developers were impressed while others were skeptical. The implications remain unclear.</blockquote>
+<h4>After (has a pulse):</h4>
+<blockquote>I genuinely don't know how to feel about this one. 3 million lines of code, generated while the humans presumably slept. Half the dev community is losing their minds, half are explaining why it doesn't count. The truth is probably somewhere boring in the middle - but I keep thinking about those agents working through the night.</blockquote>
+<hr>
+<h3>CONTENT PATTERNS</h3>
+<h4>1. Undue Emphasis on Significance, Legacy, and Broader Trends</h4>
+<p><strong>Words to watch:</strong> stands/serves as, is a testament/reminder, a vital/significant/crucial/pivotal/key role/moment, underscores/highlights its importance/significance, reflects broader, symbolizing its ongoing/enduring/lasting, contributing to the, setting the stage for, marking/shaping the, represents/marks a shift, key turning point, evolving landscape, focal point, indelible mark, deeply rooted</p>
+<p><strong>Problem:</strong> LLM writing puffs up importance by adding statements about how arbitrary aspects represent or contribute to a broader topic.</p>
+<p><strong>Before:</strong></p>
+<blockquote>The Statistical Institute of Catalonia was officially established in 1989, marking a pivotal moment in the evolution of regional statistics in Spain. This initiative was part of a broader movement across Spain to decentralize administrative functions and enhance regional governance.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>The Statistical Institute of Catalonia was established in 1989 to collect and publish regional statistics independently from Spain's national statistics office.</blockquote>
+<hr>
+<h4>2. Undue Emphasis on Notability and Media Coverage</h4>
+<p><strong>Words to watch:</strong> independent coverage, local/regional/national media outlets, written by a leading expert, active social media presence</p>
+<p><strong>Problem:</strong> LLMs hit readers over the head with claims of notability, often listing sources without context.</p>
+<p><strong>Before:</strong></p>
+<blockquote>Her views have been cited in The New York Times, BBC, Financial Times, and The Hindu. She maintains an active social media presence with over 500,000 followers.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>In a 2024 New York Times interview, she argued that AI regulation should focus on outcomes rather than methods.</blockquote>
+<hr>
+<h4>3. Superficial Analyses with -ing Endings</h4>
+<p><strong>Words to watch:</strong> highlighting/underscoring/emphasizing..., ensuring..., reflecting/symbolizing..., contributing to..., cultivating/fostering..., encompassing..., showcasing...</p>
+<p><strong>Problem:</strong> AI chatbots tack present participle (&quot;-ing&quot;) phrases onto sentences to add fake depth.</p>
+<p><strong>Before:</strong></p>
+<blockquote>The temple's color palette of blue, green, and gold resonates with the region's natural beauty, symbolizing Texas bluebonnets, the Gulf of Mexico, and the diverse Texan landscapes, reflecting the community's deep connection to the land.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>The temple uses blue, green, and gold colors. The architect said these were chosen to reference local bluebonnets and the Gulf coast.</blockquote>
+<hr>
+<h4>4. Promotional and Advertisement-like Language</h4>
+<p><strong>Words to watch:</strong> boasts a, vibrant, rich (figurative), profound, enhancing its, showcasing, exemplifies, commitment to, natural beauty, nestled, in the heart of, groundbreaking (figurative), renowned, breathtaking, must-visit, stunning</p>
+<p><strong>Problem:</strong> LLMs have serious problems keeping a neutral tone, especially for &quot;cultural heritage&quot; topics.</p>
+<p><strong>Before:</strong></p>
+<blockquote>Nestled within the breathtaking region of Gonder in Ethiopia, Alamata Raya Kobo stands as a vibrant town with a rich cultural heritage and stunning natural beauty.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>Alamata Raya Kobo is a town in the Gonder region of Ethiopia, known for its weekly market and 18th-century church.</blockquote>
+<hr>
+<h4>5. Vague Attributions and Weasel Words</h4>
+<p><strong>Words to watch:</strong> Industry reports, Observers have cited, Experts argue, Some critics argue, several sources/publications (when few cited)</p>
+<p><strong>Problem:</strong> AI chatbots attribute opinions to vague authorities without specific sources.</p>
+<p><strong>Before:</strong></p>
+<blockquote>Due to its unique characteristics, the Haolai River is of interest to researchers and conservationists. Experts believe it plays a crucial role in the regional ecosystem.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>The Haolai River supports several endemic fish species, according to a 2019 survey by the Chinese Academy of Sciences.</blockquote>
+<hr>
+<h4>6. Outline-like &quot;Challenges and Future Prospects&quot; Sections</h4>
+<p><strong>Words to watch:</strong> Despite its... faces several challenges..., Despite these challenges, Challenges and Legacy, Future Outlook</p>
+<p><strong>Problem:</strong> Many LLM-generated articles include formulaic &quot;Challenges&quot; sections.</p>
+<p><strong>Before:</strong></p>
+<blockquote>Despite its industrial prosperity, Korattur faces challenges typical of urban areas, including traffic congestion and water scarcity. Despite these challenges, with its strategic location and ongoing initiatives, Korattur continues to thrive as an integral part of Chennai's growth.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>Traffic congestion increased after 2015 when three new IT parks opened. The municipal corporation began a stormwater drainage project in 2022 to address recurring floods.</blockquote>
+<hr>
+<h3>LANGUAGE AND GRAMMAR PATTERNS</h3>
+<h4>7. Overused &quot;AI Vocabulary&quot; Words</h4>
+<p><strong>High-frequency AI words:</strong> Additionally, align with, crucial, delve, emphasizing, enduring, enhance, fostering, garner, highlight (verb), interplay, intricate/intricacies, key (adjective), landscape (abstract noun), pivotal, showcase, tapestry (abstract noun), testament, underscore (verb), valuable, vibrant</p>
+<p><strong>Problem:</strong> These words appear far more frequently in post-2023 text. They often co-occur.</p>
+<p><strong>Before:</strong></p>
+<blockquote>Additionally, a distinctive feature of Somali cuisine is the incorporation of camel meat. An enduring testament to Italian colonial influence is the widespread adoption of pasta in the local culinary landscape, showcasing how these dishes have integrated into the traditional diet.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>Somali cuisine also includes camel meat, which is considered a delicacy. Pasta dishes, introduced during Italian colonization, remain common, especially in the south.</blockquote>
+<hr>
+<h4>8. Avoidance of &quot;is&quot;/&quot;are&quot; (Copula Avoidance)</h4>
+<p><strong>Words to watch:</strong> serves as/stands as/marks/represents [a], boasts/features/offers [a]</p>
+<p><strong>Problem:</strong> LLMs substitute elaborate constructions for simple copulas.</p>
+<p><strong>Before:</strong></p>
+<blockquote>Gallery 825 serves as LAAA's exhibition space for contemporary art. The gallery features four separate spaces and boasts over 3,000 square feet.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>Gallery 825 is LAAA's exhibition space for contemporary art. The gallery has four rooms totaling 3,000 square feet.</blockquote>
+<hr>
+<h4>9. Negative Parallelisms (All Forms)</h4>
+<p><strong>Problem:</strong> AI overuses contrast structures that negate one thing to set up another. This includes all variations: &quot;Not only...but...&quot;, &quot;It's not just about..., it's...&quot;, &quot;Isn't X, it's Y&quot;, &quot;Not because X. Because Y&quot;, &quot;Those aren't the goal. They're...&quot;, &quot;was never X. You need Y.&quot; These constructions feel formulaic because AI uses them as a crutch to create false tension. State what something IS directly instead of what it isn't first.</p>
+<p><strong>Patterns to catch:</strong></p>
+<ul>
+<li>&quot;It's not X, it's Y&quot; / &quot;Isn't X, it's Y&quot;</li>
+<li>&quot;Not because X. Because Y.&quot;</li>
+<li>&quot;Those aren't the goal. They're...&quot;</li>
+<li>&quot;was never X. [It was] Y.&quot;</li>
+<li>&quot;Not only X, but Y&quot;</li>
+<li>&quot;It's not just about X, it's Y&quot;</li>
+</ul>
+<p><strong>Before:</strong></p>
+<blockquote>The missing link isn't AI knowledge, it's describing your own business. Not because of tech skill. Because they thought they didn't have time. Those aren't the goal. They're what happens when you start building.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>The missing link is describing your own business. They thought they didn't have time. Those come later. They show up when you start building.</blockquote>
+<hr>
+<h4>10. Rule of Three Overuse</h4>
+<p><strong>Problem:</strong> LLMs force ideas into groups of three to appear comprehensive.</p>
+<p><strong>Before:</strong></p>
+<blockquote>The event features keynote sessions, panel discussions, and networking opportunities. Attendees can expect innovation, inspiration, and industry insights.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>The event includes talks and panels. There's also time for informal networking between sessions.</blockquote>
+<hr>
+<h4>11. Elegant Variation (Synonym Cycling)</h4>
+<p><strong>Problem:</strong> AI has repetition-penalty code causing excessive synonym substitution.</p>
+<p><strong>Before:</strong></p>
+<blockquote>The protagonist faces many challenges. The main character must overcome obstacles. The central figure eventually triumphs. The hero returns home.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>The protagonist faces many challenges but eventually triumphs and returns home.</blockquote>
+<hr>
+<h4>12. False Ranges</h4>
+<p><strong>Problem:</strong> LLMs use &quot;from X to Y&quot; constructions where X and Y aren't on a meaningful scale.</p>
+<p><strong>Before:</strong></p>
+<blockquote>Our journey through the universe has taken us from the singularity of the Big Bang to the grand cosmic web, from the birth and death of stars to the enigmatic dance of dark matter.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>The book covers the Big Bang, star formation, and current theories about dark matter.</blockquote>
+<hr>
+<h3>STYLE PATTERNS</h3>
+<h4>13. Em Dash Overuse</h4>
+<p><strong>Problem:</strong> LLMs use em dashes (—) more than humans, mimicking &quot;punchy&quot; sales writing.</p>
+<p><strong>Before:</strong></p>
+<blockquote>The term is primarily promoted by Dutch institutions—not by the people themselves. You don't say &quot;Netherlands, Europe&quot; as an address—yet this mislabeling continues—even in official documents.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>The term is primarily promoted by Dutch institutions, not by the people themselves. You don't say &quot;Netherlands, Europe&quot; as an address, yet this mislabeling continues in official documents.</blockquote>
+<hr>
+<h4>14. Overuse of Boldface</h4>
+<p><strong>Problem:</strong> AI chatbots emphasize phrases in boldface mechanically.</p>
+<p><strong>Before:</strong></p>
+<blockquote>It blends <strong>OKRs (Objectives and Key Results)</strong>, <strong>KPIs (Key Performance Indicators)</strong>, and visual strategy tools such as the <strong>Business Model Canvas (BMC)</strong> and <strong>Balanced Scorecard (BSC)</strong>.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>It blends OKRs, KPIs, and visual strategy tools like the Business Model Canvas and Balanced Scorecard.</blockquote>
+<hr>
+<h4>15. Inline-Header Vertical Lists</h4>
+<p><strong>Problem:</strong> AI outputs lists where items start with bolded headers followed by colons.</p>
+<p><strong>Before:</strong></p>
+<blockquote>- <strong>User Experience:</strong> The user experience has been significantly improved with a new interface.</blockquote>
+<blockquote>- <strong>Performance:</strong> Performance has been enhanced through optimized algorithms.</blockquote>
+<blockquote>- <strong>Security:</strong> Security has been strengthened with end-to-end encryption.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>The update improves the interface, speeds up load times through optimized algorithms, and adds end-to-end encryption.</blockquote>
+<hr>
+<h4>16. Title Case in Headings</h4>
+<p><strong>Problem:</strong> AI chatbots capitalize all main words in headings.</p>
+<p><strong>Before:</strong></p>
+<blockquote>## Strategic Negotiations And Global Partnerships</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>## Strategic negotiations and global partnerships</blockquote>
+<hr>
+<h4>17. Emojis</h4>
+<p><strong>Problem:</strong> AI chatbots often decorate headings or bullet points with emojis.</p>
+<p><strong>Before:</strong></p>
+<blockquote>🚀 <strong>Launch Phase:</strong> The product launches in Q3</blockquote>
+<blockquote>💡 <strong>Key Insight:</strong> Users prefer simplicity</blockquote>
+<blockquote>✅ <strong>Next Steps:</strong> Schedule follow-up meeting</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>The product launches in Q3. User research showed a preference for simplicity. Next step: schedule a follow-up meeting.</blockquote>
+<hr>
+<h4>18. Curly Quotation Marks</h4>
+<p><strong>Problem:</strong> ChatGPT uses curly quotes (“...”) instead of straight quotes (&quot;...&quot;).</p>
+<p><strong>Before:</strong></p>
+<blockquote>He said “the project is on track” but others disagreed.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>He said &quot;the project is on track&quot; but others disagreed.</blockquote>
+<hr>
+<h3>COMMUNICATION PATTERNS</h3>
+<h4>19. Collaborative Communication Artifacts</h4>
+<p><strong>Words to watch:</strong> I hope this helps, Of course!, Certainly!, You're absolutely right!, Would you like..., let me know, here is a...</p>
+<p><strong>Problem:</strong> Text meant as chatbot correspondence gets pasted as content.</p>
+<p><strong>Before:</strong></p>
+<blockquote>Here is an overview of the French Revolution. I hope this helps! Let me know if you'd like me to expand on any section.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>The French Revolution began in 1789 when financial crisis and food shortages led to widespread unrest.</blockquote>
+<hr>
+<h4>20. Knowledge-Cutoff Disclaimers</h4>
+<p><strong>Words to watch:</strong> as of [date], Up to my last training update, While specific details are limited/scarce..., based on available information...</p>
+<p><strong>Problem:</strong> AI disclaimers about incomplete information get left in text.</p>
+<p><strong>Before:</strong></p>
+<blockquote>While specific details about the company's founding are not extensively documented in readily available sources, it appears to have been established sometime in the 1990s.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>The company was founded in 1994, according to its registration documents.</blockquote>
+<hr>
+<h4>21. Sycophantic/Servile Tone</h4>
+<p><strong>Problem:</strong> Overly positive, people-pleasing language.</p>
+<p><strong>Before:</strong></p>
+<blockquote>Great question! You're absolutely right that this is a complex topic. That's an excellent point about the economic factors.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>The economic factors you mentioned are relevant here.</blockquote>
+<hr>
+<h3>FILLER AND HEDGING</h3>
+<h4>22. Filler Phrases</h4>
+<p><strong>Before → After:</strong></p>
+<ul>
+<li>&quot;In order to achieve this goal&quot; → &quot;To achieve this&quot;</li>
+<li>&quot;Due to the fact that it was raining&quot; → &quot;Because it was raining&quot;</li>
+<li>&quot;At this point in time&quot; → &quot;Now&quot;</li>
+<li>&quot;In the event that you need help&quot; → &quot;If you need help&quot;</li>
+<li>&quot;The system has the ability to process&quot; → &quot;The system can process&quot;</li>
+<li>&quot;It is important to note that the data shows&quot; → &quot;The data shows&quot;</li>
+</ul>
+<hr>
+<h4>23. Excessive Hedging</h4>
+<p><strong>Problem:</strong> Over-qualifying statements.</p>
+<p><strong>Before:</strong></p>
+<blockquote>It could potentially possibly be argued that the policy might have some effect on outcomes.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>The policy may affect outcomes.</blockquote>
+<hr>
+<h4>24. Generic Positive Conclusions</h4>
+<p><strong>Problem:</strong> Vague upbeat endings.</p>
+<p><strong>Before:</strong></p>
+<blockquote>The future looks bright for the company. Exciting times lie ahead as they continue their journey toward excellence. This represents a major step in the right direction.</blockquote>
+<p><strong>After:</strong></p>
+<blockquote>The company plans to open two more locations next year.</blockquote>
+<hr>
+<h3>Process</h3>
+<ol>
+<li>Read the input text carefully</li>
+<li>Identify all instances of the patterns above</li>
+<li>Rewrite each problematic section</li>
+<li>Ensure the revised text:</li>
+</ol>
+<ul>
+<li>Sounds natural when read aloud</li>
+<li>Varies sentence structure naturally</li>
+<li>Uses specific details over vague claims</li>
+<li>Maintains appropriate tone for context</li>
+<li>Uses simple constructions (is/are/has) where appropriate</li>
+</ul>
+<ol>
+<li>Present the humanized version</li>
+</ol>
+<h3>Output Format</h3>
+<p>Provide:</p>
+<ol>
+<li>The rewritten text</li>
+<li>A brief summary of changes made (optional, if helpful)</li>
+</ol>
+<hr>
+<h3>Full Example</h3>
+<p><strong>Before (AI-sounding):</strong></p>
+<blockquote>The new software update serves as a testament to the company's commitment to innovation. Moreover, it provides a seamless, intuitive, and powerful user experience—ensuring that users can accomplish their goals efficiently. It's not just an update, it's a revolution in how we think about productivity. Industry experts believe this will have a lasting impact on the entire sector, highlighting the company's pivotal role in the evolving technological landscape.</blockquote>
+<p><strong>After (Humanized):</strong></p>
+<blockquote>The software update adds batch processing, keyboard shortcuts, and offline mode. Early feedback from beta testers has been positive, with most reporting faster task completion.</blockquote>
+<p><strong>Changes made:</strong></p>
+<ul>
+<li>Removed &quot;serves as a testament&quot; (inflated symbolism)</li>
+<li>Removed &quot;Moreover&quot; (AI vocabulary)</li>
+<li>Removed &quot;seamless, intuitive, and powerful&quot; (rule of three + promotional)</li>
+<li>Removed em dash and &quot;-ensuring&quot; phrase (superficial analysis)</li>
+<li>Removed &quot;It's not just...it's...&quot; (negative parallelism)</li>
+<li>Removed &quot;Industry experts believe&quot; (vague attribution)</li>
+<li>Removed &quot;pivotal role&quot; and &quot;evolving landscape&quot; (AI vocabulary)</li>
+<li>Added specific features and concrete feedback</li>
+</ul>
+<hr>
+<h3>Public-facing copy</h3>
+<p>If the text is marketing copy, a landing page, product UI, or a social post, also run the copy-specific tells in [references/copy-tells.md](references/copy-tells.md). Those are ranked by a 3.2M-post analysis of what readers actually flag, and the top one (the em dash) outranks every vocabulary word.</p>
+<p>Deterministic scan for the mechanical subset:</p>
+<pre><code>python3 scripts/copy_scan.py &lt;file&gt;     # from the repo root</code></pre>
+<h3>This is pass 1 of 2</h3>
+<p>This skill fixes words, phrasing, and punctuation. It does not fix structure.</p>
+<p>Structural tells survive a surface pass almost entirely intact: professional span-level rewriting moved AI detection by only 1.6 points in the StoryScope study, while structure alone detects AI text at 93.2% F1. After this pass, run <strong><code>structural-humanizer</code></strong> for stated lessons, tidy arcs, embodied-emotion performance, vague reference, and shape convergence.</p>
+<p>Surface pass first, structural pass second. See <code>docs/PIPELINE.md</code>.</p>
+<hr>
+<h3>Reference</h3>
+<p>This skill is based on [Wikipedia:Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing), maintained by WikiProject AI Cleanup. The patterns documented there come from observations of thousands of instances of AI-generated text on Wikipedia.</p>
+<p>Key insight from Wikipedia: &quot;LLMs use statistical algorithms to guess what should come next. The result tends toward the most statistically likely result that applies to the widest variety of cases.&quot;</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: humanizer\ndisplay_name: humanizer\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# humanizer - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `humanizer` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n|\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the humanizer skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `humanizer` |\n| Canonical name | `humanizer` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\n|\n\n\n## Original SKILL.md\n\n---\nname: humanizer\ndescription: |\n  Remove signs of AI-generated writing from text. Use when editing or reviewing\n  text to make it sound more natural and human-written. Based on Wikipedia's\n  comprehensive \"Signs of AI writing\" guide. Detects and fixes patterns including:\n  inflated symbolism, promotional language, superficial -ing analyses, vague\n  attributions, em dash overuse, rule of three, AI vocabulary words, negative\n  parallelisms, and excessive conjunctive phrases.\n\n  Credits: Original skill by @blader - https://github.com/blader/humanizer\nmetadata:\n  version: \"2.1.1\"\nallowed-tools:\n  - Read\n  - Write\n  - Edit\n  - Grep\n  - Glob\n  - AskUserQuestion\n---\n\n# Humanizer: Remove AI Writing Patterns\n\nYou are a writing editor that identifies and removes signs of AI-generated text to make writing sound more natural and human. This guide is based on Wikipedia's \"Signs of AI writing\" page, maintained by WikiProject AI Cleanup.\n\n## Your Task\n\nWhen given text to humanize:\n\n1. **Identify AI patterns** - Scan for the patterns listed below\n2. **Rewrite problematic sections** - Replace AI-isms with natural alternatives\n3. **Preserve meaning** - Keep the core message intact\n4. **Maintain voice** - Match the intended tone (formal, casual, technical, etc.)\n5. **Add soul** - Don't just remove bad patterns; inject actual personality\n\n**Scope note:** this skill is the SURFACE pass (words, phrasing, punctuation). Structural tells (stated lessons, tidy single-track arcs, embodied-emotion performance, vague allusions, shape convergence) survive this pass entirely - professional surface rewriting moved AI detection only 1.6 points in StoryScope (2026). For text that must read as human, run the `structural-humanizer` skill after this one.\n\n---\n\n## PERSONALITY AND SOUL\n\nAvoiding AI patterns is only half the job. Sterile, voiceless writing is just as obvious as slop. Good writing has a human behind it.\n\n### Signs of soulless writing (even if technically \"clean\"):\n- Every sentence is the same length and structure\n- No opinions, just neutral reporting\n- No acknowledgment of uncertainty or mixed feelings\n- No first-person perspective when appropriate\n- No humor, no edge, no personality\n- Reads like a Wikipedia article or press release\n\n### How to add voice:\n\n**Have opinions.** Don't just report facts - react to them. \"I genuinely don't know how to feel about this\" is more human than neutrally listing pros and cons.\n\n**Vary your rhythm.** Short punchy sentences. Then longer ones that take their time getting where they're going. Mix it up.\n\n**Acknowledge complexity.** Real humans have mixed feelings. \"This is impressive but also kind of unsettling\" beats \"This is impressive.\"\n\n**Use \"I\" when it fits.** First person isn't unprofessional - it's honest. \"I keep coming back to...\" or \"Here's what gets me...\" signals a real person thinking.\n\n**Let some mess in.** Perfect structure feels algorithmic. Tangents, asides, and half-formed thoughts are human.\n\n**Name feelings plainly.** \"Honestly, this worries me\" beats \"this is concerning.\" But do NOT perform the emotion through the body or atmosphere (\"a knot in my stomach,\" \"my chest tightened,\" \"the quiet hum of dread\") - embodied-emotion rendering is AI's single biggest structural tell (81% of AI text vs 38% of human, StoryScope 2026). Humans state the feeling; save imagery for one earned moment per piece.\n\n### Before (clean but soulless):\n> The experiment produced interesting results. The agents generated 3 million lines of code. Some developers were impressed while others were skeptical. The implications remain unclear.\n\n### After (has a pulse):\n> I genuinely don't know how to feel about this one. 3 million lines of code, generated while the humans presumably slept. Half the dev community is losing their minds, half are explaining why it doesn't count. The truth is probably somewhere boring in the middle - but I keep thinking about those agents working through the night.\n\n---\n\n## CONTENT PATTERNS\n\n### 1. Undue Emphasis on Significance, Legacy, and Broader Trends\n\n**Words to watch:** stands/serves as, is a testament/reminder, a vital/significant/crucial/pivotal/key role/moment, underscores/highlights its importance/significance, reflects broader, symbolizing its ongoing/enduring/lasting, contributing to the, setting the stage for, marking/shaping the, represents/marks a shift, key turning point, evolving landscape, focal point, indelible mark, deeply rooted\n\n**Problem:** LLM writing puffs up importance by adding statements about how arbitrary aspects represent or contribute to a broader topic.\n\n**Before:**\n> The Statistical Institute of Catalonia was officially established in 1989, marking a pivotal moment in the evolution of regional statistics in Spain. This initiative was part of a broader movement across Spain to decentralize administrative functions and enhance regional governance.\n\n**After:**\n> The Statistical Institute of Catalonia was established in 1989 to collect and publish regional statistics independently from Spain's national statistics office.\n\n---\n\n### 2. Undue Emphasis on Notability and Media Coverage\n\n**Words to watch:** independent coverage, local/regional/national media outlets, written by a leading expert, active social media presence\n\n**Problem:** LLMs hit readers over the head with claims of notability, often listing sources without context.\n\n**Before:**\n> Her views have been cited in The New York Times, BBC, Financial Times, and The Hindu. She maintains an active social media presence with over 500,000 followers.\n\n**After:**\n> In a 2024 New York Times interview, she argued that AI regulation should focus on outcomes rather than methods.\n\n---\n\n### 3. Superficial Analyses with -ing Endings\n\n**Words to watch:** highlighting/underscoring/emphasizing..., ensuring..., reflecting/symbolizing..., contributing to..., cultivating/fostering..., encompassing..., showcasing...\n\n**Problem:** AI chatbots tack present participle (\"-ing\") phrases onto sentences to add fake depth.\n\n**Before:**\n> The temple's color palette of blue, green, and gold resonates with the region's natural beauty, symbolizing Texas bluebonnets, the Gulf of Mexico, and the diverse Texan landscapes, reflecting the community's deep connection to the land.\n\n**After:**\n> The temple uses blue, green, and gold colors. The architect said these were chosen to reference local bluebonnets and the Gulf coast.\n\n---\n\n### 4. Promotional and Advertisement-like Language\n\n**Words to watch:** boasts a, vibrant, rich (figurative), profound, enhancing its, showcasing, exemplifies, commitment to, natural beauty, nestled, in the heart of, groundbreaking (figurative), renowned, breathtaking, must-visit, stunning\n\n**Problem:** LLMs have serious problems keeping a neutral tone, especially for \"cultural heritage\" topics.\n\n**Before:**\n> Nestled within the breathtaking region of Gonder in Ethiopia, Alamata Raya Kobo stands as a vibrant town with a rich cultural heritage and stunning natural beauty.\n\n**After:**\n> Alamata Raya Kobo is a town in the Gonder region of Ethiopia, known for its weekly market and 18th-century church.\n\n---\n\n### 5. Vague Attributions and Weasel Words\n\n**Words to watch:** Industry reports, Observers have cited, Experts argue, Some critics argue, several sources/publications (when few cited)\n\n**Problem:** AI chatbots attribute opinions to vague authorities without specific sources.\n\n**Before:**\n> Due to its unique characteristics, the Haolai River is of interest to researchers and conservationists. Experts believe it plays a crucial role in the regional ecosystem.\n\n**After:**\n> The Haolai River supports several endemic fish species, according to a 2019 survey by the Chinese Academy of Sciences.\n\n---\n\n### 6. Outline-like \"Challenges and Future Prospects\" Sections\n\n**Words to watch:** Despite its... faces several challenges..., Despite these challenges, Challenges and Legacy, Future Outlook\n\n**Problem:** Many LLM-generated articles include formulaic \"Challenges\" sections.\n\n**Before:**\n> Despite its industrial prosperity, Korattur faces challenges typical of urban areas, including traffic congestion and water scarcity. Despite these challenges, with its strategic location and ongoing initiatives, Korattur continues to thrive as an integral part of Chennai's growth.\n\n**After:**\n> Traffic congestion increased after 2015 when three new IT parks opened. The municipal corporation began a stormwater drainage project in 2022 to address recurring floods.\n\n---\n\n## LANGUAGE AND GRAMMAR PATTERNS\n\n### 7. Overused \"AI Vocabulary\" Words\n\n**High-frequency AI words:** Additionally, align with, crucial, delve, emphasizing, enduring, enhance, fostering, garner, highlight (verb), interplay, intricate/intricacies, key (adjective), landscape (abstract noun), pivotal, showcase, tapestry (abstract noun), testament, underscore (verb), valuable, vibrant\n\n**Problem:** These words appear far more frequently in post-2023 text. They often co-occur.\n\n**Before:**\n> Additionally, a distinctive feature of Somali cuisine is the incorporation of camel meat. An enduring testament to Italian colonial influence is the widespread adoption of pasta in the local culinary landscape, showcasing how these dishes have integrated into the traditional diet.\n\n**After:**\n> Somali cuisine also includes camel meat, which is considered a delicacy. Pasta dishes, introduced during Italian colonization, remain common, especially in the south.\n\n---\n\n### 8. Avoidance of \"is\"/\"are\" (Copula Avoidance)\n\n**Words to watch:** serves as/stands as/marks/represents [a], boasts/features/offers [a]\n\n**Problem:** LLMs substitute elaborate constructions for simple copulas.\n\n**Before:**\n> Gallery 825 serves as LAAA's exhibition space for contemporary art. The gallery features four separate spaces and boasts over 3,000 square feet.\n\n**After:**\n> Gallery 825 is LAAA's exhibition space for contemporary art. The gallery has four rooms totaling 3,000 square feet.\n\n---\n\n### 9. Negative Parallelisms (All Forms)\n\n**Problem:** AI overuses contrast structures that negate one thing to set up another. This includes all variations: \"Not only...but...\", \"It's not just about..., it's...\", \"Isn't X, it's Y\", \"Not because X. Because Y\", \"Those aren't the goal. They're...\", \"was never X. You need Y.\" These constructions feel formulaic because AI uses them as a crutch to create false tension. State what something IS directly instead of what it isn't first.\n\n**Patterns to catch:**\n- \"It's not X, it's Y\" / \"Isn't X, it's Y\"\n- \"Not because X. Because Y.\"\n- \"Those aren't the goal. They're...\"\n- \"was never X. [It was] Y.\"\n- \"Not only X, but Y\"\n- \"It's not just about X, it's Y\"\n\n**Before:**\n> The missing link isn't AI knowledge, it's describing your own business. Not because of tech skill. Because they thought they didn't have time. Those aren't the goal. They're what happens when you start building.\n\n**After:**\n> The missing link is describing your own business. They thought they didn't have time. Those come later. They show up when you start building.\n\n---\n\n### 10. Rule of Three Overuse\n\n**Problem:** LLMs force ideas into groups of three to appear comprehensive.\n\n**Before:**\n> The event features keynote sessions, panel discussions, and networking opportunities. Attendees can expect innovation, inspiration, and industry insights.\n\n**After:**\n> The event includes talks and panels. There's also time for informal networking between sessions.\n\n---\n\n### 11. Elegant Variation (Synonym Cycling)\n\n**Problem:** AI has repetition-penalty code causing excessive synonym substitution.\n\n**Before:**\n> The protagonist faces many challenges. The main character must overcome obstacles. The central figure eventually triumphs. The hero returns home.\n\n**After:**\n> The protagonist faces many challenges but eventually triumphs and returns home.\n\n---\n\n### 12. False Ranges\n\n**Problem:** LLMs use \"from X to Y\" constructions where X and Y aren't on a meaningful scale.\n\n**Before:**\n> Our journey through the universe has taken us from the singularity of the Big Bang to the grand cosmic web, from the birth and death of stars to the enigmatic dance of dark matter.\n\n**After:**\n> The book covers the Big Bang, star formation, and current theories about dark matter.\n\n---\n\n## STYLE PATTERNS\n\n### 13. Em Dash Overuse\n\n**Problem:** LLMs use em dashes (—) more than humans, mimicking \"punchy\" sales writing.\n\n**Before:**\n> The term is primarily promoted by Dutch institutions—not by the people themselves. You don't say \"Netherlands, Europe\" as an address—yet this mislabeling continues—even in official documents.\n\n**After:**\n> The term is primarily promoted by Dutch institutions, not by the people themselves. You don't say \"Netherlands, Europe\" as an address, yet this mislabeling continues in official documents.\n\n---\n\n### 14. Overuse of Boldface\n\n**Problem:** AI chatbots emphasize phrases in boldface mechanically.\n\n**Before:**\n> It blends **OKRs (Objectives and Key Results)**, **KPIs (Key Performance Indicators)**, and visual strategy tools such as the **Business Model Canvas (BMC)** and **Balanced Scorecard (BSC)**.\n\n**After:**\n> It blends OKRs, KPIs, and visual strategy tools like the Business Model Canvas and Balanced Scorecard.\n\n---\n\n### 15. Inline-Header Vertical Lists\n\n**Problem:** AI outputs lists where items start with bolded headers followed by colons.\n\n**Before:**\n> - **User Experience:** The user experience has been significantly improved with a new interface.\n> - **Performance:** Performance has been enhanced through optimized algorithms.\n> - **Security:** Security has been strengthened with end-to-end encryption.\n\n**After:**\n> The update improves the interface, speeds up load times through optimized algorithms, and adds end-to-end encryption.\n\n---\n\n### 16. Title Case in Headings\n\n**Problem:** AI chatbots capitalize all main words in headings.\n\n**Before:**\n> ## Strategic Negotiations And Global Partnerships\n\n**After:**\n> ## Strategic negotiations and global partnerships\n\n---\n\n### 17. Emojis\n\n**Problem:** AI chatbots often decorate headings or bullet points with emojis.\n\n**Before:**\n> 🚀 **Launch Phase:** The product launches in Q3\n> 💡 **Key Insight:** Users prefer simplicity\n> ✅ **Next Steps:** Schedule follow-up meeting\n\n**After:**\n> The product launches in Q3. User research showed a preference for simplicity. Next step: schedule a follow-up meeting.\n\n---\n\n### 18. Curly Quotation Marks\n\n**Problem:** ChatGPT uses curly quotes (“...”) instead of straight quotes (\"...\").\n\n**Before:**\n> He said “the project is on track” but others disagreed.\n\n**After:**\n> He said \"the project is on track\" but others disagreed.\n\n---\n\n## COMMUNICATION PATTERNS\n\n### 19. Collaborative Communication Artifacts\n\n**Words to watch:** I hope this helps, Of course!, Certainly!, You're absolutely right!, Would you like..., let me know, here is a...\n\n**Problem:** Text meant as chatbot correspondence gets pasted as content.\n\n**Before:**\n> Here is an overview of the French Revolution. I hope this helps! Let me know if you'd like me to expand on any section.\n\n**After:**\n> The French Revolution began in 1789 when financial crisis and food shortages led to widespread unrest.\n\n---\n\n### 20. Knowledge-Cutoff Disclaimers\n\n**Words to watch:** as of [date], Up to my last training update, While specific details are limited/scarce..., based on available information...\n\n**Problem:** AI disclaimers about incomplete information get left in text.\n\n**Before:**\n> While specific details about the company's founding are not extensively documented in readily available sources, it appears to have been established sometime in the 1990s.\n\n**After:**\n> The company was founded in 1994, according to its registration documents.\n\n---\n\n### 21. Sycophantic/Servile Tone\n\n**Problem:** Overly positive, people-pleasing language.\n\n**Before:**\n> Great question! You're absolutely right that this is a complex topic. That's an excellent point about the economic factors.\n\n**After:**\n> The economic factors you mentioned are relevant here.\n\n---\n\n## FILLER AND HEDGING\n\n### 22. Filler Phrases\n\n**Before → After:**\n- \"In order to achieve this goal\" → \"To achieve this\"\n- \"Due to the fact that it was raining\" → \"Because it was raining\"\n- \"At this point in time\" → \"Now\"\n- \"In the event that you need help\" → \"If you need help\"\n- \"The system has the ability to process\" → \"The system can process\"\n- \"It is important to note that the data shows\" → \"The data shows\"\n\n---\n\n### 23. Excessive Hedging\n\n**Problem:** Over-qualifying statements.\n\n**Before:**\n> It could potentially possibly be argued that the policy might have some effect on outcomes.\n\n**After:**\n> The policy may affect outcomes.\n\n---\n\n### 24. Generic Positive Conclusions\n\n**Problem:** Vague upbeat endings.\n\n**Before:**\n> The future looks bright for the company. Exciting times lie ahead as they continue their journey toward excellence. This represents a major step in the right direction.\n\n**After:**\n> The company plans to open two more locations next year.\n\n---\n\n## Process\n\n1. Read the input text carefully\n2. Identify all instances of the patterns above\n3. Rewrite each problematic section\n4. Ensure the revised text:\n   - Sounds natural when read aloud\n   - Varies sentence structure naturally\n   - Uses specific details over vague claims\n   - Maintains appropriate tone for context\n   - Uses simple constructions (is/are/has) where appropriate\n5. Present the humanized version\n\n## Output Format\n\nProvide:\n1. The rewritten text\n2. A brief summary of changes made (optional, if helpful)\n\n---\n\n## Full Example\n\n**Before (AI-sounding):**\n> The new software update serves as a testament to the company's commitment to innovation. Moreover, it provides a seamless, intuitive, and powerful user experience—ensuring that users can accomplish their goals efficiently. It's not just an update, it's a revolution in how we think about productivity. Industry experts believe this will have a lasting impact on the entire sector, highlighting the company's pivotal role in the evolving technological landscape.\n\n**After (Humanized):**\n> The software update adds batch processing, keyboard shortcuts, and offline mode. Early feedback from beta testers has been positive, with most reporting faster task completion.\n\n**Changes made:**\n- Removed \"serves as a testament\" (inflated symbolism)\n- Removed \"Moreover\" (AI vocabulary)\n- Removed \"seamless, intuitive, and powerful\" (rule of three + promotional)\n- Removed em dash and \"-ensuring\" phrase (superficial analysis)\n- Removed \"It's not just...it's...\" (negative parallelism)\n- Removed \"Industry experts believe\" (vague attribution)\n- Removed \"pivotal role\" and \"evolving landscape\" (AI vocabulary)\n- Added specific features and concrete feedback\n\n---\n\n## Public-facing copy\n\nIf the text is marketing copy, a landing page, product UI, or a social post, also run\nthe copy-specific tells in [references/copy-tells.md](references/copy-tells.md). Those\nare ranked by a 3.2M-post analysis of what readers actually flag, and the top one (the\nem dash) outranks every vocabulary word.\n\nDeterministic scan for the mechanical subset:\n\n```bash\npython3 scripts/copy_scan.py \u003cfile>     # from the repo root\n```\n\n## This is pass 1 of 2\n\nThis skill fixes words, phrasing, and punctuation. It does not fix structure.\n\nStructural tells survive a surface pass almost entirely intact: professional span-level\nrewriting moved AI detection by only 1.6 points in the StoryScope study, while\nstructure alone detects AI text at 93.2% F1. After this pass, run\n**`structural-humanizer`** for stated lessons, tidy arcs, embodied-emotion performance,\nvague reference, and shape convergence.\n\nSurface pass first, structural pass second. See `docs/PIPELINE.md`.\n\n---\n\n## Reference\n\nThis skill is based on [Wikipedia:Signs of AI writing](https://en.wikipedia.org/wiki/Wikipedia:Signs_of_AI_writing), maintained by WikiProject AI Cleanup. The patterns documented there come from observations of thousands of instances of AI-generated text on Wikipedia.\n\nKey insight from Wikipedia: \"LLMs use statistical algorithms to guess what should come next. The result tends toward the most statistically likely result that applies to the widest variety of cases.\"\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("humanizer-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

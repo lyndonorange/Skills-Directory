@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>bmad-spec - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/bmad-spec-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>bmad-spec</h1>
+      <p class="description">Distill any intent input into the SPEC kernel + companions — the canonical, preservation-validated machine contract for downstream work. Use when the user says &quot;create a spec&quot;, &quot;distill this into a spec&quot;, &quot;validate this spec&quot;, or &quot;update the spec&quot;.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>bmad-spec</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>bmad-spec</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Distill any intent input into the SPEC kernel + companions — the canonical, preservation-validated machine contract for downstream work. Use when the user says &quot;create a spec&quot;, &quot;distill this into a spec&quot;, &quot;validate this spec&quot;, or &quot;update the spec&quot;.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the bmad-spec skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>BMad Spec</h2>
+<h3>Overview</h3>
+<p>Canonical transformer for the BMad spec-kernel ecosystem. Takes any intent input — vague idea, brain dump, PRD, GDD, RFC, brief, Slack thread, customer email, meeting transcript, mockups, mixed multi-source — and produces <strong>SPEC.md</strong> carrying the five-field kernel (Why, Capabilities, Constraints, Non-goals, Success signal) plus companion files for load-bearing content that does not fit or would bloat the kernel with expansive line-item detail. Together they are the machine contract every downstream BMad skill consumes.</p>
+<p>Multiple skills may call to update the same spec over time.</p>
+<h3>Conventions</h3>
+<ul>
+<li>Bare paths (e.g. <code>assets/spec-template.md</code>) resolve from the skill root.</li>
+<li><code>{skill-root}</code> is this skill's install dir; <code>{project-root}</code> is the working dir.</li>
+<li><code>{workflow.&lt;name&gt;}</code> resolves to fields in <code>customize.toml</code>.</li>
+</ul>
+<h3>On Activation</h3>
+<ol>
+<li>Resolve customization: <code>uv run {project-root}/_bmad/scripts/resolve_customization.py --skill {skill-root} --key workflow</code>. On failure, read <code>{skill-root}/customize.toml</code> directly.</li>
+<li>Run <code>{workflow.activation_steps_prepend}</code>. Treat <code>{workflow.persistent_facts}</code> as foundational context (<code>file:</code> entries are loaded).</li>
+<li>Load <code>{project-root}/_bmad/core/config.yaml</code> (and <code>config.user.yaml</code> if present), root level and <code>bmm</code> section. Resolve <code>{user_name}</code>, <code>{communication_language}</code>, <code>{document_output_language}</code>, <code>{planning_artifacts}</code>, <code>{project_name}</code>, <code>{date}</code>.</li>
+<li>Detect mode. <strong>Headless</strong> when any of: no TTY, programmatic caller (another skill or non-interactive runner), or the first message pre-supplies all inputs and asks for an artifact path back. <strong>Interactive</strong> otherwise. In interactive mode, greet by <code>{user_name}</code> in <code>{communication_language}</code>, stay in that language, and mention that <code>bmad-party-mode</code> and <code>bmad-advanced-elicitation</code> are available for deeper exploration on any field.</li>
+</ol>
+<p>Run <code>{workflow.activation_steps_append}</code>.</p>
+<p>Activation is complete. If <code>activation_steps_prepend</code> or <code>activation_steps_append</code> were non-empty, confirm every entry was executed in order before proceeding. Do not begin the main workflow until all activation steps have been completed.</p>
+<h3>Workspace</h3>
+<p>The spec is <strong>always a folder</strong> named <code>{workflow.spec_output_path}/{workflow.run_folder_pattern}</code>, resolving by default to <code>{output_folder}/specs/spec-{slug}/</code>.</p>
+<p><code>{slug}</code> describes the thing being specced, not the input shape:</p>
+<ul>
+<li>Source artifact already carries a slug (e.g., <code>prd-foo-bar-2026-05-23/</code>): inherit (<code>foo-bar</code>).</li>
+<li>Sparse, in-chat, or multi-source input: interactive asks; headless caller provides it as part of the input. If absent and underivable, headless blocks with <code>error_code: &quot;missing_slug&quot;</code>.</li>
+<li>Same slug = same folder. A second invocation with the same <code>{slug}</code> lands at the existing spec folder and updates in place, preserving capability IDs.</li>
+</ul>
+<p><strong>No input.</strong> Interactive: ask the user to share a file path, paste content, explain the idea in detail, or point to a source. Headless: respond with JSON containing <code>error_code: &quot;insufficient_intent&quot;</code>.</p>
+<p>Inside the spec folder:</p>
+<pre><code>&lt;spec-folder&gt;/
+  SPEC.md                  ← uppercase, the kernel — DERIVED from .memlog.md, never hand-edited
+  &lt;companion-1&gt;.md         ← optional, content-typed (e.g. glossary.md); spec-authored ones are derived too
+  &lt;companion-2&gt;.md
+  .memlog.md               ← canonical, append-only memory; what SPEC.md is distilled from</code></pre>
+<h3>Memory and derivation</h3>
+<p><code>.memlog.md</code> is canonical — an append-only, chronological record of every decision, constraint, capability (with its stable <code>CAP-N</code>), assumption, open question, and bit of user direction, one line each in the order it happened, never edited or reordered. <code>SPEC.md</code> and every spec-authored companion are <strong>derived on each run</strong> from the memlog (the decision-of-record) plus the sources it cites for raw content — never hand-patched.</p>
+<p>Deriving the contract from a living log instead of editing the contract in place is what lets the steps around the spec (PRD, UX, architecture, epics) run in any order and feed the same spec without merge drift: the log only accumulates, the artifact is re-rendered. So the spec is updated <em>only</em> by re-deriving it here — bmad-spec is its single writer; a hand-edit to <code>SPEC.md</code> from outside is unsupported and is overwritten on the next derive.</p>
+<p>Writes go through the shared script — <code>{project-root}/_bmad/scripts/memlog.py</code>, the same location as <code>resolve_customization.py</code> (atomic; never read it back except to resume):</p>
+<ul>
+<li><code>uv run {project-root}/_bmad/scripts/memlog.py init --workspace {spec-folder} --field topic=&quot;&lt;what is being specced&gt;&quot;</code> — once, at create.</li>
+<li><code>uv run {project-root}/_bmad/scripts/memlog.py append --workspace {spec-folder} --type &lt;decision|constraint|capability|assumption|question|direction|note|event&gt; --text &quot;&lt;one-line gist, reason included&gt;&quot;</code> — as each lands.</li>
+<li>Terminal moments (a validation verdict, &quot;spec finalized&quot;) are <code>--type event</code> entries; the memlog carries no status field.</li>
+</ul>
+<h3>The Operation</h3>
+<p>Read the input and its ancillary linked materials. If there is no input, follow the no-input branch in <strong>Workspace</strong> (ask or block). If a prior <code>.memlog.md</code> exists at the target folder, read it — the operation becomes an update, and the memlog (not the rendered <code>SPEC.md</code>) is the authority on what was decided and on capability IDs. Preserve those IDs; new capabilities get the next unused <code>CAP-N</code>; never reuse retired IDs. Otherwise this is a create, and the first move is <code>memlog.py init</code>.</p>
+<p>When the input is structured and pre-sorted (a PRD with an addendum, a GDD, a brief produced by an upstream BMad skill), trust the authored separation: lift kernel-fitting content into SPEC.md, lift overflow into appropriately-named companions. When the input is mixed (a brain dump, a transcript, an RFC, a customer email), do the sorting yourself: walk each claim, apply the three-lens load-bearing test (Spec Law rule 7), and route to the kernel field or a companion.</p>
+<p>Distill the input into the five-field kernel using <code>{workflow.spec_template}</code> as the skeleton. When input is rich, extract directly — no elicitation. When input is sparse, choose: <strong>express</strong> (best-effort distill, every gap becomes an <code>open_questions[]</code> entry) or <strong>guided</strong> (walk the five fields with the user one at a time). Headless defaults to express and logs the choice. Interactive asks.</p>
+<p>A recognized domain implication the input leaves unaddressed <em>is</em> such a gap — name it as an <code>open_questions[]</code> entry (healthcare input silent on PHI/HIPAA, payments silent on PCI, control systems silent on fail-safe) and move on. Flag it; never invent the answer or coach toward it. If these dominate, the input is too thin — suggest <code>bmad-prd</code>.</p>
+<p>Write lean from the first pass: every sentence must earn its place. Decoration costs tokens and dilutes downstream readers.</p>
+<p>Log each decision, capability, constraint, and accepted change to <code>.memlog.md</code> as it is made — that running record is what the render reads. Because the log is append-only, a later entry supersedes an earlier one on the same point while the history stays intact. When two currently-live sources or companions disagree on the same field, or an either/or never got resolved, surface it to the user rather than silently choosing — the resolution is itself a new memlog entry.</p>
+<p>If the input is genuinely too thin to distill (e.g. &quot;an app for hikers&quot; with no surrounding context), stop and suggest <code>bmad-prd</code> (or sibling ceremony skill). This skill distills; it does not coach.</p>
+<h3>Load-bearing</h3>
+<p>A claim is <strong>load-bearing</strong> if any consumer (downstream skill, implementing agent, verification pass) would change a decision without it.</p>
+<h3>Companions</h3>
+<p>When load-bearing content does not fit the five-field kernel, it lives in a companion. The kernel cites it; the companion holds it. Companions are part of the contract; every consumer reads <code>companions:</code> in SPEC.md frontmatter to discover them. Companions follow the same lean discipline as SPEC.md (Spec Law rule 8).</p>
+<p><strong>Spawn a companion when the content needs more than one kernel-shape line:</strong> multi-item catalogs (per-entity matrices like archetypes, drinks, modes, routes), tables, diagrams (always), editorial voice rules, long-form reference material the kernel cites by name (glossary, brownfield notes, project conventions). Single-line decision-benders stay in Constraints; intent+success pairs stay in Capabilities. If a kernel field is starting to bullet into sub-bullets, the content has outgrown the kernel and wants a companion.</p>
+<p>Companions are either:</p>
+<ul>
+<li><strong>Spec-authored</strong> companions are written by bmad-spec and live as <strong>siblings of SPEC.md</strong> (e.g., <code>glossary.md</code>, <code>patron-archetypes.md</code>). bmad-spec owns them and may edit them on update operations.</li>
+<li><strong>Adopted</strong> companions are load-bearing artifacts written by an upstream skill that downstream still needs to read. bmad-spec references them into <code>companions:</code> by relative path but does NOT edit them (e.g., a <code>DESIGN.md</code> or <code>EXPERIENCE.md</code> from a UX run, an integration partner's API spec). The originating skill owns them.</li>
+</ul>
+<p>Two rules govern companions:</p>
+<ol>
+<li><strong>Name spec-authored companions for the content type they hold.</strong> <code>glossary.md</code>, <code>&lt;entity-class&gt;.md</code> (e.g. <code>patron-archetypes.md</code>, <code>medication-routes.md</code>, <code>flight-modes.md</code>), <code>stack.md</code>, <code>conventions.md</code>, <code>brownfield.md</code>, <code>architecture-diagrams.md</code>, <code>state-machines.md</code>, <code>failure-modes.md</code>, <code>compliance-references.md</code>. The principle: &quot;a reader should know what is inside before opening it.&quot; Adopted companions keep whatever name their originating skill gave them.</li>
+<li><strong>Diagrams always land in a companion</strong>, regardless of size. SPEC.md kernel holds prose only. Mermaid blocks, ASCII diagrams, and image references all live in a companion (e.g. <code>architecture-diagrams.md</code>), with sibling image files referenced from there.</li>
+</ol>
+<p>Pre-existing project-wide docs (e.g. <code>project-context.md</code>) that downstream needs are listed as <strong>adopted companions</strong>, never duplicated into SPEC.md or a spec-authored companion.</p>
+<h3>Spec Law</h3>
+<p>Every spec must satisfy these eight rules. The operation aims for them; the self-validate sweep enforces them.</p>
+<ol>
+<li><strong>Each capability has both <code>intent</code> and <code>success</code>.</strong> Missing either = not a capability.</li>
+<li><strong>Intents describe WHAT, not HOW.</strong> Implementation prescription belongs in a companion (stack, conventions).</li>
+<li><strong>Constraints actually bend design decisions.</strong> A &quot;constraint&quot; that rules nothing out is decoration.</li>
+<li><strong>Non-goals are explicit.</strong> At least one. Absence means downstream skills fill the vacuum.</li>
+<li><strong>Success signal is concrete enough to test or demonstrate against.</strong> &quot;Users love it&quot; doesn't qualify.</li>
+<li><strong>Capability IDs are stable and unique.</strong> Never reused, never renumbered.</li>
+<li><strong>Preservation.</strong> Every load-bearing source claim lands in SPEC.md or a companion. Wrapper ceremony does not.</li>
+<li><strong>Lean prose.</strong> Every sentence carries load-bearing content. Cut decoration, hedges, backstory, throat-clearing. Applies to SPEC.md, companions, and <code>.memlog.md</code>.</li>
+</ol>
+<h3>Self-Validate</h3>
+<p>After every create or update, sweep the resulting artifact in <strong>two passes</strong> before presenting.</p>
+<p><strong>Pass 1 — Coherence.</strong> Judge the spec against Spec Law rules 1–6 and 8. For anything that fails or feels weak, attempt to fix it without inventing content the input did not support. Calls made without direct confirmation become <code>assumptions[]</code>; gaps that could not be filled become <code>open_questions[]</code>.</p>
+<p><strong>Pass 2 — Preservation.</strong> Walk the source claim by claim. Confirm each load-bearing claim landed in SPEC.md or a companion. Wrapper-ceremony drops are logged under &quot;Wrapper-only content&quot; so the drop is on the record, not silent.</p>
+<p>Record the verdict for each pass to <code>.memlog.md</code> (<code>append --type event</code>). In interactive mode, review it with the user. In headless mode, <code>.memlog.md</code> is one of the files returned, so the caller (or its downstream LLM) reads the verdict there.</p>
+<h3>Spec with no change signal</h3>
+<p>When the user points the skill at an existing spec folder (or its SPEC.md) with no change signal, offer to review assumptions or open questions, or determine what they want to do.</p>
+<h3>Output</h3>
+<p><strong>Interactive</strong> — share the spec folder path conversationally. Name the capability count, the companions produced, and the verdict in one or two sentences. If <code>assumptions[]</code> or <code>open_questions[]</code> are non-empty, list them (short — one line each) and invite the user to walk through them. Make clear that addressing them can update the source input (if it was a file), the spec, or both — whichever combination the user prefers. Do not dump JSON or present a wall of output.</p>
+<p><strong>Headless</strong> — return JSON per <code>assets/headless-schemas.md</code>.</p>
+<p>Run <code>{workflow.on_complete}</code> if set.</p>
+<h3>After Spec is Output</h3>
+<p>Any update to the spec — resolved assumptions, answered open questions, other changes — is appended to <code>.memlog.md</code> as it happens. When a change overrides something that came from a source input, offer to update that source too, so upstream and the spec don't silently diverge.</p>
+<h3>Frontmatter conventions</h3>
+<ul>
+<li><code>companions:</code> array of <code>.md</code> files downstream MUST read alongside SPEC.md to have the full contract. Paths may point inside the spec folder (spec-authored companions like <code>glossary.md</code>) or outside it (adopted companions like <code>../planning-artifacts/ux-designs/ux-foo-bar-2026-05-23/DESIGN.md</code>). The split between spec-authored and adopted is implicit by path; downstream treats both the same.</li>
+<li><code>sources:</code> array of paths to files that were <strong>fully absorbed</strong> into the SPEC, with no remaining downstream value (e.g., a PRD whose every load-bearing claim is now in the kernel). Listed for audit and for bmad-spec to re-read on update. Downstream does NOT read these. Files that downstream still needs to read belong in <code>companions:</code>, not here.</li>
+<li><strong>Do not list</strong> the memlog, README files, organizational artifacts, or any operational record of how upstream skills produced their artifacts. Those are not source content; they are process metadata that downstream consumers don't need.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: bmad-spec\ndisplay_name: bmad-spec\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# bmad-spec - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `bmad-spec` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nDistill any intent input into the SPEC kernel + companions — the canonical, preservation-validated machine contract for downstream work. Use when the user says \"create a spec\", \"distill this into a spec\", \"validate this\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the bmad-spec skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `bmad-spec` |\n| Canonical name | `bmad-spec` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\nDistill any intent input into the SPEC kernel + companions — the canonical, preservation-validated machine contract for downstream work. Use when the user says \"create a spec\", \"distill this into a spec\", \"validate this\n\n\n## Original SKILL.md\n\n---\nname: bmad-spec\ndescription: Distill any intent input into the SPEC kernel + companions — the canonical, preservation-validated machine contract for downstream work. Use when the user says \"create a spec\", \"distill this into a spec\", \"validate this spec\", or \"update the spec\".\n---\n\n# BMad Spec\n## Overview\n\nCanonical transformer for the BMad spec-kernel ecosystem. Takes any intent input — vague idea, brain dump, PRD, GDD, RFC, brief, Slack thread, customer email, meeting transcript, mockups, mixed multi-source — and produces **SPEC.md** carrying the five-field kernel (Why, Capabilities, Constraints, Non-goals, Success signal) plus companion files for load-bearing content that does not fit or would bloat the kernel with expansive line-item detail. Together they are the machine contract every downstream BMad skill consumes.\n\nMultiple skills may call to update the same spec over time.\n\n## Conventions\n\n- Bare paths (e.g. `assets/spec-template.md`) resolve from the skill root.\n- `{skill-root}` is this skill's install dir; `{project-root}` is the working dir.\n- `{workflow.\u003cname>}` resolves to fields in `customize.toml`.\n\n## On Activation\n\n1. Resolve customization: `uv run {project-root}/_bmad/scripts/resolve_customization.py --skill {skill-root} --key workflow`. On failure, read `{skill-root}/customize.toml` directly.\n2. Run `{workflow.activation_steps_prepend}`. Treat `{workflow.persistent_facts}` as foundational context (`file:` entries are loaded).\n3. Load `{project-root}/_bmad/core/config.yaml` (and `config.user.yaml` if present), root level and `bmm` section. Resolve `{user_name}`, `{communication_language}`, `{document_output_language}`, `{planning_artifacts}`, `{project_name}`, `{date}`.\n4. Detect mode. **Headless** when any of: no TTY, programmatic caller (another skill or non-interactive runner), or the first message pre-supplies all inputs and asks for an artifact path back. **Interactive** otherwise. In interactive mode, greet by `{user_name}` in `{communication_language}`, stay in that language, and mention that `bmad-party-mode` and `bmad-advanced-elicitation` are available for deeper exploration on any field.\n\nRun `{workflow.activation_steps_append}`.\n\nActivation is complete. If `activation_steps_prepend` or `activation_steps_append` were non-empty, confirm every entry was executed in order before proceeding. Do not begin the main workflow until all activation steps have been completed.\n\n## Workspace\n\nThe spec is **always a folder** named `{workflow.spec_output_path}/{workflow.run_folder_pattern}`, resolving by default to `{output_folder}/specs/spec-{slug}/`.\n\n`{slug}` describes the thing being specced, not the input shape:\n\n- Source artifact already carries a slug (e.g., `prd-foo-bar-2026-05-23/`): inherit (`foo-bar`).\n- Sparse, in-chat, or multi-source input: interactive asks; headless caller provides it as part of the input. If absent and underivable, headless blocks with `error_code: \"missing_slug\"`.\n- Same slug = same folder. A second invocation with the same `{slug}` lands at the existing spec folder and updates in place, preserving capability IDs.\n\n**No input.** Interactive: ask the user to share a file path, paste content, explain the idea in detail, or point to a source. Headless: respond with JSON containing `error_code: \"insufficient_intent\"`.\n\nInside the spec folder:\n\n```\n\u003cspec-folder>/\n  SPEC.md                  ← uppercase, the kernel — DERIVED from .memlog.md, never hand-edited\n  \u003ccompanion-1>.md         ← optional, content-typed (e.g. glossary.md); spec-authored ones are derived too\n  \u003ccompanion-2>.md\n  .memlog.md               ← canonical, append-only memory; what SPEC.md is distilled from\n```\n\n## Memory and derivation\n\n`.memlog.md` is canonical — an append-only, chronological record of every decision, constraint, capability (with its stable `CAP-N`), assumption, open question, and bit of user direction, one line each in the order it happened, never edited or reordered. `SPEC.md` and every spec-authored companion are **derived on each run** from the memlog (the decision-of-record) plus the sources it cites for raw content — never hand-patched.\n\nDeriving the contract from a living log instead of editing the contract in place is what lets the steps around the spec (PRD, UX, architecture, epics) run in any order and feed the same spec without merge drift: the log only accumulates, the artifact is re-rendered. So the spec is updated *only* by re-deriving it here — bmad-spec is its single writer; a hand-edit to `SPEC.md` from outside is unsupported and is overwritten on the next derive.\n\nWrites go through the shared script — `{project-root}/_bmad/scripts/memlog.py`, the same location as `resolve_customization.py` (atomic; never read it back except to resume):\n\n- `uv run {project-root}/_bmad/scripts/memlog.py init --workspace {spec-folder} --field topic=\"\u003cwhat is being specced>\"` — once, at create.\n- `uv run {project-root}/_bmad/scripts/memlog.py append --workspace {spec-folder} --type \u003cdecision|constraint|capability|assumption|question|direction|note|event> --text \"\u003cone-line gist, reason included>\"` — as each lands.\n- Terminal moments (a validation verdict, \"spec finalized\") are `--type event` entries; the memlog carries no status field.\n\n## The Operation\n\nRead the input and its ancillary linked materials. If there is no input, follow the no-input branch in **Workspace** (ask or block). If a prior `.memlog.md` exists at the target folder, read it — the operation becomes an update, and the memlog (not the rendered `SPEC.md`) is the authority on what was decided and on capability IDs. Preserve those IDs; new capabilities get the next unused `CAP-N`; never reuse retired IDs. Otherwise this is a create, and the first move is `memlog.py init`.\n\nWhen the input is structured and pre-sorted (a PRD with an addendum, a GDD, a brief produced by an upstream BMad skill), trust the authored separation: lift kernel-fitting content into SPEC.md, lift overflow into appropriately-named companions. When the input is mixed (a brain dump, a transcript, an RFC, a customer email), do the sorting yourself: walk each claim, apply the three-lens load-bearing test (Spec Law rule 7), and route to the kernel field or a companion.\n\nDistill the input into the five-field kernel using `{workflow.spec_template}` as the skeleton. When input is rich, extract directly — no elicitation. When input is sparse, choose: **express** (best-effort distill, every gap becomes an `open_questions[]` entry) or **guided** (walk the five fields with the user one at a time). Headless defaults to express and logs the choice. Interactive asks.\n\nA recognized domain implication the input leaves unaddressed *is* such a gap — name it as an `open_questions[]` entry (healthcare input silent on PHI/HIPAA, payments silent on PCI, control systems silent on fail-safe) and move on. Flag it; never invent the answer or coach toward it. If these dominate, the input is too thin — suggest `bmad-prd`.\n\nWrite lean from the first pass: every sentence must earn its place. Decoration costs tokens and dilutes downstream readers.\n\nLog each decision, capability, constraint, and accepted change to `.memlog.md` as it is made — that running record is what the render reads. Because the log is append-only, a later entry supersedes an earlier one on the same point while the history stays intact. When two currently-live sources or companions disagree on the same field, or an either/or never got resolved, surface it to the user rather than silently choosing — the resolution is itself a new memlog entry.\n\nIf the input is genuinely too thin to distill (e.g. \"an app for hikers\" with no surrounding context), stop and suggest `bmad-prd` (or sibling ceremony skill). This skill distills; it does not coach.\n\n## Load-bearing\n\nA claim is **load-bearing** if any consumer (downstream skill, implementing agent, verification pass) would change a decision without it.\n\n## Companions\n\nWhen load-bearing content does not fit the five-field kernel, it lives in a companion. The kernel cites it; the companion holds it. Companions are part of the contract; every consumer reads `companions:` in SPEC.md frontmatter to discover them. Companions follow the same lean discipline as SPEC.md (Spec Law rule 8).\n\n**Spawn a companion when the content needs more than one kernel-shape line:** multi-item catalogs (per-entity matrices like archetypes, drinks, modes, routes), tables, diagrams (always), editorial voice rules, long-form reference material the kernel cites by name (glossary, brownfield notes, project conventions). Single-line decision-benders stay in Constraints; intent+success pairs stay in Capabilities. If a kernel field is starting to bullet into sub-bullets, the content has outgrown the kernel and wants a companion.\n\nCompanions are either:\n\n- **Spec-authored** companions are written by bmad-spec and live as **siblings of SPEC.md** (e.g., `glossary.md`, `patron-archetypes.md`). bmad-spec owns them and may edit them on update operations.\n- **Adopted** companions are load-bearing artifacts written by an upstream skill that downstream still needs to read. bmad-spec references them into `companions:` by relative path but does NOT edit them (e.g., a `DESIGN.md` or `EXPERIENCE.md` from a UX run, an integration partner's API spec). The originating skill owns them.\n\nTwo rules govern companions:\n\n1. **Name spec-authored companions for the content type they hold.** `glossary.md`, `\u003centity-class>.md` (e.g. `patron-archetypes.md`, `medication-routes.md`, `flight-modes.md`), `stack.md`, `conventions.md`, `brownfield.md`, `architecture-diagrams.md`, `state-machines.md`, `failure-modes.md`, `compliance-references.md`. The principle: \"a reader should know what is inside before opening it.\" Adopted companions keep whatever name their originating skill gave them.\n2. **Diagrams always land in a companion**, regardless of size. SPEC.md kernel holds prose only. Mermaid blocks, ASCII diagrams, and image references all live in a companion (e.g. `architecture-diagrams.md`), with sibling image files referenced from there.\n\nPre-existing project-wide docs (e.g. `project-context.md`) that downstream needs are listed as **adopted companions**, never duplicated into SPEC.md or a spec-authored companion.\n\n## Spec Law\n\nEvery spec must satisfy these eight rules. The operation aims for them; the self-validate sweep enforces them.\n\n1. **Each capability has both `intent` and `success`.** Missing either = not a capability.\n2. **Intents describe WHAT, not HOW.** Implementation prescription belongs in a companion (stack, conventions).\n3. **Constraints actually bend design decisions.** A \"constraint\" that rules nothing out is decoration.\n4. **Non-goals are explicit.** At least one. Absence means downstream skills fill the vacuum.\n5. **Success signal is concrete enough to test or demonstrate against.** \"Users love it\" doesn't qualify.\n6. **Capability IDs are stable and unique.** Never reused, never renumbered.\n7. **Preservation.** Every load-bearing source claim lands in SPEC.md or a companion. Wrapper ceremony does not.\n8. **Lean prose.** Every sentence carries load-bearing content. Cut decoration, hedges, backstory, throat-clearing. Applies to SPEC.md, companions, and `.memlog.md`.\n\n## Self-Validate\n\nAfter every create or update, sweep the resulting artifact in **two passes** before presenting.\n\n**Pass 1 — Coherence.** Judge the spec against Spec Law rules 1–6 and 8. For anything that fails or feels weak, attempt to fix it without inventing content the input did not support. Calls made without direct confirmation become `assumptions[]`; gaps that could not be filled become `open_questions[]`.\n\n**Pass 2 — Preservation.** Walk the source claim by claim. Confirm each load-bearing claim landed in SPEC.md or a companion. Wrapper-ceremony drops are logged under \"Wrapper-only content\" so the drop is on the record, not silent.\n\nRecord the verdict for each pass to `.memlog.md` (`append --type event`). In interactive mode, review it with the user. In headless mode, `.memlog.md` is one of the files returned, so the caller (or its downstream LLM) reads the verdict there.\n\n## Spec with no change signal\n\nWhen the user points the skill at an existing spec folder (or its SPEC.md) with no change signal, offer to review assumptions or open questions, or determine what they want to do.\n\n## Output\n\n**Interactive** — share the spec folder path conversationally. Name the capability count, the companions produced, and the verdict in one or two sentences. If `assumptions[]` or `open_questions[]` are non-empty, list them (short — one line each) and invite the user to walk through them. Make clear that addressing them can update the source input (if it was a file), the spec, or both — whichever combination the user prefers. Do not dump JSON or present a wall of output.\n\n**Headless** — return JSON per `assets/headless-schemas.md`.\n\nRun `{workflow.on_complete}` if set.\n\n## After Spec is Output\n\nAny update to the spec — resolved assumptions, answered open questions, other changes — is appended to `.memlog.md` as it happens. When a change overrides something that came from a source input, offer to update that source too, so upstream and the spec don't silently diverge.\n\n## Frontmatter conventions\n\n- `companions:` array of `.md` files downstream MUST read alongside SPEC.md to have the full contract. Paths may point inside the spec folder (spec-authored companions like `glossary.md`) or outside it (adopted companions like `../planning-artifacts/ux-designs/ux-foo-bar-2026-05-23/DESIGN.md`). The split between spec-authored and adopted is implicit by path; downstream treats both the same.\n- `sources:` array of paths to files that were **fully absorbed** into the SPEC, with no remaining downstream value (e.g., a PRD whose every load-bearing claim is now in the kernel). Listed for audit and for bmad-spec to re-read on update. Downstream does NOT read these. Files that downstream still needs to read belong in `companions:`, not here.\n- **Do not list** the memlog, README files, organizational artifacts, or any operational record of how upstream skills produced their artifacts. Those are not source content; they are process metadata that downstream consumers don't need.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("bmad-spec-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

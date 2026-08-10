@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>mcp-inspector - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/mcp-inspector-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>mcp-inspector</h1>
+      <p class="description">Interpret and use `mcpjam` probe, doctor, OAuth, XAA (Cross-App Access / ID-JAG), apps conformance, tools, resources, and prompts output conservatively against MCP 2025-11-25. Use when interacting with MCP servers, executing tools, triaging findings, performing security reviews, debugging enterprise-managed authorization, deciding whether a CLI finding is real or overstated, or turning inspection output into an engineer-facing report with severity and confidence.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>mcp-inspector</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>mcp-inspector</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Interpret and use `mcpjam` probe, doctor, OAuth, XAA (Cross-App Access / ID-JAG), apps conformance, tools, resources, and prompts output conservatively against MCP 2025-11-25. Use when interacting with MCP servers, executing tools, triaging findings, performing security reviews, debugging enterprise-managed authorization, deciding whether a CLI finding is real or overstated, or turning inspection output into an engineer-facing report with severity and confidence.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose mcp-inspector, then write the task. Fallback prompt: Use the mcp-inspector skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>MCPJam CLI Investigation</h2>
+<p>Use this skill when analyzing MCP server behavior from <code>mcpjam</code> or MCP Inspector output. The goal is to separate:</p>
+<ul>
+<li>real protocol issues</li>
+<li>interoperability warnings</li>
+<li>implementation polish</li>
+<li>mcpjam or SDK artifacts</li>
+</ul>
+<h3>Interactive use</h3>
+<p>When the user wants to connect to a server and use it:</p>
+<ol>
+<li>Probe the server first: <code>server probe --url &lt;url&gt; --quiet --format json</code>.</li>
+</ol>
+<ul>
+<li>Use the probe to learn auth posture, resource metadata, authorization-server metadata, and registration strategies before assuming the connected surface is public.</li>
+</ul>
+<ol>
+<li>If the probe shows <code>oauth_required</code>, authenticate with <code>oauth login --credentials-out &lt;path&gt;</code> or run <code>oauth conformance --credentials-out &lt;path&gt;</code> when the task is specifically to test the OAuth flow.</li>
+<li>Discover tools: <code>tools list --url &lt;url&gt; --credentials-file &lt;path&gt; --quiet --format json</code>.</li>
+</ol>
+<ul>
+<li>Tools with <code>_meta.ui.resourceUri</code>, deprecated <code>_meta[&quot;ui/resourceUri&quot;]</code>, or <code>openai/outputTemplate</code> in <code>toolsMetadata</code> have interactive UI.</li>
+<li>For a specific tool, check <code>toolsMetadata.&lt;toolName&gt;._meta.ui.resourceUri</code>, <code>toolsMetadata.&lt;toolName&gt;._meta[&quot;ui/resourceUri&quot;]</code>, or <code>toolsMetadata.&lt;toolName&gt;[&quot;openai/outputTemplate&quot;]</code>.</li>
+</ul>
+<ol>
+<li>Execute a tool: <code>tools call --url &lt;url&gt; --tool-name &lt;name&gt; --tool-args &lt;json&gt; --credentials-file &lt;path&gt;</code>.</li>
+<li>Execute with UI: <code>tools call --url &lt;url&gt; --tool-name &lt;name&gt; --tool-args &lt;json&gt; --credentials-file &lt;path&gt; --ui</code>.</li>
+</ol>
+<ul>
+<li><code>--ui</code> starts or attaches to the local Inspector backend and renders the completed result in App Builder.</li>
+<li>In non-TTY, agent, and CI runs, <code>--ui</code> does not open a browser by default. Pass <code>--open</code> when the CLI should open App Builder itself.</li>
+<li><code>--open</code> opens a system browser URL; it does not attach an already-controlled automation browser or make fresh tabs hydrate an injected render. Use <code>--no-open</code> when browser automation already opened Inspector App Builder. Use <code>--attach-only</code> when startup, browser opening, and discovery must all be disallowed.</li>
+<li><code>no_active_client</code> means the Inspector backend may be running but no browser client is attached. If manual recovery is needed, use <code>mcpjam inspector open</code>, not <code>mcpjam inspector start</code>.</li>
+<li><code>unknown_server</code> in the root <code>error.code</code> or an <code>inspectorRender.commands.*.error.code</code> means Inspector could not match the requested server. If the message says App Builder is focused on another server, retry with <code>--server-name &lt;focused-name&gt;</code>.</li>
+<li>Treat UI success as <code>inspectorRender.status === &quot;rendered&quot;</code>, not exit code <code>0</code> alone. If the render is <code>skipped</code>, branch on <code>inspectorRender.remediation</code> or the stable root <code>warning.code</code>.</li>
+<li>Use <code>--require-render</code> when the UI render itself is the deliverable and a skipped render should fail the command.</li>
+<li>Do not require external screenshots as proof of render success; iframe/canvas content can defeat browser snapshot tools. Prefer <code>inspectorRender.status</code>, command responses, and snapshot evidence.</li>
+<li>Use <code>--ui</code> only when the tool has UI metadata or the user explicitly asks to see UI.</li>
+</ul>
+<p>When the user asks to investigate, audit, or triage, use the Investigation workflow below.</p>
+<h3>Default stance</h3>
+<ul>
+<li>Treat raw request/response evidence as higher trust than normalized CLI convenience output.</li>
+<li>Separate observations, compliance issues, and security findings. They are related, but not interchangeable.</li>
+<li>Map claims to spec strength: <code>MUST</code> and <code>MUST NOT</code> are strong conformance signals; <code>SHOULD</code> and <code>RECOMMENDED</code> are softer guidance; <code>MAY</code> and optional fields are usually informational.</li>
+<li>Do not label a security finding <code>high</code> unless you can support a concrete attacker benefit or clear breakage path.</li>
+<li>When evidence is ambiguous, lower confidence or use <code>pending</code> before overstating the conclusion.</li>
+</ul>
+<h3>Investigation workflow</h3>
+<ol>
+<li>Start with the narrowest command that actually proves the claim.</li>
+<li>If the command may fail, you want a reusable handoff artifact, or CI should retain evidence, add <code>--debug-out &lt;path&gt;</code> to <code>server probe</code>, <code>server validate</code>, <code>tools call</code>, or <code>oauth login</code>.</li>
+<li>If the probe shows <code>oauth_required</code> and the task is to inspect the server surface, continue with <code>oauth login</code> or another supported auth flow to obtain reusable credentials before judging post-auth behavior. For multi-command connected sessions, use <code>--credentials-out &lt;path&gt;</code> on <code>oauth login</code>, <code>oauth conformance</code>, or <code>oauth conformance-suite</code> to persist tokens and <code>--credentials-file &lt;path&gt;</code> on later commands; read <code>references/cli-surface-notes.md</code> for access-token-only exceptions. When a token is already available (CI, M2M, env var), prefer a credentials file when possible and pass <code>--access-token</code> or <code>--oauth-access-token</code> only as an escape hatch.</li>
+<li>After successful auth, inspect the connected surface with direct commands such as <code>server info</code>, <code>server capabilities</code>, <code>tools list</code>, <code>resources list/read/templates</code>, and <code>prompts list/get</code>.</li>
+<li>Use <code>server doctor --out &lt;path&gt;</code> when you need one breadth-first snapshot instead of several single-purpose command outputs.</li>
+<li>If the output came from <code>server doctor</code> or a <code>--debug-out</code> artifact, split it into primary command evidence, probe evidence, and connected-sweep evidence.</li>
+<li>If the claim is specifically about MCP Apps tool metadata or <code>ui://</code> resources, start with <code>apps conformance --quiet --format json</code> before dropping to <code>tools list</code> or <code>resources read</code>.</li>
+<li>If the claim is about a tool result rendering in Inspector, use <code>tools call --tool-name &lt;name&gt; --tool-args &lt;json|@file|-&gt; --ui --quiet --format json</code>.</li>
+</ol>
+<ul>
+<li>In non-TTY runs, add <code>--open</code> if no Inspector browser client is already attached.</li>
+<li>If browser automation already opened <code>http://127.0.0.1:6274/#app-builder</code>, add <code>--no-open</code>; <code>--open</code> launches a system browser and may not target the automation-controlled client.</li>
+<li>Confirm UI delivery with <code>inspectorRender.status === &quot;rendered&quot;</code>. Treat <code>inspectorRender.remediation</code> and stable skipped-render <code>warning.code</code> values as recovery hints, not MCP tool failures.</li>
+<li>If <code>unknown_server</code> appears in the root error or command errors and the message names the focused server, retry with <code>--server-name &lt;focused-name&gt;</code>.</li>
+<li>Use <code>--require-render</code> when a skipped render should become a hard error instead of a warning.</li>
+</ul>
+<ol>
+<li>If a field may be CLI-added or SDK-normalized, read <code>references/cli-surface-notes.md</code> before concluding anything.</li>
+<li>If the claim depends on MCP semantics, read <code>references/mcp-2025-11-25-interpretation.md</code>.</li>
+<li>If the claim involves Cross-App Access, ID-JAG, or enterprise-managed authorization, read <code>references/xaa-id-jag-interpretation.md</code> before triaging <code>xaa run</code> output.</li>
+<li>If the task involves security review, read <code>references/security-best-practices.md</code> for the full checklist and follow the security review workflow below.</li>
+<li>Write the result using the output contract below.</li>
+</ol>
+<h3>Security review workflow</h3>
+<p>Use this when the task is to assess an MCP server's security posture. All checks use existing CLI commands. No special security tooling is needed. Do not assume every server should require auth.</p>
+<h4>Phase 1: Observe (read-only)</h4>
+<p>Run <code>server probe --url &lt;target&gt; --quiet --format json</code> first. Add <code>oauth metadata</code> or <code>server doctor --out &lt;path&gt;</code> only when they clarify the picture.</p>
+<ul>
+<li>Record an initial auth signal:</li>
+<li><code>full-auth candidate</code>: probe <code>status</code> is <code>oauth_required</code></li>
+<li><code>public-or-mixed candidate</code>: probe <code>status</code> is <code>ready</code></li>
+<li><code>unknown</code>: probe is only <code>reachable</code>, <code>error</code>, or otherwise ambiguous</li>
+<li>Capture discovery facts:</li>
+<li>OAuth metadata URLs and whether they point to public, private, or suspicious targets</li>
+<li><code>scopes_supported</code>, <code>WWW-Authenticate</code>, and PKCE methods</li>
+<li>registration strategies such as <code>dcr</code>, <code>cimd</code>, and <code>preregistered</code></li>
+<li>Record the evidence surface you are trusting. Raw probe/RPC evidence beats doctor summaries or convenience fields.</li>
+<li>Phase 1 can produce observations and compliance notes. By itself it should not produce a <code>high</code> security severity.</li>
+</ul>
+<h4>Phase 2: Provoke (behavior, still mostly unauth)</h4>
+<p>Treat the Phase 1 auth signal as provisional until behavior confirms it.</p>
+<ul>
+<li>For a <code>full-auth candidate</code>:</li>
+<li>run DCR shape probes if DCR is supported</li>
+<li>spot-check representative unauth <code>tools list</code> or <code>tools call</code> behavior when feasible</li>
+<li>check malformed, expired, or obviously wrong-audience token handling without overstating what a rejection proves</li>
+<li>For a <code>public-or-mixed candidate</code>:</li>
+<li>run unauth <code>tools list</code></li>
+<li>classify exposed tools as read-only, write, or side-effect</li>
+<li>call representative public tools unauth</li>
+<li>check whether gated tools fail with a clean auth challenge instead of silent empty data or partial data</li>
+<li>Anonymous tiers, rate limits, or degraded public access are posture notes, not a separate posture class.</li>
+<li>Reclassify to one of <code>no-auth</code>, <code>full-auth</code>, <code>mixed-auth</code>, or <code>unknown</code> once Phase 2 behavior is clear. If Phase 2 contradicts Phase 1, update the posture and rerun the relevant checks instead of forcing the old classification.</li>
+<li>Input-validation hits from Phase 2 cap at <code>medium</code> security severity until Phase 3 proves attacker benefit.</li>
+<li>Design or posture findings can be real security findings in Phase 2, but do not auto-promote them. Document the unsafe behavior, abuse path, and any owner-intent uncertainty before calling them <code>medium</code> or <code>high</code>.</li>
+</ul>
+<h4>Phase 3: Exploit or confirm attacker benefit</h4>
+<p>Use <code>oauth login</code> and the same browser session when the proof depends on consent or cookies.</p>
+<ul>
+<li>Use Phase 3 to turn a plausible concern into a real end-to-end security finding:</li>
+<li>DCR plus authorization flow proof</li>
+<li>redirect URI exact-match bypass proof</li>
+<li>foreign-token acceptance or token passthrough proof</li>
+<li>code, token, or cross-tenant data capture</li>
+<li>Consent skip is one route to <code>high</code>, not the only route. Any demonstrated chain that shows concrete attacker gain can justify <code>high</code>.</li>
+</ul>
+<h4>Phase 4: Inventory blast radius</h4>
+<ul>
+<li>After auth succeeds, decode JWT claims, inspect <code>Mcp-Session-Id</code> with raw logs, and enumerate tools, resources, prompts, scopes, and tenant context.</li>
+<li>Phase 4 is mainly blast-radius calibration. Treat it as context unless you also prove abuse.</li>
+</ul>
+<h4>Security severity calibration</h4>
+<ul>
+<li><code>high</code>: demonstrated attacker benefit or conforming-client breakage with direct evidence</li>
+<li><code>medium</code>: credible security issue with a concrete attack scenario, but end-to-end proof is still partial</li>
+<li><code>low</code>: hardening gap or limited-impact security concern</li>
+<li><code>pending</code>: plausible security concern with a specific missing proof step that could materially raise or lower severity</li>
+<li><code>info</code>: true observation with no credible attacker benefit yet</li>
+</ul>
+<p>Use <code>pending</code> instead of manufacturing a <code>medium</code> or <code>high</code> security severity from a checklist hit.</p>
+<h3>Command choice</h3>
+<ul>
+<li><code>server probe</code>: HTTP transport reachability, initialize behavior, and OAuth discovery hints.</li>
+<li><code>server doctor</code>: combined triage artifact for probe plus connected behavior. Good for breadth, not always sufficient to prove wire-level behavior by itself.</li>
+<li><code>oauth metadata</code>, <code>oauth proxy</code>, <code>oauth debug-proxy</code>: exact endpoint and metadata inspection when conformance output looks surprising.</li>
+<li><code>oauth login</code>: obtain reusable credentials and verify the authenticated MCP path. Use <code>--credentials-out &lt;path&gt;</code> to save tokens to disk (mode 0600) so later connected commands can use <code>--credentials-file &lt;path&gt;</code> without manual token extraction; check <code>references/cli-surface-notes.md</code> for commands that require a non-expired access token. Use this when the goal is to inspect a server that requires OAuth, then follow it with connected commands rather than stopping at the login result.</li>
+<li><code>oauth conformance</code>, <code>oauth conformance-suite</code>: flow-level auth checks. Treat these as targeted probes, not a complete security review. Use <code>--credentials-out &lt;path&gt;</code> when a passing flow should hand credentials to later connected commands; use <code>--credentials-file &lt;path&gt;</code> after that instead of extracting tokens from JSON output. Raw JSON output redacts OAuth secrets by default. When <code>--conformance-checks</code> is enabled, the command can directly probe DCR non-loopback <code>http://</code> redirects, invalid client rejection, authorization-endpoint redirect mismatch handling, invalid bearer-token rejection at the MCP server, and token-endpoint redirect mismatch handling.</li>
+<li><code>xaa run</code>: headless Cross-App Access (ID-JAG) flow against an authorization server and MCP server — mint, redeem via JWT bearer grant, and authenticated MCP initialize. Use when the task involves enterprise-managed authorization or ID-JAG trust debugging. Requires <code>--issuer-base-url</code> to point at an origin publishing the CLI's local signing key (typically <code>mcpjam inspector start</code>); read <code>references/xaa-id-jag-interpretation.md</code> before triaging its output. These are targeted checks for the current ID-JAG draft, not a conformance suite; the negative-test scorecard (tampered ID-JAGs) lives in the Inspector UI, not the CLI.</li>
+<li><code>apps conformance</code>: server-side MCP Apps checks for <code>_meta.ui.resourceUri</code>, <code>ui://</code> resources, <code>resources/read</code>, HTML MIME and payload shape, and <code>_meta.ui</code> metadata. Use this for MCP Apps surface triage.</li>
+<li><code>server info</code>, <code>server capabilities</code>, <code>server validate</code>, <code>server ping</code>, <code>server export</code>: connected behavior after initialization and auth.</li>
+<li><code>tools list</code> and <code>tools call</code>, <code>resources list/read/templates</code>, <code>prompts list/get/list-multi</code>: direct post-connect capability checks. With <code>--ui</code>, <code>tools call</code> renders the completed tool result in Inspector and reports <code>inspectorRender</code> as UI command/render evidence.</li>
+<li>Prefer <code>--quiet --format json</code>. Add <code>--rpc</code> when available if you need request and response evidence rather than a summary. Add <code>--debug-out</code> when you need a failure-safe artifact, not as a replacement for raw evidence.</li>
+<li>Use <code>--reporter junit-xml</code> or <code>--reporter json-summary</code> for CI report artifacts on conformance and diff commands. <code>server validate</code> does not accept <code>--reporter</code>; use <code>--debug-out</code> for validation artifacts. Do not use <code>--format junit-xml</code>; <code>--format</code> is only for raw <code>json</code> or <code>human</code> output.</li>
+<li>For JSON-valued options, prefer <code>@path</code> or <code>-</code> stdin over shell-escaped inline JSON when payloads are generated or contain quotes. For example: <code>mcpjam tools call --url &lt;target&gt; --tool-name &lt;name&gt; --tool-args @params.json --quiet --format json</code>.</li>
+</ul>
+<h3>Output contract</h3>
+<h4>General triage output</h4>
+<p>For non-security tasks, return:</p>
+<ul>
+<li><code>Verdict</code>: <code>real issue</code>, <code>interop warning</code>, <code>implementation polish</code>, or <code>scanner/client artifact</code></li>
+<li><code>Severity</code>: <code>high</code>, <code>medium</code>, <code>low</code>, or <code>info</code></li>
+<li><code>Confidence</code>: <code>high</code>, <code>medium</code>, or <code>low</code></li>
+<li><code>Why it matters</code>: one short paragraph tied to interoperability, security, or user impact</li>
+<li><code>Evidence</code>: the exact CLI behavior that supports the claim</li>
+<li><code>Missing evidence</code>: what would need to be confirmed before raising severity or confidence</li>
+</ul>
+<h4>Security review output</h4>
+<p>For each claimed security-review finding, return:</p>
+<ul>
+<li><code>Verdict</code>: <code>real issue</code>, <code>interop warning</code>, <code>implementation polish</code>, or <code>scanner/client artifact</code></li>
+<li><code>Compliance severity</code>: <code>high</code>, <code>medium</code>, <code>low</code>, or <code>info</code></li>
+<li><code>Security severity</code>: <code>high</code>, <code>medium</code>, <code>low</code>, <code>info</code>, or <code>pending</code></li>
+<li><code>Confidence</code>: <code>high</code>, <code>medium</code>, or <code>low</code></li>
+<li><code>Attack scenario or pending rationale</code>: if <code>Security severity</code> is <code>medium</code> or <code>high</code>, open with 2-3 sentences answering who the attacker is, what they need, and what they gain; if it is <code>pending</code>, say exactly what proof is missing</li>
+<li><code>Verified via</code>: the phase plus exact command or result that supports the claim</li>
+<li><code>Evidence</code>: the exact CLI behavior that supports the claim</li>
+<li><code>Missing evidence</code>: what would need to be confirmed before raising severity or confidence</li>
+</ul>
+<h3>Hard rules</h3>
+<ul>
+<li>Never call <code>toolsMetadata</code> an MCP server field.</li>
+<li>Never use removed app/widget commands for UI rendering. Use <code>tools call --ui</code>; use <code>resources read --resource-uri ui://...</code> for raw resource HTML.</li>
+<li>Never manually orchestrate Inspector API calls when <code>tools call --ui</code> can drive the render.</li>
+<li>Never skip <code>tools list</code> discovery when the user names a server but not a specific tool.</li>
+<li>Never infer prompt support from an empty prompts list unless you have raw RPC evidence that <code>prompts/list</code> was actually sent and answered by the server.</li>
+<li>Never stop at <code>oauth_required</code> when the user asked to inspect the authenticated server surface and the CLI can complete login. Authenticate and continue with post-login commands when feasible.</li>
+<li>Never treat a passing <code>apps conformance</code> result as full SEP-1865 conformance. The current command is server-side only and does not prove host lifecycle, sandbox proxy, or postMessage bridge behavior.</li>
+<li>Never treat missing optional metadata such as <code>outputSchema</code>, content annotations, <code>scopes_supported</code>, or <code>scope</code> hints as a hard failure without a <code>MUST</code>.</li>
+<li>Separate OAuth RFC violations from MCP profile preferences.</li>
+<li>Distinguish &quot;the server correctly rejected a bad request&quot; from &quot;the overall design is secure.&quot;</li>
+<li>Treat <code>--debug-out</code> artifacts as aggregated evidence envelopes, not pure wire captures.</li>
+<li>Never flag missing <code>scopes_supported</code> or missing <code>scope</code> in <code>WWW-Authenticate</code> as a security issue. Both are optional.</li>
+<li>Never claim a server is &quot;secure&quot; based solely on it rejecting one specific bad input. A single negative test does not prove broader security posture.</li>
+<li>Never treat a passing <code>oauth_invalid_token</code> or redirect-mismatch probe as proof that the whole authorization design is secure. Those checks only prove the exact case that was sent.</li>
+<li>Never let a checklist hit assign <code>high</code> security severity by itself.</li>
+<li>JWT <code>aud</code> mismatch is not token passthrough proof unless you show the server accepts a token issued for a different audience or resource, or otherwise misbinds the token.</li>
+<li>Supporting <code>plain</code> PKCE is usually hardening only. It cannot compound with attacker-owned-client DCR flows where the attacker chose the verifier.</li>
+<li>Hostile <code>redirect_uri</code> values are not SSRF unless you show the server fetches them.</li>
+<li>Public unauthenticated access is not itself a finding. Check whether behavior matches advertised posture and whether exposed surfaces are safe by design.</li>
+<li>Anonymous trial or rate-limited access is a posture note, not a separate severity finding.</li>
+<li>When compounding findings, explain the compound attack path. Do not just list unrelated findings and call the combination worse.</li>
+<li>Never triage an <code>xaa run</code> failure against the target server when <code>verify_issuer_publication</code> failed or the error is a bare connection failure with an empty <code>steps</code> array. Those are local issuer-setup problems: <code>--issuer-base-url</code> must serve the CLI's local signing key.</li>
+<li>Never treat <code>not_advertised</code> capability evidence in <code>xaa run</code> output as a failure when redemption succeeded, and never treat advertisement as proof redemption would succeed. Advertisement is evidence; the token-endpoint response is the verdict. <code>unknown</code> (metadata key absent) is weaker evidence than <code>not_advertised</code> (key present without the value) — do not conflate them.</li>
+<li>Never treat <code>idJag.verified: true</code> as proof the authorization server validated the assertion. It is the CLI verifying its own mint against its own issuer.</li>
+<li>Never claim ID-JAG conformance or a secure XAA posture from one completed <code>xaa run</code>. It proves one happy path for one registration strategy.</li>
+<li>Never describe <code>--assertion-format saml</code> as producing a SAML ID-JAG. It changes the identity-assertion leg and the <code>sub_id</code> claim; the ID-JAG is always a JWT. ID-JAG is an active IETF Internet-Draft — anchor MUST/SHOULD claims to the draft revision, not to an RFC.</li>
+<li>Never report <code>[REDACTED]</code> values in <code>xaa run</code> output as missing data, and never ask for un-redacted output. Redaction is by design and survives server-reflected secrets.</li>
+</ul>
+<h3>Reference map</h3>
+<ul>
+<li><code>references/cli-surface-notes.md</code></li>
+</ul>
+<p>Use for command-specific caveats, artifact shapes, local enrichments, merged errors, and normalized empty arrays.</p>
+<ul>
+<li><code>references/mcp-2025-11-25-interpretation.md</code></li>
+</ul>
+<p>Use for capability, lifecycle, transport, authorization, tools, resources, and prompts interpretation against the latest MCP spec.</p>
+<ul>
+<li><code>references/xaa-id-jag-interpretation.md</code></li>
+</ul>
+<p>Use for <code>xaa run</code> output: the three-party trust model, issuer prerequisites, capability-evidence semantics, registration-warning taxonomy, SAML axes, and severity calibration for Cross-App Access findings.</p>
+<ul>
+<li><code>references/security-best-practices.md</code></li>
+</ul>
+<p>Use for security review checks mapped to CLI commands. Covers SSRF, confused deputy, PKCE, token passthrough, scope minimization, auth-posture checks, and session security. Source: https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: mcp-inspector\ndisplay_name: mcp-inspector\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# mcp-inspector - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `mcp-inspector` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nInterpret and use `mcpjam` probe, doctor, OAuth, XAA (Cross-App Access / ID-JAG), apps conformance, tools, resources, and prompts output conservatively against MCP 2025-11-25. Use when interacting with MCP servers, execu\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose mcp-inspector, then write the task. Fallback prompt: Use the mcp-inspector skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `mcp-inspector` |\n| Canonical name | `mcp-inspector` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nInterpret and use `mcpjam` probe, doctor, OAuth, XAA (Cross-App Access / ID-JAG), apps conformance, tools, resources, and prompts output conservatively against MCP 2025-11-25. Use when interacting with MCP servers, execu\n\n\n## Original SKILL.md\n\n---\nname: mcp-inspector\ndescription: Interpret and use `mcpjam` probe, doctor, OAuth, XAA (Cross-App Access / ID-JAG), apps conformance, tools, resources, and prompts output conservatively against MCP 2025-11-25. Use when interacting with MCP servers, executing tools, triaging findings, performing security reviews, debugging enterprise-managed authorization, deciding whether a CLI finding is real or overstated, or turning inspection output into an engineer-facing report with severity and confidence.\n---\n\n# MCPJam CLI Investigation\n\nUse this skill when analyzing MCP server behavior from `mcpjam` or MCP Inspector output. The goal is to separate:\n\n- real protocol issues\n- interoperability warnings\n- implementation polish\n- mcpjam or SDK artifacts\n\n## Interactive use\n\nWhen the user wants to connect to a server and use it:\n\n1. Probe the server first: `server probe --url \u003curl> --quiet --format json`.\n  - Use the probe to learn auth posture, resource metadata, authorization-server metadata, and registration strategies before assuming the connected surface is public.\n2. If the probe shows `oauth_required`, authenticate with `oauth login --credentials-out \u003cpath>` or run `oauth conformance --credentials-out \u003cpath>` when the task is specifically to test the OAuth flow.\n3. Discover tools: `tools list --url \u003curl> --credentials-file \u003cpath> --quiet --format json`.\n  - Tools with `_meta.ui.resourceUri`, deprecated `_meta[\"ui/resourceUri\"]`, or `openai/outputTemplate` in `toolsMetadata` have interactive UI.\n  - For a specific tool, check `toolsMetadata.\u003ctoolName>._meta.ui.resourceUri`, `toolsMetadata.\u003ctoolName>._meta[\"ui/resourceUri\"]`, or `toolsMetadata.\u003ctoolName>[\"openai/outputTemplate\"]`.\n4. Execute a tool: `tools call --url \u003curl> --tool-name \u003cname> --tool-args \u003cjson> --credentials-file \u003cpath>`.\n5. Execute with UI: `tools call --url \u003curl> --tool-name \u003cname> --tool-args \u003cjson> --credentials-file \u003cpath> --ui`.\n  - `--ui` starts or attaches to the local Inspector backend and renders the completed result in App Builder.\n  - In non-TTY, agent, and CI runs, `--ui` does not open a browser by default. Pass `--open` when the CLI should open App Builder itself.\n  - `--open` opens a system browser URL; it does not attach an already-controlled automation browser or make fresh tabs hydrate an injected render. Use `--no-open` when browser automation already opened Inspector App Builder. Use `--attach-only` when startup, browser opening, and discovery must all be disallowed.\n  - `no_active_client` means the Inspector backend may be running but no browser client is attached. If manual recovery is needed, use `mcpjam inspector open`, not `mcpjam inspector start`.\n  - `unknown_server` in the root `error.code` or an `inspectorRender.commands.*.error.code` means Inspector could not match the requested server. If the message says App Builder is focused on another server, retry with `--server-name \u003cfocused-name>`.\n  - Treat UI success as `inspectorRender.status === \"rendered\"`, not exit code `0` alone. If the render is `skipped`, branch on `inspectorRender.remediation` or the stable root `warning.code`.\n  - Use `--require-render` when the UI render itself is the deliverable and a skipped render should fail the command.\n  - Do not require external screenshots as proof of render success; iframe/canvas content can defeat browser snapshot tools. Prefer `inspectorRender.status`, command responses, and snapshot evidence.\n  - Use `--ui` only when the tool has UI metadata or the user explicitly asks to see UI.\n\nWhen the user asks to investigate, audit, or triage, use the Investigation workflow below.\n\n## Default stance\n\n- Treat raw request/response evidence as higher trust than normalized CLI convenience output.\n- Separate observations, compliance issues, and security findings. They are related, but not interchangeable.\n- Map claims to spec strength: `MUST` and `MUST NOT` are strong conformance signals; `SHOULD` and `RECOMMENDED` are softer guidance; `MAY` and optional fields are usually informational.\n- Do not label a security finding `high` unless you can support a concrete attacker benefit or clear breakage path.\n- When evidence is ambiguous, lower confidence or use `pending` before overstating the conclusion.\n\n## Investigation workflow\n\n1. Start with the narrowest command that actually proves the claim.\n2. If the command may fail, you want a reusable handoff artifact, or CI should retain evidence, add `--debug-out \u003cpath>` to `server probe`, `server validate`, `tools call`, or `oauth login`.\n3. If the probe shows `oauth_required` and the task is to inspect the server surface, continue with `oauth login` or another supported auth flow to obtain reusable credentials before judging post-auth behavior. For multi-command connected sessions, use `--credentials-out \u003cpath>` on `oauth login`, `oauth conformance`, or `oauth conformance-suite` to persist tokens and `--credentials-file \u003cpath>` on later commands; read `references/cli-surface-notes.md` for access-token-only exceptions. When a token is already available (CI, M2M, env var), prefer a credentials file when possible and pass `--access-token` or `--oauth-access-token` only as an escape hatch.\n4. After successful auth, inspect the connected surface with direct commands such as `server info`, `server capabilities`, `tools list`, `resources list/read/templates`, and `prompts list/get`.\n5. Use `server doctor --out \u003cpath>` when you need one breadth-first snapshot instead of several single-purpose command outputs.\n6. If the output came from `server doctor` or a `--debug-out` artifact, split it into primary command evidence, probe evidence, and connected-sweep evidence.\n7. If the claim is specifically about MCP Apps tool metadata or `ui://` resources, start with `apps conformance --quiet --format json` before dropping to `tools list` or `resources read`.\n8. If the claim is about a tool result rendering in Inspector, use `tools call --tool-name \u003cname> --tool-args \u003cjson|@file|-> --ui --quiet --format json`.\n  - In non-TTY runs, add `--open` if no Inspector browser client is already attached.\n  - If browser automation already opened `http://127.0.0.1:6274/#app-builder`, add `--no-open`; `--open` launches a system browser and may not target the automation-controlled client.\n  - Confirm UI delivery with `inspectorRender.status === \"rendered\"`. Treat `inspectorRender.remediation` and stable skipped-render `warning.code` values as recovery hints, not MCP tool failures.\n  - If `unknown_server` appears in the root error or command errors and the message names the focused server, retry with `--server-name \u003cfocused-name>`.\n  - Use `--require-render` when a skipped render should become a hard error instead of a warning.\n9. If a field may be CLI-added or SDK-normalized, read `references/cli-surface-notes.md` before concluding anything.\n10. If the claim depends on MCP semantics, read `references/mcp-2025-11-25-interpretation.md`.\n11. If the claim involves Cross-App Access, ID-JAG, or enterprise-managed authorization, read `references/xaa-id-jag-interpretation.md` before triaging `xaa run` output.\n12. If the task involves security review, read `references/security-best-practices.md` for the full checklist and follow the security review workflow below.\n13. Write the result using the output contract below.\n\n## Security review workflow\n\nUse this when the task is to assess an MCP server's security posture. All checks use existing CLI commands. No special security tooling is needed. Do not assume every server should require auth.\n\n### Phase 1: Observe (read-only)\n\nRun `server probe --url \u003ctarget> --quiet --format json` first. Add `oauth metadata` or `server doctor --out \u003cpath>` only when they clarify the picture.\n\n- Record an initial auth signal:\n  - `full-auth candidate`: probe `status` is `oauth_required`\n  - `public-or-mixed candidate`: probe `status` is `ready`\n  - `unknown`: probe is only `reachable`, `error`, or otherwise ambiguous\n- Capture discovery facts:\n  - OAuth metadata URLs and whether they point to public, private, or suspicious targets\n  - `scopes_supported`, `WWW-Authenticate`, and PKCE methods\n  - registration strategies such as `dcr`, `cimd`, and `preregistered`\n- Record the evidence surface you are trusting. Raw probe/RPC evidence beats doctor summaries or convenience fields.\n- Phase 1 can produce observations and compliance notes. By itself it should not produce a `high` security severity.\n\n### Phase 2: Provoke (behavior, still mostly unauth)\n\nTreat the Phase 1 auth signal as provisional until behavior confirms it.\n\n- For a `full-auth candidate`:\n  - run DCR shape probes if DCR is supported\n  - spot-check representative unauth `tools list` or `tools call` behavior when feasible\n  - check malformed, expired, or obviously wrong-audience token handling without overstating what a rejection proves\n- For a `public-or-mixed candidate`:\n  - run unauth `tools list`\n  - classify exposed tools as read-only, write, or side-effect\n  - call representative public tools unauth\n  - check whether gated tools fail with a clean auth challenge instead of silent empty data or partial data\n- Anonymous tiers, rate limits, or degraded public access are posture notes, not a separate posture class.\n- Reclassify to one of `no-auth`, `full-auth`, `mixed-auth`, or `unknown` once Phase 2 behavior is clear. If Phase 2 contradicts Phase 1, update the posture and rerun the relevant checks instead of forcing the old classification.\n- Input-validation hits from Phase 2 cap at `medium` security severity until Phase 3 proves attacker benefit.\n- Design or posture findings can be real security findings in Phase 2, but do not auto-promote them. Document the unsafe behavior, abuse path, and any owner-intent uncertainty before calling them `medium` or `high`.\n\n### Phase 3: Exploit or confirm attacker benefit\n\nUse `oauth login` and the same browser session when the proof depends on consent or cookies.\n\n- Use Phase 3 to turn a plausible concern into a real end-to-end security finding:\n  - DCR plus authorization flow proof\n  - redirect URI exact-match bypass proof\n  - foreign-token acceptance or token passthrough proof\n  - code, token, or cross-tenant data capture\n- Consent skip is one route to `high`, not the only route. Any demonstrated chain that shows concrete attacker gain can justify `high`.\n\n### Phase 4: Inventory blast radius\n\n- After auth succeeds, decode JWT claims, inspect `Mcp-Session-Id` with raw logs, and enumerate tools, resources, prompts, scopes, and tenant context.\n- Phase 4 is mainly blast-radius calibration. Treat it as context unless you also prove abuse.\n\n### Security severity calibration\n\n- `high`: demonstrated attacker benefit or conforming-client breakage with direct evidence\n- `medium`: credible security issue with a concrete attack scenario, but end-to-end proof is still partial\n- `low`: hardening gap or limited-impact security concern\n- `pending`: plausible security concern with a specific missing proof step that could materially raise or lower severity\n- `info`: true observation with no credible attacker benefit yet\n\nUse `pending` instead of manufacturing a `medium` or `high` security severity from a checklist hit.\n\n## Command choice\n\n- `server probe`: HTTP transport reachability, initialize behavior, and OAuth discovery hints.\n- `server doctor`: combined triage artifact for probe plus connected behavior. Good for breadth, not always sufficient to prove wire-level behavior by itself.\n- `oauth metadata`, `oauth proxy`, `oauth debug-proxy`: exact endpoint and metadata inspection when conformance output looks surprising.\n- `oauth login`: obtain reusable credentials and verify the authenticated MCP path. Use `--credentials-out \u003cpath>` to save tokens to disk (mode 0600) so later connected commands can use `--credentials-file \u003cpath>` without manual token extraction; check `references/cli-surface-notes.md` for commands that require a non-expired access token. Use this when the goal is to inspect a server that requires OAuth, then follow it with connected commands rather than stopping at the login result.\n- `oauth conformance`, `oauth conformance-suite`: flow-level auth checks. Treat these as targeted probes, not a complete security review. Use `--credentials-out \u003cpath>` when a passing flow should hand credentials to later connected commands; use `--credentials-file \u003cpath>` after that instead of extracting tokens from JSON output. Raw JSON output redacts OAuth secrets by default. When `--conformance-checks` is enabled, the command can directly probe DCR non-loopback `http://` redirects, invalid client rejection, authorization-endpoint redirect mismatch handling, invalid bearer-token rejection at the MCP server, and token-endpoint redirect mismatch handling.\n- `xaa run`: headless Cross-App Access (ID-JAG) flow against an authorization server and MCP server — mint, redeem via JWT bearer grant, and authenticated MCP initialize. Use when the task involves enterprise-managed authorization or ID-JAG trust debugging. Requires `--issuer-base-url` to point at an origin publishing the CLI's local signing key (typically `mcpjam inspector start`); read `references/xaa-id-jag-interpretation.md` before triaging its output. These are targeted checks for the current ID-JAG draft, not a conformance suite; the negative-test scorecard (tampered ID-JAGs) lives in the Inspector UI, not the CLI.\n- `apps conformance`: server-side MCP Apps checks for `_meta.ui.resourceUri`, `ui://` resources, `resources/read`, HTML MIME and payload shape, and `_meta.ui` metadata. Use this for MCP Apps surface triage.\n- `server info`, `server capabilities`, `server validate`, `server ping`, `server export`: connected behavior after initialization and auth.\n- `tools list` and `tools call`, `resources list/read/templates`, `prompts list/get/list-multi`: direct post-connect capability checks. With `--ui`, `tools call` renders the completed tool result in Inspector and reports `inspectorRender` as UI command/render evidence.\n- Prefer `--quiet --format json`. Add `--rpc` when available if you need request and response evidence rather than a summary. Add `--debug-out` when you need a failure-safe artifact, not as a replacement for raw evidence.\n- Use `--reporter junit-xml` or `--reporter json-summary` for CI report artifacts on conformance and diff commands. `server validate` does not accept `--reporter`; use `--debug-out` for validation artifacts. Do not use `--format junit-xml`; `--format` is only for raw `json` or `human` output.\n- For JSON-valued options, prefer `@path` or `-` stdin over shell-escaped inline JSON when payloads are generated or contain quotes. For example: `mcpjam tools call --url \u003ctarget> --tool-name \u003cname> --tool-args @params.json --quiet --format json`.\n\n## Output contract\n\n### General triage output\n\nFor non-security tasks, return:\n\n- `Verdict`: `real issue`, `interop warning`, `implementation polish`, or `scanner/client artifact`\n- `Severity`: `high`, `medium`, `low`, or `info`\n- `Confidence`: `high`, `medium`, or `low`\n- `Why it matters`: one short paragraph tied to interoperability, security, or user impact\n- `Evidence`: the exact CLI behavior that supports the claim\n- `Missing evidence`: what would need to be confirmed before raising severity or confidence\n\n### Security review output\n\nFor each claimed security-review finding, return:\n\n- `Verdict`: `real issue`, `interop warning`, `implementation polish`, or `scanner/client artifact`\n- `Compliance severity`: `high`, `medium`, `low`, or `info`\n- `Security severity`: `high`, `medium`, `low`, `info`, or `pending`\n- `Confidence`: `high`, `medium`, or `low`\n- `Attack scenario or pending rationale`: if `Security severity` is `medium` or `high`, open with 2-3 sentences answering who the attacker is, what they need, and what they gain; if it is `pending`, say exactly what proof is missing\n- `Verified via`: the phase plus exact command or result that supports the claim\n- `Evidence`: the exact CLI behavior that supports the claim\n- `Missing evidence`: what would need to be confirmed before raising severity or confidence\n\n## Hard rules\n\n- Never call `toolsMetadata` an MCP server field.\n- Never use removed app/widget commands for UI rendering. Use `tools call --ui`; use `resources read --resource-uri ui://...` for raw resource HTML.\n- Never manually orchestrate Inspector API calls when `tools call --ui` can drive the render.\n- Never skip `tools list` discovery when the user names a server but not a specific tool.\n- Never infer prompt support from an empty prompts list unless you have raw RPC evidence that `prompts/list` was actually sent and answered by the server.\n- Never stop at `oauth_required` when the user asked to inspect the authenticated server surface and the CLI can complete login. Authenticate and continue with post-login commands when feasible.\n- Never treat a passing `apps conformance` result as full SEP-1865 conformance. The current command is server-side only and does not prove host lifecycle, sandbox proxy, or postMessage bridge behavior.\n- Never treat missing optional metadata such as `outputSchema`, content annotations, `scopes_supported`, or `scope` hints as a hard failure without a `MUST`.\n- Separate OAuth RFC violations from MCP profile preferences.\n- Distinguish \"the server correctly rejected a bad request\" from \"the overall design is secure.\"\n- Treat `--debug-out` artifacts as aggregated evidence envelopes, not pure wire captures.\n- Never flag missing `scopes_supported` or missing `scope` in `WWW-Authenticate` as a security issue. Both are optional.\n- Never claim a server is \"secure\" based solely on it rejecting one specific bad input. A single negative test does not prove broader security posture.\n- Never treat a passing `oauth_invalid_token` or redirect-mismatch probe as proof that the whole authorization design is secure. Those checks only prove the exact case that was sent.\n- Never let a checklist hit assign `high` security severity by itself.\n- JWT `aud` mismatch is not token passthrough proof unless you show the server accepts a token issued for a different audience or resource, or otherwise misbinds the token.\n- Supporting `plain` PKCE is usually hardening only. It cannot compound with attacker-owned-client DCR flows where the attacker chose the verifier.\n- Hostile `redirect_uri` values are not SSRF unless you show the server fetches them.\n- Public unauthenticated access is not itself a finding. Check whether behavior matches advertised posture and whether exposed surfaces are safe by design.\n- Anonymous trial or rate-limited access is a posture note, not a separate severity finding.\n- When compounding findings, explain the compound attack path. Do not just list unrelated findings and call the combination worse.\n- Never triage an `xaa run` failure against the target server when `verify_issuer_publication` failed or the error is a bare connection failure with an empty `steps` array. Those are local issuer-setup problems: `--issuer-base-url` must serve the CLI's local signing key.\n- Never treat `not_advertised` capability evidence in `xaa run` output as a failure when redemption succeeded, and never treat advertisement as proof redemption would succeed. Advertisement is evidence; the token-endpoint response is the verdict. `unknown` (metadata key absent) is weaker evidence than `not_advertised` (key present without the value) — do not conflate them.\n- Never treat `idJag.verified: true` as proof the authorization server validated the assertion. It is the CLI verifying its own mint against its own issuer.\n- Never claim ID-JAG conformance or a secure XAA posture from one completed `xaa run`. It proves one happy path for one registration strategy.\n- Never describe `--assertion-format saml` as producing a SAML ID-JAG. It changes the identity-assertion leg and the `sub_id` claim; the ID-JAG is always a JWT. ID-JAG is an active IETF Internet-Draft — anchor MUST/SHOULD claims to the draft revision, not to an RFC.\n- Never report `[REDACTED]` values in `xaa run` output as missing data, and never ask for un-redacted output. Redaction is by design and survives server-reflected secrets.\n\n## Reference map\n\n- `references/cli-surface-notes.md`\n  Use for command-specific caveats, artifact shapes, local enrichments, merged errors, and normalized empty arrays.\n- `references/mcp-2025-11-25-interpretation.md`\n  Use for capability, lifecycle, transport, authorization, tools, resources, and prompts interpretation against the latest MCP spec.\n- `references/xaa-id-jag-interpretation.md`\n  Use for `xaa run` output: the three-party trust model, issuer prerequisites, capability-evidence semantics, registration-warning taxonomy, SAML axes, and severity calibration for Cross-App Access findings.\n- `references/security-best-practices.md`\n  Use for security review checks mapped to CLI commands. Covers SSRF, confused deputy, PKCE, token passthrough, scope minimization, auth-posture checks, and session security. Source: https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("mcp-inspector-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

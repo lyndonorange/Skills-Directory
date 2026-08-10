@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>gke-multitenancy - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/gke-multitenancy-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>gke-multitenancy</h1>
+      <p class="description">Plans and configures multi-tenancy on GKE. Covers namespace isolation, RBAC planning for teams, resource quotas, LimitRanges, network isolation, and cost allocation. Use when designing GKE multi-tenancy, configuring GKE namespaces, setting up resource quotas, or isolating GKE teams. Don't use for single-tenant cluster configuration or general deployment instructions (use gke-basics or gke-app-onboarding instead).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>gke-multitenancy</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>gke-multitenancy</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Plans and configures multi-tenancy on GKE. Covers namespace isolation, RBAC planning for teams, resource quotas, LimitRanges, network isolation, and cost allocation. Use when designing GKE multi-tenancy, configuring GKE namespaces, setting up resource quotas, or isolating GKE teams. Don't use for single-tenant cluster configuration or general deployment instructions (use gke-basics or gke-app-onboarding instead).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the gke-multitenancy skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+        <div class="usage-card"><strong>Upstream provenance</strong><p><a href="https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39">Google Agent Skills</a> at 092e210b243601797a0fb939040be2b1288e6d39 (Apache-2.0).</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Universal runtime boundary</h3>
+<ul>
+<li>Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.</li>
+<li>Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.</li>
+<li>Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.</li>
+<li>Read <code>references/upstream.md</code> when provenance, the pinned revision, licensing, or local adaptation details matter.</li>
+</ul>
+<h2>GKE Multi-Tenancy</h2>
+<p>This reference covers enterprise multi-tenancy patterns on GKE, including namespace isolation, RBAC planning, resource quotas, and network segmentation.</p>
+<blockquote><strong>MCP Tools:</strong> <code>apply_k8s_manifest</code>, <code>get_k8s_resource</code>, <code>check_k8s_auth</code>,</blockquote>
+<blockquote><code>describe_k8s_resource</code>, <code>delete_k8s_resource</code></blockquote>
+<h3>When to Use</h3>
+<ul>
+<li>Multiple teams sharing a single GKE cluster</li>
+<li>Isolating workloads by environment (dev/staging/prod) within one cluster</li>
+<li>Implementing least-privilege access control</li>
+<li>Cost allocation across teams or projects</li>
+</ul>
+<h3>Multi-Tenancy Models</h3>
+<p>| Model                         | Isolation    | Complexity | Cost           | | ----------------------------- | ------------ | ---------- | -------------- | | <strong>Namespace-per-team</strong>        | Soft (RBAC + | Low        | Lowest (shared | :                               : Network      :            : cluster)       : :                               : Policy)      :            :                : | <strong>Namespace-per-environment</strong> | Soft         | Low        | Low            | | <strong>Node pool-per-team</strong>        | Medium       | Medium     | Medium         | :                               : (dedicated   :            :                : :                               : compute)     :            :                : | <strong>Cluster-per-team</strong>          | Hard (full   | High       | Highest        | :                               : isolation)   :            :                :</p>
+<blockquote><strong>Golden path recommendation</strong>: Start with namespace-per-team for cost</blockquote>
+<blockquote>efficiency. Escalate to stronger isolation only when compliance requires it.</blockquote>
+<h3>Namespace Isolation Setup</h3>
+<h4>1. Create Namespaces</h4>
+<pre><code>kubectl create namespace team-a
+kubectl create namespace team-b
+kubectl label namespace team-a team=a
+kubectl label namespace team-b team=b</code></pre>
+<h4>2. RBAC Configuration</h4>
+<p><strong>Principle</strong>: Grant minimal permissions per namespace. Never bind to <code>system:authenticated</code>.</p>
+<pre><code># Namespace-scoped role for a team
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: team-a-developer
+  namespace: team-a
+rules:
+- apiGroups: [&quot;&quot;, &quot;apps&quot;, &quot;batch&quot;]
+  resources: [&quot;pods&quot;, &quot;deployments&quot;, &quot;services&quot;, &quot;configmaps&quot;, &quot;jobs&quot;]
+  verbs: [&quot;get&quot;, &quot;list&quot;, &quot;watch&quot;, &quot;create&quot;, &quot;update&quot;, &quot;patch&quot;, &quot;delete&quot;]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: team-a-developers
+  namespace: team-a
+subjects:
+- kind: Group
+  name: &quot;team-a@example.com&quot;  # Google Group
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: team-a-developer
+  apiGroup: rbac.authorization.k8s.io</code></pre>
+<p><strong>RBAC best practices:</strong> Use Google Groups for subject bindings. Prefer namespace-scoped Roles over ClusterRoles. See the <code>gke-platform-security</code> skill for full RBAC hardening guidance.</p>
+<h4>3. Resource Quotas</h4>
+<p>Prevent any single team from consuming all cluster resources:</p>
+<pre><code>apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: team-a-quota
+  namespace: team-a
+spec:
+  hard:
+    requests.cpu: &quot;10&quot;
+    requests.memory: &quot;20Gi&quot;
+    limits.cpu: &quot;20&quot;
+    limits.memory: &quot;40Gi&quot;
+    pods: &quot;50&quot;
+    services: &quot;10&quot;
+    persistentvolumeclaims: &quot;10&quot;</code></pre>
+<h4>4. LimitRanges</h4>
+<p>Set default and maximum resource constraints per container:</p>
+<pre><code>apiVersion: v1
+kind: LimitRange
+metadata:
+  name: team-a-limits
+  namespace: team-a
+spec:
+  limits:
+  - type: Container
+    default:
+      cpu: &quot;500m&quot;
+      memory: &quot;512Mi&quot;
+    defaultRequest:
+      cpu: &quot;100m&quot;
+      memory: &quot;128Mi&quot;
+    max:
+      cpu: &quot;4&quot;
+      memory: &quot;8Gi&quot;</code></pre>
+<blockquote>[!IMPORTANT] <strong>Mandatory Defaults</strong>: When defining <code>min</code> or <code>max</code> limits in a</blockquote>
+<blockquote><code>LimitRange</code>, you <strong>must</strong> also define corresponding <code>default</code> and</blockquote>
+<blockquote><code>defaultRequest</code> values. If you set a <code>min</code> or <code>max</code> without defaults, any pod</blockquote>
+<blockquote>deployed without explicit resource requests/limits will be rejected by the</blockquote>
+<blockquote>admission controller.</blockquote>
+<h4>5. Network Isolation</h4>
+<p>Apply default-deny per namespace (see the <code>gke-workload-security</code> skill), then allow intra-team traffic:</p>
+<pre><code># Allow same-namespace pods to talk + DNS
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-same-namespace
+  namespace: team-a
+spec:
+  podSelector: {}
+  ingress:
+  - from:
+    - podSelector: {}
+  egress:
+  - to:
+    - podSelector: {}
+  - to:  # Allow DNS
+    - namespaceSelector: {}
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53</code></pre>
+<h3>Cost Allocation</h3>
+<h4>Labels for Cost Attribution</h4>
+<pre><code># Label namespaces for billing
+kubectl label namespace team-a cost-center=engineering
+kubectl label namespace team-b cost-center=data-science</code></pre>
+<h4>GKE Cost Allocation</h4>
+<p>Enable GKE cost allocation to break down costs by namespace and label:</p>
+<pre><code>gcloud container clusters update &lt;CLUSTER_NAME&gt; --region &lt;REGION&gt; \
+  --enable-cost-allocation</code></pre>
+<p>View in Cloud Billing &gt; GKE Cost Allocation.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: gke-multitenancy\ndisplay_name: gke-multitenancy\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# gke-multitenancy - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `gke-multitenancy` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nPlans and configures multi-tenancy on GKE. Covers namespace isolation, RBAC planning for teams, resource quotas, LimitRanges, network isolation, and cost allocation. Use when designing GKE multi-tenancy, configuring GKE\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the gke-multitenancy skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `gke-multitenancy` |\n| Canonical name | `gke-multitenancy` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\nPlans and configures multi-tenancy on GKE. Covers namespace isolation, RBAC planning for teams, resource quotas, LimitRanges, network isolation, and cost allocation. Use when designing GKE multi-tenancy, configuring GKE\n\n## Upstream provenance\n\nThis adapted package derives from [Google Agent Skills](https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39) at commit `092e210b243601797a0fb939040be2b1288e6d39`, licensed under `Apache-2.0`.\n\n\n## Original SKILL.md\n\n---\nname: gke-multitenancy\ndescription: \"Plans and configures multi-tenancy on GKE. Covers namespace isolation, RBAC planning for teams, resource quotas, LimitRanges, network isolation, and cost allocation. Use when designing GKE multi-tenancy, configuring GKE namespaces, setting up resource quotas, or isolating GKE teams. Don't use for single-tenant cluster configuration or general deployment instructions (use gke-basics or gke-app-onboarding instead).\"\nlicense: Apache-2.0\n---\n\n## Universal runtime boundary\n\n- Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.\n- Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.\n- Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.\n- Read `references/upstream.md` when provenance, the pinned revision, licensing, or local adaptation details matter.\n\n# GKE Multi-Tenancy\n\nThis reference covers enterprise multi-tenancy patterns on GKE, including\nnamespace isolation, RBAC planning, resource quotas, and network segmentation.\n\n> **MCP Tools:** `apply_k8s_manifest`, `get_k8s_resource`, `check_k8s_auth`,\n> `describe_k8s_resource`, `delete_k8s_resource`\n\n## When to Use\n\n-   Multiple teams sharing a single GKE cluster\n-   Isolating workloads by environment (dev/staging/prod) within one cluster\n-   Implementing least-privilege access control\n-   Cost allocation across teams or projects\n\n## Multi-Tenancy Models\n\n| Model                         | Isolation    | Complexity | Cost           |\n| ----------------------------- | ------------ | ---------- | -------------- |\n| **Namespace-per-team**        | Soft (RBAC + | Low        | Lowest (shared |\n:                               : Network      :            : cluster)       :\n:                               : Policy)      :            :                :\n| **Namespace-per-environment** | Soft         | Low        | Low            |\n| **Node pool-per-team**        | Medium       | Medium     | Medium         |\n:                               : (dedicated   :            :                :\n:                               : compute)     :            :                :\n| **Cluster-per-team**          | Hard (full   | High       | Highest        |\n:                               : isolation)   :            :                :\n\n> **Golden path recommendation**: Start with namespace-per-team for cost\n> efficiency. Escalate to stronger isolation only when compliance requires it.\n\n## Namespace Isolation Setup\n\n### 1. Create Namespaces\n\n```bash\nkubectl create namespace team-a\nkubectl create namespace team-b\nkubectl label namespace team-a team=a\nkubectl label namespace team-b team=b\n```\n\n### 2. RBAC Configuration\n\n**Principle**: Grant minimal permissions per namespace. Never bind to\n`system:authenticated`.\n\n```yaml\n# Namespace-scoped role for a team\napiVersion: rbac.authorization.k8s.io/v1\nkind: Role\nmetadata:\n  name: team-a-developer\n  namespace: team-a\nrules:\n- apiGroups: [\"\", \"apps\", \"batch\"]\n  resources: [\"pods\", \"deployments\", \"services\", \"configmaps\", \"jobs\"]\n  verbs: [\"get\", \"list\", \"watch\", \"create\", \"update\", \"patch\", \"delete\"]\n---\napiVersion: rbac.authorization.k8s.io/v1\nkind: RoleBinding\nmetadata:\n  name: team-a-developers\n  namespace: team-a\nsubjects:\n- kind: Group\n  name: \"team-a@example.com\"  # Google Group\n  apiGroup: rbac.authorization.k8s.io\nroleRef:\n  kind: Role\n  name: team-a-developer\n  apiGroup: rbac.authorization.k8s.io\n```\n\n**RBAC best practices:** Use Google Groups for subject bindings. Prefer\nnamespace-scoped Roles over ClusterRoles. See the `gke-platform-security` skill\nfor full RBAC hardening guidance.\n\n### 3. Resource Quotas\n\nPrevent any single team from consuming all cluster resources:\n\n```yaml\napiVersion: v1\nkind: ResourceQuota\nmetadata:\n  name: team-a-quota\n  namespace: team-a\nspec:\n  hard:\n    requests.cpu: \"10\"\n    requests.memory: \"20Gi\"\n    limits.cpu: \"20\"\n    limits.memory: \"40Gi\"\n    pods: \"50\"\n    services: \"10\"\n    persistentvolumeclaims: \"10\"\n```\n\n### 4. LimitRanges\n\nSet default and maximum resource constraints per container:\n\n```yaml\napiVersion: v1\nkind: LimitRange\nmetadata:\n  name: team-a-limits\n  namespace: team-a\nspec:\n  limits:\n  - type: Container\n    default:\n      cpu: \"500m\"\n      memory: \"512Mi\"\n    defaultRequest:\n      cpu: \"100m\"\n      memory: \"128Mi\"\n    max:\n      cpu: \"4\"\n      memory: \"8Gi\"\n```\n\n> [!IMPORTANT] **Mandatory Defaults**: When defining `min` or `max` limits in a\n> `LimitRange`, you **must** also define corresponding `default` and\n> `defaultRequest` values. If you set a `min` or `max` without defaults, any pod\n> deployed without explicit resource requests/limits will be rejected by the\n> admission controller.\n\n### 5. Network Isolation\n\nApply default-deny per namespace (see the `gke-workload-security` skill), then\nallow intra-team traffic:\n\n```yaml\n# Allow same-namespace pods to talk + DNS\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: allow-same-namespace\n  namespace: team-a\nspec:\n  podSelector: {}\n  ingress:\n  - from:\n    - podSelector: {}\n  egress:\n  - to:\n    - podSelector: {}\n  - to:  # Allow DNS\n    - namespaceSelector: {}\n      podSelector:\n        matchLabels:\n          k8s-app: kube-dns\n    ports:\n    - protocol: UDP\n      port: 53\n```\n\n## Cost Allocation\n\n### Labels for Cost Attribution\n\n```bash\n# Label namespaces for billing\nkubectl label namespace team-a cost-center=engineering\nkubectl label namespace team-b cost-center=data-science\n```\n\n### GKE Cost Allocation\n\nEnable GKE cost allocation to break down costs by namespace and label:\n\n```bash\ngcloud container clusters update \u003cCLUSTER_NAME> --region \u003cREGION> \\\n  --enable-cost-allocation\n```\n\nView in Cloud Billing > GKE Cost Allocation.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("gke-multitenancy-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

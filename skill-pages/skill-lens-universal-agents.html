@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>skill-lens - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/skill-lens-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>skill-lens</h1>
+      <p class="description">Use when Codex needs to study, extract, or evaluate model-generated agent skills with Microsoft SkillLens: loading raw agent trajectories, normalizing benchmark outputs, extracting reusable skills with sequential or parallel extraction, injecting a skill set into benchmark inference, comparing baseline vs skill consumption, or reproducing SkillLens experiments across ALFWorld, BFCL v4, SEAL-0, SpreadsheetBench, or SWE-bench Verified.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>skill-lens</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>skill-lens</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Use when Codex needs to study, extract, or evaluate model-generated agent skills with Microsoft SkillLens: loading raw agent trajectories, normalizing benchmark outputs, extracting reusable skills with sequential or parallel extraction, injecting a skill set into benchmark inference, comparing baseline vs skill consumption, or reproducing SkillLens experiments across ALFWorld, BFCL v4, SEAL-0, SpreadsheetBench, or SWE-bench Verified.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the skill-lens skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Skill Lens</h2>
+<h3>Overview</h3>
+<p>SkillLens is a research and evaluation framework for the full lifecycle of model-generated agent skills: experience generation, schema normalization, skill extraction, and skill consumption. Use it to answer whether a generated skill is actually useful to a target model and why.</p>
+<p>Read <code>references/upstream.md</code> when you need install commands, CLI flags, provider configuration, benchmark names, or the upstream repository links.</p>
+<h3>Workflow</h3>
+<ol>
+<li>Confirm the benchmark and target model.</li>
+<li>Generate or locate raw trajectories with <code>skilllens infer</code>.</li>
+<li>Normalize raw benchmark output into the unified <code>Trajectory</code> schema with <code>skilllens convert</code>.</li>
+<li>Extract a <code>skill_set.json</code> with <code>skilllens extract</code>, preferring the <code>parallel</code> method for paper-style extraction unless the user asks for a simpler baseline.</li>
+<li>Re-run inference with <code>skilllens infer --skill-set &lt;path&gt;</code> and compare against the no-skill baseline.</li>
+<li>Report both extraction quality and target-model skill consumption results; keep benchmark setup caveats explicit.</li>
+</ol>
+<h3>Operating Guidance</h3>
+<ul>
+<li>Treat SkillLens as an experiment harness, not as a generic skill authoring shortcut.</li>
+<li>Keep baseline and skill-injected runs comparable: same benchmark split, model, provider, worker count, sample count, and reasoning settings unless the user asks to vary them.</li>
+<li>Use small <code>--num-samples</code> smoke tests before full benchmark runs.</li>
+<li>Preserve raw trajectories, converted experience pools, extraction configs, <code>skill_set.json</code>, and inference outputs so results are reproducible.</li>
+<li>Prefer committed config files under <code>configs/examples/</code> as starting points, then override with <code>--set key=value</code> for local experiments.</li>
+<li>Do not claim a skill improves performance until a fresh skill-consumption run has been compared to a baseline.</li>
+</ul>
+<h3>Outputs To Expect</h3>
+<ul>
+<li>Raw inference runs under <code>inference_output/&lt;benchmark&gt;/...</code>.</li>
+<li>Experience pools under <code>data/experience_pool/&lt;benchmark&gt;/...</code> or a custom <code>-o</code> path.</li>
+<li>Extracted skills under the selected extraction output directory, including <code>skill_set.json</code>.</li>
+<li>Benchmark-specific results in the inference output directory.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: skill-lens\ndisplay_name: skill-lens\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# skill-lens - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `skill-lens` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nUse when Codex needs to study, extract, or evaluate model-generated agent skills with Microsoft SkillLens: loading raw agent trajectories, normalizing benchmark outputs, extracting reusable skills with sequential or para\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the skill-lens skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `skill-lens` |\n| Canonical name | `skill-lens` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\nUse when Codex needs to study, extract, or evaluate model-generated agent skills with Microsoft SkillLens: loading raw agent trajectories, normalizing benchmark outputs, extracting reusable skills with sequential or para\n\n\n## Original SKILL.md\n\n---\nname: skill-lens\ndescription: \"Use when Codex needs to study, extract, or evaluate model-generated agent skills with Microsoft SkillLens: loading raw agent trajectories, normalizing benchmark outputs, extracting reusable skills with sequential or parallel extraction, injecting a skill set into benchmark inference, comparing baseline vs skill consumption, or reproducing SkillLens experiments across ALFWorld, BFCL v4, SEAL-0, SpreadsheetBench, or SWE-bench Verified.\"\n---\n\n# Skill Lens\n\n## Overview\n\nSkillLens is a research and evaluation framework for the full lifecycle of model-generated agent skills: experience generation, schema normalization, skill extraction, and skill consumption. Use it to answer whether a generated skill is actually useful to a target model and why.\n\nRead `references/upstream.md` when you need install commands, CLI flags, provider configuration, benchmark names, or the upstream repository links.\n\n## Workflow\n\n1. Confirm the benchmark and target model.\n2. Generate or locate raw trajectories with `skilllens infer`.\n3. Normalize raw benchmark output into the unified `Trajectory` schema with `skilllens convert`.\n4. Extract a `skill_set.json` with `skilllens extract`, preferring the `parallel` method for paper-style extraction unless the user asks for a simpler baseline.\n5. Re-run inference with `skilllens infer --skill-set \u003cpath>` and compare against the no-skill baseline.\n6. Report both extraction quality and target-model skill consumption results; keep benchmark setup caveats explicit.\n\n## Operating Guidance\n\n- Treat SkillLens as an experiment harness, not as a generic skill authoring shortcut.\n- Keep baseline and skill-injected runs comparable: same benchmark split, model, provider, worker count, sample count, and reasoning settings unless the user asks to vary them.\n- Use small `--num-samples` smoke tests before full benchmark runs.\n- Preserve raw trajectories, converted experience pools, extraction configs, `skill_set.json`, and inference outputs so results are reproducible.\n- Prefer committed config files under `configs/examples/` as starting points, then override with `--set key=value` for local experiments.\n- Do not claim a skill improves performance until a fresh skill-consumption run has been compared to a baseline.\n\n## Outputs To Expect\n\n- Raw inference runs under `inference_output/\u003cbenchmark>/...`.\n- Experience pools under `data/experience_pool/\u003cbenchmark>/...` or a custom `-o` path.\n- Extracted skills under the selected extraction output directory, including `skill_set.json`.\n- Benchmark-specific results in the inference output directory.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("skill-lens-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

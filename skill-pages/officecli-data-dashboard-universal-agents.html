@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>officecli-data-dashboard - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/officecli-data-dashboard-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>officecli-data-dashboard</h1>
+      <p class="description">Use this skill to build a multi-element Excel dashboard — Dashboard sheet on open, multiple formula-driven KPI cards, multiple charts, sparklines, and conditional formatting — from CSV or tabular input. Trigger on: 'dashboard', 'KPI dashboard', 'analytics dashboard', 'executive dashboard', 'metrics dashboard', 'CSV to dashboard', 'data visualization'. Output is a single .xlsx. Scene-layer on officecli-xlsx: inherits every xlsx hard rule. DO NOT invoke for: a single budget tracker / one-sheet CSV-with-formatting (use xlsx), a 3-statement / DCF / LBO financial model (use financial-model), a weekly report with ≤ 1 chart and &lt; 10 rows (use xlsx).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>officecli-data-dashboard</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>officecli-data-dashboard</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Use this skill to build a multi-element Excel dashboard — Dashboard sheet on open, multiple formula-driven KPI cards, multiple charts, sparklines, and conditional formatting — from CSV or tabular input. Trigger on: 'dashboard', 'KPI dashboard', 'analytics dashboard', 'executive dashboard', 'metrics dashboard', 'CSV to dashboard', 'data visualization'. Output is a single .xlsx. Scene-layer on officecli-xlsx: inherits every xlsx hard rule. DO NOT invoke for: a single budget tracker / one-sheet CSV-with-formatting (use xlsx), a 3-statement / DCF / LBO financial model (use financial-model), a weekly report with ≤ 1 chart and &lt; 10 rows (use xlsx).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the officecli-data-dashboard skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Data Dashboard (scene-layer on officecli-xlsx)</h2>
+<p>A dashboard is not &quot;a spreadsheet with charts&quot;. It is a composition: <strong>one Dashboard sheet the user lands on</strong> with formula-driven KPI cards, cell-range-linked charts, sparklines, and semantic conditional formatting. Everything else (raw data, aggregations) is upstream infrastructure the user should never need to open. This skill teaches the composition pattern. Everything about the xlsx engine — cells, formulas, batch JSON, shell quoting, validate, HTML preview — comes from <code>officecli-xlsx</code> and is not re-taught here.</p>
+<h3>Setup</h3>
+<p>If <code>officecli</code> is missing:</p>
+<ul>
+<li><strong>macOS / Linux</strong>: <code>curl -fsSL https://d.officecli.ai/install.sh | bash</code></li>
+<li><strong>Windows (PowerShell)</strong>: <code>irm https://d.officecli.ai/install.ps1 | iex</code></li>
+</ul>
+<p>Verify with <code>officecli --version</code> (open a new terminal if PATH hasn't picked up). If install fails, download a binary from https://github.com/iOfficeAI/OfficeCLI/releases.</p>
+<h3>⚠️ Help-First Rule</h3>
+<p><strong>When a prop name, enum value, or alias is uncertain, consult help before guessing.</strong></p>
+<pre><code>officecli help xlsx                          # element list
+officecli help xlsx chart                    # full schema for charts
+officecli help xlsx sparkline                # sparklines
+officecli help xlsx conditionalformatting    # all CF rule types</code></pre>
+<p>Help reflects the installed CLI version. When this skill and help disagree, <strong>help wins</strong>. DeferredAddKeys (<code>combosplit</code>, <code>holesize</code>) work on <code>add</code> only — see Reference.</p>
+<h3>Mental Model &amp; Inheritance</h3>
+<p>This skill <strong>inherits every xlsx hard rule</strong> from <code>officecli-xlsx</code> — shell quoting, zero formula errors, visual delivery floor, batch JSON shape (<code>{&quot;command&quot;:&quot;set&quot;|&quot;add&quot;,&quot;path&quot;:...,&quot;props&quot;:{...}}</code> — key is <code>command</code>, NOT <code>action</code>), batch JSON dotted-name rule, chart data-feed forms, batch+resident limits, <code>validate</code> discipline. Read officecli-xlsx first; honour those rules, do not re-teach them here.</p>
+<p><strong>Reverse handoff — do NOT use this skill when:</strong></p>
+<ul>
+<li>The ask is a <strong>single-sheet CSV-with-formatting tracker</strong> (no Dashboard sheet, no KPI cards, ≤ 1 chart) → go back to <code>officecli-xlsx</code>.</li>
+<li>The ask is a <strong>3-statement / DCF / LBO financial model</strong> with blue-inputs / black-formulas / cross-sheet drivers → use <code>officecli-financial-model</code>.</li>
+<li>The ask is a <strong>weekly status report</strong> with one SUMIF summary and one chart over &lt; 10 rows → <code>officecli-xlsx</code>.</li>
+</ul>
+<p>This skill only accepts: &quot;a Dashboard sheet the user opens first, multiple KPI cards, multiple charts, some CF / sparklines&quot;.</p>
+<h3>Shell &amp; Execution Discipline</h3>
+<p>→ see officecli-xlsx §Shell &amp; Execution Discipline for the baseline (quoting, heredoc for <code>!</code>, incremental execution).</p>
+<p>Two increments specific to dashboards:</p>
+<ul>
+<li><strong>Long chart <code>add</code> commands exceed 180 chars.</strong> Always split across lines with trailing <code>\</code>; never pack a chart command onto a single line. The longer the command, the higher the chance a shell-escape bug hides inside it.</li>
+<li><strong>Multi-instance counts use <code>query --json | jq length</code>, never <code>raw-get | grep -c</code>.</strong> Example: <code>officecli query &quot;$FILE&quot; chart --json | jq '.data.results | length'</code> for &quot;how many charts do I have?&quot;.</li>
+</ul>
+<h3>Core Principles</h3>
+<p>Five non-negotiable principles. If any one is violated the output is not a dashboard, it is a spreadsheet that happens to have a chart.</p>
+<ol>
+<li><strong>Formula-driven KPIs.</strong> Every KPI value on the Dashboard sheet is a formula — <code>SUM</code>, <code>AVERAGE</code>, <code>IFERROR((...-...)/...,0)</code>, whatever — referring to cells on the Data / Summary sheet. Never hardcode a computed number. When the underlying data changes tomorrow, KPIs update on open.</li>
+</ol>
+<ol>
+<li><strong>Cell-range references for charts.</strong> Every chart series reads from a cell range: <code>series1.values=&quot;Sheet1!B2:B13&quot;</code>. Inline <code>data=&quot;Revenue:100,200,300&quot;</code> is for a 5-minute demo, not a delivered dashboard. The one exception: data requires an aggregation Excel cannot express (rare) — document the exception in a comment cell.</li>
+</ol>
+<ol>
+<li><strong>Dashboard-first architecture.</strong> KPI label cells, KPI value cells, charts, sparklines all live on the <strong>Dashboard</strong> sheet — the single sheet a user lands on. Raw imports and <code>SUMIFS</code> rollups live on Data / Summary sheets, upstream of the Dashboard. The user should never need to switch tabs to find the answer.</li>
+</ol>
+<ol>
+<li><strong>Visible cells only for chart sources.</strong> LibreOffice does not evaluate formulas in hidden columns or hidden sheets at render time. A chart whose <code>series1.values</code> points at a hidden-column <code>SUMIFS</code> renders blank. Pattern: aggregate into a <strong>visible</strong> Summary sheet, point charts at Summary cells, hide only helper columns that are not chart sources.</li>
+</ol>
+<ol>
+<li><strong>Data-size-aware complexity.</strong> A 10-row dataset does not get 5 KPIs and 4 charts. A 200-row dataset does not get 1 KPI and 1 chart. Scale up the composition with the input (table in §Design Ideas). Overbuilding is as wrong as underbuilding.</li>
+</ol>
+<h3>Requirements</h3>
+<p>All <code>officecli-xlsx</code> requirements apply (→ see officecli-xlsx §Requirements for Outputs). Dashboards add these:</p>
+<ul>
+<li><strong>Dashboard sheet is the active tab on open.</strong> Confirm 0-based sheet index with <code>officecli query &quot;$FILE&quot; sheet</code> BEFORE filling <code>activeTab=&quot;N&quot;</code>. Never guess the index.</li>
+<li><strong><code>calc.fullCalcOnLoad=true</code>.</strong> Set via <code>officecli set &quot;$FILE&quot; / --prop calc.fullCalcOnLoad=true</code>. Do NOT <code>raw-set</code> <code>&lt;calcPr&gt;</code> — it produces duplicate elements that fail validate.</li>
+<li><strong>Refresh downstream cachedValue after every upstream edit.</strong> <code>fullCalcOnLoad=true</code> schedules runtime recalc only; it does NOT refresh build-time <code>cachedValue</code>. After <code>set B=100 → set E==B+D → fix B=150</code>, E is stale until you re-issue E's formula (or close/reopen). Stale cache ships &quot;Net Change = 0&quot; to the board.</li>
+<li><strong>Every chart has a descriptive title and every series has a name.</strong> <code>&quot;Series1&quot;</code> in a legend is unfinished work.</li>
+<li><strong>Every KPI value cell has a formula.</strong> Verifiable: <code>officecli query &quot;$FILE&quot; 'Dashboard!:has(formula)' --json | jq '.data.results | length'</code> should equal your planned KPI count.</li>
+<li><strong>Header row fill on every data sheet.</strong> Data sheet, Summary sheet, and any secondary data sheet need row 1 filled (e.g., <code>fill=1F3864 + font.color=FFFFFF + font.bold=true</code>).</li>
+<li><strong>10+ rows on Data sheet → ≥ 1 CF rule on a numeric column.</strong> A 20-row table with zero visual scanning aid is a quality miss.</li>
+<li><strong>Dashboard value columns sized to the widest expected cachedValue — not a fixed 22.</strong> Rule of thumb at 24pt bold + currency numFmt: <code>width ≈ ceil((visible_chars + 2) × 1.3)</code>. A KPI holding <code>¥1,958,414,250</code> (14 visible chars with currency + commas) needs <code>width ≥ 28</code>; a 4-digit KPI still needs <code>width ≥ 22</code> as the floor. Hardcoding <code>22</code> for a 10+ digit KPI is how <code>###</code> ships to the user.</li>
+<li><strong>Sparkline row height ≥ 20.</strong> A sparkline in a default 15pt row is a flat squiggle — set <code>/Dashboard/row[N] height=22</code> (or 24 when paired with a 24pt KPI value cell in the same row).</li>
+<li><strong>Print deliverables set <code>_xlnm.Print_Area</code> scoped to Dashboard</strong> + hide non-Dashboard sheets + add <code>&lt;pageSetup fitToPage/&gt;</code>. Without all three, the print pipeline emits every sheet and Dashboard lands on page 2+. See §Print-ready delivery for the exact commands.</li>
+</ul>
+<h3>Quick Start</h3>
+<p>Minimal viable dashboard: 12-month revenue CSV → 4 KPIs + 1 line chart + activeTab + fullCalcOnLoad. Adapt the numbers, don't copy-paste blind. Broken into phases so a single failed phase is obvious.</p>
+<p><strong>Phase 1 — Data sheet: create, import, format.</strong></p>
+<pre><code>FILE=my_dashboard.xlsx
+officecli create &quot;$FILE&quot;
+officecli import &quot;$FILE&quot; /Sheet1 --file sales.csv --header
+officecli set &quot;$FILE&quot; '/Sheet1/col[A]' --prop width=12
+officecli set &quot;$FILE&quot; '/Sheet1/col[B]' --prop width=15
+officecli set &quot;$FILE&quot; '/Sheet1/B2:B13' --prop numFmt='$#,##0'
+officecli set &quot;$FILE&quot; '/Sheet1/A1:B1' --prop fill=1F3864 --prop font.color=FFFFFF --prop font.bold=true</code></pre>
+<p><strong>Phase 2 — Dashboard sheet + one KPI card.</strong></p>
+<pre><code>officecli add &quot;$FILE&quot; / --type sheet --prop name=Dashboard
+officecli set &quot;$FILE&quot; '/Dashboard/col[A]' --prop width=22
+officecli set &quot;$FILE&quot; '/Dashboard/col[B]' --prop width=12
+officecli set &quot;$FILE&quot; /Dashboard/A1 --prop value=&quot;Total Revenue&quot; --prop font.size=9 --prop font.color=666666 --prop bold=true
+officecli set &quot;$FILE&quot; /Dashboard/A2 --prop 'formula==SUM(Sheet1!B2:B13)' --prop numFmt='$#,##0' --prop font.size=24 --prop bold=true --prop font.color=2E7D32</code></pre>
+<p><strong>Phase 3 — Sparkline + chart.</strong></p>
+<pre><code>officecli add &quot;$FILE&quot; /Dashboard --type sparkline --prop cell=B2 --prop range='Sheet1!B2:B13' --prop type=line --prop color=4472C4 --prop highPoint=true --prop highMarkerColor=FF0000
+officecli add &quot;$FILE&quot; /Dashboard --type chart \
+  --prop chartType=line \
+  --prop title=&quot;Revenue Trend&quot; \
+  --prop series1.name=&quot;Revenue&quot; \
+  --prop series1.values='Sheet1!B2:B13' \
+  --prop series1.categories='Sheet1!A2:A13' \
+  --prop preset=dashboard --prop axisNumFmt='$#,##0' \
+  --prop x=0 --prop y=5 --prop width=10 --prop height=15</code></pre>
+<p><strong>Phase 4 — fullCalcOnLoad → activeTab (LAST) → close → validate.</strong></p>
+<pre><code>officecli set &quot;$FILE&quot; / --prop calc.fullCalcOnLoad=true
+
+# Resolve Dashboard's 0-based index from the actual sheet list — never hardcode.
+DASH_IDX=$(officecli query &quot;$FILE&quot; sheet --json \
+  | jq '[.data.results[].path] | index(&quot;/Dashboard&quot;)')
+officecli raw-set &quot;$FILE&quot; /workbook --xpath &quot;//x:sheets&quot; --action insertbefore \
+  --xml &quot;&lt;bookViews xmlns=\&quot;http://schemas.openxmlformats.org/spreadsheetml/2006/main\&quot;&gt;&lt;workbookView activeTab=\&quot;$DASH_IDX\&quot; /&gt;&lt;/bookViews&gt;&quot;
+officecli close &quot;$FILE&quot;
+officecli validate &quot;$FILE&quot;</code></pre>
+<p>Verified end-to-end on a 12-row revenue CSV: <code>validate</code> reports no errors, Dashboard opens first, <code>Dashboard/A2.cachedValue</code> resolves (2,075,000 for the test data), chart renders with values linked.</p>
+<h3>Design Ideas</h3>
+<p>Options, not templates. The user's data and audience drive the choices.</p>
+<h4>Layout patterns (pick one, stay consistent)</h4>
+<p><strong>Pattern 1 — executive summary</strong> (board packs): KPI strip A1:H4, charts stack from row 6.</p>
+<pre><code>┌ KPI1 │ KPI2 │ KPI3 │ KPI4 ┐  rows 1-4
+├──────┴──────┴──────┴──────┤
+│     Chart 1 (wide)        │  rows 6-18
+├───────────────┬───────────┤
+│   Chart 2     │  Chart 3  │  rows 20-32</code></pre>
+<p><strong>Pattern 2 — ops console</strong> (live ops): KPIs down A:B, charts fill C:L.</p>
+<pre><code>│ KPI1 │                   │
+│ KPI2 │    Chart 1        │  rows 1-12
+│ KPI3 │                   │
+│ KPI4 ├───────────────────┤
+│ KPI5 │    Chart 2        │  rows 14-26</code></pre>
+<p><strong>Pattern 3 — scorecard</strong> (≥ 6 KPIs, no dominant chart): grid of 2×3 cards (label / value / sparkline).</p>
+<pre><code>│ KPI1 │ KPI2 │ KPI3 │  rows 1-4
+│ KPI4 │ KPI5 │ KPI6 │  rows 5-8</code></pre>
+<h4>Complexity scaling by data size</h4>
+<p>| Rows | KPIs | Charts | Sparklines | CF rules | Preset | |---|---|---|---|---|---| | &lt; 10 | 1–2 | 1 | skip | 0–1 | <code>minimal</code> | | 10–50 | 2–3 | 2 | only if sequential time-series | 1–2 | <code>dashboard</code> | | 50–200 | 3–5 | 2–3 | only if sequential time-series | 2–3 | <code>dashboard</code> | | 200+ | 3–5 | 3 | only if sequential time-series | 3–4 | <code>dashboard</code> |</p>
+<h4>Chart type selection</h4>
+<p>| Data pattern | Chart type | Notes | |---|---|---| | Trend over time, one series | <code>line</code> | Add <code>trendline=linear</code> to show direction on noisy series | | Trend over time, multiple components | <code>line</code> (multi-series) or <code>columnStacked</code> | Stacked when components sum to a meaningful total | | Comparison across categories in time order | <code>column</code> | Not <code>bar</code> — horizontal bars break left-to-right time reading | | Part-of-whole breakdown | <code>doughnut</code> | Prefer over <code>pie</code>: <code>chartType=pie</code> has a known LibreOffice blank-render regression | | Budget vs actual | <code>combo</code> with <code>combosplit=1</code> | First series as bars, rest as lines | | Correlation | <code>scatter</code> | X-axis via <code>categories</code> / <code>series1.categories</code> — <code>series1.xValues</code> is UNSUPPORTED |</p>
+<h4>Preset options</h4>
+<p><code>--prop preset=&lt;name&gt;</code> on every chart. Options: <code>minimal</code>, <code>dashboard</code>, <code>corporate</code>, <code>magazine</code>, <code>colorful</code>, <code>monochrome</code>, <code>dark</code>. Pick one and stay consistent across all charts on a single Dashboard — mixing presets reads as accidental.</p>
+<h4>Conditional formatting — semantic colors</h4>
+<p>Four CF rule types; each uses <code>--type &lt;shorthand&gt;</code> at <code>add</code> time:</p>
+<p>| Intent | <code>--type</code> | Typical props | |---|---|---| | Magnitude bar (sales, spend) | <code>databar</code> | <code>sqref=B2:B13 color=4472C4</code> — explicit <code>min=0 max=&lt;plausible&gt;</code> recommended for predictable scaling, but omitting them is valid (defaults to data min/max) | | Heat map (rates, growth) | <code>colorscale</code> | <code>sqref=D2:D13 mincolor=FFCDD2 midcolor=FFFFFF maxcolor=C8E6C9</code> | | Status indicator | <code>iconset</code> | <code>sqref=E2:E13 iconset=3Arrows</code> — see help for the full enum | | Custom business rule | <code>formulacf</code> | <code>sqref=B2:B13 'formula=$B2&gt;=100000' fill=C8E6C9 font.color=2E7D32</code> — <code>font.bold</code> works on CF too |</p>
+<p>Semantic colors to stay consistent within a dashboard:</p>
+<ul>
+<li>good / positive: fill <code>C8E6C9</code>, font <code>2E7D32</code></li>
+<li>bad / negative: fill <code>FFCDD2</code>, font <code>C62828</code></li>
+<li>neutral: fill <code>F5F5F5</code>, font <code>666666</code></li>
+</ul>
+<h4>KPI card anatomy</h4>
+<p>A card is a label cell + a value cell. The label is small gray (font.size=9, font.color=666666, bold); the value is large bold (font.size=24, bold=true, numFmt, font.color signals tone). One row of light fill (e.g. <code>F0F4FF</code>) across the card area gives the &quot;card&quot; read without building merged-cell scaffolds. Value column width must be sized to the largest cachedValue — never narrower than 22, often 26–32 for 8+ digit currency (see Requirements).</p>
+<h4>Chart width budget by title length</h4>
+<p>At the <code>dashboard</code> preset's default title font, the chart plot-box width (in column units) must stay ahead of the title string, or the title clips mid-word. Rule of thumb: <code>chart.width ≥ ceil(title.length × 0.18)</code>. A 35-character title (&quot;Department: Year-End Headcount vs Attrition Rate&quot;) needs <code>width ≥ 7</code>; be safer and use 10–12. If the anchor cannot be widened, shorten the title to ≤ 25 characters — clipped titles in a board-ready deliverable are indefensible.</p>
+<p><code>officecli get chart[N]</code> exposes numeric <code>width</code> (e.g. <code>width=480pt</code>) alongside <code>anchor</code> (e.g. <code>&quot;A6:K21&quot;</code>) at <code>.data.results[0].format</code>. Either is usable for Gate 2 — derive column span from anchor letters (A→K = 10 cols) when you need a column-unit budget.</p>
+<h4>Print-ready delivery (board-pack / investor-send / one-pager)</h4>
+<p>Triggers: ask contains &quot;print&quot; / &quot;一页&quot; / &quot;董事会&quot; / &quot;投资人&quot;. Four artefacts on the Dashboard sheet; non-Dashboard sheets hidden so the print pipeline emits one page only.</p>
+<pre><code># 1. Print_Area scoped to Dashboard (xlnm convention).
+officecli add &quot;$FILE&quot; / --type namedrange --prop name=_xlnm.Print_Area --prop scope=Dashboard --prop 'refersTo=Dashboard!$A$1:$H$36'
+# 2. fit-to-page on Dashboard.
+officecli raw-set &quot;$FILE&quot; /Dashboard --xpath &quot;//x:worksheet&quot; --action prepend --xml '&lt;sheetPr xmlns=&quot;http://schemas.openxmlformats.org/spreadsheetml/2006/main&quot;&gt;&lt;pageSetUpPr fitToPage=&quot;1&quot;/&gt;&lt;/sheetPr&gt;'
+# 3. Landscape page setup.
+officecli raw-set &quot;$FILE&quot; /Dashboard --xpath &quot;//x:sheetData&quot; --action insertafter --xml '&lt;pageSetup orientation=&quot;landscape&quot; paperSize=&quot;9&quot; fitToWidth=&quot;1&quot; fitToHeight=&quot;1&quot;/&gt;'
+# 4. Hide non-Dashboard sheets — Print_Area scope alone does NOT stop the print pipeline from emitting every visible sheet.
+for S in Sheet1 Summary; do
+  officecli raw-set &quot;$FILE&quot; /workbook --xpath &quot;//x:sheet[@name='$S']&quot; --action setattr --xml &quot;state=hidden&quot; || true
+done</code></pre>
+<p>Delete any <code>Print_Area</code> set on Data / Summary sheets — conflicting scopes emit multi-page output.</p>
+<h3>QA (REQUIRED — Delivery Gate)</h3>
+<p><strong>Assume there are problems. Your job is to find them.</strong> A chart that was rendered does not mean a chart that was meaningful. &quot;validate pass&quot; is not delivery; &quot;the Dashboard sheet reads like someone who knows the business made it&quot; is delivery.</p>
+<h4>Minimum cycle before &quot;done&quot;</h4>
+<p>Inherit the xlsx baseline (<code>view issues</code>, formula error queries, <code>validate</code>, HTML preview scan): → see officecli-xlsx §QA minimum cycle.</p>
+<p>Then run the dashboard-specific Delivery Gates. Each gate uses <strong>COUNT-then-if</strong> pattern with a <code>.data.*</code> wrapper — never chain <code>&amp;&amp; echo OK || echo FAIL</code>.</p>
+<p><strong>Gate 1 — KPI formula coverage.</strong> Every planned KPI cell must carry a formula. Adjust <code>-lt 2</code> to your plan (4 KPIs → <code>-lt 4</code>).</p>
+<pre><code>KPI_FORMULAS=$(officecli query &quot;$FILE&quot; 'Dashboard!:has(formula)' --json | jq '.data.results | length')
+[ &quot;$KPI_FORMULAS&quot; -lt 2 ] &amp;&amp; { echo &quot;REJECT Gate 1: $KPI_FORMULAS formula cells on Dashboard&quot;; exit 1; }</code></pre>
+<p><strong>Gate 2 — Chart count matches plan, every chart has data + plausible title width.</strong></p>
+<pre><code>CHART_COUNT=$(officecli query &quot;$FILE&quot; chart --json | jq '.data.results | length')
+[ &quot;$CHART_COUNT&quot; -lt 1 ] &amp;&amp; { echo &quot;REJECT Gate 2: zero charts&quot;; exit 1; }
+col_num () { local c=$1 n=0; for ((k=0;k&lt;${#c};k++)); do n=$((n*26+$(printf '%d' &quot;'${c:$k:1}&quot;)-64)); done; echo &quot;$n&quot;; }
+for i in $(seq 1 &quot;$CHART_COUNT&quot;); do
+  JSON=$(officecli get &quot;$FILE&quot; &quot;/Dashboard/chart[$i]&quot; --json)
+  SC=$(echo &quot;$JSON&quot; | jq -r '.data.results[0].format.seriesCount // 0')
+  TITLE=$(echo &quot;$JSON&quot; | jq -r '.data.results[0].format.title // &quot;&quot;')
+  ANCHOR=$(echo &quot;$JSON&quot; | jq -r '.data.results[0].format.anchor // &quot;&quot;')
+  [ &quot;$SC&quot; = &quot;0&quot; ] || [ -z &quot;$TITLE&quot; ] &amp;&amp; { echo &quot;REJECT Gate 2: chart[$i] seriesCount=$SC title='$TITLE'&quot;; exit 1; }
+  [ -z &quot;$ANCHOR&quot; ] &amp;&amp; continue
+  LCOL=$(echo &quot;${ANCHOR%%:*}&quot; | sed 's/[0-9]*$//'); RCOL=$(echo &quot;${ANCHOR##*:}&quot; | sed 's/[0-9]*$//')
+  SPAN=$(( $(col_num &quot;$RCOL&quot;) - $(col_num &quot;$LCOL&quot;) + 1 ))
+  MIN=$(( (${#TITLE} * 18 + 99) / 100 ))
+  [ &quot;$SPAN&quot; -lt &quot;$MIN&quot; ] &amp;&amp; { echo &quot;REJECT Gate 2: chart[$i] title=${#TITLE} chars needs width ≥ $MIN, anchor spans $SPAN&quot;; exit 1; }
+done</code></pre>
+<p>Narrower titles at preset <code>minimal</code> / <code>magazine</code> may clip earlier than the 0.18 factor — spot-check.</p>
+<p><strong>Gate 3 — Chart series names populated (no &quot;Series1&quot; in legend).</strong></p>
+<pre><code>for i in $(seq 1 &quot;$CHART_COUNT&quot;); do
+  BAD=$(officecli get &quot;$FILE&quot; &quot;/Dashboard/chart[$i]&quot; --json | jq '[.data.results[0].children[]? | select(.type == &quot;series&quot;) | select((.format.name // &quot;&quot;) | test(&quot;^Series[0-9]+$&quot;; &quot;i&quot;))] | length')
+  [ &quot;$BAD&quot; -gt 0 ] &amp;&amp; { echo &quot;REJECT Gate 3: chart[$i] has $BAD auto-named series&quot;; exit 1; }
+done</code></pre>
+<p><strong>Gate 4 — CF rules on Data sheet (10+ rows).</strong></p>
+<pre><code>CF_COUNT=$(officecli query &quot;$FILE&quot; conditionalformatting --json | jq '.data.results | length')
+[ &quot;$CF_COUNT&quot; -lt 1 ] &amp;&amp; { echo &quot;REJECT Gate 4: zero CF rules on 10+ row data sheet&quot;; exit 1; }</code></pre>
+<p>Note: <code>query conditionalformatting</code> is the canonical element name; <code>query cf</code> returns 0 (not an alias).</p>
+<p><strong>Gate 5 — activeTab and fullCalcOnLoad set.</strong> Compare against real Dashboard index (Dashboard-at-index-0 is a true pass).</p>
+<pre><code>DASH_IDX=$(officecli query &quot;$FILE&quot; sheet --json | jq '[.data.results[].path] | index(&quot;/Dashboard&quot;)')
+ACTIVE=$(officecli get &quot;$FILE&quot; /workbook --json | jq '.data.results[0].format.activeTab // -1')
+FULLCALC=$(officecli get &quot;$FILE&quot; /workbook --json | jq -r '.data.results[0].format[&quot;calc.fullCalcOnLoad&quot;] // false')
+[ &quot;$ACTIVE&quot; != &quot;$DASH_IDX&quot; ] &amp;&amp; { echo &quot;REJECT Gate 5: activeTab=$ACTIVE Dashboard=$DASH_IDX&quot;; exit 1; }
+[ &quot;$FULLCALC&quot; != &quot;true&quot; ] &amp;&amp; { echo &quot;REJECT Gate 5: calc.fullCalcOnLoad=$FULLCALC — stale caches will ship&quot;; exit 1; }</code></pre>
+<p><strong>Gate 6 — Placeholder sweep.</strong> No build-time tokens in rendered output.</p>
+<pre><code>LEAKS=$(officecli view &quot;$FILE&quot; text 2&gt;/dev/null | grep -niE '\{\{|\$fy\$|&lt;TODO&gt;|xxxx|TBD' | wc -l | tr -d ' ')
+[ &quot;$LEAKS&quot; -gt 0 ] &amp;&amp; { echo &quot;REJECT Gate 6: $LEAKS placeholder tokens&quot;; exit 1; }</code></pre>
+<p><strong>Gate 7 — Visual delivery floor (ported from xlsx).</strong> Run <code>officecli view &quot;$FILE&quot; html</code> and Read the returned HTML path. Confirm:</p>
+<ul>
+<li>No <code>###</code> in any Dashboard or Data cell (columns too narrow).</li>
+<li>No truncated KPI labels, sheet tab names, or chart titles.</li>
+<li>No placeholder tokens rendered as text (<code>$fy$24</code>, <code>{var}</code>, <code>&lt;TODO&gt;</code>, <code>xxxx</code>).</li>
+<li>Pie / doughnut slices render with distinct fill colors (if collapsed in LibreOffice, verify in the user's target viewer before declaring broken — → see officecli-xlsx §Known Issues/Renderer caveats).</li>
+<li>No empty chart anchors — every chart has a visible, plausible plot.</li>
+<li>Dashboard sheet opens first (tab highlighted, active area scrolled to top).</li>
+</ul>
+<p>If <code>view html</code> is blocked (renderer conflict, headless, port busy), Gate 7 is still <strong>mandatory</strong> — run ALL fallback checks:</p>
+<pre><code># a) Token / ### sweep.
+officecli view &quot;$FILE&quot; text 2&gt;/dev/null | grep -nE '###|\{\{|&lt;TODO&gt;|\$fy\$|xxxx' &amp;&amp; { echo &quot;REJECT Gate 7: tokens or ### present&quot;; exit 1; }
+# b) Per-KPI: cachedValue length × coef must fit col width. coef=0.55 fit-to-page, 0.85 otherwise.
+for CELL in A2 C2 E2 G2; do
+  CV=$(officecli get &quot;$FILE&quot; &quot;/Dashboard/$CELL&quot; --json | jq -r '.data.results[0].format.cachedValue // .data.results[0].text // &quot;&quot;')
+  W=$(officecli get &quot;$FILE&quot; &quot;/Dashboard/col[${CELL%%[0-9]*}]&quot; --json | jq -r '.data.results[0].format.width // 0')
+  CAP=$(echo &quot;$W * 0.55&quot; | bc -l | awk '{print int($1)}')
+  [ &quot;${#CV}&quot; -gt &quot;$CAP&quot; ] &amp;&amp; { echo &quot;REJECT Gate 7: $CELL '$CV' (${#CV} chars) &gt; cap $CAP&quot;; exit 1; }
+done
+# c) Rerun Gate 2 title × 0.18 ≤ anchor span.  d) Log which fallback was used and why.</code></pre>
+<p>Gate 7 must <strong>NEVER</strong> be skipped — skipping ships <code>###</code> to the user.</p>
+<p>If scene keywords include print / 一页 / board / 投资人 / 董事会, extend Gate 7 with a structural print-scope check:</p>
+<pre><code>if echo &quot;$USER_REQ&quot; | grep -qiE 'print|一页|投资人|董事会|board'; then
+  # Every non-Dashboard sheet must be hidden or veryHidden.
+  # query sheet --json carries the name in .preview (no .name/.state); visibility lives in
+  # each sheet's own get .format.hidden (absent =&gt; visible), so iterate + probe per sheet.
+  LEAKING=&quot;&quot;
+  while IFS=$'\t' read -r SPATH SNAME; do
+    [ &quot;$SNAME&quot; = &quot;Dashboard&quot; ] &amp;&amp; continue
+    HIDDEN=$(officecli get &quot;$FILE&quot; &quot;$SPATH&quot; --json | jq -r '.data.results[0].format.hidden // false')
+    [ &quot;$HIDDEN&quot; != &quot;true&quot; ] &amp;&amp; LEAKING=&quot;$LEAKING $SNAME&quot;
+  done &lt; &lt;(officecli query &quot;$FILE&quot; 'sheet' --json | jq -r '.data.results[] | [.path, .preview] | @tsv')
+  [ -n &quot;$LEAKING&quot; ] &amp;&amp; { echo &quot;REJECT Gate 7 print-scope: visible non-Dashboard sheet(s):$LEAKING — hide before delivery&quot;; exit 1; }
+  # Dashboard must carry an explicit Print_Area named range.
+  PA=$(officecli query &quot;$FILE&quot; 'namedrange[name=&quot;_xlnm.Print_Area&quot;]' --json | jq '.data.results | length')
+  [ &quot;$PA&quot; -ge 1 ] || { echo &quot;REJECT Gate 7 print-scope: no _xlnm.Print_Area set&quot;; exit 1; }
+fi</code></pre>
+<p>The user opens the file in their target viewer (Office / WPS / Numbers) for the final print preview — the skill does not render export artefacts.</p>
+<p><strong>Gate 8 — Formula sanity (cachedValue real, not stale/error).</strong> <code>fullCalcOnLoad=true</code> refreshes at runtime, NOT build-time cache — so every formula cell must carry a non-empty, non-zero, non-error <code>cachedValue</code> now.</p>
+<pre><code>for CELL in A2 C2 E2 G2; do
+  JSON=$(officecli get &quot;$FILE&quot; &quot;/Dashboard/$CELL&quot; --json)
+  [ -z &quot;$(echo &quot;$JSON&quot; | jq -r '.data.results[0].format.formula // &quot;&quot;')&quot; ] &amp;&amp; continue
+  CV=$(echo &quot;$JSON&quot; | jq -r '.data.results[0].format.cachedValue // &quot;&quot;')
+  case &quot;$CV&quot; in
+    &quot;&quot; | &quot;0&quot; | &quot;#DIV/0!&quot; | &quot;#REF!&quot; | &quot;#N/A&quot; | &quot;#VALUE!&quot; | &quot;#NAME?&quot; | &quot;null&quot;)
+      echo &quot;REJECT Gate 8: $CELL cachedValue='$CV' — re-issue formula or close+reopen&quot;; exit 1 ;;
+  esac
+done</code></pre>
+<p>If a KPI is genuinely zero (e.g. &quot;terminations this quarter&quot; = 0), whitelist it in the loop and document — default assumption is &quot;zero is broken&quot;.</p>
+<p>If anything fails, fix at source, re-run the full cycle.</p>
+<h4>Honest limits</h4>
+<p>Scatter charts do not accept <code>series1.xValues</code> (UNSUPPORTED) — feed the x-axis via <code>categories</code> / <code>series1.categories</code>. LibreOffice chart color drift / pie-slice collapse / checkbox double-box are viewer artifacts — spot-check in Office / WPS / Numbers first.</p>
+<h3>Reference</h3>
+<ul>
+<li><strong>Shorthand <code>--type</code> at <code>add</code>:</strong> <code>chart</code>, <code>sparkline</code>, <code>databar</code>, <code>colorscale</code>, <code>iconset</code>, <code>formulacf</code>. CF rules map to <code>help xlsx conditionalformatting</code>; path suffix <code>/Sheet/cf[N]</code>.</li>
+<li><strong>Full schemas live in help:</strong> <code>officecli help xlsx chart</code> / <code>sparkline</code> / <code>conditionalformatting</code>. This skill does not mirror them.</li>
+<li><strong>DeferredAddKeys (add-only):</strong> <code>combosplit</code>, <code>holesize</code>. See D-1. (<code>preset</code>, <code>trendline</code>, <code>referenceline</code>, <code>axisNumFmt</code> now work on <code>set</code> too — help shows <code>[add/set]</code>.)</li>
+<li><strong>Build order:</strong> charts + sparklines + CF + tabColors first → <code>calc.fullCalcOnLoad=true</code> via high-level <code>set</code> → <code>raw-set activeTab</code> <strong>LAST</strong> (after all sheets exist).</li>
+</ul>
+<h3>Known Issues &amp; Pitfalls</h3>
+<h4>Dashboard-specific</h4>
+<p>| # | Issue | Mitigation | |---|---|---| | D-1 | <code>combosplit</code> is a DeferredAddKey — works on <code>add</code> only. (<code>preset</code>, <code>referenceline</code>, <code>trendline</code>, <code>axisNumFmt</code> now apply on <code>set</code> too — help shows <code>[add/set]</code>.) | Set <code>combosplit</code> at <code>add</code> time; cannot apply after the fact — remove + re-add. The other four can be applied or changed post-creation via <code>set</code>. | | D-2 | <code>referenceline</code> format is <code>value:color:label:dash</code> (color BEFORE label). <code>&quot;0:Break-Even:FF0000:dash&quot;</code> fails <code>Invalid color value</code>. | Order is value, color, label, dash. | | D-3 | Scatter charts do NOT accept <code>series1.xValues</code> (UNSUPPORTED). Feed the x-axis through <code>categories</code> / <code>series1.categories</code>. | <code>--prop series1.categories=&quot;Sheet1!A2:A13&quot;</code> (or <code>--prop categories=&quot;Sheet1!A2:A13&quot;</code>) | | D-4 | <code>formulacf</code> honors <code>font.bold</code> / <code>font.italic</code> (written to the dxf font and surfaced on readback), alongside <code>fill</code> and <code>font.color</code>. | Use any of <code>fill</code> / <code>font.color</code> / <code>font.bold</code> / <code>font.italic</code> to signal a CF rule. | | D-5 | Dashboard column widths default to 8.43 — KPI values at 24pt bold show <code>###</code> | Size by cachedValue bracket: 4–6 digits → 22–24; 7–9 digits (million) → 26–30; 10+ digits (亿 / billion) → 32–36; 百亿 / 10-digit + currency symbol + fit-to-page landscape → <strong>40–44</strong>. Formula <code>ceil((visible_chars+2)<em>1.3)</code> is a starting point; always verify via Gate 7 fallback b). Sparkline columns: 12. | | D-6 | <code>raw-set activeTab</code> must be the LAST mutation. Inserting before all sheets exist shifts indices. | Finish all sheets / charts / CF / sparklines / tabColors, then <code>raw-set</code>. | | D-7 | <code>calc.fullCalcOnLoad</code> via <code>raw-set</code> creates duplicate <code>&lt;calcPr&gt;</code> → validate fails | Use <code>officecli set &quot;$FILE&quot; / --prop calc.fullCalcOnLoad=true</code>. | | D-8 | LibreOffice does not evaluate hidden-column formulas at render → charts referencing hidden cells render blank | Aggregate into a visible Summary sheet, chart reads from Summary. Hide only columns that are not chart sources. | | D-9 | <code>chartType=pie</code> blank-renders in LibreOffice | Use <code>doughnut</code> as the safe substitute for part-of-whole breakdowns. | | D-10 | <code>SUMIFS</code> / <code>AVERAGEIFS</code> with date criteria fails silently if the criterion is a string | Wrap with <code>DATE()</code> or <code>DATEVALUE()</code>: <code>=SUMIFS(B2:B13,A2:A13,DATE(2025,1,5))</code>. | | D-11 | Summary sheet percentage formulas display as raw decimals (0.098) without <code>numFmt</code> | Set <code>numFmt=&quot;0.0%&quot;</code> at the same <code>set</code> call as the formula. | | D-12 | <code>import --header</code> sets freeze + AutoFilter but does NOT set column widths. | Set widths on <code>col[]</code>. <code>numFmt</code> on a <code>col[]</code> path now applies a column-level style (<code>&lt;col s=...&gt;</code>, schema-valid, reads back as <code>numberformat</code>); it formats blank cells in the column. Cells with their own style still need a per-cell-range <code>numFmt</code>. | | D-13 | Sparkline <code>highpoint</code> is a bool (highlight on/off), not a color. <code>--prop highpoint=FF0000</code> errors <code>Invalid boolean value</code> | <code>--prop highPoint=true --prop highMarkerColor=FF0000</code>. Same pattern for lowPoint / firstPoint / lastPoint and their </em>MarkerColor. | | D-14 | Sparkline cross-sectional data is meaningless (a region or department has no ordering) | Skip sparklines unless rows are a sequential time-series (dates, months, quarters). | | D-15 | Empty chart <code>add</code> is rejected (<code>Chart requires a 'data' property</code>) at the CLI layer — legacy skills that relied on silent accept will fail here | Always provide <code>series1.values=</code> / <code>dataRange=</code> / inline <code>data=</code> at chart <code>add</code> time. Treat Gate 2 seriesCount check as a belt-and-braces verification. | | D-16 | <code>fullCalcOnLoad=true</code> guarantees a <strong>runtime</strong> recalc when the end user opens the file; it does NOT refresh the build-time <code>cachedValue</code> in XML. Build sequence <code>set B=100 → set E==B+D → fix B=150</code> leaves <code>E.cachedValue</code> stale (board sees &quot;Net Change = 0&quot;). | After all upstream edits are final, re-issue every downstream formula (<code>officecli set &quot;$FILE&quot; /Sheet/E2 --prop formula==B2+D2</code>) OR <code>close</code> + re-open the file. Gate 8 verifies. | | D-17 | The built-in calc engine does NOT evaluate <code>SUMPRODUCT</code> with array-predicate form <code>SUMPRODUCT((A2:A97=X)<em>C2:C97</em>D2:D97)</code> — cachedValue stays <code>0</code>/<code>null</code>, Gate 8 rejects. Runtime Excel / WPS compute fine, but board-delivered XLSX with stale cache still ships <code>0</code>. | Rewrite as helper column + <code>SUMIF</code>: <code>F2==C2*D2</code> on source sheet, then <code>=SUMIF(B:B, &quot;Region X&quot;, F:F)</code>. Or pre-aggregate in Summary sheet and chart from there. |</p>
+<h4>Inherited (pointer only)</h4>
+<p>Cross-sheet <code>!</code> trap, chart <code>anchor</code> / series immutability after create → see officecli-xlsx §Known Issues.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: officecli-data-dashboard\ndisplay_name: officecli-data-dashboard\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# officecli-data-dashboard - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `officecli-data-dashboard` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nUse this skill to build a multi-element Excel dashboard — Dashboard sheet on open, multiple formula-driven KPI cards, multiple charts, sparklines, and conditional formatting — from CSV or tabular input. Trigger on: 'dash\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the officecli-data-dashboard skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `officecli-data-dashboard` |\n| Canonical name | `officecli-data-dashboard` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\nUse this skill to build a multi-element Excel dashboard — Dashboard sheet on open, multiple formula-driven KPI cards, multiple charts, sparklines, and conditional formatting — from CSV or tabular input. Trigger on: 'dash\n\n\n## Original SKILL.md\n\n---\nname: officecli-data-dashboard\ndescription: \"Use this skill to build a multi-element Excel dashboard — Dashboard sheet on open, multiple formula-driven KPI cards, multiple charts, sparklines, and conditional formatting — from CSV or tabular input. Trigger on: 'dashboard', 'KPI dashboard', 'analytics dashboard', 'executive dashboard', 'metrics dashboard', 'CSV to dashboard', 'data visualization'. Output is a single .xlsx. Scene-layer on officecli-xlsx: inherits every xlsx hard rule. DO NOT invoke for: a single budget tracker / one-sheet CSV-with-formatting (use xlsx), a 3-statement / DCF / LBO financial model (use financial-model), a weekly report with ≤ 1 chart and \u003c 10 rows (use xlsx).\"\n---\n\n# Data Dashboard (scene-layer on officecli-xlsx)\n\nA dashboard is not \"a spreadsheet with charts\". It is a composition: **one Dashboard sheet the user lands on** with formula-driven KPI cards, cell-range-linked charts, sparklines, and semantic conditional formatting. Everything else (raw data, aggregations) is upstream infrastructure the user should never need to open. This skill teaches the composition pattern. Everything about the xlsx engine — cells, formulas, batch JSON, shell quoting, validate, HTML preview — comes from `officecli-xlsx` and is not re-taught here.\n\n## Setup\n\nIf `officecli` is missing:\n\n- **macOS / Linux**: `curl -fsSL https://d.officecli.ai/install.sh | bash`\n- **Windows (PowerShell)**: `irm https://d.officecli.ai/install.ps1 | iex`\n\nVerify with `officecli --version` (open a new terminal if PATH hasn't picked up). If install fails, download a binary from https://github.com/iOfficeAI/OfficeCLI/releases.\n\n## ⚠️ Help-First Rule\n\n**When a prop name, enum value, or alias is uncertain, consult help before guessing.**\n\n```bash\nofficecli help xlsx                          # element list\nofficecli help xlsx chart                    # full schema for charts\nofficecli help xlsx sparkline                # sparklines\nofficecli help xlsx conditionalformatting    # all CF rule types\n```\n\nHelp reflects the installed CLI version. When this skill and help disagree, **help wins**. DeferredAddKeys (`combosplit`, `holesize`) work on `add` only — see Reference.\n\n## Mental Model & Inheritance\n\nThis skill **inherits every xlsx hard rule** from `officecli-xlsx` — shell quoting, zero formula errors, visual delivery floor, batch JSON shape (`{\"command\":\"set\"|\"add\",\"path\":...,\"props\":{...}}` — key is `command`, NOT `action`), batch JSON dotted-name rule, chart data-feed forms, batch+resident limits, `validate` discipline. Read officecli-xlsx first; honour those rules, do not re-teach them here.\n\n**Reverse handoff — do NOT use this skill when:**\n\n- The ask is a **single-sheet CSV-with-formatting tracker** (no Dashboard sheet, no KPI cards, ≤ 1 chart) → go back to `officecli-xlsx`.\n- The ask is a **3-statement / DCF / LBO financial model** with blue-inputs / black-formulas / cross-sheet drivers → use `officecli-financial-model`.\n- The ask is a **weekly status report** with one SUMIF summary and one chart over \u003c 10 rows → `officecli-xlsx`.\n\nThis skill only accepts: \"a Dashboard sheet the user opens first, multiple KPI cards, multiple charts, some CF / sparklines\".\n\n## Shell & Execution Discipline\n\n→ see officecli-xlsx §Shell & Execution Discipline for the baseline (quoting, heredoc for `!`, incremental execution).\n\nTwo increments specific to dashboards:\n\n- **Long chart `add` commands exceed 180 chars.** Always split across lines with trailing `\\`; never pack a chart command onto a single line. The longer the command, the higher the chance a shell-escape bug hides inside it.\n- **Multi-instance counts use `query --json | jq length`, never `raw-get | grep -c`.** Example: `officecli query \"$FILE\" chart --json | jq '.data.results | length'` for \"how many charts do I have?\".\n\n## Core Principles\n\nFive non-negotiable principles. If any one is violated the output is not a dashboard, it is a spreadsheet that happens to have a chart.\n\n1. **Formula-driven KPIs.** Every KPI value on the Dashboard sheet is a formula — `SUM`, `AVERAGE`, `IFERROR((...-...)/...,0)`, whatever — referring to cells on the Data / Summary sheet. Never hardcode a computed number. When the underlying data changes tomorrow, KPIs update on open.\n\n2. **Cell-range references for charts.** Every chart series reads from a cell range: `series1.values=\"Sheet1!B2:B13\"`. Inline `data=\"Revenue:100,200,300\"` is for a 5-minute demo, not a delivered dashboard. The one exception: data requires an aggregation Excel cannot express (rare) — document the exception in a comment cell.\n\n3. **Dashboard-first architecture.** KPI label cells, KPI value cells, charts, sparklines all live on the **Dashboard** sheet — the single sheet a user lands on. Raw imports and `SUMIFS` rollups live on Data / Summary sheets, upstream of the Dashboard. The user should never need to switch tabs to find the answer.\n\n4. **Visible cells only for chart sources.** LibreOffice does not evaluate formulas in hidden columns or hidden sheets at render time. A chart whose `series1.values` points at a hidden-column `SUMIFS` renders blank. Pattern: aggregate into a **visible** Summary sheet, point charts at Summary cells, hide only helper columns that are not chart sources.\n\n5. **Data-size-aware complexity.** A 10-row dataset does not get 5 KPIs and 4 charts. A 200-row dataset does not get 1 KPI and 1 chart. Scale up the composition with the input (table in §Design Ideas). Overbuilding is as wrong as underbuilding.\n\n## Requirements\n\nAll `officecli-xlsx` requirements apply (→ see officecli-xlsx §Requirements for Outputs). Dashboards add these:\n\n- **Dashboard sheet is the active tab on open.** Confirm 0-based sheet index with `officecli query \"$FILE\" sheet` BEFORE filling `activeTab=\"N\"`. Never guess the index.\n- **`calc.fullCalcOnLoad=true`.** Set via `officecli set \"$FILE\" / --prop calc.fullCalcOnLoad=true`. Do NOT `raw-set` `\u003ccalcPr>` — it produces duplicate elements that fail validate.\n- **Refresh downstream cachedValue after every upstream edit.** `fullCalcOnLoad=true` schedules runtime recalc only; it does NOT refresh build-time `cachedValue`. After `set B=100 → set E==B+D → fix B=150`, E is stale until you re-issue E's formula (or close/reopen). Stale cache ships \"Net Change = 0\" to the board.\n- **Every chart has a descriptive title and every series has a name.** `\"Series1\"` in a legend is unfinished work.\n- **Every KPI value cell has a formula.** Verifiable: `officecli query \"$FILE\" 'Dashboard!:has(formula)' --json | jq '.data.results | length'` should equal your planned KPI count.\n- **Header row fill on every data sheet.** Data sheet, Summary sheet, and any secondary data sheet need row 1 filled (e.g., `fill=1F3864 + font.color=FFFFFF + font.bold=true`).\n- **10+ rows on Data sheet → ≥ 1 CF rule on a numeric column.** A 20-row table with zero visual scanning aid is a quality miss.\n- **Dashboard value columns sized to the widest expected cachedValue — not a fixed 22.** Rule of thumb at 24pt bold + currency numFmt: `width ≈ ceil((visible_chars + 2) × 1.3)`. A KPI holding `¥1,958,414,250` (14 visible chars with currency + commas) needs `width ≥ 28`; a 4-digit KPI still needs `width ≥ 22` as the floor. Hardcoding `22` for a 10+ digit KPI is how `###` ships to the user.\n- **Sparkline row height ≥ 20.** A sparkline in a default 15pt row is a flat squiggle — set `/Dashboard/row[N] height=22` (or 24 when paired with a 24pt KPI value cell in the same row).\n- **Print deliverables set `_xlnm.Print_Area` scoped to Dashboard** + hide non-Dashboard sheets + add `\u003cpageSetup fitToPage/>`. Without all three, the print pipeline emits every sheet and Dashboard lands on page 2+. See §Print-ready delivery for the exact commands.\n\n## Quick Start\n\nMinimal viable dashboard: 12-month revenue CSV → 4 KPIs + 1 line chart + activeTab + fullCalcOnLoad. Adapt the numbers, don't copy-paste blind. Broken into phases so a single failed phase is obvious.\n\n**Phase 1 — Data sheet: create, import, format.**\n\n```bash\nFILE=my_dashboard.xlsx\nofficecli create \"$FILE\"\nofficecli import \"$FILE\" /Sheet1 --file sales.csv --header\nofficecli set \"$FILE\" '/Sheet1/col[A]' --prop width=12\nofficecli set \"$FILE\" '/Sheet1/col[B]' --prop width=15\nofficecli set \"$FILE\" '/Sheet1/B2:B13' --prop numFmt='$#,##0'\nofficecli set \"$FILE\" '/Sheet1/A1:B1' --prop fill=1F3864 --prop font.color=FFFFFF --prop font.bold=true\n```\n\n**Phase 2 — Dashboard sheet + one KPI card.**\n\n```bash\nofficecli add \"$FILE\" / --type sheet --prop name=Dashboard\nofficecli set \"$FILE\" '/Dashboard/col[A]' --prop width=22\nofficecli set \"$FILE\" '/Dashboard/col[B]' --prop width=12\nofficecli set \"$FILE\" /Dashboard/A1 --prop value=\"Total Revenue\" --prop font.size=9 --prop font.color=666666 --prop bold=true\nofficecli set \"$FILE\" /Dashboard/A2 --prop 'formula==SUM(Sheet1!B2:B13)' --prop numFmt='$#,##0' --prop font.size=24 --prop bold=true --prop font.color=2E7D32\n```\n\n**Phase 3 — Sparkline + chart.**\n\n```bash\nofficecli add \"$FILE\" /Dashboard --type sparkline --prop cell=B2 --prop range='Sheet1!B2:B13' --prop type=line --prop color=4472C4 --prop highPoint=true --prop highMarkerColor=FF0000\nofficecli add \"$FILE\" /Dashboard --type chart \\\n  --prop chartType=line \\\n  --prop title=\"Revenue Trend\" \\\n  --prop series1.name=\"Revenue\" \\\n  --prop series1.values='Sheet1!B2:B13' \\\n  --prop series1.categories='Sheet1!A2:A13' \\\n  --prop preset=dashboard --prop axisNumFmt='$#,##0' \\\n  --prop x=0 --prop y=5 --prop width=10 --prop height=15\n```\n\n**Phase 4 — fullCalcOnLoad → activeTab (LAST) → close → validate.**\n\n```bash\nofficecli set \"$FILE\" / --prop calc.fullCalcOnLoad=true\n\n# Resolve Dashboard's 0-based index from the actual sheet list — never hardcode.\nDASH_IDX=$(officecli query \"$FILE\" sheet --json \\\n  | jq '[.data.results[].path] | index(\"/Dashboard\")')\nofficecli raw-set \"$FILE\" /workbook --xpath \"//x:sheets\" --action insertbefore \\\n  --xml \"\u003cbookViews xmlns=\\\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\\\">\u003cworkbookView activeTab=\\\"$DASH_IDX\\\" />\u003c/bookViews>\"\nofficecli close \"$FILE\"\nofficecli validate \"$FILE\"\n```\n\nVerified end-to-end on a 12-row revenue CSV: `validate` reports no errors, Dashboard opens first, `Dashboard/A2.cachedValue` resolves (2,075,000 for the test data), chart renders with values linked.\n\n## Design Ideas\n\nOptions, not templates. The user's data and audience drive the choices.\n\n### Layout patterns (pick one, stay consistent)\n\n**Pattern 1 — executive summary** (board packs): KPI strip A1:H4, charts stack from row 6.\n```\n┌ KPI1 │ KPI2 │ KPI3 │ KPI4 ┐  rows 1-4\n├──────┴──────┴──────┴──────┤\n│     Chart 1 (wide)        │  rows 6-18\n├───────────────┬───────────┤\n│   Chart 2     │  Chart 3  │  rows 20-32\n```\n\n**Pattern 2 — ops console** (live ops): KPIs down A:B, charts fill C:L.\n```\n│ KPI1 │                   │\n│ KPI2 │    Chart 1        │  rows 1-12\n│ KPI3 │                   │\n│ KPI4 ├───────────────────┤\n│ KPI5 │    Chart 2        │  rows 14-26\n```\n\n**Pattern 3 — scorecard** (≥ 6 KPIs, no dominant chart): grid of 2×3 cards (label / value / sparkline).\n```\n│ KPI1 │ KPI2 │ KPI3 │  rows 1-4\n│ KPI4 │ KPI5 │ KPI6 │  rows 5-8\n```\n\n### Complexity scaling by data size\n\n| Rows | KPIs | Charts | Sparklines | CF rules | Preset |\n|---|---|---|---|---|---|\n| \u003c 10 | 1–2 | 1 | skip | 0–1 | `minimal` |\n| 10–50 | 2–3 | 2 | only if sequential time-series | 1–2 | `dashboard` |\n| 50–200 | 3–5 | 2–3 | only if sequential time-series | 2–3 | `dashboard` |\n| 200+ | 3–5 | 3 | only if sequential time-series | 3–4 | `dashboard` |\n\n### Chart type selection\n\n| Data pattern | Chart type | Notes |\n|---|---|---|\n| Trend over time, one series | `line` | Add `trendline=linear` to show direction on noisy series |\n| Trend over time, multiple components | `line` (multi-series) or `columnStacked` | Stacked when components sum to a meaningful total |\n| Comparison across categories in time order | `column` | Not `bar` — horizontal bars break left-to-right time reading |\n| Part-of-whole breakdown | `doughnut` | Prefer over `pie`: `chartType=pie` has a known LibreOffice blank-render regression |\n| Budget vs actual | `combo` with `combosplit=1` | First series as bars, rest as lines |\n| Correlation | `scatter` | X-axis via `categories` / `series1.categories` — `series1.xValues` is UNSUPPORTED |\n\n### Preset options\n\n`--prop preset=\u003cname>` on every chart. Options: `minimal`, `dashboard`, `corporate`, `magazine`, `colorful`, `monochrome`, `dark`. Pick one and stay consistent across all charts on a single Dashboard — mixing presets reads as accidental.\n\n### Conditional formatting — semantic colors\n\nFour CF rule types; each uses `--type \u003cshorthand>` at `add` time:\n\n| Intent | `--type` | Typical props |\n|---|---|---|\n| Magnitude bar (sales, spend) | `databar` | `sqref=B2:B13 color=4472C4` — explicit `min=0 max=\u003cplausible>` recommended for predictable scaling, but omitting them is valid (defaults to data min/max) |\n| Heat map (rates, growth) | `colorscale` | `sqref=D2:D13 mincolor=FFCDD2 midcolor=FFFFFF maxcolor=C8E6C9` |\n| Status indicator | `iconset` | `sqref=E2:E13 iconset=3Arrows` — see help for the full enum |\n| Custom business rule | `formulacf` | `sqref=B2:B13 'formula=$B2>=100000' fill=C8E6C9 font.color=2E7D32` — `font.bold` works on CF too |\n\nSemantic colors to stay consistent within a dashboard:\n\n- good / positive: fill `C8E6C9`, font `2E7D32`\n- bad / negative: fill `FFCDD2`, font `C62828`\n- neutral: fill `F5F5F5`, font `666666`\n\n### KPI card anatomy\n\nA card is a label cell + a value cell. The label is small gray (font.size=9, font.color=666666, bold); the value is large bold (font.size=24, bold=true, numFmt, font.color signals tone). One row of light fill (e.g. `F0F4FF`) across the card area gives the \"card\" read without building merged-cell scaffolds. Value column width must be sized to the largest cachedValue — never narrower than 22, often 26–32 for 8+ digit currency (see Requirements).\n\n### Chart width budget by title length\n\nAt the `dashboard` preset's default title font, the chart plot-box width (in column units) must stay ahead of the title string, or the title clips mid-word. Rule of thumb: `chart.width ≥ ceil(title.length × 0.18)`. A 35-character title (\"Department: Year-End Headcount vs Attrition Rate\") needs `width ≥ 7`; be safer and use 10–12. If the anchor cannot be widened, shorten the title to ≤ 25 characters — clipped titles in a board-ready deliverable are indefensible.\n\n`officecli get chart[N]` exposes numeric `width` (e.g. `width=480pt`) alongside `anchor` (e.g. `\"A6:K21\"`) at `.data.results[0].format`. Either is usable for Gate 2 — derive column span from anchor letters (A→K = 10 cols) when you need a column-unit budget.\n\n### Print-ready delivery (board-pack / investor-send / one-pager)\n\nTriggers: ask contains \"print\" / \"一页\" / \"董事会\" / \"投资人\". Four artefacts on the Dashboard sheet; non-Dashboard sheets hidden so the print pipeline emits one page only.\n\n```bash\n# 1. Print_Area scoped to Dashboard (xlnm convention).\nofficecli add \"$FILE\" / --type namedrange --prop name=_xlnm.Print_Area --prop scope=Dashboard --prop 'refersTo=Dashboard!$A$1:$H$36'\n# 2. fit-to-page on Dashboard.\nofficecli raw-set \"$FILE\" /Dashboard --xpath \"//x:worksheet\" --action prepend --xml '\u003csheetPr xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\">\u003cpageSetUpPr fitToPage=\"1\"/>\u003c/sheetPr>'\n# 3. Landscape page setup.\nofficecli raw-set \"$FILE\" /Dashboard --xpath \"//x:sheetData\" --action insertafter --xml '\u003cpageSetup orientation=\"landscape\" paperSize=\"9\" fitToWidth=\"1\" fitToHeight=\"1\"/>'\n# 4. Hide non-Dashboard sheets — Print_Area scope alone does NOT stop the print pipeline from emitting every visible sheet.\nfor S in Sheet1 Summary; do\n  officecli raw-set \"$FILE\" /workbook --xpath \"//x:sheet[@name='$S']\" --action setattr --xml \"state=hidden\" || true\ndone\n```\n\nDelete any `Print_Area` set on Data / Summary sheets — conflicting scopes emit multi-page output.\n\n## QA (REQUIRED — Delivery Gate)\n\n**Assume there are problems. Your job is to find them.** A chart that was rendered does not mean a chart that was meaningful. \"validate pass\" is not delivery; \"the Dashboard sheet reads like someone who knows the business made it\" is delivery.\n\n### Minimum cycle before \"done\"\n\nInherit the xlsx baseline (`view issues`, formula error queries, `validate`, HTML preview scan): → see officecli-xlsx §QA minimum cycle.\n\nThen run the dashboard-specific Delivery Gates. Each gate uses **COUNT-then-if** pattern with a `.data.*` wrapper — never chain `&& echo OK || echo FAIL`.\n\n**Gate 1 — KPI formula coverage.** Every planned KPI cell must carry a formula. Adjust `-lt 2` to your plan (4 KPIs → `-lt 4`).\n\n```bash\nKPI_FORMULAS=$(officecli query \"$FILE\" 'Dashboard!:has(formula)' --json | jq '.data.results | length')\n[ \"$KPI_FORMULAS\" -lt 2 ] && { echo \"REJECT Gate 1: $KPI_FORMULAS formula cells on Dashboard\"; exit 1; }\n```\n\n**Gate 2 — Chart count matches plan, every chart has data + plausible title width.**\n\n```bash\nCHART_COUNT=$(officecli query \"$FILE\" chart --json | jq '.data.results | length')\n[ \"$CHART_COUNT\" -lt 1 ] && { echo \"REJECT Gate 2: zero charts\"; exit 1; }\ncol_num () { local c=$1 n=0; for ((k=0;k\u003c${#c};k++)); do n=$((n*26+$(printf '%d' \"'${c:$k:1}\")-64)); done; echo \"$n\"; }\nfor i in $(seq 1 \"$CHART_COUNT\"); do\n  JSON=$(officecli get \"$FILE\" \"/Dashboard/chart[$i]\" --json)\n  SC=$(echo \"$JSON\" | jq -r '.data.results[0].format.seriesCount // 0')\n  TITLE=$(echo \"$JSON\" | jq -r '.data.results[0].format.title // \"\"')\n  ANCHOR=$(echo \"$JSON\" | jq -r '.data.results[0].format.anchor // \"\"')\n  [ \"$SC\" = \"0\" ] || [ -z \"$TITLE\" ] && { echo \"REJECT Gate 2: chart[$i] seriesCount=$SC title='$TITLE'\"; exit 1; }\n  [ -z \"$ANCHOR\" ] && continue\n  LCOL=$(echo \"${ANCHOR%%:*}\" | sed 's/[0-9]*$//'); RCOL=$(echo \"${ANCHOR##*:}\" | sed 's/[0-9]*$//')\n  SPAN=$(( $(col_num \"$RCOL\") - $(col_num \"$LCOL\") + 1 ))\n  MIN=$(( (${#TITLE} * 18 + 99) / 100 ))\n  [ \"$SPAN\" -lt \"$MIN\" ] && { echo \"REJECT Gate 2: chart[$i] title=${#TITLE} chars needs width ≥ $MIN, anchor spans $SPAN\"; exit 1; }\ndone\n```\n\nNarrower titles at preset `minimal` / `magazine` may clip earlier than the 0.18 factor — spot-check.\n\n**Gate 3 — Chart series names populated (no \"Series1\" in legend).**\n\n```bash\nfor i in $(seq 1 \"$CHART_COUNT\"); do\n  BAD=$(officecli get \"$FILE\" \"/Dashboard/chart[$i]\" --json | jq '[.data.results[0].children[]? | select(.type == \"series\") | select((.format.name // \"\") | test(\"^Series[0-9]+$\"; \"i\"))] | length')\n  [ \"$BAD\" -gt 0 ] && { echo \"REJECT Gate 3: chart[$i] has $BAD auto-named series\"; exit 1; }\ndone\n```\n\n**Gate 4 — CF rules on Data sheet (10+ rows).**\n\n```bash\nCF_COUNT=$(officecli query \"$FILE\" conditionalformatting --json | jq '.data.results | length')\n[ \"$CF_COUNT\" -lt 1 ] && { echo \"REJECT Gate 4: zero CF rules on 10+ row data sheet\"; exit 1; }\n```\n\nNote: `query conditionalformatting` is the canonical element name; `query cf` returns 0 (not an alias).\n\n**Gate 5 — activeTab and fullCalcOnLoad set.** Compare against real Dashboard index (Dashboard-at-index-0 is a true pass).\n\n```bash\nDASH_IDX=$(officecli query \"$FILE\" sheet --json | jq '[.data.results[].path] | index(\"/Dashboard\")')\nACTIVE=$(officecli get \"$FILE\" /workbook --json | jq '.data.results[0].format.activeTab // -1')\nFULLCALC=$(officecli get \"$FILE\" /workbook --json | jq -r '.data.results[0].format[\"calc.fullCalcOnLoad\"] // false')\n[ \"$ACTIVE\" != \"$DASH_IDX\" ] && { echo \"REJECT Gate 5: activeTab=$ACTIVE Dashboard=$DASH_IDX\"; exit 1; }\n[ \"$FULLCALC\" != \"true\" ] && { echo \"REJECT Gate 5: calc.fullCalcOnLoad=$FULLCALC — stale caches will ship\"; exit 1; }\n```\n\n**Gate 6 — Placeholder sweep.** No build-time tokens in rendered output.\n\n```bash\nLEAKS=$(officecli view \"$FILE\" text 2>/dev/null | grep -niE '\\{\\{|\\$fy\\$|\u003cTODO>|xxxx|TBD' | wc -l | tr -d ' ')\n[ \"$LEAKS\" -gt 0 ] && { echo \"REJECT Gate 6: $LEAKS placeholder tokens\"; exit 1; }\n```\n\n**Gate 7 — Visual delivery floor (ported from xlsx).** Run `officecli view \"$FILE\" html` and Read the returned HTML path. Confirm:\n\n- No `###` in any Dashboard or Data cell (columns too narrow).\n- No truncated KPI labels, sheet tab names, or chart titles.\n- No placeholder tokens rendered as text (`$fy$24`, `{var}`, `\u003cTODO>`, `xxxx`).\n- Pie / doughnut slices render with distinct fill colors (if collapsed in LibreOffice, verify in the user's target viewer before declaring broken — → see officecli-xlsx §Known Issues/Renderer caveats).\n- No empty chart anchors — every chart has a visible, plausible plot.\n- Dashboard sheet opens first (tab highlighted, active area scrolled to top).\n\nIf `view html` is blocked (renderer conflict, headless, port busy), Gate 7 is still **mandatory** — run ALL fallback checks:\n\n```bash\n# a) Token / ### sweep.\nofficecli view \"$FILE\" text 2>/dev/null | grep -nE '###|\\{\\{|\u003cTODO>|\\$fy\\$|xxxx' && { echo \"REJECT Gate 7: tokens or ### present\"; exit 1; }\n# b) Per-KPI: cachedValue length × coef must fit col width. coef=0.55 fit-to-page, 0.85 otherwise.\nfor CELL in A2 C2 E2 G2; do\n  CV=$(officecli get \"$FILE\" \"/Dashboard/$CELL\" --json | jq -r '.data.results[0].format.cachedValue // .data.results[0].text // \"\"')\n  W=$(officecli get \"$FILE\" \"/Dashboard/col[${CELL%%[0-9]*}]\" --json | jq -r '.data.results[0].format.width // 0')\n  CAP=$(echo \"$W * 0.55\" | bc -l | awk '{print int($1)}')\n  [ \"${#CV}\" -gt \"$CAP\" ] && { echo \"REJECT Gate 7: $CELL '$CV' (${#CV} chars) > cap $CAP\"; exit 1; }\ndone\n# c) Rerun Gate 2 title × 0.18 ≤ anchor span.  d) Log which fallback was used and why.\n```\n\nGate 7 must **NEVER** be skipped — skipping ships `###` to the user.\n\nIf scene keywords include print / 一页 / board / 投资人 / 董事会, extend Gate 7 with a structural print-scope check:\n\n```bash\nif echo \"$USER_REQ\" | grep -qiE 'print|一页|投资人|董事会|board'; then\n  # Every non-Dashboard sheet must be hidden or veryHidden.\n  # query sheet --json carries the name in .preview (no .name/.state); visibility lives in\n  # each sheet's own get .format.hidden (absent => visible), so iterate + probe per sheet.\n  LEAKING=\"\"\n  while IFS=$'\\t' read -r SPATH SNAME; do\n    [ \"$SNAME\" = \"Dashboard\" ] && continue\n    HIDDEN=$(officecli get \"$FILE\" \"$SPATH\" --json | jq -r '.data.results[0].format.hidden // false')\n    [ \"$HIDDEN\" != \"true\" ] && LEAKING=\"$LEAKING $SNAME\"\n  done \u003c \u003c(officecli query \"$FILE\" 'sheet' --json | jq -r '.data.results[] | [.path, .preview] | @tsv')\n  [ -n \"$LEAKING\" ] && { echo \"REJECT Gate 7 print-scope: visible non-Dashboard sheet(s):$LEAKING — hide before delivery\"; exit 1; }\n  # Dashboard must carry an explicit Print_Area named range.\n  PA=$(officecli query \"$FILE\" 'namedrange[name=\"_xlnm.Print_Area\"]' --json | jq '.data.results | length')\n  [ \"$PA\" -ge 1 ] || { echo \"REJECT Gate 7 print-scope: no _xlnm.Print_Area set\"; exit 1; }\nfi\n```\n\nThe user opens the file in their target viewer (Office / WPS / Numbers) for the final print preview — the skill does not render export artefacts.\n\n**Gate 8 — Formula sanity (cachedValue real, not stale/error).** `fullCalcOnLoad=true` refreshes at runtime, NOT build-time cache — so every formula cell must carry a non-empty, non-zero, non-error `cachedValue` now.\n\n```bash\nfor CELL in A2 C2 E2 G2; do\n  JSON=$(officecli get \"$FILE\" \"/Dashboard/$CELL\" --json)\n  [ -z \"$(echo \"$JSON\" | jq -r '.data.results[0].format.formula // \"\"')\" ] && continue\n  CV=$(echo \"$JSON\" | jq -r '.data.results[0].format.cachedValue // \"\"')\n  case \"$CV\" in\n    \"\" | \"0\" | \"#DIV/0!\" | \"#REF!\" | \"#N/A\" | \"#VALUE!\" | \"#NAME?\" | \"null\")\n      echo \"REJECT Gate 8: $CELL cachedValue='$CV' — re-issue formula or close+reopen\"; exit 1 ;;\n  esac\ndone\n```\n\nIf a KPI is genuinely zero (e.g. \"terminations this quarter\" = 0), whitelist it in the loop and document — default assumption is \"zero is broken\".\n\nIf anything fails, fix at source, re-run the full cycle.\n\n### Honest limits\n\nScatter charts do not accept `series1.xValues` (UNSUPPORTED) — feed the x-axis via `categories` / `series1.categories`. LibreOffice chart color drift / pie-slice collapse / checkbox double-box are viewer artifacts — spot-check in Office / WPS / Numbers first.\n\n## Reference\n\n- **Shorthand `--type` at `add`:** `chart`, `sparkline`, `databar`, `colorscale`, `iconset`, `formulacf`. CF rules map to `help xlsx conditionalformatting`; path suffix `/Sheet/cf[N]`.\n- **Full schemas live in help:** `officecli help xlsx chart` / `sparkline` / `conditionalformatting`. This skill does not mirror them.\n- **DeferredAddKeys (add-only):** `combosplit`, `holesize`. See D-1. (`preset`, `trendline`, `referenceline`, `axisNumFmt` now work on `set` too — help shows `[add/set]`.)\n- **Build order:** charts + sparklines + CF + tabColors first → `calc.fullCalcOnLoad=true` via high-level `set` → `raw-set activeTab` **LAST** (after all sheets exist).\n\n## Known Issues & Pitfalls\n\n### Dashboard-specific\n\n| # | Issue | Mitigation |\n|---|---|---|\n| D-1 | `combosplit` is a DeferredAddKey — works on `add` only. (`preset`, `referenceline`, `trendline`, `axisNumFmt` now apply on `set` too — help shows `[add/set]`.) | Set `combosplit` at `add` time; cannot apply after the fact — remove + re-add. The other four can be applied or changed post-creation via `set`. |\n| D-2 | `referenceline` format is `value:color:label:dash` (color BEFORE label). `\"0:Break-Even:FF0000:dash\"` fails `Invalid color value`. | Order is value, color, label, dash. |\n| D-3 | Scatter charts do NOT accept `series1.xValues` (UNSUPPORTED). Feed the x-axis through `categories` / `series1.categories`. | `--prop series1.categories=\"Sheet1!A2:A13\"` (or `--prop categories=\"Sheet1!A2:A13\"`) |\n| D-4 | `formulacf` honors `font.bold` / `font.italic` (written to the dxf font and surfaced on readback), alongside `fill` and `font.color`. | Use any of `fill` / `font.color` / `font.bold` / `font.italic` to signal a CF rule. |\n| D-5 | Dashboard column widths default to 8.43 — KPI values at 24pt bold show `###` | Size by cachedValue bracket: 4–6 digits → 22–24; 7–9 digits (million) → 26–30; 10+ digits (亿 / billion) → 32–36; 百亿 / 10-digit + currency symbol + fit-to-page landscape → **40–44**. Formula `ceil((visible_chars+2)*1.3)` is a starting point; always verify via Gate 7 fallback b). Sparkline columns: 12. |\n| D-6 | `raw-set activeTab` must be the LAST mutation. Inserting before all sheets exist shifts indices. | Finish all sheets / charts / CF / sparklines / tabColors, then `raw-set`. |\n| D-7 | `calc.fullCalcOnLoad` via `raw-set` creates duplicate `\u003ccalcPr>` → validate fails | Use `officecli set \"$FILE\" / --prop calc.fullCalcOnLoad=true`. |\n| D-8 | LibreOffice does not evaluate hidden-column formulas at render → charts referencing hidden cells render blank | Aggregate into a visible Summary sheet, chart reads from Summary. Hide only columns that are not chart sources. |\n| D-9 | `chartType=pie` blank-renders in LibreOffice | Use `doughnut` as the safe substitute for part-of-whole breakdowns. |\n| D-10 | `SUMIFS` / `AVERAGEIFS` with date criteria fails silently if the criterion is a string | Wrap with `DATE()` or `DATEVALUE()`: `=SUMIFS(B2:B13,A2:A13,DATE(2025,1,5))`. |\n| D-11 | Summary sheet percentage formulas display as raw decimals (0.098) without `numFmt` | Set `numFmt=\"0.0%\"` at the same `set` call as the formula. |\n| D-12 | `import --header` sets freeze + AutoFilter but does NOT set column widths. | Set widths on `col[]`. `numFmt` on a `col[]` path now applies a column-level style (`\u003ccol s=...>`, schema-valid, reads back as `numberformat`); it formats blank cells in the column. Cells with their own style still need a per-cell-range `numFmt`. |\n| D-13 | Sparkline `highpoint` is a bool (highlight on/off), not a color. `--prop highpoint=FF0000` errors `Invalid boolean value` | `--prop highPoint=true --prop highMarkerColor=FF0000`. Same pattern for lowPoint / firstPoint / lastPoint and their *MarkerColor. |\n| D-14 | Sparkline cross-sectional data is meaningless (a region or department has no ordering) | Skip sparklines unless rows are a sequential time-series (dates, months, quarters). |\n| D-15 | Empty chart `add` is rejected (`Chart requires a 'data' property`) at the CLI layer — legacy skills that relied on silent accept will fail here | Always provide `series1.values=` / `dataRange=` / inline `data=` at chart `add` time. Treat Gate 2 seriesCount check as a belt-and-braces verification. |\n| D-16 | `fullCalcOnLoad=true` guarantees a **runtime** recalc when the end user opens the file; it does NOT refresh the build-time `cachedValue` in XML. Build sequence `set B=100 → set E==B+D → fix B=150` leaves `E.cachedValue` stale (board sees \"Net Change = 0\"). | After all upstream edits are final, re-issue every downstream formula (`officecli set \"$FILE\" /Sheet/E2 --prop formula==B2+D2`) OR `close` + re-open the file. Gate 8 verifies. |\n| D-17 | The built-in calc engine does NOT evaluate `SUMPRODUCT` with array-predicate form `SUMPRODUCT((A2:A97=X)*C2:C97*D2:D97)` — cachedValue stays `0`/`null`, Gate 8 rejects. Runtime Excel / WPS compute fine, but board-delivered XLSX with stale cache still ships `0`. | Rewrite as helper column + `SUMIF`: `F2==C2*D2` on source sheet, then `=SUMIF(B:B, \"Region X\", F:F)`. Or pre-aggregate in Summary sheet and chart from there. |\n\n### Inherited (pointer only)\n\nCross-sheet `!` trap, chart `anchor` / series immutability after create → see officecli-xlsx §Known Issues.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("officecli-data-dashboard-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>reference-list-builder - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/reference-list-builder-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>reference-list-builder</h1>
+      <p class="description">Format professional references properly and prepare reference materials</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>reference-list-builder</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>reference-list-builder</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Format professional references properly and prepare reference materials</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the reference-list-builder skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Reference List Builder</h2>
+<h3>When to Use This Skill</h3>
+<p>Use this skill when the user:</p>
+<ul>
+<li>Needs to create a professional reference list</li>
+<li>Wants help choosing the right references</li>
+<li>Needs to format references properly</li>
+<li>Is preparing references for job applications</li>
+<li>Mentions: &quot;references&quot;, &quot;reference list&quot;, &quot;professional references&quot;, &quot;reference check&quot;</li>
+</ul>
+<h3>Core Capabilities</h3>
+<ul>
+<li>Format professional reference lists</li>
+<li>Guide reference selection strategy</li>
+<li>Prepare reference briefing materials</li>
+<li>Anticipate reference check questions</li>
+<li>Handle difficult reference situations</li>
+<li>Coordinate reference outreach</li>
+</ul>
+<h3>Reference Strategy</h3>
+<h4>Who Makes a Good Reference?</h4>
+<p><strong>Ideal References:</strong></p>
+<ul>
+<li>Former direct managers (most important)</li>
+<li>Senior colleagues who observed your work</li>
+<li>Cross-functional partners</li>
+<li>Clients or customers</li>
+<li>Direct reports (for leadership roles)</li>
+<li>Professors or advisors (for recent graduates)</li>
+</ul>
+<p><strong>Reference Hierarchy:</strong></p>
+<ol>
+<li><strong>Most Valuable:</strong> Recent direct supervisor</li>
+<li><strong>Very Valuable:</strong> Senior leaders who know your work</li>
+<li><strong>Valuable:</strong> Peers and cross-functional partners</li>
+<li><strong>Acceptable:</strong> Clients, vendors, professors</li>
+<li><strong>Avoid:</strong> Friends, family, HR contacts only</li>
+</ol>
+<h4>Who to Avoid</h4>
+<ul>
+<li>❌ Current employer (without permission)</li>
+<li>❌ People who barely know you</li>
+<li>❌ References from 10+ years ago only</li>
+<li>❌ Personal friends (unless specified)</li>
+<li>❌ People who might give lukewarm feedback</li>
+<li>❌ Anyone you haven't contacted in advance</li>
+</ul>
+<h3>Reference List Format</h3>
+<h4>Standard Format</h4>
+<pre><code>PROFESSIONAL REFERENCES
+
+Jane Smith
+Senior Director of Product
+TechCorp Inc.
+Phone: (555) 123-4567
+Email: jane.smith@techcorp.com
+Relationship: Direct supervisor for 3 years (2020-2023)
+
+John Doe
+VP of Engineering
+Previous Company
+Phone: (555) 234-5678
+Email: john.doe@previous.com
+Relationship: Cross-functional partner on 5 major projects</code></pre>
+<h4>Information to Include</h4>
+<p><strong>Required:</strong></p>
+<ul>
+<li>Full name</li>
+<li>Current job title</li>
+<li>Current company</li>
+<li>Phone number</li>
+<li>Professional email</li>
+<li>Your relationship to them</li>
+</ul>
+<p><strong>Optional:</strong></p>
+<ul>
+<li>LinkedIn URL</li>
+<li>Best time to reach</li>
+<li>Preferred contact method</li>
+</ul>
+<h4>Formatting Guidelines</h4>
+<ul>
+<li>Match the style of your resume (fonts, formatting)</li>
+<li>3-5 references (more only if requested)</li>
+<li>Separate page from resume</li>
+<li>Header should match resume header</li>
+<li>Include &quot;References&quot; or &quot;Professional References&quot; as title</li>
+</ul>
+<h3>Reference Preparation</h3>
+<h4>Step 1: Ask Permission</h4>
+<p><strong>Before listing anyone:</strong></p>
+<ul>
+<li>Call or email to ask permission</li>
+<li>Confirm their contact information</li>
+<li>Explain the role you're applying for</li>
+<li>Gauge their willingness and enthusiasm</li>
+</ul>
+<p><strong>Script:</strong></p>
+<pre><code>&quot;Hi [Name], I hope you're doing well! I'm applying for a [Role] position at [Company] and was wondering if you'd be comfortable serving as a reference for me. The role involves [brief description], and I think your perspective on [specific project/skill] would be particularly valuable. Would you be willing to speak with them if they reach out?&quot;</code></pre>
+<h4>Step 2: Brief Your References</h4>
+<p><strong>Send them:</strong></p>
+<ul>
+<li>Copy of your resume</li>
+<li>Job description</li>
+<li>Key points you want highlighted</li>
+<li>Specific projects to mention</li>
+<li>Timeline for when they might be contacted</li>
+</ul>
+<p><strong>Briefing Email Template:</strong></p>
+<pre><code>Subject: Reference Preparation - [Role] at [Company]
+
+Hi [Name],
+
+Thank you so much for agreeing to be a reference! Here's some context to help:
+
+**The Role:** [Job title] at [Company]
+**What they're looking for:** [Key requirements]
+
+**Points I'm emphasizing:**
+- [Achievement 1]
+- [Achievement 2]
+- [Skill they should mention]
+
+**Our work together they might ask about:**
+- [Project 1]
+- [Project 2]
+
+I've attached my resume and the job description for reference. They may reach out in the next [timeframe].
+
+Please let me know if you have any questions, and thank you again!
+
+Best,
+[Your name]</code></pre>
+<h4>Step 3: Follow Up</h4>
+<p>After references are checked:</p>
+<ul>
+<li>Thank your references regardless of outcome</li>
+<li>Let them know the result</li>
+<li>Offer to reciprocate</li>
+</ul>
+<h3>Handling Special Situations</h3>
+<h4>Current Employer Doesn't Know</h4>
+<p><strong>Options:</strong></p>
+<ul>
+<li>Ask if reference check can wait until later stage</li>
+<li>Use colleagues who've left the company</li>
+<li>Be upfront: &quot;My current employer doesn't know I'm looking&quot;</li>
+<li>Use other professional references</li>
+</ul>
+<h4>Manager Left the Company</h4>
+<p><strong>Options:</strong></p>
+<ul>
+<li>Track them down on LinkedIn</li>
+<li>Use their personal email/phone</li>
+<li>Include their new company in reference list</li>
+<li>Explain &quot;Former manager, now at [New Company]&quot;</li>
+</ul>
+<h4>Bad Relationship with Past Manager</h4>
+<p><strong>Options:</strong></p>
+<ul>
+<li>Use another supervisor from that role</li>
+<li>Use senior colleagues instead</li>
+<li>Choose references from different roles</li>
+<li>Be prepared to explain if asked</li>
+</ul>
+<h4>Limited Professional Experience</h4>
+<p><strong>Options:</strong></p>
+<ul>
+<li>Professors or academic advisors</li>
+<li>Internship supervisors</li>
+<li>Volunteer organization leaders</li>
+<li>Coaches or mentors</li>
+<li>Client contacts</li>
+</ul>
+<h4>Reference Won't Give Positive Review</h4>
+<p><strong>Don't use them.</strong> It's better to have fewer references than a lukewarm or negative one.</p>
+<h3>What Reference Checkers Ask</h3>
+<h4>Common Questions</h4>
+<p><strong>Performance:</strong></p>
+<ul>
+<li>&quot;How would you describe [name]'s work?&quot;</li>
+<li>&quot;What were their primary responsibilities?&quot;</li>
+<li>&quot;How did they perform against expectations?&quot;</li>
+</ul>
+<p><strong>Skills:</strong></p>
+<ul>
+<li>&quot;What are their greatest strengths?&quot;</li>
+<li>&quot;What areas could they improve?&quot;</li>
+<li>&quot;How would you rate their [specific skill]?&quot;</li>
+</ul>
+<p><strong>Work Style:</strong></p>
+<ul>
+<li>&quot;How did they handle pressure/deadlines?&quot;</li>
+<li>&quot;How did they work with the team?&quot;</li>
+<li>&quot;How did they handle conflict?&quot;</li>
+</ul>
+<p><strong>Character:</strong></p>
+<ul>
+<li>&quot;Would you rehire them?&quot;</li>
+<li>&quot;Is there anything else I should know?&quot;</li>
+<li>&quot;How do they compare to peers?&quot;</li>
+</ul>
+<h4>The &quot;Would You Rehire?&quot; Question</h4>
+<p><strong>Most important question.</strong> Brief your references that this may be asked and ensure they can answer enthusiastically.</p>
+<h3>Reference List Template</h3>
+<pre><code>[YOUR NAME]
+[Your Email] | [Your Phone]
+
+PROFESSIONAL REFERENCES
+
+[REFERENCE 1 - MOST SENIOR/RELEVANT]
+[Name]
+[Title]
+[Company]
+Phone: [Number]
+Email: [Email]
+Relationship: [How you worked together, dates]
+
+[REFERENCE 2]
+[Name]
+[Title]
+[Company]
+Phone: [Number]
+Email: [Email]
+Relationship: [How you worked together, dates]
+
+[REFERENCE 3]
+[Name]
+[Title]
+[Company]
+Phone: [Number]
+Email: [Email]
+Relationship: [How you worked together, dates]
+
+---
+References available upon request for additional contacts.</code></pre>
+<h3>Reference Timing</h3>
+<h4>When to Provide References</h4>
+<ul>
+<li><strong>Don't include with initial application</strong> (unless requested)</li>
+<li><strong>Bring to interview</strong> (have them ready)</li>
+<li><strong>Provide when asked</strong> (usually after final interview)</li>
+<li><strong>Always ask before sharing</strong> (confirm permission each time)</li>
+</ul>
+<h4>Common Timeline</h4>
+<ol>
+<li><strong>Application:</strong> &quot;References available upon request&quot; (optional on resume)</li>
+<li><strong>First Interview:</strong> Have list ready but don't offer</li>
+<li><strong>Final Rounds:</strong> &quot;Can you provide references?&quot; → Share list</li>
+<li><strong>Reference Check:</strong> Company contacts your references</li>
+<li><strong>Offer:</strong> Follow up with references, thank them</li>
+</ol>
+<h3>Output Format</h3>
+<p>When building a reference list:</p>
+<pre><code># REFERENCE LIST
+
+## Reference Strategy
+**Target Role:** [Position]
+**Company:** [Company]
+
+## Recommended References
+
+### Primary References (Use These)
+
+**Reference 1: [Name]**
+- Current Title: [Title]
+- Company: [Company]
+- Contact: [Phone/Email]
+- Relationship: [Description]
+- Why: [What they can speak to]
+- Key points to highlight: [Specific projects/skills]
+
+**Reference 2: [Name]**
+[Same format]
+
+**Reference 3: [Name]**
+[Same format]
+
+### Backup References (If Needed)
+
+**Reference 4: [Name]**
+[Same format]
+
+## Briefing Notes
+
+### For Each Reference, Send:
+- [ ] Resume
+- [ ] Job description
+- [ ] Key talking points
+- [ ] Timeline
+
+### Key Points to Emphasize
+- [Point 1 - who should mention]
+- [Point 2 - who should mention]
+
+## Reference Outreach
+
+### Permission Request Script
+[Customized script]
+
+### Briefing Email
+[Draft briefing email]
+
+### Thank You Template
+[Post-check thank you message]</code></pre>
+<h3>Reference Checklist</h3>
+<ul>
+<li>✅ Have 3-5 references ready</li>
+<li>✅ All references have given permission</li>
+<li>✅ Contact information is current and accurate</li>
+<li>✅ References know about the specific role</li>
+<li>✅ Each reference has your resume and talking points</li>
+<li>✅ At least one direct supervisor included</li>
+<li>✅ References span different aspects of your work</li>
+<li>✅ References are enthusiastic (not just willing)</li>
+<li>✅ Backup references identified</li>
+<li>✅ Thank you notes planned</li>
+</ul>
+<h3>Universal Evidence Contract</h3>
+<p>Read references/universal-runtime-and-evidence.md before producing or acting on career materials. Its truth, privacy, runtime-disclosure, and human-approval rules override any conflicting examples in this skill.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: reference-list-builder\ndisplay_name: reference-list-builder\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# reference-list-builder - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `reference-list-builder` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nFormat professional references properly and prepare reference materials\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the reference-list-builder skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `reference-list-builder` |\n| Canonical name | `reference-list-builder` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\nFormat professional references properly and prepare reference materials\n\n\n## Original SKILL.md\n\n---\nname: reference-list-builder\ndescription: Format professional references properly and prepare reference materials\n---\n\n# Reference List Builder\n\n## When to Use This Skill\n\nUse this skill when the user:\n- Needs to create a professional reference list\n- Wants help choosing the right references\n- Needs to format references properly\n- Is preparing references for job applications\n- Mentions: \"references\", \"reference list\", \"professional references\", \"reference check\"\n\n## Core Capabilities\n\n- Format professional reference lists\n- Guide reference selection strategy\n- Prepare reference briefing materials\n- Anticipate reference check questions\n- Handle difficult reference situations\n- Coordinate reference outreach\n\n## Reference Strategy\n\n### Who Makes a Good Reference?\n\n**Ideal References:**\n- Former direct managers (most important)\n- Senior colleagues who observed your work\n- Cross-functional partners\n- Clients or customers\n- Direct reports (for leadership roles)\n- Professors or advisors (for recent graduates)\n\n**Reference Hierarchy:**\n1. **Most Valuable:** Recent direct supervisor\n2. **Very Valuable:** Senior leaders who know your work\n3. **Valuable:** Peers and cross-functional partners\n4. **Acceptable:** Clients, vendors, professors\n5. **Avoid:** Friends, family, HR contacts only\n\n### Who to Avoid\n\n- ❌ Current employer (without permission)\n- ❌ People who barely know you\n- ❌ References from 10+ years ago only\n- ❌ Personal friends (unless specified)\n- ❌ People who might give lukewarm feedback\n- ❌ Anyone you haven't contacted in advance\n\n## Reference List Format\n\n### Standard Format\n\n```\nPROFESSIONAL REFERENCES\n\nJane Smith\nSenior Director of Product\nTechCorp Inc.\nPhone: (555) 123-4567\nEmail: jane.smith@techcorp.com\nRelationship: Direct supervisor for 3 years (2020-2023)\n\nJohn Doe\nVP of Engineering\nPrevious Company\nPhone: (555) 234-5678\nEmail: john.doe@previous.com\nRelationship: Cross-functional partner on 5 major projects\n```\n\n### Information to Include\n\n**Required:**\n- Full name\n- Current job title\n- Current company\n- Phone number\n- Professional email\n- Your relationship to them\n\n**Optional:**\n- LinkedIn URL\n- Best time to reach\n- Preferred contact method\n\n### Formatting Guidelines\n\n- Match the style of your resume (fonts, formatting)\n- 3-5 references (more only if requested)\n- Separate page from resume\n- Header should match resume header\n- Include \"References\" or \"Professional References\" as title\n\n## Reference Preparation\n\n### Step 1: Ask Permission\n\n**Before listing anyone:**\n- Call or email to ask permission\n- Confirm their contact information\n- Explain the role you're applying for\n- Gauge their willingness and enthusiasm\n\n**Script:**\n```\n\"Hi [Name], I hope you're doing well! I'm applying for a [Role] position at [Company] and was wondering if you'd be comfortable serving as a reference for me. The role involves [brief description], and I think your perspective on [specific project/skill] would be particularly valuable. Would you be willing to speak with them if they reach out?\"\n```\n\n### Step 2: Brief Your References\n\n**Send them:**\n- Copy of your resume\n- Job description\n- Key points you want highlighted\n- Specific projects to mention\n- Timeline for when they might be contacted\n\n**Briefing Email Template:**\n```\nSubject: Reference Preparation - [Role] at [Company]\n\nHi [Name],\n\nThank you so much for agreeing to be a reference! Here's some context to help:\n\n**The Role:** [Job title] at [Company]\n**What they're looking for:** [Key requirements]\n\n**Points I'm emphasizing:**\n- [Achievement 1]\n- [Achievement 2]\n- [Skill they should mention]\n\n**Our work together they might ask about:**\n- [Project 1]\n- [Project 2]\n\nI've attached my resume and the job description for reference. They may reach out in the next [timeframe].\n\nPlease let me know if you have any questions, and thank you again!\n\nBest,\n[Your name]\n```\n\n### Step 3: Follow Up\n\nAfter references are checked:\n- Thank your references regardless of outcome\n- Let them know the result\n- Offer to reciprocate\n\n## Handling Special Situations\n\n### Current Employer Doesn't Know\n\n**Options:**\n- Ask if reference check can wait until later stage\n- Use colleagues who've left the company\n- Be upfront: \"My current employer doesn't know I'm looking\"\n- Use other professional references\n\n### Manager Left the Company\n\n**Options:**\n- Track them down on LinkedIn\n- Use their personal email/phone\n- Include their new company in reference list\n- Explain \"Former manager, now at [New Company]\"\n\n### Bad Relationship with Past Manager\n\n**Options:**\n- Use another supervisor from that role\n- Use senior colleagues instead\n- Choose references from different roles\n- Be prepared to explain if asked\n\n### Limited Professional Experience\n\n**Options:**\n- Professors or academic advisors\n- Internship supervisors\n- Volunteer organization leaders\n- Coaches or mentors\n- Client contacts\n\n### Reference Won't Give Positive Review\n\n**Don't use them.** It's better to have fewer references than a lukewarm or negative one.\n\n## What Reference Checkers Ask\n\n### Common Questions\n\n**Performance:**\n- \"How would you describe [name]'s work?\"\n- \"What were their primary responsibilities?\"\n- \"How did they perform against expectations?\"\n\n**Skills:**\n- \"What are their greatest strengths?\"\n- \"What areas could they improve?\"\n- \"How would you rate their [specific skill]?\"\n\n**Work Style:**\n- \"How did they handle pressure/deadlines?\"\n- \"How did they work with the team?\"\n- \"How did they handle conflict?\"\n\n**Character:**\n- \"Would you rehire them?\"\n- \"Is there anything else I should know?\"\n- \"How do they compare to peers?\"\n\n### The \"Would You Rehire?\" Question\n\n**Most important question.** Brief your references that this may be asked and ensure they can answer enthusiastically.\n\n## Reference List Template\n\n```\n[YOUR NAME]\n[Your Email] | [Your Phone]\n\nPROFESSIONAL REFERENCES\n\n[REFERENCE 1 - MOST SENIOR/RELEVANT]\n[Name]\n[Title]\n[Company]\nPhone: [Number]\nEmail: [Email]\nRelationship: [How you worked together, dates]\n\n[REFERENCE 2]\n[Name]\n[Title]\n[Company]\nPhone: [Number]\nEmail: [Email]\nRelationship: [How you worked together, dates]\n\n[REFERENCE 3]\n[Name]\n[Title]\n[Company]\nPhone: [Number]\nEmail: [Email]\nRelationship: [How you worked together, dates]\n\n---\nReferences available upon request for additional contacts.\n```\n\n## Reference Timing\n\n### When to Provide References\n\n- **Don't include with initial application** (unless requested)\n- **Bring to interview** (have them ready)\n- **Provide when asked** (usually after final interview)\n- **Always ask before sharing** (confirm permission each time)\n\n### Common Timeline\n\n1. **Application:** \"References available upon request\" (optional on resume)\n2. **First Interview:** Have list ready but don't offer\n3. **Final Rounds:** \"Can you provide references?\" → Share list\n4. **Reference Check:** Company contacts your references\n5. **Offer:** Follow up with references, thank them\n\n## Output Format\n\nWhen building a reference list:\n\n```markdown\n# REFERENCE LIST\n\n## Reference Strategy\n**Target Role:** [Position]\n**Company:** [Company]\n\n## Recommended References\n\n### Primary References (Use These)\n\n**Reference 1: [Name]**\n- Current Title: [Title]\n- Company: [Company]\n- Contact: [Phone/Email]\n- Relationship: [Description]\n- Why: [What they can speak to]\n- Key points to highlight: [Specific projects/skills]\n\n**Reference 2: [Name]**\n[Same format]\n\n**Reference 3: [Name]**\n[Same format]\n\n### Backup References (If Needed)\n\n**Reference 4: [Name]**\n[Same format]\n\n## Briefing Notes\n\n### For Each Reference, Send:\n- [ ] Resume\n- [ ] Job description\n- [ ] Key talking points\n- [ ] Timeline\n\n### Key Points to Emphasize\n- [Point 1 - who should mention]\n- [Point 2 - who should mention]\n\n## Reference Outreach\n\n### Permission Request Script\n[Customized script]\n\n### Briefing Email\n[Draft briefing email]\n\n### Thank You Template\n[Post-check thank you message]\n```\n\n## Reference Checklist\n\n- ✅ Have 3-5 references ready\n- ✅ All references have given permission\n- ✅ Contact information is current and accurate\n- ✅ References know about the specific role\n- ✅ Each reference has your resume and talking points\n- ✅ At least one direct supervisor included\n- ✅ References span different aspects of your work\n- ✅ References are enthusiastic (not just willing)\n- ✅ Backup references identified\n- ✅ Thank you notes planned\n\n\n## Universal Evidence Contract\n\nRead references/universal-runtime-and-evidence.md before producing or acting on career materials. Its truth, privacy, runtime-disclosure, and human-approval rules override any conflicting examples in this skill.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("reference-list-builder-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

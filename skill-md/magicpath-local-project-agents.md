@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `magicpath` for Local Project Agents. It 
 
 Use this skill when your task matches this description:
 
-A platform for building, sharing, and installing UI components via AI. Components are added as source code to the user's project via the `magicpath-ai` CLI.
+Use MagicPath through the magicpath-ai CLI to find, preview, inspect, install, export, create, and edit UI components and manage MagicPath skills. Trigger for MagicPath designs/components; personal or team projects; acti
 
 ## How To Use It In Local Project Agents
 
@@ -32,7 +32,8 @@ From this workspace, type: Use the magicpath skill to...
 
 ## Description
 
-A platform for building, sharing, and installing UI components via AI. Components are added as source code to the user's project via the `magicpath-ai` CLI.
+Use MagicPath through the magicpath-ai CLI to find, preview, inspect, install, export, create, and edit UI components and manage MagicPath skills. Trigger for MagicPath designs/components; personal or team projects; acti
+
 
 ## Original SKILL.md
 
@@ -523,4 +524,3 @@ The JSON above contains auth status, projects, and CLI version. If auth.authenti
 - [CLI Reference](references/cli-reference.md)
 - [Working with repositories](references/working-with-repositories.md) — bring an existing local or online Git repository's UI onto the MagicPath canvas (e.g. "render this project in MagicPath", "bring the sidebar of my app into MagicPath")
 - [Working with embedded browsers](references/working-with-embedded-browsers.md) — use a MagicPath project as the persistent canvas inside Codex, Cursor, or another host with an in-app browser
-

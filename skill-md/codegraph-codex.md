@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `codegraph` for Codex. It removes local f
 
 Use this skill when your task matches this description:
 
-Use CodeGraph to build and query a local semantic index for a codebase. CodeGraph is installed globally as `codegraph` and configured as an MCP server for Codex and OpenCode.
+Use CodeGraph for local semantic code intelligence, MCP-backed repo exploration, symbol search, call graphs, impact analysis, affected tests, and codebase indexing. Use when the user mentions codegraph, semantic code sea
 
 ## How To Use It In Codex
 
@@ -32,7 +32,8 @@ In Codex, click the chat box, press /, choose codegraph, then write the task. Fa
 
 ## Description
 
-Use CodeGraph to build and query a local semantic index for a codebase. CodeGraph is installed globally as `codegraph` and configured as an MCP server for Codex and OpenCode.
+Use CodeGraph for local semantic code intelligence, MCP-backed repo exploration, symbol search, call graphs, impact analysis, affected tests, and codebase indexing. Use when the user mentions codegraph, semantic code sea
+
 
 ## Original SKILL.md
 
@@ -95,4 +96,3 @@ The project index lives in `.codegraph/`. Do not commit it unless the project ex
 - OpenCode MCP config: `[local home]/.config/opencode/opencode.json`
 - Codex skill: `[local home]/.codex/skills/codegraph/SKILL.md`
 - OpenCode skill: `[local home]/.config/opencode/skills/codegraph/SKILL.md`
-

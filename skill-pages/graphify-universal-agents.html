@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>graphify - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/graphify-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>graphify</h1>
+      <p class="description">Use for any question about a codebase, its architecture, file relationships, or project content — especially when graphify-out/ exists, where the question should be treated as a graphify query first. Turns any input (code, docs, papers, images, videos) into a persistent knowledge graph with god nodes, community detection, and query/path/explain tools.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>graphify</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>graphify</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Use for any question about a codebase, its architecture, file relationships, or project content — especially when graphify-out/ exists, where the question should be treated as a graphify query first. Turns any input (code, docs, papers, images, videos) into a persistent knowledge graph with god nodes, community detection, and query/path/explain tools.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the graphify skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>/graphify</h2>
+<p>Turn any folder of files into a navigable knowledge graph with community detection, an honest audit trail, and three outputs: interactive HTML, GraphRAG-ready JSON, and a plain-language GRAPH_REPORT.md.</p>
+<h3>Usage</h3>
+<pre><code>/graphify                                             # full pipeline on current directory (HTML viz; add --obsidian for a vault)
+/graphify &lt;path&gt;                                      # full pipeline on specific path
+/graphify https://github.com/&lt;owner&gt;/&lt;repo&gt;           # clone repo then run full pipeline on it
+/graphify https://github.com/&lt;owner&gt;/&lt;repo&gt; --branch &lt;branch&gt;  # clone a specific branch
+/graphify &lt;url1&gt; &lt;url2&gt; ...                           # clone multiple repos, build each, merge into one cross-repo graph
+/graphify &lt;path&gt; --mode deep                          # thorough extraction, richer INFERRED edges
+/graphify &lt;path&gt; --update                             # incremental - re-extract only new/changed files
+/graphify &lt;path&gt; --directed                            # build directed graph (preserves edge direction: source→target)
+/graphify &lt;path&gt; --whisper-model medium                # use a larger Whisper model for better transcription accuracy
+/graphify &lt;path&gt; --cluster-only                       # rerun clustering on existing graph
+/graphify &lt;path&gt; --no-viz                             # skip visualization, just report + JSON
+/graphify &lt;path&gt; --html                               # (HTML is generated by default - this flag is a no-op)
+/graphify &lt;path&gt; --svg                                # also export graph.svg (embeds in Notion, GitHub)
+/graphify &lt;path&gt; --graphml                            # export graph.graphml (Gephi, yEd)
+/graphify &lt;path&gt; --neo4j                              # generate graphify-out/cypher.txt for Neo4j
+/graphify &lt;path&gt; --neo4j-push bolt://localhost:7687   # push directly to Neo4j
+/graphify &lt;path&gt; --falkordb                           # generate graphify-out/cypher.txt for FalkorDB
+/graphify &lt;path&gt; --falkordb-push falkordb://localhost:6379   # push directly to FalkorDB
+/graphify &lt;path&gt; --mcp                                # start MCP stdio server for agent access
+/graphify &lt;path&gt; --watch                              # watch folder, auto-rebuild on code changes (no LLM needed)
+/graphify &lt;path&gt; --wiki                               # build agent-crawlable wiki (index.md + one article per community)
+/graphify &lt;path&gt; --obsidian --obsidian-dir ~/vaults/my-project  # write vault to custom path (e.g. existing vault)
+/graphify add &lt;url&gt;                                   # fetch URL, save to ./raw, update graph
+/graphify add &lt;url&gt; --author &quot;Name&quot;                   # tag who wrote it
+/graphify add &lt;url&gt; --contributor &quot;Name&quot;              # tag who added it to the corpus
+/graphify query &quot;&lt;question&gt;&quot;                          # BFS traversal - broad context
+/graphify query &quot;&lt;question&gt;&quot; --dfs                    # DFS - trace a specific path
+/graphify query &quot;&lt;question&gt;&quot; --budget 1500            # cap answer at N tokens
+/graphify path &quot;AuthModule&quot; &quot;Database&quot;                # shortest path between two concepts
+/graphify explain &quot;SwinTransformer&quot;                   # plain-language explanation of a node</code></pre>
+<h3>What graphify is for</h3>
+<p>Drop any folder of code, docs, papers, images, or video into graphify and get a queryable knowledge graph. Persistent across sessions, honest audit trail (EXTRACTED/INFERRED/AMBIGUOUS), community detection surfaces cross-document connections you wouldn't think to ask about.</p>
+<h3>What You Must Do When Invoked</h3>
+<p>If the user invoked <code>/graphify --help</code> or <code>/graphify -h</code> (with no other arguments), print the contents of the <code>## Usage</code> section above verbatim and stop. Do not run any commands, do not detect files, do not default the path to <code>.</code>. Just print the Usage block and return.</p>
+<p><strong>Fast path — existing graph:</strong> Before doing anything else, check whether <code>graphify-out/graph.json</code> exists. The expected location is <code>graphify-out/graph.json</code> relative to the <strong>current working directory</strong> (i.e. the project root where you are running commands). If it exists AND the user's request is a natural-language question about the codebase (e.g. &quot;How does X work?&quot;, &quot;What calls Y?&quot;, &quot;Trace the data flow through Z&quot;) and NOT an explicit rebuild command (<code>--update</code>, <code>--cluster-only</code>, or a bare path/URL that implies fresh extraction): <strong>skip Steps 1–5 entirely and jump straight to <code>## For /graphify query</code>.</strong> Run <code>graphify query &quot;&lt;question&gt;&quot;</code> immediately. Do not run detect. Do not check corpus size. Do not ask the user to narrow. The graph is already built — use it.</p>
+<p>If no path was given, use <code>.</code> (current directory). Do not ask the user for a path.</p>
+<p>If the path argument starts with <code>https://github.com/</code> or <code>http://github.com/</code>, treat it as a GitHub URL - run Step 0 before anything else, then continue with the resolved local path.</p>
+<p>Follow these steps in order. Do not skip steps.</p>
+<h4>Step 0 - GitHub repos and multi-path merge (only if a URL or several paths)</h4>
+<p>Only when the path is one or more <code>https://github.com/...</code> URLs, or several local subfolders to merge. See <code>references/github-and-merge.md</code> for the clone, cross-repo merge, and monorepo flow, then continue with the resolved local path. A plain local path skips this step.</p>
+<h4>Step 1 - Ensure graphify is installed</h4>
+<pre><code># Detect the correct Python interpreter (handles uv tool, pipx, venv, system installs)
+PYTHON=&quot;&quot;
+GRAPHIFY_BIN=$(which graphify 2&gt;/dev/null)
+# 1. uv tool installs — most reliable on modern Mac/Linux
+if [ -z &quot;$PYTHON&quot; ] &amp;&amp; command -v uv &gt;/dev/null 2&gt;&amp;1; then
+    _UV_PY=$(uv tool run --from graphifyy python -c &quot;import sys; print(sys.executable)&quot; 2&gt;/dev/null)
+    if [ -n &quot;$_UV_PY&quot; ]; then PYTHON=&quot;$_UV_PY&quot;; fi
+fi
+# 2. Read shebang from graphify binary (pipx and direct pip installs)
+if [ -z &quot;$PYTHON&quot; ] &amp;&amp; [ -n &quot;$GRAPHIFY_BIN&quot; ]; then
+    _SHEBANG=$(head -1 &quot;$GRAPHIFY_BIN&quot; | tr -d '#!')
+    case &quot;$_SHEBANG&quot; in
+        *[!a-zA-Z0-9/_.@-]*) ;;
+        *) &quot;$_SHEBANG&quot; -c &quot;import graphify&quot; 2&gt;/dev/null &amp;&amp; PYTHON=&quot;$_SHEBANG&quot; ;;
+    esac
+fi
+# 3. Fall back to python3
+if [ -z &quot;$PYTHON&quot; ]; then PYTHON=&quot;python3&quot;; fi
+if ! &quot;$PYTHON&quot; -c &quot;import graphify&quot; 2&gt;/dev/null; then
+    if command -v uv &gt;/dev/null 2&gt;&amp;1; then
+        uv tool install --upgrade graphifyy -q 2&gt;&amp;1 | tail -3
+        _UV_PY=$(uv tool run --from graphifyy python -c &quot;import sys; print(sys.executable)&quot; 2&gt;/dev/null)
+        if [ -n &quot;$_UV_PY&quot; ]; then PYTHON=&quot;$_UV_PY&quot;; fi
+    else
+        &quot;$PYTHON&quot; -m pip install graphifyy -q 2&gt;/dev/null \
+          || &quot;$PYTHON&quot; -m pip install graphifyy -q --break-system-packages 2&gt;&amp;1 | tail -3
+    fi
+fi
+# Write interpreter path for all subsequent steps (persists across invocations)
+mkdir -p graphify-out
+&quot;$PYTHON&quot; -c &quot;import sys; open('graphify-out/.graphify_python', 'w', encoding='utf-8').write(sys.executable)&quot;
+# Save scan root so `graphify update` (no args) knows where to look next time
+echo &quot;$(cd INPUT_PATH &amp;&amp; pwd)&quot; &gt; graphify-out/.graphify_root</code></pre>
+<p>If the import succeeds, print nothing and move straight to Step 2.</p>
+<p><strong>In every subsequent bash block, replace <code>python3</code> with <code>$(cat graphify-out/.graphify_python)</code> to use the correct interpreter.</strong></p>
+<h4>Step 2 - Detect files</h4>
+<pre><code>$(cat graphify-out/.graphify_python) -c &quot;
+import json
+from graphify.detect import detect
+from pathlib import Path
+result = detect(Path('INPUT_PATH'))
+print(json.dumps(result, ensure_ascii=False))
+&quot; &gt; graphify-out/.graphify_detect.json</code></pre>
+<p>Replace INPUT_PATH with the actual path the user provided. Do NOT cat or print the JSON - read it silently and present a clean summary instead:</p>
+<pre><code>Corpus: X files · ~Y words
+  code:     N files (.py .ts .go ...)
+  docs:     N files (.md .txt ...)
+  papers:   N files (.pdf ...)
+  images:   N files
+  video:    N files (.mp4 .mp3 ...)</code></pre>
+<p>Omit any category with 0 files from the summary.</p>
+<p>Then act on it:</p>
+<ul>
+<li>If <code>total_files</code> is 0: stop with &quot;No supported files found in [path].&quot;</li>
+<li>If <code>skipped_sensitive</code> is non-empty: mention file count skipped, not the file names.</li>
+<li>If <code>total_words</code> &gt; 2,000,000 OR <code>total_files</code> &gt; 500: show the warning. Then compute the top 5 first-level subdirectories by file count:</li>
+<li>Read <code>scan_root</code> from the detect JSON (always an absolute path to the resolved INPUT_PATH).</li>
+<li>Concatenate all file lists across all types (<code>code</code>, <code>document</code>, <code>paper</code>, <code>image</code>, <code>video</code>).</li>
+<li>Filter out any path that starts with <code>scan_root + &quot;/graphify-out/&quot;</code> to exclude converted sidecars.</li>
+<li>For each file, strip the <code>scan_root</code> prefix and take the first path component. Files directly in <code>scan_root</code> with no subdirectory count as <code>(root)</code>.</li>
+<li>If all files are in <code>(root)</code> with no subdirectories, do not ask to narrow — no subfolders exist. Instead suggest <code>--no-cluster</code> to skip the expensive clustering step and proceed.</li>
+<li>Otherwise rank by count, show the top 5 with file counts, then ask which subfolder to run on. Wait for the user's answer before proceeding.</li>
+<li>Otherwise: proceed directly to Step 2.5 if video files were detected, or Step 3 if not.</li>
+</ul>
+<h4>Step 2.5 - Video and audio (only if video files detected)</h4>
+<p>Skip this step entirely if <code>detect</code> returned zero <code>video</code> files. When the corpus has video or audio, see <code>references/transcribe.md</code> to transcribe them to text first, then treat the transcripts as doc files in Step 3.</p>
+<h4>Step 3 - Extract entities and relationships</h4>
+<p><strong>Before starting:</strong> note whether <code>--mode deep</code> was given. You must pass <code>DEEP_MODE=true</code> to every subagent in Step B2 if it was. Track this from the original invocation - do not lose it.</p>
+<p>This step has two parts: <strong>structural extraction</strong> (deterministic, free) and <strong>semantic extraction</strong> (LLM, costs tokens).</p>
+<blockquote><strong>graphify needs no API key. Never ask the user for one, and never block on one.</strong> Code is extracted structurally (AST) with no LLM and no key at all — a code-only corpus (the common <code>/graphify .</code> on a repo) skips semantic extraction entirely, so it needs nothing here: go straight to Part A and skip Part B. Semantic extraction (only for docs, papers, and images) uses Gemini <strong>only if</strong> <code>GEMINI_API_KEY</code>/<code>GOOGLE_API_KEY</code> is already set; otherwise the host agent itself is the LLM. graphify does <strong>not</strong> read <code>ANTHROPIC_API_KEY</code>, <code>OPENAI_API_KEY</code>, or any other provider key. If you catch yourself about to prompt for, wait on, or stop because of a missing API key, that is a misread of this skill — proceed without one.</blockquote>
+<p><strong>Before semantic extraction:</strong> check whether <code>GEMINI_API_KEY</code> or <code>GOOGLE_API_KEY</code> is set. If neither is set, print this one-liner to the user:</p>
+<blockquote>Tip: set <code>GEMINI_API_KEY</code> or <code>GOOGLE_API_KEY</code> to use Gemini for semantic extraction (<code>pip install 'graphifyy[gemini]'</code>).</blockquote>
+<p>Print it once, then continue — do not wait for the user to supply a key. If <code>GEMINI_API_KEY</code> or <code>GOOGLE_API_KEY</code> IS set, use <code>graphify.llm.extract_corpus_parallel(files, backend=&quot;gemini&quot;)</code> for semantic extraction instead of dispatching subagents. The default Gemini model is <code>gemini-3-flash-preview</code>; set <code>GRAPHIFY_GEMINI_MODEL</code> or pass <code>--model</code> in headless CLI flows to override it.</p>
+<blockquote><strong>No other API keys are read.</strong> When <code>GEMINI_API_KEY</code>/<code>GOOGLE_API_KEY</code> are unset, semantic extraction falls to the host agent itself — the running session is the LLM. On a host that dispatches subagents (e.g. Claude Code), dispatch them as written in Part B. On a host that runs the CLI directly in a terminal and cannot dispatch subagents, do not stall: a code-only corpus has no semantic work, so write the empty semantic file (Part B &quot;Fast path&quot;) and continue to Part C; for a corpus with docs/papers/images, either set a Gemini key or extract those inline yourself, but in no case prompt for <code>ANTHROPIC_API_KEY</code> — that prompt is a misread of this skill.</blockquote>
+<p><strong>Run Part A (AST) and Part B (semantic) in parallel. Dispatch all semantic subagents AND start AST extraction in the same message. Both can run simultaneously since they operate on different file types. Merge results in Part C as before.</strong></p>
+<p>Note: Parallelizing AST + semantic saves 5-15s on large corpora. AST is deterministic and fast; start it while subagents are processing docs/papers.</p>
+<h5>Part A - Structural extraction for code files</h5>
+<p>For any code files detected, run AST extraction in parallel with Part B subagents:</p>
+<pre><code>$(cat graphify-out/.graphify_python) -c &quot;
+import sys, json
+from graphify.extract import collect_files, extract
+from pathlib import Path
+import json
+
+code_files = []
+detect = json.loads(Path('graphify-out/.graphify_detect.json').read_text(encoding=\&quot;utf-8\&quot;))
+for f in detect.get('files', {}).get('code', []):
+    code_files.extend(collect_files(Path(f)) if Path(f).is_dir() else [Path(f)])
+
+if code_files:
+    result = extract(code_files, cache_root=Path('INPUT_PATH'))
+    Path('graphify-out/.graphify_ast.json').write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding=\&quot;utf-8\&quot;)
+    print(f'AST: {len(result[\&quot;nodes\&quot;])} nodes, {len(result[\&quot;edges\&quot;])} edges')
+else:
+    Path('graphify-out/.graphify_ast.json').write_text(json.dumps({'nodes':[],'edges':[],'input_tokens':0,'output_tokens':0}, ensure_ascii=False), encoding=\&quot;utf-8\&quot;)
+    print('No code files - skipping AST extraction')
+&quot;</code></pre>
+<h5>Part B - Semantic extraction (parallel subagents)</h5>
+<p><strong>Fast path:</strong> If detection found zero docs, papers, and images (code-only corpus), skip Part B entirely and go straight to Part C. AST handles code - there is nothing for semantic subagents to do. <strong>First write an empty semantic file</strong> so Part C's merge has its input (it reads <code>.graphify_semantic.json</code> unconditionally; without this a code-only run hits <code>FileNotFoundError</code>):</p>
+<pre><code>$(cat graphify-out/.graphify_python) -c &quot;
+import json
+from pathlib import Path
+Path('graphify-out/.graphify_semantic.json').write_text(json.dumps({'nodes':[],'edges':[],'hyperedges':[],'input_tokens':0,'output_tokens':0}), encoding='utf-8')
+&quot;</code></pre>
+<p><strong>MANDATORY: You MUST use the Agent tool here. Reading files yourself one-by-one is forbidden - it is 5-10x slower. If you do not use the Agent tool you are doing this wrong.</strong></p>
+<p>Before dispatching subagents, print a timing estimate:</p>
+<ul>
+<li>Load <code>total_words</code> and file counts from <code>graphify-out/.graphify_detect.json</code></li>
+<li>Estimate agents needed: <code>ceil(uncached_non_code_files / 22)</code> (chunk size is 20-25)</li>
+<li>Estimate time: ~45s per agent batch (they run in parallel, so total ≈ 45s × ceil(agents/parallel_limit))</li>
+<li>Print: &quot;Semantic extraction: ~N files → X agents, estimated ~Ys&quot;</li>
+</ul>
+<p><strong>Step B0 - Check extraction cache first</strong></p>
+<p>Before dispatching any subagents, check which files already have cached extraction results:</p>
+<pre><code>$(cat graphify-out/.graphify_python) -c &quot;
+import json
+from graphify.cache import check_semantic_cache
+from pathlib import Path
+
+detect = json.loads(Path('graphify-out/.graphify_detect.json').read_text(encoding=\&quot;utf-8\&quot;))
+# Only content files go to semantic extraction. Code is already covered structurally
+# by the AST pass (Part A); flattening every category here makes subagents re-read
+# every source file (#1392). Video is transcribed to a document in Step 2.5 first.
+all_files = [f for cat in ('document', 'paper', 'image') for f in detect['files'].get(cat, [])]
+
+cached_nodes, cached_edges, cached_hyperedges, uncached = check_semantic_cache(all_files, root='INPUT_PATH')
+
+# Always (re)write the cache file: write hits, else DELETE any leftover from a prior
+# run so Part C never merges a stale .graphify_cached.json (#1392).
+if cached_nodes or cached_edges or cached_hyperedges:
+    Path('graphify-out/.graphify_cached.json').write_text(json.dumps({'nodes': cached_nodes, 'edges': cached_edges, 'hyperedges': cached_hyperedges}, ensure_ascii=False), encoding=\&quot;utf-8\&quot;)
+else:
+    Path('graphify-out/.graphify_cached.json').unlink(missing_ok=True)
+Path('graphify-out/.graphify_uncached.txt').write_text('\n'.join(uncached), encoding=\&quot;utf-8\&quot;)
+print(f'Cache: {len(all_files)-len(uncached)} files hit, {len(uncached)} files need extraction')
+&quot;</code></pre>
+<p>Only dispatch subagents for files listed in <code>graphify-out/.graphify_uncached.txt</code>. If all files are cached, skip to Part C directly.</p>
+<p><strong>Step B1 - Split into chunks</strong></p>
+<p>Load files from <code>graphify-out/.graphify_uncached.txt</code>. Split into chunks of 20-25 files each. Each image gets its own chunk (vision needs separate context). When splitting, group files from the same directory together so related artifacts land in the same chunk and cross-file relationships are more likely to be extracted.</p>
+<p><strong>Step B2 - Dispatch ALL subagents in a single message (Codex)</strong></p>
+<blockquote><strong>Codex platform:</strong> Uses <code>spawn_agent</code> + <code>wait_agent</code> + <code>close_agent</code> instead of the Agent tool.</blockquote>
+<blockquote>Requires <code>multi_agent = true</code> under <code>[features]</code> in <code>~/.codex/config.toml</code>.</blockquote>
+<blockquote>If <code>spawn_agent</code> is unavailable, tell the user to add that config and restart Codex.</blockquote>
+<p>Call <code>spawn_agent</code> once per chunk — ALL in the same response so they run in parallel. Build the message by wrapping the extraction prompt in task-delegation framing:</p>
+<pre><code>spawn_agent(agent_type=&quot;worker&quot;, message=&quot;Your task is to perform the following. Follow the instructions below exactly.\n\n&lt;agent-instructions&gt;\n[extraction prompt, with FILE_LIST, CHUNK_NUM, TOTAL_CHUNKS, DEEP_MODE substituted]\n&lt;/agent-instructions&gt;\n\nExecute this now. Output ONLY the structured JSON response.&quot;)</code></pre>
+<p>After all agents are dispatched, collect results sequentially in memory:</p>
+<pre><code>result = wait_agent(handle); close_agent(handle)   # repeat per handle</code></pre>
+<p>Parse each result as JSON. Accumulate nodes/edges/hyperedges across all results and write to <code>graphify-out/.graphify_semantic_new.json</code>. Codex collects in memory, so there are no per-chunk files on disk; the disk-based success checks in Step B3 do not apply — a chunk that returns invalid JSON is the failure signal instead.</p>
+<p>Subagent prompt template:</p>
+<p>See <code>references/extraction-spec.md</code> for the compact subagent prompt (rules, node-ID format, confidence rubric, hyperedge and vision rules, JSON schema). Load it only here, only when at least one chunk holds a doc, paper, or image; a pure-code corpus has skipped Part B and never reads it. Pass each agent that prompt verbatim with FILE_LIST, CHUNK_NUM, TOTAL_CHUNKS, and DEEP_MODE substituted, and have it return the JSON inline.</p>
+<p><strong>Step B3 - Collect, cache, and merge</strong></p>
+<p>Wait for all subagents. For each result:</p>
+<ul>
+<li>Check that <code>graphify-out/.graphify_chunk_NN.json</code> exists on disk — this is the success signal</li>
+<li>If the file exists and contains valid JSON with <code>nodes</code> and <code>edges</code>, include it and save to cache</li>
+<li>If the file is missing, the subagent was likely dispatched as read-only (Explore type) — print a warning: &quot;chunk N missing from disk — subagent may have been read-only. Re-run with general-purpose agent.&quot; Do not silently skip.</li>
+<li>If a subagent failed or returned invalid JSON, print a warning and skip that chunk - do not abort</li>
+</ul>
+<p>If more than half the chunks failed or are missing, stop and tell the user to re-run and ensure <code>subagent_type=&quot;general-purpose&quot;</code> is used.</p>
+<p>Merge all chunk files into <code>.graphify_semantic_new.json</code>. <strong>After each Agent call completes, read the real token counts from the Agent tool result's <code>usage</code> field and write them back into the chunk JSON before merging</strong> — the chunk JSON itself always has placeholder zeros. Then run:</p>
+<pre><code>$(cat graphify-out/.graphify_python) -c &quot;
+import json, glob
+from pathlib import Path
+
+chunks = sorted(glob.glob('graphify-out/.graphify_chunk_*.json'))
+all_nodes, all_edges, all_hyperedges = [], [], []
+total_in, total_out = 0, 0
+for c in chunks:
+    d = json.loads(Path(c).read_text(encoding=\&quot;utf-8\&quot;))
+    all_nodes += d.get('nodes', [])
+    all_edges += d.get('edges', [])
+    all_hyperedges += d.get('hyperedges', [])
+    total_in += d.get('input_tokens', 0)
+    total_out += d.get('output_tokens', 0)
+Path('graphify-out/.graphify_semantic_new.json').write_text(json.dumps({
+    'nodes': all_nodes, 'edges': all_edges, 'hyperedges': all_hyperedges,
+    'input_tokens': total_in, 'output_tokens': total_out,
+}, indent=2, ensure_ascii=False), encoding=\&quot;utf-8\&quot;)
+print(f'Merged {len(chunks)} chunks: {total_in:,} in / {total_out:,} out tokens')
+&quot;</code></pre>
+<p>Save new results to cache:</p>
+<pre><code>$(cat graphify-out/.graphify_python) -c &quot;
+import json
+from graphify.cache import save_semantic_cache
+from pathlib import Path
+
+new = json.loads(Path('graphify-out/.graphify_semantic_new.json').read_text(encoding=\&quot;utf-8\&quot;)) if Path('graphify-out/.graphify_semantic_new.json').exists() else {'nodes':[],'edges':[],'hyperedges':[]}
+saved = save_semantic_cache(new.get('nodes', []), new.get('edges', []), new.get('hyperedges', []), root='INPUT_PATH')
+print(f'Cached {saved} files')
+&quot;</code></pre>
+<p>Merge cached + new results into <code>graphify-out/.graphify_semantic.json</code>:</p>
+<pre><code>$(cat graphify-out/.graphify_python) -c &quot;
+import json
+from pathlib import Path
+
+cached = json.loads(Path('graphify-out/.graphify_cached.json').read_text(encoding=\&quot;utf-8\&quot;)) if Path('graphify-out/.graphify_cached.json').exists() else {'nodes':[],'edges':[],'hyperedges':[]}
+new = json.loads(Path('graphify-out/.graphify_semantic_new.json').read_text(encoding=\&quot;utf-8\&quot;)) if Path('graphify-out/.graphify_semantic_new.json').exists() else {'nodes':[],'edges':[],'hyperedges':[]}
+
+all_nodes = cached['nodes'] + new.get('nodes', [])
+all_edges = cached['edges'] + new.get('edges', [])
+all_hyperedges = cached.get('hyperedges', []) + new.get('hyperedges', [])
+seen = set()
+deduped = []
+for n in all_nodes:
+    if n['id'] not in seen:
+        seen.add(n['id'])
+        deduped.append(n)
+
+merged = {
+    'nodes': deduped,
+    'edges': all_edges,
+    'hyperedges': all_hyperedges,
+    'input_tokens': new.get('input_tokens', 0),
+    'output_tokens': new.get('output_tokens', 0),
+}
+Path('graphify-out/.graphify_semantic.json').write_text(json.dumps(merged, indent=2, ensure_ascii=False), encoding=\&quot;utf-8\&quot;)
+print(f'Extraction complete - {len(deduped)} nodes, {len(all_edges)} edges ({len(cached[\&quot;nodes\&quot;])} from cache, {len(new.get(\&quot;nodes\&quot;,[]))} new)')
+&quot;</code></pre>
+<p>Clean up temp files: <code>rm -f graphify-out/.graphify_cached.json graphify-out/.graphify_uncached.txt graphify-out/.graphify_semantic_new.json</code></p>
+<h5>Part C - Merge AST + semantic into final extraction</h5>
+<pre><code>$(cat graphify-out/.graphify_python) -c &quot;
+import sys, json
+from pathlib import Path
+
+ast = json.loads(Path('graphify-out/.graphify_ast.json').read_text(encoding=\&quot;utf-8\&quot;))
+sem = json.loads(Path('graphify-out/.graphify_semantic.json').read_text(encoding=\&quot;utf-8\&quot;))
+
+# Merge: AST nodes first, semantic nodes deduplicated by id
+seen = {n['id'] for n in ast['nodes']}
+merged_nodes = list(ast['nodes'])
+for n in sem['nodes']:
+    if n['id'] not in seen:
+        merged_nodes.append(n)
+        seen.add(n['id'])
+
+merged_edges = ast['edges'] + sem['edges']
+merged_hyperedges = sem.get('hyperedges', [])
+merged = {
+    'nodes': merged_nodes,
+    'edges': merged_edges,
+    'hyperedges': merged_hyperedges,
+    'input_tokens': sem.get('input_tokens', 0),
+    'output_tokens': sem.get('output_tokens', 0),
+}
+Path('graphify-out/.graphify_extract.json').write_text(json.dumps(merged, indent=2, ensure_ascii=False), encoding=\&quot;utf-8\&quot;)
+total = len(merged_nodes)
+edges = len(merged_edges)
+print(f'Merged: {total} nodes, {edges} edges ({len(ast[\&quot;nodes\&quot;])} AST + {len(sem[\&quot;nodes\&quot;])} semantic)')
+&quot;</code></pre>
+<h4>Step 4 - Build graph, cluster, analyze, generate outputs</h4>
+<p><strong>Before starting:</strong> the code blocks below pass <code>directed=IS_DIRECTED</code> to <code>build_from_json()</code>. Replace <code>IS_DIRECTED</code> with <code>True</code> if <code>--directed</code> was given (builds a <code>DiGraph</code> preserving edge direction source→target), otherwise <code>False</code> (the default undirected <code>Graph</code>). Substitute it the same way you substitute <code>INPUT_PATH</code> — do not leave the literal <code>IS_DIRECTED</code> in the code.</p>
+<pre><code>mkdir -p graphify-out
+$(cat graphify-out/.graphify_python) -c &quot;
+import sys, json
+from graphify.build import build_from_json
+from graphify.cluster import cluster, score_all
+from graphify.analyze import god_nodes, surprising_connections, suggest_questions
+from graphify.report import generate
+from graphify.export import to_json
+from pathlib import Path
+
+extraction = json.loads(Path('graphify-out/.graphify_extract.json').read_text(encoding=\&quot;utf-8\&quot;))
+detection  = json.loads(Path('graphify-out/.graphify_detect.json').read_text(encoding=\&quot;utf-8\&quot;))
+
+# root= mirrors the --update runbook (#1361): relativize source_file to the same
+# base so the full build and incremental --update never drift apart on re-extract.
+G = build_from_json(extraction, root='INPUT_PATH', directed=IS_DIRECTED)
+# Guard BEFORE any write: an empty extraction must not clobber a good graph.json /
+# GRAPH_REPORT.md / analysis sidecar. Check immediately after build (#1392).
+if G.number_of_nodes() == 0:
+    print('ERROR: Graph is empty - extraction produced no nodes.')
+    print('Possible causes: all files were skipped, binary-only corpus, or extraction failed.')
+    raise SystemExit(1)
+communities = cluster(G)
+cohesion = score_all(G, communities)
+tokens = {'input': extraction.get('input_tokens', 0), 'output': extraction.get('output_tokens', 0)}
+gods = god_nodes(G)
+surprises = surprising_connections(G, communities)
+labels = {cid: 'Community ' + str(cid) for cid in communities}
+# Placeholder questions - regenerated with real labels in Step 5
+questions = suggest_questions(G, communities, labels)
+
+# Export FIRST and honor the #479 shrink-guard: to_json returns False (writing
+# nothing) when the new graph is smaller than the existing graph.json. Only write
+# GRAPH_REPORT.md + the analysis sidecar when the graph was actually written, so
+# they never describe a graph that graph.json doesn't contain (#1392).
+wrote = to_json(G, communities, 'graphify-out/graph.json')
+if not wrote:
+    print('ERROR: refused to shrink graphify-out/graph.json (existing graph has more nodes; #479).')
+    print('If this shrink is intentional (you deleted files), re-run a full build with --force.')
+    raise SystemExit(1)
+report = generate(G, communities, cohesion, labels, gods, surprises, detection, tokens, 'INPUT_PATH', suggested_questions=questions)
+Path('graphify-out/GRAPH_REPORT.md').write_text(report, encoding=\&quot;utf-8\&quot;)
+analysis = {
+    'communities': {str(k): v for k, v in communities.items()},
+    'cohesion': {str(k): v for k, v in cohesion.items()},
+    'gods': gods,
+    'surprises': surprises,
+    'questions': questions,
+}
+Path('graphify-out/.graphify_analysis.json').write_text(json.dumps(analysis, indent=2, ensure_ascii=False), encoding=\&quot;utf-8\&quot;)
+print(f'Graph: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges, {len(communities)} communities')
+&quot;</code></pre>
+<p>If this step prints <code>ERROR: Graph is empty</code>, stop and tell the user what happened - do not proceed to labeling or visualization.</p>
+<p>Replace INPUT_PATH with the actual path.</p>
+<h4>Step 4.5 - Graph health check (read-only integrity gate)</h4>
+<p>A non-destructive diagnostic on the extraction, before labeling. It surfaces edge collapse, dangling/missing endpoints, and self-loops — the silent-corruption modes of incremental updates and AST/LLM id mismatches. Read-only; never aborts.</p>
+<pre><code>$(cat graphify-out/.graphify_python) -c &quot;
+import json
+from pathlib import Path
+from graphify.diagnostics import diagnose_extraction, format_diagnostic_report
+
+extraction = json.loads(Path('graphify-out/.graphify_extract.json').read_text(encoding=\&quot;utf-8\&quot;))
+summary = diagnose_extraction(extraction, directed=IS_DIRECTED, root='INPUT_PATH')
+print(format_diagnostic_report(summary))
+flags = [f'{summary[k]} {label}' for k, label in (
+    ('dangling_endpoint_edges', 'dangling-endpoint edges'),
+    ('missing_endpoint_edges', 'missing-endpoint edges'),
+    ('self_loop_edges', 'self-loop edges'),
+    ('directed_same_endpoint_collapsed_edges', 'collapsed (directed) edges'),
+    ('undirected_same_endpoint_collapsed_edges', 'collapsed (undirected) edges'),
+) if summary.get(k, 0)]
+print('GRAPH HEALTH WARNING: ' + '; '.join(flags) + ' - graph may be incomplete/corrupt.' if flags else 'Graph health: OK (no dangling/missing/collapsed edges).')
+&quot;</code></pre>
+<p>Substitute <code>IS_DIRECTED</code> and <code>INPUT_PATH</code> as in Step 4. If a <code>GRAPH HEALTH WARNING</code> prints, surface it in the final summary (do not abort — the graph is still usable, but the integrity issue must be visible, per the Honesty Rules).</p>
+<h4>Step 5 - Label communities</h4>
+<p>Read <code>graphify-out/.graphify_analysis.json</code>. For each community key, look at its node labels and write a 2-5 word plain-language name (e.g. &quot;Attention Mechanism&quot;, &quot;Training Pipeline&quot;, &quot;Data Loading&quot;).</p>
+<p>Then regenerate the report and save the labels for the visualizer:</p>
+<pre><code>$(cat graphify-out/.graphify_python) -c &quot;
+import sys, json
+from graphify.build import build_from_json
+from graphify.cluster import score_all
+from graphify.analyze import god_nodes, surprising_connections, suggest_questions
+from graphify.report import generate
+from pathlib import Path
+
+extraction = json.loads(Path('graphify-out/.graphify_extract.json').read_text(encoding=\&quot;utf-8\&quot;))
+detection  = json.loads(Path('graphify-out/.graphify_detect.json').read_text(encoding=\&quot;utf-8\&quot;))
+analysis   = json.loads(Path('graphify-out/.graphify_analysis.json').read_text(encoding=\&quot;utf-8\&quot;))
+
+# root= as in Step 4 / the --update runbook (#1361) — same base for node-key parity.
+G = build_from_json(extraction, root='INPUT_PATH', directed=IS_DIRECTED)
+communities = {int(k): v for k, v in analysis['communities'].items()}
+cohesion = {int(k): v for k, v in analysis['cohesion'].items()}
+tokens = {'input': extraction.get('input_tokens', 0), 'output': extraction.get('output_tokens', 0)}
+
+# LABELS - replace these with the names you chose above
+labels = LABELS_DICT
+
+# Regenerate questions with real community labels (labels affect question phrasing)
+questions = suggest_questions(G, communities, labels)
+
+report = generate(G, communities, cohesion, labels, analysis['gods'], analysis['surprises'], detection, tokens, 'INPUT_PATH', suggested_questions=questions)
+Path('graphify-out/GRAPH_REPORT.md').write_text(report, encoding=\&quot;utf-8\&quot;)
+Path('graphify-out/.graphify_labels.json').write_text(json.dumps({str(k): v for k, v in labels.items()}, ensure_ascii=False), encoding=\&quot;utf-8\&quot;)
+print('Report updated with community labels')
+&quot;</code></pre>
+<p>Replace <code>LABELS_DICT</code> with the actual dict you constructed (e.g. <code>{0: &quot;Attention Mechanism&quot;, 1: &quot;Training Pipeline&quot;}</code>). Replace INPUT_PATH with the actual path.</p>
+<h4>Step 6 - Generate Obsidian vault (opt-in) + HTML</h4>
+<p><strong>Generate HTML always</strong> (unless <code>--no-viz</code>). <strong>Obsidian vault only if <code>--obsidian</code> was explicitly given</strong> — skip it otherwise, it generates one file per node.</p>
+<p>If <code>--obsidian</code> was given:</p>
+<ul>
+<li>If <code>--obsidian-dir &lt;path&gt;</code> was also given, pass it via <code>--dir</code>. Otherwise defaults to <code>graphify-out/obsidian</code>.</li>
+</ul>
+<pre><code>graphify export obsidian
+# or with custom dir: graphify export obsidian --dir ~/vaults/my-project</code></pre>
+<p>Generate the HTML graph (always, unless <code>--no-viz</code>):</p>
+<pre><code>graphify export html  # auto-aggregates to community view if graph &gt; 5000 nodes
+# or: graphify export html --no-viz</code></pre>
+<h4>Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark (only on their flags)</h4>
+<p>These run only when their flag is present (<code>--wiki</code>, <code>--neo4j</code>/<code>--neo4j-push</code>, <code>--falkordb</code>/<code>--falkordb-push</code>, <code>--svg</code>, <code>--graphml</code>, <code>--mcp</code>) or, for the token-reduction benchmark, when <code>total_words</code> exceeds 5,000. A default run with no export flags skips all of them. See <code>references/exports.md</code> for each one. Run any <code>--wiki</code> export before Step 9 cleanup so <code>.graphify_labels.json</code> is still available.</p>
+<hr>
+<h4>Step 9 - Save manifest, update cost tracker, clean up, and report</h4>
+<pre><code>$(cat graphify-out/.graphify_python) -c &quot;
+import json
+from pathlib import Path
+from datetime import datetime, timezone
+from graphify.detect import save_manifest
+
+# Save manifest for --update
+detect = json.loads(Path('graphify-out/.graphify_detect.json').read_text(encoding=\&quot;utf-8\&quot;))
+# In --update mode, 'all_files' carries the full corpus; 'files' is the changed
+# subset. Full-rebuild mode populates only 'files', so the fallback handles that.
+# root= relativizes the manifest keys to the scan root (same base as the build),
+# so the on-disk manifest is portable across clones/machines and a later --update
+# matches cached files instead of missing every one (#1417).
+save_manifest(detect.get('all_files') or detect['files'], root='INPUT_PATH')
+
+# Update cumulative cost tracker
+extract = json.loads(Path('graphify-out/.graphify_extract.json').read_text(encoding=\&quot;utf-8\&quot;))
+input_tok = extract.get('input_tokens', 0)
+output_tok = extract.get('output_tokens', 0)
+
+cost_path = Path('graphify-out/cost.json')
+if cost_path.exists():
+    cost = json.loads(cost_path.read_text(encoding=\&quot;utf-8\&quot;))
+else:
+    cost = {'runs': [], 'total_input_tokens': 0, 'total_output_tokens': 0}
+
+cost['runs'].append({
+    'date': datetime.now(timezone.utc).isoformat(),
+    'input_tokens': input_tok,
+    'output_tokens': output_tok,
+    'files': detect.get('total_files', 0),
+})
+cost['total_input_tokens'] += input_tok
+cost['total_output_tokens'] += output_tok
+cost_path.write_text(json.dumps(cost, indent=2, ensure_ascii=False), encoding=\&quot;utf-8\&quot;)
+
+print(f'This run: {input_tok:,} input tokens, {output_tok:,} output tokens')
+print(f'All time: {cost[\&quot;total_input_tokens\&quot;]:,} input, {cost[\&quot;total_output_tokens\&quot;]:,} output ({len(cost[\&quot;runs\&quot;])} runs)')
+&quot;
+rm -f graphify-out/.graphify_detect.json graphify-out/.graphify_extract.json graphify-out/.graphify_ast.json graphify-out/.graphify_semantic.json graphify-out/.graphify_analysis.json
+find graphify-out -maxdepth 1 -name '.graphify_chunk_*.json' -delete 2&gt;/dev/null
+rm -f graphify-out/.needs_update 2&gt;/dev/null || true</code></pre>
+<p>Replace INPUT_PATH with the actual path (same value used in Steps 4-5) so the manifest is relativized to the scan root.</p>
+<p>Tell the user (omit the obsidian line unless --obsidian was given):</p>
+<pre><code>Graph complete. Outputs in PATH_TO_DIR/graphify-out/
+
+  graph.html            - interactive graph, open in browser
+  GRAPH_REPORT.md       - audit report
+  graph.json            - raw graph data
+  obsidian/             - Obsidian vault (only if --obsidian was given)</code></pre>
+<p>If graphify saved you time, consider supporting it: https://github.com/sponsors/safishamsi</p>
+<p>Replace PATH_TO_DIR with the actual absolute path of the directory that was processed.</p>
+<p>Then paste these sections from GRAPH_REPORT.md directly into the chat:</p>
+<ul>
+<li>God Nodes</li>
+<li>Surprising Connections</li>
+<li>Suggested Questions</li>
+</ul>
+<p>Do NOT paste the full report - just those three sections. Keep it concise.</p>
+<p>Then immediately offer to explore. Pick the single most interesting suggested question from the report - the one that crosses the most community boundaries or has the most surprising bridge node - and ask:</p>
+<blockquote>&quot;The most interesting question this graph can answer: <strong>[question]</strong>. Want me to trace it?&quot;</blockquote>
+<p>If the user says yes, run <code>/graphify query &quot;[question]&quot;</code> on the graph and walk them through the answer using the graph structure - which nodes connect, which community boundaries get crossed, what the path reveals. Keep going as long as they want to explore. Each answer should end with a natural follow-up (&quot;this connects to X - want to go deeper?&quot;) so the session feels like navigation, not a one-shot report.</p>
+<p>The graph is the map. Your job after the pipeline is to be the guide.</p>
+<hr>
+<h3>Interpreter guard for subcommands</h3>
+<p>Before running any subcommand below (<code>--update</code>, <code>--cluster-only</code>, <code>query</code>, <code>path</code>, <code>explain</code>, <code>add</code>), check that <code>.graphify_python</code> exists. If it's missing (e.g. user deleted <code>graphify-out/</code>), re-resolve the interpreter first:</p>
+<pre><code>if [ ! -f graphify-out/.graphify_python ]; then
+    GRAPHIFY_BIN=$(which graphify 2&gt;/dev/null)
+    if [ -n &quot;$GRAPHIFY_BIN&quot; ]; then
+        PYTHON=$(head -1 &quot;$GRAPHIFY_BIN&quot; | tr -d '#!')
+        case &quot;$PYTHON&quot; in *[!a-zA-Z0-9/_.@-]*) PYTHON=&quot;python3&quot; ;; esac
+    else
+        PYTHON=&quot;python3&quot;
+    fi
+    mkdir -p graphify-out
+    &quot;$PYTHON&quot; -c &quot;import sys; open('graphify-out/.graphify_python', 'w', encoding='utf-8').write(sys.executable)&quot;
+fi</code></pre>
+<h3>For --update and --cluster-only</h3>
+<p>Both are non-default subcommands. <code>--update</code> re-extracts only new or changed files; <code>--cluster-only</code> reruns clustering on the existing graph. See <code>references/update.md</code> for both flows.</p>
+<hr>
+<h3>For /graphify query</h3>
+<p>When <code>graphify-out/graph.json</code> already exists and the user asks a question about the corpus, answer from the graph rather than rebuilding it:</p>
+<pre><code>graphify query &quot;&lt;question&gt;&quot;</code></pre>
+<p>Before traversal, expand the question against the graph's own vocabulary so a wording mismatch does not collapse the answer to noise. If the <code>graphify query</code> CLI is unavailable, fall back to an inline NetworkX traversal of <code>graphify-out/graph.json</code>. Answer using only what the graph output contains, and quote <code>source_location</code> when citing a specific fact. For that vocab-expansion step, the BFS/DFS traversal modes, the <code>--budget</code> cap, the NetworkX fallback, <code>save-result</code> feedback, and the <code>/graphify path</code> and <code>/graphify explain</code> flows, see <code>references/query.md</code>.</p>
+<hr>
+<h3>For /graphify add and --watch</h3>
+<p>Neither is part of the default build. When the user runs <code>/graphify add &lt;url&gt;</code> to fetch a URL into the corpus, or passes <code>--watch</code> to auto-rebuild on file changes, see <code>references/add-watch.md</code>.</p>
+<hr>
+<h3>For the commit hook and native CLAUDE.md integration</h3>
+<p>When the user asks to install the post-commit auto-rebuild hook or wire graphify into a project's CLAUDE.md, see <code>references/hooks.md</code>.</p>
+<hr>
+<h3>Honesty Rules</h3>
+<ul>
+<li>Never invent an edge. If unsure, use AMBIGUOUS.</li>
+<li>Never skip the corpus check warning.</li>
+<li>Always show token cost in the report.</li>
+<li>Never hide cohesion scores behind symbols - show the raw number.</li>
+<li>Never run HTML viz on a graph with more than 5,000 nodes without warning the user.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: graphify\ndisplay_name: graphify\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# graphify - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `graphify` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nUse for any question about a codebase, its architecture, file relationships, or project content — especially when graphify-out/ exists, where the question should be treated as a graphify query first. Turns any input (cod\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the graphify skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `graphify` |\n| Canonical name | `graphify` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\nUse for any question about a codebase, its architecture, file relationships, or project content — especially when graphify-out/ exists, where the question should be treated as a graphify query first. Turns any input (cod\n\n\n## Original SKILL.md\n\n---\nname: graphify\ndescription: \"Use for any question about a codebase, its architecture, file relationships, or project content — especially when graphify-out/ exists, where the question should be treated as a graphify query first. Turns any input (code, docs, papers, images, videos) into a persistent knowledge graph with god nodes, community detection, and query/path/explain tools.\"\n---\n\n# /graphify\n\nTurn any folder of files into a navigable knowledge graph with community detection, an honest audit trail, and three outputs: interactive HTML, GraphRAG-ready JSON, and a plain-language GRAPH_REPORT.md.\n\n## Usage\n\n```\n/graphify                                             # full pipeline on current directory (HTML viz; add --obsidian for a vault)\n/graphify \u003cpath>                                      # full pipeline on specific path\n/graphify https://github.com/\u003cowner>/\u003crepo>           # clone repo then run full pipeline on it\n/graphify https://github.com/\u003cowner>/\u003crepo> --branch \u003cbranch>  # clone a specific branch\n/graphify \u003curl1> \u003curl2> ...                           # clone multiple repos, build each, merge into one cross-repo graph\n/graphify \u003cpath> --mode deep                          # thorough extraction, richer INFERRED edges\n/graphify \u003cpath> --update                             # incremental - re-extract only new/changed files\n/graphify \u003cpath> --directed                            # build directed graph (preserves edge direction: source→target)\n/graphify \u003cpath> --whisper-model medium                # use a larger Whisper model for better transcription accuracy\n/graphify \u003cpath> --cluster-only                       # rerun clustering on existing graph\n/graphify \u003cpath> --no-viz                             # skip visualization, just report + JSON\n/graphify \u003cpath> --html                               # (HTML is generated by default - this flag is a no-op)\n/graphify \u003cpath> --svg                                # also export graph.svg (embeds in Notion, GitHub)\n/graphify \u003cpath> --graphml                            # export graph.graphml (Gephi, yEd)\n/graphify \u003cpath> --neo4j                              # generate graphify-out/cypher.txt for Neo4j\n/graphify \u003cpath> --neo4j-push bolt://localhost:7687   # push directly to Neo4j\n/graphify \u003cpath> --falkordb                           # generate graphify-out/cypher.txt for FalkorDB\n/graphify \u003cpath> --falkordb-push falkordb://localhost:6379   # push directly to FalkorDB\n/graphify \u003cpath> --mcp                                # start MCP stdio server for agent access\n/graphify \u003cpath> --watch                              # watch folder, auto-rebuild on code changes (no LLM needed)\n/graphify \u003cpath> --wiki                               # build agent-crawlable wiki (index.md + one article per community)\n/graphify \u003cpath> --obsidian --obsidian-dir ~/vaults/my-project  # write vault to custom path (e.g. existing vault)\n/graphify add \u003curl>                                   # fetch URL, save to ./raw, update graph\n/graphify add \u003curl> --author \"Name\"                   # tag who wrote it\n/graphify add \u003curl> --contributor \"Name\"              # tag who added it to the corpus\n/graphify query \"\u003cquestion>\"                          # BFS traversal - broad context\n/graphify query \"\u003cquestion>\" --dfs                    # DFS - trace a specific path\n/graphify query \"\u003cquestion>\" --budget 1500            # cap answer at N tokens\n/graphify path \"AuthModule\" \"Database\"                # shortest path between two concepts\n/graphify explain \"SwinTransformer\"                   # plain-language explanation of a node\n```\n\n## What graphify is for\n\nDrop any folder of code, docs, papers, images, or video into graphify and get a queryable knowledge graph. Persistent across sessions, honest audit trail (EXTRACTED/INFERRED/AMBIGUOUS), community detection surfaces cross-document connections you wouldn't think to ask about.\n\n## What You Must Do When Invoked\n\nIf the user invoked `/graphify --help` or `/graphify -h` (with no other arguments), print the contents of the `## Usage` section above verbatim and stop. Do not run any commands, do not detect files, do not default the path to `.`. Just print the Usage block and return.\n\n**Fast path — existing graph:** Before doing anything else, check whether `graphify-out/graph.json` exists. The expected location is `graphify-out/graph.json` relative to the **current working directory** (i.e. the project root where you are running commands). If it exists AND the user's request is a natural-language question about the codebase (e.g. \"How does X work?\", \"What calls Y?\", \"Trace the data flow through Z\") and NOT an explicit rebuild command (`--update`, `--cluster-only`, or a bare path/URL that implies fresh extraction): **skip Steps 1–5 entirely and jump straight to `## For /graphify query`.** Run `graphify query \"\u003cquestion>\"` immediately. Do not run detect. Do not check corpus size. Do not ask the user to narrow. The graph is already built — use it.\n\nIf no path was given, use `.` (current directory). Do not ask the user for a path.\n\nIf the path argument starts with `https://github.com/` or `http://github.com/`, treat it as a GitHub URL - run Step 0 before anything else, then continue with the resolved local path.\n\nFollow these steps in order. Do not skip steps.\n\n### Step 0 - GitHub repos and multi-path merge (only if a URL or several paths)\n\nOnly when the path is one or more `https://github.com/...` URLs, or several local subfolders to merge. See `references/github-and-merge.md` for the clone, cross-repo merge, and monorepo flow, then continue with the resolved local path. A plain local path skips this step.\n\n### Step 1 - Ensure graphify is installed\n\n```bash\n# Detect the correct Python interpreter (handles uv tool, pipx, venv, system installs)\nPYTHON=\"\"\nGRAPHIFY_BIN=$(which graphify 2>/dev/null)\n# 1. uv tool installs — most reliable on modern Mac/Linux\nif [ -z \"$PYTHON\" ] && command -v uv >/dev/null 2>&1; then\n    _UV_PY=$(uv tool run --from graphifyy python -c \"import sys; print(sys.executable)\" 2>/dev/null)\n    if [ -n \"$_UV_PY\" ]; then PYTHON=\"$_UV_PY\"; fi\nfi\n# 2. Read shebang from graphify binary (pipx and direct pip installs)\nif [ -z \"$PYTHON\" ] && [ -n \"$GRAPHIFY_BIN\" ]; then\n    _SHEBANG=$(head -1 \"$GRAPHIFY_BIN\" | tr -d '#!')\n    case \"$_SHEBANG\" in\n        *[!a-zA-Z0-9/_.@-]*) ;;\n        *) \"$_SHEBANG\" -c \"import graphify\" 2>/dev/null && PYTHON=\"$_SHEBANG\" ;;\n    esac\nfi\n# 3. Fall back to python3\nif [ -z \"$PYTHON\" ]; then PYTHON=\"python3\"; fi\nif ! \"$PYTHON\" -c \"import graphify\" 2>/dev/null; then\n    if command -v uv >/dev/null 2>&1; then\n        uv tool install --upgrade graphifyy -q 2>&1 | tail -3\n        _UV_PY=$(uv tool run --from graphifyy python -c \"import sys; print(sys.executable)\" 2>/dev/null)\n        if [ -n \"$_UV_PY\" ]; then PYTHON=\"$_UV_PY\"; fi\n    else\n        \"$PYTHON\" -m pip install graphifyy -q 2>/dev/null \\\n          || \"$PYTHON\" -m pip install graphifyy -q --break-system-packages 2>&1 | tail -3\n    fi\nfi\n# Write interpreter path for all subsequent steps (persists across invocations)\nmkdir -p graphify-out\n\"$PYTHON\" -c \"import sys; open('graphify-out/.graphify_python', 'w', encoding='utf-8').write(sys.executable)\"\n# Save scan root so `graphify update` (no args) knows where to look next time\necho \"$(cd INPUT_PATH && pwd)\" > graphify-out/.graphify_root\n```\n\nIf the import succeeds, print nothing and move straight to Step 2.\n\n**In every subsequent bash block, replace `python3` with `$(cat graphify-out/.graphify_python)` to use the correct interpreter.**\n\n### Step 2 - Detect files\n\n```bash\n$(cat graphify-out/.graphify_python) -c \"\nimport json\nfrom graphify.detect import detect\nfrom pathlib import Path\nresult = detect(Path('INPUT_PATH'))\nprint(json.dumps(result, ensure_ascii=False))\n\" > graphify-out/.graphify_detect.json\n```\n\nReplace INPUT_PATH with the actual path the user provided. Do NOT cat or print the JSON - read it silently and present a clean summary instead:\n\n```\nCorpus: X files · ~Y words\n  code:     N files (.py .ts .go ...)\n  docs:     N files (.md .txt ...)\n  papers:   N files (.pdf ...)\n  images:   N files\n  video:    N files (.mp4 .mp3 ...)\n```\n\nOmit any category with 0 files from the summary.\n\nThen act on it:\n- If `total_files` is 0: stop with \"No supported files found in [path].\"\n- If `skipped_sensitive` is non-empty: mention file count skipped, not the file names.\n- If `total_words` > 2,000,000 OR `total_files` > 500: show the warning. Then compute the top 5 first-level subdirectories by file count:\n  - Read `scan_root` from the detect JSON (always an absolute path to the resolved INPUT_PATH).\n  - Concatenate all file lists across all types (`code`, `document`, `paper`, `image`, `video`).\n  - Filter out any path that starts with `scan_root + \"/graphify-out/\"` to exclude converted sidecars.\n  - For each file, strip the `scan_root` prefix and take the first path component. Files directly in `scan_root` with no subdirectory count as `(root)`.\n  - If all files are in `(root)` with no subdirectories, do not ask to narrow — no subfolders exist. Instead suggest `--no-cluster` to skip the expensive clustering step and proceed.\n  - Otherwise rank by count, show the top 5 with file counts, then ask which subfolder to run on. Wait for the user's answer before proceeding.\n- Otherwise: proceed directly to Step 2.5 if video files were detected, or Step 3 if not.\n\n### Step 2.5 - Video and audio (only if video files detected)\n\nSkip this step entirely if `detect` returned zero `video` files. When the corpus has video or audio, see `references/transcribe.md` to transcribe them to text first, then treat the transcripts as doc files in Step 3.\n\n### Step 3 - Extract entities and relationships\n\n**Before starting:** note whether `--mode deep` was given. You must pass `DEEP_MODE=true` to every subagent in Step B2 if it was. Track this from the original invocation - do not lose it.\n\nThis step has two parts: **structural extraction** (deterministic, free) and **semantic extraction** (LLM, costs tokens).\n\n> **graphify needs no API key. Never ask the user for one, and never block on one.** Code is extracted structurally (AST) with no LLM and no key at all — a code-only corpus (the common `/graphify .` on a repo) skips semantic extraction entirely, so it needs nothing here: go straight to Part A and skip Part B. Semantic extraction (only for docs, papers, and images) uses Gemini **only if** `GEMINI_API_KEY`/`GOOGLE_API_KEY` is already set; otherwise the host agent itself is the LLM. graphify does **not** read `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or any other provider key. If you catch yourself about to prompt for, wait on, or stop because of a missing API key, that is a misread of this skill — proceed without one.\n\n**Before semantic extraction:** check whether `GEMINI_API_KEY` or `GOOGLE_API_KEY` is set. If neither is set, print this one-liner to the user:\n> Tip: set `GEMINI_API_KEY` or `GOOGLE_API_KEY` to use Gemini for semantic extraction (`pip install 'graphifyy[gemini]'`).\n\nPrint it once, then continue — do not wait for the user to supply a key. If `GEMINI_API_KEY` or `GOOGLE_API_KEY` IS set, use `graphify.llm.extract_corpus_parallel(files, backend=\"gemini\")` for semantic extraction instead of dispatching subagents. The default Gemini model is `gemini-3-flash-preview`; set `GRAPHIFY_GEMINI_MODEL` or pass `--model` in headless CLI flows to override it.\n\n> **No other API keys are read.** When `GEMINI_API_KEY`/`GOOGLE_API_KEY` are unset, semantic extraction falls to the host agent itself — the running session is the LLM. On a host that dispatches subagents (e.g. Claude Code), dispatch them as written in Part B. On a host that runs the CLI directly in a terminal and cannot dispatch subagents, do not stall: a code-only corpus has no semantic work, so write the empty semantic file (Part B \"Fast path\") and continue to Part C; for a corpus with docs/papers/images, either set a Gemini key or extract those inline yourself, but in no case prompt for `ANTHROPIC_API_KEY` — that prompt is a misread of this skill.\n\n**Run Part A (AST) and Part B (semantic) in parallel. Dispatch all semantic subagents AND start AST extraction in the same message. Both can run simultaneously since they operate on different file types. Merge results in Part C as before.**\n\nNote: Parallelizing AST + semantic saves 5-15s on large corpora. AST is deterministic and fast; start it while subagents are processing docs/papers.\n\n#### Part A - Structural extraction for code files\n\nFor any code files detected, run AST extraction in parallel with Part B subagents:\n\n```bash\n$(cat graphify-out/.graphify_python) -c \"\nimport sys, json\nfrom graphify.extract import collect_files, extract\nfrom pathlib import Path\nimport json\n\ncode_files = []\ndetect = json.loads(Path('graphify-out/.graphify_detect.json').read_text(encoding=\\\"utf-8\\\"))\nfor f in detect.get('files', {}).get('code', []):\n    code_files.extend(collect_files(Path(f)) if Path(f).is_dir() else [Path(f)])\n\nif code_files:\n    result = extract(code_files, cache_root=Path('INPUT_PATH'))\n    Path('graphify-out/.graphify_ast.json').write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding=\\\"utf-8\\\")\n    print(f'AST: {len(result[\\\"nodes\\\"])} nodes, {len(result[\\\"edges\\\"])} edges')\nelse:\n    Path('graphify-out/.graphify_ast.json').write_text(json.dumps({'nodes':[],'edges':[],'input_tokens':0,'output_tokens':0}, ensure_ascii=False), encoding=\\\"utf-8\\\")\n    print('No code files - skipping AST extraction')\n\"\n```\n\n#### Part B - Semantic extraction (parallel subagents)\n\n**Fast path:** If detection found zero docs, papers, and images (code-only corpus), skip Part B entirely and go straight to Part C. AST handles code - there is nothing for semantic subagents to do. **First write an empty semantic file** so Part C's merge has its input (it reads `.graphify_semantic.json` unconditionally; without this a code-only run hits `FileNotFoundError`):\n\n```bash\n$(cat graphify-out/.graphify_python) -c \"\nimport json\nfrom pathlib import Path\nPath('graphify-out/.graphify_semantic.json').write_text(json.dumps({'nodes':[],'edges':[],'hyperedges':[],'input_tokens':0,'output_tokens':0}), encoding='utf-8')\n\"\n```\n\n**MANDATORY: You MUST use the Agent tool here. Reading files yourself one-by-one is forbidden - it is 5-10x slower. If you do not use the Agent tool you are doing this wrong.**\n\nBefore dispatching subagents, print a timing estimate:\n- Load `total_words` and file counts from `graphify-out/.graphify_detect.json`\n- Estimate agents needed: `ceil(uncached_non_code_files / 22)` (chunk size is 20-25)\n- Estimate time: ~45s per agent batch (they run in parallel, so total ≈ 45s × ceil(agents/parallel_limit))\n- Print: \"Semantic extraction: ~N files → X agents, estimated ~Ys\"\n\n**Step B0 - Check extraction cache first**\n\nBefore dispatching any subagents, check which files already have cached extraction results:\n\n```bash\n$(cat graphify-out/.graphify_python) -c \"\nimport json\nfrom graphify.cache import check_semantic_cache\nfrom pathlib import Path\n\ndetect = json.loads(Path('graphify-out/.graphify_detect.json').read_text(encoding=\\\"utf-8\\\"))\n# Only content files go to semantic extraction. Code is already covered structurally\n# by the AST pass (Part A); flattening every category here makes subagents re-read\n# every source file (#1392). Video is transcribed to a document in Step 2.5 first.\nall_files = [f for cat in ('document', 'paper', 'image') for f in detect['files'].get(cat, [])]\n\ncached_nodes, cached_edges, cached_hyperedges, uncached = check_semantic_cache(all_files, root='INPUT_PATH')\n\n# Always (re)write the cache file: write hits, else DELETE any leftover from a prior\n# run so Part C never merges a stale .graphify_cached.json (#1392).\nif cached_nodes or cached_edges or cached_hyperedges:\n    Path('graphify-out/.graphify_cached.json').write_text(json.dumps({'nodes': cached_nodes, 'edges': cached_edges, 'hyperedges': cached_hyperedges}, ensure_ascii=False), encoding=\\\"utf-8\\\")\nelse:\n    Path('graphify-out/.graphify_cached.json').unlink(missing_ok=True)\nPath('graphify-out/.graphify_uncached.txt').write_text('\\n'.join(uncached), encoding=\\\"utf-8\\\")\nprint(f'Cache: {len(all_files)-len(uncached)} files hit, {len(uncached)} files need extraction')\n\"\n```\n\nOnly dispatch subagents for files listed in `graphify-out/.graphify_uncached.txt`. If all files are cached, skip to Part C directly.\n\n**Step B1 - Split into chunks**\n\nLoad files from `graphify-out/.graphify_uncached.txt`. Split into chunks of 20-25 files each. Each image gets its own chunk (vision needs separate context). When splitting, group files from the same directory together so related artifacts land in the same chunk and cross-file relationships are more likely to be extracted.\n\n**Step B2 - Dispatch ALL subagents in a single message (Codex)**\n\n> **Codex platform:** Uses `spawn_agent` + `wait_agent` + `close_agent` instead of the Agent tool.\n> Requires `multi_agent = true` under `[features]` in `~/.codex/config.toml`.\n> If `spawn_agent` is unavailable, tell the user to add that config and restart Codex.\n\nCall `spawn_agent` once per chunk — ALL in the same response so they run in parallel. Build the message by wrapping the extraction prompt in task-delegation framing:\n\n```\nspawn_agent(agent_type=\"worker\", message=\"Your task is to perform the following. Follow the instructions below exactly.\\n\\n\u003cagent-instructions>\\n[extraction prompt, with FILE_LIST, CHUNK_NUM, TOTAL_CHUNKS, DEEP_MODE substituted]\\n\u003c/agent-instructions>\\n\\nExecute this now. Output ONLY the structured JSON response.\")\n```\n\nAfter all agents are dispatched, collect results sequentially in memory:\n```\nresult = wait_agent(handle); close_agent(handle)   # repeat per handle\n```\n\nParse each result as JSON. Accumulate nodes/edges/hyperedges across all results and write to `graphify-out/.graphify_semantic_new.json`. Codex collects in memory, so there are no per-chunk files on disk; the disk-based success checks in Step B3 do not apply — a chunk that returns invalid JSON is the failure signal instead.\n\nSubagent prompt template:\n\nSee `references/extraction-spec.md` for the compact subagent prompt (rules, node-ID format, confidence rubric, hyperedge and vision rules, JSON schema). Load it only here, only when at least one chunk holds a doc, paper, or image; a pure-code corpus has skipped Part B and never reads it. Pass each agent that prompt verbatim with FILE_LIST, CHUNK_NUM, TOTAL_CHUNKS, and DEEP_MODE substituted, and have it return the JSON inline.\n\n**Step B3 - Collect, cache, and merge**\n\nWait for all subagents. For each result:\n- Check that `graphify-out/.graphify_chunk_NN.json` exists on disk — this is the success signal\n- If the file exists and contains valid JSON with `nodes` and `edges`, include it and save to cache\n- If the file is missing, the subagent was likely dispatched as read-only (Explore type) — print a warning: \"chunk N missing from disk — subagent may have been read-only. Re-run with general-purpose agent.\" Do not silently skip.\n- If a subagent failed or returned invalid JSON, print a warning and skip that chunk - do not abort\n\nIf more than half the chunks failed or are missing, stop and tell the user to re-run and ensure `subagent_type=\"general-purpose\"` is used.\n\nMerge all chunk files into `.graphify_semantic_new.json`. **After each Agent call completes, read the real token counts from the Agent tool result's `usage` field and write them back into the chunk JSON before merging** — the chunk JSON itself always has placeholder zeros. Then run:\n```bash\n$(cat graphify-out/.graphify_python) -c \"\nimport json, glob\nfrom pathlib import Path\n\nchunks = sorted(glob.glob('graphify-out/.graphify_chunk_*.json'))\nall_nodes, all_edges, all_hyperedges = [], [], []\ntotal_in, total_out = 0, 0\nfor c in chunks:\n    d = json.loads(Path(c).read_text(encoding=\\\"utf-8\\\"))\n    all_nodes += d.get('nodes', [])\n    all_edges += d.get('edges', [])\n    all_hyperedges += d.get('hyperedges', [])\n    total_in += d.get('input_tokens', 0)\n    total_out += d.get('output_tokens', 0)\nPath('graphify-out/.graphify_semantic_new.json').write_text(json.dumps({\n    'nodes': all_nodes, 'edges': all_edges, 'hyperedges': all_hyperedges,\n    'input_tokens': total_in, 'output_tokens': total_out,\n}, indent=2, ensure_ascii=False), encoding=\\\"utf-8\\\")\nprint(f'Merged {len(chunks)} chunks: {total_in:,} in / {total_out:,} out tokens')\n\"\n```\n\nSave new results to cache:\n```bash\n$(cat graphify-out/.graphify_python) -c \"\nimport json\nfrom graphify.cache import save_semantic_cache\nfrom pathlib import Path\n\nnew = json.loads(Path('graphify-out/.graphify_semantic_new.json').read_text(encoding=\\\"utf-8\\\")) if Path('graphify-out/.graphify_semantic_new.json').exists() else {'nodes':[],'edges':[],'hyperedges':[]}\nsaved = save_semantic_cache(new.get('nodes', []), new.get('edges', []), new.get('hyperedges', []), root='INPUT_PATH')\nprint(f'Cached {saved} files')\n\"\n```\n\nMerge cached + new results into `graphify-out/.graphify_semantic.json`:\n```bash\n$(cat graphify-out/.graphify_python) -c \"\nimport json\nfrom pathlib import Path\n\ncached = json.loads(Path('graphify-out/.graphify_cached.json').read_text(encoding=\\\"utf-8\\\")) if Path('graphify-out/.graphify_cached.json').exists() else {'nodes':[],'edges':[],'hyperedges':[]}\nnew = json.loads(Path('graphify-out/.graphify_semantic_new.json').read_text(encoding=\\\"utf-8\\\")) if Path('graphify-out/.graphify_semantic_new.json').exists() else {'nodes':[],'edges':[],'hyperedges':[]}\n\nall_nodes = cached['nodes'] + new.get('nodes', [])\nall_edges = cached['edges'] + new.get('edges', [])\nall_hyperedges = cached.get('hyperedges', []) + new.get('hyperedges', [])\nseen = set()\ndeduped = []\nfor n in all_nodes:\n    if n['id'] not in seen:\n        seen.add(n['id'])\n        deduped.append(n)\n\nmerged = {\n    'nodes': deduped,\n    'edges': all_edges,\n    'hyperedges': all_hyperedges,\n    'input_tokens': new.get('input_tokens', 0),\n    'output_tokens': new.get('output_tokens', 0),\n}\nPath('graphify-out/.graphify_semantic.json').write_text(json.dumps(merged, indent=2, ensure_ascii=False), encoding=\\\"utf-8\\\")\nprint(f'Extraction complete - {len(deduped)} nodes, {len(all_edges)} edges ({len(cached[\\\"nodes\\\"])} from cache, {len(new.get(\\\"nodes\\\",[]))} new)')\n\"\n```\nClean up temp files: `rm -f graphify-out/.graphify_cached.json graphify-out/.graphify_uncached.txt graphify-out/.graphify_semantic_new.json`\n\n#### Part C - Merge AST + semantic into final extraction\n\n```bash\n$(cat graphify-out/.graphify_python) -c \"\nimport sys, json\nfrom pathlib import Path\n\nast = json.loads(Path('graphify-out/.graphify_ast.json').read_text(encoding=\\\"utf-8\\\"))\nsem = json.loads(Path('graphify-out/.graphify_semantic.json').read_text(encoding=\\\"utf-8\\\"))\n\n# Merge: AST nodes first, semantic nodes deduplicated by id\nseen = {n['id'] for n in ast['nodes']}\nmerged_nodes = list(ast['nodes'])\nfor n in sem['nodes']:\n    if n['id'] not in seen:\n        merged_nodes.append(n)\n        seen.add(n['id'])\n\nmerged_edges = ast['edges'] + sem['edges']\nmerged_hyperedges = sem.get('hyperedges', [])\nmerged = {\n    'nodes': merged_nodes,\n    'edges': merged_edges,\n    'hyperedges': merged_hyperedges,\n    'input_tokens': sem.get('input_tokens', 0),\n    'output_tokens': sem.get('output_tokens', 0),\n}\nPath('graphify-out/.graphify_extract.json').write_text(json.dumps(merged, indent=2, ensure_ascii=False), encoding=\\\"utf-8\\\")\ntotal = len(merged_nodes)\nedges = len(merged_edges)\nprint(f'Merged: {total} nodes, {edges} edges ({len(ast[\\\"nodes\\\"])} AST + {len(sem[\\\"nodes\\\"])} semantic)')\n\"\n```\n\n### Step 4 - Build graph, cluster, analyze, generate outputs\n\n**Before starting:** the code blocks below pass `directed=IS_DIRECTED` to `build_from_json()`. Replace `IS_DIRECTED` with `True` if `--directed` was given (builds a `DiGraph` preserving edge direction source→target), otherwise `False` (the default undirected `Graph`). Substitute it the same way you substitute `INPUT_PATH` — do not leave the literal `IS_DIRECTED` in the code.\n\n```bash\nmkdir -p graphify-out\n$(cat graphify-out/.graphify_python) -c \"\nimport sys, json\nfrom graphify.build import build_from_json\nfrom graphify.cluster import cluster, score_all\nfrom graphify.analyze import god_nodes, surprising_connections, suggest_questions\nfrom graphify.report import generate\nfrom graphify.export import to_json\nfrom pathlib import Path\n\nextraction = json.loads(Path('graphify-out/.graphify_extract.json').read_text(encoding=\\\"utf-8\\\"))\ndetection  = json.loads(Path('graphify-out/.graphify_detect.json').read_text(encoding=\\\"utf-8\\\"))\n\n# root= mirrors the --update runbook (#1361): relativize source_file to the same\n# base so the full build and incremental --update never drift apart on re-extract.\nG = build_from_json(extraction, root='INPUT_PATH', directed=IS_DIRECTED)\n# Guard BEFORE any write: an empty extraction must not clobber a good graph.json /\n# GRAPH_REPORT.md / analysis sidecar. Check immediately after build (#1392).\nif G.number_of_nodes() == 0:\n    print('ERROR: Graph is empty - extraction produced no nodes.')\n    print('Possible causes: all files were skipped, binary-only corpus, or extraction failed.')\n    raise SystemExit(1)\ncommunities = cluster(G)\ncohesion = score_all(G, communities)\ntokens = {'input': extraction.get('input_tokens', 0), 'output': extraction.get('output_tokens', 0)}\ngods = god_nodes(G)\nsurprises = surprising_connections(G, communities)\nlabels = {cid: 'Community ' + str(cid) for cid in communities}\n# Placeholder questions - regenerated with real labels in Step 5\nquestions = suggest_questions(G, communities, labels)\n\n# Export FIRST and honor the #479 shrink-guard: to_json returns False (writing\n# nothing) when the new graph is smaller than the existing graph.json. Only write\n# GRAPH_REPORT.md + the analysis sidecar when the graph was actually written, so\n# they never describe a graph that graph.json doesn't contain (#1392).\nwrote = to_json(G, communities, 'graphify-out/graph.json')\nif not wrote:\n    print('ERROR: refused to shrink graphify-out/graph.json (existing graph has more nodes; #479).')\n    print('If this shrink is intentional (you deleted files), re-run a full build with --force.')\n    raise SystemExit(1)\nreport = generate(G, communities, cohesion, labels, gods, surprises, detection, tokens, 'INPUT_PATH', suggested_questions=questions)\nPath('graphify-out/GRAPH_REPORT.md').write_text(report, encoding=\\\"utf-8\\\")\nanalysis = {\n    'communities': {str(k): v for k, v in communities.items()},\n    'cohesion': {str(k): v for k, v in cohesion.items()},\n    'gods': gods,\n    'surprises': surprises,\n    'questions': questions,\n}\nPath('graphify-out/.graphify_analysis.json').write_text(json.dumps(analysis, indent=2, ensure_ascii=False), encoding=\\\"utf-8\\\")\nprint(f'Graph: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges, {len(communities)} communities')\n\"\n```\n\nIf this step prints `ERROR: Graph is empty`, stop and tell the user what happened - do not proceed to labeling or visualization.\n\nReplace INPUT_PATH with the actual path.\n\n### Step 4.5 - Graph health check (read-only integrity gate)\n\nA non-destructive diagnostic on the extraction, before labeling. It surfaces edge collapse, dangling/missing endpoints, and self-loops — the silent-corruption modes of incremental updates and AST/LLM id mismatches. Read-only; never aborts.\n\n```bash\n$(cat graphify-out/.graphify_python) -c \"\nimport json\nfrom pathlib import Path\nfrom graphify.diagnostics import diagnose_extraction, format_diagnostic_report\n\nextraction = json.loads(Path('graphify-out/.graphify_extract.json').read_text(encoding=\\\"utf-8\\\"))\nsummary = diagnose_extraction(extraction, directed=IS_DIRECTED, root='INPUT_PATH')\nprint(format_diagnostic_report(summary))\nflags = [f'{summary[k]} {label}' for k, label in (\n    ('dangling_endpoint_edges', 'dangling-endpoint edges'),\n    ('missing_endpoint_edges', 'missing-endpoint edges'),\n    ('self_loop_edges', 'self-loop edges'),\n    ('directed_same_endpoint_collapsed_edges', 'collapsed (directed) edges'),\n    ('undirected_same_endpoint_collapsed_edges', 'collapsed (undirected) edges'),\n) if summary.get(k, 0)]\nprint('GRAPH HEALTH WARNING: ' + '; '.join(flags) + ' - graph may be incomplete/corrupt.' if flags else 'Graph health: OK (no dangling/missing/collapsed edges).')\n\"\n```\n\nSubstitute `IS_DIRECTED` and `INPUT_PATH` as in Step 4. If a `GRAPH HEALTH WARNING` prints, surface it in the final summary (do not abort — the graph is still usable, but the integrity issue must be visible, per the Honesty Rules).\n\n### Step 5 - Label communities\n\nRead `graphify-out/.graphify_analysis.json`. For each community key, look at its node labels and write a 2-5 word plain-language name (e.g. \"Attention Mechanism\", \"Training Pipeline\", \"Data Loading\").\n\nThen regenerate the report and save the labels for the visualizer:\n\n```bash\n$(cat graphify-out/.graphify_python) -c \"\nimport sys, json\nfrom graphify.build import build_from_json\nfrom graphify.cluster import score_all\nfrom graphify.analyze import god_nodes, surprising_connections, suggest_questions\nfrom graphify.report import generate\nfrom pathlib import Path\n\nextraction = json.loads(Path('graphify-out/.graphify_extract.json').read_text(encoding=\\\"utf-8\\\"))\ndetection  = json.loads(Path('graphify-out/.graphify_detect.json').read_text(encoding=\\\"utf-8\\\"))\nanalysis   = json.loads(Path('graphify-out/.graphify_analysis.json').read_text(encoding=\\\"utf-8\\\"))\n\n# root= as in Step 4 / the --update runbook (#1361) — same base for node-key parity.\nG = build_from_json(extraction, root='INPUT_PATH', directed=IS_DIRECTED)\ncommunities = {int(k): v for k, v in analysis['communities'].items()}\ncohesion = {int(k): v for k, v in analysis['cohesion'].items()}\ntokens = {'input': extraction.get('input_tokens', 0), 'output': extraction.get('output_tokens', 0)}\n\n# LABELS - replace these with the names you chose above\nlabels = LABELS_DICT\n\n# Regenerate questions with real community labels (labels affect question phrasing)\nquestions = suggest_questions(G, communities, labels)\n\nreport = generate(G, communities, cohesion, labels, analysis['gods'], analysis['surprises'], detection, tokens, 'INPUT_PATH', suggested_questions=questions)\nPath('graphify-out/GRAPH_REPORT.md').write_text(report, encoding=\\\"utf-8\\\")\nPath('graphify-out/.graphify_labels.json').write_text(json.dumps({str(k): v for k, v in labels.items()}, ensure_ascii=False), encoding=\\\"utf-8\\\")\nprint('Report updated with community labels')\n\"\n```\n\nReplace `LABELS_DICT` with the actual dict you constructed (e.g. `{0: \"Attention Mechanism\", 1: \"Training Pipeline\"}`).\nReplace INPUT_PATH with the actual path.\n\n### Step 6 - Generate Obsidian vault (opt-in) + HTML\n\n**Generate HTML always** (unless `--no-viz`). **Obsidian vault only if `--obsidian` was explicitly given** — skip it otherwise, it generates one file per node.\n\nIf `--obsidian` was given:\n\n- If `--obsidian-dir \u003cpath>` was also given, pass it via `--dir`. Otherwise defaults to `graphify-out/obsidian`.\n\n```bash\ngraphify export obsidian\n# or with custom dir: graphify export obsidian --dir ~/vaults/my-project\n```\n\nGenerate the HTML graph (always, unless `--no-viz`):\n\n```bash\ngraphify export html  # auto-aggregates to community view if graph > 5000 nodes\n# or: graphify export html --no-viz\n```\n\n### Steps 6b-8 - Wiki, Neo4j, FalkorDB, SVG, GraphML, MCP, benchmark (only on their flags)\n\nThese run only when their flag is present (`--wiki`, `--neo4j`/`--neo4j-push`, `--falkordb`/`--falkordb-push`, `--svg`, `--graphml`, `--mcp`) or, for the token-reduction benchmark, when `total_words` exceeds 5,000. A default run with no export flags skips all of them. See `references/exports.md` for each one. Run any `--wiki` export before Step 9 cleanup so `.graphify_labels.json` is still available.\n\n---\n\n### Step 9 - Save manifest, update cost tracker, clean up, and report\n\n```bash\n$(cat graphify-out/.graphify_python) -c \"\nimport json\nfrom pathlib import Path\nfrom datetime import datetime, timezone\nfrom graphify.detect import save_manifest\n\n# Save manifest for --update\ndetect = json.loads(Path('graphify-out/.graphify_detect.json').read_text(encoding=\\\"utf-8\\\"))\n# In --update mode, 'all_files' carries the full corpus; 'files' is the changed\n# subset. Full-rebuild mode populates only 'files', so the fallback handles that.\n# root= relativizes the manifest keys to the scan root (same base as the build),\n# so the on-disk manifest is portable across clones/machines and a later --update\n# matches cached files instead of missing every one (#1417).\nsave_manifest(detect.get('all_files') or detect['files'], root='INPUT_PATH')\n\n# Update cumulative cost tracker\nextract = json.loads(Path('graphify-out/.graphify_extract.json').read_text(encoding=\\\"utf-8\\\"))\ninput_tok = extract.get('input_tokens', 0)\noutput_tok = extract.get('output_tokens', 0)\n\ncost_path = Path('graphify-out/cost.json')\nif cost_path.exists():\n    cost = json.loads(cost_path.read_text(encoding=\\\"utf-8\\\"))\nelse:\n    cost = {'runs': [], 'total_input_tokens': 0, 'total_output_tokens': 0}\n\ncost['runs'].append({\n    'date': datetime.now(timezone.utc).isoformat(),\n    'input_tokens': input_tok,\n    'output_tokens': output_tok,\n    'files': detect.get('total_files', 0),\n})\ncost['total_input_tokens'] += input_tok\ncost['total_output_tokens'] += output_tok\ncost_path.write_text(json.dumps(cost, indent=2, ensure_ascii=False), encoding=\\\"utf-8\\\")\n\nprint(f'This run: {input_tok:,} input tokens, {output_tok:,} output tokens')\nprint(f'All time: {cost[\\\"total_input_tokens\\\"]:,} input, {cost[\\\"total_output_tokens\\\"]:,} output ({len(cost[\\\"runs\\\"])} runs)')\n\"\nrm -f graphify-out/.graphify_detect.json graphify-out/.graphify_extract.json graphify-out/.graphify_ast.json graphify-out/.graphify_semantic.json graphify-out/.graphify_analysis.json\nfind graphify-out -maxdepth 1 -name '.graphify_chunk_*.json' -delete 2>/dev/null\nrm -f graphify-out/.needs_update 2>/dev/null || true\n```\n\nReplace INPUT_PATH with the actual path (same value used in Steps 4-5) so the manifest is relativized to the scan root.\n\nTell the user (omit the obsidian line unless --obsidian was given):\n```\nGraph complete. Outputs in PATH_TO_DIR/graphify-out/\n\n  graph.html            - interactive graph, open in browser\n  GRAPH_REPORT.md       - audit report\n  graph.json            - raw graph data\n  obsidian/             - Obsidian vault (only if --obsidian was given)\n```\n\nIf graphify saved you time, consider supporting it: https://github.com/sponsors/safishamsi\n\nReplace PATH_TO_DIR with the actual absolute path of the directory that was processed.\n\nThen paste these sections from GRAPH_REPORT.md directly into the chat:\n- God Nodes\n- Surprising Connections\n- Suggested Questions\n\nDo NOT paste the full report - just those three sections. Keep it concise.\n\nThen immediately offer to explore. Pick the single most interesting suggested question from the report - the one that crosses the most community boundaries or has the most surprising bridge node - and ask:\n\n> \"The most interesting question this graph can answer: **[question]**. Want me to trace it?\"\n\nIf the user says yes, run `/graphify query \"[question]\"` on the graph and walk them through the answer using the graph structure - which nodes connect, which community boundaries get crossed, what the path reveals. Keep going as long as they want to explore. Each answer should end with a natural follow-up (\"this connects to X - want to go deeper?\") so the session feels like navigation, not a one-shot report.\n\nThe graph is the map. Your job after the pipeline is to be the guide.\n\n---\n\n## Interpreter guard for subcommands\n\nBefore running any subcommand below (`--update`, `--cluster-only`, `query`, `path`, `explain`, `add`), check that `.graphify_python` exists. If it's missing (e.g. user deleted `graphify-out/`), re-resolve the interpreter first:\n\n```bash\nif [ ! -f graphify-out/.graphify_python ]; then\n    GRAPHIFY_BIN=$(which graphify 2>/dev/null)\n    if [ -n \"$GRAPHIFY_BIN\" ]; then\n        PYTHON=$(head -1 \"$GRAPHIFY_BIN\" | tr -d '#!')\n        case \"$PYTHON\" in *[!a-zA-Z0-9/_.@-]*) PYTHON=\"python3\" ;; esac\n    else\n        PYTHON=\"python3\"\n    fi\n    mkdir -p graphify-out\n    \"$PYTHON\" -c \"import sys; open('graphify-out/.graphify_python', 'w', encoding='utf-8').write(sys.executable)\"\nfi\n```\n\n## For --update and --cluster-only\n\nBoth are non-default subcommands. `--update` re-extracts only new or changed files; `--cluster-only` reruns clustering on the existing graph. See `references/update.md` for both flows.\n\n---\n\n## For /graphify query\n\nWhen `graphify-out/graph.json` already exists and the user asks a question about the corpus, answer from the graph rather than rebuilding it:\n\n```bash\ngraphify query \"\u003cquestion>\"\n```\n\nBefore traversal, expand the question against the graph's own vocabulary so a wording mismatch does not collapse the answer to noise. If the `graphify query` CLI is unavailable, fall back to an inline NetworkX traversal of `graphify-out/graph.json`. Answer using only what the graph output contains, and quote `source_location` when citing a specific fact. For that vocab-expansion step, the BFS/DFS traversal modes, the `--budget` cap, the NetworkX fallback, `save-result` feedback, and the `/graphify path` and `/graphify explain` flows, see `references/query.md`.\n\n---\n\n## For /graphify add and --watch\n\nNeither is part of the default build. When the user runs `/graphify add \u003curl>` to fetch a URL into the corpus, or passes `--watch` to auto-rebuild on file changes, see `references/add-watch.md`.\n\n---\n\n## For the commit hook and native CLAUDE.md integration\n\nWhen the user asks to install the post-commit auto-rebuild hook or wire graphify into a project's CLAUDE.md, see `references/hooks.md`.\n\n---\n\n## Honesty Rules\n\n- Never invent an edge. If unsure, use AMBIGUOUS.\n- Never skip the corpus check warning.\n- Always show token cost in the report.\n- Never hide cohesion scores behind symbols - show the raw number.\n- Never run HTML viz on a graph with more than 5,000 nodes without warning the user.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("graphify-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

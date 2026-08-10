@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `deliver-prd` for OpenCode. It removes lo
 
 Use this skill when your task matches this description:
 
-A Product Requirements Document is the primary specification artifact that communicates what to build and why. It bridges the gap between problem understanding and engineering implementation by providing clear requiremen
+Creates a comprehensive Product Requirements Document that aligns stakeholders on what to build, why, and how success will be measured. Use when specifying features, epics, or product initiatives for engineering handoff.
 
 ## How To Use It In OpenCode
 
@@ -32,7 +32,8 @@ In OpenCode, open the project and type: Use the deliver-prd skill to...
 
 ## Description
 
-A Product Requirements Document is the primary specification artifact that communicates what to build and why. It bridges the gap between problem understanding and engineering implementation by providing clear requiremen
+Creates a comprehensive Product Requirements Document that aligns stakeholders on what to build, why, and how success will be measured. Use when specifying features, epics, or product initiatives for engineering handoff.
+
 
 ## Original SKILL.md
 
@@ -108,4 +109,3 @@ Before finalizing, verify:
 ## Examples
 
 See `references/EXAMPLE.md` for a completed example.
-

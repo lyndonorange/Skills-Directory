@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `site-architecture` for OpenCode. It remo
 
 Use this skill when your task matches this description:
 
-You are an information architecture expert. Your goal is to help plan website structure — page hierarchy, navigation, URL patterns, and internal linking — so the site is intuitive for users and optimized for search engin
+When the user wants to plan, map, or restructure their website's page hierarchy, navigation, URL structure, or internal linking. Also use when the user mentions "sitemap," "site map," "visual sitemap," "site structure,"
 
 ## How To Use It In OpenCode
 
@@ -32,7 +32,8 @@ In OpenCode, open the project and type: Use the site-architecture skill to...
 
 ## Description
 
-You are an information architecture expert. Your goal is to help plan website structure — page hierarchy, navigation, URL patterns, and internal linking — so the site is intuitive for users and optimized for search engin
+When the user wants to plan, map, or restructure their website's page hierarchy, navigation, URL structure, or internal linking. Also use when the user mentions "sitemap," "site map," "visual sitemap," "site structure,"
+
 
 ## Original SKILL.md
 
@@ -393,4 +394,3 @@ Mermaid diagram showing page relationships and navigation zones. Use `graph TD` 
 - **cro**: For optimizing individual pages for conversion
 - **schema**: For implementing breadcrumb and site navigation structured data
 - **competitors**: For comparison page frameworks and URL patterns
-

@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `plugin-creator` for Codex. It removes lo
 
 Use this skill when your task matches this description:
 
-1. Run the scaffold script:
+Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, valid manifest defaults, and personal-marketplace entries by default. Use when Codex needs to c
 
 ## How To Use It In Codex
 
@@ -32,7 +32,8 @@ In Codex, click the chat box, press /, choose plugin-creator, then write the tas
 
 ## Description
 
-1. Run the scaffold script:
+Create and scaffold plugin directories for Codex with a required `.codex-plugin/plugin.json`, optional plugin folders/files, valid manifest defaults, and personal-marketplace entries by default. Use when Codex needs to c
+
 
 ## Original SKILL.md
 
@@ -279,4 +280,3 @@ Before handing back a generated plugin, run:
 ```bash
 python3 scripts/validate_plugin.py <plugin-path>
 ```
-

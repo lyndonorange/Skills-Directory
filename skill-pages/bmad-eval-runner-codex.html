@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>bmad-eval-runner - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/bmad-eval-runner-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>bmad-eval-runner</h1>
+      <p class="description">Run a skill's evals and report results. Use when the user wants to evaluate a skill, run evals, benchmark a skill, validate triggers, optimize a description, or grade skill outputs.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>bmad-eval-runner</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>bmad-eval-runner</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Run a skill's evals and report results. Use when the user wants to evaluate a skill, run evals, benchmark a skill, validate triggers, optimize a description, or grade skill outputs.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose bmad-eval-runner, then write the task. Fallback prompt: Use the bmad-eval-runner skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Skill Eval Runner</h2>
+<p>You run a skill's evals and report what they say. The user wants signal, not theatre, so cite specific findings, surface evals that pass for trivial reasons, and never widen a tolerance to make a run look like it succeeded.</p>
+<p>The runner is platform-agnostic. Everything runtime-specific (how a skill is invoked, where its auth comes from, what its transcript looks like) lives behind the adapter seam described in <code>references/platform-adapter.md</code>. No model name is hardcoded anywhere in this skill.</p>
+<h3>The four modes</h3>
+<p>Each mode answers a different question about a skill. Pick the one that matches what the user is asking, or run several.</p>
+<p>| Mode | Question it answers | Script / reference | |---|---|---| | baseline | Does the skill beat the bare model on the same input? | <code>references/eval-format.md</code>, <code>scripts/run_evals.py</code> | | variant | Does a section earn its place, or does a stripped version do as well? | <code>references/eval-format.md</code>, <code>scripts/run_evals.py</code> | | quality | Does the output meet the named rubric? | <code>references/grader.md</code>, <code>references/eval-format.md</code> | | trigger | Does the description fire on the right queries and stay quiet on the rest? | <code>references/platform-adapter.md</code>, <code>scripts/run_triggers.py</code> |</p>
+<p>Baseline runs every case twice — once with the skill staged into the clean working directory and once with nothing staged — so the bare model is measured as the long-term floor under identical conditions. Variant runs the full skill against a stripped smallest-version of itself to settle whether a section is doing real work. Quality grades one config's output against a rubric with the read-only grader. Trigger measures real firing through the adapter and can optimize the description across rounds; the optimization loop lives in <code>references/description-optimization.md</code>.</p>
+<p>A case is <code>input + rubric + optional state_prefix + optional fixture files</code>. The <code>state_prefix</code> is a bracketed prime prepended to the input that places the skill mid-workflow in a single shot, so one input can exercise any turn without a multi-turn simulator. The full case format and the strong-versus-weak expectation taxonomy are in <code>references/eval-format.md</code>.</p>
+<h3>Args</h3>
+<ul>
+<li>Positional: a path to the skill being evaluated (directory containing <code>SKILL.md</code>).</li>
+<li><code>--evals &lt;path&gt;</code>: explicit path to the cases file. If omitted, discover.</li>
+<li><code>--mode baseline|variant|quality|trigger</code>: which mode to run. May be repeated.</li>
+<li><code>--variant-path &lt;path&gt;</code>: for variant mode, the stripped or prior-version skill to compare against.</li>
+<li><code>--project-root &lt;path&gt;</code>: root of the project the skill belongs to. Default: walk up from the skill path looking for <code>_bmad/</code> or <code>.git/</code>.</li>
+<li><code>--output-dir &lt;path&gt;</code>: where run folders are written. Default: <code>{bmad_builder_reports}/eval-runs/</code> if configured, else <code>~/bmad-evals/</code>.</li>
+<li><code>--runs &lt;n&gt;</code>: repeats per case for the variance benchmark. Default: 1 for a single check, higher when the user wants a stable mean.</li>
+<li><code>--headless</code> / <code>-H</code>: non-interactive; emit final JSON only.</li>
+</ul>
+<p>These map directly onto the script CLIs below; anything not listed there (case subsets, timeouts, workers) is in the script docstrings.</p>
+<h3>On activation</h3>
+<ol>
+<li>Resolve config the way <code>bmad-workflow-builder</code> does (<code>{project-root}/_bmad/config.yaml</code> then <code>config.user.yaml</code>, falling back to <code>bmb/config.yaml</code>). Resolve <code>{user_name}</code>, <code>{communication_language}</code>, <code>{bmad_builder_reports}</code> and apply them through the session.</li>
+</ol>
+<ol>
+<li>If <code>--headless</code> was passed, set <code>{headless_mode}=true</code>, skip every confirmation below, pick the safest defaults, and proceed.</li>
+</ol>
+<ol>
+<li>Resume check: glob the output dir for an in-progress run's <code>.memlog.md</code>. If one exists and matches this skill, read it once to rebuild state, then continue append-only. Capture decisions and direction changes into the run's memlog through <code>scripts/memlog.py</code> as they land.</li>
+</ol>
+<ol>
+<li>Locate the skill and verify <code>&lt;skill-path&gt;/SKILL.md</code> exists. Halt with a clear error if it does not.</li>
+</ol>
+<ol>
+<li>Resolve the adapter config per the discovery rules in <code>references/platform-adapter.md</code> (explicit <code>--adapter</code>, <code>BMAD_EVAL_ADAPTER</code>, <code>adapter.json</code> beside the cases file). When nothing is configured and the current runtime is Claude Code, use <code>{skill-root}/assets/adapter-claude-code.json</code>.</li>
+</ol>
+<ol>
+<li>Discover the cases file. Look at <code>--evals</code> first, then <code>&lt;skill-path&gt;/evals/</code>, then <code>&lt;skill-path&gt;/../../evals/&lt;skill-name&gt;/</code>, then <code>&lt;project-root&gt;/evals/&lt;skill-name&gt;/</code>, then anywhere under <code>&lt;project-root&gt;/evals/</code>. Take the first match. If nothing is found, halt and say so; the runner does not invent cases.</li>
+</ol>
+<ol>
+<li>Confirm the run summary (skill, cases found, modes, output dir) unless headless, then execute.</li>
+</ol>
+<h3>Run execution</h3>
+<p>Each case runs in a clean working directory with the skill under test staged into it and an environment built from scratch, so the host shell config, prior runs, and ancestor instruction files do not bias the result. The isolation contract lives in <code>references/platform-adapter.md</code>; there is no container, no terminal emulation, and no credential staging.</p>
+<p>For baseline, variant, and quality modes:</p>
+<pre><code>python3 {skill-root}/scripts/run_evals.py \
+  --cases &lt;cases-file&gt; --skill-path &lt;skill&gt; --output-dir &lt;dir&gt; \
+  --mode quality|baseline|variant [--variant-path &lt;skill&gt;] \
+  [--adapter &lt;adapter.json&gt;] [--runs N]</code></pre>
+<p>The script stages the skill and any case fixtures, applies any <code>state_prefix</code> to the input, runs each config (baseline = skill staged AND bare; variant = skill AND <code>--variant-path</code>), and writes <code>&lt;run-dir&gt;/&lt;config&gt;/&lt;case-id&gt;/</code>. It captures timing and token counts the moment each invocation completes and writes them to <code>timing.json</code> immediately, so a later crash never loses the measurement.</p>
+<p>For trigger mode:</p>
+<pre><code>python3 {skill-root}/scripts/run_triggers.py \
+  --skill-path &lt;skill&gt; --queries &lt;queries-file&gt; --output-dir &lt;dir&gt; \
+  [--adapter &lt;adapter.json&gt;] [--runs-per-query N]</code></pre>
+<p>It stages a synthetic skill where the runtime discovers skills, sends each query through the adapter, and detects the skill-load tool call. Each query runs several times for stability. When the user wants to optimize the description rather than just measure it, follow <code>references/description-optimization.md</code>.</p>
+<p>For quality mode, spawn the grader described in <code>references/grader.md</code> per case, passing the case's rubric, transcript path, artifacts dir (the case's <code>cwd/</code>), and a <code>grading_path</code> of <code>&lt;case-folder&gt;/grading.json</code>. The grader writes that file, gives no partial credit, and flags weak or non-discriminating assertions; relay that feedback. If a grader subagent errors, mark that case <code>grading_error</code> — never substitute a default verdict.</p>
+<p>When <code>--runs</code> is greater than one, call <code>python3 {skill-root}/scripts/aggregate_benchmark.py --baseline &lt;run-dir&gt;/&lt;config-a&gt; --variant &lt;run-dir&gt;/&lt;config-b&gt;</code> to produce the mean, sample standard deviation, min, max, and the delta between configs (<code>--runs &lt;run-dir&gt;/&lt;config&gt;</code> for a single config's spread).</p>
+<p>When a run fails or comes back weak and the user wants the skill improved from the results, follow <code>references/self-improvement.md</code>.</p>
+<h3>Artifacts</h3>
+<p>Every run writes a dated run folder under the output dir, and those artifacts are permanent. Each case folder holds its prompt, transcript, the <code>cwd/</code> with any files the skill wrote, <code>timing.json</code>, and <code>grading.json</code> when quality mode ran. Never delete, overwrite, or rotate a run folder; disk usage is the user's call. The run's <code>.memlog.md</code> records the decisions and deltas so a resumed or audited run reads back cleanly.</p>
+<p>Tell the user where the run folder is when you finish.</p>
+<h3>Outcomes</h3>
+<ul>
+<li>The run reflects the skill's behavior in a clean working directory, not the behavior of the host shell with its memories and configs.</li>
+<li>Timing and token counts land on disk the moment they are measured.</li>
+<li>Failures cite specific expectations with evidence, and a pass that looks superficial is flagged rather than papered over.</li>
+<li>A baseline run that the skill no longer wins points to retiring the skill, not patching it.</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: bmad-eval-runner\ndisplay_name: bmad-eval-runner\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# bmad-eval-runner - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `bmad-eval-runner` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nRun a skill's evals and report results. Use when the user wants to evaluate a skill, run evals, benchmark a skill, validate triggers, optimize a description, or grade skill outputs.\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose bmad-eval-runner, then write the task. Fallback prompt: Use the bmad-eval-runner skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `bmad-eval-runner` |\n| Canonical name | `bmad-eval-runner` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nRun a skill's evals and report results. Use when the user wants to evaluate a skill, run evals, benchmark a skill, validate triggers, optimize a description, or grade skill outputs.\n\n\n## Original SKILL.md\n\n---\nname: bmad-eval-runner\ndescription: Run a skill's evals and report results. Use when the user wants to evaluate a skill, run evals, benchmark a skill, validate triggers, optimize a description, or grade skill outputs.\n---\n\n# Skill Eval Runner\n\nYou run a skill's evals and report what they say. The user wants signal, not theatre, so cite specific findings, surface evals that pass for trivial reasons, and never widen a tolerance to make a run look like it succeeded.\n\nThe runner is platform-agnostic. Everything runtime-specific (how a skill is invoked, where its auth comes from, what its transcript looks like) lives behind the adapter seam described in `references/platform-adapter.md`. No model name is hardcoded anywhere in this skill.\n\n## The four modes\n\nEach mode answers a different question about a skill. Pick the one that matches what the user is asking, or run several.\n\n| Mode | Question it answers | Script / reference |\n|---|---|---|\n| baseline | Does the skill beat the bare model on the same input? | `references/eval-format.md`, `scripts/run_evals.py` |\n| variant | Does a section earn its place, or does a stripped version do as well? | `references/eval-format.md`, `scripts/run_evals.py` |\n| quality | Does the output meet the named rubric? | `references/grader.md`, `references/eval-format.md` |\n| trigger | Does the description fire on the right queries and stay quiet on the rest? | `references/platform-adapter.md`, `scripts/run_triggers.py` |\n\nBaseline runs every case twice — once with the skill staged into the clean working directory and once with nothing staged — so the bare model is measured as the long-term floor under identical conditions. Variant runs the full skill against a stripped smallest-version of itself to settle whether a section is doing real work. Quality grades one config's output against a rubric with the read-only grader. Trigger measures real firing through the adapter and can optimize the description across rounds; the optimization loop lives in `references/description-optimization.md`.\n\nA case is `input + rubric + optional state_prefix + optional fixture files`. The `state_prefix` is a bracketed prime prepended to the input that places the skill mid-workflow in a single shot, so one input can exercise any turn without a multi-turn simulator. The full case format and the strong-versus-weak expectation taxonomy are in `references/eval-format.md`.\n\n## Args\n\n- Positional: a path to the skill being evaluated (directory containing `SKILL.md`).\n- `--evals \u003cpath>`: explicit path to the cases file. If omitted, discover.\n- `--mode baseline|variant|quality|trigger`: which mode to run. May be repeated.\n- `--variant-path \u003cpath>`: for variant mode, the stripped or prior-version skill to compare against.\n- `--project-root \u003cpath>`: root of the project the skill belongs to. Default: walk up from the skill path looking for `_bmad/` or `.git/`.\n- `--output-dir \u003cpath>`: where run folders are written. Default: `{bmad_builder_reports}/eval-runs/` if configured, else `~/bmad-evals/`.\n- `--runs \u003cn>`: repeats per case for the variance benchmark. Default: 1 for a single check, higher when the user wants a stable mean.\n- `--headless` / `-H`: non-interactive; emit final JSON only.\n\nThese map directly onto the script CLIs below; anything not listed there (case subsets, timeouts, workers) is in the script docstrings.\n\n## On activation\n\n1. Resolve config the way `bmad-workflow-builder` does (`{project-root}/_bmad/config.yaml` then `config.user.yaml`, falling back to `bmb/config.yaml`). Resolve `{user_name}`, `{communication_language}`, `{bmad_builder_reports}` and apply them through the session.\n\n2. If `--headless` was passed, set `{headless_mode}=true`, skip every confirmation below, pick the safest defaults, and proceed.\n\n3. Resume check: glob the output dir for an in-progress run's `.memlog.md`. If one exists and matches this skill, read it once to rebuild state, then continue append-only. Capture decisions and direction changes into the run's memlog through `scripts/memlog.py` as they land.\n\n4. Locate the skill and verify `\u003cskill-path>/SKILL.md` exists. Halt with a clear error if it does not.\n\n5. Resolve the adapter config per the discovery rules in `references/platform-adapter.md` (explicit `--adapter`, `BMAD_EVAL_ADAPTER`, `adapter.json` beside the cases file). When nothing is configured and the current runtime is Claude Code, use `{skill-root}/assets/adapter-claude-code.json`.\n\n6. Discover the cases file. Look at `--evals` first, then `\u003cskill-path>/evals/`, then `\u003cskill-path>/../../evals/\u003cskill-name>/`, then `\u003cproject-root>/evals/\u003cskill-name>/`, then anywhere under `\u003cproject-root>/evals/`. Take the first match. If nothing is found, halt and say so; the runner does not invent cases.\n\n7. Confirm the run summary (skill, cases found, modes, output dir) unless headless, then execute.\n\n## Run execution\n\nEach case runs in a clean working directory with the skill under test staged into it and an environment built from scratch, so the host shell config, prior runs, and ancestor instruction files do not bias the result. The isolation contract lives in `references/platform-adapter.md`; there is no container, no terminal emulation, and no credential staging.\n\nFor baseline, variant, and quality modes:\n\n```\npython3 {skill-root}/scripts/run_evals.py \\\n  --cases \u003ccases-file> --skill-path \u003cskill> --output-dir \u003cdir> \\\n  --mode quality|baseline|variant [--variant-path \u003cskill>] \\\n  [--adapter \u003cadapter.json>] [--runs N]\n```\n\nThe script stages the skill and any case fixtures, applies any `state_prefix` to the input, runs each config (baseline = skill staged AND bare; variant = skill AND `--variant-path`), and writes `\u003crun-dir>/\u003cconfig>/\u003ccase-id>/`. It captures timing and token counts the moment each invocation completes and writes them to `timing.json` immediately, so a later crash never loses the measurement.\n\nFor trigger mode:\n\n```\npython3 {skill-root}/scripts/run_triggers.py \\\n  --skill-path \u003cskill> --queries \u003cqueries-file> --output-dir \u003cdir> \\\n  [--adapter \u003cadapter.json>] [--runs-per-query N]\n```\n\nIt stages a synthetic skill where the runtime discovers skills, sends each query through the adapter, and detects the skill-load tool call. Each query runs several times for stability. When the user wants to optimize the description rather than just measure it, follow `references/description-optimization.md`.\n\nFor quality mode, spawn the grader described in `references/grader.md` per case, passing the case's rubric, transcript path, artifacts dir (the case's `cwd/`), and a `grading_path` of `\u003ccase-folder>/grading.json`. The grader writes that file, gives no partial credit, and flags weak or non-discriminating assertions; relay that feedback. If a grader subagent errors, mark that case `grading_error` — never substitute a default verdict.\n\nWhen `--runs` is greater than one, call `python3 {skill-root}/scripts/aggregate_benchmark.py --baseline \u003crun-dir>/\u003cconfig-a> --variant \u003crun-dir>/\u003cconfig-b>` to produce the mean, sample standard deviation, min, max, and the delta between configs (`--runs \u003crun-dir>/\u003cconfig>` for a single config's spread).\n\nWhen a run fails or comes back weak and the user wants the skill improved from the results, follow `references/self-improvement.md`.\n\n## Artifacts\n\nEvery run writes a dated run folder under the output dir, and those artifacts are permanent. Each case folder holds its prompt, transcript, the `cwd/` with any files the skill wrote, `timing.json`, and `grading.json` when quality mode ran. Never delete, overwrite, or rotate a run folder; disk usage is the user's call. The run's `.memlog.md` records the decisions and deltas so a resumed or audited run reads back cleanly.\n\nTell the user where the run folder is when you finish.\n\n## Outcomes\n\n- The run reflects the skill's behavior in a clean working directory, not the behavior of the host shell with its memories and configs.\n- Timing and token counts land on disk the moment they are measured.\n- Failures cite specific expectations with evidence, and a pass that looks superficial is flagged rather than papered over.\n- A baseline run that the skill no longer wins points to retiring the skill, not patching it.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("bmad-eval-runner-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

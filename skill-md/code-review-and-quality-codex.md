@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `code-review-and-quality` for Codex. It r
 
 Use this skill when your task matches this description:
 
-Multi-dimensional code review with quality gates. Every change gets reviewed before merge — no exceptions. Review covers five axes: correctness, readability, architecture, security, and performance.
+High-signal code review framework for finding bugs, security risks, missing tests, performance regressions, and maintainability problems without bikeshedding style. Use for PR reviews, self-review before merge, reviewing
 
 ## How To Use It In Codex
 
@@ -32,13 +32,14 @@ In Codex, click the chat box, press /, choose code-review-and-quality, then writ
 
 ## Description
 
-Multi-dimensional code review with quality gates. Every change gets reviewed before merge — no exceptions. Review covers five axes: correctness, readability, architecture, security, and performance.
+High-signal code review framework for finding bugs, security risks, missing tests, performance regressions, and maintainability problems without bikeshedding style. Use for PR reviews, self-review before merge, reviewing
+
 
 ## Original SKILL.md
 
 ---
 name: code-review-and-quality
-description: Conducts multi-axis code review. Use before merging any change. Use when reviewing code written by yourself, another agent, or a human. Use when you need to assess code quality across multiple dimensions before it enters the main branch.
+description: High-signal code review framework for finding bugs, security risks, missing tests, performance regressions, and maintainability problems without bikeshedding style. Use for PR reviews, self-review before merge, reviewing code from humans or agents, pair-programming feedback, establishing team review standards, security/performance/coverage scan coordination, and any situation where review feedback must be prioritized as Blocker, Major, Minor, or Suggestion.
 ---
 
 # Code Review and Quality
@@ -48,6 +49,16 @@ description: Conducts multi-axis code review. Use before merging any change. Use
 Multi-dimensional code review with quality gates. Every change gets reviewed before merge — no exceptions. Review covers five axes: correctness, readability, architecture, security, and performance.
 
 **The approval standard:** Approve a change when it definitely improves overall code health, even if it isn't perfect. Perfect code doesn't exist — the goal is continuous improvement. Don't block a change because it isn't exactly how you would have written it. If it improves the codebase and follows the project's conventions, approve it.
+
+## Default To Action
+
+- Prioritize feedback: 🔴 Blocker → 🟡 Major → 🟢 Minor → 💡 Suggestion.
+- Focus on bugs, security, testability, maintainability, and performance.
+- Skip formatting and style preferences when automation or project conventions already cover them.
+- Ask questions over commands when possible: "Have you considered...?" is usually better than "Change this to...".
+- Provide context: explain why the issue matters and what failure mode it can cause.
+- Limit effective review scope to fewer than 400 changed lines per pass. Ask for a split or review in chunks above that.
+- Review the code, not the person. Catching bugs is more valuable than sounding clever.
 
 ## When to Use
 
@@ -124,7 +135,8 @@ Small, focused changes are easier to review, faster to merge, and safer to deplo
 
 ```
 ~100 lines changed   → Good. Reviewable in one sitting.
-~300 lines changed   → Acceptable if it's a single logical change.
+~200 lines changed   → Good for one review session.
+200-400 lines changed → Review in chunks.
 ~1000 lines changed  → Too large. Split it.
 ```
 
@@ -194,17 +206,31 @@ For each file changed:
 
 Label every comment with its severity so the author knows what's required vs optional:
 
-| Prefix | Meaning | Author Action |
-|--------|---------|---------------|
-| *(no prefix)* | Required change | Must address before merge |
-| **Critical:** | Blocks merge | Security vulnerability, data loss, broken functionality |
-| **Nit:** | Minor, optional | Author may ignore — formatting, style preferences |
-| **Optional:** / **Consider:** | Suggestion | Worth considering but not required |
-| **FYI** | Informational only | No action needed — context for future reference |
+| Level | Icon | Meaning | Author Action |
+| --- | --- | --- | --- |
+| Blocker | 🔴 | Bug, security issue, crash, data loss, broken required behavior | Must fix before merge |
+| Major | 🟡 | Logic issue, important test gap, maintainability or performance risk | Should fix before merge |
+| Minor | 🟢 | Small clarity, naming, or low-risk maintainability issue | Nice to fix |
+| Suggestion | 💡 | Alternative approach or future improvement | Consider |
 
 This prevents authors from treating all feedback as mandatory and wasting time on optional suggestions.
 
-### Step 5: Verify the Verification
+Use `references/finding-templates.md` for common issue shapes and wording.
+
+### Step 5: Enforce Review Depth
+
+Score findings before declaring the review complete:
+
+| Level | Weight |
+| --- | --- |
+| Blocker | 3.0 |
+| Major | 1.5 |
+| Minor | 0.5 |
+| Suggestion | 0.25 |
+
+If the total weighted findings score is below `3.0`, perform a devils-advocate meta-review before approving. Re-scan for hidden correctness, security, performance, and coverage issues. See `references/minimum-findings.md`.
+
+### Step 6: Verify the Verification
 
 Check the author's verification story:
 
@@ -235,11 +261,20 @@ Human makes the final call
 
 This catches issues that a single model might miss — different models have different blind spots.
 
+When the runtime and user allow delegation, coordinate focused QE perspectives in parallel:
+
+- Security: injection, auth/authz, secrets, trust boundaries, unsafe deserialization.
+- Performance: N+1 queries, unbounded work, memory pressure, hot-path regressions.
+- Coverage: missing tests, weak assertions, untested edge/error paths.
+- Maintainability/correctness: API contracts, state transitions, error handling, complexity.
+
+Do not trust agent reports blindly. Inspect diffs and evidence yourself before including their findings.
+
 **Example prompt for a review agent:**
 ```
 Review this code change for correctness, security, and adherence to
 our project conventions. The spec says [X]. The change should [Y].
-Flag any issues as Critical, Important, or Suggestion.
+Flag every issue as Blocker, Major, Minor, or Suggestion.
 ```
 
 ## Dead Code Hygiene
@@ -350,8 +385,8 @@ Part of code review is dependency review:
 ```
 ## See Also
 
-- For detailed security review guidance, see `references/security-checklist.md`
-- For performance review checks, see `references/performance-checklist.md`
+- For finding wording and common templates, see `references/finding-templates.md`
+- For weighted findings and devils-advocate review, see `references/minimum-findings.md`
 
 ## Common Rationalizations
 
@@ -378,9 +413,8 @@ Part of code review is dependency review:
 
 After review is complete:
 
-- [ ] All Critical issues are resolved
-- [ ] All Important issues are resolved or explicitly deferred with justification
+- [ ] All Blocker issues are resolved
+- [ ] All Major issues are resolved or explicitly deferred with justification
 - [ ] Tests pass
 - [ ] Build succeeds
 - [ ] The verification story is documented (what changed, how it was verified)
-

@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>gke-cost-analysis - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Universal Agents</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/gke-cost-analysis-universal-agents.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Universal Agents / General and specialized workflows</div>
+      <h1>gke-cost-analysis</h1>
+      <p class="description">Answer natural language questions and perform analysis on GKE cluster and workload costs using BigQuery billing exports, cost allocation data, and live cluster monitoring metrics. Use when querying GKE costs across projects, namespaces, or workloads, analyzing billing reports in BigQuery (`bq`), checking cluster cost budgets (`gcloud billing`), or diagnosing cost drivers like pod requests vs. actual utilization (`kubectl top`). Don't use for applying cost optimization changes, creating rightsizing manifests (VPA/MPA), or selecting ComputeClasses (use gke-cost-optimization instead).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Universal Agents</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>gke-cost-analysis</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>gke-cost-analysis</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Answer natural language questions and perform analysis on GKE cluster and workload costs using BigQuery billing exports, cost allocation data, and live cluster monitoring metrics. Use when querying GKE costs across projects, namespaces, or workloads, analyzing billing reports in BigQuery (`bq`), checking cluster cost budgets (`gcloud billing`), or diagnosing cost drivers like pod requests vs. actual utilization (`kubectl top`). Don't use for applying cost optimization changes, creating rightsizing manifests (VPA/MPA), or selecting ComputeClasses (use gke-cost-optimization instead).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Universal Agents</strong><p>In tools that read ~/.agents/skills, type: Use the gke-cost-analysis skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+        <div class="usage-card"><strong>Upstream provenance</strong><p><a href="https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39">Google Agent Skills</a> at 092e210b243601797a0fb939040be2b1288e6d39 (Apache-2.0).</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Universal runtime boundary</h3>
+<ul>
+<li>Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.</li>
+<li>Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.</li>
+<li>Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.</li>
+<li>Read <code>references/upstream.md</code> when provenance, the pinned revision, licensing, or local adaptation details matter.</li>
+</ul>
+<h2>GKE Cost Analysis</h2>
+<p>This skill provides guidance on answering natural language questions about GKE-related costs, billing reports, and utilization analysis.</p>
+<h3>Overview</h3>
+<p>When users ask about GKE costs (e.g., &quot;What are my costs across projects?&quot;, &quot;What's my most expensive namespace?&quot;, &quot;Why is my cluster cost spiking?&quot;), use this skill to provide a structured and expert response using BigQuery billing exports, cost allocation metadata, and live cluster metrics.</p>
+<h3>Instructions</h3>
+<p>When handling a cost-related question:</p>
+<ol>
+<li><strong>Provide a Direct Answer</strong>: Address the specific cost question or</li>
+</ol>
+<p>analytical request clearly and concisely.</p>
+<ol>
+<li><strong>Explain BigQuery Integration</strong>: Explain how to query BigQuery for</li>
+</ol>
+<p>historical cost breakdown. Note that GKE costs originate from the GCP Billing Detailed BigQuery Export (<code>gcp_billing_export_resource_v1_*</code>).</p>
+<ol>
+<li><strong>Check &amp; Verify Cost Allocation</strong>: Explain that GKE Cost Allocation must be</li>
+</ol>
+<p>enabled on the cluster (<code>--enable-cost-allocation</code>) for namespace, label, and workload-level billing granularity. If queries return empty labels, provide the <code>gcloud</code> command to enable it.</p>
+<ol>
+<li><strong>Analyze Pricing Drivers &amp; Utilization</strong>: When diagnosing cost drivers,</li>
+</ol>
+<p>explain whether the cluster is in Autopilot (billed by requested pod CPU/memory) or Standard mode (billed by underlying VM node size + control plane fees), and compare live utilization (<code>kubectl top</code>) against provisioned requests.</p>
+<ol>
+<li><strong>Provide Actionable Commands/Queries</strong>: Provide concrete BigQuery CLI (`bq</li>
+</ol>
+<p>query<code>) commands or read-only </code>gcloud<code>/</code>kubectl<code> inspection commands. Prefer </code>bq` over BigQuery Studio when available.</p>
+<h3>Key Points &amp; Pricing Drivers</h3>
+<ul>
+<li><strong>Data Source</strong>: GKE costs come from GCP Billing Detailed BigQuery Export.</li>
+</ul>
+<p>The user must provide the full path to their BigQuery table (dataset name and table name containing the Billing Account ID).</p>
+<ul>
+<li><strong>Granularity Requirement</strong>: GKE Cost Allocation</li>
+</ul>
+<p>(<code>--enable-cost-allocation</code>) must be enabled on the cluster to populate <code>goog-k8s-cluster-name</code>, <code>k8s-namespace</code>, <code>k8s-workload-name</code>, and <code>k8s-workload-type</code> labels in BigQuery.</p>
+<ul>
+<li><strong>Autopilot vs. Standard Cost Drivers</strong>:</li>
+<li><strong>Autopilot Pricing</strong>: Billed directly on pod resource requests</li>
+</ul>
+<p>(<code>requests.cpu</code>, <code>requests.memory</code>, ephemeral storage). Over-requested pods drive up billing regardless of whether the pod actively uses those CPU cycles or memory.</p>
+<ul>
+<li><strong>Standard Pricing</strong>: Billed on provisioned node pool VMs (<code>e2</code>, <code>n4</code>,</li>
+</ul>
+<p><code>c3</code>, etc.) plus a cluster management fee ($0.10/hour). Idle nodes or multiple low-utilization dev clusters drive excess infrastructure costs.</p>
+<ul>
+<li><strong>Credits &amp; Discounts Impact</strong>: When analyzing <code>cost</code> versus</li>
+</ul>
+<p><code>cost_before_credits</code>, note that Committed Use Discounts (CUDs) and Spot VMs appear as credits or reduced rate charges in the billing export.</p>
+<ul>
+<li><strong>Tools &amp; Syntax</strong>: BigQuery CLI (<code>bq</code>) is preferred. When writing Standard</li>
+</ul>
+<p>SQL queries, use a dot (<code>.</code>) instead of a colon (<code>:</code>) to separate the project ID and dataset name (<code>{project_id}.{dataset_name}.{table_name}</code>).</p>
+<ul>
+<li><strong>Defaults</strong>: Assume last 30 days, row limit 10, ordering by cost descending</li>
+</ul>
+<p>(<code>ORDER BY cost DESC</code>), unless specified otherwise.</p>
+<h3>Live Cluster &amp; Cost Monitoring</h3>
+<p>Use read-only CLI commands to inspect current cluster budgets, node utilization, and pod resource consumption vs. requests:</p>
+<pre><code># View billing budgets for an account (requires Cost Management API)
+gcloud billing budgets list --billing-account={billing_account} --quiet
+
+# Verify/Enable GKE cost allocation on a cluster for namespace-level billing tracking
+gcloud container clusters update {cluster_name} \
+    --enable-cost-allocation \
+    --region {region}
+
+# View live node resource utilization across the cluster
+kubectl top nodes
+
+# View pod resource usage across namespaces (compare against requested limits to diagnose waste)
+kubectl top pods --all-namespaces --containers</code></pre>
+<h3>Applying Cost Optimizations</h3>
+<p>To apply rightsizing changes based on analysis (such as setting up <code>VPA</code> recommendation mode, adjusting CPU/memory to <code>P95 * 1.2</code>, configuring Spot VMs via <code>nodeSelector</code> or <code>ComputeClass</code>, enforcing <code>ResourceQuotas</code>, or selecting machine types and CUDs), use the <strong><code>gke-cost-optimization</code></strong> skill.</p>
+<h3>Example BigQuery Queries</h3>
+<p>Use these queries as templates to answer questions. All parameters (dataset, table, project, cluster, etc.) must be replaced with user values.</p>
+<h4>Cost of a Single Workload in a Single Cluster</h4>
+<pre><code>bq query --nouse_legacy_sql '
+SELECT
+  SUM(cost) + SUM(IFNULL((SELECT SUM(c.amount) FROM UNNEST(credits) c), 0)) AS cost,
+  SUM(cost) AS cost_before_credits
+FROM {billing_export_table} AS bqe
+WHERE _PARTITIONTIME &gt;= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
+  AND project.id = &quot;{project_id}&quot;
+  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = &quot;goog-k8s-cluster-location&quot; AND l.value = &quot;{region}&quot;)
+  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = &quot;goog-k8s-cluster-name&quot; AND l.value = &quot;{cluster_name}&quot;)
+  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = &quot;k8s-namespace&quot; AND l.value = &quot;{namespace}&quot;)
+  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = &quot;k8s-workload-type&quot; AND l.value = &quot;{workload_type}&quot;)
+  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = &quot;k8s-workload-name&quot; AND l.value = &quot;{workload_name}&quot;)
+;
+'</code></pre>
+<h4>Cost of Each Workload in Each Cluster</h4>
+<pre><code>bq query --nouse_legacy_sql '
+SELECT
+  project.id AS project_id,
+  (SELECT l.value FROM bqe.labels AS l WHERE l.key = &quot;goog-k8s-cluster-location&quot; LIMIT 1) AS cluster_location,
+  (SELECT l.value FROM bqe.labels AS l WHERE l.key = &quot;goog-k8s-cluster-name&quot; LIMIT 1) AS cluster_name,
+  (SELECT l.value FROM bqe.labels AS l WHERE l.key = &quot;k8s-namespace&quot; LIMIT 1) AS k8s_namespace,
+  (SELECT l.value FROM bqe.labels AS l WHERE l.key = &quot;k8s-workload-type&quot; LIMIT 1) AS k8s_workload_type,
+  (SELECT l.value FROM bqe.labels AS l WHERE l.key = &quot;k8s-workload-name&quot; LIMIT 1) AS k8s_workload_name,
+  SUM(cost) + SUM(IFNULL((SELECT SUM(c.amount) FROM UNNEST(credits) c), 0)) AS cost,
+  SUM(cost) AS cost_before_credits
+FROM {billing_export_table} AS bqe
+WHERE _PARTITIONTIME &gt;= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
+  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = &quot;goog-k8s-cluster-name&quot;)
+GROUP BY 1, 2, 3, 4, 5, 6
+ORDER BY 7 DESC
+LIMIT 10
+;
+'</code></pre>
+<h4>Cost Breakdown by Namespace in a Cluster</h4>
+<pre><code>bq query --nouse_legacy_sql '
+SELECT
+  (SELECT l.value FROM bqe.labels AS l WHERE l.key = &quot;k8s-namespace&quot; LIMIT 1) AS k8s_namespace,
+  SUM(cost) + SUM(IFNULL((SELECT SUM(c.amount) FROM UNNEST(credits) c), 0)) AS net_cost,
+  SUM(cost) AS gross_cost
+FROM {billing_export_table} AS bqe
+WHERE _PARTITIONTIME &gt;= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
+  AND project.id = &quot;{project_id}&quot;
+  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = &quot;goog-k8s-cluster-name&quot; AND l.value = &quot;{cluster_name}&quot;)
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 10
+;
+'</code></pre>
+<p>Note: Checking that the <code>goog-k8s-cluster-name</code> label exists scopes the total billing data specifically to GKE costs.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: gke-cost-analysis\ndisplay_name: gke-cost-analysis\nplatform: Universal Agents\ncategory: General and specialized workflows\n---\n\n# gke-cost-analysis - Universal Agents Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `gke-cost-analysis` for Universal Agents. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nAnswer natural language questions and perform analysis on GKE cluster and workload costs using BigQuery billing exports, cost allocation data, and live cluster monitoring metrics. Use when querying GKE costs across proje\n\n## How To Use It In Universal Agents\n\nIn tools that read ~/.agents/skills, type: Use the gke-cost-analysis skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `gke-cost-analysis` |\n| Canonical name | `gke-cost-analysis` |\n| Platform | `Universal Agents` |\n| Category | General and specialized workflows |\n\n## Description\n\nAnswer natural language questions and perform analysis on GKE cluster and workload costs using BigQuery billing exports, cost allocation data, and live cluster monitoring metrics. Use when querying GKE costs across proje\n\n## Upstream provenance\n\nThis adapted package derives from [Google Agent Skills](https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39) at commit `092e210b243601797a0fb939040be2b1288e6d39`, licensed under `Apache-2.0`.\n\n\n## Original SKILL.md\n\n---\nname: gke-cost-analysis\ndescription: \"Answer natural language questions and perform analysis on GKE cluster and workload costs using BigQuery billing exports, cost allocation data, and live cluster monitoring metrics. Use when querying GKE costs across projects, namespaces, or workloads, analyzing billing reports in BigQuery (`bq`), checking cluster cost budgets (`gcloud billing`), or diagnosing cost drivers like pod requests vs. actual utilization (`kubectl top`). Don't use for applying cost optimization changes, creating rightsizing manifests (VPA/MPA), or selecting ComputeClasses (use gke-cost-optimization instead).\"\nlicense: Apache-2.0\n---\n\n## Universal runtime boundary\n\n- Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.\n- Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.\n- Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.\n- Read `references/upstream.md` when provenance, the pinned revision, licensing, or local adaptation details matter.\n\n# GKE Cost Analysis\n\nThis skill provides guidance on answering natural language questions about\nGKE-related costs, billing reports, and utilization analysis.\n\n## Overview\n\nWhen users ask about GKE costs (e.g., \"What are my costs across projects?\",\n\"What's my most expensive namespace?\", \"Why is my cluster cost spiking?\"), use\nthis skill to provide a structured and expert response using BigQuery billing\nexports, cost allocation metadata, and live cluster metrics.\n\n## Instructions\n\nWhen handling a cost-related question:\n\n1.  **Provide a Direct Answer**: Address the specific cost question or\n    analytical request clearly and concisely.\n2.  **Explain BigQuery Integration**: Explain how to query BigQuery for\n    historical cost breakdown. Note that GKE costs originate from the GCP\n    Billing Detailed BigQuery Export (`gcp_billing_export_resource_v1_*`).\n3.  **Check & Verify Cost Allocation**: Explain that GKE Cost Allocation must be\n    enabled on the cluster (`--enable-cost-allocation`) for namespace, label,\n    and workload-level billing granularity. If queries return empty labels,\n    provide the `gcloud` command to enable it.\n4.  **Analyze Pricing Drivers & Utilization**: When diagnosing cost drivers,\n    explain whether the cluster is in Autopilot (billed by requested pod\n    CPU/memory) or Standard mode (billed by underlying VM node size + control\n    plane fees), and compare live utilization (`kubectl top`) against\n    provisioned requests.\n5.  **Provide Actionable Commands/Queries**: Provide concrete BigQuery CLI (`bq\n    query`) commands or read-only `gcloud`/`kubectl` inspection commands. Prefer\n    `bq` over BigQuery Studio when available.\n\n## Key Points & Pricing Drivers\n\n-   **Data Source**: GKE costs come from GCP Billing Detailed BigQuery Export.\n    The user must provide the full path to their BigQuery table (dataset name\n    and table name containing the Billing Account ID).\n-   **Granularity Requirement**: GKE Cost Allocation\n    (`--enable-cost-allocation`) must be enabled on the cluster to populate\n    `goog-k8s-cluster-name`, `k8s-namespace`, `k8s-workload-name`, and\n    `k8s-workload-type` labels in BigQuery.\n-   **Autopilot vs. Standard Cost Drivers**:\n    -   **Autopilot Pricing**: Billed directly on pod resource requests\n        (`requests.cpu`, `requests.memory`, ephemeral storage). Over-requested\n        pods drive up billing regardless of whether the pod actively uses those\n        CPU cycles or memory.\n    -   **Standard Pricing**: Billed on provisioned node pool VMs (`e2`, `n4`,\n        `c3`, etc.) plus a cluster management fee ($0.10/hour). Idle nodes or\n        multiple low-utilization dev clusters drive excess infrastructure costs.\n-   **Credits & Discounts Impact**: When analyzing `cost` versus\n    `cost_before_credits`, note that Committed Use Discounts (CUDs) and Spot VMs\n    appear as credits or reduced rate charges in the billing export.\n-   **Tools & Syntax**: BigQuery CLI (`bq`) is preferred. When writing Standard\n    SQL queries, use a dot (`.`) instead of a colon (`:`) to separate the\n    project ID and dataset name (`{project_id}.{dataset_name}.{table_name}`).\n-   **Defaults**: Assume last 30 days, row limit 10, ordering by cost descending\n    (`ORDER BY cost DESC`), unless specified otherwise.\n\n## Live Cluster & Cost Monitoring\n\nUse read-only CLI commands to inspect current cluster budgets, node utilization,\nand pod resource consumption vs. requests:\n\n```bash\n# View billing budgets for an account (requires Cost Management API)\ngcloud billing budgets list --billing-account={billing_account} --quiet\n\n# Verify/Enable GKE cost allocation on a cluster for namespace-level billing tracking\ngcloud container clusters update {cluster_name} \\\n    --enable-cost-allocation \\\n    --region {region}\n\n# View live node resource utilization across the cluster\nkubectl top nodes\n\n# View pod resource usage across namespaces (compare against requested limits to diagnose waste)\nkubectl top pods --all-namespaces --containers\n```\n\n## Applying Cost Optimizations\n\nTo apply rightsizing changes based on analysis (such as setting up `VPA`\nrecommendation mode, adjusting CPU/memory to `P95 * 1.2`, configuring Spot VMs\nvia `nodeSelector` or `ComputeClass`, enforcing `ResourceQuotas`, or selecting\nmachine types and CUDs), use the **`gke-cost-optimization`** skill.\n\n## Example BigQuery Queries\n\nUse these queries as templates to answer questions. All parameters (dataset,\ntable, project, cluster, etc.) must be replaced with user values.\n\n### Cost of a Single Workload in a Single Cluster\n\n```sql\nbq query --nouse_legacy_sql '\nSELECT\n  SUM(cost) + SUM(IFNULL((SELECT SUM(c.amount) FROM UNNEST(credits) c), 0)) AS cost,\n  SUM(cost) AS cost_before_credits\nFROM {billing_export_table} AS bqe\nWHERE _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)\n  AND project.id = \"{project_id}\"\n  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = \"goog-k8s-cluster-location\" AND l.value = \"{region}\")\n  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = \"goog-k8s-cluster-name\" AND l.value = \"{cluster_name}\")\n  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = \"k8s-namespace\" AND l.value = \"{namespace}\")\n  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = \"k8s-workload-type\" AND l.value = \"{workload_type}\")\n  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = \"k8s-workload-name\" AND l.value = \"{workload_name}\")\n;\n'\n```\n\n### Cost of Each Workload in Each Cluster\n\n```sql\nbq query --nouse_legacy_sql '\nSELECT\n  project.id AS project_id,\n  (SELECT l.value FROM bqe.labels AS l WHERE l.key = \"goog-k8s-cluster-location\" LIMIT 1) AS cluster_location,\n  (SELECT l.value FROM bqe.labels AS l WHERE l.key = \"goog-k8s-cluster-name\" LIMIT 1) AS cluster_name,\n  (SELECT l.value FROM bqe.labels AS l WHERE l.key = \"k8s-namespace\" LIMIT 1) AS k8s_namespace,\n  (SELECT l.value FROM bqe.labels AS l WHERE l.key = \"k8s-workload-type\" LIMIT 1) AS k8s_workload_type,\n  (SELECT l.value FROM bqe.labels AS l WHERE l.key = \"k8s-workload-name\" LIMIT 1) AS k8s_workload_name,\n  SUM(cost) + SUM(IFNULL((SELECT SUM(c.amount) FROM UNNEST(credits) c), 0)) AS cost,\n  SUM(cost) AS cost_before_credits\nFROM {billing_export_table} AS bqe\nWHERE _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)\n  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = \"goog-k8s-cluster-name\")\nGROUP BY 1, 2, 3, 4, 5, 6\nORDER BY 7 DESC\nLIMIT 10\n;\n'\n```\n\n### Cost Breakdown by Namespace in a Cluster\n\n```sql\nbq query --nouse_legacy_sql '\nSELECT\n  (SELECT l.value FROM bqe.labels AS l WHERE l.key = \"k8s-namespace\" LIMIT 1) AS k8s_namespace,\n  SUM(cost) + SUM(IFNULL((SELECT SUM(c.amount) FROM UNNEST(credits) c), 0)) AS net_cost,\n  SUM(cost) AS gross_cost\nFROM {billing_export_table} AS bqe\nWHERE _PARTITIONTIME >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)\n  AND project.id = \"{project_id}\"\n  AND EXISTS(SELECT * FROM bqe.labels AS l WHERE l.key = \"goog-k8s-cluster-name\" AND l.value = \"{cluster_name}\")\nGROUP BY 1\nORDER BY 2 DESC\nLIMIT 10\n;\n'\n```\n\nNote: Checking that the `goog-k8s-cluster-name` label exists scopes the total\nbilling data specifically to GKE costs.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("gke-cost-analysis-universal-agents-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

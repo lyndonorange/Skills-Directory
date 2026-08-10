@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>dotnet-reverse - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/dotnet-reverse-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>dotnet-reverse</h1>
+      <p class="description">.NET / C# 二进制逆向。当目标是 .NET assembly（PE 头含 CLR、.exe/.dll 托管程序）、C# 编译产物（含 NativeAOT）、红队 Sharp* 工具（Rubeus / SharpHound / SharpHound 等）、.NET 混淆程序（ConfuserEx / SmartAssembly / Babel / Eazfuscator）、.NET loader / info-stealer / 套壳 malware 时使用。优先用 dnSpyEx + de4dot，需要 AI 直接操作时联动 dnSpy MCP。不用于纯 native 二进制（走 reverse-engineering / ida-reverse）。</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>dotnet-reverse</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>dotnet-reverse</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>.NET / C# 二进制逆向。当目标是 .NET assembly（PE 头含 CLR、.exe/.dll 托管程序）、C# 编译产物（含 NativeAOT）、红队 Sharp* 工具（Rubeus / SharpHound / SharpHound 等）、.NET 混淆程序（ConfuserEx / SmartAssembly / Babel / Eazfuscator）、.NET loader / info-stealer / 套壳 malware 时使用。优先用 dnSpyEx + de4dot，需要 AI 直接操作时联动 dnSpy MCP。不用于纯 native 二进制（走 reverse-engineering / ida-reverse）。</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose dotnet-reverse, then write the task. Fallback prompt: Use the dotnet-reverse skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>.NET / C# 逆向作业规范</h2>
+<h3>ACTION REQUIRED（读完立刻执行）</h3>
+<ol>
+<li><code>NOW</code>: 用 DIE/<code>file</code>/CLR 头确认目标是 .NET 托管（否则 SWITCH 到 <code>ida-reverse/</code> / <code>reverse-engineering/</code>）</li>
+<li><code>NOW</code>: 若疑似混淆 → 先 <code>de4dot</code> 脱壳，产出 <code>*-clean.exe</code>，保留原始样本</li>
+<li><code>NEXT</code>: dnSpyEx（或 dnSpy MCP / <code>ilspycmd</code>）静态：C# 浏览 + <strong>IL 视图</strong>看关键判断</li>
+<li><code>ACT</code>: 需要明文/C2 时动态调试；需要改逻辑时 <strong>IL patch</strong> 优先于 C# 重编译</li>
+<li>阶段结束给用户 3–6 项下一步菜单（含导出报告）</li>
+</ol>
+<h3>适用范围</h3>
+<p>当任务属于以下场景时优先使用本 skill：</p>
+<ul>
+<li>识别并逆向 .NET / C# 编译产物（托管 PE / .exe / .dll）</li>
+<li>分析红队 Sharp* 工具链（Rubeus、SharpHound、SharpShell 等）</li>
+<li>脱混淆 ConfuserEx / SmartAssembly / Babel / Eazfuscator / .NET Reactor 等壳</li>
+<li>逆向 .NET loader / info-stealer / RAT 的解密与 C2 逻辑</li>
+<li>对 C# 程序做 patch（改判断、改常量、keygen）</li>
+<li>分析 IL2CPP 之前的 Mono/Unity 托管层（注意：IL2CPP 编译后是 native，走 <code>reverse-engineering/</code> + seed-014）</li>
+</ul>
+<p>如果目标是纯 native 二进制（C/C++/Go/Rust 编译、无 CLR），请改用 <code>reverse-engineering/</code>、<code>ida-reverse/</code> 或 <code>radare2/</code>。</p>
+<h3>核心原则</h3>
+<ul>
+<li><strong>先识别再下手</strong>：先确认是 .NET 托管程序（PE 头 CLR + <code>#~</code> / <code>#Strings</code> 流 + mscoree <code>_CorExeMain</code>），再决定走 dnSpy 而非 IDA</li>
+<li><strong>IL 优先于 C#</strong>：dnSpyEx 的 C# 反编译器会丢失/扭曲信息（编译器生成的状态机、async/await、yield），关键判断与 patch 必须切到 <strong>IL 编辑器</strong>，C# 视图只用于快速浏览</li>
+<li><strong>de4dot 先行</strong>：遇到混淆器先 <code>de4dot</code> 脱一轮再做静态分析，否则字符串/控制流全是乱的</li>
+<li><strong>MCP 联动</strong>：环境里若注册了 dnSpy MCP（<code>dnspy_*</code> 工具），优先走 MCP 面做 decompile / IL inspection，避免来回切 GUI</li>
+<li><strong>证据化输出</strong>：脱混淆产物、提取的配置/C2/key、patch diff 都要落盘</li>
+</ul>
+<h3>工具链映射</h3>
+<p>| 能力 | 首选 | 备注 | |------|------|------| | 反编译 + 调试 + patch | <strong>dnSpyEx</strong> | 王牌，唯一带 IL 编辑器的 GUI；老 dnSpy 已停更，用 Ex 分支 | | 轻量 CLI / headless 反编译 | <strong>ILSpy</strong> (<code>ilspycmd</code>) | 适合批量、脚本化、Linux/macOS | | 脱混淆 | <strong>de4dot</strong> | ConfuserEx 全家桶、SmartAssembly 等主流壳的默认解 | | 混淆器识别 | <strong>Detect It Easy (DIE)</strong> / <strong>file</strong> | 先判断壳类型再决定 de4dot 参数 | | 编程化操作 IL | <strong>dnlib</strong> | 写 C# 脚本批量改 metadata / 字符串解密器 | | AI 直接操作 | <strong>dnSpy MCP</strong> | <code>dnspy_decompile</code> / <code>dnspy_inspect_il</code> 等工具面 |</p>
+<blockquote>前置：Windows 主机装 dnSpyEx + de4dot（choco 或 release）；Linux/macOS 用 <code>ilspycmd</code> + <code>dotnet runtime</code>。详见 <code>references/sharp-tools.md</code> 的安装矩阵。</blockquote>
+<h3>六阶段工作流</h3>
+<h4>1. Identify（识别 .NET）</h4>
+<p>确认目标是托管程序，别把 native PE 当 .NET 分析：</p>
+<pre><code># Windows
+file target.exe                       # &quot;PE32 executable ... for MS Windows&quot; 不够
+# 关键：看有没有 CLR
+powershell -c &quot;[System.Reflection.AssemblyName]::GetAssemblyName('target.exe')&quot;
+# 或
+dnSpyEx 直接拖进去 —— 能打开就是托管
+
+# 通用
+strings target.exe | grep -iE &quot;mscoree|_CorExeMain|mscorlib|System\\.&quot;</code></pre>
+<p><strong>.NET 识别标志：</strong></p>
+<ul>
+<li>PE 头 <code>Data Directory[14]</code> (CLR Runtime Header) 非零</li>
+<li><code>mscoree.dll</code> 导入 / <code>_CorExeMain</code> 入口</li>
+<li><code>#~</code>、<code>#Strings</code>、<code>#US</code>、<code>#GUID</code>、<code>#Blob</code> metadata 流</li>
+<li><code>mscorlib</code> / <code>System.Private.CoreLib</code> 字符串</li>
+</ul>
+<p><strong>NativeAOT 例外：</strong> 编译成 native，没有 CLR 头，但有 <code>System.Private.CoreLib</code> 字符串和重构过的类型元数据 —— 这类走 <code>reverse-engineering/</code>（IDA/r2），本 skill 仅做识别提示。</p>
+<h4>2. Detect（检测混淆器）</h4>
+<pre><code># DIE 快速识别
+diec target.exe                        # Detect It Easy CLI
+# 或拖进 dnSpyEx，看是否大量乱码类名 / 控制流变形</code></pre>
+<p>常见混淆器 → 脱壳策略（详见 <code>references/obfuscators.md</code>）：</p>
+<p>| 混淆器 | 特征 | de4dot 处理 | |--------|------|------------| | ConfuserEx (1.0.0 / 2.x) | <code>&lt;module&gt;</code> anti-tamper、控制流变形、字符串加密 | <code>de4dot target.exe</code> 通常自动识别 | | SmartAssembly | <code>circular</code>/<code>string encoding</code>、资源压缩 | <code>de4dot target.exe</code> | | Babel.NET | 方法体加密、控制流 | <code>de4dot target.exe</code> | | Eazfuscator.NET | 字符串/资源加密 | <code>de4dot</code>，部分版本需手动 | | .NET Reactor | anti-tamper + necrobit | <code>de4dot</code>，新版可能失败需手动 |</p>
+<h4>3. Deobfuscate（脱混淆）</h4>
+<pre><code># de4dot 默认自动识别大多数壳
+de4dot target.exe -o target-clean.exe
+
+# 指定类型（自动识别失败时）
+de4dot --type cfze target.exe          # ConfuserEx
+de4dot --type sa target.exe            # SmartAssembly
+
+# 多层混淆 / de4dot 报 unknown
+de4dot --detect target.exe             # 看它识别成什么
+# 可能要先 patch anti-tamper 再 de4dot（见 references/obfuscators.md）</code></pre>
+<p>产出：<code>target-clean.exe</code>，后续分析用它。<strong>保留原始样本</strong>做对照。</p>
+<h4>4. Static Analyze（静态分析）</h4>
+<p>dnSpyEx 加载脱壳后样本：</p>
+<ul>
+<li><strong>C# 视图</strong>：快速浏览类结构、方法签名、字符串（用于定位）</li>
+<li><strong>IL 视图</strong>：关键判断、加密逻辑、状态机必须看 IL（右键 → Edit IL 或 IL 视图）</li>
+<li>找入口：<code>Main</code> / <code>Startup</code> / 模块初始化器 (<code>Module .cctor</code>)</li>
+<li>找关键逻辑：搜 <code>flag</code>、<code>password</code>、<code>verify</code>、<code>check</code>、<code>encrypt</code>、<code>http</code>、<code>Config</code></li>
+</ul>
+<pre><code>定位字符串 → 反向引用 → 找到使用它的方法 → IL 视图看判断逻辑</code></pre>
+<h4>5. Dynamic（动态调试）</h4>
+<p>dnSpyEx 调试器：附加进程 / 启动调试，在关键方法下断点，观察运行时：</p>
+<ul>
+<li>解密后的明文字符串（很多混淆器的字符串在运行时才解密）</li>
+<li>C2 地址、配置解密结果</li>
+<li>异常驱动的控制流（anti-debug 常用 <code>try/catch</code> 隐藏真实路径）</li>
+</ul>
+<blockquote>.NET 动态调试比 native 友好得多 —— 能直接看到对象值、字符串内容。优先动态而非死磕静态。</blockquote>
+<h4>6. Patch（按需修改）</h4>
+<pre><code>dnSpyEx → 右键方法 → Edit Method (C#) 或 Edit IL
+  - 改判断：ldc.i4.0 → ldc.i4.1（false→true）
+  - 改常量：直接编辑字符串/数字
+  - 删除校验：nop 掉整段
+File → Save Module → 替换原文件</code></pre>
+<p><strong>IL patch 可靠性 &gt; C# patch</strong>：C# 重编译可能失败（缺引用、语法不对），IL 编辑几乎不会失真。详见 <code>references/common-workflow.md</code>。</p>
+<h3>触发场景路由</h3>
+<p>用户说这些时进入本 skill：</p>
+<ul>
+<li>&quot;.NET / C# 二进制逆向&quot; / &quot;C# 程序反编译&quot;</li>
+<li>&quot;dnSpy 分析&quot; / &quot;dnSpyEx patch&quot;</li>
+<li>&quot;ConfuserEx / SmartAssembly / Babel 脱混淆 / 脱壳&quot;</li>
+<li>&quot;Sharp* 工具分析&quot;（Rubeus / SharpHound / SharpShell）</li>
+<li>&quot;.NET malware / loader / info-stealer 逆向&quot;</li>
+<li>&quot;C# 程序 patch / keygen / 修改判断&quot;</li>
+</ul>
+<h3>何时切出</h3>
+<ul>
+<li>IL2CPP 编译的 Unity 游戏 → <code>reverse-engineering/</code> + <code>seed-014_unity-il2cpp-reverse.md</code>（IL2CPP 是 native，不走 dnSpy）</li>
+<li>NativeAOT 产物 → <code>reverse-engineering/</code>（同上，native）</li>
+<li>纯 native PE（无 CLR）→ <code>reverse-engineering/</code> / <code>ida-reverse/</code></li>
+<li>需要符号/函数批量迁移到别的版本 → <code>binary-diff/</code></li>
+<li>需要画攻击路径 / 调用链图 → <code>diagram-generator/</code></li>
+</ul>
+<h3>路由上下文</h3>
+<p><strong>上游入口</strong>: <code>skills/SKILL.md</code>（总控）、<code>routing.md</code> <strong>下游出口</strong>:</p>
+<ul>
+<li>IL2CPP / NativeAOT（native）→ <code>reverse-engineering/</code></li>
+<li>深度 native .so/.dll 段分析 → <code>ida-reverse/</code> / <code>radare2/</code></li>
+<li>需要 AI 直接操作 dnSpy → 注册并联动 dnSpy MCP（见 <code>references/sharp-tools.md</code>）</li>
+</ul>
+<p><strong>同级关联模块</strong>:</p>
+<ul>
+<li><code>reverse-engineering/languages-compiled.md</code>（.NET 简介指向本模块）</li>
+<li><code>apk-reverse/</code>（Xamarin/MAUI Android 逆向可切回本模块看 C# 层）</li>
+</ul>
+<h3>参考文档</h3>
+<ul>
+<li>[references/obfuscators.md](references/obfuscators.md) — ConfuserEx / SmartAssembly / Babel / Eazfuscator / .NET Reactor 脱混淆详解 + anti-tamper 绕过</li>
+<li>[references/common-workflow.md](references/common-workflow.md) — 完整工作流、IL patch 可靠性、字符串解密器提取、状态机识别</li>
+<li>[references/sharp-tools.md](references/sharp-tools.md) — 红队 Sharp* 工具分析、工具安装矩阵、dnSpy MCP 集成、社区资源索引</li>
+</ul>
+<h3>任务完成自检</h3>
+<ul>
+<li>[ ] 是否确认过 CLR / 托管身份（或已 SWITCH 出本 skill）？</li>
+<li>[ ] 混淆样本是否先 de4dot / 等价脱壳再深分析？</li>
+<li>[ ] 关键逻辑是否用 IL 视图验证（而非只看 C# 伪代码）？</li>
+<li>[ ] 产物（clean 样本 / 配置 / patch diff）是否落盘且可复现？</li>
+<li>[ ] 是否提供了下一步菜单或报告出口？</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: dotnet-reverse\ndisplay_name: dotnet-reverse\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# dotnet-reverse - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `dotnet-reverse` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\n.NET / C# 二进制逆向。当目标是 .NET assembly（PE 头含 CLR、.exe/.dll 托管程序）、C# 编译产物（含 NativeAOT）、红队 Sharp* 工具（Rubeus / SharpHound / SharpHound 等）、.NET 混淆程序（ConfuserEx / SmartAssembly / Babel / Eazfuscator）、.NET loader / info-stealer /\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose dotnet-reverse, then write the task. Fallback prompt: Use the dotnet-reverse skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `dotnet-reverse` |\n| Canonical name | `dotnet-reverse` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\n.NET / C# 二进制逆向。当目标是 .NET assembly（PE 头含 CLR、.exe/.dll 托管程序）、C# 编译产物（含 NativeAOT）、红队 Sharp* 工具（Rubeus / SharpHound / SharpHound 等）、.NET 混淆程序（ConfuserEx / SmartAssembly / Babel / Eazfuscator）、.NET loader / info-stealer /\n\n\n## Original SKILL.md\n\n---\nname: dotnet-reverse\ndescription: .NET / C# 二进制逆向。当目标是 .NET assembly（PE 头含 CLR、.exe/.dll 托管程序）、C# 编译产物（含 NativeAOT）、红队 Sharp* 工具（Rubeus / SharpHound / SharpHound 等）、.NET 混淆程序（ConfuserEx / SmartAssembly / Babel / Eazfuscator）、.NET loader / info-stealer / 套壳 malware 时使用。优先用 dnSpyEx + de4dot，需要 AI 直接操作时联动 dnSpy MCP。不用于纯 native 二进制（走 reverse-engineering / ida-reverse）。\nlicense: MIT\ncompatibility: Requires a filesystem-based code agent or CLI with shell access, Windows host preferred (dnSpyEx 是 Windows GUI)；Linux/macOS 可用 ILSpy/de4dot CLI + mono/dotnet runtime。\nallowed-tools: Bash Read Write Edit Glob Grep Task WebFetch WebSearch\nmetadata:\n  user-invocable: \"false\"\n---\n\n# .NET / C# 逆向作业规范\n\n## ACTION REQUIRED（读完立刻执行）\n\n1. `NOW`: 用 DIE/`file`/CLR 头确认目标是 .NET 托管（否则 SWITCH 到 `ida-reverse/` / `reverse-engineering/`）\n2. `NOW`: 若疑似混淆 → 先 `de4dot` 脱壳，产出 `*-clean.exe`，保留原始样本\n3. `NEXT`: dnSpyEx（或 dnSpy MCP / `ilspycmd`）静态：C# 浏览 + **IL 视图**看关键判断\n4. `ACT`: 需要明文/C2 时动态调试；需要改逻辑时 **IL patch** 优先于 C# 重编译\n5. 阶段结束给用户 3–6 项下一步菜单（含导出报告）\n\n## 适用范围\n\n当任务属于以下场景时优先使用本 skill：\n\n- 识别并逆向 .NET / C# 编译产物（托管 PE / .exe / .dll）\n- 分析红队 Sharp* 工具链（Rubeus、SharpHound、SharpShell 等）\n- 脱混淆 ConfuserEx / SmartAssembly / Babel / Eazfuscator / .NET Reactor 等壳\n- 逆向 .NET loader / info-stealer / RAT 的解密与 C2 逻辑\n- 对 C# 程序做 patch（改判断、改常量、keygen）\n- 分析 IL2CPP 之前的 Mono/Unity 托管层（注意：IL2CPP 编译后是 native，走 `reverse-engineering/` + seed-014）\n\n如果目标是纯 native 二进制（C/C++/Go/Rust 编译、无 CLR），请改用 `reverse-engineering/`、`ida-reverse/` 或 `radare2/`。\n\n## 核心原则\n\n- **先识别再下手**：先确认是 .NET 托管程序（PE 头 CLR + `#~` / `#Strings` 流 + mscoree `_CorExeMain`），再决定走 dnSpy 而非 IDA\n- **IL 优先于 C#**：dnSpyEx 的 C# 反编译器会丢失/扭曲信息（编译器生成的状态机、async/await、yield），关键判断与 patch 必须切到 **IL 编辑器**，C# 视图只用于快速浏览\n- **de4dot 先行**：遇到混淆器先 `de4dot` 脱一轮再做静态分析，否则字符串/控制流全是乱的\n- **MCP 联动**：环境里若注册了 dnSpy MCP（`dnspy_*` 工具），优先走 MCP 面做 decompile / IL inspection，避免来回切 GUI\n- **证据化输出**：脱混淆产物、提取的配置/C2/key、patch diff 都要落盘\n\n## 工具链映射\n\n| 能力 | 首选 | 备注 |\n|------|------|------|\n| 反编译 + 调试 + patch | **dnSpyEx** | 王牌，唯一带 IL 编辑器的 GUI；老 dnSpy 已停更，用 Ex 分支 |\n| 轻量 CLI / headless 反编译 | **ILSpy** (`ilspycmd`) | 适合批量、脚本化、Linux/macOS |\n| 脱混淆 | **de4dot** | ConfuserEx 全家桶、SmartAssembly 等主流壳的默认解 |\n| 混淆器识别 | **Detect It Easy (DIE)** / **file** | 先判断壳类型再决定 de4dot 参数 |\n| 编程化操作 IL | **dnlib** | 写 C# 脚本批量改 metadata / 字符串解密器 |\n| AI 直接操作 | **dnSpy MCP** | `dnspy_decompile` / `dnspy_inspect_il` 等工具面 |\n\n> 前置：Windows 主机装 dnSpyEx + de4dot（choco 或 release）；Linux/macOS 用 `ilspycmd` + `dotnet runtime`。详见 `references/sharp-tools.md` 的安装矩阵。\n\n## 六阶段工作流\n\n### 1. Identify（识别 .NET）\n\n确认目标是托管程序，别把 native PE 当 .NET 分析：\n\n```powershell\n# Windows\nfile target.exe                       # \"PE32 executable ... for MS Windows\" 不够\n# 关键：看有没有 CLR\npowershell -c \"[System.Reflection.AssemblyName]::GetAssemblyName('target.exe')\"\n# 或\ndnSpyEx 直接拖进去 —— 能打开就是托管\n\n# 通用\nstrings target.exe | grep -iE \"mscoree|_CorExeMain|mscorlib|System\\\\.\"\n```\n\n**.NET 识别标志：**\n- PE 头 `Data Directory[14]` (CLR Runtime Header) 非零\n- `mscoree.dll` 导入 / `_CorExeMain` 入口\n- `#~`、`#Strings`、`#US`、`#GUID`、`#Blob` metadata 流\n- `mscorlib` / `System.Private.CoreLib` 字符串\n\n**NativeAOT 例外：** 编译成 native，没有 CLR 头，但有 `System.Private.CoreLib` 字符串和重构过的类型元数据 —— 这类走 `reverse-engineering/`（IDA/r2），本 skill 仅做识别提示。\n\n### 2. Detect（检测混淆器）\n\n```powershell\n# DIE 快速识别\ndiec target.exe                        # Detect It Easy CLI\n# 或拖进 dnSpyEx，看是否大量乱码类名 / 控制流变形\n```\n\n常见混淆器 → 脱壳策略（详见 `references/obfuscators.md`）：\n\n| 混淆器 | 特征 | de4dot 处理 |\n|--------|------|------------|\n| ConfuserEx (1.0.0 / 2.x) | `\u003cmodule>` anti-tamper、控制流变形、字符串加密 | `de4dot target.exe` 通常自动识别 |\n| SmartAssembly | `circular`/`string encoding`、资源压缩 | `de4dot target.exe` |\n| Babel.NET | 方法体加密、控制流 | `de4dot target.exe` |\n| Eazfuscator.NET | 字符串/资源加密 | `de4dot`，部分版本需手动 |\n| .NET Reactor | anti-tamper + necrobit | `de4dot`，新版可能失败需手动 |\n\n### 3. Deobfuscate（脱混淆）\n\n```powershell\n# de4dot 默认自动识别大多数壳\nde4dot target.exe -o target-clean.exe\n\n# 指定类型（自动识别失败时）\nde4dot --type cfze target.exe          # ConfuserEx\nde4dot --type sa target.exe            # SmartAssembly\n\n# 多层混淆 / de4dot 报 unknown\nde4dot --detect target.exe             # 看它识别成什么\n# 可能要先 patch anti-tamper 再 de4dot（见 references/obfuscators.md）\n```\n\n产出：`target-clean.exe`，后续分析用它。**保留原始样本**做对照。\n\n### 4. Static Analyze（静态分析）\n\ndnSpyEx 加载脱壳后样本：\n\n- **C# 视图**：快速浏览类结构、方法签名、字符串（用于定位）\n- **IL 视图**：关键判断、加密逻辑、状态机必须看 IL（右键 → Edit IL 或 IL 视图）\n- 找入口：`Main` / `Startup` / 模块初始化器 (`Module .cctor`)\n- 找关键逻辑：搜 `flag`、`password`、`verify`、`check`、`encrypt`、`http`、`Config`\n\n```text\n定位字符串 → 反向引用 → 找到使用它的方法 → IL 视图看判断逻辑\n```\n\n### 5. Dynamic（动态调试）\n\ndnSpyEx 调试器：附加进程 / 启动调试，在关键方法下断点，观察运行时：\n- 解密后的明文字符串（很多混淆器的字符串在运行时才解密）\n- C2 地址、配置解密结果\n- 异常驱动的控制流（anti-debug 常用 `try/catch` 隐藏真实路径）\n\n> .NET 动态调试比 native 友好得多 —— 能直接看到对象值、字符串内容。优先动态而非死磕静态。\n\n### 6. Patch（按需修改）\n\n```text\ndnSpyEx → 右键方法 → Edit Method (C#) 或 Edit IL\n  - 改判断：ldc.i4.0 → ldc.i4.1（false→true）\n  - 改常量：直接编辑字符串/数字\n  - 删除校验：nop 掉整段\nFile → Save Module → 替换原文件\n```\n\n**IL patch 可靠性 > C# patch**：C# 重编译可能失败（缺引用、语法不对），IL 编辑几乎不会失真。详见 `references/common-workflow.md`。\n\n## 触发场景路由\n\n用户说这些时进入本 skill：\n- \".NET / C# 二进制逆向\" / \"C# 程序反编译\"\n- \"dnSpy 分析\" / \"dnSpyEx patch\"\n- \"ConfuserEx / SmartAssembly / Babel 脱混淆 / 脱壳\"\n- \"Sharp* 工具分析\"（Rubeus / SharpHound / SharpShell）\n- \".NET malware / loader / info-stealer 逆向\"\n- \"C# 程序 patch / keygen / 修改判断\"\n\n## 何时切出\n\n- IL2CPP 编译的 Unity 游戏 → `reverse-engineering/` + `seed-014_unity-il2cpp-reverse.md`（IL2CPP 是 native，不走 dnSpy）\n- NativeAOT 产物 → `reverse-engineering/`（同上，native）\n- 纯 native PE（无 CLR）→ `reverse-engineering/` / `ida-reverse/`\n- 需要符号/函数批量迁移到别的版本 → `binary-diff/`\n- 需要画攻击路径 / 调用链图 → `diagram-generator/`\n\n## 路由上下文\n\n**上游入口**: `skills/SKILL.md`（总控）、`routing.md`\n**下游出口**:\n- IL2CPP / NativeAOT（native）→ `reverse-engineering/`\n- 深度 native .so/.dll 段分析 → `ida-reverse/` / `radare2/`\n- 需要 AI 直接操作 dnSpy → 注册并联动 dnSpy MCP（见 `references/sharp-tools.md`）\n\n**同级关联模块**:\n- `reverse-engineering/languages-compiled.md`（.NET 简介指向本模块）\n- `apk-reverse/`（Xamarin/MAUI Android 逆向可切回本模块看 C# 层）\n\n## 参考文档\n\n- [references/obfuscators.md](references/obfuscators.md) — ConfuserEx / SmartAssembly / Babel / Eazfuscator / .NET Reactor 脱混淆详解 + anti-tamper 绕过\n- [references/common-workflow.md](references/common-workflow.md) — 完整工作流、IL patch 可靠性、字符串解密器提取、状态机识别\n- [references/sharp-tools.md](references/sharp-tools.md) — 红队 Sharp* 工具分析、工具安装矩阵、dnSpy MCP 集成、社区资源索引\n\n## 任务完成自检\n\n- [ ] 是否确认过 CLR / 托管身份（或已 SWITCH 出本 skill）？\n- [ ] 混淆样本是否先 de4dot / 等价脱壳再深分析？\n- [ ] 关键逻辑是否用 IL 视图验证（而非只看 C# 伪代码）？\n- [ ] 产物（clean 样本 / 配置 / patch diff）是否落盘且可复现？\n- [ ] 是否提供了下一步菜单或报告出口？\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("dotnet-reverse-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

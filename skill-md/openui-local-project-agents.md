@@ -15,7 +15,7 @@ This is a friend-safe Markdown copy of `openui` for Local Project Agents. It rem
 
 Use this skill when your task matches this description:
 
-OpenUI is a full-stack Generative UI framework by Thesys. At its center is **OpenUI Lang**: a compact, line-oriented language designed for LLMs to generate user interfaces, up to 67% more token-efficient than JSON-based 
+Build generative UI apps with OpenUI and OpenUI Lang — the token-efficient open standard for LLM-generated interfaces. Use when mentioning OpenUI, @openuidev, generative UI, streaming UI from LLMs, component libraries fo
 
 ## How To Use It In Local Project Agents
 
@@ -32,7 +32,8 @@ From this workspace, type: Use the openui skill to...
 
 ## Description
 
-OpenUI is a full-stack Generative UI framework by Thesys. At its center is **OpenUI Lang**: a compact, line-oriented language designed for LLMs to generate user interfaces, up to 67% more token-efficient than JSON-based 
+Build generative UI apps with OpenUI and OpenUI Lang — the token-efficient open standard for LLM-generated interfaces. Use when mentioning OpenUI, @openuidev, generative UI, streaming UI from LLMs, component libraries fo
+
 
 ## Original SKILL.md
 
@@ -132,4 +133,3 @@ npm run dev
 OpenUI works with any LLM framework. The scaffolded app uses Next.js with the OpenAI SDK. Integration patterns exist for: Vercel AI SDK, LangChain, CrewAI, OpenAI Agents SDK, Anthropic Agents SDK, Google ADK, and any framework that produces a text stream.
 
 The core integration point is always the same: send the system prompt (from `library.prompt()`) to your LLM, then feed the streamed text into `<Renderer />`.
-

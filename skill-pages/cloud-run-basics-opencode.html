@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>cloud-run-basics - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/cloud-run-basics-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>cloud-run-basics</h1>
+      <p class="description">Manages Cloud Run services, jobs, and worker pools. Use when you need to deploy applications responding to HTTP requests (services), run event-triggered or scheduled tasks (jobs), or handle always-on pull-based background processing (worker pools).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>cloud-run-basics</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>cloud-run-basics</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Manages Cloud Run services, jobs, and worker pools. Use when you need to deploy applications responding to HTTP requests (services), run event-triggered or scheduled tasks (jobs), or handle always-on pull-based background processing (worker pools).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the cloud-run-basics skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+        <div class="usage-card"><strong>Upstream provenance</strong><p><a href="https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39">Google Agent Skills</a> at 092e210b243601797a0fb939040be2b1288e6d39 (Apache-2.0).</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Universal runtime boundary</h3>
+<ul>
+<li>Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.</li>
+<li>Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.</li>
+<li>Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.</li>
+<li>Read <code>references/upstream.md</code> when provenance, the pinned revision, licensing, or local adaptation details matter.</li>
+</ul>
+<h2>Cloud Run Basics</h2>
+<p>Cloud Run is a fully managed application platform for running your code, function, or container on top of Google's highly scalable infrastructure. It abstracts away infrastructure management, providing three primary resource types:</p>
+<ol>
+<li><strong>Services:</strong> Responds to HTTP requests sent to a unique and stable</li>
+</ol>
+<p>endpoint, using stateless instances that autoscale based on a variety of key metrics, also responds to events and functions.</p>
+<ol>
+<li><strong>Jobs:</strong> Executes parallelizable tasks that are executed manually, or on a</li>
+</ol>
+<p>schedule, and run to completion.</p>
+<ol>
+<li><strong>Worker pools:</strong> Handles always-on background workloads such as pull-based</li>
+</ol>
+<p>workloads, for example, Kafka consumers, Pub/Sub pull queues, or RabbitMQ consumers.</p>
+<h3>Prerequisites</h3>
+<ol>
+<li>Enable the Cloud Run Admin API and Cloud Build APIs:</li>
+</ol>
+<pre><code>    gcloud services enable run.googleapis.com cloudbuild.googleapis.com --quiet</code></pre>
+<ol>
+<li>If you are under a domain restriction organization policy [restricting](https://docs.cloud.google.com/organization-policy/restrict-domains.md.txt)</li>
+</ol>
+<p>unauthenticated invocations for your project, you will need to access your deployed service as described under [Testing private services](https://docs.cloud.google.com/run/docs/triggering/https-request.md.txt).</p>
+<h4>Required roles</h4>
+<p>You need the following roles to deploy your Cloud Run resource:</p>
+<ul>
+<li>Cloud Run Admin (<code>roles/run.admin</code>) on the project</li>
+<li>Cloud Run Source Developer (<code>roles/run.sourceDeveloper</code>) on the project</li>
+<li>Service Account User (<code>roles/iam.serviceAccountUser</code>) on the service</li>
+</ul>
+<p>identity</p>
+<ul>
+<li>Logs Viewer (<code>roles/logging.viewer</code>) on the project</li>
+</ul>
+<p>Cloud Build automatically uses the Compute Engine default service account as the default Cloud Build service account to build your source code and Cloud Run resource, unless you override this behavior.</p>
+<p>For Cloud Build to build your sources, grant the Cloud Build service account the Cloud Run Builder (<code>roles/run.builder</code>) role on your project:</p>
+<pre><code>gcloud projects add-iam-policy-binding PROJECT_ID \
+    --member=serviceAccount:SERVICE_ACCOUNT_EMAIL_ADDRESS \
+    --role=roles/run.builder \
+    --quiet</code></pre>
+<p>Replace <code>PROJECT_ID</code> with your Google Cloud project ID and <code>SERVICE_ACCOUNT_EMAIL_ADDRESS</code> with the email address of the Cloud Build service account.</p>
+<h3>Deploy a Cloud Run service</h3>
+<p>You can deploy your service to Cloud Run by using a container image or deploy directly from source code using a single Google Cloud CLI command.</p>
+<blockquote><strong>CRITICAL RULE:</strong> Any deployed code MUST listen on 0.0.0.0 (not 127.0.0.1)</blockquote>
+<blockquote>and use the injected $PORT environment variable (defaults to 8080), or it will</blockquote>
+<blockquote>crash on boot.</blockquote>
+<h4>Deploy a container image to Cloud Run</h4>
+<p>Cloud Run imports your container image during deployment. Cloud Run keeps this copy of the container image as long as it is used by a serving revision. Container images are not pulled from their container repository when a new Cloud Run instance is started.</p>
+<h4>Supported container images</h4>
+<p>You can directly use container images stored in the [Artifact Registry](https://docs.cloud.google.com/artifact-registry/docs/overview.md.txt), or [Docker Hub](https://hub.docker.com/). Google recommends the use of Artifact Registry since Docker Hub images are [cached](https://docs.cloud.google.com/artifact-registry/docs/pull-cached-dockerhub-images.md.txt) for up to one hour.</p>
+<p>You can use container images from other public or private registries (like JFrog Artifactory, Nexus, or GitHub Container Registry), by setting up an [Artifact Registry remote repository](https://docs.cloud.google.com/artifact-registry/docs/repositories/remote-repo.md.txt).</p>
+<p>You should only consider [Docker Hub](https://hub.docker.com/) for deploying popular container images such as [Docker Official Images](https://docs.docker.com/docker-hub/official_images/) or [Docker Sponsored OSS images](https://docs.docker.com/docker-hub/dsos-program/). For higher availability, Google recommends deploying these Docker Hub images using an [Artifact Registry remote repository](https://docs.cloud.google.com/artifact-registry/docs/repositories/remote-repo.md.txt).</p>
+<p>To deploy a container image, run the following command:</p>
+<pre><code>    gcloud run deploy SERVICE_NAME \
+        --image IMAGE_URL \
+        --region us-central1 \
+        --allow-unauthenticated \
+        --quiet</code></pre>
+<p>Replace the following:</p>
+<ul>
+<li>SERVICE_NAME: the name of the service you want to deploy to. Service names</li>
+</ul>
+<p>must be 49 characters or less and must be unique per region and project. If the service does not exist yet, this command creates the service during the deployment. You can omit this parameter entirely, but you will be prompted for the service name if you omit it.</p>
+<ul>
+<li>IMAGE_URL: a reference to the container image, for example,</li>
+</ul>
+<p><code>us-docker.pkg.dev/cloudrun/container/hello:latest</code>. If you use Artifact Registry, the repository REPO_NAME must already be created. The URL follows the format of <code>LOCATION-docker.pkg.dev/PROJECT_ID/REPO_NAME/PATH:TAG</code>. Note that if you don't supply the <code>--image</code> flag, the deploy command will attempt to deploy from source code.</p>
+<h4>Deploy from source code</h4>
+<p>There are two different ways to deploy your service from source:</p>
+<ul>
+<li>Deploy from source with build (default): This option uses Google Cloud's</li>
+</ul>
+<p>buildpacks and Cloud Build to automatically build container images from your source code without having to install Docker on your machine or set up buildpacks or Cloud Build. By default, Cloud Run uses the default machine type provided by Cloud Build.</p>
+<ul>
+<li>To deploy from source with automatic base image updates enabled, run the</li>
+</ul>
+<p>following command:</p>
+<pre><code>         gcloud run deploy SERVICE_NAME --source . \
+         --base-image BASE_IMAGE \
+         --automatic-updates \
+         --quiet</code></pre>
+<p>Cloud Run only supports automatic base images that use [Google Cloud's buildpacks base images](https://docs.cloud.google.com/docs/buildpacks/base-images.md.txt).</p>
+<ul>
+<li>To deploy from source using a Dockerfile, run the following command:</li>
+</ul>
+<pre><code>          gcloud run deploy SERVICE_NAME --source . --quiet</code></pre>
+<p>When you provide a Dockerfile, Cloud Build runs it in the cloud, and deploys the service.</p>
+<ul>
+<li>Deploy from source without build (Preview): This option deploys artifacts</li>
+</ul>
+<p>directly to Cloud Run, bypassing the Cloud Build step. This allows for rapid deployment times. To deploy from source without build, run the following command:</p>
+<pre><code>    gcloud beta run deploy SERVICE_NAME \
+     --source APPLICATION_PATH \
+     --no-build \
+     --base-image=BASE_IMAGE \
+     --command=COMMAND \
+     --args=ARG \
+     --quiet</code></pre>
+<p>Replace the following:</p>
+<ul>
+<li>SERVICE_NAME: the name of your Cloud Run service.</li>
+<li>APPLICATION_PATH: the location of your application on the local file</li>
+</ul>
+<p>system.</p>
+<ul>
+<li>BASE_IMAGE: the [runtime base image](https://docs.cloud.google.com/run/docs/configuring/services/runtime-base-images.md.txt)</li>
+</ul>
+<p>you want to use for your application. For example, <code>us-central1-docker.pkg.dev/serverless-runtimes/google-24-full/runtimes/nodejs24</code>. You can also deploy a pre-compiled binary without configuring additional language-specific runtime components using the OS only base image, such as <code>osonly24</code>.</p>
+<ul>
+<li>COMMAND: the command that the container starts up with.</li>
+<li>ARG: an argument you send to the container command. If you use multiple</li>
+</ul>
+<p>arguments, specify each on its own line.</p>
+<p>For examples on deploying from source without build, see [Examples of deploying from source without build](https://docs.cloud.google.com/run/docs/deploying-source-code.md.txt).</p>
+<h3>Create and execute a Cloud Run job</h3>
+<p>To create a new job, run the following command:</p>
+<pre><code>gcloud run jobs create JOB_NAME --image IMAGE_URL OPTIONS --quiet</code></pre>
+<p>Alternatively, use the deploy command:</p>
+<pre><code>gcloud run jobs deploy JOB_NAME --image IMAGE_URL OPTIONS --quiet</code></pre>
+<p>Replace the following:</p>
+<ul>
+<li>JOB_NAME: the name of the job you want to create. If you omit this</li>
+</ul>
+<p>parameter, you will be prompted for the job name when you run the command.</p>
+<ul>
+<li>IMAGE_URL: a reference to the container image—for example,</li>
+</ul>
+<p><code>us-docker.pkg.dev/cloudrun/container/job:latest</code>.</p>
+<ul>
+<li>Optionally, replace OPTIONS with any of the following flags:</li>
+</ul>
+<ul>
+<li><code>--tasks</code>: Accepts integers greater or equal to 1. Defaults to 1;</li>
+</ul>
+<p>maximum is 10,000. Each task is provided the environment variables <code>CLOUD_RUN_TASK_INDEX</code> with a value between 0 and the number of tasks minus 1, along with <code>CLOUD_RUN_TASK_COUNT</code>, which is the number of tasks.</p>
+<ul>
+<li><code>--max-retries</code>: The number of times a failed task is retried. Once any</li>
+</ul>
+<p>task fails beyond this limit, the entire job is marked as failed. For example, if set to 1, a failed task will be retried once, for a total of two attempts. The default is 3. Accepts integers from 0 to 10.</p>
+<ul>
+<li><code>--task-timeout</code>: Accepts a duration like &quot;2s&quot;. Defaults to 10 minutes;</li>
+</ul>
+<p>maximum is 168 hours (7 days). For tasks using GPUs, the maximum available timeout is 1 hour.</p>
+<ul>
+<li><code>--parallelism</code>: The maximum number of tasks that can execute in</li>
+</ul>
+<p>parallel. By default, tasks will be started as quickly as possible in parallel.</p>
+<ul>
+<li>--execute-now: If set, immediately after the job is created, a job</li>
+</ul>
+<p>execution is started. Equivalent to calling <code>gcloud run jobs create</code> followed by <code>gcloud run jobs execute</code>.</p>
+<p>In addition to these preceding options, you also specify more configuration such as environment variables or memory limits.</p>
+<p>For a full list of available options when creating a job, refer to the [<code>gcloud run jobs create</code>](https://docs.cloud.google.com/sdk/gcloud/reference/run/jobs/create) command line documentation.</p>
+<p>Wait for the job creation to finish. You'll see a success message upon a successful completion.</p>
+<p>To execute an existing job, run the following command:</p>
+<pre><code>gcloud run jobs execute JOB_NAME --quiet</code></pre>
+<p>If you want the command to wait until the execution completes, run the following command:</p>
+<pre><code>gcloud run jobs execute JOB_NAME --wait --region=REGION --quiet</code></pre>
+<p>Replace the following:</p>
+<ul>
+<li>JOB_NAME: the name of the job.</li>
+<li>REGION: the region in which the resource can be found. For example,</li>
+</ul>
+<p><code>europe-west1</code>. Alternatively, set the <code>run/region</code> property.</p>
+<h3>Deploy a worker pool</h3>
+<p>You can deploy a Cloud Run worker pool using container images or deploy directly from the source.</p>
+<h4>Deploy a container image</h4>
+<p>You can specify a container image with a tag (for example, <code>us-docker.pkg.dev/my-project/container/my-image:latest</code>) or with an exact digest (for example, <code>us-docker.pkg.dev/my-project/container/my-image@sha256:41f34ab970ee...</code>).</p>
+<h4>Supported container images</h4>
+<p>You can directly use container images stored in the [Artifact Registry](https://docs.cloud.google.com/artifact-registry/docs/overview.md.txt), or [Docker Hub](https://hub.docker.com/). Google recommends the use of Artifact Registry since Docker Hub images are [cached](https://docs.cloud.google.com/artifact-registry/docs/pull-cached-dockerhub-images.md.txt) for up to one hour.</p>
+<p>You can use container images from other public or private registries (like JFrog Artifactory, Nexus, or GitHub Container Registry), by setting up an [Artifact Registry remote repository](https://docs.cloud.google.com/artifact-registry/docs/repositories/remote-repo.md.txt).</p>
+<p>You should only consider [Docker Hub](https://hub.docker.com/) for deploying popular container images such as [Docker Official Images](https://docs.docker.com/docker-hub/official_images/) or [Docker Sponsored OSS images](https://docs.docker.com/docker-hub/dsos-program/). For higher availability, Google recommends deploying these Docker Hub images using an [Artifact Registry remote repository](https://docs.cloud.google.com/artifact-registry/docs/repositories/remote-repo.md.txt).</p>
+<p>To deploy a container image, run the following command:</p>
+<pre><code>gcloud run worker-pools deploy WORKER_POOL_NAME --image IMAGE_URL --quiet</code></pre>
+<p>Replace the following:</p>
+<ul>
+<li>WORKER_POOL_NAME: the name of the worker pool you want to deploy to. If the</li>
+</ul>
+<p>worker pool does not exist yet, this command creates the worker pool during the deployment. You can omit this parameter entirely, but you will be prompted for the worker pool name if you omit it.</p>
+<ul>
+<li>IMAGE_URL: a reference to the container image that contains the worker pool,</li>
+</ul>
+<p>such as <code>us-docker.pkg.dev/cloudrun/container/worker-pool:latest</code>. Note that if you don't supply the <code>--image</code> flag, the deploy command attempts to deploy from source code.</p>
+<p>Wait for the deployment to finish. Upon successful completion, Cloud Run displays a success message along with the revision information about the deployed worker pool.</p>
+<h4>Deploy a worker pool from source</h4>
+<p>You can deploy a new worker pool or worker pool revision to Cloud Run directly from source code using a single gcloud CLI command, <code>gcloud run worker-pools</code> deploy with the <code>--source</code> flag.</p>
+<p>The deploy command defaults to source deployment if you don't supply the <code>--image</code> or <code>--source</code> flags.</p>
+<p>Behind the scenes, this command uses [Google Cloud's buildpacks](https://docs.cloud.google.com/docs/buildpacks/overview.md.txt) and Cloud Build to automatically build container images from your source code without having to install Docker on your machine or set up buildpacks or Cloud Build. By default, Cloud Run uses the default machine type provided by Cloud Build.</p>
+<p>To deploy a worker pool from source, run the following command:</p>
+<pre><code>gcloud run worker-pools deploy WORKER_POOL_NAME --source . --quiet</code></pre>
+<p>Replace <code>WORKER_POOL_NAME</code> with the name you want for your worker pool.</p>
+<h4>What to do if a deployment fails:</h4>
+<ol>
+<li><strong>IAM/Permission Error:</strong> Read</li>
+</ol>
+<p>[iam-security.md](references/iam-security.md).</p>
+<ol>
+<li><strong>Crash on Boot / Healthcheck failed:</strong> Fetch the logs immediately using</li>
+</ol>
+<p><code>gcloud logging read &quot;resource.labels.service_name=SERVICE_NAME&quot; --limit=20</code> to find the exact runtime error.</p>
+<ol>
+<li><strong>Native Dependency Error (Node/Python):</strong> If using <code>--no-build</code>, switch to</li>
+</ol>
+<p><code>--source .</code> (Buildpacks) to compile native extensions properly for Linux.</p>
+<h3>Reference Directory</h3>
+<ul>
+<li>[Core Concepts](references/core-concepts.md): Services vs. Jobs vs.</li>
+</ul>
+<p>Worker pools, resource model, and auto-scaling behavior for services.</p>
+<ul>
+<li>[CLI Usage](references/cli-usage.md): Essential <code>gcloud run</code> commands for</li>
+</ul>
+<p>deployment and management.</p>
+<ul>
+<li>[Client Libraries](references/client-library-usage.md): Using Google</li>
+</ul>
+<p>Cloud client libraries to interact with Cloud Run.</p>
+<ul>
+<li>[MCP Usage](references/mcp-usage.md): Using the Cloud Run remote MCP</li>
+</ul>
+<p>server.</p>
+<ul>
+<li>[Infrastructure as Code](references/iac-usage.md): Terraform examples for</li>
+</ul>
+<p>services, jobs, worker pools, and IAM bindings.</p>
+<ul>
+<li>[IAM &amp; Security](references/iam-security.md): Roles, service identities,</li>
+</ul>
+<p>and ingress/egress controls.</p>
+<ul>
+<li>[Networking Best Practices &amp; Cost Optimization](references/networking.md): Cost</li>
+</ul>
+<p>optimization strategies, Direct VPC egress, IP address and port exhaustion strategies, performance throughput tuning, and MTU settings.</p>
+<p><em>If you need product information not found in these references, use the Developer Knowledge MCP server <code>search_documents</code> tool.</em></p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: cloud-run-basics\ndisplay_name: cloud-run-basics\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# cloud-run-basics - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `cloud-run-basics` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nManages Cloud Run services, jobs, and worker pools. Use when you need to deploy applications responding to HTTP requests (services), run event-triggered or scheduled tasks (jobs), or handle always-on pull-based backgroun\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the cloud-run-basics skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `cloud-run-basics` |\n| Canonical name | `cloud-run-basics` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\nManages Cloud Run services, jobs, and worker pools. Use when you need to deploy applications responding to HTTP requests (services), run event-triggered or scheduled tasks (jobs), or handle always-on pull-based backgroun\n\n## Upstream provenance\n\nThis adapted package derives from [Google Agent Skills](https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39) at commit `092e210b243601797a0fb939040be2b1288e6d39`, licensed under `Apache-2.0`.\n\n\n## Original SKILL.md\n\n---\nname: cloud-run-basics\ndescription: \"Manages Cloud Run services, jobs, and worker pools. Use when you need to deploy applications responding to HTTP requests (services), run event-triggered or scheduled tasks (jobs), or handle always-on pull-based background processing (worker pools).\"\nlicense: Apache-2.0\n---\n\n## Universal runtime boundary\n\n- Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.\n- Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.\n- Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.\n- Read `references/upstream.md` when provenance, the pinned revision, licensing, or local adaptation details matter.\n\n# Cloud Run Basics\n\nCloud Run is a fully managed application platform for running your code,\nfunction, or container on top of Google's highly scalable infrastructure. It\nabstracts away infrastructure management, providing three primary resource\ntypes:\n\n1.  **Services:** Responds to HTTP requests sent to a unique and stable\n    endpoint, using stateless instances that autoscale based on a variety of key\n    metrics, also responds to events and functions.\n2.  **Jobs:** Executes parallelizable tasks that are executed manually, or on a\n    schedule, and run to completion.\n3.  **Worker pools:** Handles always-on background workloads such as pull-based\n    workloads, for example, Kafka consumers, Pub/Sub pull queues, or RabbitMQ\n    consumers.\n\n## Prerequisites\n\n1.  Enable the Cloud Run Admin API and Cloud Build APIs:\n\n    ```bash\n    gcloud services enable run.googleapis.com cloudbuild.googleapis.com --quiet\n    ```\n\n1.  If you are under a domain restriction organization policy [restricting](https://docs.cloud.google.com/organization-policy/restrict-domains.md.txt)\n   unauthenticated invocations for your project, you will need to access your\n    deployed service as described under [Testing private\n    services](https://docs.cloud.google.com/run/docs/triggering/https-request.md.txt).\n\n### Required roles\n\nYou need the following roles to deploy your Cloud Run resource:\n\n*   Cloud Run Admin (`roles/run.admin`) on the project\n*   Cloud Run Source Developer (`roles/run.sourceDeveloper`) on the project\n*   Service Account User (`roles/iam.serviceAccountUser`) on the service\n    identity\n*   Logs Viewer (`roles/logging.viewer`) on the project\n\nCloud Build automatically uses the Compute Engine default service account as the\ndefault Cloud Build service account to build your source code and Cloud Run\nresource, unless you override this behavior.\n\nFor Cloud Build to build your sources, grant the Cloud Build service account the\nCloud Run Builder (`roles/run.builder`) role on your project:\n\n```bash\ngcloud projects add-iam-policy-binding PROJECT_ID \\\n    --member=serviceAccount:SERVICE_ACCOUNT_EMAIL_ADDRESS \\\n    --role=roles/run.builder \\\n    --quiet\n```\n\nReplace `PROJECT_ID` with your Google Cloud project ID and\n`SERVICE_ACCOUNT_EMAIL_ADDRESS` with the email address of the Cloud Build\nservice account.\n\n## Deploy a Cloud Run service\n\nYou can deploy your service to Cloud Run by using a container image or deploy\ndirectly from source code using a single Google Cloud CLI command.\n\n> **CRITICAL RULE:** Any deployed code MUST listen on 0.0.0.0 (not 127.0.0.1)\n> and use the injected $PORT environment variable (defaults to 8080), or it will\n> crash on boot.\n\n### Deploy a container image to Cloud Run\n\nCloud Run imports your container image during deployment. Cloud Run keeps this\ncopy of the container image as long as it is used by a serving revision.\nContainer images are not pulled from their container repository when a new Cloud\nRun instance is started.\n\n### Supported container images\n\nYou can directly use container images stored in the [Artifact\nRegistry](https://docs.cloud.google.com/artifact-registry/docs/overview.md.txt), or\n[Docker Hub](https://hub.docker.com/). Google recommends the use of Artifact\nRegistry since Docker Hub images are\n[cached](https://docs.cloud.google.com/artifact-registry/docs/pull-cached-dockerhub-images.md.txt)\nfor up to one hour.\n\nYou can use container images from other public or private registries (like JFrog\nArtifactory, Nexus, or GitHub Container Registry), by setting up an [Artifact\nRegistry remote\nrepository](https://docs.cloud.google.com/artifact-registry/docs/repositories/remote-repo.md.txt).\n\nYou should only consider [Docker Hub](https://hub.docker.com/) for deploying\npopular container images such as [Docker Official\nImages](https://docs.docker.com/docker-hub/official_images/) or [Docker\nSponsored OSS images](https://docs.docker.com/docker-hub/dsos-program/). For\nhigher availability, Google recommends deploying these Docker Hub images using\nan [Artifact Registry remote\nrepository](https://docs.cloud.google.com/artifact-registry/docs/repositories/remote-repo.md.txt).\n\nTo deploy a container image, run the following command:\n\n```bash\n    gcloud run deploy SERVICE_NAME \\\n        --image IMAGE_URL \\\n        --region us-central1 \\\n        --allow-unauthenticated \\\n        --quiet\n```\n\nReplace the following:\n\n*   SERVICE_NAME: the name of the service you want to deploy to. Service names\n    must be 49 characters or less and must be unique per region and project. If\n    the service does not exist yet, this command creates the service during the\n    deployment. You can omit this parameter entirely, but you will be prompted\n    for the service name if you omit it.\n*   IMAGE_URL: a reference to the container image, for example,\n    `us-docker.pkg.dev/cloudrun/container/hello:latest`. If you use Artifact\n    Registry, the repository REPO_NAME must already be created. The URL follows\n    the format of `LOCATION-docker.pkg.dev/PROJECT_ID/REPO_NAME/PATH:TAG`. Note\n    that if you don't supply the `--image` flag, the deploy command will attempt\n    to deploy from source code.\n\n### Deploy from source code\n\nThere are two different ways to deploy your service from source:\n\n*   Deploy from source with build (default): This option uses Google Cloud's\n    buildpacks and Cloud Build to automatically build container images from your\n    source code without having to install Docker on your machine or set up\n    buildpacks or Cloud Build. By default, Cloud Run uses the default machine\n    type provided by Cloud Build.\n\n    *   To deploy from source with automatic base image updates enabled, run the\n        following command:\n\n         ```bash\n         gcloud run deploy SERVICE_NAME --source . \\\n         --base-image BASE_IMAGE \\\n         --automatic-updates \\\n         --quiet\n         ```\n\n        Cloud Run only supports automatic base images that use [Google Cloud's\n        buildpacks base\n        images](https://docs.cloud.google.com/docs/buildpacks/base-images.md.txt).\n\n        *   To deploy from source using a Dockerfile, run the following command:\n\n         ```bash\n          gcloud run deploy SERVICE_NAME --source . --quiet\n         ```\n            When you provide a Dockerfile, Cloud Build runs it in the cloud, and\n            deploys the service.\n\n*   Deploy from source without build (Preview): This option deploys artifacts\n    directly to Cloud Run, bypassing the Cloud Build step. This allows for rapid\n    deployment times. To deploy from source without build, run the following\n    command:\n\n    ```bash\n    gcloud beta run deploy SERVICE_NAME \\\n     --source APPLICATION_PATH \\\n     --no-build \\\n     --base-image=BASE_IMAGE \\\n     --command=COMMAND \\\n     --args=ARG \\\n     --quiet\n    ```\n\n    Replace the following:\n\n    *   SERVICE_NAME: the name of your Cloud Run service.\n    *   APPLICATION_PATH: the location of your application on the local file\n        system.\n    *   BASE_IMAGE: the [runtime base image](https://docs.cloud.google.com/run/docs/configuring/services/runtime-base-images.md.txt)\n    you want to use for your application. For example,\n        `us-central1-docker.pkg.dev/serverless-runtimes/google-24-full/runtimes/nodejs24`.\n        You can also deploy a pre-compiled binary without configuring additional\n        language-specific runtime components using the OS only base image, such\n    as `osonly24`.\n    *   COMMAND: the command that the container starts up with.\n    *   ARG: an argument you send to the container command. If you use multiple\n    arguments, specify each on its own line.\n\n    For examples on deploying from source without build, see [Examples of\n        deploying from source without\n        build](https://docs.cloud.google.com/run/docs/deploying-source-code.md.txt).\n\n## Create and execute a Cloud Run job\n\nTo create a new job, run the following command:\n\n```bash\ngcloud run jobs create JOB_NAME --image IMAGE_URL OPTIONS --quiet\n```\n\nAlternatively, use the deploy command:\n\n```bash\ngcloud run jobs deploy JOB_NAME --image IMAGE_URL OPTIONS --quiet\n```\n\nReplace the following:\n\n*   JOB_NAME: the name of the job you want to create. If you omit this\n    parameter, you will be prompted for the job name when you run the command.\n*   IMAGE_URL: a reference to the container image—for example,\n    `us-docker.pkg.dev/cloudrun/container/job:latest`.\n\n*   Optionally, replace OPTIONS with any of the following flags:\n\n    *   `--tasks`: Accepts integers greater or equal to 1. Defaults to 1;\n        maximum is 10,000. Each task is provided the environment variables\n        `CLOUD_RUN_TASK_INDEX` with a value between 0 and the number of tasks\n        minus 1, along with `CLOUD_RUN_TASK_COUNT`, which is the number of\n        tasks.\n    *   `--max-retries`: The number of times a failed task is retried. Once any\n        task fails beyond this limit, the entire job is marked as failed. For\n        example, if set to 1, a failed task will be retried once, for a total of\n        two attempts. The default is 3. Accepts integers from 0 to 10.\n    *   `--task-timeout`: Accepts a duration like \"2s\". Defaults to 10 minutes;\n        maximum is 168 hours (7 days). For tasks using GPUs, the maximum\n        available timeout is 1 hour.\n    *   `--parallelism`: The maximum number of tasks that can execute in\n        parallel. By default, tasks will be started as quickly as possible in\n        parallel.\n    *   --execute-now: If set, immediately after the job is created, a job\n        execution is started. Equivalent to calling `gcloud run jobs create`\n        followed by `gcloud run jobs execute`.\n\n    In addition to these preceding options, you also specify more configuration\n    such as environment variables or memory limits.\n\nFor a full list of available options when creating a job, refer to the [`gcloud\nrun jobs\ncreate`](https://docs.cloud.google.com/sdk/gcloud/reference/run/jobs/create)\ncommand line documentation.\n\nWait for the job creation to finish. You'll see a success message upon a\nsuccessful completion.\n\nTo execute an existing job, run the following command:\n\n```bash\ngcloud run jobs execute JOB_NAME --quiet\n```\n\nIf you want the command to wait until the execution completes, run the following\ncommand:\n\n```bash\ngcloud run jobs execute JOB_NAME --wait --region=REGION --quiet\n```\n\nReplace the following:\n\n*   JOB_NAME: the name of the job.\n*   REGION: the region in which the resource can be found. For example,\n    `europe-west1`. Alternatively, set the `run/region` property.\n\n## Deploy a worker pool\n\nYou can deploy a Cloud Run worker pool using container images or deploy directly\nfrom the source.\n\n### Deploy a container image\n\nYou can specify a container image with a tag (for example,\n`us-docker.pkg.dev/my-project/container/my-image:latest`) or with an exact\ndigest (for example,\n`us-docker.pkg.dev/my-project/container/my-image@sha256:41f34ab970ee...`).\n\n### Supported container images\n\nYou can directly use container images stored in the [Artifact\nRegistry](https://docs.cloud.google.com/artifact-registry/docs/overview.md.txt), or\n[Docker Hub](https://hub.docker.com/). Google recommends the use of Artifact\nRegistry since Docker Hub images are\n[cached](https://docs.cloud.google.com/artifact-registry/docs/pull-cached-dockerhub-images.md.txt)\nfor up to one hour.\n\nYou can use container images from other public or private registries (like JFrog\nArtifactory, Nexus, or GitHub Container Registry), by setting up an [Artifact\nRegistry remote\nrepository](https://docs.cloud.google.com/artifact-registry/docs/repositories/remote-repo.md.txt).\n\nYou should only consider [Docker Hub](https://hub.docker.com/) for deploying\npopular container images such as [Docker Official\nImages](https://docs.docker.com/docker-hub/official_images/) or [Docker\nSponsored OSS images](https://docs.docker.com/docker-hub/dsos-program/). For\nhigher availability, Google recommends deploying these Docker Hub images using\nan [Artifact Registry remote\nrepository](https://docs.cloud.google.com/artifact-registry/docs/repositories/remote-repo.md.txt).\n\nTo deploy a container image, run the following command:\n\n```bash\ngcloud run worker-pools deploy WORKER_POOL_NAME --image IMAGE_URL --quiet\n```\n\nReplace the following:\n\n*   WORKER_POOL_NAME: the name of the worker pool you want to deploy to. If the\n  worker pool does not exist yet, this command creates the worker pool during\n    the deployment. You can omit this parameter entirely, but you will be\n    prompted for the worker pool name if you omit it.\n\n*   IMAGE_URL: a reference to the container image that contains the worker pool,\n    such as `us-docker.pkg.dev/cloudrun/container/worker-pool:latest`. Note that\n    if you don't supply the `--image` flag, the deploy command attempts to\n    deploy from source code.\n\nWait for the deployment to finish. Upon successful completion, Cloud Run\ndisplays a success message along with the revision information about the\ndeployed worker pool.\n\n### Deploy a worker pool from source\n\nYou can deploy a new worker pool or worker pool revision to Cloud Run directly\nfrom source code using a single gcloud CLI command, `gcloud run worker-pools`\ndeploy with the `--source` flag.\n\nThe deploy command defaults to source deployment if you don't supply the\n`--image` or `--source` flags.\n\nBehind the scenes, this command uses [Google Cloud's\nbuildpacks](https://docs.cloud.google.com/docs/buildpacks/overview.md.txt) and Cloud\nBuild to automatically build container images from your source code without\nhaving to install Docker on your machine or set up buildpacks or Cloud Build. By\ndefault, Cloud Run uses the default machine type provided by Cloud Build.\n\nTo deploy a worker pool from source, run the following command:\n\n```bash\ngcloud run worker-pools deploy WORKER_POOL_NAME --source . --quiet\n```\n\nReplace `WORKER_POOL_NAME` with the name you want for your worker pool.\n\n### What to do if a deployment fails:\n\n1.  **IAM/Permission Error:** Read\n    [iam-security.md](references/iam-security.md).\n2.  **Crash on Boot / Healthcheck failed:** Fetch the logs immediately using\n    `gcloud logging read \"resource.labels.service_name=SERVICE_NAME\" --limit=20`\n    to find the exact runtime error.\n3.  **Native Dependency Error (Node/Python):** If using `--no-build`, switch to\n    `--source .` (Buildpacks) to compile native extensions properly for Linux.\n\n## Reference Directory\n\n-   [Core Concepts](references/core-concepts.md): Services vs. Jobs vs.\n    Worker pools, resource model, and auto-scaling behavior for services.\n\n-   [CLI Usage](references/cli-usage.md): Essential `gcloud run` commands for\n    deployment and management.\n\n-   [Client Libraries](references/client-library-usage.md): Using Google\n    Cloud client libraries to interact with Cloud Run.\n\n-   [MCP Usage](references/mcp-usage.md): Using the Cloud Run remote MCP\n    server.\n\n-   [Infrastructure as Code](references/iac-usage.md): Terraform examples for\n    services, jobs, worker pools, and IAM bindings.\n\n-   [IAM & Security](references/iam-security.md): Roles, service identities,\n    and ingress/egress controls.\n\n-   [Networking Best Practices & Cost Optimization](references/networking.md): Cost\n    optimization strategies, Direct VPC egress, IP address and port exhaustion\n    strategies, performance throughput tuning, and MTU settings.\n\n*If you need product information not found in these references, use the\n    Developer Knowledge MCP server `search_documents` tool.*\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("cloud-run-basics-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+---
+name: gke-golden-path
+display_name: gke-golden-path
+platform: OpenCode
+category: General and specialized workflows
+---
+
+# gke-golden-path - OpenCode Skill Package
+
+## What This Is
+
+This is a friend-safe Markdown copy of `gke-golden-path` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.
+
+## When To Use This Skill
+
+Use this skill when your task matches this description:
+
+Provides GKE golden path configuration defaults, production readiness checklists, and cluster default patterns. Use when designing GKE clusters, verifying GKE production readiness, or checking configurations against GKE
+
+## How To Use It In OpenCode
+
+In OpenCode, open the project and type: Use the gke-golden-path skill to...
+
+## Skill Metadata
+
+| Field | Value |
+| --- | --- |
+| Display name | `gke-golden-path` |
+| Canonical name | `gke-golden-path` |
+| Platform | `OpenCode` |
+| Category | General and specialized workflows |
+
+## Description
+
+Provides GKE golden path configuration defaults, production readiness checklists, and cluster default patterns. Use when designing GKE clusters, verifying GKE production readiness, or checking configurations against GKE
+
+## Upstream provenance
+
+This adapted package derives from [Google Agent Skills](https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39) at commit `092e210b243601797a0fb939040be2b1288e6d39`, licensed under `Apache-2.0`.
+
+
+## Original SKILL.md
+
+---
+name: gke-golden-path
+description: "Provides GKE golden path configuration defaults, production readiness checklists, and cluster default patterns. Use when designing GKE clusters, verifying GKE production readiness, or checking configurations against GKE defaults. Don't use for setting up workload autoscaling specifically (use gke-workload-scaling instead)."
+license: Apache-2.0
+---
+
+## Universal runtime boundary
+
+- Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.
+- Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.
+- Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.
+- Read `references/upstream.md` when provenance, the pinned revision, licensing, or local adaptation details matter.
+
+# GKE Golden Path Configuration
+
+The golden path is the recommended Autopilot configuration for production
+clusters. It defines sensible defaults — when the user requests different
+settings, apply them and note relevant trade-offs.
+
+> **MCP Tools:** `get_cluster`, `create_cluster`, `update_cluster`
+
+## Rules
+
+1.  **Default to the golden path.** Use golden path values unless the user
+    requests otherwise. When deviating, note trade-offs but respect the user's
+    choice.
+2.  **Day-0 vs Day-1.** Flag Day-0 decisions (networking, private nodes,
+    subnets, IP allocation) prominently — they are hard/impossible to change
+    after creation.
+3.  **Tool preference: MCP > gcloud > kubectl.** MCP is preferred as it directly
+    interfaces with GKE APIs with structured data, reducing shell syntax errors
+    and parsing ambiguities. See the `gke-basics` skill's CLI reference for full
+    coverage matrix and override options. If the user
+    says "use gcloud" or "use kubectl", respect that for the session.
+4.  **Document decisions and rationale**, especially for Day-0 choices and
+    golden path deviations.
+
+## Required Inputs
+
+If the user is unsure, use golden path defaults.
+
+-   **Project ID** (required)
+-   **Region** (required, e.g., `us-central1`)
+-   **Cluster name** (required)
+-   **Environment type**: dev/test or production (defaults to production)
+-   **Networking**: bring-your-own VPC/subnet or auto-create (default:
+    auto-create)
+-   **Scale expectations**: expected node/pod count, workload types
+-   **Cost constraints**: Spot VM tolerance, budget considerations
+
+## Always-Apply Defaults
+
+Recommended best practices applied by default. If the user requests a different
+setting, apply it and briefly note the security or operational trade-off.
+
+Setting                                                            | Golden Path Value
+------------------------------------------------------------------ | -----------------
+`autopilot.enabled`                                                | `true`
+`privateClusterConfig.enablePrivateNodes`                          | `true`
+`masterAuthorizedNetworksConfig.privateEndpointEnforcementEnabled` | `true`
+`secretManagerConfig.enabled` + `rotationInterval: 120s`           | `true`
+`rbacBindingConfig.enableInsecureBinding*`                         | `false` (both)
+`workloadIdentityConfig.workloadPool`                              | enabled
+`networkConfig.datapathProvider`                                   | `ADVANCED_DATAPATH`
+`networkConfig.dnsConfig.clusterDns`                               | `CLOUD_DNS`
+`autoscaling.autoscalingProfile`                                   | `OPTIMIZE_UTILIZATION`
+`verticalPodAutoscaling.enabled`                                   | `true`
+`monitoringConfig` components                                      | SYSTEM_COMPONENTS, STORAGE, POD, DEPLOYMENT, STATEFULSET, DAEMONSET, HPA, JOBSET, CADVISOR, KUBELET, DCGM, APISERVER, SCHEDULER, CONTROLLER_MANAGER
+`loggingConfig` components                                         | SYSTEM_COMPONENTS, WORKLOADS (enabled by default)
+`advancedDatapathObservabilityConfig.enableMetrics`                | `true`
+`nodeConfig.shieldedInstanceConfig.enableSecureBoot`               | `true`
+`nodeConfig.workloadMetadataConfig.mode`                           | `GKE_METADATA`
+`nodeConfig.gcfsConfig.enabled` / `gvnic.enabled`                  | `true` / `true`
+`addonsConfig.statefulHaConfig.enabled`                            | `true`
+Storage CSI drivers (Filestore, GCS FUSE, Parallelstore)           | enabled
+Pod Security Standards                                             | `restricted` on production namespaces
+
+## Customer-Configurable Settings
+
+These have golden path defaults but customers may deviate with valid
+justification. **Ask before changing.**
+
+Setting                                  | Default                             | Why Deviate
+---------------------------------------- | ----------------------------------- | -----------
+`dnsEndpointConfig.allowExternalTraffic` | `true`                              | Restrict if cluster only accessed from within VPC
+`autoIpamConfig` / `createSubnetwork`    | `true` / `true`                     | Customer has pre-existing VPC/subnets
+`maxPodsPerNode`                         | `48`                                | `110` for high pod-density (costs more CIDR space)
+`subnetwork`                             | auto-created                        | Customer brings existing subnets
+Maintenance exclusion windows            | configured (NO_MINOR_UPGRADES, 1yr) | Customer-specific scheduling
+`nodeConfig.bootDisk.diskType`           | `pd-balanced`                       | `pd-ssd` for I/O-intensive, `pd-standard` for cost
+`nodeConfig.machineType`                 | `ek-standard-8` (Autopilot)         | Varies by workload; use ComputeClasses
+
+## Guardrails
+
+-   Do not request or output secrets (tokens, keys, service account JSON).
+-   Discover project/cluster context via MCP tools or `gcloud config get-value
+    project` — don't ask users to paste project IDs.
+-   For Day-0 decisions, always ask clarifying questions before proceeding.
+-   For Day-1 features, propose golden path defaults with trade-offs and let the
+    customer confirm.
+-   Do not promise zero downtime; advise PDBs, health probes, replicas, and
+    staged upgrades.
+-   When auditing existing clusters, compare against golden path and report
+    deviations with severity and remediation.
+
+## Golden Path Config
+
+See [golden-path-autopilot.yaml](./assets/golden-path-autopilot.yaml) for the
+full cluster-level policy settings.

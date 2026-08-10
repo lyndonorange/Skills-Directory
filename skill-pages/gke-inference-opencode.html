@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>gke-inference - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/gke-inference-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>gke-inference</h1>
+      <p class="description">Deploys and optimizes AI/ML inference workloads on GKE, using GPUs, TPUs, and model servers. Use when deploying GKE inference servers, configuring GKE GPU resources for inference, or deploying LLMs on GKE. Don't use for generic batch jobs or HPC task queues (use gke-batch-hpc instead).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>gke-inference</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>gke-inference</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Deploys and optimizes AI/ML inference workloads on GKE, using GPUs, TPUs, and model servers. Use when deploying GKE inference servers, configuring GKE GPU resources for inference, or deploying LLMs on GKE. Don't use for generic batch jobs or HPC task queues (use gke-batch-hpc instead).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the gke-inference skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+        <div class="usage-card"><strong>Upstream provenance</strong><p><a href="https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39">Google Agent Skills</a> at 092e210b243601797a0fb939040be2b1288e6d39 (Apache-2.0).</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Universal runtime boundary</h3>
+<ul>
+<li>Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.</li>
+<li>Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.</li>
+<li>Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.</li>
+<li>Read <code>references/upstream.md</code> when provenance, the pinned revision, licensing, or local adaptation details matter.</li>
+</ul>
+<h2>GKE AI/ML Inference</h2>
+<p>This reference covers deploying AI/ML inference workloads on GKE using Google's Inference Quickstart (GIQ) and best practices for LLM serving.</p>
+<blockquote><strong>MCP Tools:</strong> <code>apply_k8s_manifest</code>, <code>get_k8s_resource</code>, <code>get_k8s_logs</code>,</blockquote>
+<blockquote><code>get_k8s_rollout_status</code>, <code>describe_k8s_resource</code>, <code>list_k8s_events</code>.</blockquote>
+<blockquote><strong>CLI-only:</strong> <code>gcloud container ai profiles *</code></blockquote>
+<h3>When to Use</h3>
+<ul>
+<li>Deploy an AI model (Llama, Gemma, Mistral, etc.) to GKE</li>
+<li>Generate optimized Kubernetes manifests for inference</li>
+<li>Select GPU/TPU accelerators for model serving</li>
+<li>Configure autoscaling for LLM inference</li>
+</ul>
+<h3>Prerequisites</h3>
+<ul>
+<li>A golden path GKE Autopilot cluster (GPU workloads are supported via</li>
+</ul>
+<p>ComputeClasses and NAP)</p>
+<ul>
+<li><code>gcloud</code> CLI authenticated</li>
+<li>Sufficient GPU/TPU quota in the target region</li>
+</ul>
+<h3>Workflow</h3>
+<h4>1. Discovery: Find Models and Hardware</h4>
+<pre><code># List all supported models
+gcloud container ai profiles models list --quiet
+
+# Find valid accelerator/server combinations for a model
+gcloud container ai profiles list --model=&lt;MODEL_NAME&gt; --quiet
+
+# Example: what can run Gemma 2 9B?
+gcloud container ai profiles list --model=gemma-2-9b-it --quiet</code></pre>
+<h4>2. Generate Manifest</h4>
+<pre><code>gcloud container ai profiles manifests create \
+  --model=&lt;MODEL_NAME&gt; \
+  --model-server=&lt;SERVER&gt; \
+  --accelerator-type=&lt;ACCELERATOR&gt; \
+  --target-ntpot-milliseconds=&lt;NTPOT&gt; --quiet &gt; inference.yaml</code></pre>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>--model</code>: Model ID (e.g., <code>gemma-2-9b-it</code>, <code>llama-3-8b</code>)</li>
+<li><code>--model-server</code>: Inference server (<code>vllm</code>, <code>tgi</code>, <code>triton</code>, <code>tensorrt-llm</code>)</li>
+<li><code>--accelerator-type</code>: GPU/TPU type (<code>nvidia-l4</code>, <code>nvidia-tesla-a100</code>,</li>
+</ul>
+<p><code>nvidia-h100-80gb</code>)</p>
+<ul>
+<li><code>--target-ntpot-milliseconds</code>: Target Normalized Time Per Output Token</li>
+</ul>
+<p>(optional, for latency optimization)</p>
+<p><strong>Example:</strong></p>
+<pre><code>gcloud container ai profiles manifests create \
+  --model=gemma-2-9b-it \
+  --model-server=vllm \
+  --accelerator-type=nvidia-l4 \
+  --target-ntpot-milliseconds=50 --quiet &gt; inference.yaml</code></pre>
+<h4>3. Review and Deploy</h4>
+<pre><code># Review for placeholders (HF tokens, PVCs)
+cat inference.yaml
+
+# Deploy
+kubectl apply -f inference.yaml
+
+# Monitor
+kubectl get pods -w
+kubectl logs -f &lt;POD_NAME&gt;</code></pre>
+<blockquote>Some models require Hugging Face tokens. Create a Kubernetes Secret and</blockquote>
+<blockquote>reference it in the manifest.</blockquote>
+<h3>GPU ComputeClass for Inference</h3>
+<p>For Autopilot clusters, create a ComputeClass to target GPU nodes:</p>
+<pre><code>apiVersion: cloud.google.com/v1
+kind: ComputeClass
+metadata:
+  name: l4-inference
+spec:
+  priorities:
+  - machineFamily: g2
+    gpu:
+      type: nvidia-l4
+      count: 1
+    minCores: 4
+    minMemoryGb: 16</code></pre>
+<h3>Accelerator Selection Guide</h3>
+<p>| Accelerator         | Best For                 | Memory      | Relative Cost | | ------------------- | ------------------------ | ----------- | ------------- | | NVIDIA T4           | Budget inference,        | 16 GB       | Lowest        | :                     : lightweight legacy       :             :               : :                     : models                   :             :               : | NVIDIA L4 (G2)      | Small-medium model       | 24 GB       | Low           | :                     : inference, video,        :             :               : :                     : graphics                 :             :               : | NVIDIA RTX PRO 6000 | Multimodal AI,           | 96 GB       | Medium        | : (G4)                : high-fidelity 3D,        :             :               : :                     : fine-tuning              :             :               : | Cloud TPU v5e       | Cost-effective           | Varies      | Medium        | :                     : transformer inference    :             :               : | Cloud TPU v5p       | High-performance         | Varies      | High          | :                     : training                 :             :               : | Cloud TPU v6e       | High-efficiency next-gen | 32 GB/chip  | Medium-High   | : (Trillium)          : training &amp; serving       :             :               : | Cloud TPU v7x       | Ultra-scale inference &amp;  | 192 GB/chip | High          | : (Ironwood)          : agentic workflows        :             :               : | NVIDIA A100         | Large model inference,   | 40/80 GB    | High          | :                     : enterprise ML            :             :               : | NVIDIA H100 / H200  | Frontier model training, | 80/141 GB   | Highest       | :                     : high throughput          :             :               : | NVIDIA B200 (A4)    | Blackwell-scale          | 192 GB      | Highest       | :                     : training, FP4 precision  :             :               : | NVIDIA GB200 (A4X)  | Rack-scale AI (Grace     | Massive     | Highest       | :                     : Blackwell Superchip)     :             :               :</p>
+<h3>Autoscaling LLM Inference</h3>
+<h4>GPU-based autoscaling</h4>
+<p>Use custom metrics for GPU utilization:</p>
+<pre><code>apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: llm-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: llm-server
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Pods
+    pods:
+      metric:
+        name: gpu_duty_cycle
+      target:
+        type: AverageValue
+        averageValue: &quot;80&quot;</code></pre>
+<h4>Best practices for inference autoscaling</h4>
+<ol>
+<li><strong>Use DCGM metrics</strong>: Golden path enables DCGM monitoring for GPU</li>
+</ol>
+<p>utilization metrics</p>
+<ol>
+<li><strong>Set appropriate minReplicas</strong>: At least 1 for always-on serving; 0 for</li>
+</ol>
+<p>batch/on-demand</p>
+<ol>
+<li><strong>Tune scale-down delay</strong>: LLM model loading is slow; use longer</li>
+</ol>
+<p>stabilization windows</p>
+<ol>
+<li><strong>Consider queue depth</strong>: Scale on pending requests rather than pure GPU</li>
+</ol>
+<p>utilization for latency-sensitive workloads</p>
+<h3>Optimization Tips</h3>
+<ul>
+<li><strong>Quantization</strong>: Use quantized models (GPTQ, AWQ) to reduce GPU memory and</li>
+</ul>
+<p>increase throughput</p>
+<ul>
+<li><strong>Batching</strong>: Configure model server batch size for throughput vs latency</li>
+</ul>
+<p>trade-off</p>
+<ul>
+<li><strong>Tensor parallelism</strong>: Split large models across multiple GPUs within a</li>
+</ul>
+<p>node</p>
+<ul>
+<li><strong>KV cache optimization</strong>: Tune <code>--gpu-memory-utilization</code> in vLLM for KV</li>
+</ul>
+<p>cache allocation</p>
+<h3>Troubleshooting</h3>
+<p>| Issue              | Cause                    | Fix                         | | ------------------ | ------------------------ | --------------------------- | | Invalid            | Unsupported tuple        | Re-run <code>gcloud container ai | : model/accelerator  :                          : profiles list               : : combination        :                          : --model=&lt;MODEL&gt;</code>            : | GPU quota exceeded | Regional quota limit     | Request quota increase or   | :                    :                          : try a different region      : | OOM on GPU         | Model too large for      | Use larger GPU, enable      | :                    : accelerator              : quantization, or use tensor : :                    :                          : parallelism                 : | Slow cold start    | Large model loading from | Use local SSD for model     | :                    : registry                 : caching; pre-pull images    :</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: gke-inference\ndisplay_name: gke-inference\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# gke-inference - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `gke-inference` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nDeploys and optimizes AI/ML inference workloads on GKE, using GPUs, TPUs, and model servers. Use when deploying GKE inference servers, configuring GKE GPU resources for inference, or deploying LLMs on GKE. Don't use for\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the gke-inference skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `gke-inference` |\n| Canonical name | `gke-inference` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\nDeploys and optimizes AI/ML inference workloads on GKE, using GPUs, TPUs, and model servers. Use when deploying GKE inference servers, configuring GKE GPU resources for inference, or deploying LLMs on GKE. Don't use for\n\n## Upstream provenance\n\nThis adapted package derives from [Google Agent Skills](https://github.com/google/skills/tree/092e210b243601797a0fb939040be2b1288e6d39) at commit `092e210b243601797a0fb939040be2b1288e6d39`, licensed under `Apache-2.0`.\n\n\n## Original SKILL.md\n\n---\nname: gke-inference\ndescription: \"Deploys and optimizes AI/ML inference workloads on GKE, using GPUs, TPUs, and model servers. Use when deploying GKE inference servers, configuring GKE GPU resources for inference, or deploying LLMs on GKE. Don't use for generic batch jobs or HPC task queues (use gke-batch-hpc instead).\"\nlicense: Apache-2.0\n---\n\n## Universal runtime boundary\n\n- Treat this package as specialist guidance subordinate to active system, developer, user, repository, permission, privacy, security, accessibility, and verification rules.\n- Do not install or configure operational CLIs, hooks, services, credentials, browser runtimes, or background processes merely because this skill mentions them. Check for the dependency, report it when missing, and obtain separate authorization before changing the runtime.\n- Adapt host-specific command names to capabilities actually available in the current runtime. Report unsupported integrations instead of claiming they ran.\n- Read `references/upstream.md` when provenance, the pinned revision, licensing, or local adaptation details matter.\n\n# GKE AI/ML Inference\n\nThis reference covers deploying AI/ML inference workloads on GKE using Google's\nInference Quickstart (GIQ) and best practices for LLM serving.\n\n> **MCP Tools:** `apply_k8s_manifest`, `get_k8s_resource`, `get_k8s_logs`,\n> `get_k8s_rollout_status`, `describe_k8s_resource`, `list_k8s_events`.\n> **CLI-only:** `gcloud container ai profiles *`\n\n## When to Use\n\n-   Deploy an AI model (Llama, Gemma, Mistral, etc.) to GKE\n-   Generate optimized Kubernetes manifests for inference\n-   Select GPU/TPU accelerators for model serving\n-   Configure autoscaling for LLM inference\n\n## Prerequisites\n\n-   A golden path GKE Autopilot cluster (GPU workloads are supported via\n    ComputeClasses and NAP)\n-   `gcloud` CLI authenticated\n-   Sufficient GPU/TPU quota in the target region\n\n## Workflow\n\n### 1. Discovery: Find Models and Hardware\n\n```bash\n# List all supported models\ngcloud container ai profiles models list --quiet\n\n# Find valid accelerator/server combinations for a model\ngcloud container ai profiles list --model=\u003cMODEL_NAME> --quiet\n\n# Example: what can run Gemma 2 9B?\ngcloud container ai profiles list --model=gemma-2-9b-it --quiet\n```\n\n### 2. Generate Manifest\n\n```bash\ngcloud container ai profiles manifests create \\\n  --model=\u003cMODEL_NAME> \\\n  --model-server=\u003cSERVER> \\\n  --accelerator-type=\u003cACCELERATOR> \\\n  --target-ntpot-milliseconds=\u003cNTPOT> --quiet > inference.yaml\n```\n\n**Parameters:**\n\n-   `--model`: Model ID (e.g., `gemma-2-9b-it`, `llama-3-8b`)\n-   `--model-server`: Inference server (`vllm`, `tgi`, `triton`, `tensorrt-llm`)\n-   `--accelerator-type`: GPU/TPU type (`nvidia-l4`, `nvidia-tesla-a100`,\n    `nvidia-h100-80gb`)\n-   `--target-ntpot-milliseconds`: Target Normalized Time Per Output Token\n    (optional, for latency optimization)\n\n**Example:**\n\n```bash\ngcloud container ai profiles manifests create \\\n  --model=gemma-2-9b-it \\\n  --model-server=vllm \\\n  --accelerator-type=nvidia-l4 \\\n  --target-ntpot-milliseconds=50 --quiet > inference.yaml\n```\n\n### 3. Review and Deploy\n\n```bash\n# Review for placeholders (HF tokens, PVCs)\ncat inference.yaml\n\n# Deploy\nkubectl apply -f inference.yaml\n\n# Monitor\nkubectl get pods -w\nkubectl logs -f \u003cPOD_NAME>\n```\n\n> Some models require Hugging Face tokens. Create a Kubernetes Secret and\n> reference it in the manifest.\n\n## GPU ComputeClass for Inference\n\nFor Autopilot clusters, create a ComputeClass to target GPU nodes:\n\n```yaml\napiVersion: cloud.google.com/v1\nkind: ComputeClass\nmetadata:\n  name: l4-inference\nspec:\n  priorities:\n  - machineFamily: g2\n    gpu:\n      type: nvidia-l4\n      count: 1\n    minCores: 4\n    minMemoryGb: 16\n```\n\n## Accelerator Selection Guide\n\n| Accelerator         | Best For                 | Memory      | Relative Cost |\n| ------------------- | ------------------------ | ----------- | ------------- |\n| NVIDIA T4           | Budget inference,        | 16 GB       | Lowest        |\n:                     : lightweight legacy       :             :               :\n:                     : models                   :             :               :\n| NVIDIA L4 (G2)      | Small-medium model       | 24 GB       | Low           |\n:                     : inference, video,        :             :               :\n:                     : graphics                 :             :               :\n| NVIDIA RTX PRO 6000 | Multimodal AI,           | 96 GB       | Medium        |\n: (G4)                : high-fidelity 3D,        :             :               :\n:                     : fine-tuning              :             :               :\n| Cloud TPU v5e       | Cost-effective           | Varies      | Medium        |\n:                     : transformer inference    :             :               :\n| Cloud TPU v5p       | High-performance         | Varies      | High          |\n:                     : training                 :             :               :\n| Cloud TPU v6e       | High-efficiency next-gen | 32 GB/chip  | Medium-High   |\n: (Trillium)          : training & serving       :             :               :\n| Cloud TPU v7x       | Ultra-scale inference &  | 192 GB/chip | High          |\n: (Ironwood)          : agentic workflows        :             :               :\n| NVIDIA A100         | Large model inference,   | 40/80 GB    | High          |\n:                     : enterprise ML            :             :               :\n| NVIDIA H100 / H200  | Frontier model training, | 80/141 GB   | Highest       |\n:                     : high throughput          :             :               :\n| NVIDIA B200 (A4)    | Blackwell-scale          | 192 GB      | Highest       |\n:                     : training, FP4 precision  :             :               :\n| NVIDIA GB200 (A4X)  | Rack-scale AI (Grace     | Massive     | Highest       |\n:                     : Blackwell Superchip)     :             :               :\n\n## Autoscaling LLM Inference\n\n### GPU-based autoscaling\n\nUse custom metrics for GPU utilization:\n\n```yaml\napiVersion: autoscaling/v2\nkind: HorizontalPodAutoscaler\nmetadata:\n  name: llm-hpa\nspec:\n  scaleTargetRef:\n    apiVersion: apps/v1\n    kind: Deployment\n    name: llm-server\n  minReplicas: 1\n  maxReplicas: 10\n  metrics:\n  - type: Pods\n    pods:\n      metric:\n        name: gpu_duty_cycle\n      target:\n        type: AverageValue\n        averageValue: \"80\"\n```\n\n### Best practices for inference autoscaling\n\n1.  **Use DCGM metrics**: Golden path enables DCGM monitoring for GPU\n    utilization metrics\n2.  **Set appropriate minReplicas**: At least 1 for always-on serving; 0 for\n    batch/on-demand\n3.  **Tune scale-down delay**: LLM model loading is slow; use longer\n    stabilization windows\n4.  **Consider queue depth**: Scale on pending requests rather than pure GPU\n    utilization for latency-sensitive workloads\n\n## Optimization Tips\n\n-   **Quantization**: Use quantized models (GPTQ, AWQ) to reduce GPU memory and\n    increase throughput\n-   **Batching**: Configure model server batch size for throughput vs latency\n    trade-off\n-   **Tensor parallelism**: Split large models across multiple GPUs within a\n    node\n-   **KV cache optimization**: Tune `--gpu-memory-utilization` in vLLM for KV\n    cache allocation\n\n## Troubleshooting\n\n| Issue              | Cause                    | Fix                         |\n| ------------------ | ------------------------ | --------------------------- |\n| Invalid            | Unsupported tuple        | Re-run `gcloud container ai |\n: model/accelerator  :                          : profiles list               :\n: combination        :                          : --model=\u003cMODEL>`            :\n| GPU quota exceeded | Regional quota limit     | Request quota increase or   |\n:                    :                          : try a different region      :\n| OOM on GPU         | Model too large for      | Use larger GPU, enable      |\n:                    : accelerator              : quantization, or use tensor :\n:                    :                          : parallelism                 :\n| Slow cold start    | Large model loading from | Use local SSD for model     |\n:                    : registry                 : caching; pre-pull images    :\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("gke-inference-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

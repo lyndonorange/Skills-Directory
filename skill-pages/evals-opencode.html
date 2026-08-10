@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Evals - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">OpenCode</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/evals-opencode.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">OpenCode / General and specialized workflows</div>
+      <h1>Evals</h1>
+      <p class="description">Comprehensive AI agent evaluation framework with three grader types (code-based: deterministic; model-based: LLM rubric; human: gold standard) and pass@k / pass^k scoring. Evaluates agent transcripts, tool-call sequences, and multi-turn conversations — not just single outputs. Capability evals (~70% target) and regression evals (~99% target). Workflows: RunEval, CompareModels, ComparePrompts, CreateJudge, CreateUseCase, RunScenario, CreateScenario, ViewResults. Integrates with ALGORITHM ISC rows for automated verification. Domain patterns pre-configured for coding, conversational, research, computer-use agents. USE WHEN eval, evaluate, benchmark, regression test, compare models, create judge, test agent, pass@k, scenario simulation. NOT FOR scientific method framing (use Science).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>OpenCode</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>Evals</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>Evals</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Comprehensive AI agent evaluation framework with three grader types (code-based: deterministic; model-based: LLM rubric; human: gold standard) and pass@k / pass^k scoring. Evaluates agent transcripts, tool-call sequences, and multi-turn conversations — not just single outputs. Capability evals (~70% target) and regression evals (~99% target). Workflows: RunEval, CompareModels, ComparePrompts, CreateJudge, CreateUseCase, RunScenario, CreateScenario, ViewResults. Integrates with ALGORITHM ISC rows for automated verification. Domain patterns pre-configured for coding, conversational, research, computer-use agents. USE WHEN eval, evaluate, benchmark, regression test, compare models, create judge, test agent, pass@k, scenario simulation. NOT FOR scientific method framing (use Science).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in OpenCode</strong><p>In OpenCode, open the project and type: Use the Evals skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>Customization</h3>
+<p><strong>Before executing, check for user customizations at:</strong> <code>~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/Evals/</code></p>
+<p>If this directory exists, load and apply any PREFERENCES.md, configurations, or resources found there. These override default behavior. If the directory does not exist, proceed with skill defaults.</p>
+<h3>🚨 MANDATORY: Voice Notification (REQUIRED BEFORE ANY ACTION)</h3>
+<p><strong>You MUST send this notification BEFORE doing anything else when this skill is invoked.</strong></p>
+<ol>
+<li><strong>Send voice notification</strong>:</li>
+</ol>
+<pre><code>   curl -s -X POST http://localhost:31337/notify \
+     -H &quot;Content-Type: application/json&quot; \
+     -d '{&quot;message&quot;: &quot;Running the WORKFLOWNAME workflow in the Evals skill to ACTION&quot;}' \
+     &gt; /dev/null 2&gt;&amp;1 &amp;</code></pre>
+<ol>
+<li><strong>Output text notification</strong>:</li>
+</ol>
+<pre><code>   Running the **WorkflowName** workflow in the **Evals** skill to ACTION...</code></pre>
+<p><strong>This is not optional. Execute this curl command immediately upon skill invocation.</strong></p>
+<h2>Evals - AI Agent Evaluation Framework</h2>
+<h3>What It Does</h3>
+<p>Evaluates AI agents — their transcripts, tool-call sequences, and multi-turn conversations, not just single outputs. Three grader types cover it: code-based for deterministic checks, model-based for nuanced quality rubrics, and human for the gold standard. Scores with pass@k (capability) and pass^k (consistency). Splits evals into capability suites (~70% target) and regression suites (~99% target), and plugs into Algorithm ISC rows as a verification method.</p>
+<h3>The Problem</h3>
+<p>You can't tell if an agent got better or worse by eyeballing a few runs. A change that looks fine in one transcript may quietly regress on the next prompt, and a single run gives no statistical signal. Judging only the final output also misses how the agent got there — wrong tools, wrong order, lucky guess. This skill measures the whole workflow across repeated trials, so improvements and backsliding both show up as numbers you can gate on.</p>
+<h3>How It Works</h3>
+<p>Agent evaluation system based on Anthropic's &quot;Demystifying Evals for AI Agents&quot; (Jan 2026). It evaluates agent <em>workflows</em> (transcripts, tool calls, multi-turn conversations), not just single outputs.</p>
+<h3>When to Activate</h3>
+<ul>
+<li>&quot;run evals&quot;, &quot;test this agent&quot;, &quot;evaluate&quot;, &quot;check quality&quot;, &quot;benchmark&quot;</li>
+<li>&quot;regression test&quot;, &quot;capability test&quot;</li>
+<li>&quot;run scenario&quot;, &quot;multi-turn eval&quot;, &quot;simulated user test&quot;</li>
+<li>&quot;create scenario&quot;, &quot;simulate conversation&quot;</li>
+<li>Compare agent behaviors across changes</li>
+<li>Validate agent workflows before deployment</li>
+<li>Verify ALGORITHM ISC rows</li>
+<li>Create new evaluation tasks from failures</li>
+</ul>
+<hr>
+<h3>Core Concepts</h3>
+<h4>Three Grader Types</h4>
+<p>| Type | Strengths | Weaknesses | Use For | |------|-----------|------------|---------| | <strong>Code-based</strong> | Fast, cheap, deterministic, reproducible | Brittle, lacks nuance | Tests, state checks, tool verification | | <strong>Model-based</strong> | Flexible, captures nuance, scalable | Non-deterministic, expensive | Quality rubrics, assertions, comparisons | | <strong>Human</strong> | Gold standard, handles subjectivity | Expensive, slow | Calibration, spot checks, A/B testing |</p>
+<h4>Evaluation Types</h4>
+<p>| Type | Pass Target | Purpose | |------|-------------|---------| | <strong>Capability</strong> | ~70% | Stretch goals, measuring improvement potential | | <strong>Regression</strong> | ~99% | Quality gates, detecting backsliding |</p>
+<h4>Key Metrics</h4>
+<ul>
+<li><strong>pass@k</strong>: Probability of at least 1 success in k trials (measures capability)</li>
+<li><strong>pass^k</strong>: Probability all k trials succeed (measures consistency/reliability)</li>
+</ul>
+<hr>
+<h3>Workflow Routing</h3>
+<p>| Workflow | Trigger | File | |----------|---------|------| | RunEval | Run eval, evaluate suite, run tests, benchmark | <code>Workflows/RunEval.md</code> | | CompareModels | Compare models, model comparison, A/B test models | <code>Workflows/CompareModels.md</code> | | ComparePrompts | Compare prompts, prompt comparison, test prompts | <code>Workflows/ComparePrompts.md</code> | | CreateJudge | Create judge, model grader, evaluation judge | <code>Workflows/CreateJudge.md</code> | | CreateUseCase | Create use case, new eval, test case, create suite | <code>Workflows/CreateUseCase.md</code> | | RunScenario | Run scenario, multi-turn eval, simulated user test | <code>Workflows/RunScenario.md</code> | | CreateScenario | Create scenario, new multi-turn eval, simulate conversation | <code>Workflows/CreateScenario.md</code> | | ViewResults | View results, eval results, scores, pass rate | <code>Workflows/ViewResults.md</code> |</p>
+<h4>CLI Quick Reference</h4>
+<p>| Trigger | Tool | |---------|------| | Run suite | <code>Tools/AlgorithmBridge.ts</code> | | Log failure | <code>Tools/FailureToTask.ts log</code> | | Convert failures | <code>Tools/FailureToTask.ts convert-all</code> | | Create suite | <code>Tools/SuiteManager.ts create</code> | | Check saturation | <code>Tools/SuiteManager.ts check-saturation</code> | | Run scenario | <code>Tools/ScenarioRunner.ts --scenario &lt;path&gt;</code> |</p>
+<hr>
+<h3>Quick Reference</h3>
+<h4>CLI Commands</h4>
+<pre><code># Run an eval suite
+bun run ${LIFEOS_SKILL_DIR}/Tools/AlgorithmBridge.ts -s &lt;suite&gt;
+
+# Log a failure for later conversion
+bun run ${LIFEOS_SKILL_DIR}/Tools/FailureToTask.ts log &quot;description&quot; -c category -s severity
+
+# Convert failures to test tasks
+bun run ${LIFEOS_SKILL_DIR}/Tools/FailureToTask.ts convert-all
+
+# Manage suites
+bun run ${LIFEOS_SKILL_DIR}/Tools/SuiteManager.ts create &lt;name&gt; -t capability -d &quot;description&quot;
+bun run ${LIFEOS_SKILL_DIR}/Tools/SuiteManager.ts list
+bun run ${LIFEOS_SKILL_DIR}/Tools/SuiteManager.ts check-saturation &lt;name&gt;
+bun run ${LIFEOS_SKILL_DIR}/Tools/SuiteManager.ts graduate &lt;name&gt;</code></pre>
+<h4>ALGORITHM Integration</h4>
+<p>Evals is a verification method for THE ALGORITHM ISC rows:</p>
+<pre><code># Run eval and update ISC row
+bun run ${LIFEOS_SKILL_DIR}/Tools/AlgorithmBridge.ts -s regression-core -r 3 -u</code></pre>
+<p>ISC rows can specify eval verification:</p>
+<pre><code>| # | What Ideal Looks Like | Verify |
+|---|----------------------|--------|
+| 1 | Auth bypass fixed | eval:auth-security |
+| 2 | Tests all pass | eval:regression |</code></pre>
+<hr>
+<h3>Available Graders</h3>
+<h4>Code-Based (Fast, Deterministic)</h4>
+<p>| Grader | Use Case | |--------|----------| | <code>string_match</code> | Exact substring matching | | <code>regex_match</code> | Pattern matching | | <code>binary_tests</code> | Run test files | | <code>static_analysis</code> | Lint, type-check, security scan | | <code>state_check</code> | Verify system state after execution | | <code>tool_calls</code> | Verify specific tools were called |</p>
+<h4>Model-Based (Nuanced)</h4>
+<p>| Grader | Use Case | |--------|----------| | <code>llm_rubric</code> | Score against detailed rubric | | <code>natural_language_assert</code> | Check assertions are true | | <code>pairwise_comparison</code> | Compare to reference with position swap |</p>
+<hr>
+<h3>Domain Patterns</h3>
+<p>Pre-configured grader stacks for common agent types:</p>
+<p>| Domain | Primary Graders | |--------|-----------------| | <code>coding</code> | binary_tests + static_analysis + tool_calls + llm_rubric | | <code>conversational</code> | llm_rubric + natural_language_assert + state_check | | <code>research</code> | llm_rubric + natural_language_assert + tool_calls | | <code>computer_use</code> | state_check + tool_calls + llm_rubric |</p>
+<p>See <code>Data/DomainPatterns.yaml</code> for full configurations.</p>
+<hr>
+<h3>Task Schema (YAML)</h3>
+<pre><code>task:
+  id: &quot;fix-auth-bypass_1&quot;
+  description: &quot;Fix authentication bypass when password is empty&quot;
+  type: regression  # or capability
+  domain: coding
+
+  graders:
+    - type: binary_tests
+      required: [test_empty_pw.py]
+      weight: 0.30
+
+    - type: tool_calls
+      weight: 0.20
+      params:
+        sequence: [read_file, edit_file, run_tests]
+
+    - type: llm_rubric
+      weight: 0.50
+      params:
+        rubric: prompts/security_review.md
+
+  trials: 3
+  pass_threshold: 0.75</code></pre>
+<hr>
+<h3>Resource Index</h3>
+<p>| Resource | Purpose | |----------|---------| | <code>Types/index.ts</code> | Core type definitions | | <code>Graders/CodeBased/</code> | Deterministic graders | | <code>Graders/ModelBased/</code> | LLM-powered graders | | <code>Tools/TranscriptCapture.ts</code> | Capture agent trajectories | | <code>Tools/TrialRunner.ts</code> | Multi-trial execution with pass@k | | <code>Tools/SuiteManager.ts</code> | Suite management and saturation | | <code>Tools/FailureToTask.ts</code> | Convert failures to test tasks | | <code>Tools/AlgorithmBridge.ts</code> | ALGORITHM integration | | <code>Tools/ScenarioRunner.ts</code> | Multi-turn scenario runner (langwatch/scenario) | | <code>Tools/LifeosAgentAdapter.ts</code> | Wraps LifeOS Inference.ts as scenario AgentAdapter | | <code>Tools/ScenarioToTranscript.ts</code> | Scenario result → Evals Transcript/Trial/GraderResult | | <code>Scenarios/</code> | Authored multi-turn scenarios (<code>.scenario.ts</code>) | | <code>Data/DomainPatterns.yaml</code> | Domain-specific grader configs |</p>
+<hr>
+<h3>Key Principles (from Anthropic)</h3>
+<ol>
+<li><strong>Start with 20-50 real failures</strong> - Don't overthink, capture what actually broke</li>
+<li><strong>Unambiguous tasks</strong> - Two experts should reach identical verdicts</li>
+<li><strong>Balanced problem sets</strong> - Test both &quot;should do&quot; AND &quot;should NOT do&quot;</li>
+<li><strong>Grade outputs, not paths</strong> - Don't penalize valid creative solutions</li>
+<li><strong>Calibrate LLM judges</strong> - Against human expert judgment</li>
+<li><strong>Check transcripts regularly</strong> - Verify graders work correctly</li>
+<li><strong>Monitor saturation</strong> - Graduate to regression when hitting 95%+</li>
+<li><strong>Build infrastructure early</strong> - Evals shape how quickly you can adopt new models</li>
+</ol>
+<hr>
+<h3>Related</h3>
+<ul>
+<li><strong>ALGORITHM</strong>: Evals is a verification method</li>
+<li><strong>Science</strong>: Evals implements scientific method</li>
+<li><strong>Browser</strong>: For visual verification graders</li>
+</ul>
+<h3>Gotchas</h3>
+<ul>
+<li><strong>Choose the right grader type:</strong> Code-based for deterministic checks (fast, cheap). Model-based for nuanced quality (flexible, expensive). Human for calibration (gold standard, slow).</li>
+<li><strong>pass@k scoring requires multiple runs.</strong> A single run doesn't give statistical significance. Default to pass@3 minimum.</li>
+<li><strong>Transcript capture must be enabled BEFORE the test run.</strong> Can't retroactively capture transcripts.</li>
+<li><strong>Eval results go to the current work directory</strong> — not a global location. Tie evals to the work item.</li>
+<li><strong>Don't evaluate skills with trivial prompts.</strong> Simple one-liners may not trigger skill usage. Test prompts must be substantive.</li>
+</ul>
+<h3>Examples</h3>
+<p><strong>Example 1: Compare two prompts</strong></p>
+<pre><code>User: &quot;evaluate which prompt produces better summaries&quot;
+→ Creates eval suite with 3+ test cases
+→ Runs both prompts against test cases
+→ Model-based grader scores quality
+→ Reports pass@k and comparative analysis</code></pre>
+<p><strong>Example 2: Regression test a skill change</strong></p>
+<pre><code>User: &quot;run evals on the Research skill after the update&quot;
+→ Uses existing test fixtures for Research
+→ Before/after comparison
+→ Reports any quality regressions</code></pre>
+<h3>Execution Log</h3>
+<p>After completing any workflow, append a single JSONL entry:</p>
+<pre><code>echo '{&quot;ts&quot;:&quot;'$(date -u +%Y-%m-%dT%H:%M:%SZ)'&quot;,&quot;skill&quot;:&quot;Evals&quot;,&quot;workflow&quot;:&quot;WORKFLOW_USED&quot;,&quot;input&quot;:&quot;8_WORD_SUMMARY&quot;,&quot;status&quot;:&quot;ok|error&quot;,&quot;duration_s&quot;:SECONDS}' &gt;&gt; ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl</code></pre>
+<p>Replace <code>WORKFLOW_USED</code> with the workflow executed, <code>8_WORD_SUMMARY</code> with a brief input description, and <code>SECONDS</code> with approximate wall-clock time. Log <code>status: &quot;error&quot;</code> if the workflow failed.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: Evals\ndisplay_name: Evals\nplatform: OpenCode\ncategory: General and specialized workflows\n---\n\n# Evals - OpenCode Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `Evals` for OpenCode. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nComprehensive AI agent evaluation framework with three grader types (code-based: deterministic; model-based: LLM rubric; human: gold standard) and pass@k / pass^k scoring. Evaluates agent transcripts, tool-call sequences\n\n## How To Use It In OpenCode\n\nIn OpenCode, open the project and type: Use the Evals skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `Evals` |\n| Canonical name | `Evals` |\n| Platform | `OpenCode` |\n| Category | General and specialized workflows |\n\n## Description\n\nComprehensive AI agent evaluation framework with three grader types (code-based: deterministic; model-based: LLM rubric; human: gold standard) and pass@k / pass^k scoring. Evaluates agent transcripts, tool-call sequences\n\n\n## Original SKILL.md\n\n---\nname: Evals\ndescription: \"Comprehensive AI agent evaluation framework with three grader types (code-based: deterministic; model-based: LLM rubric; human: gold standard) and pass@k / pass^k scoring. Evaluates agent transcripts, tool-call sequences, and multi-turn conversations — not just single outputs. Capability evals (~70% target) and regression evals (~99% target). Workflows: RunEval, CompareModels, ComparePrompts, CreateJudge, CreateUseCase, RunScenario, CreateScenario, ViewResults. Integrates with ALGORITHM ISC rows for automated verification. Domain patterns pre-configured for coding, conversational, research, computer-use agents. USE WHEN eval, evaluate, benchmark, regression test, compare models, create judge, test agent, pass@k, scenario simulation. NOT FOR scientific method framing (use Science).\"\neffort: high\ncontext: fork\n---\n\n## Customization\n\n**Before executing, check for user customizations at:**\n`~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/Evals/`\n\nIf this directory exists, load and apply any PREFERENCES.md, configurations, or resources found there. These override default behavior. If the directory does not exist, proceed with skill defaults.\n\n\n## 🚨 MANDATORY: Voice Notification (REQUIRED BEFORE ANY ACTION)\n\n**You MUST send this notification BEFORE doing anything else when this skill is invoked.**\n\n1. **Send voice notification**:\n   ```bash\n   curl -s -X POST http://localhost:31337/notify \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\"message\": \"Running the WORKFLOWNAME workflow in the Evals skill to ACTION\"}' \\\n     > /dev/null 2>&1 &\n   ```\n\n2. **Output text notification**:\n   ```\n   Running the **WorkflowName** workflow in the **Evals** skill to ACTION...\n   ```\n\n**This is not optional. Execute this curl command immediately upon skill invocation.**\n\n# Evals - AI Agent Evaluation Framework\n\n## What It Does\n\nEvaluates AI agents — their transcripts, tool-call sequences, and multi-turn conversations, not just single outputs. Three grader types cover it: code-based for deterministic checks, model-based for nuanced quality rubrics, and human for the gold standard. Scores with pass@k (capability) and pass^k (consistency). Splits evals into capability suites (~70% target) and regression suites (~99% target), and plugs into Algorithm ISC rows as a verification method.\n\n## The Problem\n\nYou can't tell if an agent got better or worse by eyeballing a few runs. A change that looks fine in one transcript may quietly regress on the next prompt, and a single run gives no statistical signal. Judging only the final output also misses how the agent got there — wrong tools, wrong order, lucky guess. This skill measures the whole workflow across repeated trials, so improvements and backsliding both show up as numbers you can gate on.\n\n## How It Works\n\nAgent evaluation system based on Anthropic's \"Demystifying Evals for AI Agents\" (Jan 2026). It evaluates agent *workflows* (transcripts, tool calls, multi-turn conversations), not just single outputs.\n\n## When to Activate\n\n- \"run evals\", \"test this agent\", \"evaluate\", \"check quality\", \"benchmark\"\n- \"regression test\", \"capability test\"\n- \"run scenario\", \"multi-turn eval\", \"simulated user test\"\n- \"create scenario\", \"simulate conversation\"\n- Compare agent behaviors across changes\n- Validate agent workflows before deployment\n- Verify ALGORITHM ISC rows\n- Create new evaluation tasks from failures\n\n---\n\n## Core Concepts\n\n### Three Grader Types\n\n| Type | Strengths | Weaknesses | Use For |\n|------|-----------|------------|---------|\n| **Code-based** | Fast, cheap, deterministic, reproducible | Brittle, lacks nuance | Tests, state checks, tool verification |\n| **Model-based** | Flexible, captures nuance, scalable | Non-deterministic, expensive | Quality rubrics, assertions, comparisons |\n| **Human** | Gold standard, handles subjectivity | Expensive, slow | Calibration, spot checks, A/B testing |\n\n### Evaluation Types\n\n| Type | Pass Target | Purpose |\n|------|-------------|---------|\n| **Capability** | ~70% | Stretch goals, measuring improvement potential |\n| **Regression** | ~99% | Quality gates, detecting backsliding |\n\n### Key Metrics\n\n- **pass@k**: Probability of at least 1 success in k trials (measures capability)\n- **pass^k**: Probability all k trials succeed (measures consistency/reliability)\n\n---\n\n## Workflow Routing\n\n| Workflow | Trigger | File |\n|----------|---------|------|\n| RunEval | Run eval, evaluate suite, run tests, benchmark | `Workflows/RunEval.md` |\n| CompareModels | Compare models, model comparison, A/B test models | `Workflows/CompareModels.md` |\n| ComparePrompts | Compare prompts, prompt comparison, test prompts | `Workflows/ComparePrompts.md` |\n| CreateJudge | Create judge, model grader, evaluation judge | `Workflows/CreateJudge.md` |\n| CreateUseCase | Create use case, new eval, test case, create suite | `Workflows/CreateUseCase.md` |\n| RunScenario | Run scenario, multi-turn eval, simulated user test | `Workflows/RunScenario.md` |\n| CreateScenario | Create scenario, new multi-turn eval, simulate conversation | `Workflows/CreateScenario.md` |\n| ViewResults | View results, eval results, scores, pass rate | `Workflows/ViewResults.md` |\n\n### CLI Quick Reference\n\n| Trigger | Tool |\n|---------|------|\n| Run suite | `Tools/AlgorithmBridge.ts` |\n| Log failure | `Tools/FailureToTask.ts log` |\n| Convert failures | `Tools/FailureToTask.ts convert-all` |\n| Create suite | `Tools/SuiteManager.ts create` |\n| Check saturation | `Tools/SuiteManager.ts check-saturation` |\n| Run scenario | `Tools/ScenarioRunner.ts --scenario \u003cpath>` |\n\n---\n\n## Quick Reference\n\n### CLI Commands\n\n```bash\n# Run an eval suite\nbun run ${LIFEOS_SKILL_DIR}/Tools/AlgorithmBridge.ts -s \u003csuite>\n\n# Log a failure for later conversion\nbun run ${LIFEOS_SKILL_DIR}/Tools/FailureToTask.ts log \"description\" -c category -s severity\n\n# Convert failures to test tasks\nbun run ${LIFEOS_SKILL_DIR}/Tools/FailureToTask.ts convert-all\n\n# Manage suites\nbun run ${LIFEOS_SKILL_DIR}/Tools/SuiteManager.ts create \u003cname> -t capability -d \"description\"\nbun run ${LIFEOS_SKILL_DIR}/Tools/SuiteManager.ts list\nbun run ${LIFEOS_SKILL_DIR}/Tools/SuiteManager.ts check-saturation \u003cname>\nbun run ${LIFEOS_SKILL_DIR}/Tools/SuiteManager.ts graduate \u003cname>\n```\n\n### ALGORITHM Integration\n\nEvals is a verification method for THE ALGORITHM ISC rows:\n\n```bash\n# Run eval and update ISC row\nbun run ${LIFEOS_SKILL_DIR}/Tools/AlgorithmBridge.ts -s regression-core -r 3 -u\n```\n\nISC rows can specify eval verification:\n```\n| # | What Ideal Looks Like | Verify |\n|---|----------------------|--------|\n| 1 | Auth bypass fixed | eval:auth-security |\n| 2 | Tests all pass | eval:regression |\n```\n\n---\n\n## Available Graders\n\n### Code-Based (Fast, Deterministic)\n\n| Grader | Use Case |\n|--------|----------|\n| `string_match` | Exact substring matching |\n| `regex_match` | Pattern matching |\n| `binary_tests` | Run test files |\n| `static_analysis` | Lint, type-check, security scan |\n| `state_check` | Verify system state after execution |\n| `tool_calls` | Verify specific tools were called |\n\n### Model-Based (Nuanced)\n\n| Grader | Use Case |\n|--------|----------|\n| `llm_rubric` | Score against detailed rubric |\n| `natural_language_assert` | Check assertions are true |\n| `pairwise_comparison` | Compare to reference with position swap |\n\n---\n\n## Domain Patterns\n\nPre-configured grader stacks for common agent types:\n\n| Domain | Primary Graders |\n|--------|-----------------|\n| `coding` | binary_tests + static_analysis + tool_calls + llm_rubric |\n| `conversational` | llm_rubric + natural_language_assert + state_check |\n| `research` | llm_rubric + natural_language_assert + tool_calls |\n| `computer_use` | state_check + tool_calls + llm_rubric |\n\nSee `Data/DomainPatterns.yaml` for full configurations.\n\n---\n\n## Task Schema (YAML)\n\n```yaml\ntask:\n  id: \"fix-auth-bypass_1\"\n  description: \"Fix authentication bypass when password is empty\"\n  type: regression  # or capability\n  domain: coding\n\n  graders:\n    - type: binary_tests\n      required: [test_empty_pw.py]\n      weight: 0.30\n\n    - type: tool_calls\n      weight: 0.20\n      params:\n        sequence: [read_file, edit_file, run_tests]\n\n    - type: llm_rubric\n      weight: 0.50\n      params:\n        rubric: prompts/security_review.md\n\n  trials: 3\n  pass_threshold: 0.75\n```\n\n---\n\n## Resource Index\n\n| Resource | Purpose |\n|----------|---------|\n| `Types/index.ts` | Core type definitions |\n| `Graders/CodeBased/` | Deterministic graders |\n| `Graders/ModelBased/` | LLM-powered graders |\n| `Tools/TranscriptCapture.ts` | Capture agent trajectories |\n| `Tools/TrialRunner.ts` | Multi-trial execution with pass@k |\n| `Tools/SuiteManager.ts` | Suite management and saturation |\n| `Tools/FailureToTask.ts` | Convert failures to test tasks |\n| `Tools/AlgorithmBridge.ts` | ALGORITHM integration |\n| `Tools/ScenarioRunner.ts` | Multi-turn scenario runner (langwatch/scenario) |\n| `Tools/LifeosAgentAdapter.ts` | Wraps LifeOS Inference.ts as scenario AgentAdapter |\n| `Tools/ScenarioToTranscript.ts` | Scenario result → Evals Transcript/Trial/GraderResult |\n| `Scenarios/` | Authored multi-turn scenarios (`.scenario.ts`) |\n| `Data/DomainPatterns.yaml` | Domain-specific grader configs |\n\n---\n\n## Key Principles (from Anthropic)\n\n1. **Start with 20-50 real failures** - Don't overthink, capture what actually broke\n2. **Unambiguous tasks** - Two experts should reach identical verdicts\n3. **Balanced problem sets** - Test both \"should do\" AND \"should NOT do\"\n4. **Grade outputs, not paths** - Don't penalize valid creative solutions\n5. **Calibrate LLM judges** - Against human expert judgment\n6. **Check transcripts regularly** - Verify graders work correctly\n7. **Monitor saturation** - Graduate to regression when hitting 95%+\n8. **Build infrastructure early** - Evals shape how quickly you can adopt new models\n\n---\n\n## Related\n\n- **ALGORITHM**: Evals is a verification method\n- **Science**: Evals implements scientific method\n- **Browser**: For visual verification graders\n\n## Gotchas\n\n- **Choose the right grader type:** Code-based for deterministic checks (fast, cheap). Model-based for nuanced quality (flexible, expensive). Human for calibration (gold standard, slow).\n- **pass@k scoring requires multiple runs.** A single run doesn't give statistical significance. Default to pass@3 minimum.\n- **Transcript capture must be enabled BEFORE the test run.** Can't retroactively capture transcripts.\n- **Eval results go to the current work directory** — not a global location. Tie evals to the work item.\n- **Don't evaluate skills with trivial prompts.** Simple one-liners may not trigger skill usage. Test prompts must be substantive.\n\n## Examples\n\n**Example 1: Compare two prompts**\n```\nUser: \"evaluate which prompt produces better summaries\"\n→ Creates eval suite with 3+ test cases\n→ Runs both prompts against test cases\n→ Model-based grader scores quality\n→ Reports pass@k and comparative analysis\n```\n\n**Example 2: Regression test a skill change**\n```\nUser: \"run evals on the Research skill after the update\"\n→ Uses existing test fixtures for Research\n→ Before/after comparison\n→ Reports any quality regressions\n```\n\n## Execution Log\n\nAfter completing any workflow, append a single JSONL entry:\n\n```bash\necho '{\"ts\":\"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'\",\"skill\":\"Evals\",\"workflow\":\"WORKFLOW_USED\",\"input\":\"8_WORD_SUMMARY\",\"status\":\"ok|error\",\"duration_s\":SECONDS}' >> ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl\n```\n\nReplace `WORKFLOW_USED` with the workflow executed, `8_WORD_SUMMARY` with a brief input description, and `SECONDS` with approximate wall-clock time. Log `status: \"error\"` if the workflow failed.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("evals-opencode-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

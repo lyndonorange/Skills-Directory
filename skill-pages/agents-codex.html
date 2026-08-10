@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agents - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/agents-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / General and specialized workflows</div>
+      <h1>Agents</h1>
+      <p class="description">Compose CUSTOM agents from Base Traits + Voice + Specialization, and manage predefined functional TEAMS. Traits combine expertise (security, technical, research), personality (skeptical, analytical, enthusiastic), and approach (thorough, rapid, systematic). ComposeAgent.ts merges base + user config, outputs unique prompt + ElevenLabs voice + prosody. Predefined teams: engineering, architecture, marketing, design, security, research, content, strategy. Observer team variant: read-only oversight that votes continue/halt/escalate. USE WHEN create custom agents, spin up agents, agent personalities, compose agent, spawn parallel agents, engineering team, security team, get the team on this, observer team. NOT FOR ad-hoc swarms or TeamCreate coordination (use Delegation).</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>General and specialized workflows</span></div>
+<div class="meta-card"><strong>display name</strong><span>Agents</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>Agents</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Compose CUSTOM agents from Base Traits + Voice + Specialization, and manage predefined functional TEAMS. Traits combine expertise (security, technical, research), personality (skeptical, analytical, enthusiastic), and approach (thorough, rapid, systematic). ComposeAgent.ts merges base + user config, outputs unique prompt + ElevenLabs voice + prosody. Predefined teams: engineering, architecture, marketing, design, security, research, content, strategy. Observer team variant: read-only oversight that votes continue/halt/escalate. USE WHEN create custom agents, spin up agents, agent personalities, compose agent, spawn parallel agents, engineering team, security team, get the team on this, observer team. NOT FOR ad-hoc swarms or TeamCreate coordination (use Delegation).</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose Agents, then write the task. Fallback prompt: Use the Agents skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h3>🚨 SCOPE BOUNDARY — This Skill vs Other Systems</h3>
+<p>| the user Says | Which System | Route | |-------------|-------------|-------| | &quot;<strong>custom agents</strong>&quot;, &quot;<strong>specialized agents</strong>&quot;, &quot;spin up agents&quot; | <strong>THIS SKILL</strong> → CreateCustomAgent workflow | ComposeAgent → <code>Task(general-purpose)</code> | | &quot;<strong>engineering team</strong>&quot;, &quot;<strong>security team</strong>&quot;, &quot;<strong>[name] team: do X</strong>&quot; | <strong>THIS SKILL</strong> → SpawnTeam workflow | Load YAML config → ComposeAgent per member → parallel Task calls | | &quot;just the <strong>QA lead and senior engineer</strong> on this&quot; | <strong>THIS SKILL</strong> → SpawnTeam (subset) | Filter team members → compose subset | | &quot;<strong>swarm</strong>&quot;, &quot;<strong>create an agent team</strong>&quot; (ad-hoc coordination) | <strong>Built-in <code>TeamCreate</code></strong> (Delegation skill) | Persistent shared task list, messaging |</p>
+<p><strong>Predefined teams</strong> (engineering, architecture, marketing, design, security, research, content, strategy) = <strong>THIS SKILL → SpawnTeam workflow</strong>. These are predefined specialist groups with YAML configs, not ad-hoc teams.</p>
+<p><strong>Ad-hoc agent teams/swarms</strong> (no predefined config, custom coordination) = <strong>Built-in <code>TeamCreate</code></strong> via Delegation skill.</p>
+<ul>
+<li><strong>Custom agents</strong> = one-shot parallel workers with unique ComposeAgent identities</li>
+<li><strong>Predefined teams</strong> = YAML-configured specialist groups with roles, tensions, and expertise</li>
+<li><strong>Ad-hoc teams</strong> (TeamCreate) = persistent coordinated teams with shared task lists, messaging</li>
+</ul>
+<hr>
+<h3>🚨 MANDATORY: Voice Notification (REQUIRED BEFORE ANY ACTION)</h3>
+<p><strong>You MUST send this notification BEFORE doing anything else when this skill is invoked.</strong></p>
+<ol>
+<li><strong>Send voice notification</strong>:</li>
+</ol>
+<pre><code>   curl -s -X POST http://localhost:31337/notify \
+     -H &quot;Content-Type: application/json&quot; \
+     -d '{&quot;message&quot;: &quot;Running the WORKFLOWNAME workflow in the Agents skill to ACTION&quot;}' \
+     &gt; /dev/null 2&gt;&amp;1 &amp;</code></pre>
+<ol>
+<li><strong>Output text notification</strong>:</li>
+</ol>
+<pre><code>   Running the **WorkflowName** workflow in the **Agents** skill to ACTION...</code></pre>
+<p><strong>This is not optional. Execute this curl command immediately upon skill invocation.</strong></p>
+<h2>Agents - Custom Agent Composition System</h2>
+<h3>What It Does</h3>
+<p>Composes custom agents from base traits — expertise plus personality plus approach — and gives each one a matched voice and prosody. Also manages predefined functional teams (engineering, security, design, and more) and a read-only observer team that watches a primary agent and votes continue, halt, or escalate.</p>
+<h3>The Problem</h3>
+<p>Spinning up several agents for parallel work usually means they all sound and think alike, so you lose the different angles that made parallelism worth it. The lazy fix — reaching for a generic built-in agent type — gives no real personality, voice, or distinct perspective. This skill composes agents from trait combinations so each one has a genuine specialization and a voice to match, and keeps your customizations separate from the base set so updates never clobber them.</p>
+<h3>How It Works</h3>
+<p><strong>Auto-routes when user mentions custom agents, agent creation, or specialized personalities.</strong> <strong>Does NOT handle agent teams/swarms — &quot;agent team&quot; or &quot;swarm&quot; = built-in Claude Code <code>TeamCreate</code> tool.</strong></p>
+<h3>Configuration: Base + User Merge</h3>
+<p>The Agents skill uses the standard LifeOS SYSTEM/USER two-tier pattern:</p>
+<p>| Location | Purpose | Updates With LifeOS? | |----------|---------|-------------------| | <code>Data/Traits.yaml</code> | Base traits, example voices | Yes | | <code>USER/CUSTOMIZATIONS/SKILLS/Agents/Traits.yaml</code> | Your voices, prosody, agents | No |</p>
+<p><strong>How it works:</strong> ComposeAgent.ts loads base traits, then merges user customizations over them. Your customizations are never overwritten by LifeOS updates.</p>
+<h4>User Customization Directory</h4>
+<p>Create your customizations at:</p>
+<pre><code>~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/Agents/
+├── Traits.yaml       # Your traits, voices, prosody settings
+├── NamedAgents.md    # Your named agent backstories (optional)
+└── VoiceConfig.json  # Voice server configuration (optional)</code></pre>
+<h3>Voice Prosody Settings</h3>
+<p>Each voice can have prosody settings that control how it sounds. These are passed to ElevenLabs API.</p>
+<h4>Prosody Parameters</h4>
+<p>| Parameter | Range | Default | Effect | |-----------|-------|---------|--------| | <code>stability</code> | 0.0-1.0 | 0.5 | Low = expressive/varied, High = consistent/monotone | | <code>similarity_boost</code> | 0.0-1.0 | 0.75 | Voice identity preservation | | <code>style</code> | 0.0-1.0 | 0.0 | Style exaggeration (higher = more dramatic) | | <code>speed</code> | 0.7-1.2 | 1.0 | Speech rate | | <code>use_speaker_boost</code> | boolean | true | Enhanced clarity (adds latency) |</p>
+<h4>Example Voice Configuration</h4>
+<p>In your <code>USER/CUSTOMIZATIONS/SKILLS/Agents/Traits.yaml</code>:</p>
+<pre><code>voice_mappings:
+  voice_registry:
+    # Add a new voice with full prosody settings
+    MyCustomVoice:
+      voice_id: &quot;your-elevenlabs-voice-id&quot;
+      characteristics: [&quot;energetic&quot;, &quot;warm&quot;, &quot;professional&quot;]
+      description: &quot;Custom voice for enthusiastic agents&quot;
+      prosody:
+        stability: 0.40
+        similarity_boost: 0.75
+        style: 0.30
+        speed: 1.05
+        use_speaker_boost: true
+
+    # Override prosody for an existing base voice
+    Baron:
+      prosody:
+        stability: 0.65
+        style: 0.10
+        speed: 0.92</code></pre>
+<h4>Personality → Prosody Guidelines</h4>
+<p>| Personality | stability | style | speed | Rationale | |-------------|-----------|-------|-------|-----------| | Skeptical | 0.60 | 0.10 | 0.95 | Measured, precise | | Enthusiastic | 0.35 | 0.40 | 1.10 | High energy | | Analytical | 0.65 | 0.08 | 0.95 | Clear, structured | | Bold | 0.45 | 0.35 | 1.05 | Confident, dynamic | | Cautious | 0.70 | 0.05 | 0.90 | Careful, deliberate |</p>
+<h3>Overview</h3>
+<p>The Agents skill is a complete agent composition and management system:</p>
+<ul>
+<li>Dynamic agent composition from traits (expertise + personality + approach)</li>
+<li>Voice mappings with full prosody control</li>
+<li>Custom agent creation with unique voices</li>
+<li>Parallel agent orchestration patterns</li>
+</ul>
+<h3>Workflow Routing</h3>
+<p>| Workflow | Trigger | File | |----------|---------|------| | CreateCustomAgent | &quot;custom agents&quot;, &quot;specialized agents&quot;, &quot;create custom agents&quot;, &quot;compose agent&quot; | <code>Workflows/CreateCustomAgent.md</code> | | ListTraits | &quot;list agent traits&quot;, &quot;show available traits&quot;, &quot;what traits are there&quot; | <code>Workflows/ListTraits.md</code> | | SpawnParallelAgents | &quot;agents&quot;, &quot;launch agents&quot;, &quot;bunch of agents&quot;, &quot;spawn parallel agents&quot; | <code>Workflows/SpawnParallelAgents.md</code> | | SpawnTeam | &quot;engineering team&quot;, &quot;security team&quot;, &quot;[name] team: do X&quot;, &quot;get the team on this&quot; | <code>Workflows/SpawnTeam.md</code> | | SpawnObservers | &quot;observer team&quot;, &quot;observers&quot;, &quot;watch what it does&quot;, read-only oversight of a primary agent | <code>Workflows/SpawnObservers.md</code> |</p>
+<h3>Observer Team Archetype</h3>
+<p>Distinct from functional teams (engineering, design, etc.). An Observer team watches what a primary agent DID — not what it said. Inspired by Mythos-class multi-agent oversight: high-capability primary model produces tool calls, lower-capability aligned observers validate each call against policy and intent in real time.</p>
+<p><strong>Shape:</strong></p>
+<ul>
+<li><strong>Read-only</strong> — observers never mutate state, never call write tools. Violations of this property = immediate stop.</li>
+<li><strong>Fed the audit log</strong> — consume <code>MEMORY/OBSERVABILITY/tool-activity.jsonl</code> (with <code>ground_truth</code> captured by <code>ToolActivityTracker.hook.ts</code>), not chat transcripts.</li>
+<li><strong>Vote: continue / halt / escalate</strong> — majority rule, any escalate bubbles to the user via Pulse.</li>
+<li><strong>Cost-justified by catastrophe prevention, not feature velocity.</strong> Only spawn when primary model is doing something high-blast-radius (mass file writes, deploys, key rotations, financial ops).</li>
+</ul>
+<p><strong>Use ONLY when BOTH conditions hold:</strong></p>
+<ol>
+<li><strong>Time is not a constraint.</strong> Observers add 30-second voting cycles + ~$0.10/primary-hour. They deliberately trade speed for safety — not for interactive work.</li>
+<li><strong>Auditability is the primary requirement.</strong> The goal is a defensible, reviewable trail of what the primary actually did (compliance, post-incident review, catastrophe prevention) — not fast turnaround.</li>
+</ol>
+<p><strong>Typical fit:</strong></p>
+<ul>
+<li>Overnight / unattended autonomous runs where the user isn't watching</li>
+<li>Production deploys where post-hoc review matters more than speed</li>
+<li>Credential rotation, permission changes, PATTERNS.yaml or security-hook edits</li>
+<li>Anything where &quot;I want to prove nothing dangerous happened&quot; is the goal</li>
+</ul>
+<p><strong>Do NOT use for:</strong></p>
+<ul>
+<li>Interactive sessions with the user watching</li>
+<li>Time-sensitive work of any kind</li>
+<li>Short reactive tasks (&lt;5 tool calls)</li>
+<li>Read-only analysis</li>
+<li>Work already covered by preflight gates A/B/C/D</li>
+</ul>
+<h3>Route Triggers</h3>
+<p>| User Says | Workflow | What Happens | |-----------|----------|-------------| | &quot;<strong>custom agents</strong>&quot;, &quot;<strong>specialized agents</strong>&quot;, &quot;create <strong>custom</strong> agents&quot; | CreateCustomAgent | ComposeAgent → unique personalities, voices, colors | | &quot;agents&quot;, &quot;launch agents&quot;, &quot;bunch of agents&quot; | SpawnParallelAgents | Same identity, parallel grunt work | | &quot;<strong>engineering team</strong>&quot;, &quot;<strong>security team</strong>&quot;, &quot;<strong>[name] team: do X</strong>&quot; | <strong>SpawnTeam</strong> | Load YAML config → compose specialist members → parallel launch | | &quot;just the <strong>QA lead and senior engineer</strong>&quot; | <strong>SpawnTeam (subset)</strong> | Filter to named members from team config | | &quot;use [named agent]&quot; | Named agent | Pre-defined personality from USER config |</p>
+<h4>Available Predefined Teams</h4>
+<p>| Team | Trigger | Members | |------|---------|---------| | Engineering | &quot;engineering team&quot;, &quot;eng team&quot; | Senior Engineer, QA Lead, Performance Engineer, DevOps | | Architecture | &quot;architecture team&quot;, &quot;architect team&quot; | Systems, Infrastructure, API, Data architects | | Marketing | &quot;marketing team&quot; | Growth Strategist, Positioning Expert, Community Manager, Analytics Lead | | Design | &quot;design team&quot; | UX Lead, Visual Designer, Interaction Designer, Accessibility Specialist | | Security | &quot;security team&quot; | Threat Modeler, AppSec Engineer, Red Teamer, Compliance Analyst | | Research | &quot;research team&quot; | Primary Researcher, Contrarian Analyst, Technical Evaluator, Synthesis Writer | | Content | &quot;content team&quot; | Editor-in-Chief, Staff Writer, Audience Analyst, Distribution Strategist | | Strategy | &quot;strategy team&quot; | Strategist, Operator, Financial Analyst, Risk Assessor, Contrarian |</p>
+<p><strong>NEVER use static agent types for custom agents — always use <code>general-purpose</code> with ComposeAgent prompts.</strong></p>
+<h4>🚫 ANTI-PATTERN: Using Built-In Types for Custom Work</h4>
+<p>Built-in agent types are for INTERNAL workflow routing only. They have no unique identity, voice, or personality. (<code>Designer</code>, <code>Architect</code>, and <code>Engineer</code> were retired as agent types — shown below only as the historical anti-pattern.)</p>
+<p>| Scenario | ❌ WRONG | ✅ RIGHT | |----------|---------|---------| | &quot;Specialized agents to brainstorm UI ideas&quot; | a static built-in type (e.g. the retired <code>Designer</code>/<code>Architect</code>) | ComposeAgent with traits like &quot;ux,enthusiastic,exploratory&quot; and &quot;design,analytical,systematic&quot; | | &quot;Custom agents to review code&quot; | a static built-in type (e.g. the retired <code>Engineer</code>) | ComposeAgent with &quot;technical,skeptical,thorough&quot; and &quot;technical,creative,rapid&quot; | | &quot;Agents with different perspectives&quot; | Multiple built-in types | Multiple ComposeAgent calls with DIFFERENT trait combinations |</p>
+<h3>Components</h3>
+<h4>Data</h4>
+<p><strong>Traits.yaml</strong> (<code>Data/Traits.yaml</code>) - Base configuration:</p>
+<ul>
+<li>Core expertise areas: security, technical, research</li>
+<li>Core personalities: skeptical, analytical, enthusiastic</li>
+<li>Core approaches: thorough, rapid, systematic</li>
+<li>Example voice mappings with prosody</li>
+</ul>
+<h4>Tools</h4>
+<p><strong>ComposeAgent.ts</strong> (<code>Tools/ComposeAgent.ts</code>)</p>
+<ul>
+<li>Dynamic agent composition engine</li>
+<li>Merges base + user configurations</li>
+<li>Outputs complete agent prompt with voice settings</li>
+<li>Supports persistent custom agents via <code>--save</code> / <code>--load</code> / <code>--delete</code></li>
+</ul>
+<pre><code># Compose and use immediately
+bun run ${LIFEOS_SKILL_DIR}/Tools/ComposeAgent.ts --task &quot;Review security&quot;
+bun run ${LIFEOS_SKILL_DIR}/Tools/ComposeAgent.ts --traits &quot;security,skeptical,thorough&quot;
+
+# Persistent custom agents
+bun run ${LIFEOS_SKILL_DIR}/Tools/ComposeAgent.ts --task &quot;Security review&quot; --save
+bun run ${LIFEOS_SKILL_DIR}/Tools/ComposeAgent.ts --list-saved
+bun run ${LIFEOS_SKILL_DIR}/Tools/ComposeAgent.ts --load &quot;security-expert-skeptical-thorough&quot;
+bun run ${LIFEOS_SKILL_DIR}/Tools/ComposeAgent.ts --delete &quot;security-expert-skeptical-thorough&quot;
+
+# Other options
+bun run ${LIFEOS_SKILL_DIR}/Tools/ComposeAgent.ts --list
+bun run ${LIFEOS_SKILL_DIR}/Tools/ComposeAgent.ts --output json</code></pre>
+<p><strong>JSON output includes:</strong></p>
+<pre><code>{
+  &quot;name&quot;: &quot;Security Expert Skeptical Thorough&quot;,
+  &quot;voice&quot;: &quot;Baron&quot;,
+  &quot;voice_id&quot;: &quot;onwK4e9ZLuTAKqWW03F9&quot;,
+  &quot;voice_settings&quot;: {
+    &quot;stability&quot;: 0.70,
+    &quot;similarity_boost&quot;: 0.85,
+    &quot;style&quot;: 0.05,
+    &quot;speed&quot;: 0.95,
+    &quot;use_speaker_boost&quot;: true
+  },
+  &quot;prompt&quot;: &quot;...&quot;
+}</code></pre>
+<h4>Templates</h4>
+<p><strong>DynamicAgent.hbs</strong> (<code>Templates/DynamicAgent.hbs</code>)</p>
+<ul>
+<li>Handlebars template for dynamic agent prompts</li>
+<li>Composes: expertise + personality + approach + voice assignment</li>
+<li>Includes operational guidelines and response format</li>
+</ul>
+<h3>Architecture</h3>
+<h4>Hybrid Agent Model</h4>
+<p>| Type | Definition | Best For | |------|------------|----------| | <strong>Named Agents</strong> | Persistent identities defined in USER config | Recurring work, relationships | | <strong>Dynamic Agents</strong> | Task-specific specialists composed from traits | One-off tasks, parallel work |</p>
+<h4>The Agent Spectrum</h4>
+<pre><code>┌─────────────────────────────────────────────────────────────────────┐
+│   NAMED AGENTS          HYBRID USE          DYNAMIC AGENTS          │
+│   (Relationship)        (Best of Both)      (Task-Specific)         │
+├──────────────────────────────────────────────────────────────────────┤
+│ Defined in USER     &quot;Security expert       Ephemeral specialist     │
+│ NamedAgents.md      with [named agent]'s   composed from traits     │
+│                      skepticism&quot;                                     │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+<h3>Examples</h3>
+<p><strong>Example 1: Create custom agents</strong></p>
+<pre><code>User: &quot;Spin up 3 custom security agents&quot;
+→ Invokes CreateCustomAgent workflow
+→ Runs ComposeAgent 3 times with DIFFERENT trait combinations
+→ Each agent gets unique personality + matched voice + prosody
+→ Launches agents in parallel</code></pre>
+<p><strong>Example 2: List available traits</strong></p>
+<pre><code>User: &quot;What agent personalities can you create?&quot;
+→ Invokes ListTraits workflow
+→ Shows merged base + user traits
+→ Displays voices with prosody settings</code></pre>
+<h3>Extending the Skill</h3>
+<h4>Adding Your Own Traits</h4>
+<p>In <code>USER/CUSTOMIZATIONS/SKILLS/Agents/Traits.yaml</code>:</p>
+<pre><code># Add new expertise areas
+expertise:
+  marketing:
+    name: &quot;Marketing Expert&quot;
+    description: &quot;Brand strategy, campaigns, market positioning&quot;
+    keywords:
+      - marketing
+      - brand
+      - campaign
+      - positioning
+
+# Add new personalities
+personality:
+  visionary:
+    name: &quot;Visionary&quot;
+    description: &quot;Forward-thinking, sees the big picture&quot;
+    prompt_fragment: |
+      You think in terms of future possibilities and long-term vision.
+      Connect today's work to tomorrow's potential.</code></pre>
+<h4>Adding Named Agents</h4>
+<p>In <code>USER/CUSTOMIZATIONS/SKILLS/Agents/NamedAgents.md</code>:</p>
+<pre><code>## Alex - The Strategist
+
+**Voice ID:** your-voice-id
+**Prosody:** stability: 0.55, style: 0.20, speed: 0.95
+
+Alex is a strategic thinker who sees patterns others miss...</code></pre>
+<h3>Model Selection</h3>
+<p>| Task Type | Model | Speed | |-----------|-------|-------| | Grunt work, simple checks | <code>haiku</code> | 10-20x faster | | Standard analysis, research | <code>sonnet</code> | Balanced | | Deep reasoning, architecture | <code>opus</code> | Maximum quality |</p>
+<h3>Version History</h3>
+<ul>
+<li><strong>v2.0.0</strong> (2026-01): Restructured to base + user merge pattern, added prosody support</li>
+<li><strong>v1.0.0</strong> (2025-12): Initial creation</li>
+</ul>
+<h3>Gotchas</h3>
+<ul>
+<li><strong>Agents skill (custom agents) ≠ Agent tool (Claude Code subagents) ≠ TeamCreate (agent teams).</strong> Three different systems. &quot;Custom agents&quot; → this skill. &quot;Agent team&quot;/&quot;swarm&quot; → TeamCreate. One-off subagents → Agent tool.</li>
+<li><strong>Don't spawn agents when direct work is faster.</strong> If the task is depth-focused (one file, deep understanding), do it yourself. Agents are for breadth (multiple independent threads).</li>
+<li><strong>Don't spawn redundant agents for work already in context.</strong> Multiple past failures from re-researching what was already known.</li>
+<li><strong>Provide raw source material to agents, not summaries.</strong> Agents work better with primary sources.</li>
+<li><strong>Forked subagents inherit the full main-thread conversation and share its prompt cache</strong> (Anthropic CC v2.1.133+, enabled at <code>CLAUDE_CODE_FORK_SUBAGENT=1</code> or agent frontmatter <code>context: fork</code>). Compressed-context spawn (the default) loses nuance; fork preserves it. Decision rule: fork for design variation / follow-on research; don't fork for review (biased toward defending its own context).</li>
+</ul>
+<h3>Execution Log</h3>
+<p>After completing any workflow, append a single JSONL entry:</p>
+<pre><code>echo '{&quot;ts&quot;:&quot;'$(date -u +%Y-%m-%dT%H:%M:%SZ)'&quot;,&quot;skill&quot;:&quot;Agents&quot;,&quot;workflow&quot;:&quot;WORKFLOW_USED&quot;,&quot;input&quot;:&quot;8_WORD_SUMMARY&quot;,&quot;status&quot;:&quot;ok|error&quot;,&quot;duration_s&quot;:SECONDS}' &gt;&gt; ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl</code></pre>
+<p>Replace <code>WORKFLOW_USED</code> with the workflow executed, <code>8_WORD_SUMMARY</code> with a brief input description, and <code>SECONDS</code> with approximate wall-clock time. Log <code>status: &quot;error&quot;</code> if the workflow failed.</p>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: Agents\ndisplay_name: Agents\nplatform: Codex\ncategory: General and specialized workflows\n---\n\n# Agents - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `Agents` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nCompose CUSTOM agents from Base Traits + Voice + Specialization, and manage predefined functional TEAMS. Traits combine expertise (security, technical, research), personality (skeptical, analytical, enthusiastic), and ap\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose Agents, then write the task. Fallback prompt: Use the Agents skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `Agents` |\n| Canonical name | `Agents` |\n| Platform | `Codex` |\n| Category | General and specialized workflows |\n\n## Description\n\nCompose CUSTOM agents from Base Traits + Voice + Specialization, and manage predefined functional TEAMS. Traits combine expertise (security, technical, research), personality (skeptical, analytical, enthusiastic), and ap\n\n\n## Original SKILL.md\n\n---\nname: Agents\ndescription: \"Compose CUSTOM agents from Base Traits + Voice + Specialization, and manage predefined functional TEAMS. Traits combine expertise (security, technical, research), personality (skeptical, analytical, enthusiastic), and approach (thorough, rapid, systematic). ComposeAgent.ts merges base + user config, outputs unique prompt + ElevenLabs voice + prosody. Predefined teams: engineering, architecture, marketing, design, security, research, content, strategy. Observer team variant: read-only oversight that votes continue/halt/escalate. USE WHEN create custom agents, spin up agents, agent personalities, compose agent, spawn parallel agents, engineering team, security team, get the team on this, observer team. NOT FOR ad-hoc swarms or TeamCreate coordination (use Delegation).\"\neffort: medium\n---\n\n## 🚨 SCOPE BOUNDARY — This Skill vs Other Systems\n\n| the user Says | Which System | Route |\n|-------------|-------------|-------|\n| \"**custom agents**\", \"**specialized agents**\", \"spin up agents\" | **THIS SKILL** → CreateCustomAgent workflow | ComposeAgent → `Task(general-purpose)` |\n| \"**engineering team**\", \"**security team**\", \"**[name] team: do X**\" | **THIS SKILL** → SpawnTeam workflow | Load YAML config → ComposeAgent per member → parallel Task calls |\n| \"just the **QA lead and senior engineer** on this\" | **THIS SKILL** → SpawnTeam (subset) | Filter team members → compose subset |\n| \"**swarm**\", \"**create an agent team**\" (ad-hoc coordination) | **Built-in `TeamCreate`** (Delegation skill) | Persistent shared task list, messaging |\n\n**Predefined teams** (engineering, architecture, marketing, design, security, research, content, strategy) = **THIS SKILL → SpawnTeam workflow**. These are predefined specialist groups with YAML configs, not ad-hoc teams.\n\n**Ad-hoc agent teams/swarms** (no predefined config, custom coordination) = **Built-in `TeamCreate`** via Delegation skill.\n\n- **Custom agents** = one-shot parallel workers with unique ComposeAgent identities\n- **Predefined teams** = YAML-configured specialist groups with roles, tensions, and expertise\n- **Ad-hoc teams** (TeamCreate) = persistent coordinated teams with shared task lists, messaging\n\n---\n\n## 🚨 MANDATORY: Voice Notification (REQUIRED BEFORE ANY ACTION)\n\n**You MUST send this notification BEFORE doing anything else when this skill is invoked.**\n\n1. **Send voice notification**:\n   ```bash\n   curl -s -X POST http://localhost:31337/notify \\\n     -H \"Content-Type: application/json\" \\\n     -d '{\"message\": \"Running the WORKFLOWNAME workflow in the Agents skill to ACTION\"}' \\\n     > /dev/null 2>&1 &\n   ```\n\n2. **Output text notification**:\n   ```\n   Running the **WorkflowName** workflow in the **Agents** skill to ACTION...\n   ```\n\n**This is not optional. Execute this curl command immediately upon skill invocation.**\n\n# Agents - Custom Agent Composition System\n\n## What It Does\n\nComposes custom agents from base traits — expertise plus personality plus approach — and gives each one a matched voice and prosody. Also manages predefined functional teams (engineering, security, design, and more) and a read-only observer team that watches a primary agent and votes continue, halt, or escalate.\n\n## The Problem\n\nSpinning up several agents for parallel work usually means they all sound and think alike, so you lose the different angles that made parallelism worth it. The lazy fix — reaching for a generic built-in agent type — gives no real personality, voice, or distinct perspective. This skill composes agents from trait combinations so each one has a genuine specialization and a voice to match, and keeps your customizations separate from the base set so updates never clobber them.\n\n## How It Works\n\n**Auto-routes when user mentions custom agents, agent creation, or specialized personalities.**\n**Does NOT handle agent teams/swarms — \"agent team\" or \"swarm\" = built-in Claude Code `TeamCreate` tool.**\n\n## Configuration: Base + User Merge\n\nThe Agents skill uses the standard LifeOS SYSTEM/USER two-tier pattern:\n\n| Location | Purpose | Updates With LifeOS? |\n|----------|---------|-------------------|\n| `Data/Traits.yaml` | Base traits, example voices | Yes |\n| `USER/CUSTOMIZATIONS/SKILLS/Agents/Traits.yaml` | Your voices, prosody, agents | No |\n\n**How it works:** ComposeAgent.ts loads base traits, then merges user customizations over them. Your customizations are never overwritten by LifeOS updates.\n\n### User Customization Directory\n\nCreate your customizations at:\n```\n~/.claude/LIFEOS/USER/CUSTOMIZATIONS/SKILLS/Agents/\n├── Traits.yaml       # Your traits, voices, prosody settings\n├── NamedAgents.md    # Your named agent backstories (optional)\n└── VoiceConfig.json  # Voice server configuration (optional)\n```\n\n## Voice Prosody Settings\n\nEach voice can have prosody settings that control how it sounds. These are passed to ElevenLabs API.\n\n### Prosody Parameters\n\n| Parameter | Range | Default | Effect |\n|-----------|-------|---------|--------|\n| `stability` | 0.0-1.0 | 0.5 | Low = expressive/varied, High = consistent/monotone |\n| `similarity_boost` | 0.0-1.0 | 0.75 | Voice identity preservation |\n| `style` | 0.0-1.0 | 0.0 | Style exaggeration (higher = more dramatic) |\n| `speed` | 0.7-1.2 | 1.0 | Speech rate |\n| `use_speaker_boost` | boolean | true | Enhanced clarity (adds latency) |\n\n### Example Voice Configuration\n\nIn your `USER/CUSTOMIZATIONS/SKILLS/Agents/Traits.yaml`:\n\n```yaml\nvoice_mappings:\n  voice_registry:\n    # Add a new voice with full prosody settings\n    MyCustomVoice:\n      voice_id: \"your-elevenlabs-voice-id\"\n      characteristics: [\"energetic\", \"warm\", \"professional\"]\n      description: \"Custom voice for enthusiastic agents\"\n      prosody:\n        stability: 0.40\n        similarity_boost: 0.75\n        style: 0.30\n        speed: 1.05\n        use_speaker_boost: true\n\n    # Override prosody for an existing base voice\n    Baron:\n      prosody:\n        stability: 0.65\n        style: 0.10\n        speed: 0.92\n```\n\n### Personality → Prosody Guidelines\n\n| Personality | stability | style | speed | Rationale |\n|-------------|-----------|-------|-------|-----------|\n| Skeptical | 0.60 | 0.10 | 0.95 | Measured, precise |\n| Enthusiastic | 0.35 | 0.40 | 1.10 | High energy |\n| Analytical | 0.65 | 0.08 | 0.95 | Clear, structured |\n| Bold | 0.45 | 0.35 | 1.05 | Confident, dynamic |\n| Cautious | 0.70 | 0.05 | 0.90 | Careful, deliberate |\n\n\n## Overview\n\nThe Agents skill is a complete agent composition and management system:\n- Dynamic agent composition from traits (expertise + personality + approach)\n- Voice mappings with full prosody control\n- Custom agent creation with unique voices\n- Parallel agent orchestration patterns\n\n## Workflow Routing\n\n| Workflow | Trigger | File |\n|----------|---------|------|\n| CreateCustomAgent | \"custom agents\", \"specialized agents\", \"create custom agents\", \"compose agent\" | `Workflows/CreateCustomAgent.md` |\n| ListTraits | \"list agent traits\", \"show available traits\", \"what traits are there\" | `Workflows/ListTraits.md` |\n| SpawnParallelAgents | \"agents\", \"launch agents\", \"bunch of agents\", \"spawn parallel agents\" | `Workflows/SpawnParallelAgents.md` |\n| SpawnTeam | \"engineering team\", \"security team\", \"[name] team: do X\", \"get the team on this\" | `Workflows/SpawnTeam.md` |\n| SpawnObservers | \"observer team\", \"observers\", \"watch what it does\", read-only oversight of a primary agent | `Workflows/SpawnObservers.md` |\n\n## Observer Team Archetype\n\nDistinct from functional teams (engineering, design, etc.). An Observer team watches what a primary agent DID — not what it said. Inspired by Mythos-class multi-agent oversight: high-capability primary model produces tool calls, lower-capability aligned observers validate each call against policy and intent in real time.\n\n**Shape:**\n- **Read-only** — observers never mutate state, never call write tools. Violations of this property = immediate stop.\n- **Fed the audit log** — consume `MEMORY/OBSERVABILITY/tool-activity.jsonl` (with `ground_truth` captured by `ToolActivityTracker.hook.ts`), not chat transcripts.\n- **Vote: continue / halt / escalate** — majority rule, any escalate bubbles to the user via Pulse.\n- **Cost-justified by catastrophe prevention, not feature velocity.** Only spawn when primary model is doing something high-blast-radius (mass file writes, deploys, key rotations, financial ops).\n\n**Use ONLY when BOTH conditions hold:**\n1. **Time is not a constraint.** Observers add 30-second voting cycles + ~$0.10/primary-hour. They deliberately trade speed for safety — not for interactive work.\n2. **Auditability is the primary requirement.** The goal is a defensible, reviewable trail of what the primary actually did (compliance, post-incident review, catastrophe prevention) — not fast turnaround.\n\n**Typical fit:**\n- Overnight / unattended autonomous runs where the user isn't watching\n- Production deploys where post-hoc review matters more than speed\n- Credential rotation, permission changes, PATTERNS.yaml or security-hook edits\n- Anything where \"I want to prove nothing dangerous happened\" is the goal\n\n**Do NOT use for:**\n- Interactive sessions with the user watching\n- Time-sensitive work of any kind\n- Short reactive tasks (\u003c5 tool calls)\n- Read-only analysis\n- Work already covered by preflight gates A/B/C/D\n\n## Route Triggers\n\n| User Says | Workflow | What Happens |\n|-----------|----------|-------------|\n| \"**custom agents**\", \"**specialized agents**\", \"create **custom** agents\" | CreateCustomAgent | ComposeAgent → unique personalities, voices, colors |\n| \"agents\", \"launch agents\", \"bunch of agents\" | SpawnParallelAgents | Same identity, parallel grunt work |\n| \"**engineering team**\", \"**security team**\", \"**[name] team: do X**\" | **SpawnTeam** | Load YAML config → compose specialist members → parallel launch |\n| \"just the **QA lead and senior engineer**\" | **SpawnTeam (subset)** | Filter to named members from team config |\n| \"use [named agent]\" | Named agent | Pre-defined personality from USER config |\n\n### Available Predefined Teams\n\n| Team | Trigger | Members |\n|------|---------|---------|\n| Engineering | \"engineering team\", \"eng team\" | Senior Engineer, QA Lead, Performance Engineer, DevOps |\n| Architecture | \"architecture team\", \"architect team\" | Systems, Infrastructure, API, Data architects |\n| Marketing | \"marketing team\" | Growth Strategist, Positioning Expert, Community Manager, Analytics Lead |\n| Design | \"design team\" | UX Lead, Visual Designer, Interaction Designer, Accessibility Specialist |\n| Security | \"security team\" | Threat Modeler, AppSec Engineer, Red Teamer, Compliance Analyst |\n| Research | \"research team\" | Primary Researcher, Contrarian Analyst, Technical Evaluator, Synthesis Writer |\n| Content | \"content team\" | Editor-in-Chief, Staff Writer, Audience Analyst, Distribution Strategist |\n| Strategy | \"strategy team\" | Strategist, Operator, Financial Analyst, Risk Assessor, Contrarian |\n\n**NEVER use static agent types for custom agents — always use `general-purpose` with ComposeAgent prompts.**\n\n### 🚫 ANTI-PATTERN: Using Built-In Types for Custom Work\n\nBuilt-in agent types are for INTERNAL workflow routing only. They have no unique identity, voice, or personality. (`Designer`, `Architect`, and `Engineer` were retired as agent types — shown below only as the historical anti-pattern.)\n\n| Scenario | ❌ WRONG | ✅ RIGHT |\n|----------|---------|---------|\n| \"Specialized agents to brainstorm UI ideas\" | a static built-in type (e.g. the retired `Designer`/`Architect`) | ComposeAgent with traits like \"ux,enthusiastic,exploratory\" and \"design,analytical,systematic\" |\n| \"Custom agents to review code\" | a static built-in type (e.g. the retired `Engineer`) | ComposeAgent with \"technical,skeptical,thorough\" and \"technical,creative,rapid\" |\n| \"Agents with different perspectives\" | Multiple built-in types | Multiple ComposeAgent calls with DIFFERENT trait combinations |\n\n## Components\n\n### Data\n\n**Traits.yaml** (`Data/Traits.yaml`) - Base configuration:\n- Core expertise areas: security, technical, research\n- Core personalities: skeptical, analytical, enthusiastic\n- Core approaches: thorough, rapid, systematic\n- Example voice mappings with prosody\n\n### Tools\n\n**ComposeAgent.ts** (`Tools/ComposeAgent.ts`)\n- Dynamic agent composition engine\n- Merges base + user configurations\n- Outputs complete agent prompt with voice settings\n- Supports persistent custom agents via `--save` / `--load` / `--delete`\n\n```bash\n# Compose and use immediately\nbun run ${LIFEOS_SKILL_DIR}/Tools/ComposeAgent.ts --task \"Review security\"\nbun run ${LIFEOS_SKILL_DIR}/Tools/ComposeAgent.ts --traits \"security,skeptical,thorough\"\n\n# Persistent custom agents\nbun run ${LIFEOS_SKILL_DIR}/Tools/ComposeAgent.ts --task \"Security review\" --save\nbun run ${LIFEOS_SKILL_DIR}/Tools/ComposeAgent.ts --list-saved\nbun run ${LIFEOS_SKILL_DIR}/Tools/ComposeAgent.ts --load \"security-expert-skeptical-thorough\"\nbun run ${LIFEOS_SKILL_DIR}/Tools/ComposeAgent.ts --delete \"security-expert-skeptical-thorough\"\n\n# Other options\nbun run ${LIFEOS_SKILL_DIR}/Tools/ComposeAgent.ts --list\nbun run ${LIFEOS_SKILL_DIR}/Tools/ComposeAgent.ts --output json\n```\n\n**JSON output includes:**\n```json\n{\n  \"name\": \"Security Expert Skeptical Thorough\",\n  \"voice\": \"Baron\",\n  \"voice_id\": \"onwK4e9ZLuTAKqWW03F9\",\n  \"voice_settings\": {\n    \"stability\": 0.70,\n    \"similarity_boost\": 0.85,\n    \"style\": 0.05,\n    \"speed\": 0.95,\n    \"use_speaker_boost\": true\n  },\n  \"prompt\": \"...\"\n}\n```\n\n### Templates\n\n**DynamicAgent.hbs** (`Templates/DynamicAgent.hbs`)\n- Handlebars template for dynamic agent prompts\n- Composes: expertise + personality + approach + voice assignment\n- Includes operational guidelines and response format\n\n## Architecture\n\n### Hybrid Agent Model\n\n| Type | Definition | Best For |\n|------|------------|----------|\n| **Named Agents** | Persistent identities defined in USER config | Recurring work, relationships |\n| **Dynamic Agents** | Task-specific specialists composed from traits | One-off tasks, parallel work |\n\n### The Agent Spectrum\n\n```\n┌─────────────────────────────────────────────────────────────────────┐\n│   NAMED AGENTS          HYBRID USE          DYNAMIC AGENTS          │\n│   (Relationship)        (Best of Both)      (Task-Specific)         │\n├──────────────────────────────────────────────────────────────────────┤\n│ Defined in USER     \"Security expert       Ephemeral specialist     │\n│ NamedAgents.md      with [named agent]'s   composed from traits     │\n│                      skepticism\"                                     │\n└─────────────────────────────────────────────────────────────────────┘\n```\n\n## Examples\n\n**Example 1: Create custom agents**\n```\nUser: \"Spin up 3 custom security agents\"\n→ Invokes CreateCustomAgent workflow\n→ Runs ComposeAgent 3 times with DIFFERENT trait combinations\n→ Each agent gets unique personality + matched voice + prosody\n→ Launches agents in parallel\n```\n\n**Example 2: List available traits**\n```\nUser: \"What agent personalities can you create?\"\n→ Invokes ListTraits workflow\n→ Shows merged base + user traits\n→ Displays voices with prosody settings\n```\n\n## Extending the Skill\n\n### Adding Your Own Traits\n\nIn `USER/CUSTOMIZATIONS/SKILLS/Agents/Traits.yaml`:\n\n```yaml\n# Add new expertise areas\nexpertise:\n  marketing:\n    name: \"Marketing Expert\"\n    description: \"Brand strategy, campaigns, market positioning\"\n    keywords:\n      - marketing\n      - brand\n      - campaign\n      - positioning\n\n# Add new personalities\npersonality:\n  visionary:\n    name: \"Visionary\"\n    description: \"Forward-thinking, sees the big picture\"\n    prompt_fragment: |\n      You think in terms of future possibilities and long-term vision.\n      Connect today's work to tomorrow's potential.\n```\n\n### Adding Named Agents\n\nIn `USER/CUSTOMIZATIONS/SKILLS/Agents/NamedAgents.md`:\n\n```markdown\n## Alex - The Strategist\n\n**Voice ID:** your-voice-id\n**Prosody:** stability: 0.55, style: 0.20, speed: 0.95\n\nAlex is a strategic thinker who sees patterns others miss...\n```\n\n## Model Selection\n\n| Task Type | Model | Speed |\n|-----------|-------|-------|\n| Grunt work, simple checks | `haiku` | 10-20x faster |\n| Standard analysis, research | `sonnet` | Balanced |\n| Deep reasoning, architecture | `opus` | Maximum quality |\n\n## Version History\n\n- **v2.0.0** (2026-01): Restructured to base + user merge pattern, added prosody support\n- **v1.0.0** (2025-12): Initial creation\n\n## Gotchas\n\n- **Agents skill (custom agents) ≠ Agent tool (Claude Code subagents) ≠ TeamCreate (agent teams).** Three different systems. \"Custom agents\" → this skill. \"Agent team\"/\"swarm\" → TeamCreate. One-off subagents → Agent tool.\n- **Don't spawn agents when direct work is faster.** If the task is depth-focused (one file, deep understanding), do it yourself. Agents are for breadth (multiple independent threads).\n- **Don't spawn redundant agents for work already in context.** Multiple past failures from re-researching what was already known.\n- **Provide raw source material to agents, not summaries.** Agents work better with primary sources.\n- **Forked subagents inherit the full main-thread conversation and share its prompt cache** (Anthropic CC v2.1.133+, enabled at `CLAUDE_CODE_FORK_SUBAGENT=1` or agent frontmatter `context: fork`). Compressed-context spawn (the default) loses nuance; fork preserves it. Decision rule: fork for design variation / follow-on research; don't fork for review (biased toward defending its own context).\n\n## Execution Log\n\nAfter completing any workflow, append a single JSONL entry:\n\n```bash\necho '{\"ts\":\"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'\",\"skill\":\"Agents\",\"workflow\":\"WORKFLOW_USED\",\"input\":\"8_WORD_SUMMARY\",\"status\":\"ok|error\",\"duration_s\":SECONDS}' >> ~/.claude/LIFEOS/MEMORY/SKILLS/execution.jsonl\n```\n\nReplace `WORKFLOW_USED` with the workflow executed, `8_WORD_SUMMARY` with a brief input description, and `SECONDS` with approximate wall-clock time. Log `status: \"error\"` if the workflow failed.\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("agents-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>

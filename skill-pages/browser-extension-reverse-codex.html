@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>browser-extension-reverse - Skill Reader</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #151515;
+      --panel: #1c1c1c;
+      --panel-2: #222;
+      --text: #f2f2f2;
+      --muted: #c6c6c6;
+      --subtle: #969696;
+      --line: #303030;
+      --accent: #5cc8ff;
+      --code: #2a2a2a;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --panel-2: #f0f3f8;
+      --text: #171b22;
+      --muted: #394556;
+      --subtle: #637085;
+      --line: #dce3ee;
+      --accent: #1767d6;
+      --code: #eef2f7;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+    .shell { width: min(980px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 72px; }
+    .topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 86%, transparent); padding: 14px 0; backdrop-filter: blur(16px); }
+    .crumbs, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    a, button { color: var(--text); }
+    .pill, .theme { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-2); font-size: 13px; font-weight: 700; padding: 6px 10px; text-decoration: none; }
+    .theme { cursor: pointer; }
+    .hero { border-bottom: 1px solid var(--line); padding: 34px 0 26px; }
+    .source { color: var(--accent); font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 12px 0 10px; font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: .95; letter-spacing: 0; }
+    .description { max-width: 820px; margin: 0; color: var(--muted); font-size: 18px; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 22px 0 0; }
+    .meta-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .meta-card strong { display: block; color: var(--subtle); font-size: 12px; text-transform: uppercase; }
+    .meta-card span { display: block; margin-top: 4px; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+    .usage { border-bottom: 1px solid var(--line); padding: 24px 0; }
+    .usage h2 { margin: 0 0 6px; font-size: 1.45rem; }
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 16px; }
+    .usage-card { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 12px; }
+    .usage-card strong { display: block; margin-bottom: 6px; }
+    .usage-card p { margin: 0; color: var(--muted); }
+    article { max-width: 860px; padding-top: 22px; }
+    h2, h3, h4, h5 { line-height: 1.2; margin: 1.65em 0 .55em; }
+    h2 { font-size: 1.65rem; }
+    h3 { font-size: 1.25rem; color: var(--text); }
+    p { margin: .75em 0; color: var(--muted); }
+    ul, ol { margin: .55em 0 1.1em; padding-left: 1.35em; color: var(--muted); }
+    li { margin: .32em 0; }
+    strong { color: var(--text); }
+    code { border: 1px solid var(--line); border-radius: 5px; background: var(--code); color: var(--text); font: .92em ui-monospace, SFMono-Regular, Menlo, monospace; padding: .12em .35em; }
+    pre { overflow: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--code); padding: 16px; }
+    pre code { border: 0; background: transparent; padding: 0; }
+    blockquote { border-left: 3px solid var(--accent); margin: 1em 0; background: var(--panel); color: var(--muted); padding: 10px 14px; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+    @media (max-width: 720px) { .topbar { align-items: flex-start; flex-direction: column; } .shell { width: min(100% - 24px, 980px); } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="crumbs">
+        <a class="pill" href="../index.html">Skills Directory</a>
+        <span class="pill">Codex</span>
+      </div>
+      <div class="actions">
+        <button class="theme" id="themeButton" type="button">Toggle theme</button>
+        <a class="pill" href="../skill-md/browser-extension-reverse-codex.md">Markdown</a>
+        <button class="theme" id="copyButton" type="button">Copy skill</button>
+        <button class="theme" id="downloadButton" type="button">Download</button>
+      </div>
+    </div>
+    <header class="hero">
+      <div class="source">Codex / Agent platforms, tools, and automation</div>
+      <h1>browser-extension-reverse</h1>
+      <p class="description">Use for authorized reverse engineering of browser extensions (Chrome/Firefox) including manifest analysis, background workers, and extension-based credential or traffic logic recovery.</p>
+      <section class="meta">
+        <div class="meta-card"><strong>platform</strong><span>Codex</span></div>
+<div class="meta-card"><strong>category</strong><span>Agent platforms, tools, and automation</span></div>
+<div class="meta-card"><strong>display name</strong><span>browser-extension-reverse</span></div>
+<div class="meta-card"><strong>canonical name</strong><span>browser-extension-reverse</span></div>
+      </section>
+    </header>
+    <section class="usage">
+      <h2>When To Use This Skill</h2>
+      <p>Use for authorized reverse engineering of browser extensions (Chrome/Firefox) including manifest analysis, background workers, and extension-based credential or traffic logic recovery.</p>
+      <div class="usage-grid">
+        <div class="usage-card"><strong>How to call it in Codex</strong><p>In Codex, click the chat box, press /, choose browser-extension-reverse, then write the task. Fallback prompt: Use the browser-extension-reverse skill to...</p></div>
+        <div class="usage-card"><strong>Friend-safe copy</strong><p>This public page removes local filesystem paths, Finder-only links, and machine-specific source locations.</p></div>
+      </div>
+    </section>
+    <article>
+      <h2>Browser Extension Reverse Engineering</h2>
+<h3>ACTION REQUIRED（读完后立刻执行）</h3>
+<ol>
+<li><code>NOW</code>: 读取 <code>../field-journal/precedent-reverse.md</code></li>
+<li><code>NOW</code>: 确认目标是<strong>浏览器扩展</strong>（crx/xpi/解压目录），不是普通网页 JS（普通 → <code>js-reverse/</code>）</li>
+<li><code>NEXT</code>: 解压扩展；读 manifest</li>
+<li><code>ACT</code>: 权限面 → 后台脚本 → 网络/存储钩子</li>
+</ol>
+<h3>适用场景</h3>
+<ul>
+<li>Chrome/Edge MV2/MV3 扩展分析</li>
+<li>Firefox 扩展</li>
+<li>恶意扩展 IOC、供应链扩展投毒调查</li>
+<li>扩展实现的签名/加密/代理逻辑还原</li>
+</ul>
+<h3>工作流</h3>
+<h4>1. 包体</h4>
+<pre><code>□ crx 解压 / 从 profile 取扩展目录
+□ manifest.json：permissions、host_permissions、background、content_scripts
+□ 评估过度权限（&lt;all_urls&gt;、webRequest、debugger）</code></pre>
+<h4>2. 逻辑</h4>
+<pre><code>□ service_worker / background 入口
+□ content_script 注入点与世界（isolated）
+□ chrome.storage / IndexedDB 密钥
+□ 与 `js-reverse` 相同：Observe 网络与消息传递（runtime.sendMessage）</code></pre>
+<h4>3. 动态</h4>
+<pre><code>□ 开发者模式加载解压目录
+□ chrome://extensions 检查错误
+□ DevTools 附加 service worker
+□ 必要时 Frida/浏览器 CDP（jshookmcp）</code></pre>
+<h3>工具链</h3>
+<p>| 工具 | 用途 | |------|------| | 解压/jq | manifest | | Chrome DevTools | worker 调试 | | js-reverse 工具链 | 深度 JS | | YARA | 恶意扩展规则 |</p>
+<h3>参考</h3>
+<ul>
+<li><code>references/extension-analysis.md</code></li>
+<li>field-journal 扩展恢复相关条目</li>
+<li><code>../js-reverse/</code> <code>../malware-analysis/</code></li>
+</ul>
+<h3>路由上下文</h3>
+<p><strong>上游</strong>: MASTER R30 <strong>下游</strong>: 复杂混淆 JS → <code>js-reverse</code>；投毒调查 → supply-chain / malware</p>
+<h3>任务完成自检</h3>
+<ul>
+<li>[ ] 是否列出权限面与入口脚本？</li>
+<li>[ ] 是否还原关键数据流？</li>
+<li>[ ] Checklist？</li>
+</ul>
+    </article>
+  </div>
+  <script type="application/json" id="skillPackage">"---\nname: browser-extension-reverse\ndisplay_name: browser-extension-reverse\nplatform: Codex\ncategory: Agent platforms, tools, and automation\n---\n\n# browser-extension-reverse - Codex Skill Package\n\n## What This Is\n\nThis is a friend-safe Markdown copy of `browser-extension-reverse` for Codex. It removes local filesystem paths, Finder-only links, and machine-specific source locations.\n\n## When To Use This Skill\n\nUse this skill when your task matches this description:\n\nUse for authorized reverse engineering of browser extensions (Chrome/Firefox) including manifest analysis, background workers, and extension-based credential or traffic logic recovery.\n\n## How To Use It In Codex\n\nIn Codex, click the chat box, press /, choose browser-extension-reverse, then write the task. Fallback prompt: Use the browser-extension-reverse skill to...\n\n## Skill Metadata\n\n| Field | Value |\n| --- | --- |\n| Display name | `browser-extension-reverse` |\n| Canonical name | `browser-extension-reverse` |\n| Platform | `Codex` |\n| Category | Agent platforms, tools, and automation |\n\n## Description\n\nUse for authorized reverse engineering of browser extensions (Chrome/Firefox) including manifest analysis, background workers, and extension-based credential or traffic logic recovery.\n\n\n## Original SKILL.md\n\n---\nname: browser-extension-reverse\ndescription: Use for authorized reverse engineering of browser extensions (Chrome/Firefox) including manifest analysis, background workers, and extension-based credential or traffic logic recovery.\n---\n\n# Browser Extension Reverse Engineering\n\n## ACTION REQUIRED（读完后立刻执行）\n\n1. `NOW`: 读取 `../field-journal/precedent-reverse.md`\n2. `NOW`: 确认目标是**浏览器扩展**（crx/xpi/解压目录），不是普通网页 JS（普通 → `js-reverse/`）\n3. `NEXT`: 解压扩展；读 manifest\n4. `ACT`: 权限面 → 后台脚本 → 网络/存储钩子\n\n## 适用场景\n\n- Chrome/Edge MV2/MV3 扩展分析\n- Firefox 扩展\n- 恶意扩展 IOC、供应链扩展投毒调查\n- 扩展实现的签名/加密/代理逻辑还原\n\n## 工作流\n\n### 1. 包体\n\n```text\n□ crx 解压 / 从 profile 取扩展目录\n□ manifest.json：permissions、host_permissions、background、content_scripts\n□ 评估过度权限（\u003call_urls>、webRequest、debugger）\n```\n\n### 2. 逻辑\n\n```text\n□ service_worker / background 入口\n□ content_script 注入点与世界（isolated）\n□ chrome.storage / IndexedDB 密钥\n□ 与 `js-reverse` 相同：Observe 网络与消息传递（runtime.sendMessage）\n```\n\n### 3. 动态\n\n```text\n□ 开发者模式加载解压目录\n□ chrome://extensions 检查错误\n□ DevTools 附加 service worker\n□ 必要时 Frida/浏览器 CDP（jshookmcp）\n```\n\n## 工具链\n\n| 工具 | 用途 |\n|------|------|\n| 解压/jq | manifest |\n| Chrome DevTools | worker 调试 |\n| js-reverse 工具链 | 深度 JS |\n| YARA | 恶意扩展规则 |\n\n## 参考\n\n- `references/extension-analysis.md`\n- field-journal 扩展恢复相关条目\n- `../js-reverse/` `../malware-analysis/`\n\n## 路由上下文\n\n**上游**: MASTER R30\n**下游**: 复杂混淆 JS → `js-reverse`；投毒调查 → supply-chain / malware\n\n## 任务完成自检\n\n- [ ] 是否列出权限面与入口脚本？\n- [ ] 是否还原关键数据流？\n- [ ] Checklist？\n"</script>
+  <script>
+    const root = document.documentElement;
+    const saved = localStorage.getItem("skills-reader-theme") || "dark";
+    const skillPackage = JSON.parse(document.getElementById("skillPackage").textContent || '""');
+    function setTheme(theme) {
+      root.dataset.theme = theme;
+      localStorage.setItem("skills-reader-theme", theme);
+    }
+    function downloadText(filename, value) {
+      const blob = new Blob([value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+    document.getElementById("themeButton").addEventListener("click", () => setTheme(root.dataset.theme === "light" ? "dark" : "light"));
+    document.getElementById("copyButton").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(skillPackage);
+      document.getElementById("copyButton").textContent = "Copied";
+      setTimeout(() => document.getElementById("copyButton").textContent = "Copy skill", 1100);
+    });
+    document.getElementById("downloadButton").addEventListener("click", () => downloadText("browser-extension-reverse-codex-skill.md", skillPackage));
+    setTheme(saved);
+  </script>
+</body>
+</html>
